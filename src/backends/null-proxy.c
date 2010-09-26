@@ -18,7 +18,7 @@ static int null_configure(chain_t *chain, setting_t *config){
 static ssize_t null_create(chain_t *chain, request_t *request, buffer_t *buffer){
 	unsigned int  value_size;
 	
-	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+	if(hash_get_copy(request, "size", TYPE_INT32, &value_size, sizeof(value_size)) != 0)
 		return -EINVAL;
 		
 	if(value_size == 0x0000BEEF) // this check for backend tests

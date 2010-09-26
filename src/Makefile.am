@@ -16,7 +16,6 @@ libfrozen_la_SOURCES= 	libfrozen.c         libfrozen.h         \
 			data_protos.c       data_protos.h       \
 			data.c              data.h              \
 			hash.c              hash.h              \
-			structs_buffer.c    structs_buffer.h    \
 			structs.c           structs.h           \
 			settings.c          settings.h          \
 			$(backends_sources)                     \

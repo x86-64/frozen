@@ -105,7 +105,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	pthread_mutex_t  *mutex;
 	unsigned int      value_size;
 	
-	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+	if(hash_get_copy(request, "size", TYPE_INT32, &value_size, sizeof(value_size)) != 0)
 		return -EINVAL;
 	
 	fd    =  ((file_user_data *)chain->user_data)->handle;
@@ -131,17 +131,11 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	off_t             key;
 	data_t           *value;
-	unsigned int      value_size;
+	size_t            value_size;
 	
-
-	if(hash_get_in_buf(request, "key", TYPE_INT64, &key) != 0)
+	if(hash_get_copy (request, "key",   TYPE_INT64,  &key,   sizeof(key)) != 0)
 		return -EINVAL;
-	if( (value = hash_get_typed(request, "value", TYPE_BINARY)) == NULL) 
-		return -EINVAL;
-	
-	value_size = data_len(TYPE_BINARY, value);
-	
-	if(hash_is_valid_buf(request, value, value_size) == 0)
+	if(hash_get      (request, "value", TYPE_BINARY, &value, &value_size) != 0) 
 		return -EINVAL;
 	
 redo:
@@ -165,10 +159,9 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	off_t             key;
 	unsigned int      value_size;
 	
-	if(hash_get_in_buf(request, "key", TYPE_INT64, &key) != 0)
+	if(hash_get_copy (request, "key",   TYPE_INT64, &key,        sizeof(key)) != 0)
 		return -EINVAL;
-	
-	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+	if(hash_get_copy (request, "size",  TYPE_INT32, &value_size, sizeof(value_size)) != 0)
 		return -EINVAL;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
@@ -199,13 +192,11 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	int           direction;
 	int           ret = 0;
 	
-	if(hash_get_in_buf(request, "key_from", TYPE_INT64, &from) != 0)
+	if(hash_get_copy (request, "key_from",  TYPE_INT64, &from,       sizeof(from)) != 0)
 		return -EINVAL;
-	
-	if(hash_get_in_buf(request, "key_to", TYPE_INT64, &to) != 0)
+	if(hash_get_copy (request, "key_to",    TYPE_INT64, &to,         sizeof(to)) != 0)
 		return -EINVAL;
-	
-	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+	if(hash_get_copy (request, "size",      TYPE_INT32, &value_size, sizeof(value_size)) != 0)
 		return -EINVAL;
 	
 	if(from == to || value_size == 0)
@@ -232,7 +223,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	buff = (char *)malloc(size);
 	if(buff == NULL)
-		return -EINVAL;
+		return -ENOMEM;
 	
 	while(value_size > 0){
 		if( (ssize = pread(data->handle, buff, size, from)) == -1){

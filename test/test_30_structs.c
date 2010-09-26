@@ -13,7 +13,7 @@ START_TEST (test_structs){
 	setting_set_child_setting(settings, s_d1);
 	
 	struct_t *structure = struct_new(settings);
-		fail_unless(structure != NULL, "structure create failed");
+		fail_unless(structure != NULL,             "structure create failed");
 	member_t *m_d1 = struct_get_member_by_name(structure, "data1");
 	member_t *m_d2 = struct_get_member_by_name(structure, "data2");
 		fail_unless(m_d1 != NULL && m_d2 != NULL,  "member search failed");
@@ -21,22 +21,22 @@ START_TEST (test_structs){
 		fail_unless(m_d1->data_type == TYPE_INT32, "member size invalid");
 	
 	size_t size = struct_get_size(structure);
-		fail_unless(size == 8,                    "structure size invalid");
+		fail_unless(size == 8,                     "structure size invalid");
 	
 	subchunk_t  chunk;
 	buffer_t   *buffer  = buffer_from_data("\x11\x22\x00\x00\x33\x44\x00\x00", 8);
 	chunk_t    *b_chunk = buffer_get_first_chunk(buffer);
 	
-	struct_assign(buffer, structure);
-	
-	ret = struct_get_member_value(buffer, 0, &chunk);
+	ret = struct_get_member_value(structure, buffer, 0, &chunk);
 		fail_unless(ret == 0 && chunk.size == 4,                                       "structure_get_member_value 1 failed");
 		fail_unless(memcmp(chunk.ptr, "\x11\x22\x00\x00", chunk.size) == 0,            "structure_get_member_value 1 data failed");
-	ret = struct_get_member_value(buffer, 1, &chunk);
+	ret = struct_get_member_value(structure, buffer, 1, &chunk);
 		fail_unless(ret == 0 && chunk.size == 4,                                       "structure_get_member_value 2 failed");
 		fail_unless(memcmp(chunk.ptr, "\x33\x44\x00\x00", chunk.size) == 0,            "structure_get_member_value 2 data failed");
 	
+	buffer_free(buffer);
 	struct_free(structure);
+	
 	setting_destroy(settings);
 }
 END_TEST

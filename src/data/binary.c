@@ -21,8 +21,14 @@ int     data_binary_cmp(void *data1, void *data2){
 	return cret;
 }
 
-size_t  data_binary_len(void *data){
-	return (size_t)(((data_binary_t *)data)->size);
+size_t  data_binary_len(void *data, size_t buffer_size){
+	size_t data_size;
+	
+	data_size = (size_t)(((data_binary_t *)data)->size);
+	if(data_size > buffer_size)
+		return 0;
+	
+	return data_size;
 }
 
 void *  data_binary_ptr(void *data){

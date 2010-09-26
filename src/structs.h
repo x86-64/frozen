@@ -20,4 +20,6 @@ void            struct_free                  (struct_t *structure);
 _inline size_t  struct_get_size              (struct_t *structure){ return structure->size; }
 member_t *      struct_get_member_by_name    (struct_t *structure, char *name);
 
+int             struct_get_member_value      (struct_t *structure, buffer_t *buffer, unsigned int member_id, subchunk_t *chunk);
+
 #endif // STRUCTS_H 

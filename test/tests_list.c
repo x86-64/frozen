@@ -1,11 +1,12 @@
 #include <test_00_settings.c>
-#include <test_05_buffer.c>
-#include <test_06_data.c>
-#include <test_07_data_integer.c>
-#include <test_09_structs.c>
-#include <test_10_hash.c>
-#include <test_11_backend_file.c>
-#include <test_19_backend.c>
+#include <test_10_buffer.c>
+#include <test_20_data.c>
+#include <test_21_data_integer.c>
+#include <test_30_structs.c>
+#include <test_40_hash.c>
+#include <test_60_backend_file.c>
+#include <test_70_backend.c>
+#include <test_71_backend_locator.c>
 
 void test_list(void){
 	tcase_add_test(tc_core, test_settings_basic);
@@ -19,4 +20,5 @@ void test_list(void){
 	tcase_add_test(tc_core, test_backend_file);
 	tcase_add_test(tc_core, test_backends);
 	tcase_add_test(tc_core, test_backends_two_chains);
+	tcase_add_test(tc_core, test_backend_locator);
 }

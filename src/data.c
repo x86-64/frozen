@@ -29,7 +29,7 @@ int                  data_cmp               (data_type type, data_t *data1, data
 	return func_cmp(data1, data2);
 }
 
-size_t               data_len               (data_type type, data_t *data){
+size_t               data_len               (data_type type, data_t *data, size_t buffer_size){
 	f_data_len   func_len;
 	
 	if((unsigned)type >= data_protos_size)
@@ -45,7 +45,7 @@ size_t               data_len               (data_type type, data_t *data){
 			if(func_len == NULL || data == NULL)
 				return 0;
 			
-			return func_len(data);
+			return func_len(data, buffer_size);
 	}
 	return 0;
 }

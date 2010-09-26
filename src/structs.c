@@ -27,7 +27,7 @@ static int  struct_iter_init(void *p_setting, void *p_structure, void *null){
 	members[member_id].ptr       = (off_t)structure->size;
 	members[member_id].data_type = member_data_type;
 	
-	member_size = data_len(member_data_type, NULL);
+	member_size = data_len(member_data_type, NULL, 0);
 	
 	if(member_id == 0 || structure->size != 0)  // count structure size til member size is known
 		structure->size += member_size;     // 
@@ -70,4 +70,39 @@ member_t *  struct_get_member_by_name    (struct_t *structure, char *name){
 	return NULL;
 }
 
+// TODO rewrite to handle buffer having data splitted between two chunks
+// TODO SEC dangerous function
+
+int         struct_get_member_value      (struct_t *structure, buffer_t *buffer, unsigned int member_id, subchunk_t *chunk){
+	unsigned int   c;
+	void          *d_ptr   = NULL;
+	off_t          m_ptr   = 0;
+	member_t      *members = structure->members;
+	
+	if(member_id >= structure->members_count)
+		return -EINVAL;
+	
+	m_ptr = members[member_id].ptr;
+	
+	if(m_ptr == 0 && member_id != 0){
+		//c = member_id - 1                        // TODO uncomment to test speedup
+		//while(c != 0 && members[c].ptr == NULL)  // scroll back to known pointer
+		//	c--;
+		//m_ptr = members[c].ptr;
+		
+		c = 0;
+		while(c < member_id){
+			d_ptr  = buffer_seek(buffer, m_ptr);
+			m_ptr += data_len(members[c].data_type, d_ptr, buffer->size); // TODO SEC invalid buffer size
+			
+			// TODO add ptr's cache 
+			c++;
+		}
+	}
+	
+	chunk->ptr  = buffer_seek(buffer, m_ptr);
+	chunk->size = data_len(members[member_id].data_type, chunk->ptr, buffer->size); // TODO SEC invalid buffer size
+	
+	return 0;
+}
 

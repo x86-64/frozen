@@ -28,17 +28,15 @@ typedef struct hash_t {
 #define HASH_T_LOCAL_SIZE   sizeof(hash_t)
 #define HASH_T_NETWORK_SIZE sizeof(unsigned int) * 4
 
-hash_t *           hash_new                     (unsigned int nelements);
+hash_t *           hash_new                     (void);
 void               hash_free                    (hash_t *hash);
 
 int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
 int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value);
-data_t *           hash_get                     (hash_t *hash, char *key, data_type  type);
-int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf);
-int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value);
-
-int                hash_is_valid_buf            (hash_t *hash, data_t *data, unsigned int size);
+int                hash_get                     (hash_t *hash, char *key, data_type  type, data_t **value, size_t *value_size);
+int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf, size_t buf_size);
+int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size);
 
 #endif // HASH_H

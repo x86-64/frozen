@@ -66,7 +66,7 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 	if(chain == NULL || request == NULL || buffer == NULL)
 		return -EINVAL;
 	
-	if(hash_get_in_buf(request, "action", TYPE_INT32, &action) != 0)
+	if(hash_get_copy(request, "action", TYPE_INT32, &action, sizeof(action)) != 0)
 		return -EINVAL;
 	
 	switch(action){
@@ -107,6 +107,7 @@ static int backend_iter_chain_init(void *p_setting, void *p_backend, void *p_cha
 	if(chain == NULL)
 		return ITER_BREAK;
 	
+	//printf("initing: %s\n", chain_name);
 	ret = chain_configure(chain, setting);
 	if(ret != 0)
 		goto cleanup;
@@ -167,6 +168,9 @@ backend_t *  backend_find_by_name(char *name){
 }
 
 ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer){
+	if(backend == NULL || request == NULL)
+		return -EINVAL;
+
 	return chain_query(backend->chain, request, buffer);
 }
 

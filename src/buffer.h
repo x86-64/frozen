@@ -21,7 +21,6 @@ typedef struct buffer_t {
 	size_t      size;
 	void       *head;
 	void       *tail;
-	struct_t   *structure;
 } buffer_t;
 
 void            buffer_init                (buffer_t *buffer);

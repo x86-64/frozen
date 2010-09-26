@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define error(...)            do{ fprintf(stderr,__VA_ARGS__);    }while(0);
+#define error(...)            do{ fprintf(stdout,__VA_ARGS__);    }while(0);
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
 
 /* Own headers */
@@ -24,10 +24,9 @@
 #include <settings.h>        // 
 #include <data_protos.h>     //
 #include <data.h>            //
-#include <hash.h>            //
-#include <structs.h>         //
 #include <buffer.h>          //
-#include <structs_buffer.h>  //
+#include <structs.h>         //
+#include <hash.h>            //
 
 #include <public.h>
 
