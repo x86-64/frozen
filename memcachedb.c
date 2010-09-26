@@ -624,6 +624,20 @@ static void item_output(conn *c, char *item_name, char *item_data, size_t item_d
 	}
 }
 
+static int ident_parse(char *ident, dbitem *item){
+	char *item_attribute = index(ident, '.');
+	
+	if(item_attribute == NULL)
+		return 0;
+	
+	*item_attribute++;// = '\0';
+	
+	item->oid       = strtoll(ident, NULL, 10);	
+	item->attribute = strdup(item_attribute);
+	
+	return 1;
+}
+
 static void process_test_command(conn *c, token_t *tokens, size_t ntokens){
 	out_string(c, "VERSION 1.0");
 }
@@ -634,18 +648,37 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 	
 	do {
 		if(strcmp(key_token->value, "new") == 0){
-			unsigned int  oid_new;
+			unsigned long oid_new;
 			char          item_data[0x10];
 			
 			oid_new = db_query_new();
-			sprintf((char *)&item_data, "%u", oid_new);
+			sprintf((char *)&item_data, "%ld", oid_new);
 
 			item_output(c, key_token->value, (char *)&item_data, strlen(item_data)); 
 			need_end = 1;
 			break;
 		}
-		
 
+		dbitem *item_new = dbitem_alloc();
+		if(item_new == NULL){
+			out_string(c, "SERVER_ERROR insufficient memory");
+			return;
+		}
+
+		if(ident_parse(key_token->value, item_new) == 0){
+			out_string(c, "CLIENT_ERROR wrong syntax");
+			dbitem_free(item_new);
+			return;
+		}
+		
+		int ret = db_query_get(item_new);
+		if(ret == 0){
+			item_output(c, key_token->value, item_new->data, item_new->data_len);
+		}	
+		need_end = 1;
+		//dbitem_free(item_new);
+		
+		c->item = item_new;
 	}while(0);
 	
 	if(need_end == 1){
@@ -682,18 +715,12 @@ static void process_set_command(conn *c, token_t *tokens, size_t ntokens){
 		return;
 	}
 
-	char *item_attribute = index(key_token->value, '.');
-	
-	if(item_attribute == NULL){
+	if(ident_parse(key_token->value, item_new) == 0){
 		out_string(c, "CLIENT_ERROR wrong syntax");
 		dbitem_free(item_new);
 		return;
 	}
-	*item_attribute++ = '\0';
 
-	item_new->oid       = strtol(key_token->value, NULL, 10);	
-	item_new->attribute = strdup(item_attribute);
-	
 	c->item    = item_new;
 	c->ritem   = item_new->data;
 	c->rlbytes = item_new->data_len + 2;
@@ -701,6 +728,8 @@ static void process_set_command(conn *c, token_t *tokens, size_t ntokens){
 }
 
 static void process_set_command_complete(conn *c){
+	c->item->data[c->item->data_len] = '\0'; // coz client can cheat with \r\n
+
 	db_query_set(c->item);
 	out_string(c, "STORED");
 }
@@ -1162,7 +1191,8 @@ static void drive_machine(conn *c) {
             switch (transmit(c)) {
             case TRANSMIT_COMPLETE:
                 if (c->state == conn_mwrite) {
-                    //while (c->ileft > 0) {
+                    dbitem_free(c->item);
+		    //while (c->ileft > 0) {
                     //    item *it = *(c->icurr);
                     //    item_free(it);
                     //    c->icurr++;

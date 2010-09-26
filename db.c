@@ -1,78 +1,43 @@
 #include <memcachedb.h>
-#include <sys/stat.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <dirent.h>
 #include <sys/mman.h>
 #include <sys/user.h>
-#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <linux/mman.h>
 
-typedef struct mapping_ mapping;
-struct mapping_ {
-	int               fd;
-	char             *data;
-	long              data_len;
-	long              data_mlen;
-	pthread_rwlock_t  lock;
-};
+#include <list.c>
+#include <dbmap.c>
+#include <dbindex.c>
 
 typedef struct dbtable_ dbtable;
 struct dbtable_ {
-	char           *name;
+	char            *name;
 	
 	/* table settings */
-	int             pack_type;
+	int              pack_type;
 	
 	/* table data */
-	mapping         data;
-	mapping         index;
+	dbmap            data;
+	dbindex          idx_oid;
+	dbindex          idx_data;
 };
-
-#include <list.c>
 
 /* db settings */
 char                   *dbfile_main;
 
 static unsigned int     db_destroy_ok = 0;
-static unsigned int     db_oid_last;
+static unsigned long    db_oid_last;
 static pthread_mutex_t  db_oid_last_mutex;
 static list             db_write_queue;
 static list             db_tables;
 
 static pthread_t        db_write_thread_id;
-
-/* PUBLIC FUNCTIONS */
-
-dbitem* dbitem_alloc(void){
-	return zalloc(sizeof(dbitem));
-}
-
-void dbitem_free(dbitem *item){
-	if(item->attribute)
-		free(item->attribute);
-	if(item->data)
-		free(item->data);
-	free(item);
-}
-
-
-unsigned int db_query_new(void){
-	unsigned int oid_new;
-
-	pthread_mutex_lock(&db_oid_last_mutex);
-	oid_new = db_oid_last++;
-	pthread_mutex_unlock(&db_oid_last_mutex);
-	return oid_new;
-}
-
-unsigned int db_query_set(dbitem *item){
-	list_push(&db_write_queue, item);	
-	return 0;
-}
 
 /* PRIVATE FUNCTIONS */
 
@@ -93,77 +58,6 @@ static char *db_abspath(char *name, char *ext){
 	return strdup(fullpath);
 }
 
-static int db_mapfile(char *path, mapping *map){
-	int          fd;
-	struct stat  file_stat;
-
-	if( (fd = open(path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) < 0)
-		return 0;
-	
-	fstat(fd, &file_stat);
-	
-	map->fd        =  fd;
-	map->data_len  =  file_stat.st_size;
-	map->data_mlen = (file_stat.st_size + 0x1000) & ~0xFFF;
-	pthread_rwlock_init(&map->lock, NULL);
-
-	char *ret = mmap(0, map->data_mlen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if(ret == MAP_FAILED){
-		perror(path);
-		return 0;
-	}
-	map->data = ret;
-	
-	return 1;
-}
-
-static void db_map_lock(mapping *map){
-	pthread_rwlock_rdlock(&map->lock);
-}
-
-static void db_map_unlock(mapping *map){
-	pthread_rwlock_unlock(&map->lock);
-}
-
-static long db_expandfile(mapping *map, long add_size){
-	pthread_rwlock_wrlock(&map->lock);
-
-	long old_len  = map->data_len;
-	long old_mlen = map->data_mlen;
-
-	map->data_len   = old_len + add_size;
-	map->data_mlen  = (map->data_len + 0x1000) & ~0xFFF;
-	
-	int res;
-	lseek(map->fd, map->data_len - 1, SEEK_SET);
-	res = write(map->fd, "", 1);
-
-	if(old_mlen != map->data_mlen){
-		char *ret = mremap(map->data, old_mlen, map->data_mlen, MREMAP_MAYMOVE);
-		if(ret == MAP_FAILED){
-			perror("expandfile: mremap");
-			exit(EXIT_FAILURE);
-		}
-		map->data = ret;
-	}
-
-	pthread_rwlock_unlock(&map->lock);
-
-	return old_len; // offset to expanded area
-}
-
-static void db_unmapfile(mapping *map){
-	pthread_rwlock_wrlock(&map->lock);
-
-	msync  (map->data, map->data_len, MS_SYNC);
-	munmap (map->data, map->data_len);
-	close  (map->fd);
-	
-	map->data     = NULL;
-	map->data_len = 0;
-
-	pthread_rwlock_unlock(&map->lock);
-}
 /* }}}1 */
 
 static void *db_iter_table_search(void *table, void *name, void *addr){
@@ -203,48 +97,52 @@ static void db_table_settings_load(dbtable *table){
 	}
 }
 /* }}}2 */
-
+/* Table initialisation {{{1 */
 static dbtable* db_table_load(char *name){
-	dbtable *table = NULL;
-	
+	dbtable     *table = NULL;
+	struct stat  index_stat;
+
 	// is already loaded?
 	list_iter(&db_tables, &db_iter_table_search, name, &table);
 	if(table != NULL)
 		return;
-	
-	size_t max_len = strlen(name) + 4 + 1;
-
-	char *apath_data = db_abspath(name, "dat");
-	char *apath_idx  = db_abspath(name, "idx");
 	
 	table = zalloc(sizeof(dbtable));
 	table->name = strdup(name);
 	
 	db_table_settings_load(table);
 
-	if(
-		db_mapfile(apath_data, &table->data)  == 0 ||
-		db_mapfile(apath_idx,  &table->index) == 0
-	){
+	// load data
+	char *apath_data    = db_abspath(name, "dat");
+	
+	if(dbmap_map(apath_data, &table->data) == 0){
 		printf("failed to load '%s'\n", name);
 		exit(EXIT_FAILURE);
 	}
 	free(apath_data);
-	free(apath_idx);
+	
+	// load indexes
+	char *apath_idx_oid = db_abspath(name, "idx0"); 
+	
+	if(stat(apath_idx_oid, &index_stat) != 0){
+		dbindex_create(apath_idx_oid, DBINDEX_TYPE_PRIMARY, 4, 8);
+	}
+	dbindex_load(apath_idx_oid, &table->idx_oid);
+	free(apath_idx_oid);
+
 
 	list_push(&db_tables, table);
 	if(settings.verbose > 1)
 		printf("table '%s' loaded\n", name);
-	
 	return table;
 }
 
 static void db_table_unload(dbtable *table){
 	db_table_settings_save(table);
 
-	db_unmapfile(&table->data);
-	db_unmapfile(&table->index);
-	
+	dbindex_unload(&table->idx_oid);
+	dbmap_unmap(&table->data);
+
 	free(table->name);
 	free(table);
 }
@@ -259,9 +157,9 @@ static void db_table_unload_by_name(char *name){
 	list_unlink(&db_tables, table); // unlink table to prevent access to it
 	db_table_unload(table);
 }
+/* }}}1 */
 
-/* db_table_search return db_table struct anyway */
-static dbtable* db_table_search(char *name){
+static dbtable* db_tables_search(char *name){
 	dbtable *table = NULL;
 	
 	list_iter(&db_tables, &db_iter_table_search, (void *)name, (void *)&table);
@@ -271,15 +169,107 @@ static dbtable* db_table_search(char *name){
 	return db_table_load(name);
 }
 
+// TODO: untested 1-4 pack_types
 static void db_table_query_set(dbitem *item){
-	dbtable *table = db_table_search(item->attribute);
+	dbtable *table = db_tables_search(item->attribute);
 	
-	long data_off = db_expandfile(&table->data, item->data_len);
-	db_map_lock(&table->data);
-		// format as pack_type said
-		memcpy(table->data.data + data_off, item->data, item->data_len);
-	db_map_unlock(&table->data);
-	// add to index
+	char          *entry_ptr;
+	unsigned long  entry_off;
+	unsigned int   entry_len;
+	switch(table->pack_type){
+		case 1:  entry_len = 1; break;                      // byte
+		case 2:  entry_len = 4; break;                      // u32
+		case 3:  entry_len = 8; break;                      // u64
+		case 4:  entry_len = strlen(item->data) + 1; break; // data\0 - use strlen coz client can cheat and supply
+			                                            // data with \0 in it, which can lead to wasting disk space
+		default: entry_len = item->data_len + 4;     break; // u32 len; data
+	};
+	
+	//if search free space failed
+	entry_off = dbmap_expand(&table->data, entry_len);
+	
+	dbmap_lock(&table->data);
+		unsigned long long data_ll = 0;
+			
+		entry_ptr = table->data.data + entry_off;
+
+		switch(table->pack_type){
+			case 1:
+			case 2:
+			case 3:
+				data_ll = strtoull(item->data, NULL, 10);
+				memcpy(entry_ptr, &data_ll, entry_len);
+				break;
+			case 4:
+				memcpy(entry_ptr, item->data, entry_len);
+				break;
+			default:
+				*(unsigned int *)entry_ptr = item->data_len;
+				memcpy(entry_ptr + 4, item->data, item->data_len);
+				break;
+		};
+	dbmap_unlock(&table->data);
+	
+	if(settings.verbose > 1)
+		printf("oid: %ld off: %ld\n", item->oid, entry_off);
+	dbindex_insert(&table->idx_oid, &item->oid, &entry_off);
+	
+}
+
+static unsigned int db_table_query_get(dbitem *item){
+	unsigned long  entry_off;
+	unsigned long  entry_len;
+	unsigned char *entry_ptr;
+
+	dbtable *table = db_tables_search(item->attribute);
+	
+	if(dbindex_query(&table->idx_oid, &item->oid, &entry_off) == 0){
+	//if(1){
+		dbmap_lock(&table->data);
+		// TODO: remove copying item value to memory
+
+		entry_ptr = table->data.data + entry_off;
+		switch(table->pack_type){
+			case 1:
+			case 2:
+			case 3:
+				item->data = malloc(30);
+				break;
+			case 4:
+				entry_len  = strlen(entry_ptr) + 1;
+				item->data = malloc(entry_len);
+				break;
+			default:
+				entry_len  = *(unsigned int *)entry_ptr;
+				item->data = malloc(entry_len);
+				entry_ptr += 4;
+				break;
+		};
+		
+		switch(table->pack_type){
+			case 1: sprintf(item->data,   "%d", *entry_ptr);                       break;
+			case 2: sprintf(item->data,   "%d", *(unsigned int *)entry_ptr);       break;
+			case 3: sprintf(item->data, "%lld", *(unsigned long long *)entry_ptr); break;
+			default:
+				memcpy(item->data, entry_ptr, entry_len);
+				break;
+		}
+		
+		switch(table->pack_type){
+			case 1:
+			case 2:
+			case 3:
+				item->data_len = strlen(item->data);
+				break;
+			default:
+				item->data_len = entry_len;
+				break;
+		};
+
+		dbmap_unlock(&table->data);
+		return 0;
+	}
+	return 1;
 }
 
 static void db_tables_load(void){
@@ -315,7 +305,7 @@ static void db_tables_unload(void){
 static void db_settings_save(void){
 	FILE* db_f = fopen(dbfile_main, "w");
 
-	fprintf(db_f, "%u\n", db_oid_last);
+	fprintf(db_f, "%ld\n", db_oid_last);
 	
 	fclose(db_f);
 }
@@ -335,7 +325,7 @@ static void db_settings_load(void){
 	}else{
 		FILE* db_f = fopen(dbfile_main, "r");
 
-		res = fscanf(db_f, "%u\n", &db_oid_last);
+		res = fscanf(db_f, "%ld\n", &db_oid_last);
 	
 		fclose(db_f);
 	}
@@ -354,7 +344,7 @@ void db_write_thread(int arg){
 	db_destroy_ok++;
 }
 /* }}}1 */
-
+/* DB initialisation {{{1 */
 void db_init(void){
 	
 	list_init(&db_write_queue);
@@ -377,7 +367,7 @@ void db_init(void){
 	db_tables_load();
 
 	if(settings.verbose > 1)
-		printf("db_oid = %u\n", db_oid_last);
+		printf("db_oid = %ld\n", db_oid_last);
 	
 }
 
@@ -393,4 +383,41 @@ void db_destroy(void){
 	db_tables_unload();
 	free(dbfile_main);
 }
+/* }}}1 */
+
+/* PUBLIC FUNCTIONS */
+
+/* DBItem functions {{{1 */
+dbitem* dbitem_alloc(void){
+	return zalloc(sizeof(dbitem));
+}
+
+void dbitem_free(dbitem *item){
+	if(item->attribute)
+		free(item->attribute);
+	if(item->data)
+		free(item->data);
+	free(item);
+}
+/* }}}1 */
+
+unsigned long db_query_new(void){
+	unsigned long oid_new;
+
+	pthread_mutex_lock(&db_oid_last_mutex);
+	oid_new = db_oid_last++;
+	pthread_mutex_unlock(&db_oid_last_mutex);
+	return oid_new;
+}
+
+unsigned int db_query_set(dbitem *item){
+	list_push(&db_write_queue, item);	
+	//db_table_query_set(item);
+	return 0;
+}
+
+unsigned int db_query_get(dbitem *item){
+	return db_table_query_get(item);	
+}
+
 

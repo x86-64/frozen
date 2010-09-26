@@ -94,10 +94,10 @@ struct settings {
 extern struct settings settings;
 
 typedef struct dbitem_ {
-    unsigned int oid;
-    char*        attribute;
-    char*        data;
-    unsigned int data_len;
+    unsigned long oid;
+    char*         attribute;
+    char*         data;
+    unsigned long data_len;
 } dbitem;
 
 enum conn_states {
@@ -172,7 +172,7 @@ struct conn {
 
 extern dbitem*       dbitem_alloc(void);
 extern void          dbitem_free(dbitem*);
-extern unsigned int  db_query_new(void);
+extern unsigned long db_query_new(void);
 extern unsigned int  db_query_set(dbitem *);
 extern void          db_init(void);
 extern void          db_destroy(void);

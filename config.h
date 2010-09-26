@@ -71,7 +71,7 @@
 #define STDC_HEADERS 1
 
 /* Define this if you want to use pthreads */
-#define USE_THREADS /**/
+/* #undef USE_THREADS */
 
 /* Version number of package */
 #define VERSION "1.0.0"
