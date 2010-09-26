@@ -8,7 +8,7 @@ typedef struct block_info {
 } block_info;
 
 typedef struct block_t {
-	off_t         real_off;
+	off_t         real_block_id;
 	size_t        free_size;
 } block_t;
 
@@ -20,12 +20,14 @@ typedef struct blocks_user_data {
 	request_t    *request_read;
 	request_t    *request_write;
 	request_t    *request_move;
+	
 	data_t       *request_read_key;
 	data_t       *request_write_key;
 	data_t       *request_write_data;
 	buffer_t     *buffer_read;
 	buffer_t     *buffer_create;
 	
+	request_t    *request_chain_layer;
 } blocks_user_data;
 
 // 'blocks' chain splits underlying data space into blocks.
@@ -62,10 +64,11 @@ static int     map_new_block(chain_t *chain, request_t *request, off_t virt_bloc
 	block_info        info;
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
+	hash_empty        (data->request_chain_layer);
+	hash_assign_layer (data->request_chain_layer, request);
+	hash_set          (data->request_chain_layer, "size", TYPE_INT32, &data->block_size);
 	
-	hash_set(request, "size", TYPE_INT32, &data->block_size);
-	
-	ret = chain_next_query(chain, request, data->buffer_create);
+	ret = chain_next_query(chain, data->request_chain_layer, data->buffer_create);
 	if(ret <= 0)
 		return -EINVAL;
 	
@@ -78,9 +81,6 @@ static int     map_new_block(chain_t *chain, request_t *request, off_t virt_bloc
 
 	if(virt_block_id == data->blocks_count){
 		// insert to map table
-#ifdef BLOCKS_DBG
-		printf("request_create \n");
-#endif
 		ret = backend_query(data->backend, data->request_create, data->buffer_create);
 		if(ret <= 0)
 			return -EINVAL;
@@ -105,7 +105,6 @@ static int     map_new_block(chain_t *chain, request_t *request, off_t virt_bloc
 	info.free_size     = data->block_size;
 	
 	*(off_t *)(data->request_write_key) = virt_block_id;
-	
 	memcpy(data->request_write_data + 4, &info, sizeof(info));
 	
 	ret = backend_query(data->backend, data->request_write, NULL); 
@@ -115,7 +114,7 @@ static int     map_new_block(chain_t *chain, request_t *request, off_t virt_bloc
 	data->blocks_count++;
 	
 	p_block->free_size     = data->block_size;
-	p_block->real_off      = block_id * data->block_size;
+	p_block->real_block_id = block_id;
 	
 	return 0;
 } // }}}
@@ -136,8 +135,8 @@ static int     map_get_block(blocks_user_data *data, off_t block_id, block_t *bl
 	if(info.free_size > data->block_size || info.real_block_id >= data->blocks_count)
 		return -EINVAL;
 	
-	block->free_size = info.free_size;
-	block->real_off  = info.real_block_id * data->block_size;
+	block->free_size     = info.free_size;
+	block->real_block_id = info.real_block_id;
 	
 	return 0;
 } // }}}
@@ -148,7 +147,7 @@ static int     map_set_block(blocks_user_data *data, off_t block_id, block_t *bl
 	if(block_id >= data->blocks_count || block == NULL)
 		return -EINVAL;
 	
-	info.real_block_id = block->real_off / data->block_size;
+	info.real_block_id = block->real_block_id;
 	info.free_size     = block->free_size;
 	
 	*(off_t *)(data->request_write_key) = block_id;
@@ -161,10 +160,29 @@ static int     map_set_block(blocks_user_data *data, off_t block_id, block_t *bl
 	return 0;
 } // }}}
 
-/*
-static off_t   map_translate_key(blocks_user_data *data, off_t vm_off){
-	return -1;
-}*/
+// TODO remove TYPE_INT64 from code, support all
+
+static int    map_translate_key(blocks_user_data *data, char *key_name, request_t *request){ //
+	off_t        key;
+	off_t        virt_block_id;
+	block_t      block;
+	
+	if(hash_get_copy (request, key_name, TYPE_INT64, &key, sizeof(key)) != 0)
+		return -EINVAL;
+	
+	virt_block_id = key / data->block_size;
+	
+	if(map_get_block(data, virt_block_id, &block) != 0)
+		return -EINVAL;
+	
+	//printf("key was: %x br: %x bv: %x\n", (unsigned int)key, (unsigned int)block.real_block_id, (unsigned int));
+	key = key + (block.real_block_id - virt_block_id) * data->block_size;
+	
+	hash_set(data->request_chain_layer, key_name, TYPE_INT64, &key);
+	
+	return 0;
+}
+
 /* }}} */
 /* init {{{ */
 static int blocks_init(chain_t *chain){
@@ -197,20 +215,20 @@ static int blocks_configure(chain_t *chain, setting_t *config){
 	blocks_user_data *data         = (blocks_user_data *)chain->user_data;
 	
 	if( (block_size_str = setting_get_child_string(config, "block_size")) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'block_size' not set");
+		return_error(-EINVAL, "chain 'blocks' variable 'block_size' not set\n");
 	
 	if( (data->block_size = strtoul(block_size_str, NULL, 10)) == 0)
-		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid");
+		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
 	
 	if( (config_backend = setting_get_child_setting(config, "backend")) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set");
+		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set\n");
 	
 	if( (data->backend = backend_new("blocks_map", config_backend)) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid");
+		return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
 	
 	if( (data->request_create = hash_new()) == NULL)
 		goto free;
-
+	
 	if( (data->request_read  = hash_new()) == NULL)
 		goto free1;
 	
@@ -225,6 +243,9 @@ static int blocks_configure(chain_t *chain, setting_t *config){
 	
 	if( (data->buffer_create = buffer_alloc()) == NULL)
 		goto free5;
+	
+	if( (data->request_chain_layer = hash_new()) == NULL)
+		goto free6;
 	
 	action = ACTION_CRWD_CREATE;
 	hash_set(data->request_create, "action", TYPE_INT32, &action);
@@ -249,9 +270,10 @@ static int blocks_configure(chain_t *chain, setting_t *config){
 	hash_set(data->request_write,  "size",   TYPE_INT32, &size);
 	
 	map_get_blocks_count(data);
-
+	
 	return 0;
-
+	
+free6:  buffer_free(data->buffer_create);
 free5:  buffer_free(data->buffer_read);
 free4:  hash_free(data->request_move);
 free3:	hash_free(data->request_write);
@@ -270,28 +292,22 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	printf("moo0\n");
 	if(hash_get_copy (request, "size",  TYPE_INT32,  &element_size, sizeof(element_size)) != 0)
 		return -EINVAL;
 	
 	if(element_size > data->block_size) // TODO make sticked blocks
 		return -EINVAL;
 	
-	printf("moo1\n");
 	/* if files empty - create new block */
 	if(data->blocks_count == 0){
-	printf("moo2---\n");
 		if(map_new_block(chain, request, 0, &block) != 0)
 			return -EFAULT;
 	}
 	
-	
 	/* try write into last block */
 	block_id = data->blocks_count - 1;
-	printf("moo2 %x\n", (unsigned int)block_id);
 	if(map_get_block(data, block_id, &block) != 0)
 		return -EFAULT;
-	printf("moo3-\n");
 	
 	/* if not enough space - create new one */
 	if(element_size > block.free_size){
@@ -300,7 +316,6 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 			return -EFAULT;
 	}
 	
-	printf("moo3\n");
 	/* calc virt_ptr */
 	virt_ptr = block_id * data->block_size + (data->block_size - block.free_size);
 	
@@ -309,23 +324,35 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	if(map_set_block(data, block_id, &block) != 0)
 		return -EFAULT;
 	
-	printf("moo4\n");
 	buffer_write(buffer, sizeof(off_t), *(off_t *)chunk = virt_ptr); 
 	return sizeof(off_t);
 }
 
 static ssize_t blocks_setgetdelete(chain_t *chain, request_t *request, buffer_t *buffer){
-	ssize_t           ret;
-	// key = translate_key(key)
-	ret = chain_next_query(chain, request, buffer);
-	return ret;
+	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	
+	hash_empty        (data->request_chain_layer);
+	hash_assign_layer (data->request_chain_layer, request);
+	
+	if(map_translate_key(data, "key", request) != 0)
+		return -EINVAL;
+	
+	return chain_next_query(chain, data->request_chain_layer, buffer);
 }
 
 static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer){
-	// key = translate_key(key)
-	// size = (size > block_size) ? block_size : size;
-	// ret = chain_next_query(chain, request, buffer);
-	return -1;
+	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	
+	hash_empty        (data->request_chain_layer);
+	hash_assign_layer (data->request_chain_layer, request);
+	
+	//if(map_translate_key(data, "key_from", request) != 0)
+	//	return -EINVAL;
+	//if(map_translate_key(data, "key_to",   request) != 0)
+	//	return -EINVAL;
+	
+	
+	return chain_next_query(chain, data->request_chain_layer, buffer);
 }
 
 static ssize_t blocks_count(chain_t *chain, request_t *request, buffer_t *buffer){

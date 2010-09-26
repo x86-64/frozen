@@ -68,20 +68,20 @@ _inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { re
 
 #define buffer_read(_buffer,_size,_func)  ({                                \
 	off_t  offset;                                                      \
-	size_t chunk_size, read_size, size;                                 \
+	size_t chunk_size, _read_size, size;                                \
 	void * chunk = buffer_get_first_chunk(_buffer);                     \
 	                                                                    \
-	read_size = _size;                                                  \
+	_read_size = _size;                                                 \
 	offset    = 0;                                                      \
-	while(read_size > 0 && chunk != NULL){                              \
+	while(_read_size > 0 && chunk != NULL){                             \
 		chunk_size = chunk_get_size(chunk);                         \
 		                                                            \
-		size = (chunk_size > read_size) ? read_size : chunk_size;   \
+		size = (chunk_size > _read_size) ? _read_size : chunk_size; \
 		_func;                                                      \
 		                                                            \
-		offset    += size;                                          \
-		read_size -= size;                                          \
-		chunk      = chunk_next(chunk);                             \
+		offset     += size;                                         \
+		_read_size -= size;                                         \
+		chunk       = chunk_next(chunk);                            \
 	}                                                                   \
 })
 

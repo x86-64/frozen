@@ -60,6 +60,8 @@ typedef struct locator_ud {
 	locator_mode   mode;
 	oid_proto_t   *oid_proto;
 	unsigned int   linear_scale;
+	hash_t        *new_request;
+	
 } locator_ud;
 
 static oid_proto_t *  oid_proto_from_type(data_type type){
@@ -82,9 +84,11 @@ static int locator_init(chain_t *chain){
 }
 
 static int locator_destroy(chain_t *chain){
-	//locator_ud *data = (locator_ud *)chain->user_data;
+	locator_ud *data = (locator_ud *)chain->user_data;
 	
-	free(chain->user_data);
+	hash_free(data->new_request);
+	
+	free(data);
 	chain->user_data = NULL;
 	return 0;
 }
@@ -159,6 +163,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	
 	data->oid_proto    = oid_class_proto;
 	data->linear_scale = linear_scale;
+	data->new_request  = hash_new();
 	
 	// get backend name from 'index' 
 	
@@ -170,7 +175,15 @@ static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
 	data_type    val_type;
 	oid_proto_t *val_proto;
 	
+	// TODO holly crap
+	
 	if(hash_get_any(request, key, &val_type, &val, NULL) != 0)
+		return -EINVAL;
+	
+	if(hash_set(data->new_request, key, val_type, val) != 0)
+		return -EINVAL;
+	
+	if(hash_get_any(data->new_request, key, NULL, &val, NULL) != 0)
 		return -EINVAL;
 	
 	val_proto = oid_proto_from_type(val_type);
@@ -211,12 +224,15 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
 	
+	hash_empty        (data->new_request);
+	hash_assign_layer (data->new_request, request);
+	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(decapsulate(data, request, "size") != 0)
 				return -EINVAL;
 			
-			if( (ret = chain_next_query(chain, request, buffer)) <= 0)
+			if( (ret = chain_next_query(chain, data->new_request, buffer)) <= 0)
 				return ret;
 			
 			if(incapsulate(data, buffer) != 0)
@@ -251,6 +267,9 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
 	
+	hash_empty        (data->new_request);
+	hash_assign_layer (data->new_request, request);
+	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(decapsulate(data, request, "key") != 0)
@@ -258,16 +277,12 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 			if(decapsulate(data, request, "size") != 0)
 				return -EINVAL;
 			
-			if( (ret = chain_next_query(chain, request, buffer)) <= 0)
+			if( (ret = chain_next_query(chain, data->new_request, buffer)) <= 0)
 				return ret;
 			
 			ret = incapsulate_ret(data, ret);
+			break;
 			
-			break;
-		case LINEAR_ORIGINAL:
-			ret = chain_next_query(chain, request, buffer);
-			break;
-		
 		case INDEX_INCAPSULATED:
 			// ret = check_existance(key, buffer);
 			// if(ret <= 0)
@@ -277,12 +292,14 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 			
 			ret = chain_next_query(chain, request, buffer);
 			break;
+			
 		case INDEX_ORIGINAL:
 			// ret = check_existance(key);
 			// if(ret != 0)
 			// 	return ret;
 			
 			// fall through
+		case LINEAR_ORIGINAL:
 			ret = chain_next_query(chain, request, buffer);
 			break;
 	};
@@ -294,6 +311,9 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
 	
+	hash_empty        (data->new_request);
+	hash_assign_layer (data->new_request, request);
+	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(decapsulate(data, request, "key_from") != 0)
@@ -302,11 +322,9 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 				return -EINVAL;
 			decapsulate(data, request, "size");             // optional
 			
-			// fall through
-		case LINEAR_ORIGINAL:
-			ret = chain_next_query(chain, request, buffer);
+			ret = chain_next_query(chain, data->new_request, buffer);
 			break;
-		
+			
 		case INDEX_INCAPSULATED:
 			// ret = check_existance(key, buffer);
 			// if(ret <= 0)
@@ -314,14 +332,16 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 			//
 			// hash_set(request, "key", *buffer, ret);
 			
-			ret = chain_next_query(chain, request, buffer);
+			ret = chain_next_query(chain, data->new_request, buffer);
 			break;
+		
 		case INDEX_ORIGINAL:
 			// ret = check_existance(key);
 			// if(ret != 0)
 			// 	return ret;
 			
 			// fall through
+		case LINEAR_ORIGINAL:
 			ret = chain_next_query(chain, request, buffer);
 			break;
 	};

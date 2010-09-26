@@ -17,10 +17,8 @@ START_TEST (test_backend_blocks){
 						setting_set_child_string(s_bfile, "name",        "file");
 						setting_set_child_string(s_bfile, "filename",    "data_backend_blocks_map");
 					setting_t *s_bloca = setting_new();
-						setting_set_child_string(s_bloca, "name",        "oid-locator");
-						setting_set_child_string(s_bloca, "mode",        "linear-incapsulated");
-						setting_set_child_string(s_bloca, "oid-class",   "int32");
-						setting_set_child_string(s_bloca, "size",        "8");
+						setting_set_child_string(s_bloca, "name",        "blocks-address");
+						setting_set_child_string(s_bloca, "per-level",   "4");
 				setting_set_child_setting(s_backend, s_bfile);
 				setting_set_child_setting(s_backend, s_bloca);
 			setting_set_child_setting(s_list, s_backend);
@@ -30,6 +28,8 @@ START_TEST (test_backend_blocks){
 	backend = backend_new("in_block", settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
+	return;
+
 	unsigned int  action;
 	ssize_t       ssize;
 	char         *test_chunk;
@@ -39,58 +39,54 @@ START_TEST (test_backend_blocks){
 	int           k;
 	int           key_count = 20;
 	off_t         key_off[key_count];
+	char          key_data[] = "\x05\x00\x00\x00" "\x00";
+	
+	action  = ACTION_CRWD_CREATE;
+	ssize   = 1;
+		hash_set(hash, "action", TYPE_INT32, &action);
+		hash_set(hash, "size",   TYPE_INT32, &ssize);
 	
 	for(k=0; k<key_count; k++){
-		action  = ACTION_CRWD_CREATE;
-		ssize   = 1;
-		
-		hash_set(hash, "action", TYPE_INT32, &action);
-		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain in_block create failed");	
 		
 		buffer_read(buffer, ssize, key_off[k] = *(off_t *)chunk; break);
-		printf("new_key[%x]: %x\n", (unsigned int)k, (unsigned int)key_off[k]);
+			fail_unless(key_off[k] == k,                               "chain in_block create id failed");
 	}
 	
-	/*
 	action  = ACTION_CRWD_WRITE;
-	ssize   = 10;
+	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32,  &action);
-		hash_set(hash, "key",    TYPE_INT64,  &key_off);
-		hash_set(hash, "value",  TYPE_BINARY, &key_data);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
-		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 10, "backend in_list write 1 failed");
-	
-	// insert key
-	key_insert_off = key_off + 2;
-	ssize   = 1;
-		hash_set(hash, "key",    TYPE_INT64,  &key_insert_off);
-		hash_set(hash, "value",  TYPE_BINARY, &key_insert);
-		hash_set(hash, "insert", TYPE_INT32,  &ssize); // = 1
-		hash_set(hash, "size",   TYPE_INT32,  &ssize); // = 1
+	for(k=0; k<key_count; k++){
+		key_data[4] = (char) k;
+		
+		hash_set(hash, "key",    TYPE_INT64,  &key_off[k]);
+		hash_set(hash, "value",  TYPE_BINARY, &key_data);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 1,  "backend in_list write 2 failed");
+			fail_unless(ssize == 1, "backend in_block write failed");
+	}
+	
 	
 	// check
 	action  = ACTION_CRWD_READ;
-	ssize   = 11;
+	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32,  &action);
-		hash_set(hash, "key",    TYPE_INT64,  &key_off);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-		
+	
+	for(k=0; k<key_count; k++){
+		hash_set(hash, "key",    TYPE_INT64,  &key_off[k]);
 		buffer_remove_chunks(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 11,                                "backend in_list read 1 failed");
+			fail_unless(ssize == 1,                                "backend in_block read failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key_inserted, 11) == 0, "backend in_list read 1 data failed");
-	*/
-
+			fail_unless(memcmp(test_chunk, &key_off[k], 1) == 0,   "backend in_block read data failed");
+	}
+	
 	hash_free(hash);
 	buffer_free(buffer);
 

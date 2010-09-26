@@ -7,7 +7,8 @@ typedef struct hash_el_t {
 	unsigned int    value;  // int / ptr
 } hash_el_t;
 
-typedef struct hash_t {
+typedef struct hash_t hash_t;
+struct hash_t {
 	unsigned int   size;
 	unsigned int   nelements;
 	
@@ -23,13 +24,17 @@ typedef struct hash_t {
 	hash_el_t     *elements;
 	data_t        *data;
 	data_t        *data_end;
-} hash_t;
+	hash_t        *next_layer;
+};
 
 #define HASH_T_LOCAL_SIZE   sizeof(hash_t)
 #define HASH_T_NETWORK_SIZE sizeof(unsigned int) * 4
 
 hash_t *           hash_new                     (void);
+void               hash_empty                   (hash_t *hash);
 void               hash_free                    (hash_t *hash);
+
+void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer);
 
 int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);

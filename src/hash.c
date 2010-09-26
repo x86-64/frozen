@@ -10,6 +10,11 @@
 //   after heavy hash_set, coz hash_set on already existing element with data larger than in
 //   hash will produce dead data chunk. It still will work, but suffer traffic overhead
 
+typedef struct hash_key_t {
+	hash_t    *hash;
+	hash_el_t *element;
+} hash_key_t;
+
 hash_t *           hash_new                     (void){ // {{{
 	hash_t     *hash;
 	data_t     *data;
@@ -29,20 +34,40 @@ hash_t *           hash_new                     (void){ // {{{
 	hash->elements   = NULL;
 	hash->data       = data;
 	hash->data_end   = data;
-	
+	hash->next_layer = NULL;
+
 	return hash;
 cleanup2:
 	free(hash);
 cleanup1:
 	return NULL;
 } // }}}
-void               hash_free                    (hash_t *hash){
-	if(hash->is_local == 1){
+void               hash_empty                   (hash_t *hash){ // {{{
+	if(hash->is_local != 1)
+		return;
+	
+	if(hash->elements != NULL)
 		free(hash->elements);
+	
+	hash->elements  = NULL;
+	hash->nelements = 0;
+	hash->size      = HASH_T_NETWORK_SIZE;
+	hash->data_end  = hash->data;
+} // }}}
+void               hash_free                    (hash_t *hash){ // {{{
+	if(hash->is_local == 1){
+		if(hash->elements != NULL)
+			free(hash->elements);
 		free(hash->data);
 	}
 	free(hash);
-}
+} // }}}
+void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer){ // {{{
+	if(hash == NULL)
+		return;
+	
+	hash->next_layer = hash_layer;
+} // }}}
 
 int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
@@ -83,7 +108,7 @@ static data_t *    hash_off_to_ptr              (hash_t *hash, unsigned int offs
 	return (data_t *)(hash->data + offset);
 } // }}}
 
-static hash_el_t * hash_search_key              (hash_t *hash, char *key){ // {{{
+static int         hash_search_key              (hash_t *hash, char *key, int lookup_layers, hash_key_t *hash_key){ // {{{
 	unsigned int  i;
 	hash_el_t    *element;
 	data_t       *found_key;
@@ -97,27 +122,38 @@ static hash_el_t * hash_search_key              (hash_t *hash, char *key){ // {{
 		
 		//data_cmp(found_key, key)
 		if(strncmp(found_key, key, found_buf_size) == 0){
-			return element;
+			hash_key->hash    = hash;
+			hash_key->element = element;
+			
+			return 0;
 		}
 	}
-	return NULL;
+	if(hash->next_layer == NULL)
+		return -1;
+	if(lookup_layers == 0)
+		return -1;
+	
+	return hash_search_key(hash->next_layer, key, lookup_layers, hash_key);
 } // }}}
 
-static int         hash_key_get_data            (hash_t *hash, hash_el_t *hash_el, data_t **data, size_t *size){ // {{{
+static int         hash_key_get_data            (hash_key_t *hash_key, data_type *type, data_t **data, size_t *size){ // {{{
 	data_t       *el_data;
-	size_t        el_size;
 	size_t        el_buf_size;
 	
-	el_data = hash_off_to_ptr(hash, hash_el->value, &el_buf_size);
-	if(el_data == NULL)
-		return -1;
+	if(data != NULL || size != NULL){
+		if( (el_data = hash_off_to_ptr(hash_key->hash, hash_key->element->value, &el_buf_size)) == NULL)
+			return -1;
+		
+		if(data != NULL)
+			*data = el_data;
+	}
 	
-	el_size = data_len(hash_el->type, el_data, el_buf_size);
-	if(el_size == 0)
-		return -1;
+	if(size != NULL)
+		if( (*size = data_len(hash_key->element->type, el_data, el_buf_size)) == 0)
+			return -1;
 	
-	*data = el_data;
-	*size = el_size;
+	if(type != NULL)
+		*type = hash_key->element->type;
 	
 	return 0;	
 } // }}}
@@ -128,7 +164,7 @@ int                hash_set                     (hash_t *hash, char *key, data_t
 	unsigned int  key_chunk;
 	unsigned int  data_chunk;
 	hash_el_t    *new_elements;
-	hash_el_t    *found_key;
+	hash_key_t    found_key;
 	data_t       *found_data;
 	size_t        found_size;
 	size_t        value_size;
@@ -139,14 +175,13 @@ int                hash_set                     (hash_t *hash, char *key, data_t
 	
 	value_size = data_len(type, value, (size_t)-1); // TODO SEC bad bad bad bad...
 	
-	found_key = hash_search_key(hash, key);
-	if(found_key == NULL)
+	if(hash_search_key(hash, key, 0, &found_key) != 0)
 		goto bad;
 	
-	if(found_key->type != type)
+	if(found_key.element->type != type)
 		goto bad;
 	
-	ret = hash_key_get_data(hash, found_key, &found_data, &found_size);
+	ret = hash_key_get_data(&found_key, NULL, &found_data, &found_size);
 	if(ret != 0)
 		goto bad;
 	
@@ -188,25 +223,13 @@ bad:
 } // }}}
 
 int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size){ // {{{
-	hash_el_t    *found_key;
-	data_t       *found_data;
-	size_t        found_size;
-	int           ret;
+	hash_key_t  found_key;
 	
-	found_key = hash_search_key(hash, key);
-	if(found_key == NULL)
-		return -2;
+	if(hash_search_key(hash, key, 1, &found_key) != 0)
+		return -1;
 	
-	ret = hash_key_get_data(hash, found_key, &found_data, &found_size);
-	if(ret != 0)
-		return -3;
-	
-	if(type != NULL)
-		*type       = found_key->type;
-	if(value != NULL)
-		*value      = found_data;
-	if(value_size != NULL)
-		*value_size = found_size;
+	if(hash_key_get_data(&found_key, type, value, value_size) != 0)
+		return -1;
 	
 	return 0;
 } // }}}
@@ -247,7 +270,7 @@ void hash_dump(hash_t *hash){
 	data_t       *found_data;
 	size_t        found_buf_size;
 	size_t        found_data_size;
-
+	
 	element = hash->elements;
 	printf("hash: %x\n", (unsigned int)hash);
 	for(i=0; i < hash->nelements; i++, element++){

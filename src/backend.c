@@ -64,10 +64,10 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 	f_crwd        func       = NULL;
 	
 	if(chain == NULL || request == NULL)
-		return -EINVAL;
+		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
 	
 	if(hash_get_copy(request, "action", TYPE_INT32, &action, sizeof(action)) != 0)
-		return -EINVAL;
+		return_error(-EINVAL, "chain_query request 'action' not set\n");
 	
 	switch(action){
 		case ACTION_CRWD_CREATE: func = chain->chain_type_crwd.func_create; break;
@@ -107,15 +107,15 @@ static int backend_iter_chain_init(void *p_setting, void *p_backend, void *p_cha
 	if(chain == NULL)
 		return ITER_BREAK;
 	
+	chain->next = *(chain_t **)p_chain;
+	
 	//printf("initing: %s\n", chain_name);
 	ret = chain_configure(chain, setting);
 	if(ret != 0)
 		goto cleanup;
 	
-	chain->next = *(chain_t **)p_chain;
-	
 	*(chain_t **)p_chain = chain;
-
+	
 	return ITER_CONTINUE;
 
 cleanup:	

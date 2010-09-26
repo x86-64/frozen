@@ -164,6 +164,7 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	data_t           *value_data;
 	size_t            value_size;
 	size_t            write_size;
+	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
 	if(hash_get_copy (request, "key",   TYPE_INT64,  &key,        sizeof(key)) != 0)
 		return -EINVAL;
@@ -189,6 +190,8 @@ redo:
 		if(errno == EINTR) goto redo;
 		return -errno;
 	}
+	
+	data->file_stat_status = STAT_NEED_UPDATE; // coz can write to end, without calling create
 	
 	return ret;
 }
@@ -300,6 +303,9 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 		size        = (max_size < move_size) ? max_size : move_size;
 	}
 	free(buff);
+	
+	data->file_stat_status = STAT_NEED_UPDATE;
+	
 	return ret;
 }
 

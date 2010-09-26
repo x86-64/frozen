@@ -1,6 +1,18 @@
 
-backends_sources=backends/file.c backends/oid-locator.c backends/null-proxy.c backends/blocks.c backends/list.c
-data_sources=data/binary.c data/uint8.c data/uint16.c data/uint32.c data/uint64.c 
+backends_sources =      \
+	backends/file.c \
+	backends/oid-locator.c \
+	backends/null-proxy.c \
+	backends/blocks.c           \
+	backends/blocks-adressing.c \
+	backends/list.c
+
+data_sources= \
+	data/binary.c \
+	data/uint8.c \
+	data/uint16.c \
+	data/uint32.c \
+	data/uint64.c 
 
 AUTOMAKE_OPTIONS = subdir-objects
 
