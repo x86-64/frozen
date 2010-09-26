@@ -30,6 +30,13 @@ if test "x$enable_profile" == "xyes"; then
         LDFLAGS="$LDFLAGS -pg -nopie"
 fi
 
+AC_ARG_ENABLE(debug,  AS_HELP_STRING([--enable-debug],  [compile with debug symbols]))
+if test "x$enable_debug" == "xyes"; then
+        CFLAGS="$CFLAGS -g"
+        LDFLAGS="$LDFLAGS -g"
+fi
+
+
 AC_CONFIG_FILES([Makefile
 		doc/Makefile
 		src/Makefile

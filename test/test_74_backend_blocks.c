@@ -25,8 +25,10 @@ START_TEST (test_backend_blocks){
 	setting_set_child_setting(settings, s_file);
 	setting_set_child_setting(settings, s_list);
 	
-	backend = backend_new("in_block", settings);
-		fail_unless(backend != NULL, "backend creation failed");
+	if( (backend = backend_new("in_block", settings)) == NULL){
+		fail("backend creation failed");
+		return;
+	}
 	
 	
 	unsigned int  action;
@@ -48,13 +50,11 @@ START_TEST (test_backend_blocks){
 		hash_set(hash, "size",   TYPE_INT32, &ssize);
 	
 	for(k=0; k < key_count; k++){
-		buffer_remove_chunks(buffer);
-		
 		if( (ssize = backend_query(backend, hash, buffer)) <= 0 )
 			fail("chain in_block create failed");	
 		
 		key_off[k] = 0;
-		buffer_read_flat(buffer, ssize, &key_off[k], sizeof(off_t));
+		buffer_read(buffer, 0, &key_off[k], MIN(ssize, sizeof(off_t)));
 			fail_unless(key_off[k] == k,                               "chain in_block create id failed");
 	}
 	for(k=0; k<key_count; k++){
@@ -66,8 +66,8 @@ START_TEST (test_backend_blocks){
 			hash_set(hash, "action", TYPE_INT32,  &action);
 			hash_set(hash, "size",   TYPE_INT32,  &ssize);
 			hash_set(hash, "key",    TYPE_INT64,  &key_off[k]);
-		 	hash_set_custom(hash, "value", ssize, &data_buf);
-			memcpy(data_buf, &key_data, ssize);
+		 	
+			buffer_write(buffer, 0, &key_data, ssize);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1, "backend in_block write failed");
@@ -84,10 +84,12 @@ START_TEST (test_backend_blocks){
 		buffer_remove_chunks(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 1,                                "backend in_block read failed");
-			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, &key_off[k], 1) == 0,   "backend in_block read data failed");
+			fail_unless(
+				ssize == 1 && 
+				memcmp(test_chunk, &key_off[k], 1) == 0,
+				"backend in_block read data failed"
+			);
 	}
 	
 	hash_free(hash);

@@ -38,67 +38,40 @@ void *          buffer_add_new_tail_chunk  (buffer_t *buffer, size_t size);
 int             buffer_delete_chunk        (buffer_t *buffer, void *chunk);
 void *          buffer_seek                (buffer_t *buffer, off_t ptr);
 
+ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset, void *buf, size_t buf_size);
+ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset, void *buf, size_t buf_size);
+
 _inline size_t  buffer_get_size            (buffer_t *buffer)               { return buffer->size; }
 _inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { return buffer->head; }
 
-#define buffer_write(_buffer,_size,_func)  ({                               \
+#define buffer_process(_buffer,_size,_create,_func)  ({                     \
 	off_t  offset;                                                      \
-	size_t chunk_size, write_size, size;                                \
+	size_t chunk_size, to_process, size;                                \
 	void * chunk = buffer_get_first_chunk(_buffer);                     \
 	                                                                    \
-	write_size = _size;                                                 \
-	offset    = 0;                                                      \
+	to_process = _size;                                                 \
+	offset     = 0;                                                     \
 		                                                            \
-	while(write_size > 0){                                              \
-		if(chunk == NULL)                                           \
-			chunk = buffer_add_new_tail_chunk(                  \
-				_buffer,                                    \
-				write_size                                  \
-			);                                                  \
+	while(to_process > 0){                                              \
+		if(chunk == NULL){                                          \
+			if(_create == 1){                                   \
+				chunk = buffer_add_new_tail_chunk(          \
+					_buffer,                            \
+					to_process                          \
+				);                                          \
+			}else{                                              \
+				break;                                      \
+			}                                                   \
+		}                                                           \
 		chunk_size = chunk_get_size(chunk);                         \
 		                                                            \
-		size = (chunk_size > write_size) ? write_size : chunk_size; \
+		size = (chunk_size > to_process) ? to_process : chunk_size; \
 		_func;                                                      \
 		                                                            \
 		offset     += size;                                         \
-		write_size -= size;                                         \
+		to_process -= size;                                         \
 		chunk       = chunk_next(chunk);                            \
 	}                                                                   \
-})
-
-#define buffer_read(_buffer,_size,_func)  ({                                \
-	off_t  offset;                                                      \
-	size_t chunk_size, _read_size, size;                                \
-	void * chunk = buffer_get_first_chunk(_buffer);                     \
-	                                                                    \
-	_read_size = _size;                                                 \
-	offset    = 0;                                                      \
-	while(_read_size > 0 && chunk != NULL){                             \
-		chunk_size = chunk_get_size(chunk);                         \
-		                                                            \
-		size = (chunk_size > _read_size) ? _read_size : chunk_size; \
-		_func;                                                      \
-		                                                            \
-		offset     += size;                                         \
-		_read_size -= size;                                         \
-		chunk       = chunk_next(chunk);                            \
-	}                                                                   \
-})
-
-#define buffer_write_flat(_buffer,_dst,_dst_size) ({                        \
-	buffer_write(                                                       \
-		_buffer,                                                    \
-		_dst_size,                                                  \
-		memcpy(chunk, (void *)_dst + offset, size)                  \
-	);                                                                  \
-})
-
-#define buffer_read_flat(_buffer,_read_size,_dst,_dst_size) ({              \
-	buffer_read(                                                        \
-		_buffer,                                                    \
-		(_dst_size > _read_size) ? _read_size : _dst_size,          \
-		memcpy((void *)_dst + offset, chunk, size)                  \
-	);                                                                  \
 })
 
 #endif // BUFFER_H

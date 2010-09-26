@@ -147,7 +147,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 			return -errno;
 		}
 		
-		buffer_write_flat(buffer, &new_key, sizeof(off_t)); 
+		buffer_write(buffer, 0, &new_key, sizeof(off_t)); 
 		
 		data->file_stat_status = STAT_NEED_UPDATE;
 		
@@ -157,39 +157,44 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 }
 
 static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
-	ssize_t           ret;
+	ssize_t           ret = -1;
 	
 	off_t             key;
-	data_t           *value;
-	size_t            value_size;
-	size_t            write_size;
+	unsigned int      value_size;
+	unsigned int      write_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
 	if(hash_get_copy (request, "key",   TYPE_INT64,  &key,        sizeof(key)) != 0)
 		return -EINVAL;
-	if(hash_get_copy (request, "size",  TYPE_INT32,  &write_size, sizeof(write_size)) != 0)
+	if(hash_get_copy (request, "size",  TYPE_INT32,  &value_size, sizeof(value_size)) != 0)
 		return -EINVAL;
-	if(hash_get      (request, "value", TYPE_VOID,   &value,      &value_size) != 0) 
-		return -EINVAL;
-	
-	if(write_size > value_size) // requested write more than have in buffer
-		write_size = value_size;
 	
 redo:
-	ret = pwrite(
-		((file_user_data *)chain->user_data)->handle,
-		value,
-		write_size,
-		key
-	);
-	if(ret == -1 || ret != write_size){
-		if(errno == EINTR) goto redo;
-		return -errno;
-	}
+	write_size = 0;
 	
+	buffer_process(buffer, value_size, 0,
+		do {
+			ret = pwrite(
+				((file_user_data *)chain->user_data)->handle,
+				chunk,
+				size,
+				key + offset
+			);
+			if(ret == -1){
+				if(errno == EINTR) goto redo;
+				return -errno;
+			}
+			
+			write_size += ret;
+			
+			if(ret != size)
+				goto exit;
+		}while(0)
+	);
+exit:
 	data->file_stat_status = STAT_NEED_UPDATE; // coz can write to end, without calling create
 	
-	return ret;
+	return write_size;
 }
 
 static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
@@ -198,7 +203,7 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	off_t             key;
 	unsigned int      value_size;
 	unsigned int      read_size;
-
+	
 	if(hash_get_copy (request, "key",   TYPE_INT64, &key,        sizeof(key)) != 0)
 		return -EINVAL;
 	if(hash_get_copy (request, "size",  TYPE_INT32, &value_size, sizeof(value_size)) != 0)
@@ -206,9 +211,10 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
 	
-	read_size = 0;
 redo:
-	buffer_write(buffer, value_size,
+	read_size = 0;
+	
+	buffer_process(buffer, value_size, 1,
 		do{
 			ret = pread(fd, chunk, size, key + offset);
 			if(ret == -1){
@@ -353,11 +359,7 @@ static ssize_t file_count(chain_t *chain, request_t *request, buffer_t *buffer){
 	if(file_update_count(data) == STAT_ERROR)
 		return -EINVAL;
 	
-	buffer_write(buffer, sizeof(data->file_stat.st_size),
-		memcpy(chunk, &(data->file_stat.st_size), sizeof(data->file_stat.st_size))
-	);
-	
-	return sizeof(data->file_stat.st_size);
+	return buffer_write(buffer, 0, &(data->file_stat.st_size), sizeof(data->file_stat.st_size));
 }
 
 static chain_t chain_file = {

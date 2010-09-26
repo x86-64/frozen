@@ -37,16 +37,16 @@ START_TEST (test_backend_list){
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain in_list create failed");	
-		buffer_read(buffer, ssize, key_off = *(off_t *)chunk; break);
+		buffer_read(buffer, 0, &key_off, MIN(ssize, sizeof(off_t)));
 	
 	action  = ACTION_CRWD_WRITE;
 	ssize   = 10;
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &key_off);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-	 	hash_set_custom(hash, "value", ssize, &data_buf);
-		memcpy(data_buf, key_data, ssize);
-	
+	 	
+		buffer_write(buffer, 0, &key_data, ssize);
+		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 10, "backend in_list write 1 failed");
 	
@@ -59,8 +59,8 @@ START_TEST (test_backend_list){
 		hash_set(hash, "key",    TYPE_INT64,  &key_insert_off);
 		hash_set(hash, "insert", TYPE_INT32,  &ssize); // = 1
 		hash_set(hash, "size",   TYPE_INT32,  &ssize); // = 1
-	 	hash_set_custom(hash, "value", ssize, &data_buf);
-		memcpy(data_buf, key_insert, ssize);
+	 	
+		buffer_write(buffer, 0, &key_insert, ssize);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_list write 2 failed");
@@ -78,7 +78,11 @@ START_TEST (test_backend_list){
 			fail_unless(ssize == 11,                                "backend in_list read 1 failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key_inserted, 11) == 0, "backend in_list read 1 data failed");
+			fail_unless(
+				test_chunk != NULL &&
+				memcmp(test_chunk, key_inserted, 11) == 0,
+				"backend in_list read 1 data failed"
+			);
 	
 	hash_free(hash);
 	buffer_free(buffer);

@@ -40,13 +40,13 @@ START_TEST (test_backend_locator){
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key1 failed");	
-		buffer_read(buffer, ssize, new_key1 = *(off_t *)chunk; break);
+		buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
 		
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key2 failed");	
-		buffer_read(buffer, ssize, new_key2 = *(off_t *)chunk; break);
+		buffer_read(buffer, 0, &new_key2, MIN(ssize, sizeof(off_t)));
 			
 			fail_unless(new_key2 - new_key1 == 1,                 "backend in_locator offsets invalid");
 	
@@ -55,8 +55,8 @@ START_TEST (test_backend_locator){
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-		hash_set_custom(hash, "value", 10, &data_buf);
-		memcpy(data_buf, key1_data, 10);
+		
+		buffer_write(buffer, 0, &key1_data, 10);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_locator write 1 failed");
@@ -66,8 +66,8 @@ START_TEST (test_backend_locator){
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-		hash_set_custom(hash, "value", 10, &data_buf);
-		memcpy(data_buf, key2_data, 10);
+		
+		buffer_write(buffer, 0, &key2_data, 10);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_locator write 2 failed");
@@ -84,7 +84,10 @@ START_TEST (test_backend_locator){
 			fail_unless(ssize == 1,                             "backend in_locator read 1 failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key1_data, 10) == 0, "backend in_locator read 1 data failed");
+			fail_unless(
+				test_chunk != NULL && memcmp(test_chunk, key1_data, 10) == 0,
+				"backend in_locator read 1 data failed"
+			);
 	
 	ssize   = 1;
 		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
@@ -96,7 +99,11 @@ START_TEST (test_backend_locator){
 			fail_unless(ssize == 1,                             "backend in_locator read 2 failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key2_data, 10) == 0, "backend in_locator read 2 data failed");
+			fail_unless(
+				test_chunk != NULL &&
+				memcmp(test_chunk, key2_data, 10) == 0,
+				"backend in_locator read 2 data failed"
+			);
 		
 	hash_free(hash);
 	buffer_free(buffer);

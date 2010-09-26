@@ -128,13 +128,56 @@ void *      buffer_seek            (buffer_t *buffer, off_t ptr){
 	if(ptr == 0)
 		return buffer->head;
 	
-	buffer_read(buffer, (size_t)ptr,
+	buffer_process(buffer, (size_t)ptr, 0,
 		do{
 			if((offset + chunk_size) > ptr)
 				return chunk + (ptr - offset);
 		}while(0)
 	);
 	return NULL;
+}
+
+ssize_t     buffer_write           (buffer_t *buffer, off_t write_offset, void *buf, size_t buf_size){
+	size_t offset_diff;
+	
+	buffer_process(
+		buffer,
+		write_offset + buf_size,
+		1,
+		do {
+			if(write_offset >= offset && offset + size > write_offset){ // first chunk to write
+				offset_diff = (write_offset - offset);
+				
+				memcpy(chunk + offset_diff, buf, size - offset_diff);
+			}else if(offset >= write_offset){ // next chunks
+				memcpy(chunk, buf + (offset - write_offset), size);
+			}
+			
+		}while(0)
+	);
+	return (write_offset + buf_size);
+}
+ssize_t     buffer_read            (buffer_t *buffer, off_t read_offset, void *buf, size_t buf_size){
+	ssize_t processed = 0;
+	size_t  offset_diff;
+	
+	buffer_process(
+		buffer,
+		read_offset + buf_size,
+		0,
+		do {
+			if(read_offset >= offset && offset + size > read_offset){ // first chunk to write
+				offset_diff = (read_offset - offset);
+				
+				memcpy(buf, chunk + offset_diff, size - offset_diff);
+				processed += size - offset_diff;
+			}else if(offset >= read_offset){ // next chunks
+				memcpy(buf + (offset - read_offset), chunk, size);
+				processed += size;
+			}
+		}while(0)
+	);
+	return processed;
 }
 
 /* }}}1 */

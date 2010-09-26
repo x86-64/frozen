@@ -148,7 +148,7 @@ static int      tree_recalc(tree_t *tree){ // {{{
 	size_t       *calcs;
 	unsigned int  block_size;
 	size_t        blocks_left;
-	off_t         ptr                = 0;
+	unsigned int  ptr                = 0;
 	unsigned int  nlevels            = tree->nlevels;
 	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
 	
@@ -171,7 +171,7 @@ static int      tree_recalc(tree_t *tree){ // {{{
 			break;
 		}
 		
-		buffer_read(buffer, ret_size,
+		buffer_process(buffer, ret_size, 0,
 			do {
 				for(i=0; i < size; i += sizeof(block_info), ptr += 1){
 					block_size = ((block_info *)(chunk + i))->size;
@@ -303,7 +303,7 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 		return -1;
 	}
 	
-	buffer_read_flat(buffer, ret, &block, sizeof(block_info));
+	buffer_read(buffer, 0, &block, MIN(ret, sizeof(block_info)));
 	
 	/* fix block_info */
 	delta      = new_size - block.size;
@@ -326,11 +326,11 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	// TODO unlock
 	return 0;
 } // }}}
-static int      tree_get(tree_t *tree, off_t offset, off_t *real_offset){ // {{{
+static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, off_t *real_offset){ // {{{
 	unsigned int   i,j,ret;
 	ssize_t        m_ret;
 	off_t          level_off;
-	off_t          ptr;
+	unsigned int   ptr;
 	size_t         chunk_size;
 	buffer_t      *buffer;
 	block_info     block;
@@ -373,7 +373,7 @@ static int      tree_get(tree_t *tree, off_t offset, off_t *real_offset){ // {{{
 			)) <= 0)
 				break;
 			
-			buffer_read_flat(buffer, m_ret, &block, sizeof(block_info));
+			buffer_read(buffer, 0, &block, MIN(m_ret, sizeof(block_info)));
 			
 			/*printf("el: %x ptr: %x (%x < %x + %x)\n",
 				j, (unsigned int)ptr,
@@ -381,6 +381,7 @@ static int      tree_get(tree_t *tree, off_t offset, off_t *real_offset){ // {{{
 			);*/
 			
 			if(offset < level_off + block.size){
+				*block_vid   = ptr;
 				*real_offset = block.real_block_off + (offset - level_off);
 				ret = 0;
 				break;
@@ -408,7 +409,7 @@ static int    tree_get_block_size(tree_t *tree, unsigned int block_vid, size_t *
 	}
 	
 	*block_size = 0;
-	buffer_read_flat(buffer, m_ret, &block, sizeof(block_info));
+	buffer_read(buffer, 0, &block, MIN(m_ret, sizeof(block_info)));
 	
 	*block_size = block.size;
 	return 0;
@@ -514,6 +515,7 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	unsigned int      blocks;
 	unsigned int      block_vid;
 	size_t            block_size;
+	ssize_t           buf_ptr = 0;
 	
 	if(hash_get_copy (request, "blocks", TYPE_INT32, &blocks, sizeof(blocks)) != 0)
 		blocks = 0;
@@ -522,11 +524,11 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 		if(hash_get_copy (request, "offset", TYPE_INT64, &virt_key, sizeof(virt_key)) != 0)
 			return -EINVAL;
 		
-		if(tree_get(data->tree, virt_key, &real_key) != 0)
+		if(tree_get(data->tree, virt_key, &block_vid, &real_key) != 0)
 			return -EFAULT;
 		
-		buffer_write_flat(buffer, &real_key, sizeof(real_key));
-		return sizeof(real_key);
+		buf_ptr += buffer_write(buffer, buf_ptr, &real_key,  sizeof(real_key));
+		buf_ptr += buffer_write(buffer, buf_ptr, &block_vid, sizeof(block_vid));
 	}else{
 		if(hash_get_copy (request, "block_vid", TYPE_INT32, &block_vid, sizeof(block_vid)) != 0)
 			return -EINVAL;
@@ -534,10 +536,9 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 		if(tree_get_block_size(data->tree, block_vid, &block_size) != 0)
 			return -EFAULT;
 		
-		buffer_write_flat(buffer, &block_size, sizeof(block_size));
-		return sizeof(block_size);
+		buf_ptr += buffer_write(buffer, buf_ptr, &block_size, sizeof(block_size));
 	}
-	return -1;
+	return buf_ptr;
 }
 
 static ssize_t addrs_delete(chain_t *chain, request_t *request, buffer_t *buffer){
@@ -565,8 +566,7 @@ static ssize_t addrs_count(chain_t *chain, request_t *request, buffer_t *buffer)
 		units_count = tree_blocks_count(data->tree);
 	}
 	
-	buffer_write_flat(buffer, &units_count, sizeof(units_count));
-	return sizeof(units_count);
+	return buffer_write(buffer, 0, &units_count, sizeof(units_count));
 }
 
 static chain_t chain_addrs = {

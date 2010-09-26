@@ -55,7 +55,7 @@ START_TEST (test_backend_blocks_addrs){
 	action    = ACTION_CRWD_COUNT; 
 		hash_set(hash, "action",     TYPE_INT32, &action);	
 		if( (ssize = backend_query(backend, hash, buffer)) > 0)
-			buffer_read_flat(buffer, ssize, &count, sizeof(count)); 
+			buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count))); 
 		
 		fail_unless(count == match_size, "chain 'blocks-addressing' tree size invalid");
 	// }}}
@@ -69,9 +69,9 @@ START_TEST (test_backend_blocks_addrs){
 		hash_set(hash, "offset",     TYPE_INT64, &offset_virt);
 		
 		if( (ssize = backend_query(backend, hash, buffer)) > 0){
-			buffer_read_flat(buffer, ssize, &offset_real, sizeof(offset_real)); 
+			buffer_read(buffer, 0, &offset_real, MIN(ssize, sizeof(offset_real))); 
 		}
-			fail_unless(ssize == sizeof(off_t),     "chain 'blocks-addressing' read offset failed");
+			fail_unless(ssize >= sizeof(off_t),     "chain 'blocks-addressing' read offset failed");
 			fail_unless(
 				(blocks_count - (offset_virt / VSIZE) -1) * RSIZE + (offset_virt % VSIZE) == offset_real,
 				"chain 'blocks-addressing' read offset data failed"
@@ -96,7 +96,7 @@ START_TEST (test_backend_blocks_addrs){
 	action    = ACTION_CRWD_COUNT; 
 		hash_set(hash, "action",     TYPE_INT32, &action);	
 		if( (ssize = backend_query(backend, hash, buffer)) > 0)
-			buffer_read_flat(buffer, ssize, &count, sizeof(count)); 
+			buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count)));
 		
 		fail_unless(count == match_size + 0x10, "chain 'blocks-adressing' block_resize tree size invalid");
 	// }}}
@@ -113,7 +113,7 @@ START_TEST (test_backend_blocks_addrs){
 	action    = ACTION_CRWD_COUNT; 
 		hash_set(hash, "action",     TYPE_INT32, &action);	
 		if( (ssize = backend_query(backend, hash, buffer)) > 0)
-			buffer_read_flat(buffer, ssize, &count, sizeof(count)); 
+			buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count))); 
 		fail_unless(count == match_size + 0x10 - VSIZE, "chain 'blocks-adressing' delete tree size invalid");
 	// }}}
 	

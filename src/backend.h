@@ -81,6 +81,7 @@ typedef struct crwd_fastcall {
 	
 	buffer_t     *buffer_create;
 	buffer_t     *buffer_read;
+	buffer_t     *buffer_write;
 	buffer_t     *buffer_count;
 	
 } crwd_fastcall;

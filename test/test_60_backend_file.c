@@ -6,7 +6,7 @@ void  db_read(chain_t *chain, off_t key, size_t size, char *buf, ssize_t *ssize)
 	buffer_t       *buffer = buffer_alloc();
 	unsigned int    action;
 	hash_t         *hash;
-	char           *test_chunk;
+	ssize_t         ret;
 	
 	action = ACTION_CRWD_READ;
 	hash   = hash_new();
@@ -14,18 +14,18 @@ void  db_read(chain_t *chain, off_t key, size_t size, char *buf, ssize_t *ssize)
 		hash_set(hash, "key",    TYPE_INT64, &key);
 		hash_set(hash, "size",   TYPE_INT32, &size);
 		
-		*ssize = chain_query(chain, hash, buffer);
-		if(*ssize > 0){
-			test_chunk = buffer_get_first_chunk(buffer);
-			memcpy(buf, test_chunk, *ssize);
+		ret = chain_query(chain, hash, buffer);
+		if(ret > 0){
+			buffer_read(buffer, 0, buf, ret);
 		}
+		*ssize = ret;
 		
 	hash_free(hash);
 	buffer_free(buffer);
 }
 
 void  db_write(chain_t *chain, off_t key, char *buf, unsigned int buf_size, ssize_t *ssize){
-	buffer_t       *buffer = buffer_alloc();
+	buffer_t       *buffer = buffer_from_data(buf, buf_size);
 	unsigned int    action;
 	hash_t         *hash;
 	data_t         *data_buf;
@@ -36,8 +36,6 @@ void  db_write(chain_t *chain, off_t key, char *buf, unsigned int buf_size, ssiz
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &key);
 		hash_set(hash, "size",   TYPE_INT32,  &buf_size);
-		hash_set_custom(hash, "value", buf_size, &data_buf);
-		memcpy(data_buf, buf, buf_size);
 		
 		*ssize = chain_query(chain, hash, buffer);
 	
@@ -89,11 +87,11 @@ START_TEST (test_backend_file){
 		
 		if( (ssize = chain_query(chain, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key1 failed");	
-		buffer_read(buffer, ssize, new_key1 = *(off_t *)chunk; break);
+		buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
 		
 		if( (ssize = chain_query(chain, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key2 failed");	
-		buffer_read(buffer, ssize, new_key2 = *(off_t *)chunk; break);
+		buffer_read(buffer, 0, &new_key2, MIN(ssize, sizeof(off_t)));
 			fail_unless(new_key2 - new_key1 == 10,                 "chain file offsets invalid");
 	hash_free(hash);
 	
@@ -137,7 +135,7 @@ START_TEST (test_backend_file){
 		ssize = chain_query(chain, hash, buffer);
 			fail_unless(ssize > 0,                                "chain file count failed");
 		
-		buffer_read(buffer, ssize, count = *(size_t *)chunk; break);
+		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(off_t)));
 			fail_unless( (count / 20) >= 1,                       "chain file count failed");
 		
 	hash_free(hash);
