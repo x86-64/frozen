@@ -22,11 +22,12 @@ typedef  void * (*iter_callback)(void *, void *, void *);
 
 #define ITER_CONTINUE 1
 #define ITER_BREAK    0
+#define ITER_BROKEN   1
 
 void  list_init   (list *clist);
 void  list_push   (list *clist, void *item);
 void* list_pop    (list *clist);
-void  list_iter   (list *clist, iter_callback func, void *arg1, void *arg2);
+int   list_iter   (list *clist, iter_callback func, void *arg1, void *arg2);
 int   list_unlink (list *clist, void *item);
 
 #endif // LIST_H

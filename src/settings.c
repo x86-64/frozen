@@ -20,11 +20,17 @@ static int         setting_iter_find_child(void *p_setting, void *p_name, void *
 static setting_t * setting_find_child(setting_t *setting, char *name){
 	setting_t *child = NULL;
 	
+	if(setting == NULL)
+		return NULL;
+	
 	if(setting->type != SETTING_LIST){
 		setting_set_list(setting);
 		
 		return NULL;
 	}
+	
+	if(name == NULL)
+		return NULL;
 	
 	list_iter(&setting->list.list, (iter_callback)&setting_iter_find_child, name, &child);
 	
@@ -35,15 +41,17 @@ static setting_t * setting_find_child(setting_t *setting, char *name){
 setting_t *  setting_new(void){
 	setting_t *setting = (setting_t *)malloc(sizeof(setting_t));
 	
+	memset(setting, 0, sizeof(setting_t));
+	
 	setting->type = SETTING_NONE;
 	
 	return setting;
 }
 setting_t *  setting_new_named(char *name){
 	setting_t *setting = setting_new();
-
+	
 	setting->name = strdup(name);
-
+	
 	return setting;
 }
 void         setting_destroy(setting_t *setting){
@@ -52,6 +60,9 @@ void         setting_destroy(setting_t *setting){
 	
 	setting_empty(setting);
 	
+	if(setting->name != NULL)
+		free(setting->name);
+
 	free(setting);
 }
 void         setting_empty(setting_t *setting){
@@ -83,7 +94,11 @@ void         setting_set_string(setting_t *setting, char *value){
 	setting_empty(setting);
 	
 	setting->type         = SETTING_STRING;
-	setting->string.value = value;
+	if(value != NULL){
+		setting->string.value = strdup(value);
+	}else{
+		setting->string.value = NULL;
+	}
 }
 char *       setting_get_string(setting_t *setting){
 	if(setting->type != SETTING_STRING)
@@ -92,11 +107,11 @@ char *       setting_get_string(setting_t *setting){
 	return setting->string.value;
 }
 
-void         setting_iter_child(setting_t *setting, iter_callback func, void *arg1, void *arg2){
+int          setting_iter_child(setting_t *setting, iter_callback func, void *arg1, void *arg2){
 	if(setting->type != SETTING_LIST)
-		return;
+		return -EINVAL;
 	
-	list_iter(&setting->list.list, func, arg1, arg2);
+	return list_iter(&setting->list.list, func, arg1, arg2);
 }
 void         setting_set_child_string(setting_t *setting, char *name, char *value){
 	
@@ -122,9 +137,9 @@ char *       setting_get_child_string(setting_t *setting, char *name){
 void         setting_set_child_setting(setting_t *setting, setting_t *child){
 	
 	setting_t *old_child = setting_find_child(setting, child->name);
-	if(old_child != NULL){
-		setting_destroy_child(setting, child->name);
-	}
+		
+	if(old_child != NULL)
+		setting_destroy_child(setting, old_child->name);
 	
 	list_push(&setting->list.list, child);
 }

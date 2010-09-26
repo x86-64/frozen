@@ -1,6 +1,5 @@
-#include "../src/libfrozen.h"
-#include "../src/settings.h"
 #include "test.h"
+#include "../src/settings.h"
 
 START_TEST (test_settings_basic){
 	setting_t *setting = setting_new();
@@ -19,14 +18,13 @@ REGISTER_TEST(core, test_settings_basic)
 START_TEST (test_settings_strings){
 	char      *test;
 	setting_t *setting = setting_new();
-	char      *teststr = strdup("hello");
 	
-	setting_set_string(setting, teststr);
+	setting_set_string(setting, "hello");
 		fail_unless(setting->type == SETTING_STRING,              "set_string Setting type invalid");
 		fail_unless(strcmp(setting->string.value, "hello") == 0,  "set_string Setting value invalid (not hello)");
 	test = setting_get_string(setting);
 		fail_unless(strcmp(test, "hello") == 0,                   "set_string Setting get_sting invalid");
-
+	
 	setting_set_string(setting, NULL);
 		fail_unless(setting->type == SETTING_STRING,              "set_string(null) type invalid");
 		fail_unless(setting->string.value == NULL,                "set_string(null) value invalid");
@@ -47,18 +45,16 @@ int test_child_iter(void *p_setting, void *p_count, void *null){
 
 START_TEST (test_settings_childs){
 	char      *test;
-	char      *t_val1 = strdup("test1_value");
-	char      *t_val2 = strdup("test2_value");
 	setting_t *setting = setting_new();
 	
 	/* simple set\get */
-	setting_set_child_string(setting, "test1", t_val1);
+	setting_set_child_string(setting, "test1", "test1_value");
 		fail_unless(setting->type == SETTING_LIST,                     "set_child_string type invalid");
 	test = setting_get_child_string(setting, "test1");
 		fail_unless(test != NULL && strcmp(test, "test1_value") == 0,  "get_child_string invalid ret value");
 	
 	/* two settings in list */
-	setting_set_child_string(setting, "test2", t_val2);
+	setting_set_child_string(setting, "test2", "test2_value");
 	
 	test = setting_get_child_string(setting, "test1");
 		fail_unless(test != NULL && strcmp(test, "test1_value") == 0,  "get_child_string test1 invalid");
@@ -67,7 +63,7 @@ START_TEST (test_settings_childs){
 	
 	/* set\get child setting_t */
 	setting_t *new_setting = setting_new_named("test2");
-	setting_set_string(new_setting, strdup("test2_value_new"));
+	setting_set_string(new_setting, "test2_value_new");
 	
 	setting_set_child_setting(setting, new_setting);
 	

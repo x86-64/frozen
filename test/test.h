@@ -1,3 +1,4 @@
+#include "../src/libfrozen.h"
 #include <stdlib.h>
 #include <check.h>
 

@@ -45,19 +45,25 @@ void * list_pop(list *clist){
 	return item;
 }
 
-void list_iter(list *clist, iter_callback func, void *arg1, void *arg2){
+int list_iter(list *clist, iter_callback func, void *arg1, void *arg2){
+	int ret = 0;
+	
 	pthread_mutex_lock(&clist->lock);
 	
 	litem *curr;
 	curr = clist->head;
 	while(curr != NULL){
-		if(func(curr->item, arg1, arg2) == ITER_BREAK)
+		if(func(curr->item, arg1, arg2) == ITER_BREAK){
+			ret = ITER_BROKEN; 
 			break;
+		}
 		
 		curr = curr->next;
 	}
 	
 	pthread_mutex_unlock(&clist->lock);
+	
+	return ret;
 }
 
 int list_unlink(list *clist, void *item){
