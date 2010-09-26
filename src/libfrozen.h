@@ -8,8 +8,17 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 
 /* Own headers */
 #include <list.h>
+#include <settings.h>
+
+
+/* Global variables */
+extern setting_t *global_settings;
 

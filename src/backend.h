@@ -25,10 +25,9 @@ enum chain_types {
 };
 
 /* chain type rwd */
-typedef int (*f_rwd_set)    (void *, void *);
-typedef int (*f_rwd_get)    (void *, void *);
-typedef int (*f_rwd_delete) (void *, void *);
-
+typedef int (*f_rwd_set)    (chain_t *, void *, void *);
+typedef int (*f_rwd_get)    (chain_t *, void *, void *);
+typedef int (*f_rwd_delete) (chain_t *, void *, void *);
 
 struct chain_t {
 	char *      name;

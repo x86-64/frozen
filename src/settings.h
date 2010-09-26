@@ -1,3 +1,5 @@
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 typedef enum setting_types {
 	SETTING_NONE,
@@ -32,3 +34,4 @@ void         setting_set_child_setting(setting_t *setting, setting_t *child);
 setting_t *  setting_get_child_setting(setting_t *setting, char *name);
 void         setting_destroy_child(setting_t *setting, char *name);
 
+#endif // SETTINGS_H
