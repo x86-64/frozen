@@ -5,8 +5,10 @@ static int  struct_iter_init(void *p_setting, void *p_structure, void *null){
 	data_type member_data_type;
 	char *    member_data_type_s;
 	char *    member_name;
+	size_t    member_size;
 	member_t *members;
 	
+
 	member_name        = setting_get_child_string((setting_t *)p_setting, "name");
 	member_data_type_s = setting_get_child_string((setting_t *)p_setting, "type");
 	member_data_type   = data_type_from_string(member_data_type_s);
@@ -21,10 +23,16 @@ static int  struct_iter_init(void *p_setting, void *p_structure, void *null){
 	members = (member_t *)realloc(members, structure->members_count * sizeof(member_t));
 	structure->members  = members;
 	
-	members[member_id].name = member_name;
-	data_init(&(members[member_id].data), member_data_type);
+	members[member_id].name      = member_name;
+	members[member_id].ptr       = (off_t)structure->size;
+	members[member_id].data_type = member_data_type;
 	
-	structure->size += members[member_id].data.size;
+	member_size = data_len(member_data_type, NULL);
+	
+	if(member_id == 0 || structure->size != 0)  // count structure size til member size is known
+		structure->size += member_size;     // 
+	if(member_size == 0)                        // member size not known, stop counting
+		structure->size  = 0;               //  
 	
 	return ITER_CONTINUE;
 }
@@ -61,4 +69,5 @@ member_t *  struct_get_member_by_name    (struct_t *structure, char *name){
 	}
 	return NULL;
 }
+
 

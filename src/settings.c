@@ -1,5 +1,6 @@
 #include <libfrozen.h>
-#include <settings.h>
+
+// TODO replace with hashes
 
 /* private */
 static void        setting_set_list(setting_t *setting){
@@ -77,7 +78,7 @@ void         setting_empty(setting_t *setting){
 			
 			break;
 		case SETTING_LIST:
-			while(child = list_pop(&setting->list.list))
+			while((child = list_pop(&setting->list.list)) != NULL)
 				setting_destroy(child);
 			
 			list_destroy(&setting->list.list);

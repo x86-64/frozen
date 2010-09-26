@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <backend.h>
 
 typedef struct file_user_data {
 	char *           path;
@@ -69,6 +68,8 @@ static int file_configure(chain_t *chain, setting_t *config){
 		goto cleanup;
 	}
 	
+	// TODO add realpath and checks
+	
 	handle = open(
 		filepath,
 		O_CREAT | O_RDWR | O_LARGEFILE,
@@ -97,13 +98,16 @@ cleanup:
 	return -EINVAL;
 }
 
-static int file_create(chain_t *chain, void *key, size_t value_size){
+static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer){
 	int               fd;
 	int               ret;
 	off_t             new_key;
 	pthread_mutex_t  *mutex;
+	unsigned int      value_size;
 	
-
+	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+		return -EINVAL;
+	
 	fd    =  ((file_user_data *)chain->user_data)->handle;
 	mutex = &((file_user_data *)chain->user_data)->create_lock;
 	
@@ -115,65 +119,94 @@ static int file_create(chain_t *chain, void *key, size_t value_size){
 			return -errno;
 		}
 		
-		*(off_t *)key = new_key;
+		buffer_write(buffer, sizeof(off_t), *(off_t *)chunk = new_key); 
 		
 	pthread_mutex_unlock(mutex);
 	
-	return 0;
+	return sizeof(off_t);
 }
 
-static int file_set(chain_t *chain, void *key, buffer_t *value, size_t value_size){
-	int      fd;
-	ssize_t  ret;
+static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
+	ssize_t           ret;
+	
+	off_t             key;
+	data_t           *value;
+	unsigned int      value_size;
+	
+
+	if(hash_get_in_buf(request, "key", TYPE_INT64, &key) != 0)
+		return -EINVAL;
+	if( (value = hash_get_typed(request, "value", TYPE_BINARY)) == NULL) 
+		return -EINVAL;
+	
+	value_size = data_len(TYPE_BINARY, value);
+	
+	if(hash_is_valid_buf(request, value, value_size) == 0)
+		return -EINVAL;
+	
+redo:
+	ret = pwrite(
+		((file_user_data *)chain->user_data)->handle,
+		value,
+		value_size,
+		key
+	);
+	if(ret == -1 || ret != value_size){
+		if(errno == EINTR) goto redo;
+		return -errno;
+	}
+	
+	return ret;
+}
+
+static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
+	int               fd;
+	ssize_t           ret;
+	off_t             key;
+	unsigned int      value_size;
+	
+	if(hash_get_in_buf(request, "key", TYPE_INT64, &key) != 0)
+		return -EINVAL;
+	
+	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+		return -EINVAL;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
 	
 redo:
-	buffer_read(value, value_size,
+	buffer_write(buffer, value_size,
 		do{
-			ret = pwrite(fd, chunk, size, *(off_t *)key + offset);
+			ret = pread(fd, chunk, size, key + offset);
 			if(ret == -1 || ret != value_size){
 				if(errno == EINTR) goto redo;
 				return -errno;
 			}
 		}while(0)
 	);
+	
+	return value_size;
+}
 
+static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer){
 	return 0;
 }
 
-static int file_get(chain_t *chain, void *key, buffer_t *value, size_t value_size){
-	int      fd;
-	ssize_t  ret;
+static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
+	off_t         from, to;
+	size_t        ssize, size, max_size;
+	unsigned int  value_size;
+	char *        buff;
+	int           direction;
+	int           ret = 0;
 	
-	fd = ((file_user_data *)chain->user_data)->handle;
+	if(hash_get_in_buf(request, "key_from", TYPE_INT64, &from) != 0)
+		return -EINVAL;
 	
-redo:
-	buffer_write(value, value_size,
-		do{
-			ret = pread(fd, chunk, size, *(off_t *)key + offset);
-			if(ret == -1 || ret != value_size){
-				if(errno == EINTR) goto redo;
-				return -errno;
-			}
-		}while(0)
-	);
+	if(hash_get_in_buf(request, "key_to", TYPE_INT64, &to) != 0)
+		return -EINVAL;
 	
-	return 0;
-}
-
-static int file_delete(chain_t *chain, void *key, size_t value_size){
-	return 0;
-}
-
-static int file_move(chain_t *chain, void *key_from, void *key_to, size_t value_size){
-	off_t  from = *(off_t *)key_from;
-	off_t  to   = *(off_t *)key_to;
-	off_t  curr_from, curr_to;
-	size_t ssize, size, max_size;
-	char * buff;
-	int    direction;
-	int    ret = 0;
+	if(hash_get_in_buf(request, "size", TYPE_INT32, &value_size) != 0)
+		return -EINVAL;
 	
 	if(from == to || value_size == 0)
 		return -EINVAL;
@@ -202,43 +235,52 @@ static int file_move(chain_t *chain, void *key_from, void *key_to, size_t value_
 		return -EINVAL;
 	
 	while(value_size > 0){
-		ssize = pread(data->handle, buff, size, from);
-		if(ssize == -1){
+		if( (ssize = pread(data->handle, buff, size, from)) == -1){
 			if(errno == EINTR) continue;
 			ret = -errno;
 			break;
 		}
+		if(ssize == 0){
+			ret = -EINVAL;
+			break;
+		}
 		
-		ssize = pwrite(data->handle, buff, ssize, to);
-		if(ret == -1){
+		if( (ssize = pwrite(data->handle, buff, ssize, to) == -1)){
 			if(errno == EINTR) continue;
 			ret = -errno;
 			break;
 		}
+		if(ssize == 0){
+			// TODO what the hell, pwrite returns 0 in any case
+			//ret = -EINVAL;
+			//break;
+		}
 		
-		value_size -= ssize;
-		from       += ssize * direction;
-		to         += ssize * direction;
+		if(direction == 1){ from += size; }else{ from -= size; }
+		if(direction == 1){ to   += size; }else{ to   -= size; }
+		value_size -= size;
 		size        = (max_size < value_size) ? max_size : value_size;
-	}
 	
+	}
 	free(buff);
 	return ret;
 }
 
-static int file_count(chain_t *chain, void *count){
+static ssize_t file_count(chain_t *chain, request_t *request, buffer_t *buffer){
 	struct stat  buf;
 	int          ret;
-	int          fd;
 	
-	fd = ((file_user_data *)chain->user_data)->handle;
-	
-	ret = fstat(fd, &buf);
+	ret = fstat(
+		((file_user_data *)chain->user_data)->handle,
+		&buf
+	);
 	if(ret == 0){
-		memcpy(count, &(buf.st_size), sizeof(buf.st_size));
+		buffer_write(buffer, sizeof(buf.st_size),
+			memcpy(chunk, &(buf.st_size), sizeof(buf.st_size))
+		);
 	}
 	
-	return ret;
+	return sizeof(buf.st_size);
 }
 
 static chain_t chain_file = {
@@ -247,14 +289,14 @@ static chain_t chain_file = {
 	&file_init,
 	&file_configure,
 	&file_destroy,
-	{
+	{{
 		&file_create,
 		&file_set,
 		&file_get,
 		&file_delete,
 		&file_move,
 		&file_count
-	}
+	}}
 };
 CHAIN_REGISTER(chain_file)
 

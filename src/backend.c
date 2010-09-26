@@ -58,6 +58,38 @@ void chain_destroy(chain_t *chain){
 	
 	free(chain);
 }
+
+ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer){
+	unsigned int  action;
+	f_crwd        func       = NULL;
+	
+	if(chain == NULL || request == NULL || buffer == NULL)
+		return -EINVAL;
+	
+	if(hash_get_in_buf(request, "action", TYPE_INT32, &action) != 0)
+		return -EINVAL;
+	
+	switch(action){
+		case ACTION_CRWD_CREATE: func = chain->chain_type_crwd.func_create; break;
+		case ACTION_CRWD_READ:   func = chain->chain_type_crwd.func_get   ; break;
+		case ACTION_CRWD_WRITE:  func = chain->chain_type_crwd.func_set   ; break;
+		case ACTION_CRWD_DELETE: func = chain->chain_type_crwd.func_delete; break;
+		case ACTION_CRWD_MOVE:   func = chain->chain_type_crwd.func_move  ; break;
+		case ACTION_CRWD_COUNT:  func = chain->chain_type_crwd.func_count ; break;
+		default:
+			return -EINVAL;
+	};	
+	
+	if(func == NULL)
+		return chain_query(chain->next, request, buffer);
+	
+	return func(chain, request, buffer);
+}
+
+ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *buffer){
+	return chain_query(chain->next, request, buffer);
+}
+
 /* }}}1 */
 
 /* backends - private {{{1 */
@@ -89,6 +121,7 @@ cleanup:
 	chain_destroy(chain);
 	return ITER_BREAK;
 }
+
 static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	backend_t *backend = (backend_t *)p_backend;
 	if(strcmp(backend->name, p_name) == 0){
@@ -97,8 +130,10 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	}
 	return ITER_CONTINUE;
 }
+
 /* }}}1 */
 /* backends - public {{{1 */
+
 backend_t *  backend_new      (char *name, setting_t *setting){
 	int ret;
 	
@@ -129,6 +164,10 @@ backend_t *  backend_find_by_name(char *name){
 	list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
 	
 	return backend;
+}
+
+ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer){
+	return chain_query(backend->chain, request, buffer);
 }
 
 void         backend_destory  (backend_t *backend){

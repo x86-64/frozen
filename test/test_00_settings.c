@@ -1,4 +1,3 @@
-#include "test.h"
 
 START_TEST (test_settings_basic){
 	setting_t *setting = setting_new();

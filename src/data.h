@@ -1,28 +1,39 @@
 #ifndef DATA_H
 #define DATA_H
 
-typedef int (*f_data_cmp) (void *, void *);
+typedef size_t (*f_data_len) (void *);
+typedef int    (*f_data_cmp) (void *, void *);
 
 typedef enum size_type {
 	SIZE_FIXED,
 	SIZE_VARIABLE
 } size_type;
 
-typedef struct data_t {
+typedef struct data_proto_t {
 	char *      type_str;
 	data_type   type;
 	size_type   size_type;
+	
 	f_data_cmp  func_cmp;
-	size_t      size;
-} data_t;
+	f_data_len  func_len;
+	
+	size_t      fixed_size;
+} data_proto_t;
 
-extern data_t data_types[];
-extern size_t data_types_size;
+typedef void   data_t;
+
+extern data_proto_t  data_protos[];
+extern size_t        data_protos_size;
 
 /* api's */
-void         data_init              (data_t *data, data_type type);
-f_data_cmp   data_get_cmp_func      (data_t *data);
-data_type    data_type_from_string  (char *string);
+//int                  data_proto_init              (data_proto_t *proto, data_type type);
+int                  data_type_is_valid           (data_type type);
+int                  data_cmp                     (data_type type, data_t *data1, data_t *data2);
+size_t               data_len                     (data_type type, data_t *data);
+//_inline f_data_cmp   data_proto_get_cmp_func      (data_proto_t *data)                   { return data->func_cmp; }
+//_inline f_data_len   data_proto_get_len_func      (data_proto_t *data)                   { return data->func_len; }
+
+data_type            data_type_from_string  (char *string);
 
 #define REGISTER_DATA(type_name,size_type,func,...)
 

@@ -15,7 +15,7 @@ int int8_cmp_func(void *data1, void *data2){
 	return cret;
 }
 
-REGISTER_DATA(TYPE_INT8,SIZE_FIXED,&int8_cmp_func,1)
+REGISTER_DATA(TYPE_INT8,SIZE_FIXED,&int8_cmp_func,NULL,1)
 
 /* }}}1 */
 
@@ -34,7 +34,7 @@ int int16_cmp_func(void *data1, void *data2){
 	return cret;
 }
 
-REGISTER_DATA(TYPE_INT16,SIZE_FIXED,&int16_cmp_func,2)
+REGISTER_DATA(TYPE_INT16,SIZE_FIXED,&int16_cmp_func,NULL,2)
 
 /* }}}1 */
 
@@ -53,7 +53,7 @@ int int32_cmp_func(void *data1, void *data2){
 	return cret;
 }
 
-REGISTER_DATA(TYPE_INT32,SIZE_FIXED,&int32_cmp_func,4)
+REGISTER_DATA(TYPE_INT32,SIZE_FIXED,&int32_cmp_func,NULL,4)
 
 /* }}}1 */
 
@@ -72,7 +72,7 @@ int int64_cmp_func(void *data1, void *data2){
 	return cret;
 }
 
-REGISTER_DATA(TYPE_INT64,SIZE_FIXED,&int64_cmp_func,8)
+REGISTER_DATA(TYPE_INT64,SIZE_FIXED,&int64_cmp_func,NULL,8)
 
 /* }}}1 */
 

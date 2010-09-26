@@ -21,6 +21,7 @@ typedef struct setting_t {
 } setting_t;
 
 setting_t *  setting_new(void);
+setting_t *  setting_new_named(char *name);
 void         setting_destroy(setting_t *setting);
 void         setting_empty(setting_t *setting);
 

@@ -123,4 +123,18 @@ int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
 	}
 	return ret;
 }
+
+void *      buffer_seek            (buffer_t *buffer, off_t ptr){
+	if(ptr == 0)
+		return buffer->head;
+	
+	buffer_read(buffer, (size_t)ptr,
+		do{
+			if((offset + chunk_size) > ptr)
+				return chunk + (ptr - offset);
+		}while(0)
+	);
+	return NULL;
+}
+
 /* }}}1 */

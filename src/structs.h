@@ -2,8 +2,9 @@
 #define STRUCTS_H
 
 typedef struct member_t {
-	char *     name;
-	data_t     data;
+	char *           name;
+	off_t            ptr;
+	data_type        data_type;
 } member_t;
 
 typedef struct struct_t {

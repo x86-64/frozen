@@ -1,4 +1,3 @@
-#include "test.h"
 
 START_TEST (test_buffer){
 	size_t     size;

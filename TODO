@@ -1,2 +1,3 @@
-- malloc to configure.ac
+- add checks to configure.ac (malloc, headers, using functions)
+- add flags to configure.ac (--with-libconfig, --with-check)
 

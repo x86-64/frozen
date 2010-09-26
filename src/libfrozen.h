@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <pthread.h>
 #include <sys/types.h>
@@ -15,18 +16,20 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-
 /* Own headers */
-#include <list.h>
-#include <settings.h>
-#include <data_types.h>
-#include <data.h>
-#include <structs.h>
-#include <buffer.h>
-#include <structs_buffer.h>
-#include <backend.h>
+#include <list.h>            // internal data storage
+#include <settings.h>        // 
+#include <data_protos.h>     //
+#include <data.h>            //
+#include <hash.h>            //
+#include <structs.h>         //
+#include <buffer.h>          //
+#include <structs_buffer.h>  //
+
+#include <public.h>
+
+#include <backend.h>         // db logic 
 
 /* Global variables */
 extern setting_t *global_settings;
-
 

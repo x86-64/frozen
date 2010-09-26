@@ -1,7 +1,7 @@
 #ifndef STRUCTS_BUFFER_H
 #define STRUCTS_BUFFER_H
 
-void      struct_get_member_value      (buffer_t *buffer, int member, buffer_t *value);
-
+int           struct_get_member_value      (buffer_t *buffer, unsigned int member_id, subchunk_t *chunk);
+_inline void  struct_assign                (buffer_t *buffer, struct_t *structure)                        { buffer->structure = structure; }
 
 #endif // STRUCTS_BUFFER_H

@@ -6,6 +6,11 @@ typedef struct chunk_t {
 	void   *next;
 } chunk_t;
 
+typedef struct subchunk_t {
+	size_t  size;
+	void   *ptr;
+} subchunk_t;
+
 void *         chunk_alloc    (size_t size);
 _inline size_t chunk_get_size (void *chunk){ return ( ((chunk_t *)chunk) - 1)->size; }
 _inline void * chunk_next     (void *chunk){ return ( ((chunk_t *)chunk) - 1)->next; }
@@ -32,6 +37,7 @@ void            buffer_add_tail_chunk      (buffer_t *buffer, void *chunk);
 void *          buffer_add_new_head_chunk  (buffer_t *buffer, size_t size);
 void *          buffer_add_new_tail_chunk  (buffer_t *buffer, size_t size);
 int             buffer_delete_chunk        (buffer_t *buffer, void *chunk);
+void *          buffer_seek                (buffer_t *buffer, off_t ptr);
 
 _inline size_t  buffer_get_size            (buffer_t *buffer)               { return buffer->size; }
 _inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { return buffer->head; }
@@ -54,7 +60,7 @@ _inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { re
 		                                                            \
 		size = (chunk_size > write_size) ? write_size : chunk_size; \
 		_func;                                                      \
-                                                                            \
+		                                                            \
 		offset     += size;                                         \
 		write_size -= size;                                         \
 		chunk       = chunk_next(chunk);                            \

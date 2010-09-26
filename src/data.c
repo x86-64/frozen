@@ -1,22 +1,62 @@
 #include <libfrozen.h>
 
-void         data_init              (data_t *data, data_type type){
-	memcpy(data, &data_types[type], sizeof(data_t));
+/*
+int                  data_proto_init        (data_proto_t *proto, data_type type){
+	if((unsigned int)type >= data_protos_size) // forcing unsigned cmp
+		return -1;
+	
+	memcpy(proto, &data_protos[type], sizeof(data_proto_t));
+	return 0;
+}*/
+
+int                  data_type_is_valid     (data_type type){
+	if((unsigned)type < data_protos_size){
+		return 1;
+	}
+	return 0;
 }
 
-f_data_cmp   data_get_cmp_func      (data_t *data){
-	return data->func_cmp;
-}
-
-data_type    data_type_from_string  (char *string){
+data_type            data_type_from_string  (char *string){
 	int i;
 	
-	for(i=0; i<data_types_size; i++){
-		if(strcasecmp(data_types[i].type_str, string) == 0)
-			return data_types[i].type;
+	for(i=0; i<data_protos_size; i++){
+		if(strcasecmp(data_protos[i].type_str, string) == 0)
+			return data_protos[i].type;
 	}
 	
 	return -1;
+}
+
+int                  data_cmp               (data_type type, data_t *data1, data_t *data2){
+	if((unsigned)type >= data_protos_size)
+		return 0;
+	
+	f_data_cmp  func_cmp = data_protos[type].func_cmp;
+	if(func_cmp == NULL)
+		return 0;
+	
+	return func_cmp(data1, data2);
+}
+
+size_t               data_len               (data_type type, data_t *data){
+	f_data_len   func_len;
+	
+	if((unsigned)type >= data_protos_size)
+		return 0;
+	
+	switch(data_protos[type].size_type){
+		case SIZE_FIXED:
+			return data_protos[type].fixed_size;
+			
+		case SIZE_VARIABLE:
+			func_len = data_protos[type].func_len;
+			
+			if(func_len == NULL || data == NULL)
+				return 0;
+			
+			return func_len(data);
+	}
+	return 0;
 }
 
 
@@ -151,11 +191,4 @@ unsigned int data_cmp_binary(int data_type, char *data1, char *data2){
 	return cret;	
 }
 
-int data_typestring_to_int(char *type_string){
-	if(strcmp(type_string, "u8") == 0) return DATA_TYPE_U8;
-	if(strcmp(type_string, "u32") == 0) return DATA_TYPE_U32;
-	if(strcmp(type_string, "u64") == 0) return DATA_TYPE_U64;
-	if(strcmp(type_string, "string") == 0) return DATA_TYPE_STRING;
-	return DATA_TYPE_BINARY;
-}
 */

@@ -51,6 +51,28 @@ START_TEST (test_backends_two_chains){
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	/* test read/writes */
+	buffer_t       *buffer  = buffer_alloc();
+	request_t      *request;
+	hash_builder_t *builder;
+	unsigned int    action;
+	ssize_t         ssize;
+	
+	action  = ACTION_CRWD_CREATE;
+	builder = hash_builder_new(2);
+		hash_builder_add_data(&builder, "action", TYPE_INT32, &action);
+		hash_builder_add_data(&builder, "size",   TYPE_INT32, "\xEF\xBE\x00\x00");
+		
+		request = hash_builder_get_hash(builder);
+		
+		ssize = backend_query(backend, request, buffer);
+			fail_unless(ssize == 0x0000BEEF, "backend chain incorrectly set");
+		
+	hash_builder_free(builder);
+	buffer_free(buffer);
+	
+	/*
+	// will work, won't test
+	
 	int    ret;
 	off_t  key;
 	buffer_t *test1_val = buffer_from_data("test167890", 10);
@@ -72,9 +94,9 @@ START_TEST (test_backends_two_chains){
 	
 	buffer_free(test1_val);
 	buffer_free(test_buff);
-
-	backend_destory(backend);
+	*/
 	
+	backend_destory(backend);
 	setting_destroy(settings);
 }
 END_TEST
