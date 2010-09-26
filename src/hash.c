@@ -1,127 +1,147 @@
 #include <libfrozen.h>
 
-#define MAX_HASH_ELEMENTS         10000
-#define HASH_BUILDER_BLOCK_SIZE   1000
+#define HASH_MAX_ELEMENTS      1000
+#define HASH_DATA_BLOCK_SIZE   1000
 
-// TODO hash_resize(hash_builder_t **builder, unsigned int nelements);
+// - Local hash stored in buffers allocated by our handlers, so we care of free() memory
+// - Network hash received from buffer_t, and we dont care about allocation, but
+//   hash_t structure is still allocated by us, so we free only it 
+// - There is some limitation about hashes for network usage: try not use local hashes
+//   after heavy hash_set, coz hash_set on already existing element with data larger than in
+//   hash will produce dead data chunk. It still will work, but suffer traffic overhead
 
-int                is_set                       (void *memory, char chr, size_t size){
-	char *p = (char *)memory;
-	while(*p++ == chr && --size > 0);
+hash_t *           hash_new                     (void){ // {{{
+	hash_t     *hash;
+	hash_el_t  *elements;
+	data_t     *data;
 	
-	return (size == 0);
+	hash     = malloc( sizeof(hash_t) );
+	if(hash == NULL)
+		goto cleanup1;
+	
+	data     = malloc( HASH_DATABLOCK_SIZE );
+	if(data == NULL)
+		goto cleanup2;
+	
+	hash->is_local   = 1;
+	hash->nelements  = 0;
+	hash->size       = HASH_T_NETWORK_SIZE + nelements * sizeof(hash_el_t);
+	hash->alloc_size = HASH_DATABLOCK_SIZE;
+	hash->elements   = NULL;
+	hash->data       = data;
+	hash->data_end   = data;
+	
+	return hash;
+cleanup2:
+	free(hash);
+cleanup1:
+	return NULL;
+} // }}}
+void               hash_free                    (hash_t *hash){
+	if(hash->is_local == 1){
+		free(hash->elements);
+		free(hash->data);
+	}
+	free(hash);
 }
 
-hash_builder_t *   hash_builder_new             (unsigned int nelements){
-	size_t    alloc_size;
-	hash_t   *hash;
-	size_t    hash_size;
-	void     *data_ptr;
-	char     *p;
+int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+
+static unsigned int hash_add_data_chunk (hash_t *hash, void *data, size_t size){
+	unsigned int  new_alloc_size;
+	unsigned int  new_ptr;
+	data_t       *new_data;
 	
-	if(nelements > MAX_HASH_ELEMENTS)
-		return NULL;
+	new_alloc_size = (hash->data_end - hash->data) + size;
+	if( new_alloc_size >= hash->alloc_size){
+		new_data = realloc(hash->data, new_alloc_size + HASH_DATABLOCK_SIZE);
+		if(new_data == NULL)
+			return -1;
+		
+		hash->data_end = (new_data + (hash->data_end - hash->data));
+		hash->data     =  new_data;
+	}
+	memcpy(hash->data_end, data, size);
+	new_ptr          = (hash->data_end - hash->data); 
+	hash->data_end  += size;
+	hash->size      += size;
 	
-	hash_size  = (nelements + 1) * sizeof(hash_el_t) + sizeof(hash_t); 
-	alloc_size = hash_size + HASH_BUILDER_BLOCK_SIZE;
-	
-	hash_builder_t *builder = (hash_builder_t *)malloc(sizeof(hash_builder_t) + alloc_size);
-	if(builder == NULL)
-		return NULL;
-	
-	memset(builder, 0, sizeof(hash_builder_t) + alloc_size);
-	
-	p           = (char *)builder;
-	
-	p          += sizeof(hash_builder_t);
-	hash        = (hash_t *)p;
-	hash->size  = hash_size;
-	
-	p          += sizeof(hash_t);
-	p          += nelements * sizeof(hash_el_t);
-	memset(p, 0xFF, sizeof(hash_el_t));          // last element
-	
-	p          += sizeof(hash_el_t);
-	data_ptr    = p;
-	
-	builder->alloc_size    = alloc_size;
-	builder->nelements     = nelements;
-	builder->hash          = hash;
-	builder->data_ptr      = data_ptr;
-	builder->data_last_off = 0;
-	
-	return builder;
+	return new_ptr;
 }
 
-static unsigned int hash_builder_add_data_chunk (hash_builder_t **p_builder, void *data, size_t size){
-	unsigned int     res;
-	hash_builder_t  *builder  = *p_builder;
+static hash_el_t * hash_search_key              (hash_t *hash, char *key, data_type  type){
 	
-	if(builder->hash->size + size > builder->alloc_size){
-		builder->alloc_size  = builder->hash->size + size + HASH_BUILDER_BLOCK_SIZE;
+}
+
+static data_t *    hash_off_to_ptr              (hash_t *hash, unsigned int offset){
+	
+}
+
+int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value){ // {{{
+	unsigned int  new_id;
+	unsigned int  new_nelements;
+	hash_el_t    *new_elements;
+	hash_el_t    *found_key;
+	data_t       *found_data;
+	size_t        found_size;
+	size_t        found_ess_size;
+	size_t        value_size;
+	
+	value_size = data_len(type, value);
+	
+	found_key = hash_search_key(hash, key, type);
+	if(found_key == NULL)
+		goto bad;
 		
-		*p_builder = builder = realloc(builder, builder->alloc_size);
-		if(builder == NULL)
-			return 0;
+	found_data = hash_off_to_ptr(hash, found_key->data);
+	if(found_data == NULL)
+		goto bad;
+	
+	found_ess_size = data_len(found_key->type, NULL); // returns essential size (minimum)
+	if(!hash_is_valid_buf(hash, found_data, found_ess_size))
+		goto bad;
+	
+	found_size = data_len(found_key->type, found_data);
+	if(!hash_is_valid_buf(hash, found_data, found_size))
+		goto bad;
+	
+	if(found_size >= value_size){
+		memcpy(found_data, value, value_size);
 		
-		builder->hash        = (hash_t *)(builder + 1); // sizeof(hash_builder_t)
-		builder->data_ptr    = (char *)builder->hash + sizeof(hash_t) + (builder->nelements + 1) * sizeof(hash_el_t);
+		return 0;
 	}
 	
-	memcpy(builder->data_ptr + builder->data_last_off, data, size);
+bad:	
+	if(hash->is_local == 1){
+		new_id        = hash->new_nelements;
+		new_nelements = hash->nelements + 1;
+		if(new_nelements > HASH_MAX_ELEMENTS)
+			return -ENOMEM;
+		
+		new_elements = realloc(hash->elements, new_nelements * sizeof(hash_el_t));
+		if(new_elements == NULL)
+			return -ENOMEM;
+		hash->elements = new_elements;
+		
+		hash->elements[new_id].type  = type;
+		hash->elements[new_id].key   = hash_add_data_chunk(hash, key,   strlen(key) + 1);
+		hash->elements[new_id].value = hash_add_data_chunk(hash, value, value_size);
+		
+		return 0;
+	}
 	
-	res = builder->data_last_off;
-	
-	builder->data_last_off += size;
-	builder->hash->size    += size;
-	
-	return res;
-}
+	return -1;
+} // }}}
 
-int                 hash_builder_add_data       (hash_builder_t **p_builder, char *key, data_type type, data_t *value){
-	hash_builder_t  *builder = *p_builder;
-	hash_el_t       *elements;
-	unsigned int     hash_id;
-	unsigned int     key_chunk;
-	unsigned int     val_chunk;
-	size_t           val_size;
-	
-	if(p_builder == NULL || key == NULL || value == NULL)
-		return -EINVAL;
-	
-	elements = (hash_el_t *)(builder->hash + 1); // sizeof(hash_t)
-	
-	// find free slot
-	hash_id = 0;
-	while( is_set(&elements[hash_id], 0x0, sizeof(hash_el_t)) == 0)
-		hash_id++;
-	
-	if(hash_id >= builder->nelements)
-		return -ENOMEM; // TODO call hash_resize
-	
-	val_size  = data_len(type, value);
-	
-	key_chunk = hash_builder_add_data_chunk(p_builder, key,   strlen(key) + 1);
-	val_chunk = hash_builder_add_data_chunk(p_builder, value, val_size);
-	
-	builder  = *p_builder;
-	elements = (hash_el_t *)(builder->hash + 1); // sizeof(hash_t)
-	elements[hash_id].key   = key_chunk;
-	elements[hash_id].type  = (unsigned int)type;
-	elements[hash_id].value = val_chunk;
-	
-	return 0;
-}
+data_t *           hash_get                     (hash_t *hash, char *key, data_type  type);
+int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf);
+int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value);
 
-hash_t *           hash_builder_get_hash        (hash_builder_t *builder){
-	return builder->hash;
-}
-
-void               hash_builder_free            (hash_builder_t *builder){
-	free(builder);
-}
+int                hash_is_valid_buf            (hash_t *hash, data_t *data, unsigned int size);
 
 
+/*
 // never use hash->size as buffer_size argument, it can lead to security problems
 int                hash_audit                   (hash_t *hash, size_t buffer_size){
 	unsigned int   looked_size;
@@ -241,4 +261,4 @@ int                hash_get_in_buf              (hash_t *hash, char *key, data_t
 	}
 	return -1;
 }
-
+*/
