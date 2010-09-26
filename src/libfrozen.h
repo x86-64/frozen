@@ -19,6 +19,7 @@
 /* Own headers */
 #include <list.h>
 #include <settings.h>
+#include <data.h>
 #include <structs.h>
 #include <buffer.h>
 #include <structs_buffer.h>
