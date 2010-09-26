@@ -239,6 +239,42 @@ int                hash_get_copy                (hash_t *hash, char *key, data_t
 	return 0;
 } // }}}
 
+#ifdef DEBUG
+void hash_dump(hash_t *hash){
+	unsigned int  i,k;
+	hash_el_t    *element;
+	data_t       *found_key;
+	data_t       *found_data;
+	size_t        found_buf_size;
+	size_t        found_data_size;
+
+	element = hash->elements;
+	printf("hash: %x\n", (unsigned int)hash);
+	for(i=0; i < hash->nelements; i++, element++){
+		found_key = hash_off_to_ptr(hash, element->key, &found_buf_size);
+		if(found_key == NULL)
+			continue;
+		
+		found_data = hash_off_to_ptr(hash, element->value, &found_data_size);
+		if(found_data == NULL)
+			continue;
+		
+		found_data_size = data_len(element->type, found_data, found_data_size);
+		
+		printf(" - el: %x %s", (unsigned int)element->type, (char *)found_key);
+		for(k=0; k<found_data_size; k++){
+			if((k % 8) == 0)
+				printf("\n   0x%.4x: ", k);
+			
+			printf("%.2x ", (unsigned int)(*((char *)found_data + k)));
+		}
+		printf("\n");
+	}
+	printf("end_hash\n");
+}
+
+#endif
+
 /*
 // never use hash->size as buffer_size argument, it can lead to security problems
 int                hash_audit                   (hash_t *hash, size_t buffer_size){

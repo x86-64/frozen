@@ -1,9 +1,7 @@
 #!/bin/sh
 
 # cleanup
-rm -rf test/data_backend_file.dat      &>/dev/null
-rm -rf test/data_backend_locator.dat   &>/dev/null
-rm -rf test/data_backend_list.dat      &>/dev/null
+rm -rf test/data_backend_*.dat      &>/dev/null
 find . -name '*.gcov' -delete
 
 # backends

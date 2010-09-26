@@ -38,5 +38,8 @@ int                hash_set                     (hash_t *hash, char *key, data_t
 int                hash_get                     (hash_t *hash, char *key, data_type  type, data_t **value, size_t *value_size);
 int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf, size_t buf_size);
 int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size);
+#ifdef DEBUG
+void               hash_dump                    (hash_t *hash);
+#endif
 
 #endif // HASH_H

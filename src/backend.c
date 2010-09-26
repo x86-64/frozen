@@ -63,7 +63,7 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 	unsigned int  action;
 	f_crwd        func       = NULL;
 	
-	if(chain == NULL || request == NULL || buffer == NULL)
+	if(chain == NULL || request == NULL)
 		return -EINVAL;
 	
 	if(hash_get_copy(request, "action", TYPE_INT32, &action, sizeof(action)) != 0)
@@ -170,7 +170,7 @@ backend_t *  backend_find_by_name(char *name){
 ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer){
 	if(backend == NULL || request == NULL)
 		return -EINVAL;
-
+	
 	return chain_query(backend->chain, request, buffer);
 }
 
