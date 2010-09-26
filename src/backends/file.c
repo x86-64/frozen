@@ -125,14 +125,19 @@ static int file_create(chain_t *chain, void *key, size_t value_size){
 	return 0;
 }
 
-static int file_set(chain_t *chain, void *key, void *value, size_t value_size){
+static int file_set(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int      fd;
 	ssize_t  ret;
-	
+	void    *chunk;
+
 	fd = ((file_user_data *)chain->user_data)->handle;
+	
+	chunk = buffer_get_first_chunk(value);
+	// TODO length check
+	// TODO writing chain of chunks
 
 redo:
-	ret = pwrite(fd, value, value_size, *(off_t *)key);
+	ret = pwrite(fd, chunk, value_size, *(off_t *)key);
 	if(ret == -1 || ret != value_size){
 		if(errno == EINTR) goto redo;
 		return -errno;
@@ -141,14 +146,18 @@ redo:
 	return 0;
 }
 
-static int file_get(chain_t *chain, void *key, void *value, size_t value_size){
+static int file_get(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int      fd;
 	ssize_t  ret;
+	void    *chunk;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
-
+	
+	chunk = chunk_alloc(value_size);
+	buffer_add_tail_chunk(value, chunk);
+	
 redo:
-	ret = pread(fd, value, value_size, *(off_t *)key);
+	ret = pread(fd, chunk, value_size, *(off_t *)key);
 	if(ret == -1 || ret != value_size){
 		if(errno == EINTR) goto redo;
 		return -errno;

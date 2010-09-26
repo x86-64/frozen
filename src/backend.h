@@ -16,8 +16,8 @@ enum chain_types {
 /* chain type crwd */
 
 typedef int (*f_crwd_create) (chain_t *, void *, size_t);
-typedef int (*f_crwd_set)    (chain_t *, void *, void *, size_t);
-typedef int (*f_crwd_get)    (chain_t *, void *, void *, size_t);
+typedef int (*f_crwd_set)    (chain_t *, void *, buffer_t *, size_t);
+typedef int (*f_crwd_get)    (chain_t *, void *, buffer_t *, size_t);
 typedef int (*f_crwd_delete) (chain_t *, void *, size_t);
 typedef int (*f_crwd_move)   (chain_t *, void *, void *, size_t);
 typedef int (*f_crwd_count)  (chain_t *, void *);
@@ -56,14 +56,14 @@ void       chain_destroy      (chain_t *chain);
 
 extern inline int chain_configure   (chain_t *chain, setting_t *setting);
 extern inline int chain_crwd_create (chain_t *chain, void *key, size_t value_size);
-extern inline int chain_crwd_set    (chain_t *chain, void *key, void *value, size_t value_size);
-extern inline int chain_crwd_get    (chain_t *chain, void *key, void *value, size_t value_size);
+extern inline int chain_crwd_set    (chain_t *chain, void *key, buffer_t *value, size_t value_size);
+extern inline int chain_crwd_get    (chain_t *chain, void *key, buffer_t *value, size_t value_size);
 extern inline int chain_crwd_delete (chain_t *chain, void *key, size_t value_size);
 extern inline int chain_crwd_move   (chain_t *chain, void *key_from, void *key_to, size_t value_size);
 extern inline int chain_crwd_count  (chain_t *chain, void *count);
 extern inline int chain_next_crwd_create (chain_t *chain, void *key, size_t value_size);
-extern inline int chain_next_crwd_set    (chain_t *chain, void *key, void *value, size_t value_size);
-extern inline int chain_next_crwd_get    (chain_t *chain, void *key, void *value, size_t value_size);
+extern inline int chain_next_crwd_set    (chain_t *chain, void *key, buffer_t *value, size_t value_size);
+extern inline int chain_next_crwd_get    (chain_t *chain, void *key, buffer_t *value, size_t value_size);
 extern inline int chain_next_crwd_delete (chain_t *chain, void *key, size_t value_size);
 extern inline int chain_next_crwd_move   (chain_t *chain, void *key_from, void *key_to, size_t value_size);
 extern inline int chain_next_crwd_count  (chain_t *chain, void *count);
@@ -81,8 +81,8 @@ void         backend_destory      (backend_t *backend);
 backend_t *  backend_find_by_name (char *name);
 
 extern inline int backend_crwd_create (backend_t *backend, void *key, size_t value_size);
-extern inline int backend_crwd_set    (backend_t *backend, void *key, void *value, size_t value_size);
-extern inline int backend_crwd_get    (backend_t *backend, void *key, void *value, size_t value_size);
+extern inline int backend_crwd_set    (backend_t *backend, void *key, buffer_t *value, size_t value_size);
+extern inline int backend_crwd_get    (backend_t *backend, void *key, buffer_t *value, size_t value_size);
 extern inline int backend_crwd_delete (backend_t *backend, void *key, size_t value_size);
 extern inline int backend_crwd_move   (backend_t *backend, void *key_from, void *key_to, size_t value_size);
 extern inline int backend_crwd_count  (backend_t *backend, void *count);

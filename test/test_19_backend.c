@@ -3,7 +3,7 @@
 
 START_TEST (test_backends){
 	backend_t *backend, *found;
-
+	
 	setting_set_child_string(global_settings, "homedir", ".");
 	
 	setting_t *settings = setting_new();
@@ -54,8 +54,10 @@ START_TEST (test_backends_two_chains){
 	/* test read/writes */
 	int    ret;
 	off_t  key;
-	char  *test1_val = strdup("test167890");
-	char   test_buff[256];
+	buffer_t *test1_val = buffer_from_data("test167890", 10);
+	buffer_t *test_buff = buffer_alloc();
+	void     *test1_chunk = buffer_get_first_chunk(test1_val);
+	void     *test_chunk;
 	
 	ret = backend_crwd_create(backend, &key, 10);
 		fail_unless(ret == 0, "backend key create failed");
@@ -63,12 +65,14 @@ START_TEST (test_backends_two_chains){
 		fail_unless(ret == 0x0000BEEF, "backend chain incorrectly set");
 	ret = backend_crwd_set(backend, &key, test1_val, 10);
 		fail_unless(ret == 0, "backend key set failed");
-	ret = backend_crwd_get(backend, &key, &test_buff, 10);
-		fail_unless(ret == 0 && strncmp(test1_val, test_buff, 10) == 0, "backend key get failed");
+	ret = backend_crwd_get(backend, &key, test_buff, 10);
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(ret == 0 && strncmp(test1_chunk, test_chunk, 10) == 0, "backend key get failed");
 	ret = backend_crwd_delete(backend, &key, 10);
 		fail_unless(ret == 0, "backend key delete failed");
 	
-	free(test1_val);
+	buffer_free(test1_val);
+	buffer_free(test_buff);
 
 	backend_destory(backend);
 	

@@ -23,11 +23,11 @@ static int null_create(chain_t *chain, void *key, size_t value_size){
 	return chain_next_crwd_create(chain, key, value_size);
 }
 
-static int null_set(chain_t *chain, void *key, void *value, size_t value_size){
+static int null_set(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	return chain_next_crwd_set(chain, key, value, value_size);
 }
 
-static int null_get(chain_t *chain, void *key, void *value, size_t value_size){
+static int null_get(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	return chain_next_crwd_get(chain, key, value, value_size);
 }
 

@@ -23,19 +23,29 @@ START_TEST (test_backend_file){
 		fail_unless(ret == 0, "chain 'file' create key2 failed");
 		fail_unless(new_key2 - new_key1 == 10, "chain 'file' offsets invalid");
 	
-	char *test1_val = strdup("test167890");
-	char *test2_val = strdup("test267890");
-	char test_buff[256];
+	buffer_t *test1_val = buffer_from_data("test167890", 10);
+	buffer_t *test2_val = buffer_from_data("test267890", 10);
+	buffer_t *test_buff = buffer_alloc();
+	void *test1_chunk = buffer_get_first_chunk(test1_val);
+	void *test2_chunk = buffer_get_first_chunk(test2_val);
+	void *test_chunk;
 	
 	ret = chain_crwd_set(chain, &new_key1, test1_val, 10);
 		fail_unless(ret == 0, "chain 'file' set key1 failed");
+	
 	ret = chain_crwd_set(chain, &new_key2, test2_val, 10);
 		fail_unless(ret == 0, "chain 'file' set key2 failed");
 	
-	ret = chain_crwd_get(chain, &new_key1, &test_buff, 10);
-		fail_unless(ret == 0 && strncmp(test_buff, test1_val, 10) == 0, "chain 'file' get key1 failed");
-	ret = chain_crwd_get(chain, &new_key2, &test_buff, 10);
-		fail_unless(ret == 0 && strncmp(test_buff, test2_val, 10) == 0, "chain 'file' get key2 failed");
+	
+	ret = chain_crwd_get(chain, &new_key1, test_buff, 10);
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(ret == 0 && strncmp(test_chunk, test1_chunk, 10) == 0, "chain 'file' get key1 failed");
+	buffer_remove_chunks(test_buff);
+	
+	ret = chain_crwd_get(chain, &new_key2, test_buff, 10);
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(ret == 0 && strncmp(test_chunk, test2_chunk, 10) == 0, "chain 'file' get key2 failed");
+	buffer_remove_chunks(test_buff);
 	
 	ret = chain_crwd_delete(chain, &new_key1, 10);
 		fail_unless(ret == 0, "chain 'file' delete key1 failed");
@@ -52,33 +62,41 @@ START_TEST (test_backend_file){
 	key_to   = new_key1 + 6;
 	chain_crwd_set  (chain, &new_key1, test1_val, 10);
 	chain_crwd_move (chain, &key_from, &key_to, 2);
-	chain_crwd_get  (chain, &new_key1, &test_buff, 10);	
-		fail_unless(strncmp(test_buff, "test161690", 10) == 0, "chain 'file' move failed 1"); 
+	chain_crwd_get  (chain, &new_key1, test_buff, 10);	
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(strncmp(test_chunk, "test161690", 10) == 0, "chain 'file' move failed 1"); 
+	buffer_remove_chunks(test_buff);
 	
 	chain_crwd_set  (chain, &new_key1, test1_val, 10);
 	chain_crwd_move (chain, &key_from, &key_to, 4);
-	chain_crwd_get  (chain, &new_key1, &test_buff, 10);	
-		fail_unless(strncmp(test_buff, "test161678", 10) == 0, "chain 'file' move failed 2"); 
+	chain_crwd_get  (chain, &new_key1, test_buff, 10);	
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(strncmp(test_chunk, "test161678", 10) == 0, "chain 'file' move failed 2"); 
+	buffer_remove_chunks(test_buff);
 	
 	key_from = new_key1 + 6;
 	key_to   = new_key1 + 4;
 	chain_crwd_set  (chain, &new_key1, test1_val, 10);
 	chain_crwd_move (chain, &key_from, &key_to, 2);
-	chain_crwd_get  (chain, &new_key1, &test_buff, 10);	
-		fail_unless(strncmp(test_buff, "test787890", 10) == 0, "chain 'file' move failed 3"); 
+	chain_crwd_get  (chain, &new_key1, test_buff, 10);	
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(strncmp(test_chunk, "test787890", 10) == 0, "chain 'file' move failed 3"); 
+	buffer_remove_chunks(test_buff);
 	
 	chain_crwd_set  (chain, &new_key1, test1_val, 10);
 	chain_crwd_move (chain, &key_from, &key_to, 4);
-	chain_crwd_get  (chain, &new_key1, &test_buff, 10);	
-		fail_unless(strncmp(test_buff, "test789090", 10) == 0, "chain 'file' move failed 4"); 
+	chain_crwd_get  (chain, &new_key1, test_buff, 10);	
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(strncmp(test_chunk, "test789090", 10) == 0, "chain 'file' move failed 4"); 
+	buffer_remove_chunks(test_buff);
 	
 	
-	free(test1_val);
-	free(test2_val);
+	buffer_free(test1_val);
+	buffer_free(test2_val);
+	buffer_free(test_buff);
 	
 	setting_destroy(setting);
 	chain_destroy(chain);
-	
 }
 END_TEST
 REGISTER_TEST(core, test_backend_file)

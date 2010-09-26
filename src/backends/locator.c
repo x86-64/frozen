@@ -75,7 +75,7 @@ static int locator_create(chain_t *chain, void *key, size_t value_size){
 	return ret;
 }
 
-static int locator_set(chain_t *chain, void *key, void *value, size_t value_size){
+static int locator_set(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int         ret;
 	off_t       ul_key;
 	locator_ud *data = (locator_ud *)chain->user_data;
@@ -93,12 +93,10 @@ static int locator_set(chain_t *chain, void *key, void *value, size_t value_size
 	return ret;
 }
 
-static int locator_get(chain_t *chain, void *key, void *value, size_t value_size){
+static int locator_get(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int         ret;
 	off_t       ul_key;
 	locator_ud *data = (locator_ud *)chain->user_data;
-	
-	// TODO value overflow, we dont know data struct size
 	
 	switch(data->mode){
 		case LINEAR_STRUCT:

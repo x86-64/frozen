@@ -17,6 +17,7 @@
 /* Own headers */
 #include <list.h>
 #include <settings.h>
+#include <buffer.h>
 
 
 /* Global variables */

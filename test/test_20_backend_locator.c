@@ -24,20 +24,24 @@ START_TEST (test_backend_locator){
 	/* test read/writes */
 	int    ret;
 	off_t  key;
-	char  *test1_val = strdup("test167890123456");
-	char   test_buff[256];
+	buffer_t *test1_val = buffer_from_data("test167890123456", 16);
+	buffer_t *test_buff = buffer_alloc();
+	void     *test1_chunk = buffer_get_first_chunk(test1_val);
+	void     *test_chunk;
 	
 	ret = backend_crwd_create(backend, &key, 1);
 		fail_unless(ret == 0, "backend key create failed");
 	ret = backend_crwd_set(backend, &key, test1_val, 1);
 		fail_unless(ret == 0, "backend key set failed");
-	ret = backend_crwd_get(backend, &key, &test_buff, 1);
-		fail_unless(ret == 0 && strncmp(test1_val, test_buff, 16) == 0, "backend key get failed");
+	ret = backend_crwd_get(backend, &key, test_buff, 1);
+	test_chunk = buffer_get_first_chunk(test_buff);
+		fail_unless(ret == 0 && strncmp(test1_chunk, test_chunk, 16) == 0, "backend key get failed");
 	ret = backend_crwd_delete(backend, &key, 1);
 		fail_unless(ret == 0, "backend key delete failed");
 	
-	free(test1_val);
-	
+	buffer_free(test1_val);
+	buffer_free(test_buff);
+
 	backend_destory(backend);
 	setting_destroy(settings);
 }

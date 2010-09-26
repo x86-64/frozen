@@ -59,10 +59,10 @@ inline int chain_configure(chain_t *chain, setting_t *setting){
 inline int chain_crwd_create (chain_t *chain, void *key, size_t value_size){
 	return chain->chain_type_crwd.func_create(chain, key, value_size);
 }
-inline int chain_crwd_set    (chain_t *chain, void *key, void *value, size_t value_size){
+inline int chain_crwd_set    (chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	return chain->chain_type_crwd.func_set(chain, key, value, value_size);
 }
-inline int chain_crwd_get    (chain_t *chain, void *key, void *value, size_t value_size){
+inline int chain_crwd_get    (chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	return chain->chain_type_crwd.func_get(chain, key, value, value_size);
 }
 inline int chain_crwd_delete (chain_t *chain, void *key, size_t value_size){
@@ -82,13 +82,13 @@ inline int chain_next_crwd_create (chain_t *chain, void *key, size_t value_size)
 	
 	return chain->next->chain_type_crwd.func_create(chain->next, key, value_size);
 }
-inline int chain_next_crwd_set    (chain_t *chain, void *key, void *value, size_t value_size){
+inline int chain_next_crwd_set    (chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	if(chain->next == NULL)
 		return -EINVAL;
 	
 	return chain->next->chain_type_crwd.func_set(chain->next, key, value, value_size);
 }
-inline int chain_next_crwd_get    (chain_t *chain, void *key, void *value, size_t value_size){
+inline int chain_next_crwd_get    (chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	if(chain->next == NULL)
 		return -EINVAL;
 	
@@ -199,10 +199,10 @@ backend_t *  backend_find_by_name(char *name){
 inline int backend_crwd_create (backend_t *backend, void *key, size_t value_size){
 	return backend->chain->chain_type_crwd.func_create(backend->chain, key, value_size);
 }
-inline int backend_crwd_set    (backend_t *backend, void *key, void *value, size_t value_size){
+inline int backend_crwd_set    (backend_t *backend, void *key, buffer_t *value, size_t value_size){
 	return backend->chain->chain_type_crwd.func_set(backend->chain, key, value, value_size);
 }
-inline int backend_crwd_get    (backend_t *backend, void *key, void *value, size_t value_size){
+inline int backend_crwd_get    (backend_t *backend, void *key, buffer_t *value, size_t value_size){
 	return backend->chain->chain_type_crwd.func_get(backend->chain, key, value, value_size);
 }
 inline int backend_crwd_delete (backend_t *backend, void *key, size_t value_size){
