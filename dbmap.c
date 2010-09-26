@@ -1,10 +1,12 @@
 #include <memcachedb.h>
 #include <dbmap.h>
 
+// TODO write dbmap_shrink functions
+
 int dbmap_map(char *path, dbmap *map){
 	int          fd;
 	struct stat  file_stat;
-
+	
 	if( (fd = open(path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) < 0)
 		return 0;
 	
@@ -14,7 +16,7 @@ int dbmap_map(char *path, dbmap *map){
 	map->data_len  =  file_stat.st_size;
 	map->data_mlen = (file_stat.st_size + 0x1000) & ~0xFFF;
 	pthread_rwlock_init(&map->lock, NULL);
-
+	
 	char *ret = mmap(0, map->data_mlen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if(ret == MAP_FAILED){
 		perror(path);
@@ -72,6 +74,10 @@ unsigned long dbmap_expand(dbmap *map, unsigned long add_size){
 	pthread_rwlock_unlock(&map->lock);
 
 	return old_len; // offset to expanded area
+}
+
+void dbmap_sync(dbmap *map){
+	msync(map->data, map->data_mlen , MS_SYNC);
 }
 
 void dbmap_unmap(dbmap *map){

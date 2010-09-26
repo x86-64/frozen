@@ -131,3 +131,10 @@ unsigned int data_cmp_binary(int data_type, char *data1, char *data2){
 	return cret;	
 }
 
+int data_typestring_to_int(char *type_string){
+	if(strcmp(type_string, "u8") == 0) return DATA_TYPE_U8;
+	if(strcmp(type_string, "u32") == 0) return DATA_TYPE_U32;
+	if(strcmp(type_string, "u64") == 0) return DATA_TYPE_U64;
+	if(strcmp(type_string, "string") == 0) return DATA_TYPE_STRING;
+	return DATA_TYPE_BINARY;
+}

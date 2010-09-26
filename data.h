@@ -9,3 +9,4 @@ unsigned long data_unpacked_len(int data_type, char *data, unsigned long data_le
 void          data_pack(int data_type, char *string, char *data, unsigned long data_len);
 void          data_unpack(int data_type, char *data, unsigned long data_len, char *string);
 unsigned int  data_cmp_binary(int data_type, char *data1, char *data2);
+int           data_typestring_to_int(char *type_string);

@@ -5,21 +5,16 @@
 #include <db.h>
 #include <data.h>
 
-/* db settings */
-char                   *dbfile_main;
-
+static list             db_tables;
 static unsigned int     db_destroy_ok = 0;
 static unsigned long    db_oid_last;
 static pthread_mutex_t  db_oid_last_mutex;
-static list             db_write_queue;
-static list             db_tables;
-
-static pthread_t        db_write_thread_id;
 static pthread_mutex_t  db_mutex_query_init;
+
+/* Callbacks proto */
 
 static void* db_iter_table_search(void *table, void *name, void *addr);
 static void* db_iter_query_delete_oid(void *table, void *oid, void *null);
-
 static int   db_cmpfunc_idx_data(dbindex *index, void *item1_key, void *item2_key);
 static void* db_keyconv_idx_data(dbindex *index, void *item_key);
 
@@ -43,8 +38,7 @@ static char *db_abspath(char *name, char *ext){
 }
 
 /* }}}1 */
-
-/* DBTable initialisation {{{1 */
+/* DBTable {{{1 */
 /* DBTable settings {{{2 */
 static void db_table_settings_save(dbtable *table){
 	char *apath_set  = db_abspath(table->name, "set");
@@ -86,7 +80,6 @@ static void db_table_load_idx_data(dbtable *table){
 	}
 	free(apath_idx_data);
 }
-
 
 static dbtable* db_table_load(char *name){
 	unsigned int res;
@@ -157,14 +150,16 @@ static void db_table_unload_by_name(char *name){
 }
 
 static void db_table_unlink(char *name){
-	db_table_unload_by_name(name);
+	char *name_cpy = strdup(name);
+	db_table_unload_by_name(name_cpy);
 	
 	char *file;
-	
-	file = db_abspath(name, "dat");  unlink(file); free(file);
-	file = db_abspath(name, "set");  unlink(file); free(file);
-	file = db_abspath(name, "idx0"); unlink(file); free(file);
-	file = db_abspath(name, "idx1"); unlink(file); free(file);
+
+	file = db_abspath(name_cpy, "dat");  unlink(file); free(file);
+	file = db_abspath(name_cpy, "set");  unlink(file); free(file);
+	file = db_abspath(name_cpy, "idx0"); unlink(file); free(file);
+	file = db_abspath(name_cpy, "idx1"); unlink(file); free(file);
+	free(name_cpy);
 }
 
 static void db_table_rename(char *table_name_old, char *table_name_new){
@@ -188,44 +183,13 @@ static void db_table_rename(char *table_name_old, char *table_name_new){
 	free(name_old);
 	free(name_new);
 }
-/* }}}1 */
 
-static void dbitem_append(dbitem *item, void *data, unsigned long data_len){
-	unsigned long  need_len;
-	char          *info;
-	
-	need_len = data_len + 2;
-
-	if(item->data == NULL){
-		item->data_len  = need_len;
-		item->data      = malloc(need_len);
-		info            = item->data;
-	}else{
-		item->data      = realloc(item->data, item->data_len + need_len);
-		info            = item->data + item->data_len;
-		item->data_len += need_len;
-	}
-	memcpy(info, data, data_len);
-	info[need_len - 1] = '\n';
-	info[need_len - 2] = '\r';
-}
-
-dbtable* db_tables_search(char *name){
-	dbtable *table = NULL;
-	
-	list_iter(&db_tables, &db_iter_table_search, (void *)name, (void *)&table);
-	if(table != NULL)
-		return table;
-	
-	return db_table_load(name);
-}
-
+/* DBTable queries {{{2 */
 static unsigned int db_table_query_isset(dbitem *item){
 	unsigned long entry_off;
 	
 	return dbindex_query(&item->table->idx_oid, &item->oid, &entry_off);
 }
-
 
 static unsigned int db_table_query_set(dbitem *item){
 	dbtable       *table      = item->table;
@@ -293,8 +257,9 @@ static unsigned int db_table_query_delete(dbitem *item){
 	}
 	return 1;
 }
-
-/* Tables initialisation {{{1 */
+/* }}}2 */
+/* }}}1 */
+/* Tables {{{1 */
 static void db_tables_load(void){
 	DIR            *dir;
 	struct dirent  *dit;
@@ -323,34 +288,44 @@ static void db_tables_unload(void){
 	while(table = list_pop(&db_tables))
 		db_table_unload(table);
 }
-/* }}}1 */
-/* DB workers {{{1 */
-void db_write_thread(int arg){
-	do{
-		dbitem *item;
-		while(item = list_pop(&db_write_queue)){
-			db_table_query_set(item);
-			dbitem_free(item);
-		}
-		sleep(1);
-	}while(daemon_quit != 1);
-	db_destroy_ok++;
+
+static void db_name_sanitize(char *name){
+	char *bad_char;
+	
+	while(1){ bad_char = index(name, '.');  if(bad_char == NULL) break; *bad_char = '_'; }
+	while(1){ bad_char = index(name, '/');  if(bad_char == NULL) break; *bad_char = '_'; }
+	while(1){ bad_char = index(name, '\\'); if(bad_char == NULL) break; *bad_char = '_'; }
+}
+
+dbtable* db_tables_search(char *name){
+	dbtable *table = NULL;
+	
+	db_name_sanitize(name);
+
+	list_iter(&db_tables, &db_iter_table_search, (void *)name, (void *)&table);
+	if(table != NULL)
+		return table;
+	
+	return db_table_load(name);
 }
 /* }}}1 */
 /* DB initialisation {{{1 */
 /* DB settings {{{2 */
 static void db_settings_save(void){
-	FILE* db_f = fopen(dbfile_main, "w");
+	char *dbfile_main = db_abspath("database", "set");
+	FILE *db_f        = fopen(dbfile_main, "w");
 
 	fprintf(db_f, "%ld\n", db_oid_last);
 	
 	fclose(db_f);
+	free(dbfile_main);
 }
 
 static void db_settings_load(void){
-	int res;
-	struct stat file_stat;
-
+	int          res;
+	struct stat  file_stat;
+	char         *dbfile_main = db_abspath("database", "set");
+	
 	if(stat(dbfile_main, &file_stat) != 0){
 		printf("db doesn't exist. creating a new one\n");
 		
@@ -366,47 +341,23 @@ static void db_settings_load(void){
 	
 		fclose(db_f);
 	}
+	free(dbfile_main);
 }
 /* }}}2 */
 
 void db_init(void){
-	
-	list_init(&db_write_queue);
 	list_init(&db_tables);
 
 	pthread_mutex_init(&db_oid_last_mutex,  NULL);
 	pthread_mutex_init(&db_mutex_query_init, NULL);
 
-        if(pthread_create(&db_write_thread_id, NULL, (void *)&db_write_thread, NULL) != 0) {
-		printf("db_write_thread failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	/* load database settings */
-	if(settings.verbose > 0)
-		printf("loading db %s\n", settings.dbpath);
-	
-	dbfile_main = db_abspath("database", "set");
-
 	db_settings_load();
 	db_tables_load();
-
-	if(settings.verbose > 1)
-		printf("db_oid = %ld\n", db_oid_last);
-	
 }
 
 void db_destroy(void){
-	// wait for workers to destroy
-	while(db_destroy_ok < 1)
-		sleep(1);
-
-	// save settings and stuff
 	db_settings_save();
-	
-	// free all lists and variables
 	db_tables_unload();
-	free(dbfile_main);
 }
 /* }}}1 */
 /* Callbacks {{{1 */
@@ -516,6 +467,26 @@ dbitem* dbitem_alloc(void){
 	return zalloc(sizeof(dbitem));
 }
 
+void dbitem_append(dbitem *item, void *data, unsigned long data_len){
+	unsigned long  need_len;
+	char          *info;
+	
+	need_len = data_len + 2;
+
+	if(item->data == NULL){
+		item->data_len  = need_len;
+		item->data      = malloc(need_len);
+		info            = item->data;
+	}else{
+		item->data      = realloc(item->data, item->data_len + need_len);
+		info            = item->data + item->data_len;
+		item->data_len += need_len;
+	}
+	memcpy(info, data, data_len);
+	info[need_len - 1] = '\n';
+	info[need_len - 2] = '\r';
+}
+
 void dbitem_free(dbitem *item){
 	if(item->query)
 		free(item->query);
@@ -589,7 +560,7 @@ unsigned int db_query_search(dbitem *item){
 		/* we pack item->query to binary data and try to find it */
 		int            data_type  = item->table->data_type;
 		unsigned long  entry_len  = data_packed_len(data_type, item->query, strlen(item->query));
-		char          *entry_data = malloc(entry_len);
+		char          *entry_data = zalloc(entry_len + 1);
 		
 		data_pack(data_type, item->query, entry_data, entry_len);
 		
@@ -606,8 +577,6 @@ unsigned int db_query_search(dbitem *item){
 			free(item_oid_str);
 			
 			ret = 0;
-		}else{
-			printf("not in index\n");
 		}
 		
 		free(item_oid);
@@ -639,11 +608,12 @@ unsigned int db_query_deindex(dbtable *table){
 	}
 	
 	char *file = db_abspath(table->name, "idx1"); unlink(file); free(file);
+	return 0;
 }
 
 unsigned int db_query_index(dbtable *table, int type){
 	int ret = 1;
-
+	
 	db_query_deindex(table);
 	
 	char *file = db_abspath(table->name, "idx1");
@@ -656,10 +626,44 @@ unsigned int db_query_index(dbtable *table, int type){
 		
 		ret = 0;
 	}
-
+	
 	free(file);
 
 	return ret;
 }
 
+unsigned int db_query_destroy(dbtable *table){
+	db_table_unlink(table->name);
+	return 0;
+}
+
+/* }}}1 */
+
+/* Trash {{{1 */
+
+//static list             db_write_queue;
+//static pthread_t        db_write_thread_id;
+
+/*void db_write_thread(int arg){
+	do{
+		dbitem *item;
+		while(item = list_pop(&db_write_queue)){
+			db_table_query_set(item);
+			dbitem_free(item);
+		}
+		sleep(1);
+	}while(daemon_quit != 1);
+	db_destroy_ok++;
+}*/
+	/*
+	if(pthread_create(&db_write_thread_id, NULL, (void *)&db_write_thread, NULL) != 0) {
+		printf("db_write_thread failed\n");
+		exit(EXIT_FAILURE);
+	}*/
+// wait for workers to destroy
+	//while(db_destroy_ok < 1)
+	//	sleep(1);
+
+//list_init(&db_write_queue);
+	
 /* }}}1 */

@@ -32,6 +32,7 @@
 #include <dbmap.h>
 #include <dbindex.h>
 #include <db.h>
+#include <data.h>
 
 #ifdef HAVE_MALLOC_H
 /* OpenBSD has a malloc.h, but warns to use stdlib.h instead */
@@ -104,7 +105,7 @@ static void settings_init(void) {
     settings.socketpath = NULL;       /* by default, not using a unix socket */
     settings.dbpath     = DBPATH;
 #ifdef USE_THREADS
-    settings.num_threads = 4;
+    settings.num_threads = 16;
 #else
     settings.num_threads = 1;
 #endif
@@ -662,14 +663,15 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 	token_t *key_token   = &tokens[KEY_TOKEN];
 	token_t *query_token = &tokens[2]; 
 
+	c->item = NULL;
 	do {
 		if(strcmp(key_token->value, "new") == 0){
 			unsigned long oid_new;
-			char          item_data[0x10];
+			char          item_data[30];
 			
 			oid_new = db_query_new();
 			sprintf((char *)&item_data, "%ld", oid_new);
-
+			
 			item_output(c, key_token->value, (char *)&item_data, strlen(item_data)); 
 			break;
 		}
@@ -836,12 +838,8 @@ static void process_init_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 
 	dbtable *table = db_tables_search(key_token->value);
-	int      type  = atoi(type_token->value);
+	int      type  = data_typestring_to_int(type_token->value);
 	
-	if(type < 1 && type > 2){
-		out_string(c, "CLIENT_ERROR wrong type");
-	}
-
 	ret = db_query_init(table, type);
 	if(ret == 0){
 		out_string(c, "REASSEMBLED");
@@ -850,6 +848,24 @@ static void process_init_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
+static void process_destroy_command(conn *c, token_t *tokens, size_t ntokens){
+	unsigned int ret;
+	token_t *key_token  = &tokens[KEY_TOKEN];
+	
+	if(key_token->value == NULL){
+		out_string(c, "CLIENT_ERROR wrong syntax");
+		return;
+	}
+
+	dbtable *table = db_tables_search(key_token->value);
+	
+	ret = db_query_destroy(table);
+	if(ret == 0){
+		out_string(c, "DELETED");
+	}else{
+		out_string(c, "SERVER_ERROR");
+	}
+}
 /* process_command {{{1 */
 static void process_command(conn *c, char *command) {
 
@@ -882,6 +898,7 @@ static void process_command(conn *c, char *command) {
     if(strcmp(tokens[COMMAND_TOKEN].value, "index") == 0){   process_index_command  (c, tokens, ntokens); return; }
     if(strcmp(tokens[COMMAND_TOKEN].value, "deindex") == 0){ process_deindex_command(c, tokens, ntokens); return; }
     if(strcmp(tokens[COMMAND_TOKEN].value, "init") == 0){    process_init_command   (c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "destroy") == 0){ process_destroy_command(c, tokens, ntokens); return; }
     if(strcmp(tokens[COMMAND_TOKEN].value, "version") == 0){ process_version_command(c, tokens, ntokens); return; }
     
     out_string(c, "ERROR");
@@ -1291,7 +1308,8 @@ static void drive_machine(conn *c) {
             switch (transmit(c)) {
             case TRANSMIT_COMPLETE:
                 if (c->state == conn_mwrite) {
-                    dbitem_free(c->item);
+                    if(c->item)
+		    	dbitem_free(c->item);
 		    //while (c->ileft > 0) {
                     //    item *it = *(c->icurr);
                     //    item_free(it);
@@ -1590,11 +1608,12 @@ static int server_socket_unix(const char *path, int access_mask) {
 /* network stuff }}}1 */
 /* usage {{{1 */
 static void usage(void) {
-    printf("-p <num>      TCP port number to listen on (default: 21201)\n"
+    printf(
+           "-l <ip_addr>  interface to listen on, default is INDRR_ANY\n"
+           "-p <num>      TCP port number to listen on (default: 21201)\n"
            "-U <num>      UDP port number to listen on (default: 0, off)\n"
            "-s <file>     unix socket path to listen on (disables network support)\n"
            "-a <mask>     access mask for unix socket, in octal (default 0700)\n"
-           "-l <ip_addr>  interface to listen on, default is INDRR_ANY\n"
            "-c <num>      max simultaneous connections, default is 1024\n"
            "\n"
 	   "-d            run as a daemon\n"
@@ -1608,7 +1627,7 @@ static void usage(void) {
 	   "-D <path>     database files path, must end with /\n"
 	   );
 #ifdef USE_THREADS
-    printf("-t <num>      number of threads to use, default 4\n");
+    printf("-t <num>      number of threads to use, default 16\n");
 #endif
     return;
 }

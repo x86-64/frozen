@@ -2,6 +2,11 @@
 #include <dbmap.h>
 #include <dbindex.h>
 
+// TODO rewrite iblock from unsigned short to structure
+// TODO write vm wrappers
+// TODO rewrite code to use vm wrappers
+// TODO rewrite PRIMARY code to use vm wrappers
+
 /* DBIndex IBlocks {{{1 */
 
 static char *dbindex_iblock_get_page(dbindex *index, unsigned short iblock){
@@ -37,6 +42,8 @@ static void dbindex_iblock_unlock(dbindex* index, unsigned short iblock){
 }
 /* }}}2 */
 /* iblock start {{{2 */
+// TODO refactor free table routines
+
 static void  dbindex_iblock_init_start(dbindex *index, unsigned short iblock, unsigned int value){
 	char *free_table;
 	char *page_offset = dbindex_iblock_get_page(index, iblock);
@@ -91,7 +98,6 @@ static void  dbindex_iblock_set_start(dbindex *index, unsigned short iblock, uns
 	}
 }
 /* }}}2 */
-
 
 /* dbindex_iblock_search
  *
@@ -220,7 +226,7 @@ static void dbindex_iblock_move_elements(dbindex *index, unsigned short iblock_o
 		dbindex_iblock_set_start(index, iblock_new, items_len);
 		
 		memmove(iblock_old_data_start + items_len, iblock_old_data_start, elements_start - iblock_old_data_start);
-		memset (iblock_old_data_start, 0, items_len); // NOT can remove
+		memset (iblock_old_data_start, 0, items_len); // NOTE can remove
 
 		dbindex_iblock_init_start(index, iblock_old, iblock_old_free + items_len);
 	}
@@ -275,6 +281,18 @@ static char* dbindex_iblock_pop(dbindex *index, unsigned short iblock){
 
 static unsigned short dbindex_vm_virt2real(dbindex *index, unsigned short iblock_virt){
 	return ((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1];
+}
+
+static void dbindex_vm_insert_page(dbindex *index, unsigned short iblock_virt, unsigned short iblock_real){
+	unsigned short *mapping;
+	mapping = &(((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1]);
+	
+	memmove(
+		mapping + 1,
+		mapping,
+		(0xFFFF - iblock_virt) * sizeof(short)
+	);
+	*mapping = iblock_real;
 }
 
 static unsigned int dbindex_vm_search(
@@ -389,7 +407,7 @@ unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len,
 	
 	memset(&new_index, 0, sizeof(dbindex));
 
-	unlink(path); // SEC dangerous
+	unlink(path); // SEC danger
 	
 	dbmap_map(path, &new_index.file);
 	
@@ -601,11 +619,12 @@ static short dbindex_ipage_get_iblock(dbindex* index, void *item_key){
 	}
 }
 
+// TODO error handling
 static void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short iblock){
 	unsigned char    index_c1;
 	unsigned char    index_c2;
 	short           *ipage_l2;
-
+	
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
 			index_c1 = *((char *)item_key + 0x03);
@@ -628,7 +647,6 @@ static void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned sh
 			break;
 	};
 }
-
 /* }}}1 */
 
 unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
@@ -672,7 +690,7 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 				cret = dbindex_iblock_insert(index, iblock, cret, item_offset, new_key);
 				if(cret == 1){
 					dbmap_unlock(&index->file);
-
+					
 					iblock_new = dbindex_iblock_new(index);
 					
 					if(iblock_new == 0){
@@ -729,17 +747,9 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 				while(1){
 					if(iblock_prev_virt == 0){
 						iblock_new_real = dbindex_iblock_new(index);
-						//
-						unsigned short *mapping;
-						mapping = &(((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_curr_virt - 1]);
 						
-						memmove(
-							mapping + 1,
-							mapping,
-							(0xFFFF - iblock_curr_virt) * sizeof(short)
-						);
-						*mapping = iblock_new_real;
-						//
+						dbindex_vm_insert_page(index, iblock_curr_virt, iblock_new_real);
+						
 						iblock_prev_real = iblock_new_real;
 					}
 					
@@ -758,7 +768,7 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 				cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, key_conv);
 				if(cret == 0)
 					cret = 2;
-					
+				
 				cret = dbindex_iblock_insert(index, iblock_curr_real, cret, item_offset, item_key);
 
 				free(poped_item);
@@ -908,7 +918,7 @@ unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, 
 					stop = 1;
 					break;
 				}
-
+				
 				item_offset += index->item_size;
 			}
 		dbindex_iblock_unlock(index, iblock);
