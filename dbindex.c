@@ -35,14 +35,26 @@ static void dbindex_iblock_lock_free(pthread_rwlock_t **iblock_locks, unsigned s
 }
 
 static void dbindex_iblock_wrlock(dbindex* index, unsigned short iblock){
+	if(iblock > index->iblock_last){
+		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		return;
+	}
 	pthread_rwlock_wrlock( index->iblock_locks[iblock] );
 }
 
 static void dbindex_iblock_rdlock(dbindex* index, unsigned short iblock){
+	if(iblock > index->iblock_last){
+		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		return;
+	}
 	pthread_rwlock_rdlock( index->iblock_locks[iblock] );
 }
 
 static void dbindex_iblock_unlock(dbindex* index, unsigned short iblock){
+	if(iblock > index->iblock_last){
+		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		return;
+	}
 	pthread_rwlock_unlock( index->iblock_locks[iblock] );
 }
 /* }}}2 */
@@ -351,23 +363,31 @@ static unsigned int dbindex_vm_item_insert(vm_cursor *cursor, void *data){
 	}else{
 		iblock_free = dbindex_iblock_get_start(cursor->index, cursor->real_iblock, &iblock_dstart, &iblock_dend);
 		if(iblock_free == 0){
-			short          iblock_new;
+			short          iblock_new_virt;
+			short          iblock_new_real;
 			unsigned int   iblock_new_free;
 			char          *iblock_new_dstart;
 			char          *iblock_new_dend;
+				
+			iblock_new_virt = cursor->virt_iblock - 1;
+			iblock_new_real = dbindex_vm_virt2real(cursor->index, iblock_new_virt); 
+			iblock_new_free = dbindex_iblock_get_start(cursor->index, iblock_new_real, &iblock_new_dstart, &iblock_new_dend);
 			
-			if( (iblock_new = dbindex_iblock_new(cursor->index)) == 0)
-				return DB_ERROR;
-			
-			iblock_new_free = dbindex_iblock_get_start(cursor->index, iblock_new, &iblock_new_dstart, &iblock_new_dend);
-			
-			dbindex_vm_insert_page(cursor->index, cursor->virt_iblock, iblock_new);
+			if(iblock_new_free == 0){
+				if( (iblock_new_real = dbindex_iblock_new(cursor->index)) == 0)
+					return DB_ERROR;
+				
+				iblock_new_free = dbindex_iblock_get_start(cursor->index, iblock_new_real, &iblock_new_dstart, &iblock_new_dend);
+				
+				dbindex_vm_insert_page(cursor->index, cursor->virt_iblock, iblock_new_real);
+			}
 			
 			char *poped_item;
 			
 			poped_item = dbindex_iblock_pop(cursor->index, cursor->real_iblock);
-			dbindex_iblock_insert(cursor->index, iblock_new, 2, iblock_new_dstart - cursor->index->item_size, poped_item);
-				
+			
+			dbindex_iblock_insert(cursor->index, iblock_new_real, 2, iblock_new_dstart - cursor->index->item_size, poped_item);
+			
 			free(poped_item);
 		}
 	}
@@ -526,14 +546,19 @@ static unsigned int dbindex_vm_search(dbindex *index, vm_cursor **cursor, char *
 		range_elements = (range_end->virt_addr - range_start->virt_addr) / index->item_size;
 		current_addr   = range_start->virt_addr + (range_elements / 2) * index->item_size;
 		current_ptr    = dbindex_vm_cursor_seek(current, current_addr, SEEK_SET);
-		
-		/*printf("loop: elements: %llx offset: %llx range: %llx-%llx\n",
+		/*
+		printf("loop: elements: %llx addr: %llx ptr: %llx, range: %llx-%llx\n",
 			range_elements,
 			current_addr,
+			current_ptr,
 			range_start->virt_addr,
 			range_end->virt_addr
 		);*/
-		
+		if(current_ptr == NULL){
+			printf("broken page\n");
+			exit(255);
+		}
+
 		key1_conv = index->keyconv(index, current_ptr);
 		cret      = index->cmpfunc(index, key1_conv, key2_conv);
 		
@@ -658,42 +683,12 @@ void dbindex_load(char *path, dbindex *index){
 	fdata_ptr = (short *)(index->file.data + DBINDEX_DATA_OFFSET);
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
-			// TODO sanity check
-			index->ipage_l1 = (void **)malloc(256 * sizeof(void *));
-			if(index->ipage_l1 == NULL){
-				fprintf(stderr, "dbindex_load: insufficient memory\n");
-				return;
-			}
-			for(i=0; i<=255; i++){
-				ipage_ptr = (void *)malloc(256 * sizeof(short));
-				if(ipage_ptr == NULL){
-					fprintf(stderr, "dbindex_load: insufficient memory\n");
-					return;
-				}
-				
-				idata_ptr = ipage_ptr;
-				ipage_not_null = false;
-				for(j=0; j<=255; j++){
-					ipage_block = *fdata_ptr++;
-					if(ipage_block != 0)
-						ipage_not_null = true;
-					*idata_ptr++ = ipage_block;
-				}
-				if(ipage_not_null == false){
-					free(ipage_ptr);
-					ipage_ptr = NULL;
-				}
-				index->ipage_l1[i] = ipage_ptr;
-			}
-			// fall throuth
-			
 		case DBINDEX_TYPE_INDEX:
 
 			index->iblock_locks = zalloc(0xFFFF * sizeof(pthread_rwlock_t *));
 			for(k=1; k <= index->iblock_last; k++){
 				dbindex_iblock_lock_init(index->iblock_locks, k);
 			}
-			
 			break;
 		default:
 			fprintf(stderr, "%s: wrong index type\n", path); // TODO add DEBUG define
@@ -716,21 +711,9 @@ void dbindex_save(dbindex *index){
 		
 		memcpy(index->file.data, index, DBINDEX_SETTINGS_LEN);
 		
-		fdata_ptr = (short *)(index->file.data + DBINDEX_DATA_OFFSET);
 		switch(index->type){
 			case DBINDEX_TYPE_PRIMARY:
-				for(i=0; i<=255; i++){
-					idata_ptr = index->ipage_l1[i];
-					if(idata_ptr == NULL){
-						fdata_ptr += 256 * sizeof(short); // TODO 256???
-					}else{
-						for(j=0; j<=255; j++)
-							*fdata_ptr++ = *idata_ptr++;
-					}
-				}
-				break;
 			case DBINDEX_TYPE_INDEX:
-				// nothing to do
 				break;
 		};
 	dbmap_unlock(&index->file);
@@ -749,22 +732,11 @@ void dbindex_unload(dbindex *index){
 	//pthread_rwlock_wrlock(&index->lock);
 		switch(index->type){
 			case DBINDEX_TYPE_PRIMARY:
-				if(index->ipage_l1 != NULL){
-					for(i=0; i<=255; i++){
-						ipage_ptr = index->ipage_l1[i];
-						if(ipage_ptr != NULL)
-							free(ipage_ptr);
-					}
-					free(index->ipage_l1);
-				}
-				
+			case DBINDEX_TYPE_INDEX:
 				for(i=1; i <= index->iblock_last; i++){
 					dbindex_iblock_lock_free(index->iblock_locks, i);
 				}
 				free(index->iblock_locks);
-				break;
-			case DBINDEX_TYPE_INDEX:
-				// nothing to do
 				break;
 		};
 		dbmap_unmap(&index->file);
@@ -786,22 +758,16 @@ void dbindex_set_userdata(dbindex *index, void *data){
 static short dbindex_ipage_get_iblock(dbindex* index, void *item_key){
 	unsigned char    index_c1;
 	unsigned char    index_c2;
-	short           *ipage_l2;
-	
+	short           *fdata_ptr;
+
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
+			fdata_ptr = (short *)(index->file.data + DBINDEX_DATA_OFFSET);
+			
 			index_c1 = *((char *)item_key + 0x03);
 			index_c2 = *((char *)item_key + 0x02);
-					
-			if(index->ipage_l1 == NULL)
-				return 0;
 
-			ipage_l2 = (short *)index->ipage_l1[index_c1];
-			if( ipage_l2 == NULL )
-				return 0;
-			
-			return ipage_l2[index_c2];
-			
+			return *(fdata_ptr + index_c1 * 256 + index_c2);
 			break;
 		case DBINDEX_TYPE_INDEX:
 			// bsearch block
@@ -809,28 +775,20 @@ static short dbindex_ipage_get_iblock(dbindex* index, void *item_key){
 	}
 }
 
-// TODO error handling
 static void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short iblock){
 	unsigned char    index_c1;
 	unsigned char    index_c2;
-	short           *ipage_l2;
+	short           *fdata_ptr;
 	
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
+			fdata_ptr = (short *)(index->file.data + DBINDEX_DATA_OFFSET);
+			
 			index_c1 = *((char *)item_key + 0x03);
 			index_c2 = *((char *)item_key + 0x02);
 			
-			ipage_l2 = (short *)index->ipage_l1[index_c1];
-			if( ipage_l2 == NULL ){
-				ipage_l2 = (short *)zalloc(256 * sizeof(short));
-				if(ipage_l2 == NULL){
-					// NOTE holly shit..
-					fprintf(stderr, "dbindex_insert: insufficient memory, losing data\n");
-					return;
-				}
-				index->ipage_l1[index_c1] = ipage_l2;
-			}
-			ipage_l2[index_c2] = iblock;
+			*(fdata_ptr + index_c1 * 256 + index_c2) = iblock;
+			// msync
 			break;
 		case DBINDEX_TYPE_INDEX:
 			// nothing to do
@@ -1103,7 +1061,7 @@ unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, 
 			item_offset = page_data_start;
 			while(item_offset < page_data_end){
 				revmemcpy(new_key, item_offset, index->key_len);
-
+				
 				if(func(new_key, (item_offset + index->key_len), arg1, arg2) == NULL){
 					stop = 1;
 					break;

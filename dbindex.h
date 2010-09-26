@@ -23,7 +23,6 @@ struct dbindex_ {
 	unsigned short      iblock_last;         // 2 bytes
 	
 	/* specific variables */
-	void              **ipage_l1;            // main page of PRIMARY index
 	pthread_rwlock_t  **iblock_locks;
 	
 	list                cursors;

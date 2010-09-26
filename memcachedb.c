@@ -773,7 +773,7 @@ static void process_delete_command(conn *c, ztoken_t *tokens, size_t ntokens){
 		return;
 	}
 	
-	if(ident_parse(key_token->value, item_new) == 0){
+	if(key_token->value == NULL || ident_parse(key_token->value, item_new) == 0){
 		out_string(c, "CLIENT_ERROR wrong syntax");
 		dbitem_free(item_new);
 		return;

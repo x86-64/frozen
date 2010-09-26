@@ -87,7 +87,7 @@ static dbtable* db_table_load(char *name){
 	struct stat  index_stat;
 	
 	if(settings.verbose > 1)
-		printf("table '%s' loading...\n", name);
+		printf("loading table '%s'\n", name);
 
 	// is already loaded?
 	list_iter(&db_tables, &db_iter_table_search, name, &table);
@@ -124,8 +124,6 @@ static dbtable* db_table_load(char *name){
 	db_table_load_idx_data(table);
 	
 	list_push(&db_tables, table);
-	if(settings.verbose > 1)
-		printf("table '%s' loaded\n", name);
 	
 	return table;
 }
@@ -254,7 +252,9 @@ static unsigned int db_table_query_delete(dbitem *item){
 	if(dbindex_query(&item->table->idx_oid, &item->oid, &entry_off) == 0){
 		// TODO delete data from data file
 		
-		ret = dbindex_delete(&item->table->idx_data, &item->oid);
+		if(item->table->idx_data.loaded == 1)
+			ret = dbindex_delete(&item->table->idx_data, &item->oid);
+		
 		ret = dbindex_delete(&item->table->idx_oid,  &item->oid);
 		
 		return ret;
@@ -389,6 +389,9 @@ static void* db_iter_query_delete_oid(void *ptable, void *oid, void *null){
 	
 	item->table     = table;
 	item->oid       = *(unsigned long *)oid;
+	
+	if(settings.verbose > 1)
+		printf("removing from '%s'\n", table->name);
 	
 	db_table_query_delete(item);
 	dbitem_free(item);
