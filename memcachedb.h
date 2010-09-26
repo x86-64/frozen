@@ -27,7 +27,17 @@
 #include <netinet/in.h>
 #include <event.h>
 #include <netdb.h>
-#include <db.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <dirent.h>
+#include <sys/mman.h>
+#include <sys/user.h>
+#include <sys/stat.h>
+#include <linux/mman.h>
 
 #define DATA_BUFFER_SIZE 2048
 #define UDP_READ_BUFFER_SIZE 65536
@@ -93,12 +103,7 @@ struct settings {
 
 extern struct settings settings;
 
-typedef struct dbitem_ {
-    unsigned long oid;
-    char*         attribute;
-    char*         data;
-    unsigned long data_len;
-} dbitem;
+
 
 enum conn_states {
     conn_listening,  /** the socket which listens for connections */
@@ -140,7 +145,8 @@ struct conn {
     int    rlbytes;
 
     /* data for the nread state */
-    dbitem *item;
+    void  *item;
+    
 
     /* data for the swallow state */
     int    sbytes;    /* how many bytes to swallow */
@@ -170,19 +176,13 @@ struct conn {
  * Functions
  */
 
-extern dbitem*       dbitem_alloc(void);
-extern void          dbitem_free(dbitem*);
-extern unsigned long db_query_new(void);
-extern unsigned int  db_query_set(dbitem *);
-extern void          db_init(void);
-extern void          db_destroy(void);
-
 /* conn management */
 conn *do_conn_from_freelist();
 bool do_conn_add_to_freelist(conn *c);
 conn *conn_new(const int sfd, const int init_state, const int event_flags, const int read_buffer_size, const bool is_udp, struct event_base *base);
 
 void *zalloc(size_t size);
+void revmemcpy(char *dst, char *src, unsigned long len);
 
 /*
  * In multithreaded mode, we wrap certain functions with lock management and

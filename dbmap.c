@@ -1,12 +1,5 @@
-typedef struct dbmap_ dbmap;
-struct dbmap_ {
-	int               fd;
-	char             *data;
-	unsigned long     data_len;
-	unsigned long     data_mlen;
-	pthread_rwlock_t  lock;
-};
-
+#include <memcachedb.h>
+#include <dbmap.h>
 
 int dbmap_map(char *path, dbmap *map){
 	int          fd;

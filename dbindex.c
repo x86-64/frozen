@@ -1,44 +1,12 @@
-// 2 level indexing:
-//  - page size = 12 * 2^16
-//  - elements in one page - 2^16
+#include <memcachedb.h>
+#include <dbmap.h>
+#include <dbindex.h>
 
-// NOTE indexes written to support 4 bytes key, to use 8 bytes keys i'll
-//      write balancer with transparent redirection
+static char *dbindex_iblock_get_page(dbindex *index, unsigned short iblock){
+	return index->file.data + index->data_offset + (iblock - 1) * index->page_size;
+}
 
-#define DBINDEX_TYPE_PRIMARY 0
-
-#define DBINDEX_DATA_OFFSET  0x40
-#define DBINDEX_SETTINGS_LEN 0x1E
-
-typedef struct dbindex_ dbindex;
-struct dbindex_ {
-	/* settings, same as in index file */
-	unsigned int        type;                // 4 bytes
-	unsigned int        item_size;           // 4 bytes
-	unsigned long       page_size;           // 8 bytes
-	unsigned int        key_len;             // 4 bytes
-	unsigned int        value_len;           // 4 bytes
-	unsigned int        data_offset;         // 4 bytes
-	unsigned short      iblock_last;         // 2 bytes
-	
-	/* specific variables */
-	void              **ipage_l1;            // main page of PRIMARY index
-	pthread_rwlock_t  **iblock_locks;
-	
-	dbmap               file;
-	//pthread_rwlock_t    lock;
-};
-
-/*
- * Index file layout:
-	
-	0x00000000: 0x40: index settings
-	
-	PRIMARY INDEX:
-	0x00000040: 0x20000: ipage's 256 pointers 2 byte each = 0x100 * 2 = 0x200 * 0x100 = 0x20000
-	0x00020040: undef  : data
-*/
-
+/* iblock locks {{{2 */
 static void dbindex_iblock_lock_init(pthread_rwlock_t **iblock_locks, unsigned short iblock){
 	if(iblock_locks == NULL)
 		return;
@@ -65,25 +33,14 @@ static void dbindex_iblock_rdlock(dbindex* index, unsigned short iblock){
 static void dbindex_iblock_unlock(dbindex* index, unsigned short iblock){
 	pthread_rwlock_unlock( index->iblock_locks[iblock] );
 }
-
-static char *dbindex_iblock_get_page(dbindex *index, unsigned short iblock){
-	return index->file.data + index->data_offset + (iblock - 1) * index->page_size;
-}
-
-/* iblock start {{{1 */
+/* }}}2 */
+/* iblock start {{{2 */
 static void  dbindex_iblock_init_start(dbindex *index, unsigned short iblock, unsigned int value){
 	char *page_offset = dbindex_iblock_get_page(index, iblock);
 	
 	memset(page_offset, 0xFF, index->item_size);
 	*((unsigned int *)page_offset) = value;
 }
-
-/* dbindex_iblock_get_start
- *
- * returns space left in page
- * 	*page_data_start - ptr to data start
- * 	*page_data_end   - ptr to data end
-*/
 
 static unsigned int dbindex_iblock_get_start(dbindex *index, unsigned short iblock, char **page_data_start, char **page_data_end){
 	unsigned int  i;
@@ -115,7 +72,7 @@ static void  dbindex_iblock_set_start(dbindex *index, unsigned short iblock, uns
 	
 	*((unsigned int *)(page_data_start - ret)) -= delta;
 }
-/* }}}1 */
+/* }}}2 */
 
 /* dbindex_iblock_search
  *
@@ -157,20 +114,11 @@ static int   dbindex_iblock_search(dbindex *index, unsigned short iblock, char *
 
 	while(1){
 		range_elements = (range_end - range_start) / index->item_size;
+		item_offset = range_start + (range_elements / 2) * index->item_size;
 		
 		if(range_elements == 0)
 			break;
-
-		item_offset = range_start + (range_elements / 2) * index->item_size;
 		
-		/*printf("bsearch loop %ld: %lld elements %llx in %llx-%llx\n",
-			iblock,
-			range_elements,
-			item_offset - page_data_start,
-			range_start - page_data_start,
-			range_end   - page_data_start
-			);*/
-
 		cret = memcmp(item_offset, new_key, index->key_len);
 		if(cret == 0){
 			*pitem_offset = item_offset;
@@ -205,14 +153,6 @@ static short dbindex_iblock_new(dbindex *index){
 	return iblock;
 }
 
-static void revmemcpy(char *dst, char *src, unsigned long len){
-	src += len - 1;
-	while(len){
-		*dst++ = *src--;
-		len--;
-	}
-}
-
 static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *item_key, void *item_value){
 	// if have free space - write
 	// if dont have free space - get all our elements, alloc new page and write it
@@ -222,12 +162,13 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 	char          *item_offset;
 	char          *new_key = zalloc(index->item_size);
 		
-	//for(j=0, i=index->key_len - 1; i >= 0; i--, j++)
-	//	new_key[j] = ((char *)item_key)[i];
 	revmemcpy(new_key, item_key, index->key_len);
 	memcpy(new_key + index->key_len, item_value, index->value_len);	
 
 	bool item_written = false;
+	
+	if(settings.verbose > 1)
+		printf("dbindex_iblock_insert(%ld)\n", iblock);
 
 	dbmap_lock(&index->file);
 		dbindex_iblock_wrlock(index, iblock);
@@ -335,6 +276,7 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 	free(new_key);
 	return iblock_final;
 }
+
 
 static void dbindex_expand(dbindex *index, unsigned long need_len){
 	if(index->file.data_len < need_len){
@@ -491,6 +433,7 @@ void dbindex_unload(dbindex *index){
 	//pthread_rwlock_unlock(&index->lock);
 }
 
+/* index pages {{{1 */
 short dbindex_ipage_get_iblock(dbindex* index, void *item_key){
 	unsigned char    index_c1;
 	unsigned char    index_c2;
@@ -529,6 +472,7 @@ void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short ibl
 	}
 	ipage_l2[index_c2] = iblock;
 }
+/* }}}1 */
 
 void dbindex_insert(dbindex *index, void *item_key, void *item_value){
 	unsigned short iblock;
@@ -584,12 +528,63 @@ unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value){
 						memcpy(item_value, item_offset + index->key_len, index->value_len);
 						ret = 0;
 					}			
-					
+
 				dbindex_iblock_unlock(index, iblock);
 				dbmap_unlock(&index->file);
 				break;
 		}
 	//pthread_rwlock_unlock(&index->lock);
+	
+	free(item_revkey);
 	return ret;
 }
 
+/* dbindex_delete
+ *
+ * returns:
+ * 	0 - found and deleted
+ * 	1 - not found
+*/
+
+// TODO move actual deletion to another thread, mark item as deleted
+
+unsigned int dbindex_delete(dbindex *index, void *item_key){
+	short            iblock;
+	unsigned int     ret = 1;
+	unsigned int     free_space;
+	char            *item_revkey = malloc(index->key_len);
+	char            *page_data_start;
+	char            *page_data_end;
+	char            *item_offset;
+
+	switch(index->type){
+		case DBINDEX_TYPE_PRIMARY:
+			iblock = dbindex_ipage_get_iblock(index, item_key);
+			if(iblock == 0)
+				break;
+			
+			dbmap_lock(&index->file);
+			dbindex_iblock_wrlock(index, iblock);
+
+				revmemcpy(item_revkey, item_key, index->key_len);
+				if(dbindex_iblock_search(index, iblock, &item_offset, item_revkey) == 0){
+					free_space = dbindex_iblock_get_start(index, iblock, &page_data_start, &page_data_end);
+					
+					if(item_offset > page_data_start)
+						memmove(
+							page_data_start + index->item_size,
+							page_data_start,
+							item_offset - page_data_start
+						);
+					dbindex_iblock_init_start(index, iblock, free_space + index->item_size);
+					ret = 0;
+				}
+
+			dbindex_iblock_unlock(index, iblock);
+			dbmap_unlock(&index->file);
+			break;
+	};
+	
+	free(item_revkey);
+	return ret;
+}

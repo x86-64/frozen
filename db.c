@@ -1,32 +1,8 @@
 #include <memcachedb.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <dirent.h>
-#include <sys/mman.h>
-#include <sys/user.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <linux/mman.h>
-
-#include <list.c>
-#include <dbmap.c>
-#include <dbindex.c>
-
-typedef struct dbtable_ dbtable;
-struct dbtable_ {
-	char            *name;
-	
-	/* table settings */
-	int              pack_type;
-	
-	/* table data */
-	dbmap            data;
-	dbindex          idx_oid;
-	dbindex          idx_data;
-};
+#include <list.h>
+#include <dbmap.h>
+#include <dbindex.h>
+#include <db.h>
 
 /* db settings */
 char                   *dbfile_main;
@@ -38,6 +14,11 @@ static list             db_write_queue;
 static list             db_tables;
 
 static pthread_t        db_write_thread_id;
+
+static void* db_iter_table_search(void *table, void *name, void *addr);
+static void* db_iter_query_delete_oid(void *table, void *oid, void *null);
+
+// TODO: test 1-4 pack_types
 
 /* PRIVATE FUNCTIONS */
 
@@ -60,15 +41,8 @@ static char *db_abspath(char *name, char *ext){
 
 /* }}}1 */
 
-static void *db_iter_table_search(void *table, void *name, void *addr){
-	if(strcmp(((dbtable *)table)->name, name) == 0){
-		*(dbtable **)addr = table;
-		return (void *)0;
-	}
-	return (void *)1; // keep searching
-}
-
-/* Table settings {{{2 */
+/* DBTable initialisation {{{1 */
+/* DBTable settings {{{2 */
 static void db_table_settings_save(dbtable *table){
 	char *apath_set  = db_abspath(table->name, "set");
 
@@ -97,7 +71,7 @@ static void db_table_settings_load(dbtable *table){
 	}
 }
 /* }}}2 */
-/* Table initialisation {{{1 */
+
 static dbtable* db_table_load(char *name){
 	dbtable     *table = NULL;
 	struct stat  index_stat;
@@ -157,9 +131,13 @@ static void db_table_unload_by_name(char *name){
 	list_unlink(&db_tables, table); // unlink table to prevent access to it
 	db_table_unload(table);
 }
+
 /* }}}1 */
 
-static dbtable* db_tables_search(char *name){
+dbtable* db_tables_search(char *name){
+	if(settings.verbose > 1)
+		printf("db_tables_search\n");
+
 	dbtable *table = NULL;
 	
 	list_iter(&db_tables, &db_iter_table_search, (void *)name, (void *)&table);
@@ -169,9 +147,8 @@ static dbtable* db_tables_search(char *name){
 	return db_table_load(name);
 }
 
-// TODO: untested 1-4 pack_types
 static void db_table_query_set(dbitem *item){
-	dbtable *table = db_tables_search(item->attribute);
+	dbtable *table = item->table;
 	
 	char          *entry_ptr;
 	unsigned long  entry_off;
@@ -216,15 +193,20 @@ static void db_table_query_set(dbitem *item){
 	
 }
 
+static unsigned int db_table_query_isset(dbitem *item){
+	unsigned long entry_off;
+	
+	return dbindex_query(&item->table->idx_oid, &item->oid, &entry_off);
+}
+
 static unsigned int db_table_query_get(dbitem *item){
 	unsigned long  entry_off;
 	unsigned long  entry_len;
 	unsigned char *entry_ptr;
 
-	dbtable *table = db_tables_search(item->attribute);
-	
+	dbtable *table = item->table;
+
 	if(dbindex_query(&table->idx_oid, &item->oid, &entry_off) == 0){
-	//if(1){
 		dbmap_lock(&table->data);
 		// TODO: remove copying item value to memory
 
@@ -272,6 +254,21 @@ static unsigned int db_table_query_get(dbitem *item){
 	return 1;
 }
 
+static unsigned int db_table_query_delete(dbitem *item){
+	unsigned long  entry_off;
+	unsigned int   ret;
+	
+	if(dbindex_query(&item->table->idx_oid, &item->oid, &entry_off) == 0){
+		// TODO delete data from data file
+		
+		ret = dbindex_delete(&item->table->idx_oid, &item->oid);
+		
+		return ret;
+	}
+	return 1;
+}
+
+/* Tables initialisation {{{1 */
 static void db_tables_load(void){
 	DIR            *dir;
 	struct dirent  *dit;
@@ -300,8 +297,22 @@ static void db_tables_unload(void){
 	while(table = list_pop(&db_tables))
 		db_table_unload(table);
 }
-
-/* DB settings {{{1 */
+/* }}}1 */
+/* DB workers {{{1 */
+void db_write_thread(int arg){
+	do{
+		dbitem *item;
+		while(item = list_pop(&db_write_queue)){
+			db_table_query_set(item);
+			dbitem_free(item);
+		}
+		sleep(1);
+	}while(daemon_quit != 1);
+	db_destroy_ok++;
+}
+/* }}}1 */
+/* DB initialisation {{{1 */
+/* DB settings {{{2 */
 static void db_settings_save(void){
 	FILE* db_f = fopen(dbfile_main, "w");
 
@@ -330,21 +341,8 @@ static void db_settings_load(void){
 		fclose(db_f);
 	}
 }
-/* }}}1 */
-/* DB workers {{{1 */
-void db_write_thread(int arg){
-	do{
-		dbitem *item;
-		while(item = list_pop(&db_write_queue)){
-			db_table_query_set(item);
-			dbitem_free(item);
-		}
-		sleep(1);
-	}while(daemon_quit != 1);
-	db_destroy_ok++;
-}
-/* }}}1 */
-/* DB initialisation {{{1 */
+/* }}}2 */
+
 void db_init(void){
 	
 	list_init(&db_write_queue);
@@ -384,6 +382,58 @@ void db_destroy(void){
 	free(dbfile_main);
 }
 /* }}}1 */
+/* Iterators {{{1 */
+static void* db_iter_table_search(void *table, void *name, void *addr){
+	if(strcmp(((dbtable *)table)->name, name) == 0){
+		*(dbtable **)addr = table;
+		return (void *)0;
+	}
+	return (void *)1; // keep searching
+}
+
+static void* db_iter_query_delete_oid(void *ptable, void *oid, void *null){
+	dbtable *table = (dbtable *)ptable;
+	dbitem  *item  = dbitem_alloc();
+	
+	item->table     = table;
+	item->oid       = *(unsigned long *)oid;
+	
+	db_table_query_delete(item);
+	dbitem_free(item);
+	
+	return (void *)1;
+}
+
+static void* db_iter_query_get_oid(void *ptable, void *pitem, void *null){
+	int      ret;
+	dbtable *table = (dbtable *)ptable;
+	dbitem  *item  = (dbitem  *)pitem;
+	
+	item->table    = table;
+	
+	ret = db_table_query_isset(item);
+	
+	if(ret == 0){
+		unsigned int  need_len = strlen(table->name) + 2;
+		char         *info;
+		
+		if(item->data == NULL){
+			item->data_len  = need_len;
+			item->data      = malloc(need_len);
+			info            = item->data;
+		}else{
+			item->data      = realloc(item->data, item->data_len + need_len);
+			info            = item->data + item->data_len;
+			item->data_len += need_len;
+		}
+		strcpy(info, table->name);
+		info[need_len - 1] = '\n';
+		info[need_len - 2] = '\r';
+	}
+	
+	return (void *)1;
+}
+/* }}}1 */
 
 /* PUBLIC FUNCTIONS */
 
@@ -400,9 +450,12 @@ void dbitem_free(dbitem *item){
 	free(item);
 }
 /* }}}1 */
-
+/* DB query functions {{{1 */
 unsigned long db_query_new(void){
 	unsigned long oid_new;
+
+	if(settings.verbose > 1)
+		printf("db_query_new\n");
 
 	pthread_mutex_lock(&db_oid_last_mutex);
 	oid_new = db_oid_last++;
@@ -411,13 +464,37 @@ unsigned long db_query_new(void){
 }
 
 unsigned int db_query_set(dbitem *item){
-	list_push(&db_write_queue, item);	
-	//db_table_query_set(item);
+	
+	if(settings.verbose > 1)
+		printf("db_query_set\n");
+
+	//list_push(&db_write_queue, item);	
+	db_table_query_set(item);
 	return 0;
 }
 
 unsigned int db_query_get(dbitem *item){
-	return db_table_query_get(item);	
+	if(settings.verbose > 1)
+		printf("db_query_get\n");
+	
+	if(item->table == NULL){
+		list_iter(&db_tables, &db_iter_query_get_oid, item, NULL);
+		return 0;
+	}else{
+		return db_table_query_get(item);	
+	}
 }
 
+unsigned int db_query_delete(dbitem *item){
+	if(settings.verbose > 1)
+		printf("db_query_delete\n");
+	
+	if(item->table == NULL){
+		list_iter(&db_tables, &db_iter_query_delete_oid, &item->oid, NULL);
+		return 0;
+	}else{
+		return db_table_query_delete(item);
+	}
+}
 
+/* }}}1 */

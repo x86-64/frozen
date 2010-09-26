@@ -1,15 +1,5 @@
-typedef struct litem_ litem;
-struct litem_ {
-	litem *next;
-	void  *item;
-};
-
-typedef struct list_ list;
-struct list_ {
-	litem            *head;
-	litem     	 *tail;
-	pthread_mutex_t   lock;
-};
+#include <memcachedb.h>
+#include <list.h>
 
 void list_init(list *clist){
 	clist->head = NULL;

@@ -15,6 +15,7 @@
 #ifndef __need_IOV_MAX
 #define __need_IOV_MAX
 #endif
+
 #include <pwd.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -27,6 +28,10 @@
 #include <time.h>
 #include <assert.h>
 #include <limits.h>
+
+#include <dbmap.h>
+#include <dbindex.h>
+#include <db.h>
 
 #ifdef HAVE_MALLOC_H
 /* OpenBSD has a malloc.h, but warns to use stdlib.h instead */
@@ -109,6 +114,15 @@ void *zalloc(size_t size){
 	void *mem = malloc(size);
 	memset(mem, 0, size);
 	return mem;
+}
+
+void revmemcpy(char *dst, char *src, unsigned long len){
+	src += len - 1;
+
+	while(len){
+		*dst++ = *src--;
+		len--;
+	}
 }
 
 /* network stuff {{{1 */
@@ -627,13 +641,13 @@ static void item_output(conn *c, char *item_name, char *item_data, size_t item_d
 static int ident_parse(char *ident, dbitem *item){
 	char *item_attribute = index(ident, '.');
 	
-	if(item_attribute == NULL)
-		return 0;
-	
-	*item_attribute++;// = '\0';
-	
-	item->oid       = strtoll(ident, NULL, 10);	
-	item->attribute = strdup(item_attribute);
+	if(item_attribute != NULL){
+		*item_attribute++;
+
+		item->attribute = strdup(item_attribute);
+		item->table     = db_tables_search(item_attribute);
+	}
+	item->oid = strtoll(ident, NULL, 10);	
 	
 	return 1;
 }
@@ -728,14 +742,40 @@ static void process_set_command(conn *c, token_t *tokens, size_t ntokens){
 }
 
 static void process_set_command_complete(conn *c){
-	c->item->data[c->item->data_len] = '\0'; // coz client can cheat with \r\n
+	dbitem *item = c->item;
 
-	db_query_set(c->item);
+	item->data[item->data_len] = '\0'; // coz client can cheat with \r\n
+
+	db_query_set(item);
 	out_string(c, "STORED");
 }
 
 static void process_delete_command(conn *c, token_t *tokens, size_t ntokens){
+	int      ret;
+	token_t *key_token = &tokens[KEY_TOKEN];
 	
+	dbitem  *item_new = dbitem_alloc();
+		
+	if(item_new == NULL){
+		out_string(c, "SERVER_ERROR insufficient memory");
+		return;
+	}
+	
+	if(ident_parse(key_token->value, item_new) == 0){
+		out_string(c, "CLIENT_ERROR wrong syntax");
+		dbitem_free(item_new);
+		return;
+	}
+		
+	ret = db_query_delete(item_new);
+	
+	dbitem_free(item_new);
+	
+	if(ret == 0){
+		out_string(c, "DELETED");
+	}else{
+		out_string(c, "NOT_FOUND");
+	}
 }
 
 static void process_index_command(conn *c, token_t *tokens, size_t ntokens){
