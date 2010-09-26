@@ -1,9 +1,14 @@
 #include <libfrozen.h>
 #include <backend.h>
 
+// TODO read\write error handling
+// TODO crazy logic in file_move, can rewrite?
+
 typedef struct file_user_data {
 	char *           path;
 	int              handle;
+	size_t           copy_buffer;
+	
 	pthread_mutex_t  create_lock;
 	
 } file_user_data;
@@ -24,8 +29,10 @@ static int file_destroy(chain_t *chain){
 	file_user_data *data = (file_user_data *)chain->user_data;
 	
 	if(data->path){
-		free(data->path);
 		// was inited
+		// TODO rewrite condition
+
+		free(data->path);
 		close(data->handle);
 		pthread_mutex_destroy(&(data->create_lock));
 	}
@@ -42,6 +49,7 @@ static int file_configure(chain_t *chain, setting_t *config){
 	char   *filename;
 	char   *temp;
 	int     handle;
+	size_t  copy_buffer_size;
 	
 	filepath  = (char *)malloc(256);
 	*filepath = '\0';
@@ -74,14 +82,19 @@ static int file_configure(chain_t *chain, setting_t *config){
 		goto cleanup;
 	}
 	
+	temp = setting_get_child_string(config, "copy_buffer_size");
+	copy_buffer_size = (temp != NULL) ? strtoul(temp, NULL, 10) : 512;
+	
 	file_user_data *data = (file_user_data *)chain->user_data;
 	
-	data->path   = filepath;
-	data->handle = handle;
+	data->path        = filepath;
+	data->handle      = handle;
+	data->copy_buffer = copy_buffer_size;
 	
 	pthread_mutex_init(&(data->create_lock), NULL);
 	
 	return 0;
+
 cleanup:
 	free(filepath);
 	return -EINVAL;
@@ -117,13 +130,12 @@ static int file_set(chain_t *chain, void *key, void *value, size_t value_size){
 	ssize_t  ret;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
-	
+
+redo:
 	ret = pwrite(fd, value, value_size, *(off_t *)key);
 	if(ret == -1 || ret != value_size){
-		/* TODO error handling */
-		fprintf(stderr, "TODO file.c\n");
-		exit(255);
-		return -EINVAL;
+		if(errno == EINTR) goto redo;
+		return -errno;
 	}
 	
 	return 0;
@@ -134,13 +146,12 @@ static int file_get(chain_t *chain, void *key, void *value, size_t value_size){
 	ssize_t  ret;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
-	
+
+redo:
 	ret = pread(fd, value, value_size, *(off_t *)key);
 	if(ret == -1 || ret != value_size){
-		/* TODO error handling */
-		fprintf(stderr, "TODO file.c\n");
-		exit(255);
-		return -EINVAL;
+		if(errno == EINTR) goto redo;
+		return -errno;
 	}
 	
 	return 0;
@@ -148,6 +159,81 @@ static int file_get(chain_t *chain, void *key, void *value, size_t value_size){
 
 static int file_delete(chain_t *chain, void *key, size_t value_size){
 	return 0;
+}
+
+static int file_move(chain_t *chain, void *key_from, void *key_to, size_t value_size){
+	off_t  from = *(off_t *)key_from;
+	off_t  to   = *(off_t *)key_to;
+	off_t  curr_from, curr_to;
+	size_t ssize, size, max_size;
+	char * buff;
+	int    direction;
+	int    ret = 0;
+	
+	if(from == to || value_size == 0)
+		return -EINVAL;
+	
+	file_user_data * data = ((file_user_data *)chain->user_data);
+	
+	if(from < to){
+		max_size   = ((to - from) > data->copy_buffer) ? data->copy_buffer : (size_t)(to - from);
+		size       = (max_size < value_size)           ? max_size          : value_size;
+		
+		from      += value_size - size;
+		to        += value_size - size;
+		direction  = -1;
+	}else{
+		max_size   = ((from - to) > data->copy_buffer) ? data->copy_buffer : (size_t)(from - to);
+		size       = (max_size < value_size)           ? max_size          : value_size;
+			
+		direction  = 1;
+	}
+	
+	if(size == 0)
+		return -EINVAL;
+	
+	buff = (char *)malloc(size);
+	if(buff == NULL)
+		return -EINVAL;
+	
+	while(value_size > 0){
+		ssize = pread(data->handle, buff, size, from);
+		if(ssize == -1){
+			if(errno == EINTR) continue;
+			ret = -errno;
+			break;
+		}
+		
+		ssize = pwrite(data->handle, buff, ssize, to);
+		if(ret == -1){
+			if(errno == EINTR) continue;
+			ret = -errno;
+			break;
+		}
+		
+		value_size -= ssize;
+		from       += ssize * direction;
+		to         += ssize * direction;
+		size        = (max_size < value_size) ? max_size : value_size;
+	}
+	
+	free(buff);
+	return ret;
+}
+
+static int file_count(chain_t *chain, void *count){
+	struct stat  buf;
+	int          ret;
+	int          fd;
+	
+	fd = ((file_user_data *)chain->user_data)->handle;
+	
+	ret = fstat(fd, &buf);
+	if(ret == 0){
+		memcpy(count, &(buf.st_size), sizeof(buf.st_size));
+	}
+	
+	return ret;
 }
 
 static chain_t chain_file = {
@@ -160,7 +246,9 @@ static chain_t chain_file = {
 		&file_create,
 		&file_set,
 		&file_get,
-		&file_delete
+		&file_delete,
+		&file_move,
+		&file_count
 	}
 };
 CHAIN_REGISTER(chain_file)

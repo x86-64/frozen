@@ -1,4 +1,4 @@
-tests_planned=test_backend_file.c test_settings.c test_backend.c 
+tests_planned=test_20_backend_locator.c test_19_backend.c test_11_backend_file.c test_00_settings.c
 
 TESTS          = test
 check_PROGRAMS = test
