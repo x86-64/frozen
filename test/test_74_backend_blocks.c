@@ -103,8 +103,8 @@ START_TEST (test_backend_blocks){
 	
 	hash_empty(hash);
 	action   = ACTION_CRWD_MOVE;
-	key_from = 28;
-	key_to   = 24;
+	key_from = 2;
+	key_to   = 4;
 	ssize    = 1;
 		hash_set(hash, "action",   TYPE_INT32,  &action);
 		hash_set(hash, "key_from", TYPE_INT64,  &key_from);
