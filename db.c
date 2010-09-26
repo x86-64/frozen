@@ -314,6 +314,11 @@ dbtable* db_tables_search(char *name){
 static void db_settings_save(void){
 	char *dbfile_main = db_abspath("database", "set");
 	FILE *db_f        = fopen(dbfile_main, "w");
+	
+	if(db_f == NULL){
+		fprintf(stderr, "Db directory not exist or permission error\n");
+		exit(EXIT_FAILURE);
+	}
 
 	fprintf(db_f, "%ld\n", db_oid_last);
 	
@@ -336,7 +341,12 @@ static void db_settings_load(void){
 		db_settings_save();
 	}else{
 		FILE* db_f = fopen(dbfile_main, "r");
-
+		
+		if(db_f == NULL){
+			fprintf(stderr, "Db directory not exist or permission error\n");
+			exit(EXIT_FAILURE);
+		}
+		
 		res = fscanf(db_f, "%ld\n", &db_oid_last);
 	
 		fclose(db_f);
@@ -565,21 +575,25 @@ unsigned int db_query_search(dbitem *item){
 		data_pack(data_type, item->query, entry_data, entry_len);
 		
 		/* start searching */
-		dbindex  *idx_data     = &item->table->idx_data;
-		char     *item_oid     = malloc(idx_data->key_len);
-		char     *item_oid_str;
+		dbindex   *idx_data     = &item->table->idx_data;
+		char      *item_oid;
+		vm_cursor *cursor;
 		
-		if(dbindex_query(&item->table->idx_data, item_oid, entry_data) == 0){
-			item_oid_str = itoa(*(unsigned int *)item_oid);
+		cursor = dbindex_search(&item->table->idx_data, entry_data);
+		if(cursor != NULL){
+			while(1){
+				item_oid = itoa(*(unsigned int *)cursor->real_ptr);	
+				dbitem_append(item, item_oid, strlen(item_oid));
+				free(item_oid);
+				
+				if(dbindex_search_slide(cursor, 1) == 1)
+					break;
+			}
 			
-			dbitem_append(item, item_oid_str, strlen(item_oid_str));
-			
-			free(item_oid_str);
-			
+			dbindex_vm_cursor_free(cursor);
 			ret = 0;
 		}
-		
-		free(item_oid);
+	
 		free(entry_data);
 	}
 	return ret;

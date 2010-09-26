@@ -105,7 +105,7 @@ static void settings_init(void) {
     settings.socketpath = NULL;       /* by default, not using a unix socket */
     settings.dbpath     = DBPATH;
 #ifdef USE_THREADS
-    settings.num_threads = 16;
+    settings.num_threads = 4;
 #else
     settings.num_threads = 1;
 #endif
@@ -560,7 +560,7 @@ static void out_string(conn *c, const char *str) {
 typedef struct token_s {
     char *value;
     size_t length;
-} token_t;
+} ztoken_t;
 
 #define COMMAND_TOKEN 0
 #define SUBCOMMAND_TOKEN 1
@@ -586,7 +586,7 @@ typedef struct token_s {
  *      command  = tokens[ix].value;
  *   }
  */
-static size_t tokenize_command(char *command, token_t *tokens, const size_t max_tokens) {
+static size_t tokenize_command(char *command, ztoken_t *tokens, const size_t max_tokens) {
     char *s, *e;
     size_t ntokens = 0;
 
@@ -654,14 +654,14 @@ static int ident_parse(char *ident, dbitem *item){
 	return 1;
 }
 
-static void process_version_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_version_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	out_string(c, "VERSION 1.0");
 }
 
-static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_get_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	int      ret;
-	token_t *key_token   = &tokens[KEY_TOKEN];
-	token_t *query_token = &tokens[2]; 
+	ztoken_t *key_token   = &tokens[KEY_TOKEN];
+	ztoken_t *query_token = &tokens[2]; 
 
 	c->item = NULL;
 	do {
@@ -711,10 +711,10 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }	
 
-static void process_set_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_set_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	char         *item_data;
 	unsigned int  item_data_len;
-	token_t *key_token = &tokens[KEY_TOKEN];
+	ztoken_t *key_token = &tokens[KEY_TOKEN];
 	
 	if(ntokens != 6){
 		out_string(c, "CLIENT_ERROR wrong syntax");
@@ -761,9 +761,9 @@ static void process_set_command_complete(conn *c){
 	}
 }
 
-static void process_delete_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_delete_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	int      ret;
-	token_t *key_token = &tokens[KEY_TOKEN];
+	ztoken_t *key_token = &tokens[KEY_TOKEN];
 	
 	dbitem  *item_new = dbitem_alloc();
 		
@@ -789,9 +789,9 @@ static void process_delete_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
-static void process_deindex_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_deindex_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	unsigned int  ret;
-	token_t      *key_token = &tokens[KEY_TOKEN];
+	ztoken_t      *key_token = &tokens[KEY_TOKEN];
 	
 	if(key_token->value == NULL){
 		out_string(c, "CLIENT_ERROR wrong syntax");
@@ -808,9 +808,9 @@ static void process_deindex_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
-static void process_index_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_index_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	unsigned int  ret;
-	token_t      *key_token = &tokens[KEY_TOKEN];
+	ztoken_t      *key_token = &tokens[KEY_TOKEN];
 	
 	if(key_token->value == NULL){
 		out_string(c, "CLIENT_ERROR wrong syntax");
@@ -827,10 +827,10 @@ static void process_index_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
-static void process_init_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_init_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	unsigned int ret;
-	token_t *key_token  = &tokens[KEY_TOKEN];
-	token_t *type_token = &tokens[2];
+	ztoken_t *key_token  = &tokens[KEY_TOKEN];
+	ztoken_t *type_token = &tokens[2];
 	
 	if(key_token->value == NULL || type_token->value == NULL){
 		out_string(c, "CLIENT_ERROR wrong syntax");
@@ -848,9 +848,9 @@ static void process_init_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
-static void process_destroy_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_destroy_command(conn *c, ztoken_t *tokens, size_t ntokens){
 	unsigned int ret;
-	token_t *key_token  = &tokens[KEY_TOKEN];
+	ztoken_t *key_token  = &tokens[KEY_TOKEN];
 	
 	if(key_token->value == NULL){
 		out_string(c, "CLIENT_ERROR wrong syntax");
@@ -869,7 +869,7 @@ static void process_destroy_command(conn *c, token_t *tokens, size_t ntokens){
 /* process_command {{{1 */
 static void process_command(conn *c, char *command) {
 
-    token_t tokens[MAX_TOKENS];
+    ztoken_t tokens[MAX_TOKENS];
     size_t ntokens;
     int comm;
 
@@ -1627,7 +1627,7 @@ static void usage(void) {
 	   "-D <path>     database files path, must end with /\n"
 	   );
 #ifdef USE_THREADS
-    printf("-t <num>      number of threads to use, default 16\n");
+    printf("-t <num>      number of threads to use, default 4\n");
 #endif
     return;
 }
@@ -1666,7 +1666,7 @@ static void sig_handler(const int sig)
         return;
     }
     daemon_quit = 1;
-    fprintf(stderr, "Signal %d handled, memcacahedb is now exit..\n", sig);
+    fprintf(stderr, "Signal %d handled, exiting\n", sig);
 
     /* make sure deadlock detect loop is quit*/
     //sleep(2);

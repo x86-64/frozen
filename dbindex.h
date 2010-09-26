@@ -35,6 +35,26 @@ struct dbindex_ {
 	void * (*keyconv)(dbindex *, void *);         // convert key function
 };
 
+
+#define CURSOR_READ       1
+#define CURSOR_WRITE      2
+#define CURSOR_FIXED      4
+
+typedef struct vm_cursor_ vm_cursor;
+struct vm_cursor_ {
+	unsigned long   page_len;
+	int             rw;
+	dbindex        *index;
+	char           *base_addr;
+	unsigned long   virt_addr;
+	unsigned short  virt_iblock;
+	unsigned long   real_addr;
+	unsigned short  real_iblock;
+	char           *real_ptr;
+	void           *query;
+};
+
+
 /*
  * Index file layout:
 	
@@ -53,6 +73,13 @@ void dbindex_set_funcs(dbindex *index, int (*cmpfunc)(dbindex *, void *, void *)
 unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_delete(dbindex *index, void *item_key);
-unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, void *), void *arg1, void *arg2);
+vm_cursor*   dbindex_search(dbindex *index, void *query);
+unsigned int dbindex_search_slide(vm_cursor *cursor, int direction);
 
+char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence);
+char* dbindex_vm_cursor_next(vm_cursor *cursor);
+char *dbindex_vm_cursor_prev(vm_cursor *cursor);
+vm_cursor* dbindex_vm_cursor_new(dbindex *index, int type, unsigned long value, int whence);
+void dbindex_vm_cursor_free(vm_cursor *cursor);
+	

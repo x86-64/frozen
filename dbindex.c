@@ -3,7 +3,6 @@
 #include <dbindex.h>
 
 // TODO rewrite iblock from unsigned short to structure
-// TODO write vm wrappers
 // TODO rewrite code to use vm wrappers
 // TODO rewrite PRIMARY code to use vm wrappers
 
@@ -295,93 +294,164 @@ static void dbindex_vm_insert_page(dbindex *index, unsigned short iblock_virt, u
 	*mapping = iblock_real;
 }
 
-static unsigned int dbindex_vm_search(
-					dbindex *index,
-					unsigned short *piblock_virt,
-					unsigned short *piblock_real,
-					char **pitem_offset,
-					char *new_key_conv
-				){
+/* DBIndex virtual mapping cursors {{{1 */
+char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence){
+	unsigned long long   addr_diff;
+	unsigned long long   virt_max;
+	char                *page_data_end;
+	char                *page_data_start;
+	
+	if(c->real_iblock != 0)
+		dbindex_iblock_unlock(c->index, c->real_iblock);
+	
+	virt_max = c->index->iblock_last * c->index->page_size;
+	
+	switch(whence){
+		case SEEK_SET:
+			c->virt_addr  = value;
+			break;
+		case SEEK_CUR:
+			c->virt_addr += value;
+			break;
+		case SEEK_END:
+			c->virt_addr  = virt_max + value;
+			break;
+	};
+	
+	if(c->virt_addr >= virt_max)
+		return NULL;
+	
+	c->virt_iblock = (c->virt_addr / c->index->page_size) + 1;
+	c->real_iblock = dbindex_vm_virt2real(c->index, c->virt_iblock);
+	
+	c->real_addr   = c->virt_addr + (c->real_iblock - c->virt_iblock) * c->index->page_size;
+	c->real_ptr    = c->base_addr + c->real_addr;
+//TODO remake	
+	c->page_len    = dbindex_iblock_get_start(c->index, c->real_iblock, &page_data_start, &page_data_end);
+	
+	if(((c->rw & CURSOR_FIXED) == 0) && (c->real_ptr < page_data_start)){
+		addr_diff = (page_data_start - c->real_ptr);
+		
+		c->real_addr += addr_diff;
+		c->virt_addr += addr_diff;
+		c->real_ptr  += addr_diff;
+	}
+	
+	if(c->rw & CURSOR_WRITE){
+		dbindex_iblock_wrlock(c->index, c->real_iblock);
+	}else{
+		dbindex_iblock_rdlock(c->index, c->real_iblock);
+	}
+	
+	return c->real_ptr;
+}
+
+// return real_ptr on success, NULL on error
+char* dbindex_vm_cursor_next(vm_cursor *cursor){
+	return dbindex_vm_cursor_seek(cursor, cursor->index->item_size, SEEK_CUR);
+}
+
+// return real_ptr on success, NULL on error
+char *dbindex_vm_cursor_prev(vm_cursor *cursor){
+	//char *real_ptr;
+	char *prev_ptr;
+	
+	//real_ptr = cursor->real_ptr;
+	prev_ptr = dbindex_vm_cursor_seek(cursor, - (unsigned long long)cursor->index->item_size, SEEK_CUR);
+	
+	//if(prev_ptr == real_ptr)
+	//	return NULL;
+	
+	return prev_ptr;
+}
+
+vm_cursor* dbindex_vm_cursor_new(dbindex *index, int type, unsigned long value, int whence){
+	vm_cursor *cursor = (vm_cursor *)zalloc(sizeof(vm_cursor));
+	
+	cursor->base_addr = index->file.data + index->data_offset;
+	cursor->index     = index;
+	cursor->rw        = type;
+	
+	dbindex_vm_cursor_seek(cursor, value, whence);
+	
+	return cursor;
+}
+
+void dbindex_vm_cursor_free(vm_cursor *cursor){
+	if(cursor->real_iblock != 0)
+		dbindex_iblock_unlock(cursor->index, cursor->real_iblock);
+	free(cursor);
+}
+/* }}}1 */
+
+static unsigned int dbindex_vm_search(dbindex *index, vm_cursor **cursor, char *key2_conv){
 	int             cret;
-	unsigned int    page_len;
-	unsigned long   range_elements;
 	unsigned int    ret;
-	unsigned short  iblock_virt;
-	unsigned short  iblock_real;
-	unsigned short  iblock_first_real;
-	char           *item_offset_virt;
-	char           *item_offset_real;
-	char           *file_start;
-	char           *file_end;
-	char           *range_start;
-	char           *range_end;
-	char           *page_data_start;
-	char           *page_data_end;
-	char           *key_conv;
+	vm_cursor      *range_start;
+	vm_cursor      *range_end;
+	vm_cursor      *current;
+	char           *current_ptr;
+	unsigned long   current_addr;
+	unsigned long   range_elements;
+	char           *key1_conv;
 	
-	file_start        = index->file.data + index->data_offset;
-	file_end          = file_start + index->iblock_last * index->page_size;
+	range_start = dbindex_vm_cursor_new(index, CURSOR_READ, 0, SEEK_SET);
+	range_end   = dbindex_vm_cursor_new(index, CURSOR_READ | CURSOR_FIXED, 0, SEEK_END);
 	
-	iblock_first_real = dbindex_vm_virt2real(index, 1);
-	page_len          = dbindex_iblock_get_start(index, iblock_first_real, &page_data_start, &page_data_end);
-	
-	range_start       = file_start + page_len;
-	range_end         = file_end;
-	
-	if(range_start == range_end){
-		*piblock_virt = 1;
-		*piblock_real = 1;
-		*pitem_offset = range_start - index->item_size;
+	if(range_start->virt_addr == range_end->virt_addr){
+		*cursor = range_end;
+		
+		dbindex_vm_cursor_prev(range_end);
+		dbindex_vm_cursor_free(range_start);
 		return 2;
 	}
 	
+	current     = dbindex_vm_cursor_new(index, CURSOR_READ, 0, SEEK_END);
+	//dbindex_vm_cursor_prev(range_end);
+	
 	while(1){
-		range_elements   = (range_end - range_start) / index->item_size;
-		item_offset_virt = range_start + (range_elements / 2) * index->item_size;
+		range_elements = (range_end->virt_addr - range_start->virt_addr) / index->item_size;
+		current_addr   = range_start->virt_addr + (range_elements / 2) * index->item_size;
+		current_ptr    = dbindex_vm_cursor_seek(current, current_addr, SEEK_SET);
 		
-		iblock_virt = ((item_offset_virt - file_start) / index->page_size) + 1;
-		iblock_real = dbindex_vm_virt2real(index, iblock_virt);
-		
-		*piblock_virt = iblock_virt;
-		*piblock_real = iblock_real;
-		
-		item_offset_real = item_offset_virt + (iblock_real - iblock_virt) * index->page_size;
-		
-		ret = dbindex_iblock_get_start(index, iblock_real, &page_data_start, &page_data_end);
-		
-		/*printf("loop1: virt %d <=> real %d | elements: %llx offset: %llx range: %llx-%llx page: %llx-%llx\n",
-			iblock_virt,
-			iblock_real,
+		/*printf("loop: elements: %llx offset: %llx range: %llx-%llx\n",
 			range_elements,
-			item_offset_real - index->file.data,
-			range_start - index->file.data,
-			range_end   - index->file.data,
-			page_data_start - index->file.data,
-			page_data_end - index->file.data
+			current_addr,
+			range_start->virt_addr,
+			range_end->virt_addr
 		);*/
 		
-		if(item_offset_real < page_data_start)
-			item_offset_real = page_data_start; // real elements_count less than virtual
+		key1_conv = index->keyconv(index, current_ptr);
+		cret      = index->cmpfunc(index, key1_conv, key2_conv);
 		
-		key_conv = index->keyconv(index, item_offset_real);
-		
-		cret = index->cmpfunc(index, key_conv, new_key_conv);
 		if(cret == 0){
-			*pitem_offset = item_offset_real;
+			current->query = key2_conv;
+			
+			while(dbindex_search_slide(current, -1) == 0);
+			
+			*cursor = current;
+			
+			dbindex_vm_cursor_free(range_start);
+			dbindex_vm_cursor_free(range_end);
+			
 			return 0;
-		}else if(cret == -2){
-			printf("fatal\n");
-			return -2;
 		}else if(cret < 0){
-			range_end   = item_offset_virt;
-		}else{ // if(ret > 0){
-			range_start = item_offset_virt;
+			dbindex_vm_cursor_seek(range_end,   current_addr, SEEK_SET);
+		}else{
+			dbindex_vm_cursor_seek(range_start, current_addr, SEEK_SET);
 		}
 		
 		if(range_elements <= 1){
-			*pitem_offset = range_end + (iblock_real - iblock_virt) * index->page_size - index->item_size;
+			*cursor = range_end;
 			
-			return (ret == 0) ? 1 : 2;
+			dbindex_vm_cursor_prev(range_end);
+			
+			ret = (range_end->page_len == 0) ? 1 : 2;
+			
+			dbindex_vm_cursor_free(current);
+			dbindex_vm_cursor_free(range_start);
+			
+			return ret;
 		}
 	}
 }
@@ -406,7 +476,7 @@ unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len,
 		return ret;
 	
 	memset(&new_index, 0, sizeof(dbindex));
-
+	
 	unlink(path); // SEC danger
 	
 	dbmap_map(path, &new_index.file);
@@ -667,7 +737,8 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 	char          *item_offset;
 	char          *new_key       = zalloc(index->item_size);
 	char          *key_conv;
-	
+	vm_cursor     *cursor;
+
 	//pthread_rwlock_rdlock(&index->lock);
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
@@ -731,24 +802,24 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 			key_conv = index->keyconv(index, item_key);	
 			
 			/* insert item */
-			cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, key_conv);
+			cret = dbindex_vm_search(index, &cursor, key_conv);
 			if(cret == 0)
 				cret = 2;
 			
-			cret = dbindex_iblock_insert(index, iblock_curr_real, cret, item_offset, item_key);
+			cret = dbindex_iblock_insert(index, cursor->real_iblock, cret, cursor->real_ptr, item_key);
 			if(cret == 1){ // page full
 				char *poped_item;
 				
-				poped_item = dbindex_iblock_pop(index, iblock_curr_real);
+				poped_item = dbindex_iblock_pop(index, cursor->real_iblock);
 				
-				iblock_prev_virt = iblock_curr_virt - 1;
+				iblock_prev_virt = cursor->virt_iblock - 1;
 				iblock_prev_real = dbindex_vm_virt2real(index, iblock_prev_virt);
 				
 				while(1){
 					if(iblock_prev_virt == 0){
 						iblock_new_real = dbindex_iblock_new(index);
 						
-						dbindex_vm_insert_page(index, iblock_curr_virt, iblock_new_real);
+						dbindex_vm_insert_page(index, cursor->real_iblock, iblock_new_real);
 						
 						iblock_prev_real = iblock_new_real;
 					}
@@ -765,15 +836,17 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 					dbindex_iblock_insert(index, iblock_prev_real, 2, page_data_end - index->item_size, poped_item);
 					break;
 				}
-				cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, key_conv);
+				dbindex_vm_cursor_free(cursor);
+				cret = dbindex_vm_search(index, &cursor, key_conv);
 				if(cret == 0)
 					cret = 2;
 				
-				cret = dbindex_iblock_insert(index, iblock_curr_real, cret, item_offset, item_key);
-
+				cret = dbindex_iblock_insert(index, cursor->real_iblock, cret, cursor->real_ptr, item_key);
+				
 				free(poped_item);
 				break;
 			}
+			dbindex_vm_cursor_free(cursor);
 			
 			ret = 0;
 			break;
@@ -820,27 +893,59 @@ unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value){
 						memcpy(item_value, item_offset + index->key_len, index->value_len);
 						ret = 0;
 					}
-
+					
 				dbindex_iblock_unlock(index, iblock_real);
 				dbmap_unlock(&index->file);
-				break;
-			case DBINDEX_TYPE_INDEX:
-				dbmap_lock(&index->file);
-					
-					cret = dbindex_vm_search(index, &iblock_virt, &iblock_real, &item_offset, item_value);
-					if(cret == 0){
-						memcpy(item_key, item_offset, index->key_len);
-						ret = 0;
-					}
-					
-				dbmap_unlock(&index->file);
-				
 				break;
 		}
 	//pthread_rwlock_unlock(&index->lock);
 	
 	free(item_revkey);
 	return ret;
+}
+
+vm_cursor* dbindex_search(dbindex *index, void *query){
+	unsigned int     cret;
+	vm_cursor       *cursor;
+	
+	switch(index->type){
+		case DBINDEX_TYPE_INDEX:
+			dbmap_lock(&index->file);
+				
+				cret = dbindex_vm_search(index, &cursor, query);
+				if(cret != 0){
+					dbindex_vm_cursor_free(cursor);
+					cursor = NULL;
+				}
+				
+			dbmap_unlock(&index->file);	
+			break;
+	}
+	return cursor;
+}
+
+unsigned int dbindex_search_slide(vm_cursor *cursor, int direction){
+	unsigned int  cret;
+	char         *key1_conv;
+	char         *real_ptr;
+	
+	if(direction < 0)
+		real_ptr = cursor->real_ptr - cursor->index->item_size;
+	else
+		real_ptr = cursor->real_ptr + cursor->index->item_size;
+
+	if((key1_conv = cursor->index->keyconv(cursor->index, real_ptr)) == NULL)
+		return 1;
+	
+	if((cret = cursor->index->cmpfunc(cursor->index, key1_conv, cursor->query)) != 0)
+		return 1;
+	
+	if(direction < 0){
+		dbindex_vm_cursor_prev(cursor);
+	}else{
+		dbindex_vm_cursor_next(cursor);
+	}
+	return 0;	
 }
 
 /* dbindex_delete

@@ -37,7 +37,6 @@
 #include <sys/mman.h>
 #include <sys/user.h>
 #include <sys/stat.h>
-#include <linux/mman.h>
 
 #define DATA_BUFFER_SIZE 2048
 #define UDP_READ_BUFFER_SIZE 65536
