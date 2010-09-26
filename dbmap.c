@@ -35,22 +35,28 @@ void dbmap_unlock(dbmap *map){
 	pthread_rwlock_unlock(&map->lock);
 }
 
-unsigned long dbmap_expand(dbmap *map, unsigned long add_size){
+static unsigned long dbmap_resize(dbmap *map, int action, unsigned long size){
 	pthread_rwlock_wrlock(&map->lock);
 
 	unsigned long old_len  = map->data_len;
 	unsigned long old_mlen = map->data_mlen;
-	unsigned long new_len  = old_len + add_size;
+	unsigned long new_len;
+	
+	if(action == 1){
+		new_len  = old_len + size;
+	}else{
+		new_len  = old_len - size;
+	}
 	unsigned long new_mlen = (new_len + 0x1000) & ~0xFFF;
 	
 	int res;
-	res = lseek(map->fd, new_len - 1, SEEK_SET);
-	res = write(map->fd, "", 1);
+	//res = lseek(map->fd, new_len - 1, SEEK_SET);
+	//res = write(map->fd, "", 1);
+	res = ftruncate(map->fd, new_len);
 	
 	if(res == -1){
 		old_len = (unsigned long) -1;
 	}else{
-
 		map->data_len  = new_len;
 		map->data_mlen = new_mlen;
 	
@@ -74,6 +80,13 @@ unsigned long dbmap_expand(dbmap *map, unsigned long add_size){
 	pthread_rwlock_unlock(&map->lock);
 
 	return old_len; // offset to expanded area
+}
+
+unsigned long dbmap_expand(dbmap *map, unsigned long add_size){
+	return dbmap_resize(map, 1, add_size);
+}
+unsigned long dbmap_shrink(dbmap *map, unsigned long shr_size){
+	return dbmap_resize(map, 0, shr_size);
 }
 
 void dbmap_sync(dbmap *map){

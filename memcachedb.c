@@ -89,6 +89,8 @@ int daemon_quit = 0;
 static conn *listen_conn = NULL;
 static struct event_base *main_base;
 
+extern char *optarg;
+
 #define TRANSMIT_COMPLETE   0
 #define TRANSMIT_INCOMPLETE 1
 #define TRANSMIT_SOFT_ERROR 2
@@ -101,7 +103,7 @@ static void settings_init(void) {
     /* By default this string should be NULL for getaddrinfo() */
     settings.inter = NULL;
     settings.item_buf_size = 512;     /* default is 512B */
-    settings.maxconns = 1024;         /* to limit connections-related memory to about 5MB */
+    settings.maxconns = 100;         /* to limit connections-related memory to about 5MB */
     settings.verbose = 0;
     settings.socketpath = NULL;       /* by default, not using a unix socket */
     settings.dbpath     = DBPATH;
@@ -649,6 +651,9 @@ static int ident_parse(char *ident, dbitem *item){
 		
 		item->attribute = strdup(item_attribute);
 		item->table     = db_tables_search(item_attribute);
+	}else{
+		item->attribute = NULL;
+		item->table     = NULL;
 	}
 	item->oid = strtoll(ident, NULL, 10);
 	

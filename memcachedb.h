@@ -85,7 +85,7 @@
 #endif
 
 #define MAX_VERBOSITY_LEVEL 2
-#define DBPATH "/mnt/file/usr/share/db/"
+#define DBPATH "/home/file/data/db_test"
 
 struct settings {
     size_t item_buf_size;

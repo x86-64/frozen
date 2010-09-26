@@ -224,9 +224,9 @@ static unsigned int db_table_query_get(dbitem *item){
 	unsigned long  entry_off;
 	unsigned long  entry_len;
 	unsigned char *entry_ptr;
-
+	
 	dbtable *table = item->table;
-
+	
 	if(dbindex_query(&table->idx_oid, &item->oid, &entry_off) == 0){
 		dbmap_lock(&table->data);
 			// TODO: remove copying item value to memory
@@ -236,9 +236,9 @@ static unsigned int db_table_query_get(dbitem *item){
 			
 			item->data     = malloc(entry_len);	
 			item->data_len = entry_len;
-		
+			
 			data_unpack(table->data_type, entry_ptr, entry_len, item->data);
-
+			
 		dbmap_unlock(&table->data);
 		return 0;
 	}
@@ -252,10 +252,15 @@ static unsigned int db_table_query_delete(dbitem *item){
 	if(dbindex_query(&item->table->idx_oid, &item->oid, &entry_off) == 0){
 		// TODO delete data from data file
 		
-		if(item->table->idx_data.loaded == 1)
-			ret = dbindex_delete(&item->table->idx_data, &item->oid);
-		
-		ret = dbindex_delete(&item->table->idx_oid,  &item->oid);
+		if(item->table->idx_data.loaded == 1){
+			if((ret = dbindex_delete(&item->table->idx_data, &item->oid)) != 0){
+				printf("query_delete failed in data: %x %d\n", item->oid, item->oid);
+				return ret;
+			}
+		}
+		if((ret = dbindex_delete(&item->table->idx_oid,  &item->oid)) != 0){
+			printf("query_delete failed in data: %d\n", item->oid);
+		}
 		
 		return ret;
 	}
@@ -466,8 +471,9 @@ static void* db_keyconv_idx_data(dbindex *index, void *item_key){
 	char               *item_ptr;
 	dbtable            *table        = (dbtable *)index->user_data;
 	
-	if(dbindex_query(&table->idx_oid, item_key, &item_offset) != 0)
+	if(dbindex_query(&table->idx_oid, item_key, &item_offset) != 0){
 		return NULL;
+	}
 	
 	item_ptr = table->data.data + item_offset;
 	
@@ -527,11 +533,13 @@ unsigned long db_query_new(void){
 	return oid_new;
 }
 
-unsigned int db_query_set(dbitem *item){
-	
+unsigned int db_query_set(dbitem *item){	
 	if(settings.verbose > 1)
 		printf("db_query_set\n");
-
+	
+	if(item->table == NULL)
+		return 1;
+	
 	//list_push(&db_write_queue, item);	
 	return db_table_query_set(item);
 }

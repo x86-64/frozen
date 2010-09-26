@@ -80,7 +80,6 @@ unsigned int data_cmp_binary(int data_type, char *data1, char *data2){
 	unsigned long long  item2_data;
 	unsigned int        item1_len;
 	unsigned int        item2_len;
-	unsigned int        cmp_len;
 	
 	switch(data_type){
 		case DATA_TYPE_U8:
@@ -105,26 +104,27 @@ unsigned int data_cmp_binary(int data_type, char *data1, char *data2){
 			else                             { cret =  1; }	
 			break;
 		case DATA_TYPE_STRING:
-			cret = strcmp(data1, data2);
-			if(cret > 0) cret =  1;
-			if(cret < 0) cret = -1;
+			
+			item1_len = strlen(data1);
+			item2_len = strlen(data2);
+	 		     if(item1_len > item2_len){ cret =  1; }
+			else if(item1_len < item2_len){ cret = -1; }
+			else {
+				cret = strcmp(data1, data2);
+				if(cret > 0) cret =  1;
+				if(cret < 0) cret = -1;
+			}
 			break;
 		case DATA_TYPE_BINARY:
 		default:
 			item1_len = *(unsigned int *)data1;
 			item2_len = *(unsigned int *)data2;
-			
-			cmp_len = item1_len;
-			if(item1_len > item2_len)
-				cmp_len = item2_len;
-
-			cret = memcmp((char *)data1 + 4, (char *)data2 + 4, cmp_len);
-			if(cret > 0) cret =  1;
-			if(cret < 0) cret = -1;			
-			if(cret == 0){
-				     if(item1_len == item2_len){ cret =  0; }
-				else if(item1_len <  item2_len){ cret = -1; }
-				else                           { cret =  1; }
+			     if(item1_len > item2_len){ cret =  1; }
+			else if(item1_len < item2_len){ cret = -1; }
+			else {
+				cret = memcmp((char *)data1 + 4, (char *)data2 + 4, item1_len);
+				if(cret > 0) cret =  1;
+				if(cret < 0) cret = -1;			
 			}
 			break;
 	};

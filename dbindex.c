@@ -11,6 +11,7 @@
 // TODO rewrite iblock from unsigned short to structure
 // TODO rewrite code to use vm wrappers
 // TODO rewrite PRIMARY code to use vm wrappers
+// TODO fix binary search http://habrahabr.ru/blogs/algorithm/91605/
 
 /* DBIndex IBlocks {{{1 */
 
@@ -36,7 +37,7 @@ static void dbindex_iblock_lock_free(pthread_rwlock_t **iblock_locks, unsigned s
 
 static void dbindex_iblock_wrlock(dbindex* index, unsigned short iblock){
 	if(iblock > index->iblock_last){
-		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		printf("wrlock, table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
 		return;
 	}
 	pthread_rwlock_wrlock( index->iblock_locks[iblock] );
@@ -44,7 +45,7 @@ static void dbindex_iblock_wrlock(dbindex* index, unsigned short iblock){
 
 static void dbindex_iblock_rdlock(dbindex* index, unsigned short iblock){
 	if(iblock > index->iblock_last){
-		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		printf("rdlock, table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
 		return;
 	}
 	pthread_rwlock_rdlock( index->iblock_locks[iblock] );
@@ -52,7 +53,7 @@ static void dbindex_iblock_rdlock(dbindex* index, unsigned short iblock){
 
 static void dbindex_iblock_unlock(dbindex* index, unsigned short iblock){
 	if(iblock > index->iblock_last){
-		printf("table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
+		printf("unlock, table have broken block count! (%d out of %d)\n", iblock, index->iblock_last);
 		return;
 	}
 	pthread_rwlock_unlock( index->iblock_locks[iblock] );
@@ -334,13 +335,41 @@ static void dbindex_vm_insert_page(dbindex *index, unsigned short iblock_virt, u
 
 static void dbindex_vm_delete_page(dbindex *index, unsigned short iblock_virt){
 	unsigned short *mapping;
-	mapping = &(((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1]);
+	unsigned short  iblock_del_real;
+	unsigned short  iblock_last_virt;
+	char           *iblock_del_start;
+	char           *iblock_last_start;
+
+	if(index->iblock_last == 1) // leave last block
+		return;
+
+	mapping         = &(((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1]);
+	iblock_del_real = *mapping;
 	
 	memmove(
 		mapping,
 		mapping + 1,
 		(0xFFFF - iblock_virt) * sizeof(short)
 	);
+		
+	if(iblock_del_real != index->iblock_last){
+		iblock_last_start = dbindex_iblock_get_page(index, index->iblock_last); 
+		iblock_del_start  = dbindex_iblock_get_page(index, iblock_del_real);
+		
+		memcpy(iblock_del_start, iblock_last_start, index->page_size);
+		
+		mapping = ((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET));
+		
+		for(iblock_last_virt=0; iblock_last_virt<=0xFFFF; iblock_last_virt++){
+			if(mapping[iblock_last_virt] == index->iblock_last){
+				mapping[iblock_last_virt] = iblock_del_real;
+				break;
+			}
+		}
+	}
+	index->iblock_last--;
+	
+	dbmap_shrink(&index->file, index->page_size);
 }
 
 static unsigned int dbindex_vm_item_insert(vm_cursor *cursor, void *data){
@@ -403,6 +432,8 @@ static unsigned int dbindex_vm_item_delete(vm_cursor *cursor){
 	if(ret == cursor->index->page_size){
 		dbindex_vm_delete_page(cursor->index, cursor->virt_iblock);
 	}
+	
+	return 0;
 }
 
 /* }}}1 */
@@ -452,7 +483,7 @@ char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence)
 	}else{
 		dbindex_iblock_rdlock(c->index, c->real_iblock);
 	}
-
+	
 	if(c->real_ptr < page_data_start){
 		if((c->rw & CURSOR_FIXED) == 0){
 			addr_diff = (page_data_start - c->real_ptr);
@@ -460,8 +491,6 @@ char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence)
 			c->real_addr += addr_diff;
 			c->virt_addr += addr_diff;
 			c->real_ptr  += addr_diff;
-		}else{
-			return NULL;
 		}
 	}
 	
@@ -558,8 +587,22 @@ static unsigned int dbindex_vm_search(dbindex *index, vm_cursor **cursor, char *
 			printf("broken page\n");
 			exit(255);
 		}
-
+		
 		key1_conv = index->keyconv(index, current_ptr);
+		
+		if(key1_conv == NULL || key2_conv == NULL){
+			printf("loop: elements: %llx addr: %llx ptr: %llx, range: %llx-%llx\n",
+			range_elements,
+			current_addr,
+			current_ptr - index->file.data,
+			range_start->virt_addr,
+			range_end->virt_addr
+		);		printf("damn data!\n");
+			*cursor = NULL;
+			exit(255);
+			return 0;
+		}
+		
 		cret      = index->cmpfunc(index, key1_conv, key2_conv);
 		
 		if(cret == 0){
@@ -826,8 +869,8 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 			/* prepare item */
 			revmemcpy(new_key, item_key, index->key_len);
 			memcpy(new_key + index->key_len, item_value, index->value_len);	
-
-
+			
+			
 			iblock = dbindex_ipage_get_iblock(index, item_key);
 			if(iblock == 0)
 				iblock = index->iblock_last;
@@ -999,11 +1042,10 @@ unsigned int dbindex_search_slide(vm_cursor *cursor, int direction){
 unsigned int dbindex_delete(dbindex *index, void *item_key){
 	short            iblock;
 	unsigned int     ret = 1;
-	char            *item_revkey = malloc(index->key_len);
 	char            *item_offset;
 	char            *key_conv;
 	vm_cursor       *cursor;
-
+	
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
 			iblock = dbindex_ipage_get_iblock(index, item_key);
@@ -1012,13 +1054,15 @@ unsigned int dbindex_delete(dbindex *index, void *item_key){
 			
 			dbmap_lock(&index->file);
 			dbindex_iblock_wrlock(index, iblock);
-
+				
+				char  *item_revkey = malloc(index->key_len);
 				revmemcpy(item_revkey, item_key, index->key_len);
 				if(dbindex_iblock_search(index, iblock, &item_offset, item_revkey) == 0){
 					dbindex_iblock_delete(index, iblock, item_offset);
 					
 					ret = 0;
 				}
+				free(item_revkey);
 				
 			dbindex_iblock_unlock(index, iblock);
 			dbmap_unlock(&index->file);
@@ -1028,8 +1072,10 @@ unsigned int dbindex_delete(dbindex *index, void *item_key){
 			
 			if( (cursor = dbindex_search(index, key_conv)) != NULL){
 				do {
-					ret = dbindex_vm_item_delete(cursor);
-					
+					if(memcmp(item_key, cursor->real_ptr, index->key_len) == 0){
+						ret = dbindex_vm_item_delete(cursor);
+						break;
+					}
 				}while(dbindex_search_slide(cursor, 1) == 0);
 				
 				dbindex_vm_cursor_free(cursor);
@@ -1037,7 +1083,6 @@ unsigned int dbindex_delete(dbindex *index, void *item_key){
 			break;
 	};
 	
-	free(item_revkey);
 	return ret;
 }
 

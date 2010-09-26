@@ -12,5 +12,6 @@ void           dbmap_lock(dbmap *map);
 void           dbmap_unlock(dbmap *map);
 void           dbmap_sync(dbmap *map);
 unsigned long  dbmap_expand(dbmap *map, unsigned long add_size);
+unsigned long  dbmap_shrink(dbmap *map, unsigned long shr_size);
 void           dbmap_unmap(dbmap *map);
 
