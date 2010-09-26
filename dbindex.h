@@ -39,13 +39,13 @@ struct dbindex_ {
 	0x00020040: undef  : data
 */
 
-void dbindex_create(char *path, unsigned int type, unsigned int key_len, unsigned int value_len);
+unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len, unsigned int value_len);
 void dbindex_load(char *path, dbindex *index);
 void dbindex_save(dbindex *index);
 void dbindex_unload(dbindex *index);
 short dbindex_ipage_get_iblock(dbindex* index, void *item_key);
 void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short iblock);
-void dbindex_insert(dbindex *index, void *item_key, void *item_value);
+unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_delete(dbindex *index, void *item_key);
 

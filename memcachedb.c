@@ -657,7 +657,7 @@ static void process_test_command(conn *c, token_t *tokens, size_t ntokens){
 }
 
 static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
-	int      need_end  = 0;
+	int      ret;
 	token_t *key_token = &tokens[KEY_TOKEN];
 	
 	do {
@@ -669,7 +669,6 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 			sprintf((char *)&item_data, "%ld", oid_new);
 
 			item_output(c, key_token->value, (char *)&item_data, strlen(item_data)); 
-			need_end = 1;
 			break;
 		}
 
@@ -678,30 +677,30 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 			out_string(c, "SERVER_ERROR insufficient memory");
 			return;
 		}
-
+		
 		if(ident_parse(key_token->value, item_new) == 0){
 			out_string(c, "CLIENT_ERROR wrong syntax");
 			dbitem_free(item_new);
 			return;
 		}
 		
-		int ret = db_query_get(item_new);
+		if(index(key_token->value, '?') == key_token->value){
+			ret = db_query_search(item_new);
+		}else{
+			ret = db_query_get(item_new);
+		}
 		if(ret == 0){
 			item_output(c, key_token->value, item_new->data, item_new->data_len);
-		}	
-		need_end = 1;
-		//dbitem_free(item_new);
+		}
 		
 		c->item = item_new;
 	}while(0);
 	
-	if(need_end == 1){
-		if(add_iov(c, "END\r\n", 5) != 0){
-			out_string(c, "SERVER_ERROR memory problems");
-		}else{
-			conn_set_state(c, conn_mwrite);
-			//c->msgcurr = 0;
-		}
+	if(add_iov(c, "END\r\n", 5) != 0){
+		out_string(c, "SERVER_ERROR memory problems");
+	}else{
+		conn_set_state(c, conn_mwrite);
+		//c->msgcurr = 0;
 	}
 }	
 
@@ -742,12 +741,17 @@ static void process_set_command(conn *c, token_t *tokens, size_t ntokens){
 }
 
 static void process_set_command_complete(conn *c){
+	unsigned int res;
 	dbitem *item = c->item;
 
 	item->data[item->data_len] = '\0'; // coz client can cheat with \r\n
 
-	db_query_set(item);
-	out_string(c, "STORED");
+	res = db_query_set(item);
+	if(res == 0){
+		out_string(c, "STORED");
+	}else{
+		out_string(c, "SERVER_ERROR");
+	}
 }
 
 static void process_delete_command(conn *c, token_t *tokens, size_t ntokens){

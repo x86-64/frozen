@@ -19,6 +19,7 @@ static void* db_iter_table_search(void *table, void *name, void *addr);
 static void* db_iter_query_delete_oid(void *table, void *oid, void *null);
 
 // TODO: test 1-4 pack_types
+// TODO: test all!
 
 /* PRIVATE FUNCTIONS */
 
@@ -73,6 +74,7 @@ static void db_table_settings_load(dbtable *table){
 /* }}}2 */
 
 static dbtable* db_table_load(char *name){
+	unsigned int res;
 	dbtable     *table = NULL;
 	struct stat  index_stat;
 
@@ -99,8 +101,12 @@ static dbtable* db_table_load(char *name){
 	char *apath_idx_oid = db_abspath(name, "idx0"); 
 	
 	if(stat(apath_idx_oid, &index_stat) != 0){
-		dbindex_create(apath_idx_oid, DBINDEX_TYPE_PRIMARY, 4, 8);
+		res = dbindex_create(apath_idx_oid, DBINDEX_TYPE_PRIMARY, 4, 8);
+		if(res == 1){
+			// TODO error handling
+		}
 	}
+	
 	dbindex_load(apath_idx_oid, &table->idx_oid);
 	free(apath_idx_oid);
 
@@ -108,6 +114,7 @@ static dbtable* db_table_load(char *name){
 	list_push(&db_tables, table);
 	if(settings.verbose > 1)
 		printf("table '%s' loaded\n", name);
+	
 	return table;
 }
 
@@ -134,6 +141,26 @@ static void db_table_unload_by_name(char *name){
 
 /* }}}1 */
 
+static void dbitem_append(dbitem *item, void *data, unsigned long data_len){
+	unsigned long  need_len;
+	char          *info;
+	
+	need_len = data_len + 2;
+
+	if(item->data == NULL){
+		item->data_len  = need_len;
+		item->data      = malloc(need_len);
+		info            = item->data;
+	}else{
+		item->data      = realloc(item->data, item->data_len + need_len);
+		info            = item->data + item->data_len;
+		item->data_len += need_len;
+	}
+	memcpy(info, data, data_len);
+	info[need_len - 1] = '\n';
+	info[need_len - 2] = '\r';
+}
+
 dbtable* db_tables_search(char *name){
 	if(settings.verbose > 1)
 		printf("db_tables_search\n");
@@ -147,12 +174,13 @@ dbtable* db_tables_search(char *name){
 	return db_table_load(name);
 }
 
-static void db_table_query_set(dbitem *item){
+static unsigned int db_table_query_set(dbitem *item){
 	dbtable *table = item->table;
 	
 	char          *entry_ptr;
 	unsigned long  entry_off;
 	unsigned int   entry_len;
+	
 	switch(table->pack_type){
 		case 1:  entry_len = 1; break;                      // byte
 		case 2:  entry_len = 4; break;                      // u32
@@ -164,7 +192,11 @@ static void db_table_query_set(dbitem *item){
 	
 	//if search free space failed
 	entry_off = dbmap_expand(&table->data, entry_len);
-	
+
+	if(entry_off == -1){
+		return 1; // error
+	}
+
 	dbmap_lock(&table->data);
 		unsigned long long data_ll = 0;
 			
@@ -189,8 +221,8 @@ static void db_table_query_set(dbitem *item){
 	
 	if(settings.verbose > 1)
 		printf("oid: %ld off: %ld\n", item->oid, entry_off);
-	dbindex_insert(&table->idx_oid, &item->oid, &entry_off);
 	
+	return dbindex_insert(&table->idx_oid, &item->oid, &entry_off);
 }
 
 static unsigned int db_table_query_isset(dbitem *item){
@@ -414,25 +446,24 @@ static void* db_iter_query_get_oid(void *ptable, void *pitem, void *null){
 	ret = db_table_query_isset(item);
 	
 	if(ret == 0){
-		unsigned int  need_len = strlen(table->name) + 2;
-		char         *info;
-		
-		if(item->data == NULL){
-			item->data_len  = need_len;
-			item->data      = malloc(need_len);
-			info            = item->data;
-		}else{
-			item->data      = realloc(item->data, item->data_len + need_len);
-			info            = item->data + item->data_len;
-			item->data_len += need_len;
-		}
-		strcpy(info, table->name);
-		info[need_len - 1] = '\n';
-		info[need_len - 2] = '\r';
+		dbitem_append(item, table->name, strlen(table->name));
 	}
 	
 	return (void *)1;
 }
+
+static void* db_iter_query_search(void *item_key, void *item_value, void *pitem){
+	dbitem *item = (dbitem *)pitem;
+	char   *info = malloc(30);
+
+	sprintf(info, "%u", *(unsigned int *)item_key);
+	
+	dbitem_append(item, info, strlen(info));
+	
+	free(info);
+	return (void *)1;
+}
+
 /* }}}1 */
 
 /* PUBLIC FUNCTIONS */
@@ -469,8 +500,7 @@ unsigned int db_query_set(dbitem *item){
 		printf("db_query_set\n");
 
 	//list_push(&db_write_queue, item);	
-	db_table_query_set(item);
-	return 0;
+	return db_table_query_set(item);
 }
 
 unsigned int db_query_get(dbitem *item){
@@ -495,6 +525,15 @@ unsigned int db_query_delete(dbitem *item){
 	}else{
 		return db_table_query_delete(item);
 	}
+}
+
+unsigned int db_query_search(dbitem *item){
+	if(settings.verbose > 1)
+		printf("db_query_search\n");
+	
+	// lookup other indexes
+
+	dbindex_search(&item->table->idx_oid, &db_iter_query_search, item);
 }
 
 /* }}}1 */

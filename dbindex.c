@@ -83,7 +83,6 @@ static void  dbindex_iblock_set_start(dbindex *index, unsigned short iblock, uns
 */
 
 static int   dbindex_iblock_search(dbindex *index, unsigned short iblock, char **pitem_offset, char *new_key){
-	// TODO remake with binary search
 	unsigned int  ret;
 	char         *item_offset;
 	char         *page_data_start;
@@ -104,21 +103,31 @@ static int   dbindex_iblock_search(dbindex *index, unsigned short iblock, char *
 		}
 		item_offset += index->item_size;
 	}
+	item_offset -= index->item_size;
 	*/
-	
+
 	/* binary search */
 	char          *range_start = page_data_start;
 	char          *range_end   = page_data_end;
 	unsigned long  range_elements;
 	int            cret;
+	
+	if(range_start == range_end){
+		*pitem_offset = range_end - index->item_size;
+		return 2;
+	}
 
 	while(1){
 		range_elements = (range_end - range_start) / index->item_size;
-		item_offset = range_start + (range_elements / 2) * index->item_size;
-		
-		if(range_elements == 0)
-			break;
-		
+		item_offset    = range_start + (range_elements / 2) * index->item_size;
+	/*	
+		printf("loop %llx %llx %llx-%llx\n",
+			range_elements,
+			item_offset - index->file.data,
+			range_start - index->file.data,
+			range_end   - index->file.data
+		);*/
+
 		cret = memcmp(item_offset, new_key, index->key_len);
 		if(cret == 0){
 			*pitem_offset = item_offset;
@@ -128,21 +137,28 @@ static int   dbindex_iblock_search(dbindex *index, unsigned short iblock, char *
 		}else{ // if(ret > 0){
 			range_start = item_offset;
 		}
+		
+		if(range_elements == 1){
+			*pitem_offset = range_end - index->item_size;
+			
+			return (ret == 0) ? 1 : 2;
+		}
 	}
-	
-	*pitem_offset = item_offset - index->item_size;
-	
-	return (ret == 0) ? 1 : 2;
 }
 
-static short dbindex_iblock_new(dbindex *index){
-	short  iblock;
-	char  *iblock_offset;
+static unsigned short dbindex_iblock_new(dbindex *index){
+	unsigned short  iblock;
+	char           *iblock_offset;
+	unsigned long   ret;
 	
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
 			
-			dbmap_expand(&index->file, index->page_size);
+			ret = dbmap_expand(&index->file, index->page_size);
+			if(ret == -1){
+				return 0; //error
+			}
+
 			iblock = ++index->iblock_last;
 			
 			dbindex_iblock_init_start (index, iblock, index->page_size);
@@ -153,7 +169,7 @@ static short dbindex_iblock_new(dbindex *index){
 	return iblock;
 }
 
-static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *item_key, void *item_value){
+static unsigned short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *item_key, void *item_value){
 	// if have free space - write
 	// if dont have free space - get all our elements, alloc new page and write it
 	
@@ -166,13 +182,10 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 	memcpy(new_key + index->key_len, item_value, index->value_len);	
 
 	bool item_written = false;
-	
-	if(settings.verbose > 1)
-		printf("dbindex_iblock_insert(%ld)\n", iblock);
 
 	dbmap_lock(&index->file);
 		dbindex_iblock_wrlock(index, iblock);
-
+	
 			ret = dbindex_iblock_search(index, iblock, &item_offset, new_key);
 			if(ret == 0){
 				// found existing item
@@ -182,14 +195,15 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 				// insert ne
 				char *page_data_start;
 				char *page_data_end;
-				char *page_data_start_new;
-	
+				
 				dbindex_iblock_get_start(index, iblock, &page_data_start, &page_data_end);
-	
-				page_data_start_new = page_data_start - index->item_size;
-	
+				
 				if(item_offset >= page_data_start)
-					memcpy(page_data_start_new, page_data_start, item_offset - page_data_start + index->item_size);
+					memcpy(
+						page_data_start - index->item_size,
+						page_data_start,
+						item_offset - page_data_start + index->item_size
+					);
 				
 				memcpy(item_offset, new_key, index->item_size);
 				
@@ -201,57 +215,91 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 	dbmap_unlock(&index->file);
 
 	if(item_written == false){
-		short  iblock_new = dbindex_iblock_new(index);
+		unsigned short iblock_new = dbindex_iblock_new(index);
 		
+		if(iblock_new == 0){
+			free(new_key);
+			return 0;
+		}
+
 		dbmap_lock(&index->file);
 		dbindex_iblock_wrlock(index, iblock_new);
 		dbindex_iblock_rdlock(index, iblock);
 
 			dbindex_iblock_search(index, iblock, &item_offset, new_key); // rerun search, map can be moved
-		
+			
+			int    no_our_elements = 0;
 			char  *our_elements_start;
 			char  *our_elements_end;
 			char  *our_element         = zalloc(index->item_size);
 				
 			our_element[0] = new_key[0];
 			our_element[1] = new_key[1];
-			dbindex_iblock_search(index, iblock, &our_elements_end, our_element);
+			if(dbindex_iblock_search(index, iblock, &our_elements_end, our_element) != 0){
+				// end not match
+				//our_elements_end -= index->item_size;
+				if(memcmp(our_element, our_elements_end, 2) == 0){
+					// but end exist
+				}else{
+					no_our_elements = 1;
+				}
+			}
+			
 			our_element[2] = (char)0xFF;
 			our_element[3] = (char)0xFF;
-			dbindex_iblock_search(index, iblock, &our_elements_start, our_element);
-			our_elements_start += index->item_size;
-			our_elements_end   += index->item_size;
-			item_offset        += index->item_size;
-					
+			if(dbindex_iblock_search(index, iblock, &our_elements_start, our_element) != 0){
+				our_elements_start += index->item_size;
+				if(memcmp(our_element, our_elements_start, 2) == 0){
+					// but start exist
+				}else{
+					no_our_elements = 1;
+				}
+			}
+			
 			free(our_element);
-	
+			
+			if(no_our_elements == 1){
+				our_elements_end   = item_offset;
+				our_elements_start = item_offset + index->item_size;
+			}
+
 			unsigned int  iblock_free_len;
 			char         *iblock_data_start;
 			char         *iblock_data_end;
 			char         *iblock_new_data_start;
 			char         *iblock_new_data_end;
-		
-			iblock_free_len = dbindex_iblock_get_start(index, iblock, &iblock_data_start, &iblock_data_end);
+			
+			iblock_free_len = dbindex_iblock_get_start(index, iblock,     &iblock_data_start,     &iblock_data_end);
 					  dbindex_iblock_get_start(index, iblock_new, &iblock_new_data_start, &iblock_new_data_end);
-
-			unsigned long  new_items_p2_len = (our_elements_end - item_offset);
-			unsigned long  new_items_p1_len = (item_offset - our_elements_start);
+			
+			unsigned long  new_items_p2_len = (our_elements_end - item_offset   );
+			unsigned long  new_items_p1_len = (item_offset - our_elements_start + index->item_size);
 			unsigned long  new_items_len    = new_items_p1_len + new_items_p2_len;
 			char          *new_items_p2_pos = iblock_new_data_end - new_items_p2_len;
 			char          *new_items_i_pos  = new_items_p2_pos    - index->item_size;
 			char          *new_items_p1_pos = new_items_i_pos     - new_items_p1_len;
 			
+			/*
+			printf("copy; key: %.8llx %llx our elements: %llx-%llx item_offset: %llx len: p1 %llx p2 %llx \n",
+				*(unsigned int *)new_key,
+				no_our_elements,
+				our_elements_start - index->file.data,
+				our_elements_end   - index->file.data,
+				item_offset        - index->file.data,
+				new_items_p1_len,
+				new_items_p2_len
+			);*/
 			
 			/* copy our elements to new page */
 			if(new_items_p1_len > 0)
 				memcpy(new_items_p1_pos, our_elements_start, new_items_p1_len);
 			memcpy(new_items_i_pos, new_key, index->item_size);
 			if(new_items_p2_len > 0)
-				memcpy(new_items_p2_pos, item_offset, new_items_p2_len);
+				memcpy(new_items_p2_pos, item_offset + index->item_size, new_items_p2_len);
 			
 			/* set correct page length */
 			dbindex_iblock_set_start(index, iblock_new, new_items_len + index->item_size);
-		
+			
 			/* set corrent iblock */
 			iblock_final = iblock_new;
 			
@@ -278,43 +326,62 @@ static short dbindex_iblock_insert(dbindex *index, unsigned short iblock, void *
 }
 
 
-static void dbindex_expand(dbindex *index, unsigned long need_len){
+static unsigned long dbindex_expand(dbindex *index, unsigned long need_len){
 	if(index->file.data_len < need_len){
-		dbmap_expand(&index->file, need_len - index->file.data_len);
+		return dbmap_expand(&index->file, need_len - index->file.data_len);
 	}
+	return 1;
 }
 
-void dbindex_create(char *path, unsigned int type, unsigned int key_len, unsigned int value_len){
-	dbindex new_index;
+unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len, unsigned int value_len){
+	unsigned long  res;
+	unsigned int   ret = 1;
+	unsigned short iblock;
+	dbindex        new_index;
 		
 	if(key_len <= 2)
-		return;
+		return ret;
 	
 	memset(&new_index, 0, sizeof(dbindex));
 
 	unlink(path); // SEC dangerous
 	
 	dbmap_map(path, &new_index.file);
-	dbindex_expand(&new_index, DBINDEX_DATA_OFFSET);
 	
-	new_index.type      = type;
-	new_index.item_size = key_len + value_len;
-	new_index.key_len   = key_len;
-	new_index.value_len = value_len;
-	new_index.page_size = (1 << (key_len - 2) * 8) * (key_len + value_len);
+	res = dbindex_expand(&new_index, DBINDEX_DATA_OFFSET);
+	if(res != -1){
+		new_index.type      = type;
+		new_index.item_size = key_len + value_len;
+		new_index.key_len   = key_len;
+		new_index.value_len = value_len;
+		new_index.page_size = (1 << (key_len - 2) * 8) * (key_len + value_len);
+		
+		int switch_ok = 0;
+		switch(type){
+			case DBINDEX_TYPE_PRIMARY:
+				new_index.data_offset = DBINDEX_DATA_OFFSET + 0x20000;
+				new_index.iblock_last = 0;
+				
+				res = dbindex_expand(&new_index, DBINDEX_DATA_OFFSET + 0x20000);
+				if(res == -1)
+					break;
+				
+				iblock = dbindex_iblock_new(&new_index);
+				if(iblock == 0)
+					break;
 
-	switch(type){
-		case DBINDEX_TYPE_PRIMARY:
-			new_index.data_offset = DBINDEX_DATA_OFFSET + 0x20000;
-			new_index.iblock_last = 0;
-
-			dbindex_expand(&new_index, DBINDEX_DATA_OFFSET + 0x20000);
-			dbindex_iblock_new(&new_index);
-			break;
-	};
-	memcpy(new_index.file.data, &new_index, DBINDEX_SETTINGS_LEN);
-	
+				switch_ok = 1;
+				break;
+		};
+		if(switch_ok == 1){
+			memcpy(new_index.file.data, &new_index, DBINDEX_SETTINGS_LEN);
+			
+			ret = 0;
+		}
+	}
 	dbmap_unmap(&new_index.file);
+	
+	return ret;
 }
 
 void dbindex_load(char *path, dbindex *index){
@@ -474,7 +541,7 @@ void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short ibl
 }
 /* }}}1 */
 
-void dbindex_insert(dbindex *index, void *item_key, void *item_value){
+unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 	unsigned short iblock;
 	unsigned short iblock_new;
 
@@ -489,11 +556,14 @@ void dbindex_insert(dbindex *index, void *item_key, void *item_value){
 					iblock = index->iblock_last;
 				
 				iblock_new = dbindex_iblock_insert(index, iblock, item_key, item_value);
-				
+				if(iblock_new == 0)
+					return 1; //error
+
 				dbindex_ipage_set_iblock(index, item_key, iblock_new);
 			break;
 		};
 	//pthread_rwlock_unlock(&index->lock);
+	return 0;
 }
 
 
@@ -588,3 +658,41 @@ unsigned int dbindex_delete(dbindex *index, void *item_key){
 	free(item_revkey);
 	return ret;
 }
+
+unsigned int dbindex_search(dbindex *index, void *(*func)(void *, void *, void *), void *arg){
+	unsigned short iblock;
+	unsigned int   ret;
+	unsigned int   stop = 0;
+	char          *item_offset;
+	char          *page_data_start;
+	char          *page_data_end;
+	char          *new_key = malloc(index->item_size);
+
+	dbmap_lock(&index->file);
+	
+	iblock = 1;
+	while(iblock <= index->iblock_last && stop == 0){
+		dbindex_iblock_rdlock(index, iblock);
+			
+			ret = dbindex_iblock_get_start(index, iblock, &page_data_start, &page_data_end);
+			
+			item_offset = page_data_start;
+			while(item_offset < page_data_end){
+				revmemcpy(new_key, item_offset, index->key_len);
+
+				if(func(new_key, (item_offset + index->key_len), arg) == NULL){
+					stop = 1;
+					break;
+				}
+
+				item_offset += index->item_size;
+			}
+		dbindex_iblock_unlock(index, iblock);
+		iblock++;
+	}
+	
+	dbmap_unlock(&index->file);
+	
+	free(new_key);
+}
+

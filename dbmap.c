@@ -38,30 +38,37 @@ unsigned long dbmap_expand(dbmap *map, unsigned long add_size){
 
 	unsigned long old_len  = map->data_len;
 	unsigned long old_mlen = map->data_mlen;
-
-	map->data_len   = old_len + add_size;
-	map->data_mlen  = (map->data_len + 0x1000) & ~0xFFF;
+	unsigned long new_len  = old_len + add_size;
+	unsigned long new_mlen = (new_len + 0x1000) & ~0xFFF;
 	
 	int res;
-	lseek(map->fd, map->data_len - 1, SEEK_SET);
+	res = lseek(map->fd, new_len - 1, SEEK_SET);
 	res = write(map->fd, "", 1);
+	
+	if(res == -1){
+		old_len = (unsigned long) -1;
+	}else{
 
-	if(old_mlen != map->data_mlen){
-		char *ret;
-		
-		// not work :(
-		//ret = mremap(map->data, old_mlen, map->data_mlen, MREMAP_MAYMOVE);
-		
-		msync  (map->data, old_mlen, MS_SYNC);
-		munmap (map->data, old_mlen);
-		ret = mmap(0, map->data_mlen, PROT_READ | PROT_WRITE, MAP_SHARED, map->fd, 0);
-		if(ret == MAP_FAILED){
-			perror("expandfile: mremap");
-			exit(EXIT_FAILURE);
+		map->data_len  = new_len;
+		map->data_mlen = new_mlen;
+	
+		if(old_mlen != new_mlen){
+			char *ret;
+			
+			// not work :(
+			//ret = mremap(map->data, old_mlen, map->data_mlen, MREMAP_MAYMOVE);
+			
+			msync  (map->data, old_mlen, MS_SYNC);
+			munmap (map->data, old_mlen);
+			ret = mmap(0, map->data_mlen, PROT_READ | PROT_WRITE, MAP_SHARED, map->fd, 0);
+			if(ret == MAP_FAILED){
+				perror("expandfile: mremap");
+				exit(EXIT_FAILURE);
+			}
+			map->data = (char *)ret;
 		}
-		map->data = (char *)ret;
 	}
-
+	
 	pthread_rwlock_unlock(&map->lock);
 
 	return old_len; // offset to expanded area
