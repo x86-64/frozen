@@ -2,6 +2,8 @@
 #include <config.h>
 #endif
 
+#define _inline  extern inline
+
 /* Standart libraries */
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,9 +19,11 @@
 /* Own headers */
 #include <list.h>
 #include <settings.h>
+#include <structs.h>
 #include <buffer.h>
-
+#include <structs_buffer.h>
 
 /* Global variables */
 extern setting_t *global_settings;
+
 

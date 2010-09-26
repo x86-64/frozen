@@ -1,7 +1,7 @@
 #include <libfrozen.h>
 #include <backend.h>
 
-/* this module is only for development */
+/* this module must be used only as example */
 
 static int null_init(chain_t *chain){
 	return 0;

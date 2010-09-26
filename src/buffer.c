@@ -10,18 +10,6 @@ void *      chunk_alloc (size_t size){
 	
 	return (void *)(chunk + 1);
 }
-
-size_t      chunk_get_size(void *chunk){
-	return ( ((chunk_t *)chunk) - 1)->size;
-}
-
-void *      chunk_next  (void *chunk){
-	return ( ((chunk_t *)chunk) - 1)->next;
-}
-
-void        chunk_free  (void *chunk){
-	free( ((chunk_t *)chunk) - 1);
-}
 /* }}}1 */
 /* buffers - public {{{1 */
 void        buffer_init    (buffer_t *buffer){
@@ -57,6 +45,17 @@ void        buffer_free    (buffer_t *buffer){
 	free(buffer);
 }
 
+buffer_t *  buffer_from_data(void *data, size_t data_size){
+	buffer_t *buffer = buffer_alloc();
+	void     *chunk  = chunk_alloc(data_size);
+	
+	memcpy(chunk, data, data_size);
+	
+	buffer_add_tail_chunk(buffer, chunk);
+	
+	return buffer;
+}
+
 void        buffer_add_head_chunk (buffer_t *buffer, void *chunk){
 	size_t size = chunk_get_size(chunk);
 	buffer->size += size;
@@ -79,6 +78,20 @@ void        buffer_add_tail_chunk (buffer_t *buffer, void *chunk){
 		((chunk_t *)buffer->tail - 1)->next = chunk;
 	}
 	buffer->tail = chunk;
+}
+
+void *      buffer_add_new_head_chunk  (buffer_t *buffer, size_t size){
+	void *chunk = chunk_alloc(size);
+	
+	buffer_add_head_chunk(buffer, chunk);
+	return chunk;
+}
+
+void *      buffer_add_new_tail_chunk  (buffer_t *buffer, size_t size){
+	void *chunk = chunk_alloc(size);
+	
+	buffer_add_tail_chunk(buffer, chunk);
+	return chunk;
 }
 
 int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
@@ -110,43 +123,4 @@ int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
 	}
 	return ret;
 }
-
-size_t      buffer_get_size       (buffer_t *buffer){
-	return buffer->size;
-}
-
-void *      buffer_get_first_chunk(buffer_t *buffer){
-	return buffer->head;
-}
-/*
-buffer_t *  buffer_prealloced(size_t data_size){
-	buffer_t *buffer = buffer_alloc();
-	void     *chunk  = chunk_alloc(data_size);
-
-	return buffer;
-}*/
-
-buffer_t *  buffer_from_data(void *data, size_t data_size){
-	buffer_t *buffer = buffer_alloc();
-	void     *chunk  = chunk_alloc(data_size);
-	
-	memcpy(chunk, data, data_size);
-	
-	buffer_add_tail_chunk(buffer, chunk);
-	
-	return buffer;
-}
-/*
-int         buffer_cmp(buffer_t *buffer1, buffer_t *buffer2){
-	void *chunk1 = buffer_get_first_chunk(buffer1);
-	void *chunk2 = buffer_get_first_chunk(buffer2);
-	size_t chunk1_size = chunk_get_size(chunk1);
-	size_t chunk2_size = chunk_get_size(chunk2);
-	size_t size;
-	
-	size = (chunk1_size > chunk2_size) ? chunk2_size : chunk1_size;
-	
-	return memcmp(chunk1, chunk2, size);
-}*/
-
 /* }}}1 */

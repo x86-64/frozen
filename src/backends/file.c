@@ -1,9 +1,6 @@
 #include <libfrozen.h>
 #include <backend.h>
 
-// TODO read\write error handling
-// TODO crazy logic in file_move, can rewrite?
-
 typedef struct file_user_data {
 	char *           path;
 	int              handle;
@@ -31,7 +28,7 @@ static int file_destroy(chain_t *chain){
 	if(data->path){
 		// was inited
 		// TODO rewrite condition
-
+		
 		free(data->path);
 		close(data->handle);
 		pthread_mutex_destroy(&(data->create_lock));
@@ -128,40 +125,39 @@ static int file_create(chain_t *chain, void *key, size_t value_size){
 static int file_set(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int      fd;
 	ssize_t  ret;
-	void    *chunk;
-
+	
 	fd = ((file_user_data *)chain->user_data)->handle;
 	
-	chunk = buffer_get_first_chunk(value);
-	// TODO length check
-	// TODO writing chain of chunks
-
 redo:
-	ret = pwrite(fd, chunk, value_size, *(off_t *)key);
-	if(ret == -1 || ret != value_size){
-		if(errno == EINTR) goto redo;
-		return -errno;
-	}
-	
+	buffer_read(value, value_size,
+		do{
+			ret = pwrite(fd, chunk, size, *(off_t *)key + offset);
+			if(ret == -1 || ret != value_size){
+				if(errno == EINTR) goto redo;
+				return -errno;
+			}
+		}while(0)
+	);
+
 	return 0;
 }
 
 static int file_get(chain_t *chain, void *key, buffer_t *value, size_t value_size){
 	int      fd;
 	ssize_t  ret;
-	void    *chunk;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
 	
-	chunk = chunk_alloc(value_size);
-	buffer_add_tail_chunk(value, chunk);
-	
 redo:
-	ret = pread(fd, chunk, value_size, *(off_t *)key);
-	if(ret == -1 || ret != value_size){
-		if(errno == EINTR) goto redo;
-		return -errno;
-	}
+	buffer_write(value, value_size,
+		do{
+			ret = pread(fd, chunk, size, *(off_t *)key + offset);
+			if(ret == -1 || ret != value_size){
+				if(errno == EINTR) goto redo;
+				return -errno;
+			}
+		}while(0)
+	);
 	
 	return 0;
 }

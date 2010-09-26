@@ -7,6 +7,7 @@ libfrozen_la_LDFLAGS= -module -avoid-version
 libfrozen_la_SOURCES= 	libfrozen.c libfrozen.h \
 			list.c      list.h      \
 			buffer.c    buffer.h    \
+			structs.c   structs.h   \
 			settings.c  settings.h  \
 			$(backends_sources)     \
 			backend.c   backend.h
