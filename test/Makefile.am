@@ -1,9 +1,9 @@
-tests_planned=test_backend_file.c test_backend.c 
+tests_planned=test_backend_file.c test_settings.c test_backend.c 
 
-TESTS               = check_main
-check_PROGRAMS      = check_main
-check_main_LDADD    = -lcheck $(top_builddir)/src/libfrozen.la
-check_main_SOURCES  =  	$(tests_planned)                  \
-			check_main.c check_main.h         \
+TESTS          = test
+check_PROGRAMS = test
+test_LDADD     = -lcheck $(top_builddir)/src/libfrozen.la
+test_SOURCES   =  	$(tests_planned)                  \
+			test.c test.h                     \
 			$(top_builddir)/src/libfrozen.h
 

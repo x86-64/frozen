@@ -1,4 +1,4 @@
-#include <check_main.h>
+#include <test.h>
 
 Suite *s;
 TCase *tc_core;

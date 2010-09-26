@@ -1,6 +1,6 @@
 #include "../src/libfrozen.h"
 #include "../src/backend.h"
-#include "check_main.h"
+#include "test.h"
 
 int chains_registred = 0;
 void * chain_callb(void *arg, void *null1, void *null2){

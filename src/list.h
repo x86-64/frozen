@@ -1,3 +1,7 @@
+#ifndef LIST_H
+#define LIST_H
+
+#include <errno.h>
 #include <pthread.h>
 #include <malloc.h>
 
@@ -14,9 +18,15 @@ struct list_ {
 	pthread_mutex_t   lock;
 };
 
-void  list_init(list *clist);
-void  list_push(list *clist, void *item);
-void* list_pop(list *clist);
-void  list_iter(list *clist, void *(*func)(void *, void *, void *), void *arg1, void *arg2);
-void  list_unlink(list *clist, void *item);
+typedef  void * (*iter_callback)(void *, void *, void *);
 
+#define ITER_CONTINUE 1
+#define ITER_BREAK    0
+
+void  list_init   (list *clist);
+void  list_push   (list *clist, void *item);
+void* list_pop    (list *clist);
+void  list_iter   (list *clist, iter_callback func, void *arg1, void *arg2);
+int   list_unlink (list *clist, void *item);
+
+#endif // LIST_H
