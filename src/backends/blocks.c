@@ -124,7 +124,10 @@ static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_o
 		(size_t)       ( sizeof(off_t)    )
 	);
 } // }}}
-static ssize_t   real_copy          (blocks_user_data *data, off_t from, off_t to, size_t size){ // {{{
+static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t to, size_t size){ // {{{
+	if(size == 0)
+		return 0;
+
 	return fc_crwd_next_chain(
 		&data->fc_real,
 		data->ch_real,
@@ -319,7 +322,7 @@ static ssize_t itms_insert_copy(chain_t *chain, off_t src, off_t dst, size_t siz
 		if(real_new(data, &new_block_off) <= 0)
 			return -EFAULT;
 		
-		if(real_copy(data, src_real, new_block_off, block_size) != 0)
+		if(real_move(data, src_real, new_block_off, block_size) != 0)
 			return -EFAULT;
 		
 		if(map_insert(data, new_block_vid, (unsigned int)new_block_off, block_size) != 0)
@@ -342,8 +345,50 @@ static ssize_t itms_insert_copy(chain_t *chain, off_t src, off_t dst, size_t siz
 	return 0;
 }
 
-static ssize_t itms_delete(chain_t *chain, off_t from, size_t size){
-	return -1;
+static ssize_t itms_delete(chain_t *chain, off_t start, size_t size){
+	off_t         start_real,      end_real;
+	unsigned int  start_block_off, end_block_off;
+	unsigned int  start_block_vid, end_block_vid, i_vid;
+	unsigned int  end_block_aoff;                          // absolute offset
+	unsigned int  block_size;
+	
+	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	
+	if(map_off(data, start,        &start_block_vid, &start_real) <= 0)
+		return -EFAULT;
+	if(map_off(data, start + size, &end_block_vid,   &end_real)   <= 0){
+		end_block_vid = (data->blocks_count - 1);
+		end_block_off = data->block_size;
+	}else{
+		end_block_off   = end_real   % data->block_size;
+		end_block_aoff  = (end_real - end_block_off);
+	}
+	start_block_off = start_real % data->block_size;
+	
+	for(i_vid = start_block_vid; i_vid <= end_block_vid; i_vid++){
+		if(i_vid == end_block_vid){
+			if(map_get_block_size(data, end_block_vid, &block_size) <= 0)
+				return -EFAULT;
+			
+			if(real_move(data, end_real, end_block_aoff, block_size - end_block_off) != 0)
+				return -EFAULT;
+				
+			if(map_resize(data, end_block_vid, block_size - end_block_off) != 0)
+				return -EFAULT;
+			
+			break;
+		}
+		if(i_vid == start_block_vid){ // first block
+			if(map_resize(data, start_block_vid, start_block_off) != 0)
+				return -EFAULT;
+			
+			continue;
+		}
+		
+		if(map_resize(data, i_vid, 0) != 0)
+			return -EFAULT;
+	}
+	return 0;
 }
 
 static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer){
@@ -366,7 +411,7 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 		if(itms_insert_copy(chain, r_from, r_from, move_delta) != 0)
 			return -EINVAL;
 	}else{ // moving data backward
-		if(itms_delete(chain, r_from, -move_delta) != 0)
+		if(itms_delete(chain, r_to, -move_delta) != 0)
 			return -EINVAL;
 	}
 	

@@ -6,6 +6,7 @@ void read_all(hash_t *hash, buffer_t *buffer, backend_t *backend, off_t *key_off
 	unsigned int k;
 	
 	// check
+	memset(buf, 0, 29);
 	action  = ACTION_CRWD_READ;
 	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32,  &action);
@@ -58,11 +59,11 @@ START_TEST (test_backend_blocks){
 	hash_t       *hash   = hash_new();
 	
 	int           k;
-	int           key_count = 26;
+	int           key_count = 28;
 	off_t         key_off[key_count];
 	off_t         key_from, key_to;
 	char         *key_data  = malloc(30);
-	char          chunk_1[] = "abcdefghijklmnopqrstuvwxyz";
+	char          chunk_1[] = "_`abcdefghijklmnopqrstuvwxyz";
 	data_t       *data_buf;
 	
 	action  = ACTION_CRWD_CREATE;
@@ -79,7 +80,7 @@ START_TEST (test_backend_blocks){
 			fail_unless(key_off[k] == k,                               "chain in_block create id failed");
 	}
 	for(k=0; k<key_count; k++){
-		key_data[0] = (char)(0x61 + k);
+		key_data[0] = (char)(0x5F + k);
 		
 		hash_empty(hash);
 		action  = ACTION_CRWD_WRITE;
@@ -98,20 +99,20 @@ START_TEST (test_backend_blocks){
 	
 	read_all(hash, buffer, backend, &key_off, key_count, key_data);
 		fail_unless(memcmp(key_data, chunk_1, key_count) == 0, "backend in_block read failed");
+	printf("was: %s\n", key_data);
 	
 	hash_empty(hash);
 	action   = ACTION_CRWD_MOVE;
-	key_from = 0;
-	key_to   = 7;
+	key_from = 28;
+	key_to   = 24;
 	ssize    = 1;
 		hash_set(hash, "action",   TYPE_INT32,  &action);
-		//hash_set(hash, "size",     TYPE_INT32,  &ssize);
 		hash_set(hash, "key_from", TYPE_INT64,  &key_from);
 		hash_set(hash, "key_to",   TYPE_INT64,  &key_to);
 	
 	ssize = backend_query(backend, hash, buffer);
 		fail_unless(ssize == 0, "backend in_block move failed");
-	
+		
 	read_all(hash, buffer, backend, &key_off, key_count, key_data);
 	printf("res: %s\n", key_data);
 	
