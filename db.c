@@ -85,6 +85,9 @@ static dbtable* db_table_load(char *name){
 	unsigned int res;
 	dbtable     *table = NULL;
 	struct stat  index_stat;
+	
+	if(settings.verbose > 1)
+		printf("table '%s' loading...\n", name);
 
 	// is already loaded?
 	list_iter(&db_tables, &db_iter_table_search, name, &table);
@@ -251,7 +254,8 @@ static unsigned int db_table_query_delete(dbitem *item){
 	if(dbindex_query(&item->table->idx_oid, &item->oid, &entry_off) == 0){
 		// TODO delete data from data file
 		
-		ret = dbindex_delete(&item->table->idx_oid, &item->oid);
+		ret = dbindex_delete(&item->table->idx_data, &item->oid);
+		ret = dbindex_delete(&item->table->idx_oid,  &item->oid);
 		
 		return ret;
 	}
@@ -357,10 +361,10 @@ static void db_settings_load(void){
 
 void db_init(void){
 	list_init(&db_tables);
-
+	
 	pthread_mutex_init(&db_oid_last_mutex,  NULL);
 	pthread_mutex_init(&db_mutex_query_init, NULL);
-
+	
 	db_settings_load();
 	db_tables_load();
 }
@@ -581,14 +585,12 @@ unsigned int db_query_search(dbitem *item){
 		
 		cursor = dbindex_search(&item->table->idx_data, entry_data);
 		if(cursor != NULL){
-			while(1){
+			do{
 				item_oid = itoa(*(unsigned int *)cursor->real_ptr);	
 				dbitem_append(item, item_oid, strlen(item_oid));
 				free(item_oid);
 				
-				if(dbindex_search_slide(cursor, 1) == 1)
-					break;
-			}
+			}while(dbindex_search_slide(cursor, 1) == 0);
 			
 			dbindex_vm_cursor_free(cursor);
 			ret = 0;

@@ -26,6 +26,7 @@ struct dbindex_ {
 	void              **ipage_l1;            // main page of PRIMARY index
 	pthread_rwlock_t  **iblock_locks;
 	
+	list                cursors;
 	dbmap               file;
 	int                 loaded;
 	//pthread_rwlock_t    lock;
@@ -46,12 +47,15 @@ struct vm_cursor_ {
 	int             rw;
 	dbindex        *index;
 	char           *base_addr;
+	
 	unsigned long   virt_addr;
 	unsigned short  virt_iblock;
 	unsigned long   real_addr;
 	unsigned short  real_iblock;
 	char           *real_ptr;
+	
 	void           *query;
+	int             query_result;
 };
 
 
@@ -82,4 +86,5 @@ char* dbindex_vm_cursor_next(vm_cursor *cursor);
 char *dbindex_vm_cursor_prev(vm_cursor *cursor);
 vm_cursor* dbindex_vm_cursor_new(dbindex *index, int type, unsigned long value, int whence);
 void dbindex_vm_cursor_free(vm_cursor *cursor);
+static void* dbindex_iter_cursors_recalc(void *cursor, void *null1, void *null2);
 	

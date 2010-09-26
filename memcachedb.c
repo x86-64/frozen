@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <limits.h>
 
+#include <list.h>
 #include <dbmap.h>
 #include <dbindex.h>
 #include <db.h>
@@ -1849,12 +1850,12 @@ int main (int argc, char **argv) {
 //        }
 //    }
 
+    
     /* initialize main thread libevent instance */
     main_base = event_init();
 
     /* initialize other stuff */
     //item_init();
-    db_init();
     conn_init();
 
     /*
@@ -1911,6 +1912,8 @@ int main (int argc, char **argv) {
         fprintf(stderr, "can not register db_destroy"); 
         exit(EXIT_FAILURE);
     }
+
+    db_init();
 
     /* enter the event loop */
     event_base_loop(main_base, 0);

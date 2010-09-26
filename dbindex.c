@@ -1,6 +1,12 @@
 #include <memcachedb.h>
+#include <list.h>
 #include <dbmap.h>
 #include <dbindex.h>
+
+#define SEARCH_FOUND      0
+#define SEARCH_NOT_FOUND  1 
+#define DB_SUCCESS        0
+#define DB_ERROR          1
 
 // TODO rewrite iblock from unsigned short to structure
 // TODO rewrite code to use vm wrappers
@@ -120,7 +126,7 @@ static int   dbindex_iblock_search(dbindex *index, unsigned short iblock, char *
 	unsigned long  range_elements;
 	int            cret;
 	
-
+	
 	if(range_start == range_end){
 		*pitem_offset = range_end - index->item_size;
 		return 2;
@@ -177,7 +183,9 @@ static unsigned short dbindex_iblock_new(dbindex *index){
 			dbindex_iblock_lock_init  (index->iblock_locks, iblock);
 			break;
 	};
-
+	
+	list_iter(&index->cursors, &dbindex_iter_cursors_recalc, NULL, NULL);
+	
 	return iblock;
 }
 
@@ -275,6 +283,24 @@ static char* dbindex_iblock_pop(dbindex *index, unsigned short iblock){
 	return new_key;
 }
 
+static unsigned int dbindex_iblock_delete(dbindex *index, unsigned short iblock, char *item_offset){
+	char         *page_data_start;
+	char         *page_data_end;
+	unsigned int  free_space;
+	
+	free_space = dbindex_iblock_get_start(index, iblock, &page_data_start, &page_data_end);
+	
+	if(item_offset > page_data_start)
+		memmove(
+			page_data_start + index->item_size,
+			page_data_start,
+			item_offset - page_data_start
+		);
+	free_space += index->item_size;
+	dbindex_iblock_init_start(index, iblock, free_space);
+	
+	return free_space;
+}
 /* }}}1 */
 /* DBIndex Virtual mapping {{{1 */
 
@@ -294,6 +320,72 @@ static void dbindex_vm_insert_page(dbindex *index, unsigned short iblock_virt, u
 	*mapping = iblock_real;
 }
 
+static void dbindex_vm_delete_page(dbindex *index, unsigned short iblock_virt){
+	unsigned short *mapping;
+	mapping = &(((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1]);
+	
+	memmove(
+		mapping,
+		mapping + 1,
+		(0xFFFF - iblock_virt) * sizeof(short)
+	);
+}
+
+static unsigned int dbindex_vm_item_insert(vm_cursor *cursor, void *data){
+	unsigned int   iblock_free;
+	char          *iblock_dstart;
+	char          *iblock_dend;
+	
+	if(cursor == NULL)
+		return DB_ERROR;
+	
+	if(cursor->real_iblock == 0){
+		if( (cursor->real_iblock = dbindex_iblock_new(cursor->index)) == 0)
+			return DB_ERROR;
+		
+		dbindex_vm_insert_page(cursor->index, 1, cursor->real_iblock);
+	
+		iblock_free = dbindex_iblock_get_start(cursor->index, cursor->real_iblock, &iblock_dstart, &iblock_dend);
+		
+		cursor->real_ptr = iblock_dend - cursor->index->item_size;
+	}else{
+		iblock_free = dbindex_iblock_get_start(cursor->index, cursor->real_iblock, &iblock_dstart, &iblock_dend);
+		if(iblock_free == 0){
+			short          iblock_new;
+			unsigned int   iblock_new_free;
+			char          *iblock_new_dstart;
+			char          *iblock_new_dend;
+			
+			if( (iblock_new = dbindex_iblock_new(cursor->index)) == 0)
+				return DB_ERROR;
+			
+			iblock_new_free = dbindex_iblock_get_start(cursor->index, iblock_new, &iblock_new_dstart, &iblock_new_dend);
+			
+			dbindex_vm_insert_page(cursor->index, cursor->virt_iblock, iblock_new);
+			
+			char *poped_item;
+			
+			poped_item = dbindex_iblock_pop(cursor->index, cursor->real_iblock);
+			dbindex_iblock_insert(cursor->index, iblock_new, 2, iblock_new_dstart - cursor->index->item_size, poped_item);
+				
+			free(poped_item);
+		}
+	}
+	dbindex_iblock_insert(cursor->index, cursor->real_iblock, 2, cursor->real_ptr, data);
+	
+	return DB_SUCCESS;
+}
+
+static unsigned int dbindex_vm_item_delete(vm_cursor *cursor){
+	unsigned int ret;
+	
+	ret = dbindex_iblock_delete(cursor->index, cursor->real_iblock, cursor->real_ptr);
+	if(ret == cursor->index->page_size){
+		dbindex_vm_delete_page(cursor->index, cursor->virt_iblock);
+	}
+}
+
+/* }}}1 */
 /* DBIndex virtual mapping cursors {{{1 */
 char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence){
 	unsigned long long   addr_diff;
@@ -318,29 +410,39 @@ char* dbindex_vm_cursor_seek(vm_cursor *c, unsigned long long value, int whence)
 			break;
 	};
 	
-	if(c->virt_addr >= virt_max)
-		return NULL;
+	//if(c->virt_addr >= virt_max)
+	//	return NULL;
 	
 	c->virt_iblock = (c->virt_addr / c->index->page_size) + 1;
 	c->real_iblock = dbindex_vm_virt2real(c->index, c->virt_iblock);
 	
-	c->real_addr   = c->virt_addr + (c->real_iblock - c->virt_iblock) * c->index->page_size;
-	c->real_ptr    = c->base_addr + c->real_addr;
-//TODO remake	
-	c->page_len    = dbindex_iblock_get_start(c->index, c->real_iblock, &page_data_start, &page_data_end);
-	
-	if(((c->rw & CURSOR_FIXED) == 0) && (c->real_ptr < page_data_start)){
-		addr_diff = (page_data_start - c->real_ptr);
-		
-		c->real_addr += addr_diff;
-		c->virt_addr += addr_diff;
-		c->real_ptr  += addr_diff;
+	//printf("virt %d real %d\n", c->virt_iblock, c->real_iblock);
+	if(c->real_iblock == 0){
+		c->real_ptr = c->base_addr + c->virt_addr;
+		return NULL;
 	}
 	
+	c->real_addr   = c->virt_addr + (c->real_iblock - c->virt_iblock) * c->index->page_size;
+	c->real_ptr    = c->base_addr + c->real_addr;
+	
+	c->page_len    = dbindex_iblock_get_start(c->index, c->real_iblock, &page_data_start, &page_data_end);
+		
 	if(c->rw & CURSOR_WRITE){
 		dbindex_iblock_wrlock(c->index, c->real_iblock);
 	}else{
 		dbindex_iblock_rdlock(c->index, c->real_iblock);
+	}
+
+	if(c->real_ptr < page_data_start){
+		if((c->rw & CURSOR_FIXED) == 0){
+			addr_diff = (page_data_start - c->real_ptr);
+			
+			c->real_addr += addr_diff;
+			c->virt_addr += addr_diff;
+			c->real_ptr  += addr_diff;
+		}else{
+			return NULL;
+		}
 	}
 	
 	return c->real_ptr;
@@ -353,16 +455,22 @@ char* dbindex_vm_cursor_next(vm_cursor *cursor){
 
 // return real_ptr on success, NULL on error
 char *dbindex_vm_cursor_prev(vm_cursor *cursor){
-	//char *real_ptr;
-	char *prev_ptr;
+	char *real_ptr1 = cursor->real_ptr;
+	char *real_ptr2 = dbindex_vm_cursor_seek(cursor, - (unsigned long long)cursor->index->item_size, SEEK_CUR);
 	
-	//real_ptr = cursor->real_ptr;
-	prev_ptr = dbindex_vm_cursor_seek(cursor, - (unsigned long long)cursor->index->item_size, SEEK_CUR);
-	
-	//if(prev_ptr == real_ptr)
-	//	return NULL;
-	
-	return prev_ptr;
+	if(real_ptr1 == real_ptr2)
+		return NULL;
+	return real_ptr2;
+}
+
+// return real_ptr on success, NULL on error
+char *dbindex_vm_cursor_recalc(vm_cursor *cursor){
+	return dbindex_vm_cursor_seek(cursor, 0, SEEK_CUR);
+}
+
+static void* dbindex_iter_cursors_recalc(void *cursor, void *null1, void *null2){
+	((vm_cursor *)cursor)->base_addr = ((vm_cursor *)cursor)->index->file.data + ((vm_cursor *)cursor)->index->data_offset;
+	dbindex_vm_cursor_recalc((vm_cursor *)cursor);
 }
 
 vm_cursor* dbindex_vm_cursor_new(dbindex *index, int type, unsigned long value, int whence){
@@ -374,12 +482,17 @@ vm_cursor* dbindex_vm_cursor_new(dbindex *index, int type, unsigned long value, 
 	
 	dbindex_vm_cursor_seek(cursor, value, whence);
 	
+	list_push(&index->cursors, cursor);
+
 	return cursor;
 }
 
 void dbindex_vm_cursor_free(vm_cursor *cursor){
 	if(cursor->real_iblock != 0)
 		dbindex_iblock_unlock(cursor->index, cursor->real_iblock);
+	
+	list_unlink(&cursor->index->cursors, cursor);
+	
 	free(cursor);
 }
 /* }}}1 */
@@ -431,6 +544,8 @@ static unsigned int dbindex_vm_search(dbindex *index, vm_cursor **cursor, char *
 			
 			*cursor = current;
 			
+			current->query_result = SEARCH_FOUND;
+			
 			dbindex_vm_cursor_free(range_start);
 			dbindex_vm_cursor_free(range_end);
 			
@@ -443,6 +558,8 @@ static unsigned int dbindex_vm_search(dbindex *index, vm_cursor **cursor, char *
 		
 		if(range_elements <= 1){
 			*cursor = range_end;
+			
+			range_end->query_result = SEARCH_NOT_FOUND;
 			
 			dbindex_vm_cursor_prev(range_end);
 			
@@ -582,6 +699,9 @@ void dbindex_load(char *path, dbindex *index){
 			fprintf(stderr, "%s: wrong index type\n", path); // TODO add DEBUG define
 			return;
 	};
+	
+	list_init(&index->cursors);
+	
 	index->loaded = 1;
 }
 
@@ -802,53 +922,10 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 			key_conv = index->keyconv(index, item_key);	
 			
 			/* insert item */
-			cret = dbindex_vm_search(index, &cursor, key_conv);
-			if(cret == 0)
-				cret = 2;
+			ret = dbindex_vm_search      (index, &cursor, key_conv);
+			ret = dbindex_vm_item_insert (cursor, item_key);		
 			
-			cret = dbindex_iblock_insert(index, cursor->real_iblock, cret, cursor->real_ptr, item_key);
-			if(cret == 1){ // page full
-				char *poped_item;
-				
-				poped_item = dbindex_iblock_pop(index, cursor->real_iblock);
-				
-				iblock_prev_virt = cursor->virt_iblock - 1;
-				iblock_prev_real = dbindex_vm_virt2real(index, iblock_prev_virt);
-				
-				while(1){
-					if(iblock_prev_virt == 0){
-						iblock_new_real = dbindex_iblock_new(index);
-						
-						dbindex_vm_insert_page(index, cursor->real_iblock, iblock_new_real);
-						
-						iblock_prev_real = iblock_new_real;
-					}
-					
-					unsigned int   page_free_size;
-					char          *page_data_start;
-					char          *page_data_end;
-					
-					page_free_size = dbindex_iblock_get_start(index, iblock_prev_real, &page_data_start, &page_data_end);
-					if(page_free_size == 0){
-						iblock_prev_virt = 0;
-						continue;
-					}
-					dbindex_iblock_insert(index, iblock_prev_real, 2, page_data_end - index->item_size, poped_item);
-					break;
-				}
-				dbindex_vm_cursor_free(cursor);
-				cret = dbindex_vm_search(index, &cursor, key_conv);
-				if(cret == 0)
-					cret = 2;
-				
-				cret = dbindex_iblock_insert(index, cursor->real_iblock, cret, cursor->real_ptr, item_key);
-				
-				free(poped_item);
-				break;
-			}
 			dbindex_vm_cursor_free(cursor);
-			
-			ret = 0;
 			break;
 	};
 	//pthread_rwlock_unlock(&index->lock);
@@ -913,7 +990,7 @@ vm_cursor* dbindex_search(dbindex *index, void *query){
 			dbmap_lock(&index->file);
 				
 				cret = dbindex_vm_search(index, &cursor, query);
-				if(cret != 0){
+				if(cret != SEARCH_FOUND){
 					dbindex_vm_cursor_free(cursor);
 					cursor = NULL;
 				}
@@ -933,6 +1010,8 @@ unsigned int dbindex_search_slide(vm_cursor *cursor, int direction){
 		real_ptr = cursor->real_ptr - cursor->index->item_size;
 	else
 		real_ptr = cursor->real_ptr + cursor->index->item_size;
+	
+	// check diapasone of real_ptr
 
 	if((key1_conv = cursor->index->keyconv(cursor->index, real_ptr)) == NULL)
 		return 1;
@@ -941,9 +1020,11 @@ unsigned int dbindex_search_slide(vm_cursor *cursor, int direction){
 		return 1;
 	
 	if(direction < 0){
-		dbindex_vm_cursor_prev(cursor);
+		if(dbindex_vm_cursor_prev(cursor) == NULL)
+			return 1;
 	}else{
-		dbindex_vm_cursor_next(cursor);
+		if(dbindex_vm_cursor_next(cursor) == NULL)
+			return 1;
 	}
 	return 0;	
 }
@@ -960,12 +1041,11 @@ unsigned int dbindex_search_slide(vm_cursor *cursor, int direction){
 unsigned int dbindex_delete(dbindex *index, void *item_key){
 	short            iblock;
 	unsigned int     ret = 1;
-	unsigned int     free_space;
 	char            *item_revkey = malloc(index->key_len);
-	char            *page_data_start;
-	char            *page_data_end;
 	char            *item_offset;
-	
+	char            *key_conv;
+	vm_cursor       *cursor;
+
 	switch(index->type){
 		case DBINDEX_TYPE_PRIMARY:
 			iblock = dbindex_ipage_get_iblock(index, item_key);
@@ -977,20 +1057,25 @@ unsigned int dbindex_delete(dbindex *index, void *item_key){
 
 				revmemcpy(item_revkey, item_key, index->key_len);
 				if(dbindex_iblock_search(index, iblock, &item_offset, item_revkey) == 0){
-					free_space = dbindex_iblock_get_start(index, iblock, &page_data_start, &page_data_end);
+					dbindex_iblock_delete(index, iblock, item_offset);
 					
-					if(item_offset > page_data_start)
-						memmove(
-							page_data_start + index->item_size,
-							page_data_start,
-							item_offset - page_data_start
-						);
-					dbindex_iblock_init_start(index, iblock, free_space + index->item_size);
 					ret = 0;
 				}
-
+				
 			dbindex_iblock_unlock(index, iblock);
 			dbmap_unlock(&index->file);
+			break;
+		case DBINDEX_TYPE_INDEX:
+			key_conv = index->keyconv(index, item_key);	
+			
+			if( (cursor = dbindex_search(index, key_conv)) != NULL){
+				do {
+					ret = dbindex_vm_item_delete(cursor);
+					
+				}while(dbindex_search_slide(cursor, 1) == 0);
+				
+				dbindex_vm_cursor_free(cursor);
+			}
 			break;
 	};
 	
