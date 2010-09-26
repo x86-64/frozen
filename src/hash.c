@@ -15,62 +15,29 @@ typedef struct hash_key_t {
 	hash_el_t *element;
 } hash_key_t;
 
-hash_t *           hash_new                     (void){ // {{{
-	hash_t     *hash;
-	data_t     *data;
+/* private {{{ */
+static int         hash_new_key                 (hash_t *hash, hash_key_t *hash_key){
+	unsigned int  new_id;
+	unsigned int  new_nelements;
+	hash_el_t    *new_elements;
 	
-	hash     = malloc( sizeof(hash_t) );
-	if(hash == NULL)
-		goto cleanup1;
+	new_id        = hash->nelements;
+	new_nelements = hash->nelements + 1;
+	if(new_nelements > HASH_MAX_ELEMENTS)
+		return -ENOMEM;
 	
-	data     = malloc( HASH_DATABLOCK_SIZE );
-	if(data == NULL)
-		goto cleanup2;
+	new_elements = realloc(hash->elements, new_nelements * sizeof(hash_el_t));
+	if(new_elements == NULL)
+		return -ENOMEM;
 	
-	hash->is_local   = 1;
-	hash->nelements  = 0;
-	hash->size       = HASH_T_NETWORK_SIZE;
-	hash->alloc_size = HASH_DATABLOCK_SIZE;
-	hash->elements   = NULL;
-	hash->data       = data;
-	hash->data_end   = data;
-	hash->next_layer = NULL;
-
-	return hash;
-cleanup2:
-	free(hash);
-cleanup1:
-	return NULL;
-} // }}}
-void               hash_empty                   (hash_t *hash){ // {{{
-	if(hash->is_local != 1)
-		return;
+	hash->elements  = new_elements;
+	hash->nelements = new_nelements;
 	
-	if(hash->elements != NULL)
-		free(hash->elements);
+	hash_key->hash    = hash;
+	hash_key->element = &(hash->elements[new_id]);
 	
-	hash->elements  = NULL;
-	hash->nelements = 0;
-	hash->size      = HASH_T_NETWORK_SIZE;
-	hash->data_end  = hash->data;
-} // }}}
-void               hash_free                    (hash_t *hash){ // {{{
-	if(hash->is_local == 1){
-		if(hash->elements != NULL)
-			free(hash->elements);
-		free(hash->data);
-	}
-	free(hash);
-} // }}}
-void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer){ // {{{
-	if(hash == NULL)
-		return;
-	
-	hash->next_layer = hash_layer;
-} // }}}
-
-int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+	return 0;
+}
 
 static unsigned int hash_add_data_chunk (hash_t *hash, void *data, size_t size){ // {{{
 	unsigned int  new_alloc_size;
@@ -86,7 +53,9 @@ static unsigned int hash_add_data_chunk (hash_t *hash, void *data, size_t size){
 		hash->data_end = (new_data + (hash->data_end - hash->data));
 		hash->data     =  new_data;
 	}
-	memcpy(hash->data_end, data, size);
+	if(data != NULL)
+		memcpy(hash->data_end, data, size);
+	
 	new_ptr          = (hash->data_end - hash->data); 
 	hash->data_end  += size;
 	hash->size      += size;
@@ -158,12 +127,69 @@ static int         hash_key_get_data            (hash_key_t *hash_key, data_type
 	return 0;	
 } // }}}
 
+
+/* }}} */
+
+hash_t *           hash_new                     (void){ // {{{
+	hash_t     *hash;
+	data_t     *data;
+	
+	hash     = malloc( sizeof(hash_t) );
+	if(hash == NULL)
+		goto cleanup1;
+	
+	data     = malloc( HASH_DATABLOCK_SIZE );
+	if(data == NULL)
+		goto cleanup2;
+	
+	hash->is_local   = 1;
+	hash->nelements  = 0;
+	hash->size       = HASH_T_NETWORK_SIZE;
+	hash->alloc_size = HASH_DATABLOCK_SIZE;
+	hash->elements   = NULL;
+	hash->data       = data;
+	hash->data_end   = data;
+	hash->next_layer = NULL;
+
+	return hash;
+cleanup2:
+	free(hash);
+cleanup1:
+	return NULL;
+} // }}}
+void               hash_empty                   (hash_t *hash){ // {{{
+	if(hash->is_local != 1)
+		return;
+	
+	if(hash->elements != NULL)
+		free(hash->elements);
+	
+	hash->elements  = NULL;
+	hash->nelements = 0;
+	hash->size      = HASH_T_NETWORK_SIZE;
+	hash->data_end  = hash->data;
+} // }}}
+void               hash_free                    (hash_t *hash){ // {{{
+	if(hash->is_local == 1){
+		if(hash->elements != NULL)
+			free(hash->elements);
+		free(hash->data);
+	}
+	free(hash);
+} // }}}
+void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer){ // {{{
+	if(hash == NULL)
+		return;
+	
+	hash->next_layer = hash_layer;
+} // }}}
+
+int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+
 int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value){ // {{{
-	unsigned int  new_id;
-	unsigned int  new_nelements;
 	unsigned int  key_chunk;
 	unsigned int  data_chunk;
-	hash_el_t    *new_elements;
 	hash_key_t    found_key;
 	data_t       *found_data;
 	size_t        found_size;
@@ -192,34 +218,56 @@ int                hash_set                     (hash_t *hash, char *key, data_t
 	}
 	
 bad:	
-	if(hash->is_local == 1){
-		new_id        = hash->nelements;
-		new_nelements = hash->nelements + 1;
-		if(new_nelements > HASH_MAX_ELEMENTS)
-			return -ENOMEM;
-		
-		new_elements = realloc(hash->elements, new_nelements * sizeof(hash_el_t));
-		if(new_elements == NULL)
-			return -ENOMEM;
-		hash->elements  = new_elements;
-		
-		key_chunk  = hash_add_data_chunk(hash, key,   strlen(key) + 1);
-		if(key_chunk  == (unsigned int)-1)
+	if(hash->is_local != 1)
+		return -1;
+	
+	if(hash_new_key(hash, &found_key) != 0)
+		return -1;
+	
+	key_chunk  = hash_add_data_chunk(hash, key,   strlen(key) + 1);
+	if(key_chunk  == (unsigned int)-1)
+		return -1;
+	
+	data_chunk = hash_add_data_chunk(hash, value, value_size);
+	if(data_chunk == (unsigned int)-1)
+		return -1;
+	
+	found_key.element->type  = type;
+	found_key.element->key   = key_chunk;
+	found_key.element->value = data_chunk;
+	
+	return 0;
+} // }}}
+
+int                hash_set_custom              (hash_t *hash, char *key, unsigned int chunk_size, data_t **data){ // {{{
+	unsigned int  key_chunk;
+	unsigned int  data_chunk;
+	hash_key_t    found_key;
+	
+	if(hash == NULL || key == NULL || chunk_size == 0 || hash->is_local != 1)
+		return -1;
+	
+	if(hash_search_key(hash, key, 0, &found_key) != 0){
+		if(hash_new_key(hash, &found_key) != 0)
 			return -1;
-		
-		data_chunk = hash_add_data_chunk(hash, value, value_size);
-		if(data_chunk == (unsigned int)-1)
-			return -1;
-		
-		hash->elements[new_id].type  = type;
-		hash->elements[new_id].key   = key_chunk;
-		hash->elements[new_id].value = data_chunk;
-		hash->nelements              = new_nelements;
-		
-		return 0;
 	}
 	
-	return -1;
+	key_chunk  = hash_add_data_chunk(hash, key,   strlen(key) + 1);
+	if(key_chunk  == (unsigned int)-1)
+		return -1;
+	
+	data_chunk = hash_add_data_chunk(hash, NULL,  chunk_size);
+	if(data_chunk == (unsigned int)-1)
+		return -1;
+	
+	found_key.element->type  = TYPE_VOID;
+	found_key.element->key   = key_chunk;
+	found_key.element->value = data_chunk;
+	
+	if(data != NULL)
+		*data = hash_off_to_ptr(hash, data_chunk, NULL);
+	
+	return 0;
 } // }}}
 
 int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size){ // {{{

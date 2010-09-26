@@ -28,8 +28,7 @@ START_TEST (test_backend_blocks){
 	backend = backend_new("in_block", settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
-	return;
-
+	
 	unsigned int  action;
 	ssize_t       ssize;
 	char         *test_chunk;
@@ -37,38 +36,42 @@ START_TEST (test_backend_blocks){
 	hash_t       *hash   = hash_new();
 	
 	int           k;
-	int           key_count = 20;
+	int           key_count = 30;
 	off_t         key_off[key_count];
-	char          key_data[] = "\x05\x00\x00\x00" "\x00";
+	char          key_data[] = "\x00";
+	data_t       *data_buf;
+	
 	
 	action  = ACTION_CRWD_CREATE;
 	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32, &action);
 		hash_set(hash, "size",   TYPE_INT32, &ssize);
 	
-	for(k=0; k<key_count; k++){
-		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
+	for(k=0; k < key_count; k++){
+		buffer_remove_chunks(buffer);
+		
+		if( (ssize = backend_query(backend, hash, buffer)) <= 0 )
 			fail("chain in_block create failed");	
 		
-		buffer_read(buffer, ssize, key_off[k] = *(off_t *)chunk; break);
+		key_off[k] = 0;
+		buffer_read_flat(buffer, ssize, &key_off[k], sizeof(off_t));
 			fail_unless(key_off[k] == k,                               "chain in_block create id failed");
 	}
-	
-	action  = ACTION_CRWD_WRITE;
-	ssize   = 1;
-		hash_set(hash, "action", TYPE_INT32,  &action);
-		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-		
 	for(k=0; k<key_count; k++){
-		key_data[4] = (char) k;
+		key_data[0] = (char) k;
 		
-		hash_set(hash, "key",    TYPE_INT64,  &key_off[k]);
-		hash_set(hash, "value",  TYPE_BINARY, &key_data);
+		hash_empty(hash);
+		action  = ACTION_CRWD_WRITE;
+		ssize   = 1;
+			hash_set(hash, "action", TYPE_INT32,  &action);
+			hash_set(hash, "size",   TYPE_INT32,  &ssize);
+			hash_set(hash, "key",    TYPE_INT64,  &key_off[k]);
+		 	hash_set_custom(hash, "value", ssize, &data_buf);
+			memcpy(data_buf, &key_data, ssize);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1, "backend in_block write failed");
 	}
-	
 	
 	// check
 	action  = ACTION_CRWD_READ;
@@ -95,4 +98,5 @@ START_TEST (test_backend_blocks){
 }
 END_TEST
 REGISTER_TEST(core, test_backend_blocks)
+
 

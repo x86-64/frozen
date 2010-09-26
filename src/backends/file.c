@@ -71,9 +71,6 @@ static int file_configure(chain_t *chain, setting_t *config){
 	int     handle;
 	size_t  copy_buffer_size;
 	
-	filepath  = (char *)malloc(256);
-	*filepath = '\0';
-	
 	filename = setting_get_child_string(config, "filename");
 	if(filename == NULL)
 		return -EINVAL;
@@ -83,6 +80,9 @@ static int file_configure(chain_t *chain, setting_t *config){
 	//		goto cleanup;
 	//}
 	
+	filepath  = malloc(256);
+	*filepath = '\0';
+	
 	temp = setting_get_child_string(global_settings, "homedir");
 	if(temp == NULL)
 		goto cleanup;
@@ -90,7 +90,7 @@ static int file_configure(chain_t *chain, setting_t *config){
 	
 	if(snprintf(filepath, 256, "%s/%s.dat", temp, filename) >= 256){
 		/* snprintf can truncate strings, so malicious user can use it to access another file.
-		 * we check string len such way to ensure buffer not filled and none of strings was truncated */
+		 * we check string len such way to ensure none of strings was truncated */
 		goto cleanup;
 	}
 	
@@ -147,7 +147,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 			return -errno;
 		}
 		
-		buffer_write(buffer, sizeof(off_t), *(off_t *)chunk = new_key); 
+		buffer_write_flat(buffer, &new_key, sizeof(off_t)); 
 		
 		data->file_stat_status = STAT_NEED_UPDATE;
 		
@@ -161,7 +161,6 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	off_t             key;
 	data_t           *value;
-	data_t           *value_data;
 	size_t            value_size;
 	size_t            write_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
@@ -170,11 +169,8 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 		return -EINVAL;
 	if(hash_get_copy (request, "size",  TYPE_INT32,  &write_size, sizeof(write_size)) != 0)
 		return -EINVAL;
-	if(hash_get      (request, "value", TYPE_BINARY, &value,      &value_size) != 0) 
+	if(hash_get      (request, "value", TYPE_VOID,   &value,      &value_size) != 0) 
 		return -EINVAL;
-	
-	value_data = data_binary_ptr(value);
-	value_size = data_binary_len(value);
 	
 	if(write_size > value_size) // requested write more than have in buffer
 		write_size = value_size;
@@ -182,7 +178,7 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 redo:
 	ret = pwrite(
 		((file_user_data *)chain->user_data)->handle,
-		value_data,
+		value,
 		write_size,
 		key
 	);
@@ -201,7 +197,8 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t           ret;
 	off_t             key;
 	unsigned int      value_size;
-	
+	unsigned int      read_size;
+
 	if(hash_get_copy (request, "key",   TYPE_INT64, &key,        sizeof(key)) != 0)
 		return -EINVAL;
 	if(hash_get_copy (request, "size",  TYPE_INT32, &value_size, sizeof(value_size)) != 0)
@@ -209,21 +206,60 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
 	
+	read_size = 0;
 redo:
 	buffer_write(buffer, value_size,
 		do{
 			ret = pread(fd, chunk, size, key + offset);
-			if(ret == -1 || ret != size){
+			if(ret == -1){
 				if(errno == EINTR) goto redo;
 				return -errno;
 			}
+			
+			read_size += ret;
+			
+			if(ret != size)
+				goto exit;
 		}while(0)
 	);
-	
-	return value_size;
+exit:
+	return read_size;
 }
 
 static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer){
+	int               fd;
+	off_t             key;
+	pthread_mutex_t  *mutex;
+	unsigned int      value_size;
+	unsigned int      forced;
+	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	
+	if(hash_get_copy (request, "key",          TYPE_INT64, &key,        sizeof(key)) != 0)
+		return -EINVAL;
+	if(hash_get_copy (request, "size",         TYPE_INT32, &value_size, sizeof(value_size)) != 0)
+		return -EINVAL;
+	if(hash_get_copy (request, "imcrazybitch", TYPE_INT32, &forced,     sizeof(forced)) != 0){
+		forced = 0;
+	}
+	
+	fd    =  data->handle;
+	mutex = &data->create_lock;
+	
+	pthread_mutex_lock(mutex);
+		
+		if(file_update_count(data) == STAT_ERROR)
+			return -EFAULT;
+		
+		if(key + value_size != data->file_stat.st_size && forced == 0) // truncating only last elements
+			return -EFAULT;
+		
+		if(ftruncate(fd, key) == -1)
+			return -errno;
+		
+		data->file_stat_status = STAT_NEED_UPDATE;
+		
+	pthread_mutex_unlock(mutex);
+	
 	return 0;
 }
 
@@ -242,13 +278,16 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 		return -EINVAL;
 	if(hash_get_copy (request, "key_to",    TYPE_INT64, &to,         sizeof(to)) != 0)
 		return -EINVAL;
-	if(hash_get_copy (request, "size",      TYPE_INT32, &req_size,   sizeof(req_size)) != 0){
+	if(
+		!(
+			hash_get_copy (request, "size", TYPE_INT32, &req_size, sizeof(req_size)) == 0  &&
+			(move_size = req_size) != (unsigned int)-1
+		)
+	){
 		if(file_update_count(data) == STAT_ERROR)
 			return -EINVAL;
 		
 		move_size = (data->file_stat.st_size - from);
-	}else{
-		move_size = req_size;
 	}
 	
 	if(from == to || move_size == 0)
@@ -271,8 +310,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	if(size == 0)
 		return -EINVAL;
 	
-	buff = (char *)malloc(size);
-	if(buff == NULL)
+	if( (buff = malloc(max_size)) == NULL)
 		return -ENOMEM;
 	
 	while(move_size > 0){

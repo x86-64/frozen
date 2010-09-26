@@ -27,9 +27,10 @@ START_TEST (test_backend_locator){
 	off_t         new_key1, new_key2;
 	buffer_t     *buffer = buffer_alloc();
 	char  *test_chunk;
-	char  key1_data[]  = "\x0e\x00\x00\x00test167890";
-	char  key2_data[]  = "\x0e\x00\x00\x00test267890";
-	
+	char  key1_data[]  = "test167890";
+	char  key2_data[]  = "test267890";
+	data_t *data_buf;
+
 	hash = hash_new();
 	
 	action  = ACTION_CRWD_CREATE;
@@ -53,16 +54,20 @@ START_TEST (test_backend_locator){
 	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
-		hash_set(hash, "value",  TYPE_BINARY, &key1_data);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		hash_set_custom(hash, "value", 10, &data_buf);
+		memcpy(data_buf, key1_data, 10);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_locator write 1 failed");
-		
+	
+	hash_empty(hash);
 	ssize   = 1;
+		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
-		hash_set(hash, "value",  TYPE_BINARY, &key2_data);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		hash_set_custom(hash, "value", 10, &data_buf);
+		memcpy(data_buf, key2_data, 10);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_locator write 2 failed");
@@ -76,10 +81,10 @@ START_TEST (test_backend_locator){
 		buffer_remove_chunks(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 1,                                 "backend in_locator read 1 failed");
+			fail_unless(ssize == 1,                             "backend in_locator read 1 failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key1_data + 4, 10) == 0, "backend in_locator read 1 data failed");
+			fail_unless(memcmp(test_chunk, key1_data, 10) == 0, "backend in_locator read 1 data failed");
 	
 	ssize   = 1;
 		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
@@ -88,10 +93,10 @@ START_TEST (test_backend_locator){
 		buffer_remove_chunks(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 1,                                 "backend in_locator read 2 failed");
+			fail_unless(ssize == 1,                             "backend in_locator read 2 failed");
 			
 		test_chunk = buffer_get_first_chunk(buffer);
-			fail_unless(memcmp(test_chunk, key2_data + 4, 10) == 0, "backend in_locator read 2 data failed");
+			fail_unless(memcmp(test_chunk, key2_data, 10) == 0, "backend in_locator read 2 data failed");
 		
 	hash_free(hash);
 	buffer_free(buffer);

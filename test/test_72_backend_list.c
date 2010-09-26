@@ -22,11 +22,12 @@ START_TEST (test_backend_list){
 	char         *test_chunk;
 	buffer_t     *buffer = buffer_alloc();
 	hash_t       *hash   = hash_new();
-	
+	data_t       *data_buf;
+
 	off_t         key_off;
 	off_t         key_insert_off;
-	char          key_data[]     = "\x0e\x00\x00\x00" "0123456789";
-	char          key_insert[]   = "\x05\x00\x00\x00" "a";
+	char          key_data[]     = "0123456789";
+	char          key_insert[]   = "a";
 	char          key_inserted[] = "01a23456789";
 	
 	action  = ACTION_CRWD_CREATE;
@@ -42,19 +43,24 @@ START_TEST (test_backend_list){
 	ssize   = 10;
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &key_off);
-		hash_set(hash, "value",  TYPE_BINARY, &key_data);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
-		
+	 	hash_set_custom(hash, "value", ssize, &data_buf);
+		memcpy(data_buf, key_data, ssize);
+	
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 10, "backend in_list write 1 failed");
+	
+	hash_empty(hash);
 	
 	// insert key
 	key_insert_off = key_off + 2;
 	ssize   = 1;
+		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &key_insert_off);
-		hash_set(hash, "value",  TYPE_BINARY, &key_insert);
 		hash_set(hash, "insert", TYPE_INT32,  &ssize); // = 1
 		hash_set(hash, "size",   TYPE_INT32,  &ssize); // = 1
+	 	hash_set_custom(hash, "value", ssize, &data_buf);
+		memcpy(data_buf, key_insert, ssize);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,  "backend in_list write 2 failed");

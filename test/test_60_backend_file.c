@@ -28,14 +28,16 @@ void  db_write(chain_t *chain, off_t key, char *buf, unsigned int buf_size, ssiz
 	buffer_t       *buffer = buffer_alloc();
 	unsigned int    action;
 	hash_t         *hash;
+	data_t         *data_buf;
 	char           *test_chunk;
 	
 	action  = ACTION_CRWD_WRITE;
 	hash = hash_new();
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &key);
-		hash_set(hash, "value",  TYPE_BINARY,  buf);
 		hash_set(hash, "size",   TYPE_INT32,  &buf_size);
+		hash_set_custom(hash, "value", buf_size, &data_buf);
+		memcpy(data_buf, buf, buf_size);
 		
 		*ssize = chain_query(chain, hash, buffer);
 	
@@ -95,8 +97,8 @@ START_TEST (test_backend_file){
 			fail_unless(new_key2 - new_key1 == 10,                 "chain file offsets invalid");
 	hash_free(hash);
 	
-	char  key1_data[]  = "\x0e\x00\x00\x00test167890";
-	char  key2_data[]  = "\x0e\x00\x00\x00test267890";
+	char  key1_data[]  = "test167890";
+	char  key2_data[]  = "test267890";
 	
 	char  move1_data[] = "test161690";
 	char  move2_data[] = "test161678";
@@ -115,40 +117,13 @@ START_TEST (test_backend_file){
 	/* }}}1 */
 	/* read {{{1 */
 	db_read(chain, new_key1, 10, test_chunk, &ssize); 
-		fail_unless(ssize == 10,                                   "chain file key 1 get failed");
-		fail_unless(memcmp(test_chunk, key1_data + 4, ssize) == 0, "chain file key 1 get data failed"); 
+		fail_unless(ssize == 10,                               "chain file key 1 get failed");
+		fail_unless(memcmp(test_chunk, key1_data, ssize) == 0, "chain file key 1 get data failed"); 
 	
 	db_read(chain, new_key2, 10, test_chunk, &ssize); 
-		fail_unless(ssize == 10,                                   "chain file key 2 get failed");
-		fail_unless(memcmp(test_chunk, key2_data + 4, ssize) == 0, "chain file key 2 get data failed"); 
+		fail_unless(ssize == 10,                               "chain file key 2 get failed");
+		fail_unless(memcmp(test_chunk, key2_data, ssize) == 0, "chain file key 2 get data failed"); 
 
-	/* }}}1 */
-	/* delete {{{1 */
-	action  = ACTION_CRWD_DELETE;
-	hash = hash_new();
-		hash_set(hash, "action", TYPE_INT32,  &action);
-		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
-		hash_set(hash, "size",   TYPE_INT32, "\x0e\x00\x00\x00");
-		
-		buffer_remove_chunks(buffer);
-		
-		ssize = chain_query(chain, hash, buffer);
-			fail_unless(ssize == 0,                                "chain file key 1 delete failed");
-		
-	hash_free(hash);
-	
-	action  = ACTION_CRWD_DELETE;
-	hash = hash_new();
-		hash_set(hash, "action", TYPE_INT32,  &action);
-		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
-		hash_set(hash, "size",   TYPE_INT32, "\x0e\x00\x00\x00");
-		
-		buffer_remove_chunks(buffer);
-		
-		ssize = chain_query(chain, hash, buffer);
-			fail_unless(ssize == 0,                                "chain file key 2 delete failed");
-		
-	hash_free(hash);
 	/* }}}1 */
 	/* count {{{1 */
 	size_t  count;
@@ -193,7 +168,23 @@ START_TEST (test_backend_file){
 		fail_unless(memcmp(test_chunk, move4_data, ssize) == 0, "chain file key 4 move data failed"); 
 	
 	/* }}}1 */
-	
+	/* delete {{{1 */
+	action  = ACTION_CRWD_DELETE;
+	hash = hash_new();
+	ssize = 10 + 10;
+		hash_set(hash, "action", TYPE_INT32,  &action);
+		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		
+		buffer_remove_chunks(buffer);
+		
+		ssize = chain_query(chain, hash, buffer);
+			fail_unless(ssize == 0,                                "chain file key 1 delete failed");
+		
+	hash_free(hash);
+	/* }}}1 */
+
+
 	free(test_chunk);
 	buffer_free(buffer);
 	setting_destroy(setting);

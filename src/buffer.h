@@ -85,11 +85,19 @@ _inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { re
 	}                                                                   \
 })
 
+#define buffer_write_flat(_buffer,_dst,_dst_size) ({                        \
+	buffer_write(                                                       \
+		_buffer,                                                    \
+		_dst_size,                                                  \
+		memcpy(chunk, (void *)_dst + offset, size)                  \
+	);                                                                  \
+})
+
 #define buffer_read_flat(_buffer,_read_size,_dst,_dst_size) ({              \
 	buffer_read(                                                        \
 		_buffer,                                                    \
 		(_dst_size > _read_size) ? _read_size : _dst_size,          \
-		memcpy(_dst + offset, chunk, size)                          \
+		memcpy((void *)_dst + offset, chunk, size)                  \
 	);                                                                  \
 })
 

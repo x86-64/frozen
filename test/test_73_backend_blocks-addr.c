@@ -59,7 +59,6 @@ START_TEST (test_backend_blocks_addrs){
 		
 		fail_unless(count == match_size, "chain 'blocks-addressing' tree size invalid");
 	// }}}
-	
 	// check offsets {{{
 	buffer_remove_chunks(buffer);
 	
@@ -115,11 +114,13 @@ START_TEST (test_backend_blocks_addrs){
 		hash_set(hash, "action",     TYPE_INT32, &action);	
 		if( (ssize = backend_query(backend, hash, buffer)) > 0)
 			buffer_read_flat(buffer, ssize, &count, sizeof(count)); 
-		
 		fail_unless(count == match_size + 0x10 - VSIZE, "chain 'blocks-adressing' delete tree size invalid");
 	// }}}
-
+	
+	hash_free(hash);
+	buffer_free(buffer);
 	backend_destory(backend);
+	setting_destroy(s_backend);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_blocks_addrs)

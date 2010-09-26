@@ -6,6 +6,7 @@ typedef enum data_type {
 	TYPE_INT32,
 	TYPE_INT64,
 	TYPE_INT8,
+	TYPE_VOID,
 } data_type;
 
 int     data_binary_cmp(void *data1, void *data2);
@@ -28,6 +29,7 @@ int data_int8_cmp(void *data1, void *data2);
 int data_int8_inc(void *data);
 int data_int8_div(void *data, unsigned int divider);
 int data_int8_mul(void *data, unsigned int mul);
+size_t  data_void_raw_len(void *data, size_t buffer_size);
 
 
 #endif // DATA_PROTOS_H
