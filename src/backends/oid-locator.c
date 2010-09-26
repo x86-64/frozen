@@ -73,11 +73,9 @@ static oid_proto_t *  oid_proto_from_type(data_type type){
 }
 
 static int locator_init(chain_t *chain){
-	locator_ud *user_data = (locator_ud *)malloc(sizeof(locator_ud));
+	locator_ud *user_data = (locator_ud *)calloc(1, sizeof(locator_ud));
 	if(user_data == NULL)
 		return -ENOMEM;
-	
-	memset(user_data, 0, sizeof(locator_ud));
 	
 	chain->user_data = user_data;
 	return 0;
@@ -257,6 +255,8 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 		case LINEAR_INCAPSULATED:
 			if(decapsulate(data, request, "key") != 0)
 				return -EINVAL;
+			if(decapsulate(data, request, "size") != 0)
+				return -EINVAL;
 			
 			if( (ret = chain_next_query(chain, request, buffer)) <= 0)
 				return ret;
@@ -300,8 +300,7 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 				return -EINVAL;
 			if(decapsulate(data, request, "key_to")   != 0)
 				return -EINVAL;
-			if(decapsulate(data, request, "size")     != 0)
-				return -EINVAL;
+			decapsulate(data, request, "size");             // optional
 			
 			// fall through
 		case LINEAR_ORIGINAL:

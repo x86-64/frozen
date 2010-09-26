@@ -18,6 +18,13 @@ data_type            data_type_from_string  (char *string){
 	return -1;
 }
 
+data_proto_t *       data_proto_from_type   (data_type type){
+	if((unsigned)type >= data_protos_size)
+		return 0;
+	
+	return &data_protos[type];
+}
+
 int                  data_cmp               (data_type type, data_t *data1, data_t *data2){
 	if((unsigned)type >= data_protos_size)
 		return 0;

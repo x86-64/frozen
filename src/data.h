@@ -33,6 +33,7 @@ extern size_t        data_protos_size;
 
 /* api's */
 //int                  data_proto_init              (data_proto_t *proto, data_type type);
+data_proto_t *       data_proto_from_type   (data_type type);
 int                  data_type_is_valid     (data_type type);
 int                  data_cmp               (data_type type, data_t *data1, data_t *data2);
 size_t               data_len               (data_type type, data_t *data, size_t buffer_size);

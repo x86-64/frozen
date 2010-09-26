@@ -20,25 +20,28 @@ START_TEST (test_backend_locator){
 	
 	backend = backend_new("in_locator", settings);
 		fail_unless(backend != NULL, "backend creation failed");
-
+	
 	unsigned int  action;
 	hash_t       *hash;
 	ssize_t       ssize;
 	off_t         new_key1, new_key2;
 	buffer_t     *buffer = buffer_alloc();
+	char  *test_chunk;
 	char  key1_data[]  = "\x0e\x00\x00\x00test167890";
 	char  key2_data[]  = "\x0e\x00\x00\x00test267890";
 	
-	action  = ACTION_CRWD_CREATE;
 	hash = hash_new();
+	
+	action  = ACTION_CRWD_CREATE;
+	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32, &action);
-		hash_set(hash, "size",   TYPE_INT32, "\x01\x00\x00\x00");
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key1 failed");	
 		buffer_read(buffer, ssize, new_key1 = *(off_t *)chunk; break);
 		
-		hash_set(hash, "size",   TYPE_INT32, "\x01\x00\x00\x00");
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key2 failed");	
@@ -47,24 +50,51 @@ START_TEST (test_backend_locator){
 			fail_unless(new_key2 - new_key1 == 1,                 "backend in_locator offsets invalid");
 	
 	action  = ACTION_CRWD_WRITE;
+	ssize   = 1;
 		hash_set(hash, "action", TYPE_INT32,  &action);
 		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
 		hash_set(hash, "value",  TYPE_BINARY, &key1_data);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
 		ssize = backend_query(backend, hash, buffer);
-			fail_unless(ssize == 1,  "backend in_locator write failed");
+			fail_unless(ssize == 1,  "backend in_locator write 1 failed");
 		
+	ssize   = 1;
+		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
+		hash_set(hash, "value",  TYPE_BINARY, &key2_data);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		
+		ssize = backend_query(backend, hash, buffer);
+			fail_unless(ssize == 1,  "backend in_locator write 2 failed");
+	
+	action  = ACTION_CRWD_READ;
+	ssize   = 1;
+		hash_set(hash, "action", TYPE_INT32,  &action);
+		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		
+		buffer_remove_chunks(buffer);
+		
+		ssize = backend_query(backend, hash, buffer);
+			fail_unless(ssize == 1,                                 "backend in_locator read 1 failed");
+			
+		test_chunk = buffer_get_first_chunk(buffer);
+			fail_unless(memcmp(test_chunk, key1_data + 4, 10) == 0, "backend in_locator read 1 data failed");
+	
+	ssize   = 1;
+		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		
+		buffer_remove_chunks(buffer);
+		
+		ssize = backend_query(backend, hash, buffer);
+			fail_unless(ssize == 1,                                 "backend in_locator read 2 failed");
+			
+		test_chunk = buffer_get_first_chunk(buffer);
+			fail_unless(memcmp(test_chunk, key2_data + 4, 10) == 0, "backend in_locator read 2 data failed");
 		
 	hash_free(hash);
 	buffer_free(buffer);
-
-/*
-	ret = backend_crwd_get(backend, &key, test_buff, 1);
-	test_chunk = buffer_get_first_chunk(test_buff);
-		fail_unless(ret == 0 && strncmp(test1_chunk, test_chunk, 16) == 0, "backend key get failed");
-	ret = backend_crwd_delete(backend, &key, 1);
-		fail_unless(ret == 0, "backend key delete failed");
-*/
 
 	backend_destory(backend);
 	setting_destroy(settings);
