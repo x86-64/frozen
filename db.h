@@ -3,7 +3,7 @@ struct dbtable_ {
 	char            *name;
 	
 	/* table settings */
-	int              pack_type;
+	int              data_type;
 	
 	/* table data */
 	dbmap            data;
@@ -14,6 +14,7 @@ struct dbtable_ {
 typedef struct dbitem_ {
     unsigned long  oid;
     char*          attribute;
+    char*          query;
     char*          data;
     unsigned long  data_len;
     dbtable       *table;

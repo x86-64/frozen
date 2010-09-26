@@ -639,15 +639,16 @@ static void item_output(conn *c, char *item_name, char *item_data, size_t item_d
 }
 
 static int ident_parse(char *ident, dbitem *item){
-	char *item_attribute = index(ident, '.');
-	
+	char *item_attribute;
+
+	item_attribute = index(ident, '.');
 	if(item_attribute != NULL){
 		*item_attribute++;
-
+		
 		item->attribute = strdup(item_attribute);
 		item->table     = db_tables_search(item_attribute);
 	}
-	item->oid = strtoll(ident, NULL, 10);	
+	item->oid = strtoll(ident, NULL, 10);
 	
 	return 1;
 }
@@ -658,8 +659,9 @@ static void process_version_command(conn *c, token_t *tokens, size_t ntokens){
 
 static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 	int      ret;
-	token_t *key_token = &tokens[KEY_TOKEN];
-	
+	token_t *key_token   = &tokens[KEY_TOKEN];
+	token_t *query_token = &tokens[2]; 
+
 	do {
 		if(strcmp(key_token->value, "new") == 0){
 			unsigned long oid_new;
@@ -685,6 +687,9 @@ static void process_get_command(conn *c, token_t *tokens, size_t ntokens){
 		}
 		
 		if(index(key_token->value, '?') == key_token->value){
+			if(query_token->value != NULL)
+				item_new->query = strdup(query_token->value);
+			
 			ret = db_query_search(item_new);
 		}else{
 			ret = db_query_get(item_new);

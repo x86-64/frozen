@@ -277,7 +277,13 @@ static unsigned short dbindex_vm_virt2real(dbindex *index, unsigned short iblock
 	return ((unsigned short *)(index->file.data + DBINDEX_DATA_OFFSET))[iblock_virt - 1];
 }
 
-static unsigned int dbindex_vm_search(dbindex *index, unsigned short *piblock_virt, unsigned short *piblock_real, char **pitem_offset, char *new_key){
+static unsigned int dbindex_vm_search(
+					dbindex *index,
+					unsigned short *piblock_virt,
+					unsigned short *piblock_real,
+					char **pitem_offset,
+					char *new_key_conv
+				){
 	int             cret;
 	unsigned int    page_len;
 	unsigned long   range_elements;
@@ -293,8 +299,7 @@ static unsigned int dbindex_vm_search(dbindex *index, unsigned short *piblock_vi
 	char           *range_end;
 	char           *page_data_start;
 	char           *page_data_end;
-	
-	int (*cmpfunc)(dbindex *, void *, void *) = index->cmpfunc;
+	char           *key_conv;
 	
 	file_start        = index->file.data + index->data_offset;
 	file_end          = file_start + index->iblock_last * index->page_size;
@@ -306,13 +311,12 @@ static unsigned int dbindex_vm_search(dbindex *index, unsigned short *piblock_vi
 	range_end         = file_end;
 	
 	if(range_start == range_end){
-		printf("empty_range\n");
 		*piblock_virt = 1;
 		*piblock_real = 1;
 		*pitem_offset = range_start - index->item_size;
 		return 2;
 	}
-
+	
 	while(1){
 		range_elements   = (range_end - range_start) / index->item_size;
 		item_offset_virt = range_start + (range_elements / 2) * index->item_size;
@@ -337,15 +341,16 @@ static unsigned int dbindex_vm_search(dbindex *index, unsigned short *piblock_vi
 			page_data_start - index->file.data,
 			page_data_end - index->file.data
 		);*/
-			
+		
 		if(item_offset_real < page_data_start)
 			item_offset_real = page_data_start; // real elements_count less than virtual
-	
-		cret = cmpfunc(index, item_offset_real, new_key);
+		
+		key_conv = index->keyconv(index, item_offset_real);
+		
+		cret = index->cmpfunc(index, key_conv, new_key_conv);
 		if(cret == 0){
-			// element found, but index is not unique by keys, so we lie that element not found
 			*pitem_offset = item_offset_real;
-			return 2;
+			return 0;
 		}else if(cret == -2){
 			printf("fatal\n");
 			return -2;
@@ -357,7 +362,7 @@ static unsigned int dbindex_vm_search(dbindex *index, unsigned short *piblock_vi
 		
 		if(range_elements <= 1){
 			*pitem_offset = range_end + (iblock_real - iblock_virt) * index->page_size - index->item_size;
-
+			
 			return (ret == 0) ? 1 : 2;
 		}
 	}
@@ -527,6 +532,9 @@ void dbindex_save(dbindex *index){
 void dbindex_unload(dbindex *index){
 	int    i;
 	void  *ipage_ptr;
+	
+	if(index->loaded != 1)
+		return;
 
 	dbindex_save(index);
 
@@ -556,8 +564,9 @@ void dbindex_unload(dbindex *index){
 	index->loaded = 0;
 }
 
-void dbindex_set_cmpfunc(dbindex *index, int (*cmpfunc)(dbindex *, void *, void *)){
+void dbindex_set_funcs(dbindex *index, int (*cmpfunc)(dbindex *, void *, void *), void *(*keyconv)(dbindex *, void *)){
 	index->cmpfunc = cmpfunc;
+	index->keyconv = keyconv;
 }
 
 void dbindex_set_userdata(dbindex *index, void *data){
@@ -639,6 +648,7 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 	unsigned int   cret;
 	char          *item_offset;
 	char          *new_key       = zalloc(index->item_size);
+	char          *key_conv;
 	
 	//pthread_rwlock_rdlock(&index->lock);
 	switch(index->type){
@@ -699,7 +709,14 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 			ret = 0;
 			break;
 		case DBINDEX_TYPE_INDEX:
-			cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, item_key);
+			/* prepare item */
+			key_conv = index->keyconv(index, item_key);	
+			
+			/* insert item */
+			cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, key_conv);
+			if(cret == 0)
+				cret = 2;
+			
 			cret = dbindex_iblock_insert(index, iblock_curr_real, cret, item_offset, item_key);
 			if(cret == 1){ // page full
 				char *poped_item;
@@ -738,7 +755,10 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 					dbindex_iblock_insert(index, iblock_prev_real, 2, page_data_end - index->item_size, poped_item);
 					break;
 				}
-				cret = dbindex_vm_search(index, &iblock_curr_real, &iblock_curr_real, &item_offset, item_key);
+				cret = dbindex_vm_search(index, &iblock_curr_virt, &iblock_curr_real, &item_offset, key_conv);
+				if(cret == 0)
+					cret = 2;
+					
 				cret = dbindex_iblock_insert(index, iblock_curr_real, cret, item_offset, item_key);
 
 				free(poped_item);
@@ -757,40 +777,54 @@ unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value){
 
 /* dbindex_query
  *
+ * INDEX:  in: item_value - converted key
+ *        out: item_key   - key
  * returns: 
  *     0 - found
  *     1 - not found
 */
 
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value){
-	short            iblock;
 	unsigned int     ret = 1;
+	unsigned int     cret;
+	unsigned short   iblock_real;
+	unsigned short   iblock_virt;
 	unsigned char    index_c1;
 	unsigned char    index_c2;
 	char            *item_revkey = malloc(index->key_len);
 	char            *item_offset;
-	short           *ipage_l2;
+	unsigned short  *ipage_l2;
 
 	//pthread_rwlock_rdlock(&index->lock);
 		switch(index->type){
 			case DBINDEX_TYPE_PRIMARY:
-				iblock = dbindex_ipage_get_iblock(index, item_key);
-				if(iblock == 0)
+				iblock_real = dbindex_ipage_get_iblock(index, item_key);
+				if(iblock_real == 0)
 					break;
 				
 				dbmap_lock(&index->file);
-				dbindex_iblock_rdlock(index, iblock);
+				dbindex_iblock_rdlock(index, iblock_real);
 					
 					revmemcpy(item_revkey, item_key, index->key_len);
-					if(dbindex_iblock_search(index, iblock, &item_offset, item_revkey) == 0){
+					if(dbindex_iblock_search(index, iblock_real, &item_offset, item_revkey) == 0){
 						memcpy(item_value, item_offset + index->key_len, index->value_len);
 						ret = 0;
-					}else{
-						printf("bug\n");
 					}
 
-				dbindex_iblock_unlock(index, iblock);
+				dbindex_iblock_unlock(index, iblock_real);
 				dbmap_unlock(&index->file);
+				break;
+			case DBINDEX_TYPE_INDEX:
+				dbmap_lock(&index->file);
+					
+					cret = dbindex_vm_search(index, &iblock_virt, &iblock_real, &item_offset, item_value);
+					if(cret == 0){
+						memcpy(item_key, item_offset, index->key_len);
+						ret = 0;
+					}
+					
+				dbmap_unlock(&index->file);
+				
 				break;
 		}
 	//pthread_rwlock_unlock(&index->lock);
@@ -857,7 +891,7 @@ unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, 
 	char          *page_data_start;
 	char          *page_data_end;
 	char          *new_key = malloc(index->item_size);
-
+	
 	dbmap_lock(&index->file);
 	
 	iblock = 1;

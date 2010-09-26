@@ -31,7 +31,8 @@ struct dbindex_ {
 	//pthread_rwlock_t    lock;
 	void               *user_data;
 	
-	int (*cmpfunc)(dbindex *, void *, void *);
+	int    (*cmpfunc)(dbindex *, void *, void *); // cmp two converted keys
+	void * (*keyconv)(dbindex *, void *);         // convert key function
 };
 
 /*
@@ -48,8 +49,10 @@ unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len,
 void dbindex_load(char *path, dbindex *index);
 void dbindex_save(dbindex *index);
 void dbindex_unload(dbindex *index);
+void dbindex_set_funcs(dbindex *index, int (*cmpfunc)(dbindex *, void *, void *), void *(*keyconv)(dbindex *, void *));
 unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_delete(dbindex *index, void *item_key);
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, void *), void *arg1, void *arg2);
+

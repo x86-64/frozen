@@ -3,6 +3,7 @@
 #include <dbmap.h>
 #include <dbindex.h>
 #include <db.h>
+#include <data.h>
 
 /* db settings */
 char                   *dbfile_main;
@@ -18,8 +19,9 @@ static pthread_mutex_t  db_mutex_query_init;
 
 static void* db_iter_table_search(void *table, void *name, void *addr);
 static void* db_iter_query_delete_oid(void *table, void *oid, void *null);
+
 static int   db_cmpfunc_idx_data(dbindex *index, void *item1_key, void *item2_key);
-	
+static void* db_keyconv_idx_data(dbindex *index, void *item_key);
 
 /* PRIVATE FUNCTIONS */
 
@@ -49,7 +51,7 @@ static void db_table_settings_save(dbtable *table){
 
 	FILE *fp_set = fopen(apath_set, "w");
 	
-	fprintf(fp_set, "%d\n", table->pack_type);
+	fprintf(fp_set, "%d\n", table->data_type);
 	
 	fclose(fp_set);
 }
@@ -60,13 +62,13 @@ static void db_table_settings_load(dbtable *table){
 
 	char *apath_set  = db_abspath(table->name, "set");
 	if(stat(apath_set, &file_stat) != 0){
-		table->pack_type = 5;
+		table->data_type = 5;
 		
 		db_table_settings_save(table);
 	}else{
 		FILE *fp_set = fopen(apath_set, "r");
 
-		res = fscanf(fp_set, "%d\n", &table->pack_type);
+		res = fscanf(fp_set, "%d\n", &table->data_type);
 
 		fclose(fp_set);
 	}
@@ -80,7 +82,7 @@ static void db_table_load_idx_data(dbtable *table){
 	if(stat(apath_idx_data, &index_stat) == 0){
 		dbindex_load(apath_idx_data, &table->idx_data);
 		dbindex_set_userdata (&table->idx_data, table);
-		dbindex_set_cmpfunc  (&table->idx_data, &db_cmpfunc_idx_data);
+		dbindex_set_funcs    (&table->idx_data, &db_cmpfunc_idx_data, &db_keyconv_idx_data);
 	}
 	free(apath_idx_data);
 }
@@ -136,6 +138,7 @@ static void db_table_unload(dbtable *table){
 	db_table_settings_save(table);
 
 	dbindex_unload(&table->idx_oid);
+	dbindex_unload(&table->idx_data);
 	dbmap_unmap(&table->data);
 
 	free(table->name);
@@ -208,9 +211,6 @@ static void dbitem_append(dbitem *item, void *data, unsigned long data_len){
 }
 
 dbtable* db_tables_search(char *name){
-	if(settings.verbose > 1)
-		printf("db_tables_search\n");
-
 	dbtable *table = NULL;
 	
 	list_iter(&db_tables, &db_iter_table_search, (void *)name, (void *)&table);
@@ -220,64 +220,39 @@ dbtable* db_tables_search(char *name){
 	return db_table_load(name);
 }
 
-static unsigned int db_table_query_set(dbitem *item){
-	dbtable *table = item->table;
+static unsigned int db_table_query_isset(dbitem *item){
+	unsigned long entry_off;
 	
+	return dbindex_query(&item->table->idx_oid, &item->oid, &entry_off);
+}
+
+
+static unsigned int db_table_query_set(dbitem *item){
+	dbtable       *table      = item->table;
 	char          *entry_ptr;
 	unsigned long  entry_off;
 	unsigned int   entry_len;
 	
-	switch(table->pack_type){
-		case 1:  entry_len = 1; break;                      // byte
-		case 2:  entry_len = 4; break;                      // u32
-		case 3:  entry_len = 8; break;                      // u64
-		case 4:  entry_len = strlen(item->data) + 1; break; // data\0 - use strlen coz client can cheat and supply
-			                                            // data with \0 in it, which can lead to wasting disk space
-		default: entry_len = item->data_len + 4;     break; // u32 len; data
-	};
+	entry_len = data_packed_len(table->data_type, item->data, item->data_len);
 	
-	//if search free space failed
+	// TODO search free space failed
 	entry_off = dbmap_expand(&table->data, entry_len);
-
-	if(entry_off == -1){
-		return 1; // error
-	}
-
-	dbmap_lock(&table->data);
-		unsigned long long data_ll = 0;
-			
-		entry_ptr = table->data.data + entry_off;
-
-		switch(table->pack_type){
-			case 1:
-			case 2:
-			case 3:
-				data_ll = strtoull(item->data, NULL, 10);
-				memcpy(entry_ptr, &data_ll, entry_len);
-				break;
-			case 4:
-				memcpy(entry_ptr, item->data, entry_len);
-				break;
-			default:
-				*(unsigned int *)entry_ptr = item->data_len;
-				memcpy(entry_ptr + 4, item->data, item->data_len);
-				break;
-		};
-	dbmap_unlock(&table->data);
 	
-	if(settings.verbose > 1)
-		printf("oid: %ld off: %ld\n", item->oid, entry_off);
+	if(entry_off == -1)
+		return 1; // error
+	
+	dbmap_lock(&table->data);
+		
+		entry_ptr = table->data.data + entry_off;
+		
+		data_pack(table->data_type, item->data, entry_ptr, entry_len);
+		
+	dbmap_unlock(&table->data);
 	
 	dbindex_insert(&table->idx_oid,  &item->oid, &entry_off);
 	dbindex_insert(&table->idx_data, &item->oid, NULL);
 	
 	return 0;
-}
-
-static unsigned int db_table_query_isset(dbitem *item){
-	unsigned long entry_off;
-	
-	return dbindex_query(&item->table->idx_oid, &item->oid, &entry_off);
 }
 
 static unsigned int db_table_query_get(dbitem *item){
@@ -289,46 +264,15 @@ static unsigned int db_table_query_get(dbitem *item){
 
 	if(dbindex_query(&table->idx_oid, &item->oid, &entry_off) == 0){
 		dbmap_lock(&table->data);
-		// TODO: remove copying item value to memory
-
-		entry_ptr = table->data.data + entry_off;
-		switch(table->pack_type){
-			case 1:
-			case 2:
-			case 3:
-				item->data = malloc(30);
-				break;
-			case 4:
-				entry_len  = strlen(entry_ptr) + 1;
-				item->data = malloc(entry_len);
-				break;
-			default:
-				entry_len  = *(unsigned int *)entry_ptr;
-				item->data = malloc(entry_len);
-				entry_ptr += 4;
-				break;
-		};
+			// TODO: remove copying item value to memory
+			
+			entry_ptr = table->data.data + entry_off;
+			entry_len = data_unpacked_len(table->data_type, entry_ptr, 0);
+			
+			item->data     = malloc(entry_len);	
+			item->data_len = entry_len;
 		
-		switch(table->pack_type){
-			case 1: sprintf(item->data,   "%d", *entry_ptr);                       break;
-			case 2: sprintf(item->data,   "%d", *(unsigned int *)entry_ptr);       break;
-			case 3: sprintf(item->data, "%lld", *(unsigned long long *)entry_ptr); break;
-			default:
-				memcpy(item->data, entry_ptr, entry_len);
-				break;
-		}
-		
-		switch(table->pack_type){
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-				item->data_len = strlen(item->data);
-				break;
-			default:
-				item->data_len = entry_len;
-				break;
-		};
+			data_unpack(table->data_type, entry_ptr, entry_len, item->data);
 
 		dbmap_unlock(&table->data);
 		return 0;
@@ -503,11 +447,17 @@ static void* db_iter_query_get_oid(void *ptable, void *pitem, void *null){
 	return (void *)1;
 }
 
+static char* itoa(unsigned int num){
+	char num_str[30];
+	
+	sprintf(num_str, "%u", num);
+	
+	return strdup(num_str);
+}
+
 static void* db_iter_query_search(void *item_key, void *item_value, void *pitem, void *null){
 	dbitem *item = (dbitem *)pitem;
-	char   *info = malloc(30);
-
-	sprintf(info, "%u", *(unsigned int *)item_key);
+	char   *info = itoa(*(unsigned int *)item_key);
 	
 	dbitem_append(item, info, strlen(info));
 	
@@ -524,10 +474,8 @@ static void* db_iter_query_init(void *item_key, void *item_value, void *ptable, 
 	
 	if(db_table_query_get(item) == 0){
 		item->table = tmp_table;
-		
+
 		db_table_query_set(item);
-	}else{
-		printf("fatal\n");
 	}
 	
 	dbitem_free(item);
@@ -540,73 +488,24 @@ static void* db_iter_query_index(void *item_key, void *item_value, void *ptable,
 }
 
 static int db_cmpfunc_idx_data(dbindex *index, void *item1_key, void *item2_key){
-	int                 cret;
-	unsigned long       item1_offset;
-	unsigned long       item2_offset;
-	char               *item1_ptr;
-	char               *item2_ptr;
-	unsigned long long  item1_data;
-	unsigned long long  item2_data;
-	unsigned int        item1_len;
-	unsigned int        item2_len;
-	unsigned int        cmp_len;
-	dbtable             *table       = (dbtable *)index->user_data;
+	dbtable *table = (dbtable *)index->user_data;
 	
-	//printf("%llx %llx\n", *(unsigned int *)item1_key, *(unsigned int *)item2_key);
-	
-	if(dbindex_query(&table->idx_oid, item1_key, &item1_offset) != 0)
-		return -2;
-	if(dbindex_query(&table->idx_oid, item2_key, &item2_offset) != 0)
-		return -2;
-	
-	dbmap_lock(&table->data);
-		item1_ptr = table->data.data + item1_offset;
-		item2_ptr = table->data.data + item2_offset;
-		
-		switch(table->pack_type){
-			case 1:
-				item1_data = (unsigned long long)*(unsigned char *)item1_ptr;
-				item2_data = (unsigned long long)*(unsigned char *)item2_ptr; 
-				     if(item1_data == item2_data){ cret =  0; }
-				else if(item1_data <  item2_data){ cret = -1; }
-				else                             { cret =  1; }
-				break;
-			case 2:
-				item1_data = (unsigned long long)*(unsigned int *)item1_ptr;
-				item2_data = (unsigned long long)*(unsigned int *)item2_ptr; 
-				     if(item1_data == item2_data){ cret =  0; }
-				else if(item1_data <  item2_data){ cret = -1; }
-				else                             { cret =  1; }
-				break;
-			case 3:
-				item1_data = (unsigned long long)*(unsigned long long *)item1_ptr;
-				item2_data = (unsigned long long)*(unsigned long long *)item2_ptr; 
-				     if(item1_data == item2_data){ cret =  0; }
-				else if(item1_data <  item2_data){ cret = -1; }
-				else                             { cret =  1; }			
-				break;
-			case 4:
-				cret = strcmp(item1_ptr, item2_ptr);
-				if(cret > 0) cret =  1;
-				if(cret < 0) cret = -1;
-				break;
-			default:
-				item1_len = *(unsigned int *)item1_ptr;
-				item2_len = *(unsigned int *)item2_ptr;
-				
-				cmp_len = item1_len;
-				if(item1_len > item2_len)
-					cmp_len = item2_len;
-
-				cret = memcmp(item1_ptr + 4, item2_ptr + 4, cmp_len);
-				if(cret > 0) cret =  1;
-				if(cret < 0) cret = -1;			
-				break;
-		};
-	dbmap_unlock(&table->data);
-
-	return cret;
+	return data_cmp_binary(table->data_type, item1_key, item2_key);
 }
+
+static void* db_keyconv_idx_data(dbindex *index, void *item_key){
+	unsigned long       item_offset;
+	char               *item_ptr;
+	dbtable            *table        = (dbtable *)index->user_data;
+	
+	if(dbindex_query(&table->idx_oid, item_key, &item_offset) != 0)
+		return NULL;
+	
+	item_ptr = table->data.data + item_offset;
+	
+	return item_ptr;
+}
+
 
 /* }}}1 */
 
@@ -618,6 +517,8 @@ dbitem* dbitem_alloc(void){
 }
 
 void dbitem_free(dbitem *item){
+	if(item->query)
+		free(item->query);
 	if(item->attribute)
 		free(item->attribute);
 	if(item->data)
@@ -672,12 +573,47 @@ unsigned int db_query_delete(dbitem *item){
 }
 
 unsigned int db_query_search(dbitem *item){
+	unsigned int ret = 1;
+
 	if(settings.verbose > 1)
 		printf("db_query_search\n");
 	
-	// lookup other indexes
-	
-	dbindex_iter(&item->table->idx_oid, &db_iter_query_search, item, NULL);
+	if(item->query == NULL || strcmp(item->query, "%") == 0){
+		dbindex_iter(&item->table->idx_oid, &db_iter_query_search, item, NULL);
+		return 0;
+	}
+
+	if(item->table->idx_data.loaded == 1){
+		/* direct value search */
+		
+		/* we pack item->query to binary data and try to find it */
+		int            data_type  = item->table->data_type;
+		unsigned long  entry_len  = data_packed_len(data_type, item->query, strlen(item->query));
+		char          *entry_data = malloc(entry_len);
+		
+		data_pack(data_type, item->query, entry_data, entry_len);
+		
+		/* start searching */
+		dbindex  *idx_data     = &item->table->idx_data;
+		char     *item_oid     = malloc(idx_data->key_len);
+		char     *item_oid_str;
+		
+		if(dbindex_query(&item->table->idx_data, item_oid, entry_data) == 0){
+			item_oid_str = itoa(*(unsigned int *)item_oid);
+			
+			dbitem_append(item, item_oid_str, strlen(item_oid_str));
+			
+			free(item_oid_str);
+			
+			ret = 0;
+		}else{
+			printf("not in index\n");
+		}
+		
+		free(item_oid);
+		free(entry_data);
+	}
+	return ret;
 }
 
 unsigned int db_query_init(dbtable *table, int type){
@@ -687,7 +623,7 @@ unsigned int db_query_init(dbtable *table, int type){
 		db_table_unlink("_temp");
 		
 		tmp_table = db_table_load("_temp");
-		tmp_table->pack_type = type;
+		tmp_table->data_type = type;
 		
 		dbindex_iter(&table->idx_oid, &db_iter_query_init, table, tmp_table);
 		
@@ -727,4 +663,3 @@ unsigned int db_query_index(dbtable *table, int type){
 }
 
 /* }}}1 */
-
