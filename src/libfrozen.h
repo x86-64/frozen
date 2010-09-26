@@ -16,6 +16,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#define error(...)            do{ fprintf(stderr,__VA_ARGS__);    }while(0);
+#define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
+
 /* Own headers */
 #include <list.h>            // internal data storage
 #include <settings.h>        // 

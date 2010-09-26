@@ -29,5 +29,5 @@ void *  data_binary_ptr(void *data){
 	return (void *)((data_binary_t *)data + 1);
 }
 
-REGISTER_DATA(TYPE_BINARY,SIZE_VARIABLE,&data_binary_cmp,&data_binary_len)
+REGISTER_DATA(TYPE_BINARY,SIZE_VARIABLE, .func_cmp = &data_binary_cmp, .func_len = &data_binary_len)
 

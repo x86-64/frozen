@@ -6,18 +6,19 @@ rm -rf test/data_backend_locator.dat   &>/dev/null
 find . -name '*.gcov' -delete
 
 # backends
-planned=`find src/backends/ -name '*.c' -printf 'backends/%P '`
-cat src/Makefile.am | sed "s#\(backends_sources=\).*#\1$planned#" > src/Makefile.tmp
-mv src/Makefile.tmp src/Makefile.am
+#planned=`find src/backends/ -maxdepth 1 -name '*.c' -printf 'backends/%P '`
+#cat src/Makefile.am | sed "s#\(backends_sources=\).*#\1$planned backends/oid-locator.c#" > src/Makefile.tmp
+#mv src/Makefile.tmp src/Makefile.am
 
 # data types
-planned=`find src/data/ -name '*.c' -printf 'data/%P '`
-cat src/Makefile.am | sed "s#\(data_sources=\).*#\1$planned#" > src/Makefile.tmp
-mv src/Makefile.tmp src/Makefile.am
+#planned=`find src/data/ -name '*.c' -printf 'data/%P '`
+#cat src/Makefile.am | sed "s#\(data_sources=\).*#\1$planned#" > src/Makefile.tmp
+#mv src/Makefile.tmp src/Makefile.am
 
 cat src/data/*.c | perl -e '
 $e=""; $f=""; $a="";
 while(<STDIN>){
+	s/\s*?\/[\/*].*$//g;
 	if(/REGISTER_DATA\(([^,]*),(.*)\)/){
 		$n=lc(substr($1,5));
 		$t=$1;

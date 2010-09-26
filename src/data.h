@@ -3,6 +3,8 @@
 
 typedef size_t (*f_data_len) (void *);
 typedef int    (*f_data_cmp) (void *, void *);
+typedef int    (*f_data_inc) (void *);
+typedef int    (*f_data_div) (void *, unsigned int);
 
 typedef enum size_type {
 	SIZE_FIXED,
@@ -16,6 +18,8 @@ typedef struct data_proto_t {
 	
 	f_data_cmp  func_cmp;
 	f_data_len  func_len;
+	f_data_div  func_div;
+	f_data_inc  func_inc;
 	
 	size_t      fixed_size;
 } data_proto_t;
@@ -27,9 +31,10 @@ extern size_t        data_protos_size;
 
 /* api's */
 //int                  data_proto_init              (data_proto_t *proto, data_type type);
-int                  data_type_is_valid           (data_type type);
-int                  data_cmp                     (data_type type, data_t *data1, data_t *data2);
-size_t               data_len                     (data_type type, data_t *data);
+int                  data_type_is_valid     (data_type type);
+int                  data_cmp               (data_type type, data_t *data1, data_t *data2);
+size_t               data_len               (data_type type, data_t *data);
+size_type            data_size_type         (data_type type);
 //_inline f_data_cmp   data_proto_get_cmp_func      (data_proto_t *data)                   { return data->func_cmp; }
 //_inline f_data_len   data_proto_get_len_func      (data_proto_t *data)                   { return data->func_len; }
 
