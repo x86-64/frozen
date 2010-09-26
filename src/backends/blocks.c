@@ -271,6 +271,8 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffer){
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
+	// TODO r_size > block_size
+	
 	hash_empty        (data->layer_get);
 	hash_assign_layer (data->layer_get, request);
 	
@@ -300,14 +302,20 @@ static ssize_t itms_insert_copy(chain_t *chain, off_t src, off_t dst, size_t siz
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
+	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+		return -EINVAL;
+		
+	new_block_vid = src_block_vid;
+	
+	goto start;
 	while(size > 0){
-		if(map_off(data, src, &src_block_vid, &src_real) != 0)
+		if(map_off(data, src, &src_block_vid, &src_real) <= 0)
 			return -EINVAL;
 		
+	start:
 		src_block_off = src_real % data->block_size;
 		block_size    = MIN(size, (data->block_size - src_block_off));
 		
-		new_block_vid = data->blocks_count;       // TODO remove
 		if(real_new(data, &new_block_off) <= 0)
 			return -EFAULT;
 		
@@ -317,18 +325,19 @@ static ssize_t itms_insert_copy(chain_t *chain, off_t src, off_t dst, size_t siz
 		if(map_insert(data, new_block_vid, (unsigned int)new_block_off, block_size) != 0)
 			return -EFAULT;
 		
-		src        += block_size;
+		src        += block_size * 2; // TODO oh my...
 		size       -= block_size;
+		new_block_vid++;
 	}
 	
-	if(map_off(data, dst, &dst_block_vid, &dst_real) != 0)
-		return -EINVAL;
+	if(map_off(data, dst, &dst_block_vid, &dst_real) <= 0)
+		return -EFAULT;
 	
 	dst_block_off = dst_real % data->block_size;
 	
 	if(dst_block_off != 0){ // inserting data in middle, we truncate block and insert data after it
 		if(map_resize(data, dst_block_vid, dst_block_off) != 0)
-			return -EINVAL;
+			return -EFAULT;
 	}
 	return 0;
 }
@@ -343,9 +352,9 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	
 	ssize_t           move_delta;
 	
-	if(hash_get_copy (request, "from", TYPE_INT64, &r_from, sizeof(r_from)) != 0)
+	if(hash_get_copy (request, "key_from", TYPE_INT64, &r_from, sizeof(r_from)) != 0)
 		return -EINVAL;
-	if(hash_get_copy (request, "to",   TYPE_INT64, &r_to,   sizeof(r_to))   != 0)
+	if(hash_get_copy (request, "key_to",   TYPE_INT64, &r_to,   sizeof(r_to))   != 0)
 		return -EINVAL;
 	
 	if(r_from == r_to)

@@ -51,7 +51,7 @@ chain_t *   chain_new          (char *name);
 ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer);
 ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *buffer);
 void        chain_destroy      (chain_t *chain);
-_inline int chain_configure    (chain_t *chain, setting_t *setting){ return chain->func_configure(chain, setting); }
+_inline int chain_configure    (chain_t *chain, setting_t *setting);
 
 /* }}}1 */
 

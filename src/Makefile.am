@@ -1,8 +1,8 @@
 
-backends_sources =      \
-	backends/file.c \
-	backends/oid-locator.c \
-	backends/null-proxy.c \
+backends_sources =                  \
+	backends/file.c             \
+	backends/oid-locator.c      \
+	backends/null-proxy.c       \
 	backends/blocks.c           \
 	backends/blocks-adressing.c \
 	backends/list.c

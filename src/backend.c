@@ -57,6 +57,7 @@ void chain_destroy(chain_t *chain){
 	
 	free(chain);
 }
+inline int  chain_configure    (chain_t *chain, setting_t *setting){ return chain->func_configure(chain, setting); }
 
 ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer){
 	unsigned int  action;

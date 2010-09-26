@@ -10,6 +10,10 @@ void *      chunk_alloc (size_t size){
 	
 	return (void *)(chunk + 1);
 }
+inline size_t chunk_get_size (void *chunk){ return ( ((chunk_t *)chunk) - 1)->size; }
+inline void * chunk_next     (void *chunk){ return ( ((chunk_t *)chunk) - 1)->next; }
+inline void   chunk_free     (void *chunk){ free( ((chunk_t *)chunk) - 1); }
+
 /* }}}1 */
 /* buffers - public {{{1 */
 void        buffer_init    (buffer_t *buffer){
@@ -123,6 +127,9 @@ int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
 	}
 	return ret;
 }
+
+inline size_t  buffer_get_size            (buffer_t *buffer)               { return buffer->size; }
+inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { return buffer->head; }
 
 void *      buffer_seek            (buffer_t *buffer, off_t ptr){
 	if(ptr == 0)

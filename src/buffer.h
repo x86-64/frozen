@@ -12,10 +12,9 @@ typedef struct subchunk_t {
 } subchunk_t;
 
 void *         chunk_alloc    (size_t size);
-_inline size_t chunk_get_size (void *chunk){ return ( ((chunk_t *)chunk) - 1)->size; }
-_inline void * chunk_next     (void *chunk){ return ( ((chunk_t *)chunk) - 1)->next; }
-_inline void   chunk_free     (void *chunk){ free( ((chunk_t *)chunk) - 1); }
-
+_inline size_t chunk_get_size (void *chunk);
+_inline void * chunk_next     (void *chunk);
+_inline void   chunk_free     (void *chunk);
 
 typedef struct buffer_t {
 	size_t      size;
@@ -41,8 +40,8 @@ void *          buffer_seek                (buffer_t *buffer, off_t ptr);
 ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset, void *buf, size_t buf_size);
 ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset, void *buf, size_t buf_size);
 
-_inline size_t  buffer_get_size            (buffer_t *buffer)               { return buffer->size; }
-_inline void *  buffer_get_first_chunk     (buffer_t *buffer)               { return buffer->head; }
+_inline size_t  buffer_get_size            (buffer_t *buffer);
+_inline void *  buffer_get_first_chunk     (buffer_t *buffer);
 
 #define buffer_process(_buffer,_size,_create,_func)  ({                     \
 	off_t  offset;                                                      \

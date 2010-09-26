@@ -135,7 +135,7 @@ START_TEST (test_backend_file){
 		ssize = chain_query(chain, hash, buffer);
 			fail_unless(ssize > 0,                                "chain file count failed");
 		
-		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(off_t)));
+		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(size_t)));
 			fail_unless( (count / 20) >= 1,                       "chain file count failed");
 		
 	hash_free(hash);

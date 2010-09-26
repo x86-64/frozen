@@ -3,7 +3,7 @@
 #endif
 
 #define DEBUG
-#define _inline  extern inline
+#define _inline extern inline
 
 /* Standart libraries */
 #include <stdlib.h>
