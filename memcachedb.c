@@ -652,7 +652,7 @@ static int ident_parse(char *ident, dbitem *item){
 	return 1;
 }
 
-static void process_test_command(conn *c, token_t *tokens, size_t ntokens){
+static void process_version_command(conn *c, token_t *tokens, size_t ntokens){
 	out_string(c, "VERSION 1.0");
 }
 
@@ -782,16 +782,67 @@ static void process_delete_command(conn *c, token_t *tokens, size_t ntokens){
 	}
 }
 
-static void process_index_command(conn *c, token_t *tokens, size_t ntokens){
-
+static void process_deindex_command(conn *c, token_t *tokens, size_t ntokens){
+	unsigned int  ret;
+	token_t      *key_token = &tokens[KEY_TOKEN];
+	
+	if(key_token->value == NULL){
+		out_string(c, "CLIENT_ERROR wrong syntax");
+		return;
+	}
+	
+	dbtable *table = db_tables_search(key_token->value);
+	
+	ret = db_query_deindex(table);
+	if(ret == 0){
+		out_string(c, "DELETED");
+	}else{
+		out_string(c, "SERVER_ERROR");
+	}
 }
 
-static void process_deindex_command(conn *c, token_t *tokens, size_t ntokens){
-
+static void process_index_command(conn *c, token_t *tokens, size_t ntokens){
+	unsigned int  ret;
+	token_t      *key_token = &tokens[KEY_TOKEN];
+	
+	if(key_token->value == NULL){
+		out_string(c, "CLIENT_ERROR wrong syntax");
+		return;
+	}
+	
+	dbtable *table = db_tables_search(key_token->value);
+	
+	ret = db_query_index(table, DBINDEX_TYPE_INDEX);
+	if(ret == 0){
+		out_string(c, "CREATED");
+	}else{
+		out_string(c, "SERVER_ERROR");
+	}
 }
 
 static void process_init_command(conn *c, token_t *tokens, size_t ntokens){
+	unsigned int ret;
+	token_t *key_token  = &tokens[KEY_TOKEN];
+	token_t *type_token = &tokens[2];
+	
+	if(key_token->value == NULL || type_token->value == NULL){
+		out_string(c, "CLIENT_ERROR wrong syntax");
+		return;
+	}
 
+	dbtable *table = db_tables_search(key_token->value);
+	int      type  = atoi(type_token->value);
+	
+	if(type < 1 && type > 2){
+		out_string(c, "CLIENT_ERROR wrong type");
+	}
+
+	ret = db_query_init(table, type);
+	if(ret == 0){
+		out_string(c, "REASSEMBLED");
+	}else{
+		out_string(c, "SERVER_ERROR");
+	}
 }
 
 /* process_command {{{1 */
@@ -820,13 +871,13 @@ static void process_command(conn *c, char *command) {
 	return;
     }
 
-    if(strcmp(tokens[COMMAND_TOKEN].value, "get") == 0){     process_get_command(c, tokens, ntokens);    return; }
-    if(strcmp(tokens[COMMAND_TOKEN].value, "set") == 0){     process_set_command(c, tokens, ntokens);    return; } 
-    if(strcmp(tokens[COMMAND_TOKEN].value, "delete") == 0){  process_delete_command(c, tokens, ntokens); return; }
-    if(strcmp(tokens[COMMAND_TOKEN].value, "index") == 0){   process_index_command(c, tokens, ntokens);  return; }
-    if(strcmp(tokens[COMMAND_TOKEN].value, "deindex") == 0){ process_deindex_command(c, tokens, ntokens); return;}
-    if(strcmp(tokens[COMMAND_TOKEN].value, "init") == 0){    process_init_command(c, tokens, ntokens);   return; }
-    if(strcmp(tokens[COMMAND_TOKEN].value, "version") == 0){ process_test_command(c, tokens, ntokens);   return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "get") == 0){     process_get_command    (c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "set") == 0){     process_set_command    (c, tokens, ntokens); return; } 
+    if(strcmp(tokens[COMMAND_TOKEN].value, "delete") == 0){  process_delete_command (c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "index") == 0){   process_index_command  (c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "deindex") == 0){ process_deindex_command(c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "init") == 0){    process_init_command   (c, tokens, ntokens); return; }
+    if(strcmp(tokens[COMMAND_TOKEN].value, "version") == 0){ process_version_command(c, tokens, ntokens); return; }
     
     out_string(c, "ERROR");
     return;

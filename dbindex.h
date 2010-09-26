@@ -6,6 +6,7 @@
 //      write balancer with transparent redirection
 
 #define DBINDEX_TYPE_PRIMARY 0
+#define DBINDEX_TYPE_INDEX   1
 
 #define DBINDEX_DATA_OFFSET  0x40
 #define DBINDEX_SETTINGS_LEN 0x1E
@@ -26,7 +27,11 @@ struct dbindex_ {
 	pthread_rwlock_t  **iblock_locks;
 	
 	dbmap               file;
+	int                 loaded;
 	//pthread_rwlock_t    lock;
+	void               *user_data;
+	
+	int (*cmpfunc)(dbindex *, void *, void *);
 };
 
 /*
@@ -43,9 +48,8 @@ unsigned int dbindex_create(char *path, unsigned int type, unsigned int key_len,
 void dbindex_load(char *path, dbindex *index);
 void dbindex_save(dbindex *index);
 void dbindex_unload(dbindex *index);
-short dbindex_ipage_get_iblock(dbindex* index, void *item_key);
-void dbindex_ipage_set_iblock(dbindex* index, void *item_key, unsigned short iblock);
 unsigned int dbindex_insert(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
 unsigned int dbindex_delete(dbindex *index, void *item_key);
-
+unsigned int dbindex_query(dbindex *index, void *item_key, void *item_value);
+unsigned int dbindex_iter(dbindex *index, void *(*func)(void *, void *, void *, void *), void *arg1, void *arg2);

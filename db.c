@@ -14,12 +14,12 @@ static list             db_write_queue;
 static list             db_tables;
 
 static pthread_t        db_write_thread_id;
+static pthread_mutex_t  db_mutex_query_init;
 
 static void* db_iter_table_search(void *table, void *name, void *addr);
 static void* db_iter_query_delete_oid(void *table, void *oid, void *null);
-
-// TODO: test 1-4 pack_types
-// TODO: test all!
+static int   db_cmpfunc_idx_data(dbindex *index, void *item1_key, void *item2_key);
+	
 
 /* PRIVATE FUNCTIONS */
 
@@ -73,6 +73,19 @@ static void db_table_settings_load(dbtable *table){
 }
 /* }}}2 */
 
+static void db_table_load_idx_data(dbtable *table){	
+	struct stat index_stat;
+
+	char *apath_idx_data = db_abspath(table->name, "idx1");
+	if(stat(apath_idx_data, &index_stat) == 0){
+		dbindex_load(apath_idx_data, &table->idx_data);
+		dbindex_set_userdata (&table->idx_data, table);
+		dbindex_set_cmpfunc  (&table->idx_data, &db_cmpfunc_idx_data);
+	}
+	free(apath_idx_data);
+}
+
+
 static dbtable* db_table_load(char *name){
 	unsigned int res;
 	dbtable     *table = NULL;
@@ -109,8 +122,9 @@ static dbtable* db_table_load(char *name){
 	
 	dbindex_load(apath_idx_oid, &table->idx_oid);
 	free(apath_idx_oid);
-
-
+	
+	db_table_load_idx_data(table);
+	
 	list_push(&db_tables, table);
 	if(settings.verbose > 1)
 		printf("table '%s' loaded\n", name);
@@ -139,6 +153,38 @@ static void db_table_unload_by_name(char *name){
 	db_table_unload(table);
 }
 
+static void db_table_unlink(char *name){
+	db_table_unload_by_name(name);
+	
+	char *file;
+	
+	file = db_abspath(name, "dat");  unlink(file); free(file);
+	file = db_abspath(name, "set");  unlink(file); free(file);
+	file = db_abspath(name, "idx0"); unlink(file); free(file);
+	file = db_abspath(name, "idx1"); unlink(file); free(file);
+}
+
+static void db_table_rename(char *table_name_old, char *table_name_new){
+	char *name_old = strdup(table_name_old);
+	char *name_new = strdup(table_name_new);
+
+	db_table_unload_by_name (name_old);
+	db_table_unlink         (name_new);
+	
+	int ret;
+	char *filef, *filet;
+	
+	filef = db_abspath(name_old, "set");  filet = db_abspath(name_new, "set");  ret = link(filef, filet); free(filef); free(filet);
+	filef = db_abspath(name_old, "dat");  filet = db_abspath(name_new, "dat");  ret = link(filef, filet); free(filef); free(filet);
+	filef = db_abspath(name_old, "idx0"); filet = db_abspath(name_new, "idx0"); ret = link(filef, filet); free(filef); free(filet);
+	filef = db_abspath(name_old, "idx1"); filet = db_abspath(name_new, "idx1"); ret = link(filef, filet); free(filef); free(filet);
+	
+	db_table_unlink(name_old);
+	db_table_load(name_new);
+
+	free(name_old);
+	free(name_new);
+}
 /* }}}1 */
 
 static void dbitem_append(dbitem *item, void *data, unsigned long data_len){
@@ -222,7 +268,10 @@ static unsigned int db_table_query_set(dbitem *item){
 	if(settings.verbose > 1)
 		printf("oid: %ld off: %ld\n", item->oid, entry_off);
 	
-	return dbindex_insert(&table->idx_oid, &item->oid, &entry_off);
+	dbindex_insert(&table->idx_oid,  &item->oid, &entry_off);
+	dbindex_insert(&table->idx_data, &item->oid, NULL);
+	
+	return 0;
 }
 
 static unsigned int db_table_query_isset(dbitem *item){
@@ -273,6 +322,7 @@ static unsigned int db_table_query_get(dbitem *item){
 			case 1:
 			case 2:
 			case 3:
+			case 4:
 				item->data_len = strlen(item->data);
 				break;
 			default:
@@ -358,7 +408,7 @@ static void db_settings_load(void){
 	struct stat file_stat;
 
 	if(stat(dbfile_main, &file_stat) != 0){
-		printf("db doesn't exist. createing a new one\n");
+		printf("db doesn't exist. creating a new one\n");
 		
 		/* set up default settings for database */
 		db_oid_last = 0;
@@ -380,7 +430,8 @@ void db_init(void){
 	list_init(&db_write_queue);
 	list_init(&db_tables);
 
-	pthread_mutex_init(&db_oid_last_mutex, NULL);
+	pthread_mutex_init(&db_oid_last_mutex,  NULL);
+	pthread_mutex_init(&db_mutex_query_init, NULL);
 
         if(pthread_create(&db_write_thread_id, NULL, (void *)&db_write_thread, NULL) != 0) {
 		printf("db_write_thread failed\n");
@@ -414,7 +465,7 @@ void db_destroy(void){
 	free(dbfile_main);
 }
 /* }}}1 */
-/* Iterators {{{1 */
+/* Callbacks {{{1 */
 static void* db_iter_table_search(void *table, void *name, void *addr){
 	if(strcmp(((dbtable *)table)->name, name) == 0){
 		*(dbtable **)addr = table;
@@ -452,7 +503,7 @@ static void* db_iter_query_get_oid(void *ptable, void *pitem, void *null){
 	return (void *)1;
 }
 
-static void* db_iter_query_search(void *item_key, void *item_value, void *pitem){
+static void* db_iter_query_search(void *item_key, void *item_value, void *pitem, void *null){
 	dbitem *item = (dbitem *)pitem;
 	char   *info = malloc(30);
 
@@ -462,6 +513,99 @@ static void* db_iter_query_search(void *item_key, void *item_value, void *pitem)
 	
 	free(info);
 	return (void *)1;
+}
+
+static void* db_iter_query_init(void *item_key, void *item_value, void *ptable, void *tmp_table){
+	dbitem  *item  = dbitem_alloc();
+	dbtable *table = (dbtable *)ptable;
+	
+	item->table = table;
+	item->oid   = (unsigned long)*(unsigned int *)item_key;
+	
+	if(db_table_query_get(item) == 0){
+		item->table = tmp_table;
+		
+		db_table_query_set(item);
+	}else{
+		printf("fatal\n");
+	}
+	
+	dbitem_free(item);
+	return (void *)1;
+}
+
+static void* db_iter_query_index(void *item_key, void *item_value, void *ptable, void *null){
+	dbindex_insert(&(((dbtable *)ptable)->idx_data), item_key, NULL);
+	return (void *)1;
+}
+
+static int db_cmpfunc_idx_data(dbindex *index, void *item1_key, void *item2_key){
+	int                 cret;
+	unsigned long       item1_offset;
+	unsigned long       item2_offset;
+	char               *item1_ptr;
+	char               *item2_ptr;
+	unsigned long long  item1_data;
+	unsigned long long  item2_data;
+	unsigned int        item1_len;
+	unsigned int        item2_len;
+	unsigned int        cmp_len;
+	dbtable             *table       = (dbtable *)index->user_data;
+	
+	//printf("%llx %llx\n", *(unsigned int *)item1_key, *(unsigned int *)item2_key);
+	
+	if(dbindex_query(&table->idx_oid, item1_key, &item1_offset) != 0)
+		return -2;
+	if(dbindex_query(&table->idx_oid, item2_key, &item2_offset) != 0)
+		return -2;
+	
+	dbmap_lock(&table->data);
+		item1_ptr = table->data.data + item1_offset;
+		item2_ptr = table->data.data + item2_offset;
+		
+		switch(table->pack_type){
+			case 1:
+				item1_data = (unsigned long long)*(unsigned char *)item1_ptr;
+				item2_data = (unsigned long long)*(unsigned char *)item2_ptr; 
+				     if(item1_data == item2_data){ cret =  0; }
+				else if(item1_data <  item2_data){ cret = -1; }
+				else                             { cret =  1; }
+				break;
+			case 2:
+				item1_data = (unsigned long long)*(unsigned int *)item1_ptr;
+				item2_data = (unsigned long long)*(unsigned int *)item2_ptr; 
+				     if(item1_data == item2_data){ cret =  0; }
+				else if(item1_data <  item2_data){ cret = -1; }
+				else                             { cret =  1; }
+				break;
+			case 3:
+				item1_data = (unsigned long long)*(unsigned long long *)item1_ptr;
+				item2_data = (unsigned long long)*(unsigned long long *)item2_ptr; 
+				     if(item1_data == item2_data){ cret =  0; }
+				else if(item1_data <  item2_data){ cret = -1; }
+				else                             { cret =  1; }			
+				break;
+			case 4:
+				cret = strcmp(item1_ptr, item2_ptr);
+				if(cret > 0) cret =  1;
+				if(cret < 0) cret = -1;
+				break;
+			default:
+				item1_len = *(unsigned int *)item1_ptr;
+				item2_len = *(unsigned int *)item2_ptr;
+				
+				cmp_len = item1_len;
+				if(item1_len > item2_len)
+					cmp_len = item2_len;
+
+				cret = memcmp(item1_ptr + 4, item2_ptr + 4, cmp_len);
+				if(cret > 0) cret =  1;
+				if(cret < 0) cret = -1;			
+				break;
+		};
+	dbmap_unlock(&table->data);
+
+	return cret;
 }
 
 /* }}}1 */
@@ -487,7 +631,7 @@ unsigned long db_query_new(void){
 
 	if(settings.verbose > 1)
 		printf("db_query_new\n");
-
+	
 	pthread_mutex_lock(&db_oid_last_mutex);
 	oid_new = db_oid_last++;
 	pthread_mutex_unlock(&db_oid_last_mutex);
@@ -532,8 +676,55 @@ unsigned int db_query_search(dbitem *item){
 		printf("db_query_search\n");
 	
 	// lookup other indexes
+	
+	dbindex_iter(&item->table->idx_oid, &db_iter_query_search, item, NULL);
+}
 
-	dbindex_search(&item->table->idx_oid, &db_iter_query_search, item);
+unsigned int db_query_init(dbtable *table, int type){
+	pthread_mutex_lock(&db_mutex_query_init);
+		dbtable *tmp_table;
+		
+		db_table_unlink("_temp");
+		
+		tmp_table = db_table_load("_temp");
+		tmp_table->pack_type = type;
+		
+		dbindex_iter(&table->idx_oid, &db_iter_query_init, table, tmp_table);
+		
+		db_table_rename("_temp", table->name);
+		db_table_unlink("_temp");
+		
+	pthread_mutex_unlock(&db_mutex_query_init);
+}
+
+unsigned int db_query_deindex(dbtable *table){
+	if(table->idx_data.loaded == 1){
+		dbindex_unload(&table->idx_data);
+	}
+	
+	char *file = db_abspath(table->name, "idx1"); unlink(file); free(file);
+}
+
+unsigned int db_query_index(dbtable *table, int type){
+	int ret = 1;
+
+	db_query_deindex(table);
+	
+	char *file = db_abspath(table->name, "idx1");
+	
+	if(dbindex_create(file, DBINDEX_TYPE_INDEX, 4, 0) == 0){
+		db_table_load_idx_data(table);
+		
+		// reinsert items
+		dbindex_iter(&table->idx_oid, &db_iter_query_index, table, NULL);
+		
+		ret = 0;
+	}
+
+	free(file);
+
+	return ret;
 }
 
 /* }}}1 */
+
