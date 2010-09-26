@@ -1,4 +1,3 @@
-#include <memcachedb.h>
 #include <list.h>
 
 void list_init(list *clist){
