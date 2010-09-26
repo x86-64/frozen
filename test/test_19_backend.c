@@ -1,5 +1,4 @@
 #include "test.h"
-#include "../src/backend.h"
 
 START_TEST (test_backends){
 	backend_t *backend, *found;

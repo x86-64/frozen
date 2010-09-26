@@ -1,3 +1,6 @@
+#ifndef BACKEND_H
+#define BACKEND_H
+
 /* chains */
 
 typedef struct chain_t    chain_t;
@@ -147,3 +150,4 @@ _inline int backend_crwd_count  (backend_t *backend, void *count){
 }
 /* }}}1 */
 
+#endif // BACKEND_H

@@ -19,10 +19,12 @@
 /* Own headers */
 #include <list.h>
 #include <settings.h>
+#include <data_types.h>
 #include <data.h>
 #include <structs.h>
 #include <buffer.h>
 #include <structs_buffer.h>
+#include <backend.h>
 
 /* Global variables */
 extern setting_t *global_settings;

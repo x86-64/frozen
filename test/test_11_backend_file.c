@@ -1,6 +1,4 @@
 #include "test.h"
-#include "../src/backend.h"
-#include "../src/settings.h"
 
 START_TEST (test_backend_file){
 	int ret;
