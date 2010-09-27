@@ -12,7 +12,7 @@ m4_include(backends/oids/guid.c)
 /* oid protos {{{ */
 typedef struct oid_proto_t {
 	data_type     type;
-	f_data_inc    func_increment;
+	f_data_add    func_add;
 	f_data_div    func_divide;
 	f_data_mul    func_multiply;
 } oid_proto_t;
@@ -113,7 +113,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(
-				oid_class_proto->func_increment == NULL       ||
+				oid_class_proto->func_add       == NULL       ||
 				oid_class_proto->func_divide    == NULL       ||
 			      //oid_class_size_type             != SIZE_FIXED ||
 				linear_scale                    == 0
@@ -121,7 +121,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 				oid_class_supported = 0;
 			break;
 		case INDEX_INCAPSULATED:
-			if(oid_class_proto->func_increment == NULL)
+			if(oid_class_proto->func_add == NULL)
 				oid_class_supported = 0;
 			break;
 		case INDEX_ORIGINAL:

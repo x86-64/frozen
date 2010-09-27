@@ -28,14 +28,15 @@ int data_int64_cmp(void *data1, void *data2){ // {{{
 	return cret;
 } // }}}
 
-int data_int64_inc(void *data){ // {{{
-	unsigned long long data_val;
-	
-	data_val = *(unsigned long long *)data;
-	if(data_val == 0xFF)
-		return -1;
-	
-	*(unsigned char *)data = data_val + 1;
+int data_int64_add(void *data, unsigned int number){ // {{{
+	unsigned long long data_val = *(unsigned long long *)data;
+	*(unsigned long long *)data = data_val + number;
+	return 0;
+} // }}}
+
+int data_int64_sub(void *data, unsigned int number){ // {{{
+	unsigned long long data_val = *(unsigned long long *)data;
+	*(unsigned long long *)data = data_val - number;
 	return 0;
 } // }}}
 
@@ -60,6 +61,6 @@ int data_int64_mul(void *data, unsigned int mul){ // {{{
 	return 0;
 } // }}}
 
-REGISTER_DATA(TYPE_INT64,SIZE_FIXED, .func_cmp = &data_int64_cmp, .func_inc = &data_int64_inc, .func_div = &data_int64_div, .func_mul = &data_int64_mul, .fixed_size = 8)
+REGISTER_DATA(TYPE_INT64,SIZE_FIXED, .func_cmp = &data_int64_cmp, .func_add = &data_int64_add, .func_sub = &data_int64_sub, .func_div = &data_int64_div, .func_mul = &data_int64_mul, .fixed_size = 8)
 
 /* vim: set filetype=c: */

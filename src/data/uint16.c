@@ -28,14 +28,15 @@ int data_int16_cmp(void *data1, void *data2){ // {{{
 	return cret;
 } // }}}
 
-int data_int16_inc(void *data){ // {{{
-	unsigned short data_val;
-	
-	data_val = *(unsigned short *)data;
-	if(data_val == 0xFF)
-		return -1;
-	
-	*(unsigned char *)data = data_val + 1;
+int data_int16_add(void *data, unsigned int number){ // {{{
+	unsigned short data_val = *(unsigned short *)data;
+	*(unsigned short *)data = data_val + number;
+	return 0;
+} // }}}
+
+int data_int16_sub(void *data, unsigned int number){ // {{{
+	unsigned short data_val = *(unsigned short *)data;
+	*(unsigned short *)data = data_val - number;
 	return 0;
 } // }}}
 
@@ -60,6 +61,6 @@ int data_int16_mul(void *data, unsigned int mul){ // {{{
 	return 0;
 } // }}}
 
-REGISTER_DATA(TYPE_INT16,SIZE_FIXED, .func_cmp = &data_int16_cmp, .func_inc = &data_int16_inc, .func_div = &data_int16_div, .func_mul = &data_int16_mul, .fixed_size = 2)
+REGISTER_DATA(TYPE_INT16,SIZE_FIXED, .func_cmp = &data_int16_cmp, .func_add = &data_int16_add, .func_sub = &data_int16_sub, .func_div = &data_int16_div, .func_mul = &data_int16_mul, .fixed_size = 2)
 
 /* vim: set filetype=c: */

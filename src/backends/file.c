@@ -341,8 +341,8 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 			//break;
 		}
 		
-		if(direction == 1){ from += size; }else{ from -= size; }
-		if(direction == 1){ to   += size; }else{ to   -= size; }
+		if(direction ==  1){ from += size; }else{ from -= size; }
+		if(direction ==  1){ to   += size; }else{ to   -= size; }
 		move_size  -= size;
 		size        = (max_size < move_size) ? max_size : move_size;
 	}

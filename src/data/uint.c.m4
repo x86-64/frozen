@@ -27,14 +27,15 @@ m4_ifelse(BYTES(), `8', `m4_define(`TYPE', `long long')')
 	return cret;
 } // }}}
 
-`int data_int'BITS()_inc(void *data){ // {{{
-	unsigned TYPE data_val;
-	
-	data_val = *(unsigned TYPE *)data;
-	if(data_val == 0xFF)
-		return -1;
-	
-	*(unsigned char *)data = data_val + 1;
+`int data_int'BITS()_add(void *data, unsigned int number){ // {{{
+	unsigned TYPE data_val = *(unsigned TYPE *)data;
+	*(unsigned TYPE *)data = data_val + number;
+	return 0;
+} // }}}
+
+`int data_int'BITS()_sub(void *data, unsigned int number){ // {{{
+	unsigned TYPE data_val = *(unsigned TYPE *)data;
+	*(unsigned TYPE *)data = data_val - number;
 	return 0;
 } // }}}
 
@@ -59,6 +60,6 @@ m4_ifelse(BYTES(), `8', `m4_define(`TYPE', `long long')')
 	return 0;
 } // }}}
 
-REGISTER_DATA(`TYPE_INT'BITS(),SIZE_FIXED, .func_cmp = &`data_int'BITS()_cmp, .func_inc = &`data_int'BITS()_inc, .func_div = &`data_int'BITS()_div, .func_mul = &`data_int'BITS()_mul, .fixed_size = BYTES)
+REGISTER_DATA(`TYPE_INT'BITS(),SIZE_FIXED, .func_cmp = &`data_int'BITS()_cmp, .func_add = &`data_int'BITS()_add, .func_sub = &`data_int'BITS()_sub, .func_div = &`data_int'BITS()_div, .func_mul = &`data_int'BITS()_mul, .fixed_size = BYTES)
 
 /* vim: set filetype=c: */

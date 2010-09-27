@@ -32,19 +32,19 @@
 /* oid protos {{{ */
 typedef struct oid_proto_t {
 	data_type     type;
-	f_data_inc    func_increment;
+	f_data_add    func_add;
 	f_data_div    func_divide;
 	f_data_mul    func_multiply;
 } oid_proto_t;
 
 oid_proto_t oid_protos[] = {
-	{ TYPE_INT8,  &data_int8_inc,  &data_int8_div , &data_int8_mul  },
+	{ TYPE_INT8,  &data_int8_add,  &data_int8_div , &data_int8_mul  },
 #line 21
-{ TYPE_INT16, &data_int16_inc, &data_int16_div, &data_int16_mul },
+{ TYPE_INT16, &data_int16_add, &data_int16_div, &data_int16_mul },
 #line 21
-{ TYPE_INT32, &data_int32_inc, &data_int32_div, &data_int32_mul },
+{ TYPE_INT32, &data_int32_add, &data_int32_div, &data_int32_mul },
 #line 21
-{ TYPE_INT64, &data_int64_inc, &data_int64_div, &data_int64_mul },
+{ TYPE_INT64, &data_int64_add, &data_int64_div, &data_int64_mul },
 #line 21
 
 }; // }}}
@@ -141,7 +141,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(
-				oid_class_proto->func_increment == NULL       ||
+				oid_class_proto->func_add       == NULL       ||
 				oid_class_proto->func_divide    == NULL       ||
 			      //oid_class_size_type             != SIZE_FIXED ||
 				linear_scale                    == 0
@@ -149,7 +149,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 				oid_class_supported = 0;
 			break;
 		case INDEX_INCAPSULATED:
-			if(oid_class_proto->func_increment == NULL)
+			if(oid_class_proto->func_add == NULL)
 				oid_class_supported = 0;
 			break;
 		case INDEX_ORIGINAL:

@@ -29,6 +29,7 @@ START_TEST (test_backend_list){
 	char          key_data[]     = "0123456789";
 	char          key_insert[]   = "a";
 	char          key_inserted[] = "01a23456789";
+	char          key_delete[]   = "01a3456789";
 	
 	action  = ACTION_CRWD_CREATE;
 	ssize   = 10;
@@ -83,10 +84,37 @@ START_TEST (test_backend_list){
 				memcmp(test_chunk, key_inserted, 11) == 0,
 				"backend in_list read 1 data failed"
 			);
+	// delete key
+	key_insert_off = key_off + 3;
+	action  = ACTION_CRWD_DELETE;
+	ssize   = 1;
+		hash_set(hash, "action", TYPE_INT32,  &action);
+		hash_set(hash, "key",    TYPE_INT64,  &key_insert_off);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize); // = 1
+	 	
+		ssize = backend_query(backend, hash, buffer);
+			fail_unless(ssize == 0,  "backend in_list delete failed");
+	
+	// check
+	action  = ACTION_CRWD_READ;
+	ssize   = 10;
+		hash_set(hash, "action", TYPE_INT32,  &action);
+		hash_set(hash, "key",    TYPE_INT64,  &key_off);
+		hash_set(hash, "size",   TYPE_INT32,  &ssize);
+		
+		ssize = backend_query(backend, hash, buffer);
+			fail_unless(ssize == 10,                                "backend in_list read 1 failed");
+			
+		test_chunk = buffer_get_first_chunk(buffer);
+			fail_unless(
+				test_chunk != NULL &&
+				memcmp(test_chunk, key_delete, 10) == 0,
+				"backend in_list read 1 data failed"
+			);
 	
 	hash_free(hash);
 	buffer_free(buffer);
-
+	
 	backend_destory(backend);
 	setting_destroy(settings);
 }

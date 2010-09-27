@@ -391,9 +391,8 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 	// TODO unlock
 	return ret;
 } // }}}
-static int    tree_get_block_size(tree_t *tree, unsigned int block_vid, size_t *block_size){ // {{{
+static int    tree_get_block(tree_t *tree, unsigned int block_vid, block_info *block){ // {{{
 	ssize_t          m_ret;
-	block_info       block;
 	buffer_t        *buffer;
 	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
 	
@@ -408,10 +407,7 @@ static int    tree_get_block_size(tree_t *tree, unsigned int block_vid, size_t *
 		return -1;
 	}
 	
-	*block_size = 0;
-	buffer_read(buffer, 0, &block, MIN(m_ret, sizeof(block_info)));
-	
-	*block_size = block.size;
+	buffer_read(buffer, 0, block, MIN(m_ret, sizeof(block_info)));
 	return 0;
 } // }}}
 static int      tree_size(tree_t *tree, size_t *size){ // {{{
@@ -514,7 +510,7 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	off_t             real_key;
 	unsigned int      blocks;
 	unsigned int      block_vid;
-	size_t            block_size;
+	block_info        block;
 	ssize_t           buf_ptr = 0;
 	
 	if(hash_get_copy (request, "blocks", TYPE_INT32, &blocks, sizeof(blocks)) != 0)
@@ -533,10 +529,11 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 		if(hash_get_copy (request, "block_vid", TYPE_INT32, &block_vid, sizeof(block_vid)) != 0)
 			return -EINVAL;
 		
-		if(tree_get_block_size(data->tree, block_vid, &block_size) != 0)
+		if(tree_get_block(data->tree, block_vid, &block) != 0)
 			return -EFAULT;
 		
-		buf_ptr += buffer_write(buffer, buf_ptr, &block_size, sizeof(block_size));
+		buf_ptr += buffer_write(buffer, buf_ptr, &block.size,           sizeof(block.size));
+		buf_ptr += buffer_write(buffer, buf_ptr, &block.real_block_off, sizeof(block.real_block_off));
 	}
 	return buf_ptr;
 }

@@ -3,7 +3,8 @@
 
 typedef size_t (*f_data_len) (void *, size_t);
 typedef int    (*f_data_cmp) (void *, void *);
-typedef int    (*f_data_inc) (void *);
+typedef int    (*f_data_add) (void *, unsigned int);
+typedef int    (*f_data_sub) (void *, unsigned int);
 typedef int    (*f_data_div) (void *, unsigned int);
 typedef int    (*f_data_mul) (void *, unsigned int);
 
@@ -21,7 +22,8 @@ typedef struct data_proto_t {
 	f_data_len  func_len;
 	f_data_div  func_div;
 	f_data_mul  func_mul;
-	f_data_inc  func_inc;
+	f_data_add  func_add;
+	f_data_sub  func_sub;
 	
 	size_t      fixed_size;
 } data_proto_t;

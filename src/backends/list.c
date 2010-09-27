@@ -69,7 +69,7 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 			return -EINVAL;
 		
 		key_proto = data_proto_from_type(key_type);
-		if(key_proto->func_inc(key) != 0)
+		if(key_proto->func_add(key, 1) != 0)
 			return -EINVAL;
 		
 		ret = chain_next_query(chain, data->move_request, data->move_buffer); 
@@ -78,6 +78,32 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	}
 	
 	return chain_next_query(chain, request, buffer);
+}
+
+static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer){
+	ssize_t           ret;
+	data_t           *key;
+	data_type         key_type;
+	data_proto_t     *key_proto;
+	lists_user_data  *data = (lists_user_data *)chain->user_data;
+	
+	if(hash_get_any(request, "key", &key_type, &key, NULL) != 0)
+		return -EINVAL;
+		
+	hash_set(data->move_request, "key_from", key_type, key);
+	hash_set(data->move_request, "key_to",   key_type, key);
+	
+	if(hash_get_any(data->move_request, "key_from", &key_type, &key, NULL) != 0)
+		return -EINVAL;
+	
+	key_proto = data_proto_from_type(key_type);
+	if(key_proto->func_add(key, 1) != 0)
+		return -EINVAL;
+	
+	hash_dump(data->move_request);
+	ret = chain_next_query(chain, data->move_request, data->move_buffer); 
+	
+	return ret;
 }
 
 static chain_t chain_lists = {
@@ -90,7 +116,7 @@ static chain_t chain_lists = {
 		.func_create = &lists_rest,
 		.func_set    = &lists_set,
 		.func_get    = &lists_rest,
-		.func_delete = &lists_rest,
+		.func_delete = &lists_delete,
 		.func_move   = &lists_rest,
 		.func_count  = &lists_rest
 	}}
