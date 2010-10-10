@@ -40,53 +40,53 @@ m4_changequote([,])
 	return cret;
 } // }}}
 
-[int data_int]BITS()_add(void *data, unsigned int number){ // {{{
+[int data_int]BITS()_bare_arith(void *data, char operator, unsigned int operand){ // {{{
 	unsigned TYPE data_val = *(unsigned TYPE *)data;
-	*(unsigned TYPE *)data = data_val + number;
-	return 0;
+	unsigned TYPE data_tmp;
+	
+	switch(operator){
+		case '+': *(unsigned TYPE *)data = data_val + operand; return 0;
+		case '-': *(unsigned TYPE *)data = data_val - operand; return 0;
+		case '*':
+			data_tmp = data_val * operand;
+			if(data_val > data_tmp)
+				return -1;
+			*(unsigned TYPE *)data = data_tmp;
+			return 0;
+		case '/':
+			if(operand == 0)
+				return -1;
+			*(unsigned TYPE *)data = data_val / operand;
+			return 0;
+	}
+	return -1;
 } // }}}
 
-[int data_int]BITS()_sub(void *data, unsigned int number){ // {{{
-	unsigned TYPE data_val = *(unsigned TYPE *)data;
-	*(unsigned TYPE *)data = data_val - number;
-	return 0;
-} // }}}
-
-[int data_int]BITS()_div(void *data, unsigned int divider){ // {{{
-	if(divider == 0)
+[int data_int]BITS()_buff_arith(data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand){ // {{{
+	int           ret;
+	unsigned TYPE data_val;
+	
+	if(buffer_read  (buffer, buffer_off, &data_val, sizeof(data_val)) != sizeof(data_val))
+		return -1;
+	ret = data_int[]BITS()_bare_arith(&data_val, operator, operand);
+	if(buffer_write (buffer, buffer_off, &data_val, sizeof(data_val)) != sizeof(data_val))
 		return -1;
 	
-	unsigned TYPE data_val = *(unsigned TYPE *)data;
-	*(unsigned TYPE *)data = data_val / divider;
-	
-	return 0;
-} // }}}
-
-[int data_int]BITS()_mul(void *data, unsigned int mul){ // {{{
-	unsigned TYPE data_val  = *(unsigned TYPE *)data;
-	unsigned TYPE data_muls = data_val * mul;
-	
-	if(data_val > data_muls) // check for overflow
-		return -1; 
-	
-	*(unsigned TYPE *)data = data_muls;
-	return 0;
+	return ret;
 } // }}}
 
 /*
 REGISTER_TYPE([TYPE_INT]BITS())
 REGISTER_PROTO([
 	`{
-		.type            = TYPE_INT]BITS()[,
-		.type_str        = "int]BITS()[",
-		.size_type       = SIZE_FIXED,
-		.func_bare_cmp   = &data_int]BITS()[_cmp,
-		.func_buffer_cmp = &data_int]BITS()[_buff_cmp,
-		.func_add        = &data_int]BITS()[_add,
-		.func_sub        = &data_int]BITS()[_sub,
-		.func_div        = &data_int]BITS()[_div,
-		.func_mul        = &data_int]BITS()[_mul,
-		.fixed_size      = ]BYTES()[
+		.type                   = TYPE_INT]BITS()[,
+		.type_str               = "int]BITS()[",
+		.size_type              = SIZE_FIXED,
+		.func_bare_cmp          = &data_int]BITS()[_cmp,
+		.func_bare_arithmetic   = &data_int]BITS()[_bare_arith,
+		.func_buffer_cmp        = &data_int]BITS()[_buff_cmp,
+		.func_buffer_arithmetic = &data_int]BITS()[_buff_arith,
+		.fixed_size             = ]BYTES()[
 	}'
 ])
 */

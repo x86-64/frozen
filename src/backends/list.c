@@ -49,7 +49,6 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	unsigned int      insert;
 	data_t           *key;
 	data_type         key_type;
-	data_proto_t     *key_proto;
 	lists_user_data  *data = (lists_user_data *)chain->user_data;
 	
 	if(
@@ -68,8 +67,7 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 		if(hash_get_any(data->move_request, "key_to", &key_type, &key, NULL) != 0)
 			return -EINVAL;
 		
-		key_proto = data_proto_from_type(key_type);
-		if(key_proto->func_add(key, 1) != 0)
+		if(data_bare_arithmetic(key_type, key, '+', 1) != 0)
 			return -EINVAL;
 		
 		ret = chain_next_query(chain, data->move_request, data->move_buffer); 
@@ -84,7 +82,6 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	ssize_t           ret;
 	data_t           *key;
 	data_type         key_type;
-	data_proto_t     *key_proto;
 	lists_user_data  *data = (lists_user_data *)chain->user_data;
 	
 	if(hash_get_any(request, "key", &key_type, &key, NULL) != 0)
@@ -96,8 +93,7 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	if(hash_get_any(data->move_request, "key_from", &key_type, &key, NULL) != 0)
 		return -EINVAL;
 	
-	key_proto = data_proto_from_type(key_type);
-	if(key_proto->func_add(key, 1) != 0)
+	if(data_bare_arithmetic(key_type, key, '+', 1) != 0)
 		return -EINVAL;
 	
 	ret = chain_next_query(chain, data->move_request, data->move_buffer); 

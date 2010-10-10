@@ -36,7 +36,7 @@ data_proto_t *       data_proto_from_type   (data_type type){ // {{{
 	return &data_protos[type];
 } // }}}
 
-int                  data_ctx_new           (data_ctx_t *ctx, data_type type, void *context){ // {{{
+int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context){ // {{{
 	f_data_ctx_n   func_ctx_parse;
 	void          *user_data;
 	
@@ -52,7 +52,7 @@ int                  data_ctx_new           (data_ctx_t *ctx, data_type type, vo
 	ctx->user_data      = user_data;
 	return 0;
 } // }}}
-int                  data_ctx_free          (data_ctx_t *ctx){ // {{{
+int                  data_ctx_destory       (data_ctx_t *ctx){ // {{{
 	if( ctx->data_proto->func_ctx_free != NULL)
 		ctx->data_proto->func_ctx_free(ctx->user_data);
 	
@@ -88,6 +88,17 @@ int                  data_buffer_cmp        (data_ctx_t *ctx, buffer_t *buffer1,
 	
 	return func_cmp(ctx, buffer1, buffer1_off, buffer2, buffer2_off);
 } // }}}
+int                  data_buffer_arithmetic (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand){ // {{{
+	f_data_arith_b  func_arith;
+	
+	if(ctx == NULL || buffer == NULL)
+		return -EINVAL;
+	
+	if( (func_arith = ctx->data_proto->func_buffer_arithmetic) == NULL)
+		return -EINVAL;
+	
+	return func_arith(ctx, buffer, buffer_off, operator, operand);
+} // }}}
 
 size_t               data_bare_len          (data_type type, data_t *data, size_t buffer_size){ // {{{
 	f_data_len_r   func_len;
@@ -117,6 +128,17 @@ int                  data_bare_cmp          (data_type type, data_t *data1, data
 		return 0;
 	
 	return func_cmp(data1, data2);
+} // }}}
+int                  data_bare_arithmetic   (data_type type, data_t *data, char operator, unsigned int operand){ // {{{
+	f_data_arith_r  func_arith;
+	
+	if((unsigned)type >= data_protos_size)
+		return 0;
+	
+	if( (func_arith = data_protos[type].func_bare_arithmetic) == NULL)
+		return 0;
+	
+	return func_arith(data, operator, operand);
 } // }}}
 
 size_type            data_size_type         (data_type type){ // {{{

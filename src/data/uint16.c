@@ -41,53 +41,53 @@ int data_int16_cmp(void *data1, void *data2){ // {{{
 	return cret;
 } // }}}
 
-int data_int16_add(void *data, unsigned int number){ // {{{
+int data_int16_bare_arith(void *data, char operator, unsigned int operand){ // {{{
 	unsigned short data_val = *(unsigned short *)data;
-	*(unsigned short *)data = data_val + number;
-	return 0;
+	unsigned short data_tmp;
+	
+	switch(operator){
+		case '+': *(unsigned short *)data = data_val + operand; return 0;
+		case '-': *(unsigned short *)data = data_val - operand; return 0;
+		case '*':
+			data_tmp = data_val * operand;
+			if(data_val > data_tmp)
+				return -1;
+			*(unsigned short *)data = data_tmp;
+			return 0;
+		case '/':
+			if(operand == 0)
+				return -1;
+			*(unsigned short *)data = data_val / operand;
+			return 0;
+	}
+	return -1;
 } // }}}
 
-int data_int16_sub(void *data, unsigned int number){ // {{{
-	unsigned short data_val = *(unsigned short *)data;
-	*(unsigned short *)data = data_val - number;
-	return 0;
-} // }}}
-
-int data_int16_div(void *data, unsigned int divider){ // {{{
-	if(divider == 0)
+int data_int16_buff_arith(data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand){ // {{{
+	int           ret;
+	unsigned short data_val;
+	
+	if(buffer_read  (buffer, buffer_off, &data_val, sizeof(data_val)) != sizeof(data_val))
+		return -1;
+	ret = data_int16_bare_arith(&data_val, operator, operand);
+	if(buffer_write (buffer, buffer_off, &data_val, sizeof(data_val)) != sizeof(data_val))
 		return -1;
 	
-	unsigned short data_val = *(unsigned short *)data;
-	*(unsigned short *)data = data_val / divider;
-	
-	return 0;
-} // }}}
-
-int data_int16_mul(void *data, unsigned int mul){ // {{{
-	unsigned short data_val  = *(unsigned short *)data;
-	unsigned short data_muls = data_val * mul;
-	
-	if(data_val > data_muls) // check for overflow
-		return -1; 
-	
-	*(unsigned short *)data = data_muls;
-	return 0;
+	return ret;
 } // }}}
 
 /*
 REGISTER_TYPE(TYPE_INT16)
 REGISTER_PROTO(
 	`{
-		.type            = TYPE_INT16,
-		.type_str        = "int16",
-		.size_type       = SIZE_FIXED,
-		.func_bare_cmp   = &data_int16_cmp,
-		.func_buffer_cmp = &data_int16_buff_cmp,
-		.func_add        = &data_int16_add,
-		.func_sub        = &data_int16_sub,
-		.func_div        = &data_int16_div,
-		.func_mul        = &data_int16_mul,
-		.fixed_size      = 2
+		.type                   = TYPE_INT16,
+		.type_str               = "int16",
+		.size_type              = SIZE_FIXED,
+		.func_bare_cmp          = &data_int16_cmp,
+		.func_bare_arithmetic   = &data_int16_bare_arith,
+		.func_buffer_cmp        = &data_int16_buff_cmp,
+		.func_buffer_arithmetic = &data_int16_buff_arith,
+		.fixed_size             = 2
 	}'
 )
 */

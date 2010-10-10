@@ -3,30 +3,6 @@
 # cleanup
 find . -name '*.gcov' -delete
 
-#cat src/data/*.c | perl -e '
-#$e=""; $f=""; $a="";
-#while(<STDIN>){
-#	s/\s*?\/[\/*].*$//g;
-#	if(/REGISTER_DATA\(([^,]*),(.*)\)/){
-#		$n=lc(substr($1,5));
-#		$t=$1;
-#		$r=$2;
-#		$e .= "\t$t,\n";
-#		$a .= "\t{ \"$n\",$t,$r },\n";
-#	}
-#	if(/{$/ and /[\(\)]/){
-#		s/{$/;/g;
-#		$f .= $_;
-#	}
-#}
-#$e = "typedef enum data_type {\n$e} data_type;\n\n";
-#$data_types_c = "#include <libfrozen.h>\n\ndata_proto_t data_protos[] = {\n$a};\nsize_t data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);\n\n";
-#$data_types_h = "#ifndef DATA_PROTOS_H\n#define DATA_PROTOS_H\n$e$f\n\n#endif // DATA_PROTOS_H";
-#
-#open FH, ">src/data_protos.c"; print FH $data_types_c; close FH;
-#open FH, ">src/data_protos.h"; print FH $data_types_h; close FH;
-#'
-
 cat test/test_*.c | perl -e '
 $e=""; $f=""; $e="";
 while(<STDIN>){

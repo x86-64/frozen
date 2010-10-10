@@ -97,7 +97,7 @@ static int sorts_destroy(chain_t *chain){ // {{{
 	// TODO destory without configure cause crash
 
 	fc_crwd_destory(&data->fc_table);
-	data_ctx_free(&data->cmp_ctx);
+	data_ctx_destory(&data->cmp_ctx);
 	
 	free(chain->user_data);
 	
@@ -137,7 +137,7 @@ static int sorts_configure(chain_t *chain, setting_t *config){ // {{{
 	
 	/* get context */
 	cmp_context_str = setting_get_child_string(config, "type-context");
-	if( data_ctx_new(&data->cmp_ctx, info_type, cmp_context_str) != 0)
+	if( data_ctx_init(&data->cmp_ctx, info_type, cmp_context_str) != 0)
 		return -EINVAL;
 	
 	

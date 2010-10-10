@@ -13,7 +13,8 @@ typedef struct locator_ud {
 	data_type      oid_type;
 	unsigned int   linear_scale;
 	hash_t        *new_request;
-	
+	data_ctx_t     ctx;
+
 } locator_ud;
 
 static int locator_init(chain_t *chain){
@@ -29,6 +30,8 @@ static int locator_destroy(chain_t *chain){
 	locator_ud *data = (locator_ud *)chain->user_data;
 	
 	hash_free(data->new_request);
+	
+	data_ctx_destory(&data->ctx);
 	
 	free(data);
 	chain->user_data = NULL;
@@ -94,6 +97,8 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	if(oid_class_supported == 0)
 		return_error(-EINVAL, "locator 'oid-class' not supported\n");
 	
+	data_ctx_init(&data->ctx, data->oid_type, NULL); 
+	
 	data->linear_scale = linear_scale;
 	data->new_request  = hash_new();
 	
@@ -105,7 +110,6 @@ static int locator_configure(chain_t *chain, setting_t *config){
 static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
 	data_t       *val;
 	data_type     val_type;
-	data_proto_t *val_proto;
 	
 	// TODO holly crap
 	
@@ -118,20 +122,16 @@ static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
 	if(hash_get_any(data->new_request, key, NULL, &val, NULL) != 0)
 		return -EINVAL;
 	
-	val_proto = data_proto_from_type(val_type);
-	if(val_proto->func_mul(val, data->linear_scale) != 0)
+	if(data_bare_arithmetic(val_type, val, '*', data->linear_scale) != 0)
 		return -EINVAL;
 	
 	return 0;
 }
 
 static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
-	/*
-	data_t      *key;
 	
 	// divide returned key on data->size
-	key = (data_t *)buffer_seek(buffer, 0);
-	if(data->oid_proto->func_divide(key, data->linear_scale) != 0){
+	if(data_buffer_arithmetic(&data->ctx, buffer, 0, '/', data->linear_scale) != 0){
 				
 		// TODO linear incapsulation can't really deal with keys that
 		// not cleanly divide on linear_scale. For now we return -EIO,
@@ -140,8 +140,6 @@ static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
 		return -EIO;
 	}
 	return 0;
-	*/
-	return -1;
 }
 
 static ssize_t incapsulate_ret(locator_ud *data, ssize_t ret){
