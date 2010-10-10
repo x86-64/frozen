@@ -54,7 +54,6 @@ START_TEST (test_backend_blocks){
 	
 	unsigned int  action;
 	ssize_t       ssize;
-	char         *test_chunk;
 	buffer_t     *buffer = buffer_alloc();
 	hash_t       *hash   = hash_new();
 	
@@ -64,7 +63,6 @@ START_TEST (test_backend_blocks){
 	off_t         key_from, key_to;
 	char         *key_data  = malloc(100);
 	char          chunk_1[] = "_`abcdefghijklmnopqrstuvwxyz";
-	data_t       *data_buf;
 	
 	action  = ACTION_CRWD_CREATE;
 	ssize   = 1;
@@ -97,7 +95,7 @@ START_TEST (test_backend_blocks){
 	
 	// check
 	
-	read_all(hash, buffer, backend, &key_off, key_count, key_data);
+	read_all(hash, buffer, backend, (off_t *)&key_off, key_count, key_data);
 		fail_unless(memcmp(key_data, chunk_1, key_count) == 0, "backend in_block read failed");
 	//printf("was: %s\n", key_data);
 	
@@ -113,7 +111,7 @@ START_TEST (test_backend_blocks){
 	ssize = backend_query(backend, hash, buffer);
 		fail_unless(ssize == 0, "backend in_block move failed");
 	
-	read_all(hash, buffer, backend, &key_off, key_count, key_data);
+	read_all(hash, buffer, backend, (off_t *)&key_off, key_count, key_data);
 	//	printf("from: %x to: %x res: %x, str: %s\n", (unsigned int)key_from, (unsigned int)key_to, (unsigned int)ssize, (char *)key_data);
 
 	/*
@@ -150,6 +148,7 @@ START_TEST (test_backend_blocks){
 		}
 	}*/
 	
+	free(key_data);
 	hash_free(hash);
 	buffer_free(buffer);
 	

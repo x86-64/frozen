@@ -1,8 +1,16 @@
 #include <libfrozen.h>
 
-size_t  data_void_raw_len(void *data, size_t buffer_size){
+size_t  data_void_bare_len(void *data, size_t buffer_size){
 	return buffer_size;
 }
 
-REGISTER_DATA(TYPE_VOID,SIZE_VARIABLE, .func_len = &data_void_raw_len)
-
+/*
+REGISTER_TYPE(`TYPE_VOID')
+REGISTER_PROTO(
+	`{
+		.type          = TYPE_VOID,
+		.type_str      = "void",
+		.size_type     = SIZE_VARIABLE,
+		.func_bare_len = &data_void_bare_len
+	}')
+*/

@@ -76,6 +76,7 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 		case ACTION_CRWD_DELETE: func = chain->chain_type_crwd.func_delete; break;
 		case ACTION_CRWD_MOVE:   func = chain->chain_type_crwd.func_move  ; break;
 		case ACTION_CRWD_COUNT:  func = chain->chain_type_crwd.func_count ; break;
+		case ACTION_CRWD_CUSTOM: func = chain->chain_type_crwd.func_custom; break;
 		default:
 			return -EINVAL;
 	};	
@@ -206,11 +207,13 @@ int           fc_crwd_init    (crwd_fastcall *fc_table){
 	if( (fc_table->request_move   = hash_new()) == NULL)  goto free;
 	if( (fc_table->request_delete = hash_new()) == NULL)  goto free;
 	if( (fc_table->request_count  = hash_new()) == NULL)  goto free;
+	if( (fc_table->request_custom = hash_new()) == NULL)  goto free;
 	
 	if( (fc_table->buffer_create = buffer_alloc()) == NULL) goto free;
 	if( (fc_table->buffer_read   = buffer_alloc()) == NULL) goto free;
 	if( (fc_table->buffer_write  = buffer_alloc()) == NULL) goto free;
 	if( (fc_table->buffer_count  = buffer_alloc()) == NULL) goto free;
+	if( (fc_table->buffer_custom = buffer_alloc()) == NULL) goto free;
 	
 	action = ACTION_CRWD_CREATE; hash_set(fc_table->request_create, "action", TYPE_INT32, &action);
 	action = ACTION_CRWD_READ;   hash_set(fc_table->request_read,   "action", TYPE_INT32, &action);
@@ -218,6 +221,7 @@ int           fc_crwd_init    (crwd_fastcall *fc_table){
 	action = ACTION_CRWD_MOVE;   hash_set(fc_table->request_move,   "action", TYPE_INT32, &action);
 	action = ACTION_CRWD_DELETE; hash_set(fc_table->request_delete, "action", TYPE_INT32, &action);
 	action = ACTION_CRWD_COUNT;  hash_set(fc_table->request_count,  "action", TYPE_INT32, &action);
+	action = ACTION_CRWD_CUSTOM; hash_set(fc_table->request_custom, "action", TYPE_INT32, &action);
 	
 	return 0;
 free:
@@ -232,11 +236,13 @@ void          fc_crwd_destory (crwd_fastcall *fc_table){
 	if( (fc_table->request_move   != NULL)) hash_free(fc_table->request_move);
 	if( (fc_table->request_delete != NULL)) hash_free(fc_table->request_delete);
 	if( (fc_table->request_count  != NULL)) hash_free(fc_table->request_count);
+	if( (fc_table->request_custom != NULL)) hash_free(fc_table->request_custom);
 	
 	if( (fc_table->buffer_create  != NULL)) buffer_free(fc_table->buffer_create);
 	if( (fc_table->buffer_read    != NULL)) buffer_free(fc_table->buffer_read);
 	if( (fc_table->buffer_write   != NULL)) buffer_free(fc_table->buffer_write);
 	if( (fc_table->buffer_count   != NULL)) buffer_free(fc_table->buffer_count);
+	if( (fc_table->buffer_custom  != NULL)) buffer_free(fc_table->buffer_custom);
 	
 	memset(fc_table, 0, sizeof(crwd_fastcall));
 }
@@ -249,6 +255,7 @@ static ssize_t  fc_crwd_call  (crwd_fastcall *fc_table, chain_t *chain, va_list 
 	off_t         r_key_to;
 	unsigned int  r_size;
 	void         *r_buf;
+	char         *r_fname;
 	buffer_t    **o_buffer;
 	void         *o_buf;
 	size_t        o_buf_size;
@@ -322,6 +329,19 @@ static ssize_t  fc_crwd_call  (crwd_fastcall *fc_table, chain_t *chain, va_list 
 			ret = chain_query(chain, fc_table->request_count, fc_table->buffer_count);
 			if(ret > 0){
 				buffer_read(fc_table->buffer_count, 0, o_buf, MIN(ret, o_buf_size)); 
+			}
+			return ret;
+		// }}}
+		case ACTION_CRWD_CUSTOM: // (fc_table, chain, ACTION_CRWD_CUSTOM, "func_name", [&buf], [sizeof(buf)]); // {{{
+			r_fname    = va_arg(args, char *);
+			o_buf      = va_arg(args, void *);
+			o_buf_size = va_arg(args, size_t);
+			
+			if(hash_set       (fc_table->request_custom, "function", TYPE_STRING, &r_fname) != 0) return -1;
+			
+			ret = chain_query(chain, fc_table->request_custom, fc_table->buffer_custom);
+			if(ret > 0 && o_buf != NULL){
+				buffer_read(fc_table->buffer_custom, 0, o_buf, MIN(ret, o_buf_size)); 
 			}
 			return ret;
 		// }}}

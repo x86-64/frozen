@@ -2,53 +2,6 @@
 #include <libfrozen.h>
 #include <backend.h>
 
-/* m4 {{{
-#line 7
-
-
-#line 1 "backends/oids/integer.c"
-#include <libfrozen.h>
-
-// simply use existing functions
-
-
-#line 5
-        
-
-#line 6
-        
-
-#line 7
-         
-
-#line 8
-        
-
-#line 9 "backends/oid-locator.c.m4"
-
-#line 10 "backends/oid-locator.c.m4"
-
-}}} */
-/* oid protos {{{ */
-typedef struct oid_proto_t {
-	data_type     type;
-	f_data_add    func_add;
-	f_data_div    func_divide;
-	f_data_mul    func_multiply;
-} oid_proto_t;
-
-oid_proto_t oid_protos[] = {
-	{ TYPE_INT8,  &data_int8_add,  &data_int8_div , &data_int8_mul  },
-#line 21
-{ TYPE_INT16, &data_int16_add, &data_int16_div, &data_int16_mul },
-#line 21
-{ TYPE_INT32, &data_int32_add, &data_int32_div, &data_int32_mul },
-#line 21
-{ TYPE_INT64, &data_int64_add, &data_int64_div, &data_int64_mul },
-#line 21
-
-}; // }}}
-
 typedef enum locator_mode {
 	LINEAR_INCAPSULATED,  // public oid converted to private oid using div()
 	LINEAR_ORIGINAL,      // public oid same as private oid, insecure
@@ -58,21 +11,11 @@ typedef enum locator_mode {
 
 typedef struct locator_ud {
 	locator_mode   mode;
-	oid_proto_t   *oid_proto;
+	data_type      oid_type;
 	unsigned int   linear_scale;
 	hash_t        *new_request;
 	
 } locator_ud;
-
-static oid_proto_t *  oid_proto_from_type(data_type type){
-	int i;
-	
-	for(i=0; i < sizeof(oid_protos) / sizeof(oid_proto_t); i++){
-		if(oid_protos[i].type == type)
-			return &(oid_protos[i]);
-	}
-	return NULL;
-}
 
 static int locator_init(chain_t *chain){
 	locator_ud *user_data = (locator_ud *)calloc(1, sizeof(locator_ud));
@@ -94,11 +37,9 @@ static int locator_destroy(chain_t *chain){
 }
 
 static int locator_configure(chain_t *chain, setting_t *config){
-	data_type      oid_class_type;
       //size_type     *oid_class_size_type;
 	int            oid_class_supported = 1;
 	char          *oid_class_str;
-	oid_proto_t   *oid_class_proto;
 	char          *mode_str;
 	char          *linear_scale_str;
 	unsigned int   linear_scale;
@@ -124,15 +65,8 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	if(oid_class_str == NULL)
 		return_error(-EINVAL, "locator 'oid-class' not defined\n");
 	
-	oid_class_type = data_type_from_string(oid_class_str);
-	if(oid_class_type == -1)
+	if( (data->oid_type = data_type_from_string(oid_class_str)) == -1)
 		return_error(-EINVAL, "locator 'oid-class' invalid\n");
-	
-	//oid_class_size_type = data_size_type(oid_class_type);
-	
-	oid_class_proto = oid_proto_from_type(oid_class_type);
-	if(oid_class_proto == NULL)
-		return_error(-EINVAL, "locator 'oid-class' not supported\n");
 	
 	linear_scale_str = setting_get_child_string(config, "size");
 	linear_scale     = (linear_scale_str != NULL) ? strtoul(linear_scale_str, NULL, 10) : 0;
@@ -141,16 +75,16 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
 			if(
-				oid_class_proto->func_add       == NULL       ||
-				oid_class_proto->func_divide    == NULL       ||
+			      //oid_class_proto->func_add       == NULL       ||
+			      //oid_class_proto->func_divide    == NULL       ||
 			      //oid_class_size_type             != SIZE_FIXED ||
 				linear_scale                    == 0
 			)
 				oid_class_supported = 0;
 			break;
 		case INDEX_INCAPSULATED:
-			if(oid_class_proto->func_add == NULL)
-				oid_class_supported = 0;
+			//if(oid_class_proto->func_add == NULL)
+			//	oid_class_supported = 0;
 			break;
 		case INDEX_ORIGINAL:
 		case LINEAR_ORIGINAL:
@@ -161,7 +95,6 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	if(oid_class_supported == 0)
 		return_error(-EINVAL, "locator 'oid-class' not supported\n");
 	
-	data->oid_proto    = oid_class_proto;
 	data->linear_scale = linear_scale;
 	data->new_request  = hash_new();
 	
@@ -171,9 +104,9 @@ static int locator_configure(chain_t *chain, setting_t *config){
 }
 
 static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
-	data_t      *val;
-	data_type    val_type;
-	oid_proto_t *val_proto;
+	data_t       *val;
+	data_type     val_type;
+	data_proto_t *val_proto;
 	
 	// TODO holly crap
 	
@@ -186,14 +119,15 @@ static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
 	if(hash_get_any(data->new_request, key, NULL, &val, NULL) != 0)
 		return -EINVAL;
 	
-	val_proto = oid_proto_from_type(val_type);
-	if(val_proto->func_multiply(val, data->linear_scale) != 0)
+	val_proto = data_proto_from_type(val_type);
+	if(val_proto->func_mul(val, data->linear_scale) != 0)
 		return -EINVAL;
 	
 	return 0;
 }
 
 static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
+	/*
 	data_t      *key;
 	
 	// divide returned key on data->size
@@ -206,8 +140,9 @@ static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
 		
 		return -EIO;
 	}
-	
 	return 0;
+	*/
+	return -1;
 }
 
 static ssize_t incapsulate_ret(locator_ud *data, ssize_t ret){

@@ -251,7 +251,7 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 			if(map_get_block(data, end_block_vid, &block_roff, &block_size) <= 0)
 				return -EFAULT;
 			
-			if(real_move(data, end_real, end_block_aoff, block_size - end_block_off) != 0)
+			if(real_move(data, end_real, block_roff, block_size - end_block_off) != 0) // TODO WRRRRRROOOOOOOOOOOONGG
 				return -EFAULT;
 				
 			if(map_resize(data, end_block_vid, block_size - end_block_off) != 0)

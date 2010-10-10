@@ -60,7 +60,7 @@ START_TEST (test_backend_blocks_addrs){
 		fail_unless(count == match_size, "chain 'blocks-addressing' tree size invalid");
 	// }}}
 	// check offsets {{{
-	buffer_remove_chunks(buffer);
+	buffer_cleanup(buffer);
 	
 	action    = ACTION_CRWD_READ;
 		hash_set(hash, "action",     TYPE_INT32, &action);

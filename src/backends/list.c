@@ -100,7 +100,6 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	if(key_proto->func_add(key, 1) != 0)
 		return -EINVAL;
 	
-	hash_dump(data->move_request);
 	ret = chain_next_query(chain, data->move_request, data->move_buffer); 
 	
 	return ret;

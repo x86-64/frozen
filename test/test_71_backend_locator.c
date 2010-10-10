@@ -26,11 +26,12 @@ START_TEST (test_backend_locator){
 	ssize_t       ssize;
 	off_t         new_key1, new_key2;
 	buffer_t     *buffer = buffer_alloc();
-	char  *test_chunk;
-	char  key1_data[]  = "test167890";
-	char  key2_data[]  = "test267890";
-	data_t *data_buf;
-
+	
+	char          key1_data[]  = "test167890";
+	char          key2_data[]  = "test267890";
+	buffer_t     *key1_buffer  = buffer_alloc_from_bare(&key1_data, sizeof(key1_data));
+	buffer_t     *key2_buffer  = buffer_alloc_from_bare(&key2_data, sizeof(key2_data));
+	
 	hash = hash_new();
 	
 	action  = ACTION_CRWD_CREATE;
@@ -40,6 +41,7 @@ START_TEST (test_backend_locator){
 		
 		if( (ssize = backend_query(backend, hash, buffer)) != sizeof(off_t) )
 			fail("chain file create key1 failed");	
+		
 		buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
 		
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
@@ -78,14 +80,12 @@ START_TEST (test_backend_locator){
 		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
-		buffer_remove_chunks(buffer);
+		buffer_cleanup(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,                             "backend in_locator read 1 failed");
-			
-		test_chunk = buffer_get_first_chunk(buffer);
 			fail_unless(
-				test_chunk != NULL && memcmp(test_chunk, key1_data, 10) == 0,
+				buffer_memcmp(buffer, 0, key1_buffer, 0, 10) == 0,
 				"backend in_locator read 1 data failed"
 			);
 	
@@ -93,21 +93,21 @@ START_TEST (test_backend_locator){
 		hash_set(hash, "key",    TYPE_INT64,  &new_key2);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
-		buffer_remove_chunks(buffer);
+		buffer_cleanup(buffer);
 		
 		ssize = backend_query(backend, hash, buffer);
 			fail_unless(ssize == 1,                             "backend in_locator read 2 failed");
-			
-		test_chunk = buffer_get_first_chunk(buffer);
 			fail_unless(
-				test_chunk != NULL &&
-				memcmp(test_chunk, key2_data, 10) == 0,
+				buffer_memcmp(buffer, 0, key2_buffer, 0, 10) == 0,
 				"backend in_locator read 2 data failed"
 			);
 		
 	hash_free(hash);
 	buffer_free(buffer);
-
+	
+	buffer_free(key1_buffer);
+	buffer_free(key2_buffer);
+	
 	backend_destory(backend);
 	setting_destroy(settings);
 }

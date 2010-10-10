@@ -1,41 +1,29 @@
 
 START_TEST (test_buffer){
-	size_t     size;
-	void      *chunk;
-	void      *chunk2;
-	void      *test;
+	void      *chunk1, *chunk2, *chunkt;
 	buffer_t  *buffer;
 	char       data[] = "1234567890";
 	char      *testb  = calloc(1, 100);
-	
-	chunk = chunk_alloc(100);
-		fail_unless(chunk != NULL, "chunk create failed");
-	size = chunk_get_size(chunk);
-		fail_unless(size  == 100, "chunk size invalid");
-	
-	chunk2 = chunk_alloc(50);
-	
+	size_t     size;
 	
 	buffer = buffer_alloc();
 		fail_unless(buffer != NULL, "buffer create failed");
 	size = buffer_get_size(buffer);
 		fail_unless(size == 0, "buffer size failed");
 	
-	buffer_add_head_chunk(buffer, chunk);
-	size = buffer_get_size(buffer);
+	chunk1 = buffer_add_head_chunk(buffer, 100);
+	size   = buffer_get_size(buffer);
 		fail_unless(size == 100, "buffer add head chunk failed");
-	buffer_add_tail_chunk(buffer, chunk2);
-	size = buffer_get_size(buffer);
+	chunk2 = buffer_add_tail_chunk(buffer, 50);
+	size   = buffer_get_size(buffer);
 		fail_unless(size == 150, "buffer add tail chunk failed");
 	
-	test = chunk_next(chunk);
-		fail_unless(test == chunk2, "chunk->next failed");
-	
-	buffer_delete_chunk(buffer, chunk);
-	size = buffer_get_size(buffer);
-		fail_unless(size == 50, "buffer delete chunk failed");
+	chunkt = chunk_next(chunk1);
+		fail_unless(chunkt == chunk2, "chunk->next failed");
 	
 	buffer_free(buffer);
+	
+	
 	buffer = buffer_alloc();
 	
 	buffer_write(buffer, 0, &data, 1);
@@ -49,6 +37,23 @@ START_TEST (test_buffer){
 		fail_unless(memcmp(testb, &data, 10) == 0, "buffer chunked write-read failed");
 	
 	buffer_free(buffer);
+	
+	char      data1[] = "test1234tezt5678";
+	char      data2[] = "testtezt56781234";
+	buffer_t  data1_buffer, data2_buffer;
+	
+	buffer_init_from_bare(&data1_buffer, &data1, sizeof(data1));
+	buffer_init_from_bare(&data2_buffer, &data2, sizeof(data2));
+	
+	// TODO check chunked buffers
+	
+	fail_unless( buffer_memcmp(&data1_buffer, 0, &data2_buffer, 0, 4) == 0, "buffer_memcmp failed (test <=> test)");
+	fail_unless( buffer_memcmp(&data1_buffer, 8, &data2_buffer, 4, 4) == 0, "buffer_memcmp failed (tezt <=> tezt)");
+	fail_unless( buffer_memcmp(&data1_buffer, 4, &data2_buffer, 8, 4) != 0, "buffer_memcmp failed (1234 <=> 5678)");
+	
+	buffer_destroy(&data1_buffer);
+	buffer_destroy(&data2_buffer);
+	
 	free(testb);
 }
 END_TEST

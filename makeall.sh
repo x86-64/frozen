@@ -1,42 +1,31 @@
 #!/bin/sh
 
 # cleanup
-rm -rf test/data_backend_*.dat      &>/dev/null
 find . -name '*.gcov' -delete
 
-# backends
-#planned=`find src/backends/ -maxdepth 1 -name '*.c' -printf 'backends/%P '`
-#cat src/Makefile.am | sed "s#\(backends_sources=\).*#\1$planned backends/oid-locator.c#" > src/Makefile.tmp
-#mv src/Makefile.tmp src/Makefile.am
-
-# data types
-#planned=`find src/data/ -name '*.c' -printf 'data/%P '`
-#cat src/Makefile.am | sed "s#\(data_sources=\).*#\1$planned#" > src/Makefile.tmp
-#mv src/Makefile.tmp src/Makefile.am
-
-cat src/data/*.c | perl -e '
-$e=""; $f=""; $a="";
-while(<STDIN>){
-	s/\s*?\/[\/*].*$//g;
-	if(/REGISTER_DATA\(([^,]*),(.*)\)/){
-		$n=lc(substr($1,5));
-		$t=$1;
-		$r=$2;
-		$e .= "\t$t,\n";
-		$a .= "\t{ \"$n\",$t,$r },\n";
-	}
-	if(/{$/ and /[\(\)]/){
-		s/{$/;/g;
-		$f .= $_;
-	}
-}
-$e = "typedef enum data_type {\n$e} data_type;\n\n";
-$data_types_c = "#include <libfrozen.h>\n\ndata_proto_t data_protos[] = {\n$a};\nsize_t data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);\n\n";
-$data_types_h = "#ifndef DATA_PROTOS_H\n#define DATA_PROTOS_H\n$e$f\n\n#endif // DATA_PROTOS_H";
-
-open FH, ">src/data_protos.c"; print FH $data_types_c; close FH;
-open FH, ">src/data_protos.h"; print FH $data_types_h; close FH;
-'
+#cat src/data/*.c | perl -e '
+#$e=""; $f=""; $a="";
+#while(<STDIN>){
+#	s/\s*?\/[\/*].*$//g;
+#	if(/REGISTER_DATA\(([^,]*),(.*)\)/){
+#		$n=lc(substr($1,5));
+#		$t=$1;
+#		$r=$2;
+#		$e .= "\t$t,\n";
+#		$a .= "\t{ \"$n\",$t,$r },\n";
+#	}
+#	if(/{$/ and /[\(\)]/){
+#		s/{$/;/g;
+#		$f .= $_;
+#	}
+#}
+#$e = "typedef enum data_type {\n$e} data_type;\n\n";
+#$data_types_c = "#include <libfrozen.h>\n\ndata_proto_t data_protos[] = {\n$a};\nsize_t data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);\n\n";
+#$data_types_h = "#ifndef DATA_PROTOS_H\n#define DATA_PROTOS_H\n$e$f\n\n#endif // DATA_PROTOS_H";
+#
+#open FH, ">src/data_protos.c"; print FH $data_types_c; close FH;
+#open FH, ">src/data_protos.h"; print FH $data_types_h; close FH;
+#'
 
 cat test/test_*.c | perl -e '
 $e=""; $f=""; $e="";

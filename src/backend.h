@@ -33,6 +33,7 @@ struct chain_t {
 			f_crwd  func_delete;
 			f_crwd  func_move;
 			f_crwd  func_count;
+			f_crwd  func_custom;
 		} chain_type_crwd;
 	};
 	
@@ -78,11 +79,13 @@ typedef struct crwd_fastcall {
 	request_t    *request_move;
 	request_t    *request_delete;
 	request_t    *request_count;
+	request_t    *request_custom;
 	
 	buffer_t     *buffer_create;
 	buffer_t     *buffer_read;
 	buffer_t     *buffer_write;
 	buffer_t     *buffer_count;
+	buffer_t     *buffer_custom;
 	
 } crwd_fastcall;
 

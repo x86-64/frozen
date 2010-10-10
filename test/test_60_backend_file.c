@@ -1,7 +1,5 @@
 #include "test.h"
 
-// TODO remove all buffer_remove_chunks(buffer);
-
 void  db_read(chain_t *chain, off_t key, size_t size, char *buf, ssize_t *ssize){
 	buffer_t       *buffer = buffer_alloc();
 	unsigned int    action;
@@ -25,11 +23,12 @@ void  db_read(chain_t *chain, off_t key, size_t size, char *buf, ssize_t *ssize)
 }
 
 void  db_write(chain_t *chain, off_t key, char *buf, unsigned int buf_size, ssize_t *ssize){
-	buffer_t       *buffer = buffer_from_data(buf, buf_size);
+	buffer_t        buffer;
 	unsigned int    action;
 	hash_t         *hash;
-	data_t         *data_buf;
-	char           *test_chunk;
+	
+	buffer_init(&buffer);
+	buffer_add_head_raw(&buffer, buf, buf_size);
 	
 	action  = ACTION_CRWD_WRITE;
 	hash = hash_new();
@@ -37,17 +36,18 @@ void  db_write(chain_t *chain, off_t key, char *buf, unsigned int buf_size, ssiz
 		hash_set(hash, "key",    TYPE_INT64,  &key);
 		hash_set(hash, "size",   TYPE_INT32,  &buf_size);
 		
-		*ssize = chain_query(chain, hash, buffer);
+		*ssize = chain_query(chain, hash, &buffer);
 	
 	hash_free(hash);
-	buffer_free(buffer);
+	buffer_destroy(&buffer);
 }
 
 void  db_move(chain_t *chain, off_t key_from, off_t key_to, size_t key_size, ssize_t *ssize){
-	buffer_t       *buffer = buffer_alloc();
+	buffer_t        buffer;
 	unsigned int    action;
 	hash_t         *hash;
-	char           *test_chunk;
+	
+	buffer_init(&buffer);
 	
 	action  = ACTION_CRWD_MOVE;
 	hash = hash_new();
@@ -56,10 +56,10 @@ void  db_move(chain_t *chain, off_t key_from, off_t key_to, size_t key_size, ssi
 		hash_set(hash, "key_to",   TYPE_INT64, &key_to); 
 		hash_set(hash, "size",     TYPE_INT32, &key_size);
 		
-		*ssize = chain_query(chain, hash, buffer);
+		*ssize = chain_query(chain, hash, &buffer);
 		
 	hash_free(hash);
-	buffer_free(buffer);
+	buffer_destroy(&buffer);
 }
 
 START_TEST (test_backend_file){
@@ -130,7 +130,7 @@ START_TEST (test_backend_file){
 	hash = hash_new();
 		hash_set(hash, "action", TYPE_INT32, &action);
 		
-		buffer_remove_chunks(buffer);
+		buffer_cleanup(buffer);
 		
 		ssize = chain_query(chain, hash, buffer);
 			fail_unless(ssize > 0,                                "chain file count failed");
@@ -174,7 +174,7 @@ START_TEST (test_backend_file){
 		hash_set(hash, "key",    TYPE_INT64,  &new_key1);
 		hash_set(hash, "size",   TYPE_INT32,  &ssize);
 		
-		buffer_remove_chunks(buffer);
+		buffer_cleanup(buffer);
 		
 		ssize = chain_query(chain, hash, buffer);
 			fail_unless(ssize == 0,                                "chain file key 1 delete failed");

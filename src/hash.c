@@ -118,7 +118,7 @@ static int         hash_key_get_data            (hash_key_t *hash_key, data_type
 	}
 	
 	if(size != NULL)
-		if( (*size = data_len(hash_key->element->type, el_data, el_buf_size)) == 0)
+		if( (*size = data_bare_len(hash_key->element->type, el_data, el_buf_size)) == 0)
 			return -1;
 	
 	if(type != NULL)
@@ -199,7 +199,7 @@ int                hash_set                     (hash_t *hash, char *key, data_t
 	if(hash == NULL || key == NULL || value == NULL)
 		return -1;
 	
-	value_size = data_len(type, value, (size_t)-1); // TODO SEC bad bad bad bad...
+	value_size = data_bare_len(type, value, (size_t)-1); // TODO SEC bad bad bad bad...
 	
 	if(hash_search_key(hash, key, 0, &found_key) != 0)
 		goto bad;
@@ -330,7 +330,7 @@ void hash_dump(hash_t *hash){
 		if(found_data == NULL)
 			continue;
 		
-		found_data_size = data_len(element->type, found_data, found_data_size);
+		found_data_size = data_bare_len(element->type, found_data, found_data_size);
 		
 		printf(" - el: %x %s", (unsigned int)element->type, (char *)found_key);
 		for(k=0; k<found_data_size; k++){

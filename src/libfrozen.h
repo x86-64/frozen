@@ -5,6 +5,11 @@
 #define DEBUG
 #define _inline extern inline
 
+#define _FILE_OFFSET_BITS 64
+#define _LARGEFILE64_SOURCE
+#define __USE_GNU
+#define _XOPEN_SOURCE 500 
+
 /* Standart libraries */
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,9 +31,8 @@
 /* Own headers */
 #include <list.h>            // internal data storage
 #include <settings.h>        // 
-#include <data_protos.h>     //
-#include <data.h>            //
 #include <buffer.h>          //
+#include <data.h>            //
 #include <structs.h>         //
 #include <hash.h>            //
 
@@ -38,4 +42,7 @@
 
 /* Global variables */
 extern setting_t *global_settings;
+
+int frozen_init(void);
+int frozen_destory(void);
 
