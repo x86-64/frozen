@@ -40,8 +40,10 @@ int                  data_ctx_init          (data_ctx_t *ctx, data_type type, vo
 	f_data_ctx_n   func_ctx_parse;
 	void          *user_data;
 	
-	if((unsigned)type >= data_protos_size)
+	if((unsigned)type >= data_protos_size){
+		memset(ctx, 0, sizeof(data_ctx_t));
 		return -EINVAL;
+	}
 	
 	user_data = NULL;
 	if( (func_ctx_parse = data_protos[type].func_ctx_parse) != NULL){
@@ -53,7 +55,7 @@ int                  data_ctx_init          (data_ctx_t *ctx, data_type type, vo
 	return 0;
 } // }}}
 int                  data_ctx_destory       (data_ctx_t *ctx){ // {{{
-	if( ctx->data_proto->func_ctx_free != NULL)
+	if( ctx->data_proto != NULL && ctx->data_proto->func_ctx_free != NULL)
 		ctx->data_proto->func_ctx_free(ctx->user_data);
 	
 	return 0;

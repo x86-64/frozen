@@ -10,6 +10,7 @@
 #include <test_72_backend_list.c>
 #include <test_73_backend_blocks-addr.c>
 #include <test_74_backend_blocks.c>
+#include <test_75_backend_insert-sort.c>
 
 void test_list(void){
 	tcase_add_test(tc_core, test_settings_basic);
@@ -27,4 +28,5 @@ void test_list(void){
 	tcase_add_test(tc_core, test_backend_list);
 	tcase_add_test(tc_core, test_backend_blocks_addrs);
 	tcase_add_test(tc_core, test_backend_blocks);
+	tcase_add_test(tc_core, test_backend_insert_sort);
 }

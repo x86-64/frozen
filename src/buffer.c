@@ -144,20 +144,28 @@ static void     buffer_add_tail_any        (buffer_t *buffer, void *chunk){ // {
 } // }}}
 void *          buffer_add_head_chunk      (buffer_t *buffer, size_t size){ // {{{
 	void *chunk = chunk_data_alloc(size);
+	if(chunk == NULL) return NULL;
+	
 	buffer_add_head_any(buffer, chunk);
 	return chunk;
 } // }}}
 void *          buffer_add_tail_chunk      (buffer_t *buffer, size_t size){ // {{{
 	void *chunk = chunk_data_alloc(size);
+	if(chunk == NULL) return NULL;
+	
 	buffer_add_tail_any(buffer, chunk);
 	return chunk;
 } // }}}
 void            buffer_add_head_raw        (buffer_t *buffer, void *ptr, size_t size){ // {{{
 	void *chunk = chunk_bare_alloc(ptr, size);
+	if(chunk == NULL) return;
+	
 	buffer_add_head_any(buffer, chunk);
 } // }}}
 void            buffer_add_tail_raw        (buffer_t *buffer, void *ptr, size_t size){ // {{{
 	void *chunk = chunk_bare_alloc(ptr, size);
+	if(chunk == NULL) return;
+	
 	buffer_add_tail_any(buffer, chunk);
 } // }}}
 

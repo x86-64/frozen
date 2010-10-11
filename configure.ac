@@ -22,7 +22,7 @@ PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
 
 AC_ARG_ENABLE(debug,  AS_HELP_STRING([--enable-debug],  [compile with debug symbols]))
 if test "x$enable_debug" == "xyes"; then
-        CFLAGS="-g3 -O0 -Wall -Werror $CFLAGS"
+        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror"
 fi
 
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))

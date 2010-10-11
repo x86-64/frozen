@@ -165,8 +165,8 @@ static int      tree_recalc(tree_t *tree){ // {{{
 					tree->chain,
 					ACTION_CRWD_READ,
 					(off_t)        (ptr       * sizeof(block_info)),
-					(unsigned int) (read_size * sizeof(block_info)),
-					(buffer_t *)   &buffer
+					(buffer_t *)   &buffer,
+					(unsigned int) (read_size * sizeof(block_info))
 		)) <= 0){
 			break;
 		}
@@ -297,8 +297,8 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 		tree->chain,
 		ACTION_CRWD_READ,
 		(off_t)         (block_vid * sizeof(block_info)),
-		(unsigned int)  sizeof(block_info),
-		(void *)       &buffer
+		(void *)       &buffer,
+		(unsigned int)  sizeof(block_info)
 	)) <= 0){
 		return -1;
 	}
@@ -368,8 +368,8 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 				tree->chain,
 				ACTION_CRWD_READ,
 				(off_t)         (ptr * sizeof(block_info)),
-				(unsigned int)  sizeof(block_info),
-				(void *)       &buffer
+				(void *)       &buffer,
+				(unsigned int)  sizeof(block_info)
 			)) <= 0)
 				break;
 			
@@ -401,8 +401,8 @@ static int    tree_get_block(tree_t *tree, unsigned int block_vid, block_info *b
 		tree->chain,
 		ACTION_CRWD_READ,
 		(off_t)         (block_vid * sizeof(block_info)),
-		(unsigned int)  sizeof(block_info),
-		(void *)       &buffer
+		(void *)       &buffer,
+		(unsigned int)  sizeof(block_info)
 	)) <= 0){
 		return -1;
 	}

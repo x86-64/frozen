@@ -275,10 +275,10 @@ static ssize_t  fc_crwd_call  (crwd_fastcall *fc_table, chain_t *chain, va_list 
 			}
 			return ret;
 		// }}}
-		case ACTION_CRWD_READ:   // (fc_table, chain, ACTION_CRWD_READ, key, size, &buffer); // {{{
+		case ACTION_CRWD_READ:   // (fc_table, chain, ACTION_CRWD_READ, key, &buffer, size); // {{{
 			r_key      = va_arg(args, off_t);
-			r_size     = va_arg(args, unsigned int);
 			o_buffer   = va_arg(args, buffer_t **);
+			r_size     = va_arg(args, unsigned int);
 			
 			if(hash_set(fc_table->request_read, "key",  TYPE_INT64, &r_key)  != 0) return -1;
 			if(hash_set(fc_table->request_read, "size", TYPE_INT32, &r_size) != 0) return -1;
@@ -391,6 +391,63 @@ ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...){ // {{{
 	
 	va_end(args);
 	return ret;
+} // }}}
+
+/* }}} */
+
+/* buffer_io {{{ */
+static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
+	chain_t        *chain = (chain_t *)buffer->io_context;
+	hash_t         *hash;
+	buffer_t        buffer_read;
+	unsigned int    action;
+	ssize_t         ret;
+	
+	buffer_init_from_bare(&buffer_read, buf, buf_size);
+	
+	action = ACTION_CRWD_READ;
+	hash   = hash_new();
+		hash_set(hash, "action", TYPE_INT32, &action);
+		hash_set(hash, "key",    TYPE_INT64, &offset);
+		hash_set(hash, "size",   TYPE_INT32, &buf_size);
+		
+		ret = chain_query(chain, hash, &buffer_read);	
+	hash_free(hash);
+	
+	buffer_destroy(&buffer_read);
+	
+	return ret;
+} // }}}
+
+static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
+	chain_t        *chain = (chain_t *)buffer->io_context;
+	hash_t         *hash;
+	buffer_t        buffer_write;
+	unsigned int    action;
+	ssize_t         ret;
+	
+	buffer_init_from_bare(&buffer_write, buf, buf_size);
+	
+	action = ACTION_CRWD_WRITE;
+	hash   = hash_new();
+		hash_set(hash, "action", TYPE_INT32, &action);
+		hash_set(hash, "key",    TYPE_INT64, &offset);
+		hash_set(hash, "size",   TYPE_INT32, &buf_size);
+		
+		ret = chain_query(chain, hash, &buffer_write);	
+	hash_free(hash);
+	
+	buffer_destroy(&buffer_write);
+	
+	return ret;
+} // }}}
+
+void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached){ // {{{
+	buffer_io_init(buffer, (void *)chain, &backend_buffer_func_read, &backend_buffer_func_write, cached);
+} // }}}
+
+buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached){ // {{{
+	return buffer_io_alloc((void *)chain, &backend_buffer_func_read, &backend_buffer_func_write, cached);
 } // }}}
 
 /* }}} */

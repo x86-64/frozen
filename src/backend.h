@@ -96,4 +96,9 @@ ssize_t         fc_crwd_next_chain (crwd_fastcall *fc_table, ...);
 ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...);
 /* }}} */
 
+/* buffer_io {{{ */
+void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
+buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
+/* }}} */
+
 #endif // BACKEND_H

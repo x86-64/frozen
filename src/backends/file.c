@@ -297,7 +297,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	}
 	
 	if(from == to || move_size == 0)
-		return -EINVAL;
+		return 0;
 	
 	if(from < to){
 		max_size   = ((to - from) > data->copy_buffer) ? data->copy_buffer : (size_t)(to - from);

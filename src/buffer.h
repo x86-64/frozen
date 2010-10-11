@@ -36,29 +36,6 @@ struct buffer_t {
 	func_buffer  io_write;
 };
 
-/*
-void            buffer_init                (buffer_t *buffer);
-void            buffer_remove_chunks       (buffer_t *buffer);
-void            buffer_destroy             (buffer_t *buffer);
-
-buffer_t *      buffer_alloc               (void);
-buffer_t *      buffer_from_data           (void *data, size_t data_size);
-void            buffer_free                (buffer_t *buffer);
-
-void            buffer_add_head_chunk      (buffer_t *buffer, void *chunk);
-void            buffer_add_tail_chunk      (buffer_t *buffer, void *chunk);
-void *          buffer_add_new_head_chunk  (buffer_t *buffer, size_t size);
-void *          buffer_add_new_tail_chunk  (buffer_t *buffer, size_t size);
-int             buffer_delete_chunk        (buffer_t *buffer, void *chunk);
-void *          buffer_seek                (buffer_t *buffer, off_t ptr);
-
-ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset, void *buf, size_t buf_size);
-ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset,  void *buf, size_t buf_size);
-
-_inline size_t  buffer_get_size            (buffer_t *buffer);
-_inline void *  buffer_get_first_chunk     (buffer_t *buffer);
-*/
-
 void *          chunk_alloc                (size_t size);
 _inline size_t  chunk_get_size             (void *chunk);
 _inline void *  chunk_get_ptr              (void *chunk);
