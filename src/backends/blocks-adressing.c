@@ -341,6 +341,7 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 	
 	ret       = -1;
 	level_off = 0;
+	ptr       = 0;
 	// TODO lock
 		for(i=1; i < tree->nlevels; i++){
 			for(j=0; j < tree->elements_per_level; j++, ptr++){
