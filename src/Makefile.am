@@ -23,6 +23,7 @@ EXTRA_DIST=backends/*.m4 data/*.c data/*.m4 backends/insert-sort/*.c
 
 lib_LTLIBRARIES=libfrozen.la
 libfrozen_la_LDFLAGS= -module -avoid-version
+libfrozen_la_CPPFLAGS= -fvisibility=hidden
 libfrozen_la_SOURCES=   data.h \
 			libfrozen.c         libfrozen.h         \
 			list.c              list.h              \

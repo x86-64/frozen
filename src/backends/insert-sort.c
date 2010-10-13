@@ -118,10 +118,10 @@ static int sorts_init(chain_t *chain){ // {{{
 static int sorts_destroy(chain_t *chain){ // {{{
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
-	// TODO destory without configure cause crash
+	// TODO destroy without configure cause crash
 
-	fc_crwd_destory(&data->fc_table);
-	data_ctx_destory(&data->cmp_ctx);
+	fc_crwd_destroy(&data->fc_table);
+	data_ctx_destroy(&data->cmp_ctx);
 	hash_free(data->set_request);
 	
 	buffer_destroy(&data->key_buffer);

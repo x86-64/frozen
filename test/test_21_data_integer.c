@@ -5,11 +5,6 @@ START_TEST (test_data_integer){
 	unsigned long long  v100_2 = 0x11223344;
 	unsigned long long  v200_1 = 0x44556677;
 	
-	fail_unless(data_protos[TYPE_INT8].fixed_size  == 1, "data_int8  fixed_size failed");
-	fail_unless(data_protos[TYPE_INT16].fixed_size == 2, "data_int16 fixed_size failed");
-	fail_unless(data_protos[TYPE_INT32].fixed_size == 4, "data_int32 fixed_size failed");
-	fail_unless(data_protos[TYPE_INT64].fixed_size == 8, "data_int64 fixed_size failed");
-	
 	fail_unless(data_bare_cmp(TYPE_INT8, &v100_1, &v100_2) ==  0, "data_int8_cmp cmp failed 1");
 	fail_unless(data_bare_cmp(TYPE_INT8, &v100_1, &v200_1) == -1, "data_int8_cmp cmp failed 2");
 	fail_unless(data_bare_cmp(TYPE_INT8, &v200_1, &v100_1) ==  1, "data_int8_cmp cmp failed 3");

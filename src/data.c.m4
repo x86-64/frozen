@@ -54,7 +54,7 @@ int                  data_ctx_init          (data_ctx_t *ctx, data_type type, vo
 	ctx->user_data      = user_data;
 	return 0;
 } // }}}
-int                  data_ctx_destory       (data_ctx_t *ctx){ // {{{
+int                  data_ctx_destroy       (data_ctx_t *ctx){ // {{{
 	if( ctx->data_proto != NULL && ctx->data_proto->func_ctx_free != NULL)
 		ctx->data_proto->func_ctx_free(ctx->user_data);
 	

@@ -286,13 +286,13 @@ static int blocks_init(chain_t *chain){
 static int blocks_destroy(chain_t *chain){
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	fc_crwd_destory(&data->fc_map);
-	fc_crwd_destory(&data->fc_real);
+	fc_crwd_destroy(&data->fc_map);
+	fc_crwd_destroy(&data->fc_real);
 
 	if(data->layer_get   != NULL) hash_free(data->layer_get);
 	if(data->layer_count != NULL) hash_free(data->layer_count);
 	
-	backend_destory(data->bk_map);
+	backend_destroy(data->bk_map);
 	free(chain->user_data);
 	
 	chain->user_data = NULL;
@@ -340,9 +340,9 @@ static int blocks_configure(chain_t *chain, setting_t *config){
 	return 0;
 
 free3:  hash_free(data->layer_get);
-free2:  fc_crwd_destory(&data->fc_real);
-free1:  fc_crwd_destory(&data->fc_map);
-free:	backend_destory(data->bk_map);
+free2:  fc_crwd_destroy(&data->fc_real);
+free1:  fc_crwd_destroy(&data->fc_map);
+free:	backend_destroy(data->bk_map);
 	return -ENOMEM;
 }
 /* }}} */
@@ -493,3 +493,123 @@ static chain_t chain_blocks = {
 };
 CHAIN_REGISTER(chain_blocks)
 
+/*
+static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_t size){ // {{{
+	off_t         src_real,      dst_real;
+	unsigned int  src_block_vid, dst_block_vid;
+	unsigned int  dst_block_off;
+	unsigned int  new_block_vid;
+	off_t         src_block_roff;
+	off_t         new_block_roff;
+	
+	//off_t         block_roff;
+	size_t        block_size;
+	
+	// TODO copy only data from src blocks instead of whole block
+	// TODO eh.. how it works?
+	// NOTE this is HELL!
+	
+	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	
+	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+		return -EINVAL;
+	if(map_off(data, dst, &dst_block_vid, &dst_real) <= 0)
+		return -EINVAL;
+	
+	dst_block_off = dst_real % data->block_size;
+	
+	if(dst_block_off != 0){ // inserting data in middle, we truncate block and insert data after it
+		block_size = data->block_size - dst_block_off;
+		
+		if(real_new(data, &new_block_roff) <= 0)
+			return -EFAULT;
+		
+		if(real_move(data, dst_real, new_block_roff, block_size) != 0)
+			return -EFAULT;
+		
+		if(map_insert(data, dst_block_vid + 1, (unsigned int)new_block_roff, block_size) != 0)
+			return -EFAULT;
+		
+		if(map_resize(data, dst_block_vid, dst_block_off) != 0)
+			return -EFAULT;
+	}
+	
+	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+		return -EINVAL;
+	
+	new_block_vid = src_block_vid;
+	
+	goto start;
+	while(size > 0){
+		if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+			return -EINVAL;
+		
+	start:
+		if(map_get_block(data, src_block_vid, &src_block_roff, &block_size) <= 0)
+			return -EFAULT;
+		
+		block_size = MIN(size, block_size);
+		
+		if(real_new(data, &new_block_roff) <= 0)
+			return -EFAULT;
+		
+		if(real_move(data, src_real, new_block_roff, block_size) != 0)
+			return -EFAULT;
+		
+		if(map_insert(data, new_block_vid, (unsigned int)new_block_roff, block_size) != 0)
+			return -EFAULT;
+		
+		src        += block_size * 2; // TODO oh my...
+		size       -= block_size;
+		new_block_vid++;
+	}
+	
+	return 0;
+} // }}}
+static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ // {{{
+	off_t         start_real,      end_real;
+	unsigned int  start_block_off, end_block_off;
+	unsigned int  start_block_vid, end_block_vid, i_vid;
+	unsigned int  end_block_aoff;                          // absolute offset
+	off_t         block_roff;
+	size_t        block_size;
+	
+	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	
+	if(map_off(data, start,        &start_block_vid, &start_real) <= 0)
+		return -EFAULT;
+	if(map_off(data, start + size, &end_block_vid,   &end_real)   <= 0){
+		end_block_vid = (data->blocks_count - 1);
+		end_block_off = data->block_size;
+	}else{
+		end_block_off   = end_real   % data->block_size;
+		end_block_aoff  = (end_real - end_block_off);
+	}
+	start_block_off = start_real % data->block_size;
+	
+	for(i_vid = start_block_vid; i_vid <= end_block_vid; i_vid++){
+		if(i_vid == end_block_vid){
+			if(map_get_block(data, end_block_vid, &block_roff, &block_size) <= 0)
+				return -EFAULT;
+			
+			if(real_move(data, end_real, block_roff, block_size - end_block_off) != 0) // TODO WRRRRRROOOOOOOOOOOONGG
+				return -EFAULT;
+				
+			if(map_resize(data, end_block_vid, block_size - end_block_off) != 0)
+				return -EFAULT;
+			
+			break;
+		}
+		if(i_vid == start_block_vid){ // first block
+			if(map_resize(data, start_block_vid, start_block_off) != 0)
+				return -EFAULT;
+			
+			continue;
+		}
+		
+		if(map_resize(data, i_vid, 0) != 0)
+			return -EFAULT;
+	}
+	return 0;
+} // }}}
+*/

@@ -8,7 +8,7 @@ START_TEST (test_settings_basic){
 		fail_unless( setting->type == SETTING_NONE,  "Setting after empty is not valid");
 	
 	setting_destroy(setting);
-		fail_unless( 1 == 1, "Setting destory not work");
+		fail_unless( 1 == 1, "Setting destroy not work");
 }
 END_TEST
 REGISTER_TEST(core, test_settings_basic)

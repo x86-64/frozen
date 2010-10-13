@@ -392,7 +392,7 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 	// TODO unlock
 	return ret;
 } // }}}
-static int    tree_get_block(tree_t *tree, unsigned int block_vid, block_info *block){ // {{{
+static int      tree_get_block(tree_t *tree, unsigned int block_vid, block_info *block){ // {{{
 	ssize_t          m_ret;
 	buffer_t        *buffer;
 	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
@@ -435,7 +435,7 @@ static int addrs_init(chain_t *chain){
 static int addrs_destroy(chain_t *chain){
 	addrs_user_data *data = (addrs_user_data *)chain->user_data;
 	
-	fc_crwd_destory(&data->fc_table);
+	fc_crwd_destroy(&data->fc_table);
 	tree_free(data->tree);
 	
 	free(chain->user_data);
@@ -475,7 +475,7 @@ static int addrs_configure(chain_t *chain, setting_t *config){
 	
 	return 0;
 	
-free1:  fc_crwd_destory(&data->fc_table);
+free1:  fc_crwd_destroy(&data->fc_table);
 	return_error(-ENOMEM, "chain 'blocks-address' no memory\n"); 
 }
 /* }}} */

@@ -43,36 +43,36 @@ _inline void *  chunk_next                 (void *chunk);
 _inline void    chunk_free                 (void *chunk);
 
 
-void            buffer_init                (buffer_t *buffer);
-buffer_t *      buffer_alloc               (void);
+API void            buffer_init                (buffer_t *buffer);
+API buffer_t *      buffer_alloc               (void);
 
-void            buffer_io_init             (buffer_t *buffer, void *context, func_buffer read, func_buffer write, int cached);
-buffer_t *      buffer_io_alloc            (void *context, func_buffer read, func_buffer write, int cached);
+API void            buffer_io_init             (buffer_t *buffer, void *context, func_buffer read, func_buffer write, int cached);
+API buffer_t *      buffer_io_alloc            (void *context, func_buffer read, func_buffer write, int cached);
 
-void            buffer_init_from_bare      (buffer_t *buffer, void *ptr, size_t size);
-buffer_t *      buffer_alloc_from_bare     (void *ptr, size_t size);
-void            buffer_init_from_copy      (buffer_t *buffer, void *ptr, size_t size);
-buffer_t *      buffer_alloc_from_copy     (void *ptr, size_t size);
+API void            buffer_init_from_bare      (buffer_t *buffer, void *ptr, size_t size);
+API buffer_t *      buffer_alloc_from_bare     (void *ptr, size_t size);
+API void            buffer_init_from_copy      (buffer_t *buffer, void *ptr, size_t size);
+API buffer_t *      buffer_alloc_from_copy     (void *ptr, size_t size);
 
-void            buffer_destroy             (buffer_t *buffer);
-void            buffer_free                (buffer_t *buffer);
+API void            buffer_destroy             (buffer_t *buffer);
+API void            buffer_free                (buffer_t *buffer);
 
 
-void            buffer_defragment          (buffer_t *buffer);
-void            buffer_cleanup             (buffer_t *buffer);
-_inline size_t  buffer_get_size            (buffer_t *buffer);
+API void            buffer_defragment          (buffer_t *buffer);
+API void            buffer_cleanup             (buffer_t *buffer);
+API _inline size_t  buffer_get_size            (buffer_t *buffer);
 
-ssize_t         buffer_write               (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
-ssize_t         buffer_read                (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
+API ssize_t         buffer_write               (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
+API ssize_t         buffer_read                (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
 
-void *          buffer_add_head_chunk      (buffer_t *buffer, size_t size);
-void *          buffer_add_tail_chunk      (buffer_t *buffer, size_t size);
-void            buffer_add_head_raw        (buffer_t *buffer, void *ptr, size_t size);
-void            buffer_add_tail_raw        (buffer_t *buffer, void *ptr, size_t size);
+API void *          buffer_add_head_chunk      (buffer_t *buffer, size_t size);
+API void *          buffer_add_tail_chunk      (buffer_t *buffer, size_t size);
+API void            buffer_add_head_raw        (buffer_t *buffer, void *ptr, size_t size);
+API void            buffer_add_tail_raw        (buffer_t *buffer, void *ptr, size_t size);
 
-ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size);
-ssize_t         buffer_strcmp              (buffer_t *buffer1, buffer_t *buffer_2);
-size_t          buffer_strlen              (buffer_t *buffer);
+API ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size);
+API ssize_t         buffer_strcmp              (buffer_t *buffer1, buffer_t *buffer_2);
+API size_t          buffer_strlen              (buffer_t *buffer);
 
 #define buffer_process(_buffer,_size,_create,_func)  ({                     \
 	off_t  offset;                                                      \

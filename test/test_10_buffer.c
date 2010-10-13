@@ -1,6 +1,6 @@
 
 START_TEST (test_buffer){
-	void      *chunk1, *chunk2, *chunkt;
+	void      *chunk1, *chunk2;
 	buffer_t  *buffer;
 	char       data[] = "1234567890";
 	char      *testb  = calloc(1, 100);
@@ -17,9 +17,6 @@ START_TEST (test_buffer){
 	chunk2 = buffer_add_tail_chunk(buffer, 50);
 	size   = buffer_get_size(buffer);
 		fail_unless(size == 150, "buffer add tail chunk failed");
-	
-	chunkt = chunk_next(chunk1);
-		fail_unless(chunkt == chunk2, "chunk->next failed");
 	
 	buffer_free(buffer);
 	

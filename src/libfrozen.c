@@ -7,7 +7,7 @@ int frozen_init(void){
 	return 0;
 }
 
-int frozen_destory(void){
+int frozen_destroy(void){
 	setting_destroy(global_settings);
 	return 0;
 }

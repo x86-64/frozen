@@ -30,23 +30,23 @@ struct hash_t {
 #define HASH_T_LOCAL_SIZE   sizeof(hash_t)
 #define HASH_T_NETWORK_SIZE sizeof(unsigned int) * 4
 
-hash_t *           hash_new                     (void);
-void               hash_empty                   (hash_t *hash);
-void               hash_free                    (hash_t *hash);
+API hash_t *           hash_new                     (void);
+API void               hash_empty                   (hash_t *hash);
+API void               hash_free                    (hash_t *hash);
 
-void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer);
+API void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer);
 
-int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
-int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value);
-int                hash_set_custom              (hash_t *hash, char *key, unsigned int chunk_size, data_t **data);
+API int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value);
+API int                hash_set_custom              (hash_t *hash, char *key, unsigned int chunk_size, data_t **data);
 
-int                hash_get                     (hash_t *hash, char *key, data_type  type, data_t **value, size_t *value_size);
-int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf, size_t buf_size);
-int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size);
+API int                hash_get                     (hash_t *hash, char *key, data_type  type, data_t **value, size_t *value_size);
+API int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf, size_t buf_size);
+API int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size);
 #ifdef DEBUG
-void               hash_dump                    (hash_t *hash);
+API void               hash_dump                    (hash_t *hash);
 #endif
 
 #endif // HASH_H

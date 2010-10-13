@@ -32,7 +32,7 @@ static int locator_destroy(chain_t *chain){
 	
 	hash_free(data->new_request);
 	
-	data_ctx_destory(&data->ctx);
+	data_ctx_destroy(&data->ctx);
 	
 	free(data);
 	chain->user_data = NULL;

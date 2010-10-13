@@ -14,12 +14,12 @@ typedef struct struct_t {
 	member_t * members;
 } struct_t;
 
-struct_t *      struct_new                   (setting_t *config);
-void            struct_free                  (struct_t *structure);
+API struct_t *      struct_new                   (setting_t *config);
+API void            struct_free                  (struct_t *structure);
 
-_inline size_t  struct_get_size              (struct_t *structure);
-member_t *      struct_get_member_by_name    (struct_t *structure, char *name);
+API _inline size_t  struct_get_size              (struct_t *structure);
+API member_t *      struct_get_member_by_name    (struct_t *structure, char *name);
 
-int             struct_get_member_value      (struct_t *structure, buffer_t *buffer, unsigned int member_id, chunk_t *chunk);
+API int             struct_get_member_value      (struct_t *structure, buffer_t *buffer, unsigned int member_id, chunk_t *chunk);
 
 #endif // STRUCTS_H 

@@ -51,9 +51,9 @@ START_TEST (test_backend_insert_sort){
 			fail("chain in_sort wrong inserts");
 	}
 	
-	fc_crwd_destory(&fc_table);
+	fc_crwd_destroy(&fc_table);
 	
-	backend_destory(backend);
+	backend_destroy(backend);
 	setting_destroy(settings);
 }
 END_TEST

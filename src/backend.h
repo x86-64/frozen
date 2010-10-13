@@ -64,10 +64,10 @@ typedef struct backend_t {
 	
 } backend_t;
 
-backend_t *  backend_new          (char *name, setting_t *setting);
-ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer);
-void         backend_destory      (backend_t *backend);
-backend_t *  backend_find_by_name (char *name);
+API backend_t *  backend_new          (char *name, setting_t *setting);
+API ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer);
+API void         backend_destroy      (backend_t *backend);
+API backend_t *  backend_find_by_name (char *name);
 
 /* }}}1 */
 
@@ -89,16 +89,16 @@ typedef struct crwd_fastcall {
 	
 } crwd_fastcall;
 
-int             fc_crwd_init       (crwd_fastcall *fc_table);
-void            fc_crwd_destory (crwd_fastcall *fc_table);
-ssize_t         fc_crwd_chain      (crwd_fastcall *fc_table, ...);
-ssize_t         fc_crwd_next_chain (crwd_fastcall *fc_table, ...);
-ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...);
+API int             fc_crwd_init       (crwd_fastcall *fc_table);
+API void            fc_crwd_destroy    (crwd_fastcall *fc_table);
+API ssize_t         fc_crwd_chain      (crwd_fastcall *fc_table, ...);
+API ssize_t         fc_crwd_next_chain (crwd_fastcall *fc_table, ...);
+API ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...);
 /* }}} */
 
 /* buffer_io {{{ */
-void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
-buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
+API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
+API buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
 /* }}} */
 
 #endif // BACKEND_H

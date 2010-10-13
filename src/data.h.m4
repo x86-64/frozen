@@ -60,22 +60,22 @@ extern data_proto_t  data_protos[];
 extern size_t        data_protos_size;
 
 /* api's */
-data_proto_t *       data_proto_from_type   (data_type type);
-int                  data_type_is_valid     (data_type type);
-data_type            data_type_from_string  (char *string);
+API data_proto_t *       data_proto_from_type   (data_type type);
+API int                  data_type_is_valid     (data_type type);
+API data_type            data_type_from_string  (char *string);
 
-int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context);
-int                  data_ctx_destory       (data_ctx_t *ctx);
+API int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context);
+API int                  data_ctx_destroy       (data_ctx_t *ctx);
 
-size_t               data_buffer_len        (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off);
-int                  data_buffer_cmp        (data_ctx_t *ctx, buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off);
-int                  data_buffer_arithmetic (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand);
+API size_t               data_buffer_len        (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off);
+API int                  data_buffer_cmp        (data_ctx_t *ctx, buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off);
+API int                  data_buffer_arithmetic (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand);
 
-size_t               data_bare_len          (data_type type, data_t *data,  size_t buffer_size);
-int                  data_bare_cmp          (data_type type, data_t *data1, data_t *data2);
-int                  data_bare_arithmetic   (data_type type, data_t *data, char operator, unsigned int operand);
+API size_t               data_bare_len          (data_type type, data_t *data,  size_t buffer_size);
+API int                  data_bare_cmp          (data_type type, data_t *data1, data_t *data2);
+API int                  data_bare_arithmetic   (data_type type, data_t *data, char operator, unsigned int operand);
 
-size_type            data_size_type         (data_type type);
+API size_type            data_size_type         (data_type type);
 
 #endif // DATA_H
 

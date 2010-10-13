@@ -151,7 +151,7 @@ backend_t *  backend_new      (char *name, setting_t *setting){
 	
 	ret = setting_iter_child(setting, (iter_callback)&backend_iter_chain_init, backend, &backend->chain);
 	if(ret == ITER_BROKEN){
-		backend_destory(backend);
+		backend_destroy(backend);
 		return NULL;
 	}
 	
@@ -175,7 +175,7 @@ ssize_t      backend_query        (backend_t *backend, request_t *request, buffe
 	return chain_query(backend->chain, request, buffer);
 }
 
-void         backend_destory  (backend_t *backend){
+void         backend_destroy  (backend_t *backend){
 	if(backend == NULL)
 		return;
 	
@@ -225,11 +225,11 @@ int           fc_crwd_init    (crwd_fastcall *fc_table){
 	
 	return 0;
 free:
-	fc_crwd_destory(fc_table);
+	fc_crwd_destroy(fc_table);
 	return -1;
 }
 
-void          fc_crwd_destory (crwd_fastcall *fc_table){
+void          fc_crwd_destroy (crwd_fastcall *fc_table){
 	if( (fc_table->request_create != NULL)) hash_free(fc_table->request_create);
 	if( (fc_table->request_read   != NULL)) hash_free(fc_table->request_read);
 	if( (fc_table->request_write  != NULL)) hash_free(fc_table->request_write);
