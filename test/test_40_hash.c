@@ -1,29 +1,34 @@
 
 START_TEST (test_hash){
-	char            data1_buff[] = "\x11\x22\x00\x00";
-	char            data2_buff[] = "\x33\x44\x00\x00";
-	data_t         *data1 = (data_t *)&data1_buff;
-	data_t         *data2 = (data_t *)&data2_buff;
-	data_t         *test_data;
-	size_t          test_size;
-	int             ret;
+	hash_t  hash[] = {
+		{ TYPE_STRING, "key1", "value1" },
+		{ TYPE_STRING, "key2", "value2" },
+		{ TYPE_STRING, "key3", "value3" },
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_end
+	};
 	
-	hash_t *hash = hash_new();
-		fail_unless(hash != NULL, "hash_new failed");
+	hash_t *key1, *key2, *key3, *key4;
 	
-	ret = hash_set(hash, "test1", TYPE_INT32, data1);
-		fail_unless(ret == 0,     "hash_set 1 failed");
-	ret = hash_set(hash, "test2", TYPE_INT32, data2);
-		fail_unless(ret == 0,     "hash_set 2 failed");
+	hash_add_value(hash, TYPE_STRING, "key4", "value4");
 	
-	ret = hash_get(hash, "test1", TYPE_INT32, &test_data, &test_size);
-		fail_unless(ret == 0 && test_size == 4,               "hash_get 1 failed");
-		fail_unless(memcmp(test_data, data1, test_size) == 0, "hash_get 1 data failed");
-	ret = hash_get(hash, "test2", TYPE_INT32, &test_data, &test_size);
-		fail_unless(ret == 0 && test_size == 4,               "hash_get 2 failed");
-		fail_unless(memcmp(test_data, data2, test_size) == 0, "hash_get 2 data failed");
+	fail_unless(hash_find_value(hash, "key_no") == NULL, "hash found invalid entry");
+	fail_unless( (key1 = hash_find_value(hash, "key1"))   != NULL, "hash not found existing entry");
+	fail_unless( (key2 = hash_find_value(hash, "key2"))   != NULL, "hash not found existing entry");
+	fail_unless( (key3 = hash_find_value(hash, "key3"))   != NULL, "hash not found existing entry");
+	fail_unless( (key4 = hash_find_value(hash, "key4"))   != NULL, "hash not found existing entry");
 	
-	hash_free(hash);
+	fail_unless(strcmp(key1->value, "value1") == 0, "hash found wrong entry");
+	fail_unless(strcmp(key2->value, "value2") == 0, "hash found wrong entry");
+	fail_unless(strcmp(key3->value, "value3") == 0, "hash found wrong entry");
+	fail_unless(strcmp(key4->value, "value4") == 0, "hash found wrong entry");
+	
+	hash_del_value(hash, "key2");
+	
+	fail_unless( (key2 = hash_find_value(hash, "key2")) == NULL, "necrozz attack!!");
 }
 END_TEST
 REGISTER_TEST(core, test_hash)

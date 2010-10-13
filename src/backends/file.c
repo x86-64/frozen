@@ -130,10 +130,10 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	int               ret;
 	off_t             new_key;
 	pthread_mutex_t  *mutex;
-	unsigned int      value_size;
+	hash_t           *r_value_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if(hash_get_copy(request, "size", TYPE_INT32, &value_size, sizeof(value_size)) != 0)
+	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 	fd    =  data->handle;
@@ -142,7 +142,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	pthread_mutex_lock(mutex);
 		
 		new_key = lseek(fd, 0, SEEK_END);
-		ret = ftruncate(fd, new_key + value_size);
+		ret = ftruncate(fd, new_key + *(unsigned int *)r_value_size->value);
 		if(ret == -1){
 			return -errno;
 		}
@@ -158,27 +158,28 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 
 static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t           ret = -1;
-	
-	off_t             key;
-	unsigned int      value_size;
 	unsigned int      write_size;
+	
+	hash_t           *r_key;
+	hash_t           *r_value_size;
+	
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if(hash_get_copy (request, "key",   TYPE_INT64,  &key,        sizeof(key)) != 0)
+	if( (r_key        = hash_find_typed_value(request, TYPE_INT64, "key"))  == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "size",  TYPE_INT32,  &value_size, sizeof(value_size)) != 0)
+	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 redo:
 	write_size = 0;
 	
-	buffer_process(buffer, value_size, 0,
+	buffer_process(buffer, HVALUE(r_value_size, unsigned int), 0,
 		do {
 			ret = pwrite(
 				((file_user_data *)chain->user_data)->handle,
 				chunk,
 				size,
-				key + offset
+				HVALUE(r_key, off_t) + offset
 			);
 			if(ret == -1){
 				if(errno == EINTR) goto redo;
@@ -200,13 +201,13 @@ exit:
 static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	int               fd;
 	ssize_t           ret;
-	off_t             key;
-	unsigned int      value_size;
 	unsigned int      read_size;
+	hash_t           *r_key;
+	hash_t           *r_value_size;
 	
-	if(hash_get_copy (request, "key",   TYPE_INT64, &key,        sizeof(key)) != 0)
+	if( (r_key        = hash_find_typed_value(request, TYPE_INT64, "key"))  == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "size",  TYPE_INT32, &value_size, sizeof(value_size)) != 0)
+	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
@@ -214,9 +215,9 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 redo:
 	read_size = 0;
 	
-	buffer_process(buffer, value_size, 1,
+	buffer_process(buffer, HVALUE(r_value_size, unsigned int), 1,
 		do{
-			ret = pread(fd, chunk, size, key + offset);
+			ret = pread(fd, chunk, size, HVALUE(r_key, off_t) + offset);
 			if(ret == -1){
 				if(errno == EINTR) goto redo;
 				return -errno;
@@ -234,19 +235,20 @@ exit:
 
 static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer){
 	int               fd;
-	off_t             key;
+	int               forced = 0;
 	pthread_mutex_t  *mutex;
-	unsigned int      value_size;
-	unsigned int      forced;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	hash_t           *r_key;
+	hash_t           *r_value_size;
+	hash_t           *r_force;
 	
-	if(hash_get_copy (request, "key",          TYPE_INT64, &key,        sizeof(key)) != 0)
+
+	if( (r_key        = hash_find_typed_value(request, TYPE_INT64, "key"))  == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "size",         TYPE_INT32, &value_size, sizeof(value_size)) != 0)
+	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "imcrazybitch", TYPE_INT32, &forced,     sizeof(forced)) != 0){
-		forced = 0;
-	}
+	if( (r_force      = hash_find_typed_value(request, TYPE_INT32, "imcrazybitch")) != NULL)
+		forced = HVALUE(r_force, int);
 	
 	fd    =  data->handle;
 	mutex = &data->create_lock;
@@ -256,10 +258,13 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 		if(file_update_count(data) == STAT_ERROR)
 			return -EFAULT;
 		
-		if(key + value_size != data->file_stat.st_size && forced == 0) // truncating only last elements
+		if(
+			HVALUE(r_key, off_t) + HVALUE(r_value_size, unsigned int) != data->file_stat.st_size
+			&& forced == 0
+		) // truncating only last elements
 			return -EFAULT;
 		
-		if(ftruncate(fd, key) == -1)
+		if(ftruncate(fd, HVALUE(r_key, off_t)) == -1)
 			return -errno;
 		
 		data->file_stat_status = STAT_NEED_UPDATE;
@@ -271,7 +276,6 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 
 static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	off_t            from, to;
-	unsigned int     req_size;
 	
 	size_t           move_size;
 	size_t           ssize, size, max_size;
@@ -279,15 +283,25 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	int              direction;
 	int              ret         = 0;
 	file_user_data  *data        = ((file_user_data *)chain->user_data);
+	hash_t           *r_key_from;
+	hash_t           *r_key_to;
+	hash_t           *r_value_size;
 	
-	if(hash_get_copy (request, "key_from",  TYPE_INT64, &from,       sizeof(from)) != 0)
+	if( (r_key_from   = hash_find_typed_value(request, TYPE_INT64, "key_from")) == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "key_to",    TYPE_INT64, &to,         sizeof(to)) != 0)
+	if( (r_key_to     = hash_find_typed_value(request, TYPE_INT64, "key_to")) == NULL)
 		return -EINVAL;
+	
+	from = HVALUE(r_key_from, off_t);
+	to   = HVALUE(r_key_to,   off_t);
+	
+	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+		return -EINVAL;
+	
 	if(
 		!(
-			hash_get_copy (request, "size", TYPE_INT32, &req_size, sizeof(req_size)) == 0  &&
-			(move_size = req_size) != (unsigned int)-1
+			(r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) != NULL &&
+			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (unsigned int)-1
 		)
 	){
 		if(file_update_count(data) == STAT_ERROR)

@@ -1,52 +1,30 @@
 #ifndef HASH_H
 #define HASH_H
 
-typedef struct hash_el_t {
-	unsigned int    type;   // enum data_type
-	unsigned int    key;    // char *
-	unsigned int    value;  // int / ptr
-} hash_el_t;
+typedef struct hash_t {
+	data_type       type;
+	char *          key;
+	void *          value;
+} hash_t;
 
-typedef struct hash_t hash_t;
-struct hash_t {
-	unsigned int   size;
-	unsigned int   nelements;
-	
-	union {
-		unsigned int   is_local;    // local
-		unsigned int   reserved1;   // network
-	};
-	union {
-		unsigned int   alloc_size;  // local
-		unsigned int   reserved2;   // network
-	};
-	
-	hash_el_t     *elements;
-	data_t        *data;
-	data_t        *data_end;
-	hash_t        *next_layer;
-};
+#define hash_ptr_null  (void *) 0
+#define hash_ptr_end   (void *)-1 
 
-#define HASH_T_LOCAL_SIZE   sizeof(hash_t)
-#define HASH_T_NETWORK_SIZE sizeof(unsigned int) * 4
+#define hash_null {0, hash_ptr_null, hash_ptr_null}
+#define hash_end  {0, hash_ptr_end,  hash_ptr_end }
 
-API hash_t *           hash_new                     (void);
-API void               hash_empty                   (hash_t *hash);
-API void               hash_free                    (hash_t *hash);
+#define HVALUE(_hash_t,_type)  *(_type *)_hash_t->value
 
-API void               hash_assign_layer            (hash_t *hash, hash_t *hash_layer);
+API hash_t *           hash_find_value              (hash_t *hash, char *key);
+API hash_t *           hash_find_typed_value        (hash_t *hash, data_type type, char *key);
+API hash_t *           hash_add_value               (hash_t *hash, data_type type, char *key, void *value);
+API void               hash_del_value               (hash_t *hash, char *key);
 
-API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
-
-API int                hash_set                     (hash_t *hash, char *key, data_type  type, data_t  *value);
-API int                hash_set_custom              (hash_t *hash, char *key, unsigned int chunk_size, data_t **data);
-
-API int                hash_get                     (hash_t *hash, char *key, data_type  type, data_t **value, size_t *value_size);
-API int                hash_get_copy                (hash_t *hash, char *key, data_type  type, data_t  *buf, size_t buf_size);
-API int                hash_get_any                 (hash_t *hash, char *key, data_type *type, data_t **value, size_t *value_size);
 #ifdef DEBUG
 API void               hash_dump                    (hash_t *hash);
 #endif
+
+API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
 #endif // HASH_H

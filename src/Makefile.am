@@ -1,12 +1,13 @@
 
 backends_sources =                  \
-	backends/file.c             \
-	backends/oid-locator.c      \
 	backends/null-proxy.c       \
-	backends/blocks.c           \
-	backends/blocks-adressing.c \
-	backends/list.c             \
-	backends/insert-sort.c
+	backends/file.c            
+	
+#	backends/oid-locator.c      \
+#	backends/blocks.c           \
+#	backends/blocks-adressing.c \
+#	backends/list.c             \
+#	backends/insert-sort.c
 
 data_sources=         \
 	data/void.c   \

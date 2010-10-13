@@ -1,21 +1,47 @@
 #include <libfrozen.h>
 
-#define HASH_MAX_ELEMENTS      1000
-#define HASH_DATABLOCK_SIZE    1000
+hash_t *         hash_find_value              (hash_t *hash, char *key){ // {{{
+	hash_t      *value = hash;
+	
+	while(value->key != hash_ptr_end){
+		if(
+			value->key == key ||
+			(
+				key != hash_ptr_null && value->key != hash_ptr_null &&
+				key != hash_ptr_end  &&
+				strcmp(value->key, key) == 0
+			)
+		)
+			return value;
+		value++;
+	}
+	return NULL;
+} // }}}
+hash_t *         hash_find_typed_value        (hash_t *hash, data_type type, char *key){ // {{{
+	hash_t      *hvalue = hash_find_value(hash, key);
+	return (hvalue != NULL) ? ((hvalue->type != type) ? NULL : hvalue) : NULL;
+} // }}}
+hash_t *         hash_add_value               (hash_t *hash, data_type type, char *key, void *value){ // {{{
+	hash_t      *hvalue;
+	
+	if( (hvalue = hash_find_value(hash, hash_ptr_null)) == NULL)
+		return NULL;
+	
+	hvalue->type  = type;
+	hvalue->value = value;
+	hvalue->key   = key;
+	return hvalue;
+} // }}}
+void               hash_del_value               (hash_t *hash, char *key){ // {{{
+	hash_t       *hvalue;
+	
+	if( (hvalue = hash_find_value(hash, key)) == NULL)
+		return;
+	
+	hvalue->key = hash_ptr_null;
+} // }}}
 
-// - Local hash stored in buffers allocated by our handlers, so we care of free() memory
-// - Network hash received from buffer_t, and we dont care about allocation, but
-//   hash_t structure is still allocated by us, so we free only it 
-// - There is some limitation about hashes for network usage: try not use local hashes
-//   after heavy hash_set, coz hash_set on already existing element with data larger than in
-//   hash will produce dead data chunk. It still will work, but suffer traffic overhead
-
-typedef struct hash_key_t {
-	hash_t    *hash;
-	hash_el_t *element;
-} hash_key_t;
-
-/* private {{{ */
+/* private {{{
 static int         hash_new_key                 (hash_t *hash, hash_key_t *hash_key){
 	unsigned int  new_id;
 	unsigned int  new_nelements;
@@ -126,9 +152,6 @@ static int         hash_key_get_data            (hash_key_t *hash_key, data_type
 	
 	return 0;	
 } // }}}
-
-
-/* }}} */
 
 hash_t *           hash_new                     (void){ // {{{
 	hash_t     *hash;
@@ -345,7 +368,7 @@ void hash_dump(hash_t *hash){
 }
 
 #endif
-
+*/
 /*
 // never use hash->size as buffer_size argument, it can lead to security problems
 int                hash_audit                   (hash_t *hash, size_t buffer_size){

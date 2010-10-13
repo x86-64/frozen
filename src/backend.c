@@ -60,16 +60,16 @@ void chain_destroy(chain_t *chain){
 inline int  chain_configure    (chain_t *chain, setting_t *setting){ return chain->func_configure(chain, setting); }
 
 ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer){
-	unsigned int  action;
 	f_crwd        func       = NULL;
+	hash_t       *r_action;
 	
 	if(chain == NULL || request == NULL)
 		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
 	
-	if(hash_get_copy(request, "action", TYPE_INT32, &action, sizeof(action)) != 0)
+	if( (r_action = hash_find_typed_value(request, TYPE_INT32, "action")) == NULL)
 		return_error(-EINVAL, "chain_query request 'action' not set\n");
 	
-	switch(action){
+	switch(HVALUE(r_action, unsigned int)){
 		case ACTION_CRWD_CREATE: func = chain->chain_type_crwd.func_create; break;
 		case ACTION_CRWD_READ:   func = chain->chain_type_crwd.func_get   ; break;
 		case ACTION_CRWD_WRITE:  func = chain->chain_type_crwd.func_set   ; break;
@@ -195,7 +195,7 @@ void         backend_destroy  (backend_t *backend){
 }
 /* }}}1 */
 
-/* crwd_fastcall {{{ */
+/* crwd_fastcall {{{
 int           fc_crwd_init    (crwd_fastcall *fc_table){
 	int  action;
 	
@@ -393,49 +393,52 @@ ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...){ // {{{
 	return ret;
 } // }}}
 
-/* }}} */
+ }}} */
 
 /* buffer_io {{{ */
 static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
-	chain_t        *chain = (chain_t *)buffer->io_context;
-	hash_t         *hash;
 	buffer_t        buffer_read;
-	unsigned int    action;
 	ssize_t         ret;
 	
+	hash_t  hash[] = {
+		{ TYPE_INT32, "action", (int []){ACTION_CRWD_READ} },
+		{ TYPE_INT32, "key",    &offset                    },
+		{ TYPE_INT32, "size",   &buf_size                  },
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_end
+	};
 	buffer_init_from_bare(&buffer_read, buf, buf_size);
 	
-	action = ACTION_CRWD_READ;
-	hash   = hash_new();
-		hash_set(hash, "action", TYPE_INT32, &action);
-		hash_set(hash, "key",    TYPE_INT64, &offset);
-		hash_set(hash, "size",   TYPE_INT32, &buf_size);
-		
-		ret = chain_query(chain, hash, &buffer_read);	
-	hash_free(hash);
+	ret = chain_query( (chain_t *)buffer->io_context, hash, &buffer_read);	
 	
 	buffer_destroy(&buffer_read);
-	
 	return ret;
 } // }}}
 
 static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
-	chain_t        *chain = (chain_t *)buffer->io_context;
-	hash_t         *hash;
 	buffer_t        buffer_write;
-	unsigned int    action;
 	ssize_t         ret;
 	
+	hash_t  hash[] = {
+		{ TYPE_INT32, "action", (int []){ACTION_CRWD_WRITE}},
+		{ TYPE_INT32, "key",    &offset                    },
+		{ TYPE_INT32, "size",   &buf_size                  },
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_null,
+		hash_end
+	};
 	buffer_init_from_bare(&buffer_write, buf, buf_size);
 	
-	action = ACTION_CRWD_WRITE;
-	hash   = hash_new();
-		hash_set(hash, "action", TYPE_INT32, &action);
-		hash_set(hash, "key",    TYPE_INT64, &offset);
-		hash_set(hash, "size",   TYPE_INT32, &buf_size);
-		
-		ret = chain_query(chain, hash, &buffer_write);	
-	hash_free(hash);
+	ret = chain_query( (chain_t *)buffer->io_context, hash, &buffer_write);	
 	
 	buffer_destroy(&buffer_write);
 	
