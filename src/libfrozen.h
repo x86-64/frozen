@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <alloca.h>
 
 #define API __attribute__((visibility("default")))
 

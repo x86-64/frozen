@@ -1,5 +1,7 @@
 #include <libfrozen.h>
 
+#define DEBUG
+
 hash_t *         hash_find_value              (hash_t *hash, char *key){ // {{{
 	hash_t      *value = hash;
 	
@@ -15,21 +17,37 @@ hash_t *         hash_find_value              (hash_t *hash, char *key){ // {{{
 			return value;
 		value++;
 	}
+	if(value->value != NULL)
+		return hash_find_value((hash_t *)value->value, key);
+	
 	return NULL;
 } // }}}
 hash_t *         hash_find_typed_value        (hash_t *hash, data_type type, char *key){ // {{{
 	hash_t      *hvalue = hash_find_value(hash, key);
 	return (hvalue != NULL) ? ((hvalue->type != type) ? NULL : hvalue) : NULL;
 } // }}}
-hash_t *         hash_add_value               (hash_t *hash, data_type type, char *key, void *value){ // {{{
+hash_t *         hash_append_value            (hash_t *hash, data_type type, char *key, void *value, size_t value_size){ // {{{
 	hash_t      *hvalue;
 	
 	if( (hvalue = hash_find_value(hash, hash_ptr_null)) == NULL)
 		return NULL;
 	
-	hvalue->type  = type;
-	hvalue->value = value;
-	hvalue->key   = key;
+	hvalue->type       = type;
+	hvalue->key        = key;
+	hvalue->value      = value;
+	hvalue->value_size = value_size;
+	return hvalue;
+} // }}}
+hash_t *         hash_set_value               (hash_t *hash, data_type type, char *key, void *value, size_t value_size){ // {{{
+	hash_t      *hvalue;
+	
+	if( (hvalue = hash_find_value(hash, key)) == NULL)
+		return hash_append_value(hash, type, key, value, value_size);
+	
+	hvalue->type       = type;
+	hvalue->key        = key;
+	hvalue->value      = value;
+	hvalue->value_size = value_size;
 	return hvalue;
 } // }}}
 void               hash_del_value               (hash_t *hash, char *key){ // {{{
@@ -40,6 +58,34 @@ void               hash_del_value               (hash_t *hash, char *key){ // {{
 	
 	hvalue->key = hash_ptr_null;
 } // }}}
+void               hash_assign                  (hash_t *hash, hash_t *hash_next){ // {{{
+	hash_t *hend = hash_find_value(hash, hash_ptr_end);
+	hend->value = hash_next;
+} // }}}
+
+#ifdef DEBUG
+void hash_dump(hash_t *hash){
+	unsigned int  k;
+	hash_t       *element = hash;
+	
+	printf("hash: %x\n", (unsigned int)hash);
+	while(element->key != hash_ptr_end){
+		if(element->key == hash_ptr_null)
+			continue;
+		
+		printf(" - el: %x %s -> %x", (unsigned int)element->type, (char *)element->key, (unsigned int)element->value);
+		for(k=0; k<element->value_size; k++){
+			if((k % 8) == 0)
+				printf("\n   0x%.4x: ", k);
+			
+			printf("%.2x ", (unsigned int)(*((char *)element->value + k)));
+		}
+		printf("\n");
+		element++;
+	}
+	printf("end_hash\n");
+}
+#endif
 
 /* private {{{
 static int         hash_new_key                 (hash_t *hash, hash_key_t *hash_key){
@@ -333,41 +379,6 @@ int                hash_get_copy                (hash_t *hash, char *key, data_t
 	return 0;
 } // }}}
 
-#ifdef DEBUG
-void hash_dump(hash_t *hash){
-	unsigned int  i,k;
-	hash_el_t    *element;
-	data_t       *found_key;
-	data_t       *found_data;
-	size_t        found_buf_size;
-	size_t        found_data_size;
-	
-	element = hash->elements;
-	printf("hash: %x\n", (unsigned int)hash);
-	for(i=0; i < hash->nelements; i++, element++){
-		found_key = hash_off_to_ptr(hash, element->key, &found_buf_size);
-		if(found_key == NULL)
-			continue;
-		
-		found_data = hash_off_to_ptr(hash, element->value, &found_data_size);
-		if(found_data == NULL)
-			continue;
-		
-		found_data_size = data_bare_len(element->type, found_data, found_data_size);
-		
-		printf(" - el: %x %s", (unsigned int)element->type, (char *)found_key);
-		for(k=0; k<found_data_size; k++){
-			if((k % 8) == 0)
-				printf("\n   0x%.4x: ", k);
-			
-			printf("%.2x ", (unsigned int)(*((char *)found_data + k)));
-		}
-		printf("\n");
-	}
-	printf("end_hash\n");
-}
-
-#endif
 */
 /*
 // never use hash->size as buffer_size argument, it can lead to security problems

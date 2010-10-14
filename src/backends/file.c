@@ -142,7 +142,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	pthread_mutex_lock(mutex);
 		
 		new_key = lseek(fd, 0, SEEK_END);
-		ret = ftruncate(fd, new_key + *(unsigned int *)r_value_size->value);
+		ret = ftruncate(fd, new_key + HVALUE(r_value_size, unsigned int));
 		if(ret == -1){
 			return -errno;
 		}
@@ -295,13 +295,10 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	from = HVALUE(r_key_from, off_t);
 	to   = HVALUE(r_key_to,   off_t);
 	
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
-		return -EINVAL;
-	
 	if(
 		!(
 			(r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) != NULL &&
-			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (unsigned int)-1
+			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (size_t)-1
 		)
 	){
 		if(file_update_count(data) == STAT_ERROR)

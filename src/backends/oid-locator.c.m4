@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 #include <backend.h>
+#include <alloca.h>
 
 typedef enum locator_mode {
 	LINEAR_INCAPSULATED,  // public oid converted to private oid using div()
@@ -12,7 +13,6 @@ typedef struct locator_ud {
 	locator_mode   mode;
 	data_type      oid_type;
 	unsigned int   linear_scale;
-	hash_t        *new_request;
 	data_ctx_t     ctx;
 
 } locator_ud;
@@ -28,8 +28,6 @@ static int locator_init(chain_t *chain){
 
 static int locator_destroy(chain_t *chain){
 	locator_ud *data = (locator_ud *)chain->user_data;
-	
-	hash_free(data->new_request);
 	
 	data_ctx_destroy(&data->ctx);
 	
@@ -100,39 +98,15 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	data_ctx_init(&data->ctx, data->oid_type, NULL); 
 	
 	data->linear_scale = linear_scale;
-	data->new_request  = hash_new();
 	
 	// get backend name from 'index' 
 	
 	return 0;
 }
 
-static ssize_t decapsulate(locator_ud *data, request_t *request, char *key){
-	data_t       *val;
-	data_type     val_type;
-	
-	// TODO holly crap
-	
-	if(hash_get_any(request, key, &val_type, &val, NULL) != 0)
-		return -EINVAL;
-	
-	if(hash_set(data->new_request, key, val_type, val) != 0)
-		return -EINVAL;
-	
-	if(hash_get_any(data->new_request, key, NULL, &val, NULL) != 0)
-		return -EINVAL;
-	
-	if(data_bare_arithmetic(val_type, val, '*', data->linear_scale) != 0)
-		return -EINVAL;
-	
-	return 0;
-}
-
 static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
-	
 	// divide returned key on data->size
 	if(data_buffer_arithmetic(&data->ctx, buffer, 0, '/', data->linear_scale) != 0){
-				
 		// TODO linear incapsulation can't really deal with keys that
 		// not cleanly divide on linear_scale. For now we return -EIO,
 		// but later need call some pad() to normalize or fix scaling
@@ -155,16 +129,25 @@ static ssize_t incapsulate_ret(locator_ud *data, ssize_t ret){
 static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
-	
-	hash_empty        (data->new_request);
-	hash_assign_layer (data->new_request, request);
+	hash_t      *r_size;
+	void        *o_size;
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if(decapsulate(data, request, "size") != 0)
+			if( (r_size = hash_find_value(request, "size")) == NULL)
 				return -EINVAL;
 			
-			if( (ret = chain_next_query(chain, data->new_request, buffer)) <= 0)
+			o_size = alloca(r_size->value_size);
+			memcpy(o_size, r_size->value, r_size->value_size);
+			if(data_bare_arithmetic(r_size->type, o_size, '*', data->linear_scale) != 0)
+				return -EINVAL;
+			
+			hash_t  new_request[] = {
+				{ r_size->type, "size", o_size, r_size->value_size },
+				hash_next(request)
+			};
+			
+			if( (ret = chain_next_query(chain, new_request, buffer)) <= 0)
 				return ret;
 			
 			if(incapsulate(data, buffer) != 0)
@@ -198,18 +181,29 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
-	
-	hash_empty        (data->new_request);
-	hash_assign_layer (data->new_request, request);
+	hash_t      *r_key, *r_size;
+	void        *o_key, *o_size;
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if(decapsulate(data, request, "key") != 0)
-				return -EINVAL;
-			if(decapsulate(data, request, "size") != 0)
-				return -EINVAL;
+			if( (r_key  = hash_find_value(request, "key"))  == NULL) return -EINVAL;
+			if( (r_size = hash_find_value(request, "size")) == NULL) return -EINVAL;
 			
-			if( (ret = chain_next_query(chain, data->new_request, buffer)) <= 0)
+			o_key  = alloca(r_key->value_size);
+			o_size = alloca(r_size->value_size);
+			memcpy(o_key,  r_key->value,  r_key->value_size);
+			memcpy(o_size, r_size->value, r_size->value_size);
+			
+			if(data_bare_arithmetic(r_key->type,  o_key,  '*', data->linear_scale) != 0) return -EINVAL;
+			if(data_bare_arithmetic(r_size->type, o_size, '*', data->linear_scale) != 0) return -EINVAL;
+			
+			hash_t  new_request[] = {
+				{ r_key->type,  "key",  o_key,  r_key->value_size  },
+				{ r_size->type, "size", o_size, r_size->value_size },
+				hash_next(request)
+			};
+			
+			if( (ret = chain_next_query(chain, new_request, buffer)) <= 0)
 				return ret;
 			
 			ret = incapsulate_ret(data, ret);
@@ -242,19 +236,40 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
 	locator_ud  *data = (locator_ud *)chain->user_data;
-	
-	hash_empty        (data->new_request);
-	hash_assign_layer (data->new_request, request);
+	hash_t      *r_key_from, *r_key_to;
+	hash_t      *r_size;
+	char        *r_size_str = hash_ptr_null;
+	void        *o_key_from, *o_key_to, *o_size;
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if(decapsulate(data, request, "key_from") != 0)
-				return -EINVAL;
-			if(decapsulate(data, request, "key_to")   != 0)
-				return -EINVAL;
-			decapsulate(data, request, "size");             // optional
+			if( (r_key_from = hash_find_value(request, "key_from")) == NULL) return -EINVAL;
+			if( (r_key_to   = hash_find_value(request, "key_to"))   == NULL) return -EINVAL;
 			
-			ret = chain_next_query(chain, data->new_request, buffer);
+			if( (r_size     = hash_find_value(request, "size")) != NULL){ // size is optional
+				o_size     = alloca(r_size->value_size);
+				memcpy(o_size,     r_size->value,     r_size->value_size);
+				if(data_bare_arithmetic(r_size->type,     o_size,     '*', data->linear_scale) != 0) return -EINVAL;
+				r_size_str = r_size->key;
+			}
+			
+			o_key_from = alloca(r_key_from->value_size);
+			o_key_to   = alloca(r_key_to->value_size);
+			
+			memcpy(o_key_from, r_key_from->value, r_key_from->value_size);
+			memcpy(o_key_to,   r_key_to->value,   r_key_to->value_size);
+			
+			if(data_bare_arithmetic(r_key_from->type, o_key_from, '*', data->linear_scale) != 0) return -EINVAL;
+			if(data_bare_arithmetic(r_key_to->type,   o_key_to,   '*', data->linear_scale) != 0) return -EINVAL;
+			
+			hash_t  new_request[] = {
+				{ r_key_from->type, r_key_from->key, o_key_from, r_key_from->value_size  },
+				{ r_key_to->type,   r_key_to->key,   o_key_to,   r_key_to->value_size    },
+				{ r_size->type    , r_size_str,      o_size,     r_size->value_size      },
+				hash_next(request)
+			};
+			
+			ret = chain_next_query(chain, new_request, buffer);
 			break;
 			
 		case INDEX_INCAPSULATED:
@@ -264,7 +279,7 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 			//
 			// hash_set(request, "key", *buffer, ret);
 			
-			ret = chain_next_query(chain, data->new_request, buffer);
+			ret = chain_next_query(chain, request, buffer);
 			break;
 		
 		case INDEX_ORIGINAL:

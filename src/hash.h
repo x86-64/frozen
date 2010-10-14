@@ -5,20 +5,24 @@ typedef struct hash_t {
 	data_type       type;
 	char *          key;
 	void *          value;
+	size_t          value_size;
 } hash_t;
 
 #define hash_ptr_null  (void *) 0
 #define hash_ptr_end   (void *)-1 
 
-#define hash_null {0, hash_ptr_null, hash_ptr_null}
-#define hash_end  {0, hash_ptr_end,  hash_ptr_end }
+#define hash_null       {0, hash_ptr_null, hash_ptr_null, 0}
+#define hash_next(hash) {0, hash_ptr_end,  (void *)hash,  0}
+#define hash_end        hash_next(NULL)
 
 #define HVALUE(_hash_t,_type)  *(_type *)_hash_t->value
 
 API hash_t *           hash_find_value              (hash_t *hash, char *key);
 API hash_t *           hash_find_typed_value        (hash_t *hash, data_type type, char *key);
-API hash_t *           hash_add_value               (hash_t *hash, data_type type, char *key, void *value);
+API hash_t *           hash_append_value            (hash_t *hash, data_type type, char *key, void *value, size_t value_size);
+API hash_t *           hash_set_value               (hash_t *hash, data_type type, char *key, void *value, size_t value_size);
 API void               hash_del_value               (hash_t *hash, char *key);
+API void               hash_assign                  (hash_t *hash, hash_t *hash_next);
 
 #ifdef DEBUG
 API void               hash_dump                    (hash_t *hash);
