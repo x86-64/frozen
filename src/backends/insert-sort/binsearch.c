@@ -1,16 +1,23 @@
+// TODO rewrite using data_* functions
 
 ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffer1, buffer_t *key_out){
 	ssize_t         ret;
 	off_t           range_start, range_end, current;
-	buffer_t        buffer_backend;
+	buffer_t        buffer_backend, buffer_count;
 	
 	range_start = range_end = 0;
-	if(
-		fc_crwd_chain(&data->fc_table, data->chain, ACTION_CRWD_COUNT, &range_end, sizeof(range_end)) <= 0 || 
-		range_start == range_end
-	){
+	
+	hash_t  req_count[] = {
+		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_COUNT }, sizeof(int) },
+		hash_end
+	};
+	buffer_init_from_bare(&buffer_count, &range_end, sizeof(range_end));
+	
+	ret = chain_next_query(data->chain, req_count, &buffer_count);
+	if(ret <= 0 || range_start == range_end){
 		buffer_write(key_out, 0, &range_end, sizeof(range_end));
-		return KEY_NOT_FOUND;
+		ret = KEY_NOT_FOUND;
+		goto cleanup2;
 	}
 	
 	backend_buffer_io_init(&buffer_backend, (void *)data->chain, 0);
@@ -18,7 +25,8 @@ ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffe
 	/* check last element of list to fast-up incremental inserts */
 	if( (ret = data_buffer_cmp(&data->cmp_ctx, buffer1, 0, &buffer_backend, range_end - 1)) >= 0){
 		buffer_write(key_out, 0, &range_end, sizeof(range_end));
-		return (ret == 0) ? KEY_FOUND : KEY_NOT_FOUND;
+		ret = (ret == 0) ? KEY_FOUND : KEY_NOT_FOUND;
+		goto cleanup1;
 	}
 	
 	while(range_start + 1 < range_end){
@@ -36,7 +44,7 @@ ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffe
 		if(ret == 0){
 			buffer_write(key_out, 0, &current, sizeof(current));
 			ret = KEY_FOUND;
-			goto cleanup;
+			goto cleanup1;
 		}else if(ret < 0){
 			range_end   = current;
 		}else{
@@ -51,8 +59,10 @@ ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffe
 	buffer_write(key_out, 0, &current, sizeof(current));
 	ret = KEY_NOT_FOUND;
 	
-cleanup:
+cleanup1:
 	buffer_destroy(&buffer_backend);
+cleanup2:
+	buffer_destroy(&buffer_count);
 	return ret;
 }
 

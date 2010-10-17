@@ -195,215 +195,15 @@ void         backend_destroy  (backend_t *backend){
 }
 /* }}}1 */
 
-/* crwd_fastcall {{{
-int           fc_crwd_init    (crwd_fastcall *fc_table){
-	int  action;
-	
-	memset(fc_table, 0, sizeof(crwd_fastcall));
-	
-	if( (fc_table->request_create = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_read   = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_write  = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_move   = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_delete = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_count  = hash_new()) == NULL)  goto free;
-	if( (fc_table->request_custom = hash_new()) == NULL)  goto free;
-	
-	if( (fc_table->buffer_create = buffer_alloc()) == NULL) goto free;
-	if( (fc_table->buffer_read   = buffer_alloc()) == NULL) goto free;
-	if( (fc_table->buffer_write  = buffer_alloc()) == NULL) goto free;
-	if( (fc_table->buffer_count  = buffer_alloc()) == NULL) goto free;
-	if( (fc_table->buffer_custom = buffer_alloc()) == NULL) goto free;
-	
-	action = ACTION_CRWD_CREATE; hash_set(fc_table->request_create, "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_READ;   hash_set(fc_table->request_read,   "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_WRITE;  hash_set(fc_table->request_write,  "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_MOVE;   hash_set(fc_table->request_move,   "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_DELETE; hash_set(fc_table->request_delete, "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_COUNT;  hash_set(fc_table->request_count,  "action", TYPE_INT32, &action);
-	action = ACTION_CRWD_CUSTOM; hash_set(fc_table->request_custom, "action", TYPE_INT32, &action);
-	
-	return 0;
-free:
-	fc_crwd_destroy(fc_table);
-	return -1;
-}
-
-void          fc_crwd_destroy (crwd_fastcall *fc_table){
-	if( (fc_table->request_create != NULL)) hash_free(fc_table->request_create);
-	if( (fc_table->request_read   != NULL)) hash_free(fc_table->request_read);
-	if( (fc_table->request_write  != NULL)) hash_free(fc_table->request_write);
-	if( (fc_table->request_move   != NULL)) hash_free(fc_table->request_move);
-	if( (fc_table->request_delete != NULL)) hash_free(fc_table->request_delete);
-	if( (fc_table->request_count  != NULL)) hash_free(fc_table->request_count);
-	if( (fc_table->request_custom != NULL)) hash_free(fc_table->request_custom);
-	
-	if( (fc_table->buffer_create  != NULL)) buffer_free(fc_table->buffer_create);
-	if( (fc_table->buffer_read    != NULL)) buffer_free(fc_table->buffer_read);
-	if( (fc_table->buffer_write   != NULL)) buffer_free(fc_table->buffer_write);
-	if( (fc_table->buffer_count   != NULL)) buffer_free(fc_table->buffer_count);
-	if( (fc_table->buffer_custom  != NULL)) buffer_free(fc_table->buffer_custom);
-	
-	memset(fc_table, 0, sizeof(crwd_fastcall));
-}
-
-static ssize_t  fc_crwd_call  (crwd_fastcall *fc_table, chain_t *chain, va_list args){ // {{{ 
-	int           action;
-	ssize_t       ret;
-	off_t         r_key;
-	off_t         r_key_from;
-	off_t         r_key_to;
-	unsigned int  r_size;
-	void         *r_buf;
-	char         *r_fname;
-	buffer_t    **o_buffer;
-	void         *o_buf;
-	size_t        o_buf_size;
-	
-	action = va_arg(args, int);
-	switch(action){
-		case ACTION_CRWD_CREATE: // (fc_table, chain, ACTION_CRWD_CREATE, size, &key, sizeof(key)); // {{{
-			r_size     = va_arg(args, unsigned int);
-			o_buf      = va_arg(args, void *);
-			o_buf_size = va_arg(args, size_t);
-			
-			if(hash_set(fc_table->request_create, "size", TYPE_INT32, &r_size)) return -1;
-			
-			ret = chain_query(chain, fc_table->request_create, fc_table->buffer_create);
-			if(ret > 0){
-				buffer_read(fc_table->buffer_create, 0, o_buf, MIN(ret, o_buf_size)); 
-			}
-			return ret;
-		// }}}
-		case ACTION_CRWD_READ:   // (fc_table, chain, ACTION_CRWD_READ, key, &buffer, size); // {{{
-			r_key      = va_arg(args, off_t);
-			o_buffer   = va_arg(args, buffer_t **);
-			r_size     = va_arg(args, unsigned int);
-			
-			if(hash_set(fc_table->request_read, "key",  TYPE_INT64, &r_key)  != 0) return -1;
-			if(hash_set(fc_table->request_read, "size", TYPE_INT32, &r_size) != 0) return -1;
-			
-			ret = chain_query(chain, fc_table->request_read, fc_table->buffer_read);
-			if(ret > 0){
-				*o_buffer = fc_table->buffer_read;
-			}
-			return ret;
-		// }}}
-		case ACTION_CRWD_WRITE:  // (fc_table, chain, ACTION_CRWD_WRITE, key, buf, size); // {{{
-			r_key      = va_arg(args, off_t);
-			r_buf      = va_arg(args, void *);
-			r_size     = va_arg(args, unsigned int);
-			
-			if(hash_set        (fc_table->request_write, "key",    TYPE_INT64, &r_key)      != 0) return -1;
-			if(hash_set        (fc_table->request_write, "size",   TYPE_INT32, &r_size)     != 0) return -1;
-			
-			buffer_write(fc_table->buffer_write, 0, r_buf, r_size);
-			
-			return chain_query(chain, fc_table->request_write, fc_table->buffer_write);
-		
-		// }}}
-		case ACTION_CRWD_DELETE: // (fc_table, chain, ACTION_CRWD_DELETE, key, size); // {{{
-			r_key      = va_arg(args, off_t);
-			r_size     = va_arg(args, unsigned int);
-			
-			if(hash_set        (fc_table->request_delete, "key",   TYPE_INT64, &r_key)      != 0) return -1;
-			if(hash_set        (fc_table->request_delete, "size",  TYPE_INT32, &r_size)     != 0) return -1;
-			
-			return chain_query(chain, fc_table->request_delete, NULL);
-		// }}}
-		case ACTION_CRWD_MOVE:   // (fc_table, chain, ACTION_CRWD_MOVE, key_from, key_to, size); // {{{
-			r_key_from = va_arg(args, off_t);
-			r_key_to   = va_arg(args, off_t);
-			r_size     = va_arg(args, unsigned int);
-			
-			if(hash_set        (fc_table->request_move, "key_from", TYPE_INT64, &r_key_from) != 0) return -1;
-			if(hash_set        (fc_table->request_move, "key_to",   TYPE_INT64, &r_key_to)   != 0) return -1;
-			if(hash_set        (fc_table->request_move, "size",     TYPE_INT32, &r_size)     != 0) return -1;
-			
-			return chain_query(chain, fc_table->request_move, NULL);
-		// }}}
-		case ACTION_CRWD_COUNT:  // (fc_table, chain, ACTION_CRWD_COUNT, &size, sizeof(size)); // {{{
-			o_buf      = va_arg(args, void *);
-			o_buf_size = va_arg(args, size_t);
-			
-			ret = chain_query(chain, fc_table->request_count, fc_table->buffer_count);
-			if(ret > 0){
-				buffer_read(fc_table->buffer_count, 0, o_buf, MIN(ret, o_buf_size)); 
-			}
-			return ret;
-		// }}}
-		case ACTION_CRWD_CUSTOM: // (fc_table, chain, ACTION_CRWD_CUSTOM, "func_name", [&buf], [sizeof(buf)]); // {{{
-			r_fname    = va_arg(args, char *);
-			o_buf      = va_arg(args, void *);
-			o_buf_size = va_arg(args, size_t);
-			
-			if(hash_set       (fc_table->request_custom, "function", TYPE_STRING, &r_fname) != 0) return -1;
-			
-			ret = chain_query(chain, fc_table->request_custom, fc_table->buffer_custom);
-			if(ret > 0 && o_buf != NULL){
-				buffer_read(fc_table->buffer_custom, 0, o_buf, MIN(ret, o_buf_size)); 
-			}
-			return ret;
-		// }}}
-		default:
-			return -EINVAL;
-	};	
-} // }}}
-
-ssize_t         fc_crwd_chain      (crwd_fastcall *fc_table, ...){ // {{{ 
-	ssize_t  ret;
-	va_list  args;
-	chain_t *chain;
-	
-	va_start(args, fc_table);
-	
-	chain = va_arg(args, chain_t *);
-	
-	ret = fc_crwd_call(fc_table, chain, args);
-	
-	va_end(args);
-	return ret;
-} // }}}
-ssize_t         fc_crwd_next_chain (crwd_fastcall *fc_table, ...){ // {{{ 
-	ssize_t  ret;
-	va_list  args;
-	chain_t *chain;
-	
-	va_start(args, fc_table);
-	
-	chain = va_arg(args, chain_t *);
-	
-	ret = fc_crwd_call(fc_table, chain->next, args);
-	
-	va_end(args);
-	return ret;
-} // }}}
-ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...){ // {{{ 
-	ssize_t    ret;
-	va_list    args;
-	backend_t *backend;
-	
-	va_start(args, fc_table);
-	
-	backend = va_arg(args, backend_t *);
-	
-	ret = fc_crwd_call(fc_table, backend->chain, args);
-	
-	va_end(args);
-	return ret;
-} // }}}
-
- }}} */
-
 /* buffer_io {{{ */
 static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
 	buffer_t        buffer_read;
 	ssize_t         ret;
 	
 	hash_t  hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_READ} },
-		{ TYPE_INT32, "key",    &offset                    },
-		{ TYPE_INT32, "size",   &buf_size                  },
+		{ TYPE_INT32, "action", (int []){ACTION_CRWD_READ}, sizeof(int)   },
+		{ TYPE_INT64, "key",    &offset                   , sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int []){ buf_size       }, sizeof(int)   },
 		hash_null,
 		hash_null,
 		hash_null,
@@ -425,9 +225,9 @@ static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void 
 	ssize_t         ret;
 	
 	hash_t  hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_WRITE}},
-		{ TYPE_INT32, "key",    &offset                    },
-		{ TYPE_INT32, "size",   &buf_size                  },
+		{ TYPE_INT32, "action", (int []){ACTION_CRWD_WRITE}, sizeof(int)   },
+		{ TYPE_INT64, "key",    &offset                    , sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int []){ buf_size        }, sizeof(int)   },
 		hash_null,
 		hash_null,
 		hash_null,

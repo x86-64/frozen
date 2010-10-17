@@ -71,31 +71,6 @@ API backend_t *  backend_find_by_name (char *name);
 
 /* }}}1 */
 
-/* fastcalls {{{ */
-typedef struct crwd_fastcall {
-	request_t    *request_create;
-	request_t    *request_read;
-	request_t    *request_write;
-	request_t    *request_move;
-	request_t    *request_delete;
-	request_t    *request_count;
-	request_t    *request_custom;
-	
-	buffer_t     *buffer_create;
-	buffer_t     *buffer_read;
-	buffer_t     *buffer_write;
-	buffer_t     *buffer_count;
-	buffer_t     *buffer_custom;
-	
-} crwd_fastcall;
-
-API int             fc_crwd_init       (crwd_fastcall *fc_table);
-API void            fc_crwd_destroy    (crwd_fastcall *fc_table);
-API ssize_t         fc_crwd_chain      (crwd_fastcall *fc_table, ...);
-API ssize_t         fc_crwd_next_chain (crwd_fastcall *fc_table, ...);
-API ssize_t         fc_crwd_backend    (crwd_fastcall *fc_table, ...);
-/* }}} */
-
 /* buffer_io {{{ */
 API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
 API buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);

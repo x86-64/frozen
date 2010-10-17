@@ -16,7 +16,6 @@ typedef struct tree_t {
 } tree_t;
 
 typedef struct addrs_user_data {
-	crwd_fastcall fc_table;
 	tree_t       *tree;
 
 } addrs_user_data;
@@ -46,15 +45,19 @@ static int      tree_reinit(tree_t *tree){ // {{{
 	size_t           *table;
 	size_t           *lss;
 	off_t            *tof;
-	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
 	
-	fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_COUNT,
-		(void *)      &tree->blocks_count,
-		(unsigned int) sizeof(tree->blocks_count)
-	);
+	buffer_t  req_buffer;
+	hash_t    req_count[] = {
+		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_COUNT }, sizeof(int) },
+		hash_end
+	};
+	buffer_init_from_bare(&req_buffer, &tree->blocks_count, sizeof(tree->blocks_count));
+	if(chain_next_query(tree->chain, req_count, &req_buffer) <= 0){
+		buffer_destroy(&req_buffer);
+		return -1;
+	}
+	buffer_destroy(&req_buffer);
+	
 	tree->blocks_count      /= sizeof(block_info);
 	
 	nlevels = log_any(tree->blocks_count, tree->elements_per_level) + 1;
@@ -143,33 +146,31 @@ static void     tree_free(tree_t *tree){ // {{{
 static int      tree_recalc(tree_t *tree){ // {{{
 	int           i,j;
 	ssize_t       ret_size;
+	unsigned int  block_size;
 	unsigned int  read_size;
 	buffer_t     *buffer;
 	size_t       *calcs;
-	unsigned int  block_size;
 	size_t        blocks_left;
 	unsigned int  ptr                = 0;
 	unsigned int  nlevels            = tree->nlevels;
-	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
 	
 	if( (blocks_left = tree->blocks_count) == 0)
 		return 0;
 	
-	calcs = calloc(sizeof(size_t), tree->nlevels);
+	calcs  = calloc(sizeof(size_t), tree->nlevels);
+	buffer = buffer_alloc();
 	
 	while(blocks_left > 0){
 		read_size = ( (blocks_left > tree->read_per_calc) ? tree->read_per_calc : blocks_left );
 		
-		if( (ret_size = fc_crwd_next_chain(
-					&data->fc_table,
-					tree->chain,
-					ACTION_CRWD_READ,
-					(off_t)        (ptr       * sizeof(block_info)),
-					(buffer_t *)   &buffer,
-					(unsigned int) (read_size * sizeof(block_info))
-		)) <= 0){
+		hash_t    req_read[] = {
+			{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_READ               }, sizeof(int)   },
+			{ TYPE_INT64, "key",    (off_t []){ ptr * sizeof(block_info)       }, sizeof(off_t) },
+			{ TYPE_INT32, "size",   (int [])  { read_size * sizeof(block_info) }, sizeof(int)   },
+			hash_end
+		};
+		if( (ret_size = chain_next_query(tree->chain, req_read, buffer)) <= 0)
 			break;
-		}
 		
 		buffer_process(buffer, ret_size, 0,
 			do {
@@ -212,66 +213,69 @@ static int      tree_recalc(tree_t *tree){ // {{{
 		tree->table[ tree->tof[j] + (ptr / tree->lss[j]) ] = calcs[j];
 	}
 	
+	buffer_free(buffer);
 	free(calcs);
 	return (blocks_left == 0) ? 0 : -1;
 } // }}}
 static int      tree_insert(tree_t *tree, unsigned int block_vid, unsigned int block_off, unsigned int size){ // {{{
 	block_info       block;
 	ssize_t          ret;
-	addrs_user_data *data  = (addrs_user_data *)tree->chain->user_data;
+	buffer_t         req_buffer;
+	
+	buffer_init_from_bare(&req_buffer, &block, sizeof(block));
 	
 	block.real_block_off   = block_off;
 	block.size             = size;
 	
-	ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_MOVE,
-		(off_t)((block_vid    ) * sizeof(block_info)),
-		(off_t)((block_vid + 1) * sizeof(block_info)),
-		(unsigned int)-1
-	);
+	hash_t    req_move[] = {
+		{ TYPE_INT32, "action",   (int [])  { ACTION_CRWD_MOVE                     }, sizeof(int)   },
+		{ TYPE_INT64, "key_from", (off_t []){ (block_vid    ) * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT64, "key_to",   (off_t []){ (block_vid + 1) * sizeof(block_info) }, sizeof(off_t) },
+		hash_end
+	};
+	ret = chain_next_query(tree->chain, req_move, NULL);
 	
-	if( (ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_WRITE,
-		(off_t) (block_vid * sizeof(block_info)),
-		(void *)&block,
-		(unsigned int)sizeof(block_info)
-	)) <= 0)
-		return ret;
+	hash_t    req_write[] = {
+		{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_WRITE              }, sizeof(int)   },
+		{ TYPE_INT64, "key",    (off_t []){ block_vid * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)             }, sizeof(int)   },
+		hash_end
+	};
+	if( (ret = chain_next_query(tree->chain, req_write, &req_buffer)) <= 0)
+		goto cleanup;
 	
+	ret = -1;
 	if(tree_reinit(tree) != 0)
-		return -1;
+		goto cleanup;
 	
 	// TODO replace recalc with faster procedure which recalc only changed items instead of all
 	if(tree_recalc(tree) != 0)
-		return -1;
+		goto cleanup;
 	
-	return 0;
+	ret = 0;
+cleanup:
+	buffer_destroy(&req_buffer);
+	return ret;
 } // }}}
 static int      tree_delete_block(tree_t *tree, unsigned int block_vid){ // {{{
 	ssize_t           ret;
-	addrs_user_data  *data = (addrs_user_data *)tree->chain->user_data;
 	
-	if( (ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_MOVE,
-		(off_t)((block_vid + 1) * sizeof(block_info)),
-		(off_t)((block_vid    ) * sizeof(block_info)),
-		(unsigned int)-1
-	)) != 0)
+	hash_t    req_move[] = {
+		{ TYPE_INT32, "action",   (int [])  { ACTION_CRWD_MOVE                     }, sizeof(int)   },
+		{ TYPE_INT64, "key_from", (off_t []){ (block_vid + 1) * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT64, "key_to",   (off_t []){ (block_vid    ) * sizeof(block_info) }, sizeof(off_t) },
+		hash_end
+	};
+	if( (ret = chain_next_query(tree->chain, req_move, NULL)) != 0)
 		return ret;
 	
-	if( (ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_DELETE,
-		(off_t) ( (tree->blocks_count - 1) * sizeof(block_info)),
-		(unsigned int)sizeof(block_info)
-	)) != 0)
+	hash_t    req_delete[] = {
+		{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_DELETE                            }, sizeof(int)   },
+		{ TYPE_INT64, "key",    (off_t []){ (tree->blocks_count - 1) * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)                            }, sizeof(int)   },
+		hash_end
+	};
+	if( (ret = chain_next_query(tree->chain, req_delete, NULL)) != 0)
 		return ret;
 	
 	if(tree_reinit(tree) != 0)
@@ -288,53 +292,50 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	ssize_t           ret;
 	block_info        block;
 	int               j;
-	buffer_t         *buffer;
-	addrs_user_data  *data = (addrs_user_data *)tree->chain->user_data;
+	buffer_t          req_buffer;
+	
+	buffer_init_from_bare(&req_buffer, &block, sizeof(block));
 	
 	/* read block_info */
-	if( (ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_READ,
-		(off_t)         (block_vid * sizeof(block_info)),
-		(void *)       &buffer,
-		(unsigned int)  sizeof(block_info)
-	)) <= 0){
+	hash_t    req_read[] = {
+		{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_READ               }, sizeof(int)   },
+		{ TYPE_INT64, "key",    (off_t []){ block_vid * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)             }, sizeof(int)   },
+		hash_end
+	};
+	if( (ret = chain_next_query(tree->chain, req_read, &req_buffer)) <= 0){
+		buffer_destroy(&req_buffer);
 		return -1;
 	}
-	
-	buffer_read(buffer, 0, &block, MIN(ret, sizeof(block_info)));
 	
 	/* fix block_info */
 	delta      = new_size - block.size;
 	block.size = new_size; 
 	
 	/* write block info */
-	fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_WRITE,
-		(off_t)         (block_vid * sizeof(block_info)),
-		(void *)       &block,
-		(unsigned int)  sizeof(block_info)
-	);
+	hash_t    req_write[] = {
+		{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_WRITE              }, sizeof(int)   },
+		{ TYPE_INT64, "key",    (off_t []){ block_vid * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)             }, sizeof(int)   },
+		hash_end
+	};
+	chain_next_query(tree->chain, req_write, &req_buffer);
 	
 	// TODO lock
 		for(j=0; j < tree->nlevels; j++){
 			tree->table[ tree->tof[j] + (block_vid / tree->lss[j]) ] += delta;
 		}
 	// TODO unlock
+	
+	buffer_destroy(&req_buffer);
 	return 0;
 } // }}}
 static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, off_t *real_offset){ // {{{
 	unsigned int   i,j,ret;
-	ssize_t        m_ret;
 	off_t          level_off;
 	unsigned int   ptr;
 	size_t         chunk_size;
-	buffer_t      *buffer;
 	block_info     block;
-	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
 	
 	if(offset >= tree->table[0]) // out of range
 		return -1;
@@ -362,19 +363,19 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 		}
 		// last level
 		
+		buffer_t  req_buffer;
+		buffer_init_from_bare(&req_buffer, &block, sizeof(block));
+		
 		/* read block_info */
 		for(j=0; j < tree->elements_per_level; j++, ptr++){
-			if( (m_ret = fc_crwd_next_chain(
-				&data->fc_table,
-				tree->chain,
-				ACTION_CRWD_READ,
-				(off_t)         (ptr * sizeof(block_info)),
-				(void *)       &buffer,
-				(unsigned int)  sizeof(block_info)
-			)) <= 0)
+			hash_t    req_read[] = {
+				{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_READ               }, sizeof(int)   },
+				{ TYPE_INT64, "key",    (off_t []){ ptr * sizeof(block_info)       }, sizeof(off_t) },
+				{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)             }, sizeof(int)   },
+				hash_end
+			};
+			if(chain_next_query(tree->chain, req_read, &req_buffer) <= 0)
 				break;
-			
-			buffer_read(buffer, 0, &block, MIN(m_ret, sizeof(block_info)));
 			
 			/*printf("el: %x ptr: %x (%x < %x + %x)\n",
 				j, (unsigned int)ptr,
@@ -389,26 +390,26 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 			}
 			level_off += block.size;
 		}
+		buffer_destroy(&req_buffer);
+		
 	// TODO unlock
 	return ret;
 } // }}}
 static int      tree_get_block(tree_t *tree, unsigned int block_vid, block_info *block){ // {{{
-	ssize_t          m_ret;
-	buffer_t        *buffer;
-	addrs_user_data *data            = (addrs_user_data *)tree->chain->user_data;
+	buffer_t         req_buffer;
 	
-	if( (m_ret = fc_crwd_next_chain(
-		&data->fc_table,
-		tree->chain,
-		ACTION_CRWD_READ,
-		(off_t)         (block_vid * sizeof(block_info)),
-		(void *)       &buffer,
-		(unsigned int)  sizeof(block_info)
-	)) <= 0){
+	buffer_init_from_bare(&req_buffer, block, sizeof(block_info));
+	
+	hash_t    req_read[] = {
+		{ TYPE_INT32, "action", (int [])  { ACTION_CRWD_READ               }, sizeof(int)   },
+		{ TYPE_INT64, "key",    (off_t []){ block_vid * sizeof(block_info) }, sizeof(off_t) },
+		{ TYPE_INT32, "size",   (int [])  { sizeof(block_info)             }, sizeof(int)   },
+		hash_end
+	};
+	if(chain_next_query(tree->chain, req_read, &req_buffer) <= 0)
 		return -1;
-	}
 	
-	buffer_read(buffer, 0, block, MIN(m_ret, sizeof(block_info)));
+	buffer_destroy(&req_buffer);
 	return 0;
 } // }}}
 static int      tree_size(tree_t *tree, size_t *size){ // {{{
@@ -435,7 +436,6 @@ static int addrs_init(chain_t *chain){
 static int addrs_destroy(chain_t *chain){
 	addrs_user_data *data = (addrs_user_data *)chain->user_data;
 	
-	fc_crwd_destroy(&data->fc_table);
 	tree_free(data->tree);
 	
 	free(chain->user_data);
@@ -464,9 +464,6 @@ static int addrs_configure(chain_t *chain, setting_t *config){
 			read_per_calc = READ_PER_CALC_DEFAULT;
 	}
 	
-	if( fc_crwd_init(&data->fc_table) != 0)
-		return_error(-EINVAL, "chain 'blocks-address' fastcall table init failed\n");
-	
 	if( (data->tree = tree_alloc(chain, elements_per_level, read_per_calc)) == NULL)
 		goto free1;
 	
@@ -475,30 +472,32 @@ static int addrs_configure(chain_t *chain, setting_t *config){
 	
 	return 0;
 	
-free1:  fc_crwd_destroy(&data->fc_table);
+free1:  
 	return_error(-ENOMEM, "chain 'blocks-address' no memory\n"); 
 }
 /* }}} */
 
 static ssize_t addrs_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	unsigned int      block_vid;
-	unsigned int      block_off;
-	unsigned int      block_size;
 	unsigned int      insert       = 1;
+	hash_t           *r_block_size, *r_block_vid, *r_block_off;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if(hash_get_copy (request, "block_size",  TYPE_INT32, &block_size,  sizeof(block_size)) != 0) 
+	if( (r_block_size = hash_find_typed_value(request, TYPE_INT32, "block_size")) == NULL) 
 		return -EINVAL;
 	
-	if(hash_get_copy (request, "block_vid",   TYPE_INT32, &block_vid,   sizeof(block_vid))  != 0)
+	if( (r_block_vid  = hash_find_typed_value(request, TYPE_INT32, "block_vid"))  == NULL)
 		block_vid = tree_blocks_count(data->tree);
+	else
+		block_vid = HVALUE(r_block_vid, unsigned int);
 	
-	if(hash_get_copy (request, "block_off",   TYPE_INT32, &block_off,   sizeof(block_off))  != 0)
+	if( (r_block_off  = hash_find_typed_value(request, TYPE_INT32, "block_off"))  == NULL)
 		insert = 0;
+	
 	if(insert == 0){
-		return tree_resize_block(data->tree, block_vid, block_size);
+		return tree_resize_block(data->tree, block_vid, HVALUE(r_block_size, unsigned int));
 	}
-	return tree_insert(data->tree, block_vid, block_off, block_size);
+	return tree_insert(data->tree, block_vid, HVALUE(r_block_off, unsigned int), HVALUE(r_block_size, unsigned int));
 }
 
 // TODO custom functions to chain
@@ -506,31 +505,28 @@ static ssize_t addrs_set(chain_t *chain, request_t *request, buffer_t *buffer){
 // get block_size - get("blocks", "block_vid")
 
 static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
-	addrs_user_data *data = (addrs_user_data *)chain->user_data;
-	off_t             virt_key;
+	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	
 	off_t             real_key;
-	unsigned int      blocks;
 	unsigned int      block_vid;
 	block_info        block;
 	ssize_t           buf_ptr = 0;
+	hash_t           *r_virt_key, *r_block_vid;
 	
-	if(hash_get_copy (request, "blocks", TYPE_INT32, &blocks, sizeof(blocks)) != 0)
-		blocks = 0;
-	
-	if(blocks == 0){
-		if(hash_get_copy (request, "offset", TYPE_INT64, &virt_key, sizeof(virt_key)) != 0)
+	if(hash_find_value(request, "blocks") == NULL){
+		if( (r_virt_key = hash_find_typed_value(request, TYPE_INT64, "offset")) == NULL)
 			return -EINVAL;
 		
-		if(tree_get(data->tree, virt_key, &block_vid, &real_key) != 0)
+		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), &block_vid, &real_key) != 0)
 			return -EFAULT;
 		
 		buf_ptr += buffer_write(buffer, buf_ptr, &real_key,  sizeof(real_key));
 		buf_ptr += buffer_write(buffer, buf_ptr, &block_vid, sizeof(block_vid));
 	}else{
-		if(hash_get_copy (request, "block_vid", TYPE_INT32, &block_vid, sizeof(block_vid)) != 0)
+		if( (r_block_vid = hash_find_typed_value(request, TYPE_INT32, "block_vid")) == NULL)
 			return -EINVAL;
 		
-		if(tree_get_block(data->tree, block_vid, &block) != 0)
+		if(tree_get_block(data->tree, HVALUE(r_block_vid, unsigned int), &block) != 0)
 			return -EFAULT;
 		
 		buf_ptr += buffer_write(buffer, buf_ptr, &block.size,           sizeof(block.size));
@@ -540,24 +536,20 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 }
 
 static ssize_t addrs_delete(chain_t *chain, request_t *request, buffer_t *buffer){
-	unsigned int      block_vid;
+	hash_t           *r_block_vid;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if(hash_get_copy (request, "block_vid",   TYPE_INT32, &block_vid,   sizeof(block_vid))  != 0)
+	if( (r_block_vid = hash_find_typed_value(request, TYPE_INT32, "block_vid")) == NULL)
 		return -EINVAL;
 	
-	return tree_delete_block(data->tree, block_vid);
+	return tree_delete_block(data->tree, HVALUE(r_block_vid, unsigned int));
 }
 
 static ssize_t addrs_count(chain_t *chain, request_t *request, buffer_t *buffer){
 	size_t            units_count; 
-	unsigned int      blocks;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if(hash_get_copy (request, "blocks", TYPE_INT32, &blocks, sizeof(blocks)) != 0)
-		blocks = 0;
-	
-	if(blocks == 0){
+	if(hash_find_value(request, "blocks") == NULL){
 		if(tree_size(data->tree, &units_count) != 0)
 			return -EINVAL;
 	}else{

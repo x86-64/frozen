@@ -18,10 +18,7 @@ struct sort_proto_t {
 struct sorts_user_data {
 	chain_t         *chain;
 	sort_proto_t    *engine;
-	crwd_fastcall    fc_table;
 	data_ctx_t       cmp_ctx;
-	
-	hash_t          *set_request;
 	
 	off_t            key;
 	buffer_t         key_buffer;
@@ -55,9 +52,7 @@ static int sorts_destroy(chain_t *chain){ // {{{
 	
 	// TODO destroy without configure cause crash
 
-	fc_crwd_destroy(&data->fc_table);
 	data_ctx_destroy(&data->cmp_ctx);
-	hash_free(data->set_request);
 	
 	buffer_destroy(&data->key_buffer);
 	
@@ -102,13 +97,8 @@ static int sorts_configure(chain_t *chain, setting_t *config){ // {{{
 	if( data_ctx_init(&data->cmp_ctx, info_type, cmp_context_str) != 0)
 		return_error(-EINVAL, "chain 'insert-sort' data ctx create failed\n");
 	
-	if( fc_crwd_init(&data->fc_table) != 0)
-		return_error(-EINVAL, "chain 'insert-sort' fastcall table init failed\n");
-	
 	buffer_init_from_bare(&data->key_buffer, &data->key, sizeof(data->key));
 	// TODO fix mem leak
-	
-	data->set_request  = hash_new();
 	
 	return 0;
 } // }}}
@@ -120,7 +110,6 @@ static ssize_t sorts_create(chain_t *chain, request_t *request, buffer_t *buffer
 
 static ssize_t sorts_set   (chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t       ret;
-	unsigned int  insert = 1;
 	
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
@@ -135,24 +124,25 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request, buffer_t *buffer
 		
 	}
 	*/
-	hash_empty        (data->set_request);
-	hash_assign_layer (data->set_request, request);
-	hash_set          (data->set_request, "key",    TYPE_INT64, &data->key);
-	hash_set          (data->set_request, "insert", TYPE_INT32, &insert);
+	hash_t set_request[] = {
+		{ TYPE_INT64, "key",     &data->key,   sizeof(data->key) },
+		{ TYPE_INT32, "insert", (int []){ 1 }, sizeof(int)       },
+		hash_next(request)
+	};
 	
 	// next("unlock");
-	return chain_next_query(chain, data->set_request, buffer);
+	return chain_next_query(chain, set_request, buffer);
 }
 
 static ssize_t sorts_custom(chain_t *chain, request_t *request, buffer_t *buffer){
-	data_t *funcname;
+	hash_t *r_funcname;
 	
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
-	if(hash_get(request, "function", TYPE_STRING, &funcname, NULL) != 0)
+	if( (r_funcname = hash_find_typed_value(request, TYPE_STRING, "function")) == NULL)
 		return -EINVAL;
 	
-	if(strcmp((char *)funcname, "search") == 0){
+	if(strcmp((char *)r_funcname->value, "search") == 0){
 		return data->engine->func_find(data, buffer, &data->key_buffer); // do search
 	}
 	
