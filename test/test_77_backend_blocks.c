@@ -8,9 +8,9 @@ void read_all(buffer_t *buffer, backend_t *backend, off_t *key_off, unsigned int
 	memset(buf, 0, 29);
 	for(k=0; k<key_count; k++){
 		hash_t  req_read[] = {
-			{ TYPE_INT32, "action", (int []){ ACTION_CRWD_READ }, sizeof(int)   },
-			{ TYPE_INT64, "key",    &key_off[k],                  sizeof(off_t) },
-			{ TYPE_INT32, "size",   (int []){ 1                }, sizeof(int)   },
+			{ "action", DATA_INT32(ACTION_CRWD_READ) },
+			{ "key",    DATA_PTR_OFFT(&key_off[k])   },
+			{ "size",   DATA_INT32(1)                },
 			hash_end
 		};
 		if( (ssize = backend_query(backend, req_read, buffer)) == 1){
@@ -62,8 +62,8 @@ START_TEST (test_backend_blocks){
 	
 	for(k=0; k < key_count; k++){
 		hash_t  req_create[] = {
-			{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
-			{ TYPE_INT32, "size",   (int []){ 1                  }, sizeof(int) },
+			{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+			{ "size",   DATA_INT32(1)                  },
 			hash_end
 		};
 		
@@ -78,9 +78,9 @@ START_TEST (test_backend_blocks){
 		key_data[0] = (char)(0x5F + k);
 		
 		hash_t  req_write[] = {
-			{ TYPE_INT32, "action", (int []){ ACTION_CRWD_WRITE  }, sizeof(int)   },
-			{ TYPE_INT64, "key",    &key_off[k],                    sizeof(off_t) },
-			{ TYPE_INT32, "size",   (int []){ 1                  }, sizeof(int)   },
+			{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+			{ "key",    DATA_PTR_OFFT(&key_off[k])    },
+			{ "size",   DATA_INT32(1)                 },
 			hash_end
 		};
 		
@@ -99,9 +99,9 @@ START_TEST (test_backend_blocks){
 	key_from = 1;
 	key_to   = 2;
 	hash_t  req_move[] = {
-		{ TYPE_INT32, "action",   (int []){ ACTION_CRWD_MOVE   }, sizeof(int)   },
-		{ TYPE_INT64, "key_from", &key_from,                      sizeof(off_t) },
-		{ TYPE_INT64, "key_to",   &key_to,                        sizeof(off_t) },
+		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
+		{ "key_from", DATA_PTR_OFFT(&key_from)     },
+		{ "key_to",   DATA_PTR_OFFT(&key_to)       },
 		hash_end
 	};
 	ssize = backend_query(backend, req_move, buffer);

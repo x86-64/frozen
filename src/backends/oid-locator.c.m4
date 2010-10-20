@@ -143,7 +143,7 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 				return -EINVAL;
 			
 			hash_t  new_request[] = {
-				{ r_size->type, "size", o_size, r_size->value_size },
+				{ "size", r_size->type, o_size, r_size->value_size },
 				hash_next(request)
 			};
 			
@@ -198,8 +198,8 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 			if(data_bare_arithmetic(r_size->type, o_size, '*', data->linear_scale) != 0) return -EINVAL;
 			
 			hash_t  new_request[] = {
-				{ r_key->type,  "key",  o_key,  r_key->value_size  },
-				{ r_size->type, "size", o_size, r_size->value_size },
+				{ "key",  r_key->type,  o_key,  r_key->value_size  },
+				{ "size", r_size->type, o_size, r_size->value_size },
 				hash_next(request)
 			};
 			
@@ -263,9 +263,9 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 			if(data_bare_arithmetic(r_key_to->type,   o_key_to,   '*', data->linear_scale) != 0) return -EINVAL;
 			
 			hash_t  new_request[] = {
-				{ r_key_from->type, r_key_from->key, o_key_from, r_key_from->value_size  },
-				{ r_key_to->type,   r_key_to->key,   o_key_to,   r_key_to->value_size    },
-				{ r_size->type    , r_size_str,      o_size,     r_size->value_size      },
+				{ r_key_from->key,  r_key_from->type, o_key_from, r_key_from->value_size  },
+				{ r_key_to->key,    r_key_to->type,   o_key_to,   r_key_to->value_size    },
+				{ r_size_str,       r_size->type    , o_size,     r_size->value_size      },
 				hash_next(request)
 			};
 			

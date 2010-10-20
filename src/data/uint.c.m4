@@ -77,6 +77,8 @@ m4_changequote([,])
 
 /*
 REGISTER_TYPE([TYPE_INT]BITS())
+REGISTER_MACRO([DATA_INT]BITS()[(value)],     `[TYPE_INT]BITS()[, (unsigned ]TYPE()[ []){ value }, sizeof(unsigned ]TYPE()[)]')
+REGISTER_MACRO([DATA_PTR_INT]BITS()[(value)], `[TYPE_INT]BITS()[, value, sizeof(unsigned ]TYPE()[)]')
 REGISTER_PROTO([
 	`{
 		.type                   = TYPE_INT]BITS()[,

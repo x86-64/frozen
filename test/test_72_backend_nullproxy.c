@@ -22,8 +22,8 @@ START_TEST (test_backends_two_chains){
 	buffer_t       *buffer  = buffer_alloc();
 	ssize_t         ssize;
 	hash_t          request[] = {
-		{ TYPE_INT32, "action",  (int []) { ACTION_CRWD_CREATE } },
-		{ TYPE_INT32, "size",    (int []) { 0xBEEF }             },
+		{ "action",  DATA_INT32(ACTION_CRWD_CREATE)  },
+		{ "size",    DATA_INT32( 0xBEEF )            },
 		hash_end
 	};
 	

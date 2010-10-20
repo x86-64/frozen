@@ -31,8 +31,8 @@ START_TEST (test_backend_list){
 	
 	// create new
 	hash_t  hash_create[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
-		{ TYPE_INT32, "size",   (int []){ 10                 }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",   DATA_INT32(10)                 },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create, buffer)) != sizeof(off_t) )
@@ -42,22 +42,21 @@ START_TEST (test_backend_list){
 	
 	// write keys
 	hash_t  hash_write[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_WRITE  }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ key_off            }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   10                 }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ "key",    DATA_OFFT(key_off)             },
+		{ "size",   DATA_INT32(10)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key_data, 10);
 	ssize = backend_query(backend, hash_write, buffer);
 		fail_unless(ssize == 10, "backend in_list write 1 failed");
 	
-	
 	// insert key
 	hash_t  hash_insert[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_WRITE  }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ key_off + 2        }, sizeof(off_t) },
-		{ TYPE_INT32, "insert", (int []){   1                  }, sizeof(int)   },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "key",    DATA_OFFT(key_off + 2)        },
+		{ "insert", DATA_INT32(1)                 },
+		{ "size",   DATA_INT32(1)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key_insert, 1);
@@ -66,9 +65,9 @@ START_TEST (test_backend_list){
 	
 	// check
 	hash_t  hash_read[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_READ   }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ key_off            }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   11                 }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
+		{ "key",    DATA_OFFT(key_off)            },
+		{ "size",   DATA_INT32(11)                },
 		hash_end
 	};
 	buffer_cleanup(buffer);
@@ -81,9 +80,9 @@ START_TEST (test_backend_list){
 	
 	// delete key
 	hash_t  hash_delete[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_DELETE }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ key_off + 3        }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_DELETE)   },
+		{ "key",    DATA_OFFT(key_off + 3)           },
+		{ "size",   DATA_INT32(1)                    },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_delete, buffer);
@@ -91,9 +90,9 @@ START_TEST (test_backend_list){
 	
 	// check
 	hash_t  hash_read2[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_READ   }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ key_off            }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   10                 }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
+		{ "key",    DATA_OFFT(key_off)               },
+		{ "size",   DATA_INT32(10)                   },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_read2, buffer);

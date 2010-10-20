@@ -16,6 +16,8 @@ data_sources=         \
 	data/uint16.c \
 	data/uint32.c \
 	data/uint64.c \
+	data/offt.c   \
+	data/sizet.c  \
 	data/string.c 
 
 AUTOMAKE_OPTIONS = subdir-objects

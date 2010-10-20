@@ -11,6 +11,8 @@ size_t  data_string_len(void *data, size_t buffer_size){
 
 /*
 REGISTER_TYPE(`TYPE_STRING')
+REGISTER_MACRO(`DATA_STRING(value)',      `TYPE_STRING, value, sizeof(value)')
+REGISTER_MACRO(`DATA_PTR_STRING(value,size)', `TYPE_STRING, value, size')
 REGISTER_PROTO(
 	`{
 		.type          = TYPE_STRING,

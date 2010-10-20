@@ -5,10 +5,18 @@
 m4_define(`REGISTER_TYPE', `
         m4_define(`TYPES_ARRAY', m4_defn(`TYPES_ARRAY')`$1,
 ')')
+m4_define(`REGISTER_MACRO', `
+	m4_define(`MACRO_ARRAY',
+		m4_defn(`MACRO_ARRAY')
+		`#define $1 $2'
+	)
+')
 m4_divert(-1)
 m4_include(data_protos.m4)
 m4_divert(0)
 }}} */
+
+MACRO_ARRAY()
 
 typedef enum data_type { TYPES_ARRAY() } data_type;
 

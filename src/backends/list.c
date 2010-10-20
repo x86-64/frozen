@@ -38,10 +38,10 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 		if(data_bare_arithmetic(r_key->type, o_key_to, '+', 1) != 0) return -EINVAL;
 		
 		hash_t  new_request[] = {
-			{ TYPE_INT32,  "action",   (int []){ ACTION_CRWD_MOVE }, sizeof(int)       },
-			{ r_key->type, "key_from", o_key_from,                   r_key->value_size },
-			{ r_key->type, "key_to",   o_key_to,                     r_key->value_size },
-			{ TYPE_INT32,  "size",     (int []){ -1               }, sizeof(int)       },
+			{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
+			{ "key_from", r_key->type, o_key_from, r_key->value_size },
+			{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
+			{ "size",     DATA_INT32(-1)                             },
 			hash_next(request)
 		};
 		
@@ -70,10 +70,10 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	if(data_bare_arithmetic(r_key->type, o_key_from, '+', HVALUE(r_size, unsigned int)) != 0) return -EINVAL;
 	
 	hash_t  new_request[] = {
-		{ TYPE_INT32,  "action",   (int []){ ACTION_CRWD_MOVE }, sizeof(int)       },
-		{ r_key->type, "key_from", o_key_from,                   r_key->value_size },
-		{ r_key->type, "key_to",   o_key_to,                     r_key->value_size },
-		{ TYPE_INT32,  "size",     (int []){ -1               }, sizeof(int)       },
+		{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
+		{ "key_from", r_key->type, o_key_from, r_key->value_size },
+		{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
+		{ "size",     DATA_INT32(-1)                             },
 		hash_next(request)
 	};
 	

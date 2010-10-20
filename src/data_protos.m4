@@ -6,4 +6,6 @@ m4_include(data/uint8.c)
 m4_include(data/uint16.c)
 m4_include(data/uint32.c)
 m4_include(data/uint64.c)
+m4_include(data/offt.c)
+m4_include(data/sizet.c)
 

@@ -1,9 +1,9 @@
 
 START_TEST (test_hash){
 	hash_t  hash[] = {
-		{ TYPE_STRING, "key1", "value1" },
-		{ TYPE_STRING, "key2", "value2" },
-		{ TYPE_STRING, "key3", "value3" },
+		{ "key1", DATA_STRING("value1") },
+		{ "key2", DATA_STRING("value2") },
+		{ "key3", DATA_STRING("value3") },
 		hash_null,
 		hash_null,
 		hash_null,
@@ -31,7 +31,7 @@ START_TEST (test_hash){
 	fail_unless( (key2 = hash_find_value(hash, "key2")) == NULL, "necrozz attack!!");
 	
 	hash_t hash2[] = {
-		{ TYPE_STRING, "key2", "value_next_2" },
+		{ "key2", DATA_STRING("value_next_2") },
 		hash_next(hash)
 	};
 	fail_unless( (key2_n = hash_find_value(hash2, "key2"))   != NULL, "assigned hash not found existing entry");

@@ -35,10 +35,10 @@ START_TEST (test_backend_blocks_addrs){
 	block_off = 0;
 	for(i=0; i<blocks_count; i++){
 		hash_t  req_write[] = {
-			{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(unsigned int) },
-			{ TYPE_INT32, "block_vid",  &block_vid,                    sizeof(unsigned int) },
-			{ TYPE_INT32, "block_size", (int []){ VSIZE             }, sizeof(unsigned int) },
-			{ TYPE_INT32, "block_off",  &block_off,                    sizeof(unsigned int) },
+			{ "action",     DATA_INT32(ACTION_CRWD_WRITE) },
+			{ "block_vid",  DATA_PTR_INT32(&block_vid)    },
+			{ "block_off",  DATA_PTR_INT32(&block_off)    },
+			{ "block_size", DATA_INT32(VSIZE)             },
 			hash_end
 		};
 		block_off += RSIZE;
@@ -52,7 +52,7 @@ START_TEST (test_backend_blocks_addrs){
 	
 	// count blocks {{{
 	hash_t  req_count[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_COUNT }, sizeof(unsigned int) },
+		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, req_count, buffer)) > 0)
@@ -66,8 +66,8 @@ START_TEST (test_backend_blocks_addrs){
 	
 	for(offset_virt=0; offset_virt<match_size; offset_virt++){
 		hash_t  req_read[] = {
-			{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_READ }, sizeof(unsigned int) },
-			{ TYPE_INT64, "offset",     &offset_virt,                 sizeof(off_t)        },
+			{ "action", DATA_INT32(ACTION_CRWD_READ) },
+			{ "offset", DATA_PTR_OFFT(&offset_virt)  },
 			hash_end
 		};
 		if( (ssize = backend_query(backend, req_read, buffer)) > 0){
@@ -84,9 +84,9 @@ START_TEST (test_backend_blocks_addrs){
 	// resize block {{{
 	block_vid = 3;
 	hash_t  req_write2[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(unsigned int) },
-		{ TYPE_INT32, "block_vid",  (int []){ 3                 }, sizeof(unsigned int) },
-		{ TYPE_INT32, "block_size", (int []){ 0x110             }, sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "block_vid",  DATA_INT32(3)                 },
+		{ "block_size", DATA_INT32(0x110)             },
 		hash_end
 	};
 	ssize = backend_query(backend, req_write2, NULL);
@@ -100,8 +100,8 @@ START_TEST (test_backend_blocks_addrs){
 	// }}}
 	// delete block {{{
 	hash_t  req_delete[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_DELETE }, sizeof(unsigned int) },
-		{ TYPE_INT32, "block_vid",  (int []){ 2                  }, sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_DELETE) },
+		{ "block_vid",  DATA_INT32(2)                  },
 		hash_end
 	};
 	ssize = backend_query(backend, req_delete, NULL);

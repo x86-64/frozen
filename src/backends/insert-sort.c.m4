@@ -125,8 +125,8 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request, buffer_t *buffer
 	}
 	*/
 	hash_t set_request[] = {
-		{ TYPE_INT64, "key",     &data->key,   sizeof(data->key) },
-		{ TYPE_INT32, "insert", (int []){ 1 }, sizeof(int)       },
+		{ "key",    DATA_PTR_OFFT(&data->key)  },
+		{ "insert", DATA_INT32(1)              },
 		hash_next(request)
 	};
 	

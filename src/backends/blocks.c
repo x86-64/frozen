@@ -21,36 +21,36 @@ typedef struct blocks_user_data {
 
 static ssize_t   map_new            (blocks_user_data *data, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
-		{ TYPE_INT32, "block_off",  &b_off,                        sizeof(unsigned int) },
-		{ TYPE_INT32, "block_size", &b_size,                       sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ "block_off",  DATA_PTR_INT32(&b_off)         },
+		{ "block_size", DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
-		{ TYPE_INT32, "block_vid",  &b_vid,                        sizeof(unsigned int) },
-		{ TYPE_INT32, "block_off",  &b_off,                        sizeof(unsigned int) },
-		{ TYPE_INT32, "block_size", &b_size,                       sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
+		{ "block_off",  DATA_PTR_INT32(&b_off)         },
+		{ "block_size", DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid, unsigned int new_size){ // {{{
 	hash_t  req_write[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
-		{ TYPE_INT32, "block_vid",  &b_vid,                        sizeof(unsigned int) },
-		{ TYPE_INT32, "block_size", &new_size,                     sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
+		{ "block_size", DATA_PTR_INT32(&new_size)      },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 /*static ssize_t   map_delete         (blocks_user_data *data, unsigned int b_vid){ // {{{
 	hash_t  req_delete[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_DELETE }, sizeof(int)          },
-		{ TYPE_INT32, "block_vid",  &b_vid,                         sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_DELETE) },
+		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_delete, NULL);
@@ -63,8 +63,8 @@ static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, uns
 	buffer_init(&req_buffer);
 	
 	hash_t    req_read[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_READ  }, sizeof(int)          },
-		{ TYPE_INT64, "offset",     &virt_off,                     sizeof(off_t)        },
+		{ "action", DATA_INT32(ACTION_CRWD_READ) },
+		{ "offset", DATA_PTR_OFFT(&virt_off)     },
 		hash_end
 	};
 	
@@ -84,9 +84,9 @@ static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_
 	buffer_init(&req_buffer);
 	
 	hash_t    req_read[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_READ  }, sizeof(int)          },
-		{ TYPE_INT32, "blocks",     (int []){ 1                 }, sizeof(int)          },
-		{ TYPE_INT32, "block_vid",  &block_vid,                    sizeof(unsigned int) },
+		{ "action",     DATA_INT32(ACTION_CRWD_READ) },
+		{ "blocks",     DATA_INT32(1)                },
+		{ "block_vid",  DATA_PTR_INT32(&block_vid)   },
 		hash_end
 	};
 	
@@ -110,8 +110,8 @@ static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
 	data->blocks_count = 0;
 	
 	hash_t  req_count[] = {
-		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_COUNT }, sizeof(int)          },
-		{ TYPE_INT32, "blocks",     (int []){ 1                 }, sizeof(int)          },
+		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
+		{ "blocks", DATA_INT32(1)                 },
 		hash_end
 	};
 	ret = backend_query(data->bk_map, req_count, &req_buffer);
@@ -125,8 +125,8 @@ static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_o
 	buffer_init_from_bare(&req_buffer, real_block_off, sizeof(off_t));
 	
 	hash_t    req_create[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
-		{ TYPE_INT32, "size"  , (int []){ sizeof(off_t)      }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_CREATE ) },
+		{ "size"  , DATA_INT32(data->block_size   ) },
 		hash_end
 	};
 	
@@ -139,10 +139,10 @@ static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t t
 		return 0;
 	
 	hash_t    req_move[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_MOVE   }, sizeof(int)   },
-		{ TYPE_INT64, "key_from", &from                       , sizeof(off_t) },
-		{ TYPE_INT64, "key_to",   &to                         , sizeof(off_t) },
-		{ TYPE_INT32, "size"  , (int []){ size               }, sizeof(int)   },
+		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
+		{ "key_from", DATA_PTR_OFFT(&from)         },
+		{ "key_to",   DATA_PTR_OFFT(&to)           },
+		{ "size"  ,   DATA_INT32(size)             },
 		hash_end
 	};
 	
@@ -378,7 +378,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	
 	/* calc virt_ptr */
 	hash_t  req_count[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_COUNT }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
 		hash_end
 	};
 	ret = backend_query(data->bk_map, req_count, buffer); 
@@ -396,16 +396,16 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffe
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
 	// TODO r_size > block_size
-	// TODO remove TYPE_INT64 from code, support all
+	// TODO remove TYPE_OFFT from code, support all
 	
-	if( (r_key_virt = hash_find_typed_value(request, TYPE_INT64, "key")) == NULL)
+	if( (r_key_virt = hash_find_typed_value(request, TYPE_OFFT, "key")) == NULL)
 		return -EINVAL;
 	
 	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, &key_real) <= 0)
 		return -EINVAL;
 	
 	hash_t  req_layer[] = {
-		{ r_key_virt->type, r_key_virt->key, &key_real, r_key_virt->value_size },
+		{ r_key_virt->key, r_key_virt->type, &key_real, r_key_virt->value_size },
 		hash_next(request)
 	};
 	
@@ -414,7 +414,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffe
 static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
 	hash_t *r_key, *r_size;
 	
-	if( (r_key  = hash_find_typed_value(request, TYPE_INT64, "key")) == NULL)
+	if( (r_key  = hash_find_typed_value(request, TYPE_OFFT,  "key")) == NULL)
 		return -EINVAL;
 	if( (r_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
@@ -428,9 +428,9 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	
 	ssize_t           move_delta;
 	
-	if( (r_from = hash_find_typed_value (request, TYPE_INT64, "key_from")) == NULL)
+	if( (r_from = hash_find_typed_value (request, TYPE_OFFT, "key_from")) == NULL)
 		return -EINVAL;
-	if( (r_to   = hash_find_typed_value (request, TYPE_INT64, "key_to"))   == NULL)
+	if( (r_to   = hash_find_typed_value (request, TYPE_OFFT, "key_to"))   == NULL)
 		return -EINVAL;
 	
 	from = HVALUE(r_from, off_t);

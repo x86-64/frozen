@@ -201,9 +201,9 @@ static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void 
 	ssize_t         ret;
 	
 	hash_t  hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_READ}, sizeof(int)   },
-		{ TYPE_INT64, "key",    &offset                   , sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){ buf_size       }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
+		{ "key",    DATA_PTR_OFFT(&offset)        },
+		{ "size",   DATA_INT32(buf_size)          },
 		hash_null,
 		hash_null,
 		hash_null,
@@ -225,9 +225,9 @@ static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void 
 	ssize_t         ret;
 	
 	hash_t  hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_WRITE}, sizeof(int)   },
-		{ TYPE_INT64, "key",    &offset                    , sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){ buf_size        }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "key",    DATA_PTR_OFFT(&offset)        },
+		{ "size",   DATA_INT32(buf_size)          },
 		hash_null,
 		hash_null,
 		hash_null,

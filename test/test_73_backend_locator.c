@@ -31,8 +31,8 @@ START_TEST (test_backend_locator){
 	buffer_t     *key2_buffer  = buffer_alloc_from_bare(&key2_data, sizeof(key2_data));
 	
 	hash_t  hash_create1[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
-		{ TYPE_INT32, "size",   (int []){ 1                  }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",   DATA_INT32(1)                  },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create1, buffer)) != sizeof(off_t) )
@@ -40,8 +40,8 @@ START_TEST (test_backend_locator){
 	buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
 		
 	hash_t  hash_create2[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
-		{ TYPE_INT32, "size",   (int []){ 1                  }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",   DATA_INT32(1)                  },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create2, buffer)) != sizeof(off_t) )
@@ -52,9 +52,9 @@ START_TEST (test_backend_locator){
 	
 
 	hash_t  hash_write1[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_WRITE  }, sizeof(int)   },
-		{ TYPE_INT64, "key",    (off_t []){ new_key1           }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int)   },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "key",    DATA_OFFT(new_key1)           },
+		{ "size",   DATA_INT32(1)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key1_data, 10);
@@ -63,9 +63,9 @@ START_TEST (test_backend_locator){
 	
 	
 	hash_t  hash_write2[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_WRITE  }, sizeof(int) },
-		{ TYPE_INT64, "key",    (off_t []){ new_key2           }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "key",    DATA_OFFT(new_key2)           },
+		{ "size",   DATA_INT32(1)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key2_data, 10);
@@ -74,9 +74,9 @@ START_TEST (test_backend_locator){
 	
 	
 	hash_t  hash_read1[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_READ   }, sizeof(int) },
-		{ TYPE_INT64, "key",    (off_t []){ new_key1           }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
+		{ "key",    DATA_OFFT(new_key1)           },
+		{ "size",   DATA_INT32(1)                 },
 		hash_end
 	};
 	buffer_cleanup(buffer);
@@ -88,9 +88,9 @@ START_TEST (test_backend_locator){
 		);
 	
 	hash_t  hash_read2[] = {
-		{ TYPE_INT32, "action", (int []){   ACTION_CRWD_READ   }, sizeof(int) },
-		{ TYPE_INT64, "key",    (off_t []){ new_key2           }, sizeof(off_t) },
-		{ TYPE_INT32, "size",   (int []){   1                  }, sizeof(int) },
+		{ "action", DATA_INT32(ACTION_CRWD_READ) },
+		{ "key",    DATA_OFFT(new_key2)          },
+		{ "size",   DATA_INT32(1)                },
 		hash_end
 	};
 	buffer_cleanup(buffer);

@@ -5,9 +5,9 @@ void  db_read(backend_t *backend, off_t key, size_t size, char *buf, ssize_t *ss
 	ssize_t         ret;
 	
 	hash_t hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_READ} },
-		{ TYPE_INT64, "key",    &key  },
-		{ TYPE_INT32, "size",   &size },
+		{ "action", DATA_INT32(ACTION_CRWD_READ) },
+		{ "key",    DATA_PTR_OFFT(&key)          },
+		{ "size",   DATA_PTR_INT32(&size)        },
 		hash_end
 	};
 	
@@ -27,9 +27,9 @@ void  db_write(backend_t *backend, off_t key, char *buf, unsigned int buf_size, 
 	buffer_add_head_raw(&buffer, buf, buf_size);
 	
 	hash_t hash[] = {
-		{ TYPE_INT32, "action", (int []){ACTION_CRWD_WRITE} },
-		{ TYPE_INT64, "key",    &key  },
-		{ TYPE_INT32, "size",   &buf_size },
+		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+		{ "key",    DATA_PTR_OFFT(&key)           },
+		{ "size",   DATA_PTR_INT32(&buf_size)     },
 		hash_end
 	};
 		
@@ -44,10 +44,10 @@ void  db_move(backend_t *backend, off_t key_from, off_t key_to, size_t key_size,
 	buffer_init(&buffer);
 	
 	hash_t hash[] = {
-		{ TYPE_INT32, "action",   (int []){ACTION_CRWD_MOVE} },
-		{ TYPE_INT64, "key_from", &key_from  },
-		{ TYPE_INT64, "key_to",   &key_to   },
-		{ TYPE_INT32, "size",     &key_size },
+		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
+		{ "key_from", DATA_PTR_OFFT(&key_from)     },
+		{ "key_to",   DATA_PTR_OFFT(&key_to)       },
+		{ "size",     DATA_PTR_INT32(&key_size)    },
 		hash_end
 	};
 	
@@ -75,8 +75,8 @@ START_TEST (test_backend_file){
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	hash_t hash_create[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE } },
-		{ TYPE_INT32, "size",   (int []){ 10 } },
+		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",   DATA_INT32(10)                 },
 		hash_end
 	};
 		
@@ -121,7 +121,7 @@ START_TEST (test_backend_file){
 	size_t  count;
 	
 	hash_t hash_count[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_COUNT } },
+		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
 		hash_end
 	};
 		
@@ -163,9 +163,9 @@ START_TEST (test_backend_file){
 	ssize = 10 + 10;
 	
 	hash_t hash_delete[] = {
-		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_DELETE } },
-		{ TYPE_INT64, "key",    &new_key1                      },
-		{ TYPE_INT32, "size",   &ssize                         },
+		{ "action", DATA_INT32(ACTION_CRWD_DELETE) },
+		{ "key",    DATA_PTR_OFFT(&new_key1)       },
+		{ "size",   DATA_PTR_INT32(&ssize)         },
 		hash_end
 	};
 	
