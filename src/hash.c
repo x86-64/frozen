@@ -2,35 +2,41 @@
 
 #define DEBUG
 
-hash_t *         hash_find_value              (hash_t *hash, char *key){ // {{{
+hash_t *         hash_find              (hash_t *hash, char *key){ // {{{
 	hash_t      *value = hash;
 	
 	while(value->key != hash_ptr_end){
 		if(
-			value->key == key ||
+			value->key != NULL &&
 			(
-				key != hash_ptr_null && value->key != hash_ptr_null &&
-				key != hash_ptr_end  &&
-				strcmp(value->key, key) == 0
+				value->key == key ||
+				(
+					key != hash_ptr_null && value->key != hash_ptr_null &&
+					key != hash_ptr_end  &&
+					strcmp(value->key, key) == 0
+				)
 			)
 		)
 			return value;
+		
 		value++;
 	}
 	if(value->value != NULL)
-		return hash_find_value((hash_t *)value->value, key);
+		return hash_find((hash_t *)value->value, key);
 	
 	return NULL;
 } // }}}
-hash_t *         hash_find_typed_value        (hash_t *hash, data_type type, char *key){ // {{{
-	hash_t      *hvalue = hash_find_value(hash, key);
+hash_t *         hash_find_typed        (hash_t *hash, data_type type, char *key){ // {{{
+	hash_t      *hvalue = hash_find(hash, key);
 	return (hvalue != NULL) ? ((hvalue->type != type) ? NULL : hvalue) : NULL;
 } // }}}
-hash_t *         hash_append_value            (hash_t *hash, data_type type, char *key, void *value, size_t value_size){ // {{{
+hash_t *         hash_set                     (hash_t *hash, char *key, data_type type, void *value, size_t value_size){ // {{{
 	hash_t      *hvalue;
 	
-	if( (hvalue = hash_find_value(hash, hash_ptr_null)) == NULL)
-		return NULL;
+	if( (hvalue = hash_find(hash, key)) == NULL){
+		if( (hvalue = hash_find(hash, hash_ptr_null)) == NULL)
+			return NULL;
+	}
 	
 	hvalue->type       = type;
 	hvalue->key        = key;
@@ -38,29 +44,74 @@ hash_t *         hash_append_value            (hash_t *hash, data_type type, cha
 	hvalue->value_size = value_size;
 	return hvalue;
 } // }}}
-hash_t *         hash_set_value               (hash_t *hash, data_type type, char *key, void *value, size_t value_size){ // {{{
-	hash_t      *hvalue;
-	
-	if( (hvalue = hash_find_value(hash, key)) == NULL)
-		return hash_append_value(hash, type, key, value, value_size);
-	
-	hvalue->type       = type;
-	hvalue->key        = key;
-	hvalue->value      = value;
-	hvalue->value_size = value_size;
-	return hvalue;
-} // }}}
-void               hash_del_value               (hash_t *hash, char *key){ // {{{
+void               hash_delete                (hash_t *hash, char *key){ // {{{
 	hash_t       *hvalue;
 	
-	if( (hvalue = hash_find_value(hash, key)) == NULL)
+	if( (hvalue = hash_find(hash, key)) == NULL)
 		return;
 	
 	hvalue->key = hash_ptr_null;
 } // }}}
 void               hash_assign                  (hash_t *hash, hash_t *hash_next){ // {{{
-	hash_t *hend = hash_find_value(hash, hash_ptr_end);
+	hash_t *hend = hash_find(hash, hash_ptr_end);
 	hend->value = hash_next;
+} // }}}
+int                hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
+	hash_t      *value = hash;
+	int          ret;
+	
+	while(value->key != hash_ptr_end){
+		if( value->key == hash_ptr_null )
+			goto next;
+		
+		ret = func(value, arg1, arg2);
+		if(ret != ITER_CONTINUE)
+			return ret;
+	
+	next:	
+		value++;
+	}
+	if(value->value != NULL)
+		return hash_iter((hash_t *)value->value, func, arg1, arg2);
+	
+	return ITER_OK;
+} // }}}
+data_type          hash_get_data_type           (hash_t *hash){ // {{{
+	return hash->type;
+} // }}}
+void *             hash_get_value_ptr           (hash_t *hash){ // {{{
+	return hash->value;
+} // }}}
+size_t             hash_get_value_size          (hash_t *hash){ // {{{
+	return hash->value_size;
+} // }}}
+int                hash_get          (hash_t *hash, char *key, data_type *type, void **value, size_t *value_size){ // {{{
+	hash_t *hvalue;
+	
+	if( (hvalue = hash_find(hash, key)) == NULL)
+		return -1;
+	
+	if(type != NULL)
+		*type = hvalue->type;
+	if(value != NULL)
+		*value = hvalue->value;
+	if(value_size != NULL)
+		*value_size = hvalue->value_size;
+	
+	return 0;
+} // }}}
+int                hash_get_typed    (hash_t *hash, data_type type, char *key, void **value, size_t *value_size){ // {{{
+	hash_t *hvalue;
+	
+	if( (hvalue = hash_find_typed(hash, type, key)) == NULL)
+		return -1;
+	
+	if(value != NULL)
+		*value = hvalue->value;
+	if(value_size != NULL)
+		*value_size = hvalue->value_size;
+	
+	return 0;
 } // }}}
 
 #ifdef DEBUG

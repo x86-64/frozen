@@ -3,17 +3,21 @@
 START_TEST (test_backend_list){
 	backend_t *backend;
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *settings = setting_new();
-		setting_t *s_file = setting_new();
-			setting_set_child_string(s_file, "name",        "file");
-			setting_set_child_string(s_file, "filename",    "data_backend_list");
-	setting_t *s_list = setting_new();
-			setting_set_child_string(s_list, "name",        "list");
-	setting_set_child_setting(settings, s_file);
-	setting_set_child_setting(settings, s_list);
-	
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("file")                     },
+			{ "filename",    DATA_STRING("data_backend_list")        },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("list")                     },
+			hash_end
+		)},
+		hash_end
+	};
+		
 	backend = backend_new("in_list", settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
@@ -109,7 +113,6 @@ START_TEST (test_backend_list){
 	buffer_free(key_delete_buff);
 	
 	backend_destroy(backend);
-	setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_list)

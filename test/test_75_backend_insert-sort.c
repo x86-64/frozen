@@ -4,22 +4,26 @@
 START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *settings = setting_new();
-		setting_t *s_file = setting_new();
-			setting_set_child_string(s_file, "name",        "file");
-			setting_set_child_string(s_file, "filename",    "data_backend_insert_sort");
-		setting_t *s_list = setting_new();
-			setting_set_child_string(s_list, "name",        "list");
-		setting_t *s_sort = setting_new();
-			setting_set_child_string(s_sort, "name",        "insert-sort");
-			setting_set_child_string(s_sort, "sort-engine", "binsearch");
-			setting_set_child_string(s_sort, "type",        "int8");
-			
-	setting_set_child_setting(settings, s_file);
-	setting_set_child_setting(settings, s_list);
-	setting_set_child_setting(settings, s_sort);
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("file")                     },
+			{ "filename",    DATA_STRING("data_backend_insert_sort") },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("list")                     },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("insert-sort")              },
+			{ "sort-engine", DATA_STRING("binsearch")                },
+			{ "type",        DATA_STRING("int8")                     },
+			hash_end
+		)},
+		hash_end
+	};
 	
 	if( (backend = backend_new("in_sort", settings)) == NULL){
 		fail("backend creation failed");
@@ -68,7 +72,6 @@ START_TEST (test_backend_insert_sort){
 	buffer_destroy(&temp);
 	
 	backend_destroy(backend);
-	setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_insert_sort)

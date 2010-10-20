@@ -3,20 +3,23 @@
 START_TEST (test_backend_locator){
 	backend_t *backend;
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *settings = setting_new();
-		setting_t *s_file = setting_new();
-			setting_set_child_string(s_file, "name",        "file");
-			setting_set_child_string(s_file, "filename",    "data_backend_locator");
-		setting_t *s_loca = setting_new();
-			setting_set_child_string(s_loca, "name",        "oid-locator");
-			setting_set_child_string(s_loca, "mode",        "linear-incapsulated");
-			setting_set_child_string(s_loca, "oid-class",   "int32");
-			setting_set_child_string(s_loca, "size",        "16");
-			
-	setting_set_child_setting(settings, s_file);
-	setting_set_child_setting(settings, s_loca);
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("file")                     },
+			{ "filename",    DATA_STRING("data_backend_locator")     },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("oid-locator")              },
+			{ "mode",        DATA_STRING("linear-incapsulated")      },
+			{ "oid-class",   DATA_STRING("int32")                    },
+			{ "size",        DATA_INT32(19)                          },
+			hash_end
+		)},
+		hash_end
+	};
 	
 	backend = backend_new("in_locator", settings);
 		fail_unless(backend != NULL, "backend creation failed");
@@ -108,7 +111,6 @@ START_TEST (test_backend_locator){
 	buffer_free(key2_buffer);
 	
 	backend_destroy(backend);
-	setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_locator)

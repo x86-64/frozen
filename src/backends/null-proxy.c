@@ -11,14 +11,14 @@ static int null_destroy(chain_t *chain){
 	return 0;
 }
 
-static int null_configure(chain_t *chain, setting_t *config){
+static int null_configure(chain_t *chain, hash_t *config){
 	return 0;
 }
 
 static ssize_t null_create(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t       *r_value_size;
 	
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 		
 	if(HVALUE(r_value_size, unsigned int) == 0x0000BEEF) // this check for backend tests

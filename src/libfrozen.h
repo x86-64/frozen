@@ -33,18 +33,17 @@
 
 /* Own headers */
 #include <list.h>            // internal data storage
-#include <settings.h>        // 
 #include <buffer.h>          //
 #include <data.h>            //
-#include <structs.h>         //
 #include <hash.h>            //
+#include <structs.h>         //
 
 #include <public.h>
 
 #include <backend.h>         // db logic 
 
 /* Global variables */
-API extern setting_t *global_settings;
+API extern hash_t *global_settings;
 
 API int frozen_init(void);
 API int frozen_destroy(void);

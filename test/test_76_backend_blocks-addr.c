@@ -15,19 +15,23 @@ START_TEST (test_backend_blocks_addrs){
 	backend_t    *backend;
 	buffer_t     *buffer = buffer_alloc();
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *s_backend = setting_new_named("backend");
-		setting_t *s_bfile = setting_new();
-			setting_set_child_string(s_bfile, "name",        "file");
-			setting_set_child_string(s_bfile, "filename",    "data_backend_addrs");
-		setting_t *s_bloca = setting_new();
-			setting_set_child_string(s_bloca, "name",        "blocks-address");
-			setting_set_child_string(s_bloca, "per-level",   "4");
-	setting_set_child_setting(s_backend, s_bfile);
-	setting_set_child_setting(s_backend, s_bloca);
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name",      DATA_STRING("file")               },
+			{ "filename",  DATA_STRING("data_backend_addrs") },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",      DATA_STRING("blocks-address")     },
+			{ "per-level", DATA_INT32(4)                     },
+			hash_end
+		)},
+		hash_end
+	};
 	
-	backend = backend_new("addrs", s_backend);
+	backend = backend_new("addrs", settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	// create 30 blocks with size VSIZE {{{
@@ -117,7 +121,6 @@ START_TEST (test_backend_blocks_addrs){
 	
 	buffer_free(buffer);
 	backend_destroy(backend);
-	setting_destroy(s_backend);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_blocks_addrs)

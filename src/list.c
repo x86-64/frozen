@@ -54,7 +54,7 @@ int list_iter(list *clist, iter_callback func, void *arg1, void *arg2){
 	curr = clist->head;
 	while(curr != NULL){
 		if(func(curr->item, arg1, arg2) == ITER_BREAK){
-			ret = ITER_BROKEN; 
+			ret = ITER_BREAK; 
 			break;
 		}
 		

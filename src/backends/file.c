@@ -64,29 +64,21 @@ static int file_destroy(chain_t *chain){
 	return 0;
 }
 
-static int file_configure(chain_t *chain, setting_t *config){
+static int file_configure(chain_t *chain, hash_t *config){
 	char   *filepath;
 	char   *filename;
 	char   *temp;
 	int     handle;
 	size_t  copy_buffer_size;
 	
-	filename = setting_get_child_string(config, "filename");
-	if(filename == NULL)
+	if(hash_get_typed(config, TYPE_STRING, "filename", (void **)&filename, NULL) != 0)
 		return -EINVAL;
-	
-	//	filename = setting_get_child_string(config, "backend_name");
-	//	if(filename == NULL)
-	//		goto cleanup;
-	//}
 	
 	filepath  = malloc(256);
 	*filepath = '\0';
 	
-	temp = setting_get_child_string(global_settings, "homedir");
-	if(temp == NULL)
+	if(hash_get_typed(global_settings, TYPE_STRING, "homedir", (void **)&temp, NULL) != 0)
 		goto cleanup;
-	
 	
 	if(snprintf(filepath, 256, "%s/%s.dat", temp, filename) >= 256){
 		/* snprintf can truncate strings, so malicious user can use it to access another file.
@@ -106,8 +98,9 @@ static int file_configure(chain_t *chain, setting_t *config){
 		goto cleanup;
 	}
 	
-	temp = setting_get_child_string(config, "copy_buffer_size");
-	copy_buffer_size = (temp != NULL) ? strtoul(temp, NULL, 10) : 512;
+	copy_buffer_size =
+		(hash_get_typed(config, TYPE_INT32, "copy_buffer_size", (void **)&temp, NULL) == 0) ?
+		*(unsigned int *)temp : 512;
 	
 	file_user_data *data = (file_user_data *)chain->user_data;
 	
@@ -133,7 +126,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	hash_t           *r_value_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 	fd    =  data->handle;
@@ -165,9 +158,9 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if( (r_key        = hash_find_typed_value(request, TYPE_OFFT, "key"))  == NULL)
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 redo:
@@ -205,9 +198,9 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t           *r_key;
 	hash_t           *r_value_size;
 	
-	if( (r_key        = hash_find_typed_value(request, TYPE_OFFT, "key"))  == NULL)
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT, "key"))  == NULL)
 		return -EINVAL;
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
@@ -243,11 +236,11 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 	hash_t           *r_force;
 	
 
-	if( (r_key        = hash_find_typed_value(request, TYPE_OFFT, "key"))  == NULL)
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT, "key"))  == NULL)
 		return -EINVAL;
-	if( (r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
-	if( (r_force      = hash_find_typed_value(request, TYPE_INT32, "imcrazybitch")) != NULL)
+	if( (r_force      = hash_find_typed(request, TYPE_INT32, "imcrazybitch")) != NULL)
 		forced = HVALUE(r_force, int);
 	
 	fd    =  data->handle;
@@ -287,9 +280,9 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t           *r_key_to;
 	hash_t           *r_value_size;
 	
-	if( (r_key_from   = hash_find_typed_value(request, TYPE_OFFT, "key_from")) == NULL)
+	if( (r_key_from   = hash_find_typed(request, TYPE_OFFT, "key_from")) == NULL)
 		return -EINVAL;
-	if( (r_key_to     = hash_find_typed_value(request, TYPE_OFFT, "key_to")) == NULL)
+	if( (r_key_to     = hash_find_typed(request, TYPE_OFFT, "key_to")) == NULL)
 		return -EINVAL;
 	
 	from = HVALUE(r_key_from, off_t);
@@ -297,7 +290,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	if(
 		!(
-			(r_value_size = hash_find_typed_value(request, TYPE_INT32, "size")) != NULL &&
+			(r_value_size = hash_find_typed(request, TYPE_INT32, "size")) != NULL &&
 			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (size_t)-1
 		)
 	){

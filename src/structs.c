@@ -1,16 +1,23 @@
 #include <libfrozen.h>
 
-static int  struct_iter_init(void *p_setting, void *p_structure, void *null){
+static int  struct_iter_init(hash_t *config, void *p_structure, void *null){
 	size_t    member_id;
 	data_type member_data_type;
 	char *    member_data_type_s;
 	char *    member_name;
 	size_t    member_size;
 	member_t *members;
+	hash_t   *c_name, *c_type;
+	hash_t   *member_config;
 	
-
-	member_name        = setting_get_child_string((setting_t *)p_setting, "name");
-	member_data_type_s = setting_get_child_string((setting_t *)p_setting, "type");
+	member_config = (hash_t *)config->value;
+	if( (c_name = hash_find_typed(member_config, TYPE_STRING, "name")) == NULL)
+		return ITER_BREAK;
+	if( (c_type = hash_find_typed(member_config, TYPE_STRING, "type")) == NULL)
+		return ITER_BREAK;
+	
+	member_name        = (char *)( c_name->value );
+	member_data_type_s = (char *)( c_type->value );
 	member_data_type   = data_type_from_string(member_data_type_s);
 	
 	if(member_name == NULL || member_data_type_s == NULL || member_data_type < 0)
@@ -37,14 +44,14 @@ static int  struct_iter_init(void *p_setting, void *p_structure, void *null){
 	return ITER_CONTINUE;
 }
 
-struct_t *  struct_new                   (setting_t *config){
+struct_t *  struct_new                   (hash_t *config){
 	int       ret;
 	struct_t *structure = (struct_t *)malloc(sizeof(struct_t));
 	
 	memset(structure, 0, sizeof(struct_t));
 	
-	ret = setting_iter_child(config, (iter_callback)&struct_iter_init, structure, NULL);
-	if(ret == ITER_BROKEN){
+	ret = hash_iter(config, &struct_iter_init, (void *)structure, NULL);
+	if(ret == ITER_BREAK){
 		struct_free(structure);
 		return NULL;
 	}

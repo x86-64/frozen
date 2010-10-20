@@ -302,27 +302,26 @@ static int blocks_destroy(chain_t *chain){
 	return 0;
 }
 
-static int blocks_configure(chain_t *chain, setting_t *config){
-	setting_t        *config_backend;
-	char             *block_size_str;
+static int blocks_configure(chain_t *chain, hash_t *config){
+	void             *temp;
 	blocks_user_data *data         = (blocks_user_data *)chain->user_data;
 	
-	if( (block_size_str = setting_get_child_string(config, "block_size")) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'block_size' not set\n");
+	data->block_size =
+		(hash_get_typed(config, TYPE_INT32, "block_size", &temp, NULL) == 0) ?
+		*(unsigned int *)temp : 0;
 	
-	if( (data->block_size = strtoul(block_size_str, NULL, 10)) == 0)
+	if( data->block_size == 0)
 		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
 	
-	if( (config_backend = setting_get_child_setting(config, "backend")) == NULL)
+	if(hash_get_typed(config, TYPE_HASHT, "backend", &temp, NULL) != 0)
 		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set\n");
 	
-	if( (data->bk_map = backend_new("blocks_map", config_backend)) == NULL)
+	if( (data->bk_map = backend_new("blocks_map", (hash_t *)temp)) == NULL)
 		return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
 	
 	data->ch_real = chain;
 	
 	map_blocks(data);
-	
 	return 0;
 }
 /* }}} */
@@ -337,7 +336,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	ssize_t           ret;
 	hash_t           *r_size;
 	
-	if( (r_size = hash_find_typed_value (request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	element_size = HVALUE(r_size, unsigned int);
 	
@@ -398,7 +397,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffe
 	// TODO r_size > block_size
 	// TODO remove TYPE_OFFT from code, support all
 	
-	if( (r_key_virt = hash_find_typed_value(request, TYPE_OFFT, "key")) == NULL)
+	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, "key")) == NULL)
 		return -EINVAL;
 	
 	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, &key_real) <= 0)
@@ -414,9 +413,9 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffe
 static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
 	hash_t *r_key, *r_size;
 	
-	if( (r_key  = hash_find_typed_value(request, TYPE_OFFT,  "key")) == NULL)
+	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "key")) == NULL)
 		return -EINVAL;
-	if( (r_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
 	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
@@ -428,9 +427,9 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	
 	ssize_t           move_delta;
 	
-	if( (r_from = hash_find_typed_value (request, TYPE_OFFT, "key_from")) == NULL)
+	if( (r_from = hash_find_typed (request, TYPE_OFFT, "key_from")) == NULL)
 		return -EINVAL;
-	if( (r_to   = hash_find_typed_value (request, TYPE_OFFT, "key_to"))   == NULL)
+	if( (r_to   = hash_find_typed (request, TYPE_OFFT, "key_to"))   == NULL)
 		return -EINVAL;
 	
 	from = HVALUE(r_from, off_t);
@@ -450,7 +449,7 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	}
 	
 	// manage bottom of move
-	if( (r_size = hash_find_typed_value (request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_INT32, "size")) == NULL)
 		return 0;
 	size = HVALUE(r_size, unsigned int);
 	if(size == -1)

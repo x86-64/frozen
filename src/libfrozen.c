@@ -1,14 +1,20 @@
 #include "libfrozen.h"
 
-setting_t *global_settings;
+hash_t *global_settings;
 
 int frozen_init(void){
-	global_settings = setting_new();
+	hash_t  global_proto[20] = {
+		[0 ... 18] = hash_null,
+		hash_end
+	};
+	
+	global_settings = malloc(sizeof(global_proto));
+	memcpy(global_settings, &global_proto, sizeof(global_proto));
 	return 0;
 }
 
 int frozen_destroy(void){
-	setting_destroy(global_settings);
+	free(global_settings);
 	return 0;
 }
 

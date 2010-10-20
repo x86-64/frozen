@@ -57,7 +57,7 @@ void chain_destroy(chain_t *chain){
 	
 	free(chain);
 }
-inline int  chain_configure    (chain_t *chain, setting_t *setting){ return chain->func_configure(chain, setting); }
+inline int  chain_configure    (chain_t *chain, hash_t *config){ return chain->func_configure(chain, config); }
 
 ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer){
 	f_crwd        func       = NULL;
@@ -66,7 +66,7 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 	if(chain == NULL || request == NULL)
 		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
 	
-	if( (r_action = hash_find_typed_value(request, TYPE_INT32, "action")) == NULL)
+	if( (r_action = hash_find_typed(request, TYPE_INT32, "action")) == NULL)
 		return_error(-EINVAL, "chain_query request 'action' not set\n");
 	
 	switch(HVALUE(r_action, unsigned int)){
@@ -94,14 +94,14 @@ ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *bu
 /* }}}1 */
 
 /* backends - private {{{1 */
-static int backend_iter_chain_init(void *p_setting, void *p_backend, void *p_chain){
+static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chain){
 	int        ret;
 	chain_t   *chain;
 	char      *chain_name;
-	setting_t *setting = (setting_t *)p_setting;
+	hash_t    *chain_config;
 	
-	chain_name = setting_get_child_string(setting, "name");
-	if(chain_name == NULL)
+	chain_config = (hash_t *)config->value;
+	if(hash_get_typed(chain_config, TYPE_STRING, "name", (void **)&chain_name, NULL) != 0)
 		return ITER_BREAK;
 	
 	chain = chain_new(chain_name);
@@ -111,7 +111,7 @@ static int backend_iter_chain_init(void *p_setting, void *p_backend, void *p_cha
 	chain->next = *(chain_t **)p_chain;
 	
 	//printf("initing: %s\n", chain_name);
-	ret = chain_configure(chain, setting);
+	ret = chain_configure(chain, chain_config);
 	if(ret != 0)
 		goto cleanup;
 	
@@ -136,10 +136,10 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 /* }}}1 */
 /* backends - public {{{1 */
 
-backend_t *  backend_new      (char *name, setting_t *setting){
+backend_t *  backend_new      (char *name, hash_t *config){
 	int ret;
 	
-	if(name == NULL || setting == NULL)
+	if(name == NULL || config == NULL)
 		return NULL;	
 	
 	backend_t *backend = (backend_t *)malloc(sizeof(backend_t));
@@ -149,8 +149,8 @@ backend_t *  backend_new      (char *name, setting_t *setting){
 	backend->name  = strdup(name);
 	backend->chain = NULL;
 	
-	ret = setting_iter_child(setting, (iter_callback)&backend_iter_chain_init, backend, &backend->chain);
-	if(ret == ITER_BROKEN){
+	ret = hash_iter(config, &backend_iter_chain_init, backend, &backend->chain);
+	if(ret == ITER_BREAK){
 		backend_destroy(backend);
 		return NULL;
 	}

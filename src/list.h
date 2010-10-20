@@ -18,11 +18,11 @@ struct list_ {
 	pthread_mutex_t   lock;
 };
 
-typedef  void * (*iter_callback)(void *, void *, void *);
+typedef int  (*iter_callback)(void *, void *, void *);
 
-#define ITER_CONTINUE 1
-#define ITER_BREAK    0
-#define ITER_BROKEN   1
+#define ITER_OK       0
+#define ITER_BREAK    1
+#define ITER_CONTINUE 2
 
 void  list_init   (list *clist);
 void  list_destroy(list *clist);

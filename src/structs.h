@@ -14,7 +14,7 @@ typedef struct struct_t {
 	member_t * members;
 } struct_t;
 
-API struct_t *      struct_new                   (setting_t *config);
+API struct_t *      struct_new                   (hash_t *config);
 API void            struct_free                  (struct_t *structure);
 
 API _inline size_t  struct_get_size              (struct_t *structure);

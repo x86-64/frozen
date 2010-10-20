@@ -11,7 +11,7 @@ static int lists_destroy(chain_t *chain){
 	return 0;
 }
 
-static int lists_configure(chain_t *chain, setting_t *config){
+static int lists_configure(chain_t *chain, hash_t *config){
 	return 0;
 }
 
@@ -21,13 +21,13 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	void             *o_key_from, *o_key_to;
 	
 	if(
-		(r_insert = hash_find_typed_value(request, TYPE_INT32, "insert")) != NULL &&
+		(r_insert = hash_find_typed(request, TYPE_INT32, "insert")) != NULL &&
 		HVALUE(r_insert, unsigned int) == 1
 	){
 		// on insert we move all items from 'key' to 'key'+1
 		// recommended use of 'blocks' chain as under-lying chain to improve perfomance
 		
-		if( (r_key = hash_find_value(request, "key")) == NULL) return -EINVAL;
+		if( (r_key = hash_find(request, "key")) == NULL) return -EINVAL;
 			
 		o_key_from = alloca(r_key->value_size);
 		o_key_to   = alloca(r_key->value_size);
@@ -58,8 +58,8 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	hash_t           *r_key, *r_size;
 	void             *o_key_from, *o_key_to;
 	
-	if( (r_key  = hash_find_value(request, "key"))  == NULL) return -EINVAL;
-	if( (r_size = hash_find_value(request, "size")) == NULL) return -EINVAL;
+	if( (r_key  = hash_find(request, "key"))  == NULL) return -EINVAL;
+	if( (r_size = hash_find(request, "size")) == NULL) return -EINVAL;
 		
 	o_key_from = alloca(r_key->value_size);
 	o_key_to   = alloca(r_key->value_size);

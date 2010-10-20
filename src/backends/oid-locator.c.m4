@@ -36,7 +36,7 @@ static int locator_destroy(chain_t *chain){
 	return 0;
 }
 
-static int locator_configure(chain_t *chain, setting_t *config){
+static int locator_configure(chain_t *chain, hash_t *config){
       //size_type     *oid_class_size_type;
 	int            oid_class_supported = 1;
 	char          *oid_class_str;
@@ -45,8 +45,7 @@ static int locator_configure(chain_t *chain, setting_t *config){
 	unsigned int   linear_scale;
 	locator_ud    *data                = (locator_ud *)chain->user_data;
 	
-	mode_str = setting_get_child_string(config, "mode");
-	if(mode_str == NULL)
+	if(hash_get_typed(config, TYPE_STRING, "mode", (void **)&mode_str, NULL) != 0)
 		return_error(-EINVAL, "locator 'mode' not defined\n");
 	
 	      if(strcasecmp(mode_str, "linear-incapsulated") == 0){
@@ -61,15 +60,15 @@ static int locator_configure(chain_t *chain, setting_t *config){
 		return_error(-EINVAL, "locator 'mode' invalid or not supported\n");
 	}
 	
-	oid_class_str = setting_get_child_string(config, "oid-class");
-	if(oid_class_str == NULL)
+	if(hash_get_typed(config, TYPE_STRING, "oid-class", (void **)&oid_class_str, NULL) != 0)
 		return_error(-EINVAL, "locator 'oid-class' not defined\n");
 	
 	if( (data->oid_type = data_type_from_string(oid_class_str)) == -1)
 		return_error(-EINVAL, "locator 'oid-class' invalid\n");
 	
-	linear_scale_str = setting_get_child_string(config, "size");
-	linear_scale     = (linear_scale_str != NULL) ? strtoul(linear_scale_str, NULL, 10) : 0;
+	linear_scale =
+		(hash_get_typed(config, TYPE_INT32, "size", (void **)&linear_scale_str, NULL) == 0) ?
+		*(unsigned int *)linear_scale_str : 0;
 	
 	/* check everything */
 	switch(data->mode){
@@ -134,7 +133,7 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if( (r_size = hash_find_value(request, "size")) == NULL)
+			if( (r_size = hash_find(request, "size")) == NULL)
 				return -EINVAL;
 			
 			o_size = alloca(r_size->value_size);
@@ -186,8 +185,8 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if( (r_key  = hash_find_value(request, "key"))  == NULL) return -EINVAL;
-			if( (r_size = hash_find_value(request, "size")) == NULL) return -EINVAL;
+			if( (r_key  = hash_find(request, "key"))  == NULL) return -EINVAL;
+			if( (r_size = hash_find(request, "size")) == NULL) return -EINVAL;
 			
 			o_key  = alloca(r_key->value_size);
 			o_size = alloca(r_size->value_size);
@@ -243,10 +242,10 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if( (r_key_from = hash_find_value(request, "key_from")) == NULL) return -EINVAL;
-			if( (r_key_to   = hash_find_value(request, "key_to"))   == NULL) return -EINVAL;
+			if( (r_key_from = hash_find(request, "key_from")) == NULL) return -EINVAL;
+			if( (r_key_to   = hash_find(request, "key_to"))   == NULL) return -EINVAL;
 			
-			if( (r_size     = hash_find_value(request, "size")) != NULL){ // size is optional
+			if( (r_size     = hash_find(request, "size")) != NULL){ // size is optional
 				o_size     = alloca(r_size->value_size);
 				memcpy(o_size,     r_size->value,     r_size->value_size);
 				if(data_bare_arithmetic(r_size->type,     o_size,     '*', data->linear_scale) != 0) return -EINVAL;

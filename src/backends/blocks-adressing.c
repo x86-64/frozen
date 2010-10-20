@@ -444,25 +444,24 @@ static int addrs_destroy(chain_t *chain){
 	return 0;
 }
 
-static int addrs_configure(chain_t *chain, setting_t *config){
-	char             *elements_per_level_str;
+static int addrs_configure(chain_t *chain, hash_t *config){
+	void             *temp;
 	unsigned int      elements_per_level;
-	char             *read_per_calc_str;
 	unsigned int      read_per_calc;
 	
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if( (elements_per_level_str   = setting_get_child_string(config, "per-level")) == NULL)
-		return_error(-EINVAL, "chain 'blocks-address' variable 'per-level' not set");
+	elements_per_level =
+		(hash_get_typed(config, TYPE_INT32, "per-level", &temp, NULL) == 0) ?
+		*(unsigned int *)temp : 0;
 	
-	if( (elements_per_level       = strtoul(elements_per_level_str, NULL, 10)) <= 1)
+	if( elements_per_level <= 1)
 		return_error(-EINVAL, "chain 'blocks-address' variable 'per-level' invalid");
 	
-	read_per_calc = READ_PER_CALC_DEFAULT;
-	if( (read_per_calc_str        = setting_get_child_string(config, "recalc-read-size")) != NULL){
-		if( (read_per_calc    = strtoul(elements_per_level_str, NULL, 10)) < 1)
-			read_per_calc = READ_PER_CALC_DEFAULT;
-	}
+	read_per_calc =
+		(hash_get_typed(config, TYPE_INT32, "recalc-read-size", &temp, NULL) == 0) ?
+		(*(unsigned int *)temp < 1) ? *(unsigned int *)temp : READ_PER_CALC_DEFAULT :
+		READ_PER_CALC_DEFAULT;
 	
 	if( (data->tree = tree_alloc(chain, elements_per_level, read_per_calc)) == NULL)
 		goto free1;
@@ -483,15 +482,15 @@ static ssize_t addrs_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t           *r_block_size, *r_block_vid, *r_block_off;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if( (r_block_size = hash_find_typed_value(request, TYPE_INT32, "block_size")) == NULL) 
+	if( (r_block_size = hash_find_typed(request, TYPE_INT32, "block_size")) == NULL) 
 		return -EINVAL;
 	
-	if( (r_block_vid  = hash_find_typed_value(request, TYPE_INT32, "block_vid"))  == NULL)
+	if( (r_block_vid  = hash_find_typed(request, TYPE_INT32, "block_vid"))  == NULL)
 		block_vid = tree_blocks_count(data->tree);
 	else
 		block_vid = HVALUE(r_block_vid, unsigned int);
 	
-	if( (r_block_off  = hash_find_typed_value(request, TYPE_INT32, "block_off"))  == NULL)
+	if( (r_block_off  = hash_find_typed(request, TYPE_INT32, "block_off"))  == NULL)
 		insert = 0;
 	
 	if(insert == 0){
@@ -513,8 +512,8 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t           buf_ptr = 0;
 	hash_t           *r_virt_key, *r_block_vid;
 	
-	if(hash_find_value(request, "blocks") == NULL){
-		if( (r_virt_key = hash_find_typed_value(request, TYPE_OFFT, "offset")) == NULL)
+	if(hash_find(request, "blocks") == NULL){
+		if( (r_virt_key = hash_find_typed(request, TYPE_OFFT, "offset")) == NULL)
 			return -EINVAL;
 		
 		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), &block_vid, &real_key) != 0)
@@ -523,7 +522,7 @@ static ssize_t addrs_get(chain_t *chain, request_t *request, buffer_t *buffer){
 		buf_ptr += buffer_write(buffer, buf_ptr, &real_key,  sizeof(real_key));
 		buf_ptr += buffer_write(buffer, buf_ptr, &block_vid, sizeof(block_vid));
 	}else{
-		if( (r_block_vid = hash_find_typed_value(request, TYPE_INT32, "block_vid")) == NULL)
+		if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
 			return -EINVAL;
 		
 		if(tree_get_block(data->tree, HVALUE(r_block_vid, unsigned int), &block) != 0)
@@ -539,7 +538,7 @@ static ssize_t addrs_delete(chain_t *chain, request_t *request, buffer_t *buffer
 	hash_t           *r_block_vid;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if( (r_block_vid = hash_find_typed_value(request, TYPE_INT32, "block_vid")) == NULL)
+	if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
 		return -EINVAL;
 	
 	return tree_delete_block(data->tree, HVALUE(r_block_vid, unsigned int));
@@ -549,7 +548,7 @@ static ssize_t addrs_count(chain_t *chain, request_t *request, buffer_t *buffer)
 	size_t            units_count; 
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	if(hash_find_value(request, "blocks") == NULL){
+	if(hash_find(request, "blocks") == NULL){
 		if(tree_size(data->tree, &units_count) != 0)
 			return -EINVAL;
 	}else{

@@ -3,16 +3,20 @@
 START_TEST (test_backends_two_chains){
 	backend_t *backend;
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *settings = setting_new();
-		setting_t *s_file = setting_new();
-			setting_set_child_string(s_file, "name",     "file");
-			setting_set_child_string(s_file, "filename", "data_backend_file");
-		setting_t *s_null = setting_new();
-			setting_set_child_string(s_null, "name",     "null-proxy");
-	setting_set_child_setting(settings, s_file);
-	setting_set_child_setting(settings, s_null);
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("file")                     },
+			{ "filename",    DATA_STRING("data_backend_file")        },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name",        DATA_STRING("null-proxy")               },
+			hash_end
+		)},
+		hash_end
+	};
 	
 	/* create backend */
 	backend = backend_new("in_file", settings);
@@ -35,7 +39,6 @@ START_TEST (test_backends_two_chains){
 	// rest will work, won't test
 	
 	backend_destroy(backend);
-	setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_backends_two_chains)

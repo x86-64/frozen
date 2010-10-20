@@ -6,7 +6,7 @@
 typedef struct chain_t    chain_t;
 
 typedef int (*f_init)      (chain_t *);
-typedef int (*f_configure) (chain_t *, setting_t *);
+typedef int (*f_configure) (chain_t *, hash_t *);
 typedef int (*f_destroy)   (chain_t *);
 
 typedef enum chain_types {
@@ -52,7 +52,7 @@ chain_t *   chain_new          (char *name);
 ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer);
 ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *buffer);
 void        chain_destroy      (chain_t *chain);
-_inline int chain_configure    (chain_t *chain, setting_t *setting);
+_inline int chain_configure    (chain_t *chain, hash_t *config);
 
 /* }}}1 */
 
@@ -64,7 +64,7 @@ typedef struct backend_t {
 	
 } backend_t;
 
-API backend_t *  backend_new          (char *name, setting_t *setting);
+API backend_t *  backend_new          (char *name, hash_t *config);
 API ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer);
 API void         backend_destroy      (backend_t *backend);
 API backend_t *  backend_find_by_name (char *name);

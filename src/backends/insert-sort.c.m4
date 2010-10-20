@@ -62,7 +62,7 @@ static int sorts_destroy(chain_t *chain){ // {{{
 	
 	return 0;
 } // }}}
-static int sorts_configure(chain_t *chain, setting_t *config){ // {{{
+static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	char       *sort_engine_str;
 	char       *info_type_str;
 	char       *cmp_context_str;
@@ -74,7 +74,7 @@ static int sorts_configure(chain_t *chain, setting_t *config){ // {{{
 	data->chain = chain;
 	
 	/* get engine info */
-	if( (sort_engine_str = setting_get_child_string(config, "sort-engine")) == NULL)
+	if(hash_get_typed(config, TYPE_STRING, "sort-engine", (void **)&sort_engine_str, NULL) != 0)
 		return_error(-EINVAL, "chain 'insert-sort' parameter 'sort-engine' not supplied\n");
 	
 	for(i=0, data->engine = NULL; i<sort_protos_size; i++){
@@ -87,13 +87,13 @@ static int sorts_configure(chain_t *chain, setting_t *config){ // {{{
 		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
 	
 	/* get type of data */
-	if( (info_type_str = setting_get_child_string(config, "type")) == NULL)
+	if(hash_get_typed(config, TYPE_STRING, "type", (void **)&info_type_str, NULL) != 0)
 		return_error(-EINVAL, "chain 'insert-sort' type not defined\n");
 	if( (info_type = data_type_from_string(info_type_str)) == -1)
 		return_error(-EINVAL, "chain 'insert-sort' type invalid\n");
 	
 	/* get context */
-	cmp_context_str = setting_get_child_string(config, "type-context");
+	hash_get_typed(config, TYPE_STRING, "type-context", (void **)&cmp_context_str, NULL);
 	if( data_ctx_init(&data->cmp_ctx, info_type, cmp_context_str) != 0)
 		return_error(-EINVAL, "chain 'insert-sort' data ctx create failed\n");
 	
@@ -139,7 +139,7 @@ static ssize_t sorts_custom(chain_t *chain, request_t *request, buffer_t *buffer
 	
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
-	if( (r_funcname = hash_find_typed_value(request, TYPE_STRING, "function")) == NULL)
+	if( (r_funcname = hash_find_typed(request, TYPE_STRING, "function")) == NULL)
 		return -EINVAL;
 	
 	if(strcmp((char *)r_funcname->value, "search") == 0){

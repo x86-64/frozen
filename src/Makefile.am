@@ -9,15 +9,16 @@ backends_sources =                  \
 	backends/blocks.c
 
 
-data_sources=         \
-	data/void.c   \
-	data/binary.c \
-	data/uint8.c  \
-	data/uint16.c \
-	data/uint32.c \
-	data/uint64.c \
-	data/offt.c   \
-	data/sizet.c  \
+data_sources=          \
+	data/void.c    \
+	data/binary.c  \
+	data/uint8.c   \
+	data/uint16.c  \
+	data/uint32.c  \
+	data/uint64.c  \
+	data/off_t.c   \
+	data/size_t.c  \
+	data/hash_t.c  \
 	data/string.c 
 
 AUTOMAKE_OPTIONS = subdir-objects
@@ -35,7 +36,6 @@ libfrozen_la_SOURCES=   data.h \
 			data.c                                  \
 			hash.c              hash.h              \
 			structs.c           structs.h           \
-			settings.c          settings.h          \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			public.h

@@ -1,15 +1,18 @@
 
 START_TEST (test_structs){
-	
-	setting_t *settings = setting_new();
-		setting_t *s_d1 = setting_new();
-			setting_set_child_string(s_d1, "name",     "data1");
-			setting_set_child_string(s_d1, "type",     "int32");
-		setting_t *s_d2 = setting_new();
-			setting_set_child_string(s_d2, "name",     "data2");
-			setting_set_child_string(s_d2, "type",     "int32");
-	setting_set_child_setting(settings, s_d2);
-	setting_set_child_setting(settings, s_d1);
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name", DATA_STRING("data1") },
+			{ "type", DATA_STRING("int32") },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name", DATA_STRING("data2") },
+			{ "type", DATA_STRING("int32") },
+			hash_end
+		)},
+		hash_end
+	};
 	
 	struct_t *structure = struct_new(settings);
 		fail_unless(structure != NULL,             "structure create failed");
@@ -40,8 +43,6 @@ START_TEST (test_structs){
 	*/
 	
 	struct_free(structure);
-	
-	setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_structs)

@@ -22,33 +22,39 @@ void read_all(buffer_t *buffer, backend_t *backend, off_t *key_off, unsigned int
 START_TEST (test_backend_blocks){
 	backend_t *backend;
 	
-	setting_set_child_string(global_settings, "homedir", ".");
+	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
-	setting_t *settings = setting_new();
-		setting_t *s_file = setting_new();
-			setting_set_child_string(s_file, "name",        "file");
-			setting_set_child_string(s_file, "filename",    "data_backend_blocks");
-		setting_t *s_list = setting_new();
-			setting_set_child_string(s_list, "name",        "blocks");
-			setting_set_child_string(s_list, "block_size",  "4");
-				setting_t *s_backend = setting_new_named("backend");
-					setting_t *s_bfile = setting_new();
-						setting_set_child_string(s_bfile, "name",        "file");
-						setting_set_child_string(s_bfile, "filename",    "data_backend_blocks_map");
-					setting_t *s_bloca = setting_new();
-						setting_set_child_string(s_bloca, "name",        "blocks-address");
-						setting_set_child_string(s_bloca, "per-level",   "4");
-				setting_set_child_setting(s_backend, s_bfile);
-				setting_set_child_setting(s_backend, s_bloca);
-			setting_set_child_setting(s_list, s_backend);
-	setting_set_child_setting(settings, s_file);
-	setting_set_child_setting(settings, s_list);
-	
+	hash_t  settings[] = {
+		{ NULL, DATA_HASHT(
+			{ "name", DATA_STRING("file") },
+			{ "filename", DATA_STRING("data_backend_blocks") },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT(
+			{ "name", DATA_STRING("blocks") },
+			{ "block_size", DATA_INT32(4)   },
+			{ "backend", DATA_HASHT(
+				{ NULL, DATA_HASHT(
+					{ "name", DATA_STRING("file")                        },
+					{ "filename", DATA_STRING("data_backend_blocks_map") },
+					hash_end
+				)},
+				{ NULL, DATA_HASHT(
+					{ "name", DATA_STRING("blocks-address")              },
+					{ "per-level", DATA_INT32(4)                         },
+					hash_end
+				)},
+				hash_end
+			)},
+			hash_end
+		)},
+		hash_end
+	};
+
 	if( (backend = backend_new("in_block", settings)) == NULL){
 		fail("backend creation failed");
 		return;
 	}
-	
 	
 	ssize_t       ssize;
 	buffer_t     *buffer = buffer_alloc();
@@ -148,7 +154,7 @@ START_TEST (test_backend_blocks){
 	buffer_free(buffer);
 	
 	backend_destroy(backend);
-	setting_destroy(settings);
+	//setting_destroy(settings);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_blocks)
