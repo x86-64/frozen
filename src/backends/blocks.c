@@ -8,15 +8,11 @@ typedef struct block_info {
 } block_info;
 
 typedef struct blocks_user_data {
-	crwd_fastcall fc_map;
-	crwd_fastcall fc_real;
 	backend_t    *bk_map;
 	chain_t      *ch_real;
-
+	
 	size_t        block_size;
 	off_t         blocks_count;
-	request_t    *layer_count;
-	request_t    *layer_get;
 	
 } blocks_user_data;
 
@@ -24,120 +20,133 @@ typedef struct blocks_user_data {
 // This is useful for reducing copy time in insert operations
 
 static ssize_t   map_new            (blocks_user_data *data, unsigned int b_off, unsigned int b_size){ // {{{
-	int      action;
-	
-	action = ACTION_CRWD_WRITE;
-	hash_set(data->fc_map.request_create, "action",     TYPE_INT32, &action);
-	hash_set(data->fc_map.request_create, "block_off",  TYPE_INT32, &b_off);
-	hash_set(data->fc_map.request_create, "block_size", TYPE_INT32, &b_size);
-	
-	return backend_query(data->bk_map, data->fc_map.request_create, NULL);
+	hash_t  req_write[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
+		{ TYPE_INT32, "block_off",  &b_off,                        sizeof(unsigned int) },
+		{ TYPE_INT32, "block_size", &b_size,                       sizeof(unsigned int) },
+		hash_end
+	};
+	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
-	int      action;
-	
-	action = ACTION_CRWD_WRITE;
-	hash_set(data->fc_map.request_create, "action",     TYPE_INT32, &action);
-	hash_set(data->fc_map.request_create, "block_vid",  TYPE_INT32, &b_vid);
-	hash_set(data->fc_map.request_create, "block_off",  TYPE_INT32, &b_off);
-	hash_set(data->fc_map.request_create, "block_size", TYPE_INT32, &b_size);
-	
-	return backend_query(data->bk_map, data->fc_map.request_create, NULL);
+	hash_t  req_write[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
+		{ TYPE_INT32, "block_vid",  &b_vid,                        sizeof(unsigned int) },
+		{ TYPE_INT32, "block_off",  &b_off,                        sizeof(unsigned int) },
+		{ TYPE_INT32, "block_size", &b_size,                       sizeof(unsigned int) },
+		hash_end
+	};
+	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid, unsigned int new_size){ // {{{
-	hash_set(data->fc_map.request_write, "block_vid",  TYPE_INT32, &b_vid);
-	hash_set(data->fc_map.request_write, "block_size", TYPE_INT32, &new_size);
-	
-	return backend_query(data->bk_map, data->fc_map.request_write, NULL);
+	hash_t  req_write[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_WRITE }, sizeof(int)          },
+		{ TYPE_INT32, "block_vid",  &b_vid,                        sizeof(unsigned int) },
+		{ TYPE_INT32, "block_size", &new_size,                     sizeof(unsigned int) },
+		hash_end
+	};
+	return backend_query(data->bk_map, req_write, NULL);
 } // }}}
 /*static ssize_t   map_delete         (blocks_user_data *data, unsigned int b_vid){ // {{{
-	hash_set(data->fc_map.request_delete, "block_vid", TYPE_INT32, &b_vid);
-	
-	return backend_query(data->bk_map, data->fc_map.request_delete, NULL);
+	hash_t  req_delete[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_DELETE }, sizeof(int)          },
+		{ TYPE_INT32, "block_vid",  &b_vid,                         sizeof(unsigned int) },
+		hash_end
+	};
+	return backend_query(data->bk_map, req_delete, NULL);
 } // }}}*/
 static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
 	ssize_t  ret;
 	ssize_t  buf_ptr = 0;
-
-	hash_set(data->fc_map.request_read, "offset", TYPE_INT64, &virt_off);
 	
-	ret = backend_query(data->bk_map, data->fc_map.request_read, data->fc_map.buffer_read);
+	buffer_t  req_buffer;
+	buffer_init(&req_buffer);
+	
+	hash_t    req_read[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_READ  }, sizeof(int)          },
+		{ TYPE_INT64, "offset",     &virt_off,                     sizeof(off_t)        },
+		hash_end
+	};
+	
+	ret = backend_query(data->bk_map, req_read, &req_buffer);
 	if(ret > 0){
-		buf_ptr += buffer_read(data->fc_map.buffer_read, buf_ptr, real_off,  sizeof(off_t));
-		buf_ptr += buffer_read(data->fc_map.buffer_read, buf_ptr, block_vid, sizeof(unsigned int));
+		buf_ptr += buffer_read(&req_buffer, buf_ptr, real_off,  sizeof(off_t));
+		buf_ptr += buffer_read(&req_buffer, buf_ptr, block_vid, sizeof(unsigned int));
 	}
+	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
 static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
-	int      action;
-	ssize_t  ret     = 1;
+	ssize_t  ret;
 	ssize_t  buf_ptr = 0;
 	
-	action = ACTION_CRWD_READ;
-	hash_set(data->fc_map.request_move, "action",    TYPE_INT32, &action);
-	hash_set(data->fc_map.request_move, "blocks",    TYPE_INT32, &ret);
-	hash_set(data->fc_map.request_move, "block_vid", TYPE_INT32, &block_vid);
+	buffer_t  req_buffer;
+	buffer_init(&req_buffer);
 	
-	ret = backend_query(data->bk_map, data->fc_map.request_move, data->fc_map.buffer_create);
+	hash_t    req_read[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_READ  }, sizeof(int)          },
+		{ TYPE_INT32, "blocks",     (int []){ 1                 }, sizeof(int)          },
+		{ TYPE_INT32, "block_vid",  &block_vid,                    sizeof(unsigned int) },
+		hash_end
+	};
+	
+	ret = backend_query(data->bk_map, req_read, &req_buffer);
 	if(ret > 0){
 		*real_off   = 0;
 		*block_size = 0;
 		
-		buf_ptr += buffer_read(data->fc_map.buffer_create, buf_ptr, block_size, MIN(ret, sizeof(unsigned int)));
-		buf_ptr += buffer_read(data->fc_map.buffer_create, buf_ptr, real_off,   MIN(ret, sizeof(unsigned int)));
+		buf_ptr += buffer_read(&req_buffer, buf_ptr, block_size, MIN(ret, sizeof(unsigned int))); // TODO bad
+		buf_ptr += buffer_read(&req_buffer, buf_ptr, real_off,   MIN(ret, sizeof(unsigned int)));
 	}
+	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
 static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
-	ssize_t  ret = 1;
+	ssize_t  ret;
+	
+	buffer_t req_buffer;
+	buffer_init_from_bare(&req_buffer, &data->blocks_count, sizeof(data->blocks_count));
 	
 	data->blocks_count = 0;
 	
-	hash_set(data->fc_map.request_count, "blocks", TYPE_INT32, &ret);
-	
-	ret = backend_query(data->bk_map, data->fc_map.request_count, data->fc_map.buffer_count);
-	if(ret > 0){
-		buffer_read(data->fc_map.buffer_count, 0, &data->blocks_count, MIN(ret, sizeof(data->blocks_count)));
-	}
+	hash_t  req_count[] = {
+		{ TYPE_INT32, "action",     (int []){ ACTION_CRWD_COUNT }, sizeof(int)          },
+		{ TYPE_INT32, "blocks",     (int []){ 1                 }, sizeof(int)          },
+		hash_end
+	};
+	ret = backend_query(data->bk_map, req_count, &req_buffer);
+	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
-static ssize_t   map_translate_key  (blocks_user_data *data, char *key_name, request_t *request, request_t *layer){ // {{{
-	off_t        key_virt, key_real;
-	unsigned int block_vid;
-	
-	// TODO remove TYPE_INT64 from code, support all
-	if(hash_get_copy (request, key_name, TYPE_INT64, &key_virt, sizeof(key_virt)) != 0)
-		return -EINVAL;
-	
-	if(map_off(data, key_virt, &block_vid, &key_real) <= 0)
-		return -EINVAL;
-	
-	hash_set(layer, key_name, TYPE_INT64, &key_real);
-	
-	return 0;
-} // }}}
 static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_off){ // {{{
-	return fc_crwd_next_chain(
-		&data->fc_real,
-		data->ch_real,
-		ACTION_CRWD_CREATE,
-		(unsigned int) ( data->block_size ),
-		(off_t *)      ( real_block_off   ),
-		(size_t)       ( sizeof(off_t)    )
-	);
+	ssize_t   ret;
+	
+	buffer_t  req_buffer;
+	buffer_init_from_bare(&req_buffer, real_block_off, sizeof(off_t));
+	
+	hash_t    req_create[] = {
+		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_CREATE }, sizeof(int) },
+		{ TYPE_INT32, "size"  , (int []){ sizeof(off_t)      }, sizeof(int) },
+		hash_end
+	};
+	
+	ret = chain_next_query(data->ch_real, req_create, &req_buffer);
+	buffer_destroy(&req_buffer);
+	return ret;
 } // }}}
 static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t to, size_t size){ // {{{
 	if(from == to || size == 0)
 		return 0;
-
-	return fc_crwd_next_chain(
-		&data->fc_real,
-		data->ch_real,
-		ACTION_CRWD_MOVE,
-		(off_t)        ( from ),
-		(off_t)        ( to   ),
-		(unsigned int) ( size )
-	);
+	
+	hash_t    req_move[] = {
+		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_MOVE   }, sizeof(int)   },
+		{ TYPE_INT64, "key_from", &from                       , sizeof(off_t) },
+		{ TYPE_INT64, "key_to",   &to                         , sizeof(off_t) },
+		{ TYPE_INT32, "size"  , (int []){ size               }, sizeof(int)   },
+		hash_end
+	};
+	
+	return chain_next_query(data->ch_real, req_move, NULL);
 } // }}}
 static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_t size){ // {{{
 	off_t         src_real,      dst_real;
@@ -286,12 +295,6 @@ static int blocks_init(chain_t *chain){
 static int blocks_destroy(chain_t *chain){
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	fc_crwd_destroy(&data->fc_map);
-	fc_crwd_destroy(&data->fc_real);
-
-	if(data->layer_get   != NULL) hash_free(data->layer_get);
-	if(data->layer_count != NULL) hash_free(data->layer_count);
-	
 	backend_destroy(data->bk_map);
 	free(chain->user_data);
 	
@@ -302,7 +305,6 @@ static int blocks_destroy(chain_t *chain){
 static int blocks_configure(chain_t *chain, setting_t *config){
 	setting_t        *config_backend;
 	char             *block_size_str;
-	unsigned int      action;
 	blocks_user_data *data         = (blocks_user_data *)chain->user_data;
 	
 	if( (block_size_str = setting_get_child_string(config, "block_size")) == NULL)
@@ -319,31 +321,9 @@ static int blocks_configure(chain_t *chain, setting_t *config){
 	
 	data->ch_real = chain;
 	
-	if( fc_crwd_init(&data->fc_map) != 0){
-		error("chain 'blocks' fastcall table map init failed\n");  goto free;
-	}
-	if( fc_crwd_init(&data->fc_real) != 0){
-		error("chain 'blocks' fastcall table real init failed\n"); goto free1;
-	}
-	
-	if( (data->layer_get   = hash_new()) == NULL)
-		goto free2;
-	
-	if( (data->layer_count = hash_new()) == NULL)
-		goto free3;
-	
-	action = ACTION_CRWD_COUNT;
-	hash_set(data->layer_count, "action", TYPE_INT32, &action);
-	
 	map_blocks(data);
 	
 	return 0;
-
-free3:  hash_free(data->layer_get);
-free2:  fc_crwd_destroy(&data->fc_real);
-free1:  fc_crwd_destroy(&data->fc_map);
-free:	backend_destroy(data->bk_map);
-	return -ENOMEM;
 }
 /* }}} */
 
@@ -355,9 +335,11 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	size_t            block_size;
 	off_t             block_vid;
 	ssize_t           ret;
+	hash_t           *r_size;
 	
-	if(hash_get_copy (request, "size", TYPE_INT32, &element_size, sizeof(element_size)) != 0)
+	if( (r_size = hash_find_typed_value (request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
+	element_size = HVALUE(r_size, unsigned int);
 	
 	if(element_size > data->block_size) // TODO make sticked blocks
 		return -EINVAL;
@@ -395,8 +377,11 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	}
 	
 	/* calc virt_ptr */
-	hash_assign_layer  (data->layer_count, request);               // transfer query to map backend _COUNT
-	ret = backend_query(data->bk_map, data->layer_count, buffer); 
+	hash_t  req_count[] = {
+		{ TYPE_INT32, "action", (int []){ ACTION_CRWD_COUNT }, sizeof(int) },
+		hash_end
+	};
+	ret = backend_query(data->bk_map, req_count, buffer); 
 	
 	/* really add item */
 	if(map_resize(data, block_vid, block_size + element_size) != 0)
@@ -405,68 +390,81 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	return ret;
 } // }}}
 static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+	off_t             key_real;
+	unsigned int      block_vid;
+	hash_t           *r_key_virt;
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
 	// TODO r_size > block_size
+	// TODO remove TYPE_INT64 from code, support all
 	
-	hash_empty        (data->layer_get);
-	hash_assign_layer (data->layer_get, request);
-	
-	if(map_translate_key(data, "key", request, data->layer_get) != 0)
+	if( (r_key_virt = hash_find_typed_value(request, TYPE_INT64, "key")) == NULL)
 		return -EINVAL;
 	
-	return chain_next_query(chain, data->layer_get, buffer);
+	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, &key_real) <= 0)
+		return -EINVAL;
+	
+	hash_t  req_layer[] = {
+		{ r_key_virt->type, r_key_virt->key, &key_real, r_key_virt->value_size },
+		hash_next(request)
+	};
+	
+	return chain_next_query(chain, req_layer, buffer);
 } // }}}
 static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
-	off_t             r_key;
-	unsigned int      r_size;
+	hash_t *r_key, *r_size;
 	
-	if(hash_get_copy (request, "key",  TYPE_INT64, &r_key,  sizeof(r_key)) != 0)
+	if( (r_key  = hash_find_typed_value(request, TYPE_INT64, "key")) == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "size", TYPE_INT32, &r_size, sizeof(r_size)) != 0)
+	if( (r_size = hash_find_typed_value(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
 	
-	return itms_delete(chain, r_key, r_size);
+	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
 } // }}}
 static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
-	off_t             r_from, r_to;
-	unsigned int      r_size;
+	off_t             from, to;
+	unsigned int      size;
+	hash_t           *r_from, *r_to, *r_size;
 	
 	ssize_t           move_delta;
 	
-	if(hash_get_copy (request, "key_from", TYPE_INT64, &r_from, sizeof(r_from)) != 0)
+	if( (r_from = hash_find_typed_value (request, TYPE_INT64, "key_from")) == NULL)
 		return -EINVAL;
-	if(hash_get_copy (request, "key_to",   TYPE_INT64, &r_to,   sizeof(r_to))   != 0)
+	if( (r_to   = hash_find_typed_value (request, TYPE_INT64, "key_to"))   == NULL)
 		return -EINVAL;
 	
-	if(r_from == r_to)
+	from = HVALUE(r_from, off_t);
+	to   = HVALUE(r_to,   off_t);
+	
+	if(from == to)
 		return 0;
 	
 	// manage top of move
-	move_delta = (r_to - r_from);
+	move_delta = (to - from);
 	if(move_delta > 0){ // moving data forward
-		if(itms_insert_copy(chain, r_from, r_from, move_delta) != 0)
+		if(itms_insert_copy(chain, from, from, move_delta) != 0)
 			return -EINVAL;
 	}else{ // moving data backward
-		if(itms_delete(chain, r_to, -move_delta) != 0)
+		if(itms_delete(chain, to, -move_delta) != 0)
 			return -EINVAL;
 	}
 	
 	// manage bottom of move
-	if(
-		hash_get_copy (request, "size", TYPE_INT32, &r_size, sizeof(r_size)) == 0 &&
-		r_size != -1
-	){
-		r_from += r_size;
-		r_to   += r_size;
+	if( (r_size = hash_find_typed_value (request, TYPE_INT32, "size")) == NULL)
+		return 0;
+	size = HVALUE(r_size, unsigned int);
+	if(size == -1)
+		return 0;
 		
-		if(move_delta > 0){ // moving data forward
-			if(itms_delete(chain, r_from, move_delta) != 0)
-				return -EINVAL;
-		}else{ // moving data backward
-			if(itms_insert_copy(chain, r_to, r_from, -move_delta) != 0)
-				return -EINVAL;
-		}
+	from += size;
+	to   += size;
+	
+	if(move_delta > 0){ // moving data forward
+		if(itms_delete(chain, from, move_delta) != 0)
+			return -EINVAL;
+	}else{ // moving data backward
+		if(itms_insert_copy(chain, to, from, -move_delta) != 0)
+			return -EINVAL;
 	}
 	return 0;
 } // }}}
