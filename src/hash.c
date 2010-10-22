@@ -119,12 +119,12 @@ void hash_dump(hash_t *hash){
 	unsigned int  k;
 	hash_t       *element = hash;
 	
-	printf("hash: %x\n", (unsigned int)hash);
+	printf("hash: %p\n", hash);
 	while(element->key != hash_ptr_end){
 		if(element->key == hash_ptr_null)
 			continue;
 		
-		printf(" - el: %x %s -> %x", (unsigned int)element->type, (char *)element->key, (unsigned int)element->value);
+		printf(" - el: %x %s -> %p", (unsigned int)element->type, (char *)element->key, element->value);
 		for(k=0; k<element->value_size; k++){
 			if((k % 8) == 0)
 				printf("\n   0x%.4x: ", k);

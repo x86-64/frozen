@@ -291,7 +291,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	if(
 		!(
 			(r_value_size = hash_find_typed(request, TYPE_INT32, "size")) != NULL &&
-			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (size_t)-1
+			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (unsigned int)-1
 		)
 	){
 		if(file_update_count(data) == STAT_ERROR)
