@@ -1,3 +1,4 @@
+#include <libfrozen.h>
 
 #include <sys/time.h>
 
@@ -11,15 +12,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <libfrozen.h>
-
 /* global options */
-char            defopt_write_file[] = "benchmark_baseline.dat";
+char            defopt_write_file[]  = "benchmark_baseline.dat";
+char            defopt_frozen_file[] = "benchmark_frozen.dat";
 
-unsigned int    opt_verbose         = 0;
-unsigned int    opt_iters           = 10000;
-char           *opt_write_file      = defopt_write_file;
-unsigned int    opt_item_size       = 10;
+unsigned int    opt_verbose          = 0;
+unsigned int    opt_iters            = 10000;
+char           *opt_write_file       = defopt_write_file;
+char           *opt_frozen_file      = defopt_frozen_file;
+unsigned int    opt_item_size        = 10;
 
 /* getopt arrays  {{{ */
 struct cmdline_option {
@@ -41,12 +42,15 @@ typedef void (*opt_func)(void);
 void opts_help(void);
 
 static struct cmdline_option option_data[] = { 
-	{ "iters",        'i', OPT_VALUE_INT,  &opt_iters,            "number of iterations for each test, def 10000"                        },
-	{ "help",         'h', OPT_FUNC,       (void *)&opts_help,    "help screen"                                                          },
-	{ "verbose",      'v', OPT_VALUE_BOOL, &opt_verbose,          "verbose"                                                              },
-	{ "Test 'baseline':", 0, OPT_GROUP,    NULL, NULL                                                                                    },
-	{ "file",         'f', OPT_VALUE_STR,  &opt_write_file,       "test_baseline file to write"                                          },
-	{ "size",         's', OPT_VALUE_INT,  &opt_item_size,        "test_baseline read\\write chunk size"                                 },
+	{ "iters",          'i', OPT_VALUE_INT,  &opt_iters,            "number of iterations for each test, def 10000"                        },
+	{ "help",           'h', OPT_FUNC,       (void *)&opts_help,    "help screen"                                                          },
+	{ "verbose",        'v', OPT_VALUE_BOOL, &opt_verbose,          "verbose"                                                              },
+	{ "Test 'baseline':", 0, OPT_GROUP,      NULL, NULL                                                                                    },
+	{ "baseline-file",    0, OPT_VALUE_STR,  &opt_write_file,       "test_baseline file to write"                                          },
+	{ "size",           's', OPT_VALUE_INT,  &opt_item_size,        "test_baseline read\\write chunk size"                                 },
+	{ "Test 'frozen':",   0, OPT_GROUP,      NULL, NULL                                                                                    },
+	{ "frozen-file",      0, OPT_VALUE_STR,  &opt_frozen_file,      "test_frozen file to write"                                            },
+	
 	{ NULL, 0, 0, NULL, NULL }
 };
 
@@ -97,23 +101,32 @@ void bench_query(bench_t *bench){
 	gettimeofday(&bench->tv_end, NULL);
     
         timeval_subtract(&bench->tv_diff, &bench->tv_end, &bench->tv_start);
-        sprintf(bench->string, "%u.%.6u", (unsigned int)bench->tv_diff.tv_sec, (unsigned int)bench->tv_diff.tv_usec);
+        sprintf(bench->string, "%3u.%.6u", (unsigned int)bench->tv_diff.tv_sec, (unsigned int)bench->tv_diff.tv_usec);
 	
 	bench->time_ms = bench->tv_diff.tv_usec / 1000  + bench->tv_diff.tv_sec * 1000;
 	bench->time_us = bench->tv_diff.tv_usec         + bench->tv_diff.tv_sec * 1000000;
+	
+	if(bench->time_ms == 0) bench->time_ms = 1;
+	if(bench->time_us == 0) bench->time_us = 1;
 }
 void bench_func(char *name, int (*func)(unsigned int), unsigned int iters){
 	int       ret;
+	
+	if(iters == 0){
+		printf("benchmark of '%s' not run, iters == 0\n", name);
+		return;
+	}
+	
 	bench_t  *be = bench_start();
 	
 	ret = func(iters);
 	
 	bench_query(be);
-	printf("%u iters took %s sec; speed: %7lu iters/s; one iter: %5lu ms/ %10lu us   benchmark of '%s' %s\n",
+	
+	printf("%u iters took %s sec; speed: %7lu iters/s (one: %10lu us)  benchmark of '%s' %s\n",
 		iters,
 		be->string,
 		( iters * 1000 / be->time_ms), 
-		( be->time_ms / iters ),
 		( be->time_us / iters ),
 		name,
 		( ret == 0 ) ? "succeed" : "FAILED" 
@@ -193,10 +206,113 @@ cleanup:
 	return (int)ret;
 } // }}}
 
+int test_frozen_seqwrite(unsigned int iters){ // {{{
+	int    ret;
+	off_t  off;
+	
+	frozen_init();
+		hash_t  b_config[] = {
+			{ NULL, DATA_HASHT(
+				{ "name",     DATA_STRING("file")                                           },
+				{ "filename", DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
+				hash_end
+			)},
+			hash_end
+		};
+		backend_t *backend = backend_new("bench_file", b_config);
+		if(backend == NULL){
+			printf("test_frozen_seqwrite backend create failed\n");
+			goto exit;
+		}
+		
+		buffer_t  buffer;
+		buffer_init_from_bare(&buffer, item, opt_item_size);
+		
+		off = 0;
+		while(iters > 0){
+			hash_t  request[] = {
+				{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+				{ "key",    DATA_OFFT(off)                },
+				{ "size",   DATA_INT32(opt_item_size)     },
+				hash_end
+			};
+			
+			ret = backend_query(backend, request, &buffer);
+			if(ret <= 0){
+				ret = -1;
+				goto cleanup;
+			}
+			
+			iters--;
+			off  += opt_item_size;
+		}
+		ret = 0;
+	
+	cleanup:
+		backend_destroy(backend);
+		buffer_destroy(&buffer);
+	
+	exit:
+	frozen_destroy();
+	return ret;
+} // }}}
+int test_frozen_seqread(unsigned int iters){ // {{{
+	int    ret;
+	off_t  off;
+	
+	frozen_init();
+		hash_t  b_config[] = {
+			{ NULL, DATA_HASHT(
+				{ "name",     DATA_STRING("file")                                           },
+				{ "filename", DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
+				hash_end
+			)},
+			hash_end
+		};
+		backend_t *backend = backend_new("bench_file", b_config);
+		if(backend == NULL){
+			printf("test_frozen_seqread backend create failed\n");
+			goto exit;
+		}
+		
+		buffer_t  buffer;
+		buffer_init_from_bare(&buffer, item, opt_item_size);
+		
+		off = 0;
+		while(iters > 0){
+			hash_t  request[] = {
+				{ "action", DATA_INT32(ACTION_CRWD_READ)  },
+				{ "key",    DATA_OFFT(off)                },
+				{ "size",   DATA_INT32(opt_item_size)     },
+				hash_end
+			};
+			
+			ret = backend_query(backend, request, &buffer);
+			if(ret <= 0){
+				ret = -1;
+				goto cleanup;
+			}
+			
+			iters--;
+			off  += opt_item_size;
+		}
+		ret = 0;
+	
+	cleanup:
+		backend_destroy(backend);
+		buffer_destroy(&buffer);
+	
+	exit:
+	frozen_destroy();
+	return ret;
+} // }}}
+
+
 void main_cleanup(void){
 	/* cleanup */
 	free(item);
 	unlink(opt_write_file);
+	unlink(opt_frozen_file);
 }
 
 void main_rest(void){
@@ -208,7 +324,9 @@ void main_rest(void){
 	bench_func("baseline_seq_write",   &test_baseline_seqwrite, opt_iters);
 	bench_func("baseline_seq_rewrite", &test_baseline_seqwrite, opt_iters);
 	bench_func("baseline_seq_read",    &test_baseline_seqread,  opt_iters);
-	
+	bench_func("frozen_seq_write",     &test_frozen_seqwrite,   opt_iters);
+	bench_func("frozen_seq_rewrite",   &test_frozen_seqwrite,   opt_iters);
+	bench_func("frozen_seq_read",      &test_frozen_seqread,    opt_iters);
 }
 
 void opts_init(void){ // {{{

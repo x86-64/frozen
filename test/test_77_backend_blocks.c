@@ -22,12 +22,10 @@ void read_all(buffer_t *buffer, backend_t *backend, off_t *key_off, unsigned int
 START_TEST (test_backend_blocks){
 	backend_t *backend;
 	
-	hash_set(global_settings, "homedir", DATA_STRING("."));
-	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name", DATA_STRING("file") },
-			{ "filename", DATA_STRING("data_backend_blocks") },
+			{ "name",     DATA_STRING("file")                    },
+			{ "filename", DATA_STRING("data_backend_blocks.dat") },
 			hash_end
 		)},
 		{ NULL, DATA_HASHT(
@@ -35,13 +33,13 @@ START_TEST (test_backend_blocks){
 			{ "block_size", DATA_INT32(4)   },
 			{ "backend", DATA_HASHT(
 				{ NULL, DATA_HASHT(
-					{ "name", DATA_STRING("file")                        },
-					{ "filename", DATA_STRING("data_backend_blocks_map") },
+					{ "name",     DATA_STRING("file")                        },
+					{ "filename", DATA_STRING("data_backend_blocks_map.dat") },
 					hash_end
 				)},
 				{ NULL, DATA_HASHT(
-					{ "name", DATA_STRING("blocks-address")              },
-					{ "per-level", DATA_INT32(4)                         },
+					{ "name",      DATA_STRING("blocks-address")             },
+					{ "per-level", DATA_INT32(4)                             },
 					hash_end
 				)},
 				hash_end
@@ -50,7 +48,7 @@ START_TEST (test_backend_blocks){
 		)},
 		hash_end
 	};
-
+	
 	if( (backend = backend_new("in_block", settings)) == NULL){
 		fail("backend creation failed");
 		return;

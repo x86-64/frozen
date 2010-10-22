@@ -41,7 +41,7 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 			{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
 			{ "key_from", r_key->type, o_key_from, r_key->value_size },
 			{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
-			{ "size",     DATA_INT32(-1)                             },
+			{ "size",     DATA_VOID                                  },
 			hash_next(request)
 		};
 		
@@ -73,7 +73,7 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
 		{ "key_from", r_key->type, o_key_from, r_key->value_size },
 		{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
-		{ "size",     DATA_INT32(-1)                             },
+		{ "size",     DATA_VOID                                  },
 		hash_next(request)
 	};
 	

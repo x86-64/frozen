@@ -69,7 +69,7 @@ REGISTER_MACRO(`DATA_PTR_OFFT(value)', `TYPE_OFFT, value, sizeof(off_t)')
 REGISTER_PROTO(
 	`{
 		.type                   = TYPE_OFFT,
-		.type_str               = "offt",
+		.type_str               = "off_t",
 		.size_type              = SIZE_FIXED,
 		.func_bare_cmp          = &data_offt_cmp,
 		.func_bare_arithmetic   = &data_offt_bare_arith,

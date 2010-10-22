@@ -2,23 +2,24 @@
 #include <backend.h>
 #include <alloca.h>
 
-typedef enum locator_mode {
+typedef enum locate_mode {
 	LINEAR_INCAPSULATED,  // public oid converted to private oid using div()
 	LINEAR_ORIGINAL,      // public oid same as private oid, insecure
 	INDEX_INCAPSULATED,   // public oid converted to private oid using index
 	INDEX_ORIGINAL        // public oid same as private oid, but checked for existance via index
-} locator_mode;
+} locate_mode;
 
-typedef struct locator_ud {
-	locator_mode   mode;
+typedef struct locate_ud {
+	locate_mode    mode;
 	data_type      oid_type;
 	unsigned int   linear_scale;
 	data_ctx_t     ctx;
+	backend_t     *backend;
 
-} locator_ud;
+} locate_ud;
 
-static int locator_init(chain_t *chain){
-	locator_ud *user_data = (locator_ud *)calloc(1, sizeof(locator_ud));
+static int locate_init(chain_t *chain){
+	locate_ud *user_data = (locate_ud *)calloc(1, sizeof(locate_ud));
 	if(user_data == NULL)
 		return -ENOMEM;
 	
@@ -26,8 +27,8 @@ static int locator_init(chain_t *chain){
 	return 0;
 }
 
-static int locator_destroy(chain_t *chain){
-	locator_ud *data = (locator_ud *)chain->user_data;
+static int locate_destroy(chain_t *chain){
+	locate_ud *data = (locate_ud *)chain->user_data;
 	
 	data_ctx_destroy(&data->ctx);
 	
@@ -36,17 +37,14 @@ static int locator_destroy(chain_t *chain){
 	return 0;
 }
 
-static int locator_configure(chain_t *chain, hash_t *config){
-      //size_type     *oid_class_size_type;
-	int            oid_class_supported = 1;
-	char          *oid_class_str;
+static int locate_configure(chain_t *chain, hash_t *config){
 	char          *mode_str;
-	char          *linear_scale_str;
 	unsigned int   linear_scale;
-	locator_ud    *data                = (locator_ud *)chain->user_data;
+	void          *temp;
+	locate_ud     *data                = (locate_ud *)chain->user_data;
 	
 	if(hash_get_typed(config, TYPE_STRING, "mode", (void **)&mode_str, NULL) != 0)
-		return_error(-EINVAL, "locator 'mode' not defined\n");
+		return_error(-EINVAL, "locate 'mode' not defined\n");
 	
 	      if(strcasecmp(mode_str, "linear-incapsulated") == 0){
 		data->mode = LINEAR_INCAPSULATED;
@@ -57,18 +55,23 @@ static int locator_configure(chain_t *chain, hash_t *config){
 	}else if(strcasecmp(mode_str, "index-original") == 0){
 		data->mode = INDEX_ORIGINAL;
 	}else{
-		return_error(-EINVAL, "locator 'mode' invalid or not supported\n");
+		return_error(-EINVAL, "locate 'mode' invalid or not supported\n");
 	}
 	
-	if(hash_get_typed(config, TYPE_STRING, "oid-class", (void **)&oid_class_str, NULL) != 0)
-		return_error(-EINVAL, "locator 'oid-class' not defined\n");
+	if(hash_get_typed(config, TYPE_STRING, "oid-type", &temp, NULL) != 0)
+		return_error(-EINVAL, "locate 'oid-type' not defined\n");
 	
-	if( (data->oid_type = data_type_from_string(oid_class_str)) == -1)
-		return_error(-EINVAL, "locator 'oid-class' invalid\n");
+	if( (data->oid_type = data_type_from_string((char *)temp)) == -1)
+		return_error(-EINVAL, "locate 'oid-type' invalid\n");
 	
 	linear_scale =
-		(hash_get_typed(config, TYPE_INT32, "size", (void **)&linear_scale_str, NULL) == 0) ?
-		*(unsigned int *)linear_scale_str : 0;
+		(hash_get_typed(config, TYPE_INT32, "size", &temp, NULL) == 0) ?
+		*(unsigned int *)temp : 0;
+	
+	if(hash_get_typed(config, TYPE_HASHT, "backend", &temp, NULL) == 0){
+		if( (data->backend = backend_new("blocks_map", (hash_t *)temp)) == NULL)
+			return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
+	}
 	
 	/* check everything */
 	switch(data->mode){
@@ -79,20 +82,17 @@ static int locator_configure(chain_t *chain, hash_t *config){
 			      //oid_class_size_type             != SIZE_FIXED ||
 				linear_scale                    == 0
 			)
-				oid_class_supported = 0;
+				return_error(-EINVAL, "locate 'oid-type' not supported\n");
 			break;
 		case INDEX_INCAPSULATED:
-			//if(oid_class_proto->func_add == NULL)
-			//	oid_class_supported = 0;
+			if(data->backend == NULL)
+				return_error(-EINVAL, "locate 'backend' not supplied\n");
 			break;
 		case INDEX_ORIGINAL:
 		case LINEAR_ORIGINAL:
 			// everything ok
 			break;
 	};
-	
-	if(oid_class_supported == 0)
-		return_error(-EINVAL, "locator 'oid-class' not supported\n");
 	
 	data_ctx_init(&data->ctx, data->oid_type, NULL); 
 	
@@ -103,7 +103,7 @@ static int locator_configure(chain_t *chain, hash_t *config){
 	return 0;
 }
 
-static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
+static ssize_t incapsulate(locate_ud *data, buffer_t *buffer){
 	// divide returned key on data->size
 	if(data_buffer_arithmetic(&data->ctx, buffer, 0, '/', data->linear_scale) != 0){
 		// TODO linear incapsulation can't really deal with keys that
@@ -115,7 +115,7 @@ static ssize_t incapsulate(locator_ud *data, buffer_t *buffer){
 	return 0;
 }
 
-static ssize_t incapsulate_ret(locator_ud *data, ssize_t ret){
+static ssize_t incapsulate_ret(locate_ud *data, ssize_t ret){
 	div_t  div_res;
 	div_res = div(ret, data->linear_scale);
 	
@@ -125,9 +125,9 @@ static ssize_t incapsulate_ret(locator_ud *data, ssize_t ret){
 	return div_res.quot;
 }
 
-static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t locate_create(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
-	locator_ud  *data = (locator_ud *)chain->user_data;
+	locate_ud  *data = (locate_ud *)chain->user_data;
 	hash_t      *r_size;
 	void        *o_size;
 	
@@ -155,14 +155,23 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 			break;
 		
 		case INDEX_INCAPSULATED:
-			// ret = check_existance(key, buffer);
-			// if(ret <= 0)
-			// 	return ret;
-			//
-			// hash_set(request, "key", *buffer, ret);
-			// ret = chain_next_query(chain, request, buffer);
+			// query undelying chain to create space for info
+			ret = chain_next_query(chain, request, buffer);
+			if(ret <= 0)
+				return ret;
+			
+			// write to index new key
+			hash_t  idx_request[] = {
+				{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
+				{ "size",   DATA_INT32(1)                 },
+				hash_end
+			};
+			ret = backend_query(data->backend, idx_request, buffer);
+			if(ret <= 0)
+				return ret;
+			// backend_query return buffer with oid
 			break;
-		
+			
 		case INDEX_ORIGINAL:
 			// ret = check_existance(key);
 			// if(ret != 0)
@@ -177,9 +186,9 @@ static ssize_t locator_create(chain_t *chain, request_t *request, buffer_t *buff
 	return ret;
 }
 
-static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t locate_setgetdelete(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
-	locator_ud  *data = (locator_ud *)chain->user_data;
+	locate_ud  *data = (locate_ud *)chain->user_data;
 	hash_t      *r_key, *r_size;
 	void        *o_key, *o_size;
 	
@@ -232,9 +241,9 @@ static ssize_t locator_setgetdelete(chain_t *chain, request_t *request, buffer_t
 	return ret;
 }
 
-static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t locate_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
-	locator_ud  *data = (locator_ud *)chain->user_data;
+	locate_ud  *data = (locate_ud *)chain->user_data;
 	hash_t      *r_key_from, *r_key_to;
 	hash_t      *r_size;
 	char        *r_size_str = hash_ptr_null;
@@ -295,9 +304,9 @@ static ssize_t locator_move(chain_t *chain, request_t *request, buffer_t *buffer
 	return ret;
 }
 
-static ssize_t locator_count(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t locate_count(chain_t *chain, request_t *request, buffer_t *buffer){
 	ssize_t      ret  = -1;
-	locator_ud  *data = (locator_ud *)chain->user_data;
+	locate_ud  *data = (locate_ud *)chain->user_data;
 	
 	if( (ret = chain_next_query(chain, request, buffer)) <= 0)
 		return ret;
@@ -308,21 +317,21 @@ static ssize_t locator_count(chain_t *chain, request_t *request, buffer_t *buffe
 	return ret;
 }
 
-static chain_t chain_locator = {
-	"oid-locator",
+static chain_t chain_locate = {
+	"locate",
 	CHAIN_TYPE_CRWD,
-	&locator_init,
-	&locator_configure,
-	&locator_destroy,
+	&locate_init,
+	&locate_configure,
+	&locate_destroy,
 	{{
-		.func_create = &locator_create,
-		.func_set    = &locator_setgetdelete,
-		.func_get    = &locator_setgetdelete,
-		.func_delete = &locator_setgetdelete,
-		.func_move   = &locator_move,
-		.func_count  = &locator_count,
+		.func_create = &locate_create,
+		.func_set    = &locate_setgetdelete,
+		.func_get    = &locate_setgetdelete,
+		.func_delete = &locate_setgetdelete,
+		.func_move   = &locate_move,
+		.func_count  = &locate_count,
 	}}
 };
-CHAIN_REGISTER(chain_locator)
+CHAIN_REGISTER(chain_locate)
 
 /* vim: set filetype=c: */

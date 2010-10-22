@@ -1,27 +1,25 @@
 #include "test.h"
 
-START_TEST (test_backend_locator){
+START_TEST (test_backend_locate){
 	backend_t *backend;
-	
-	hash_set(global_settings, "homedir", DATA_STRING("."));
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
 			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_locator")     },
+			{ "filename",    DATA_STRING("data_backend_locate.dat")  },
 			hash_end
 		)},
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("oid-locator")              },
+			{ "name",        DATA_STRING("locate")                   },
 			{ "mode",        DATA_STRING("linear-incapsulated")      },
-			{ "oid-class",   DATA_STRING("int32")                    },
+			{ "oid-type",    DATA_STRING("int32")                    },
 			{ "size",        DATA_INT32(19)                          },
 			hash_end
 		)},
 		hash_end
 	};
 	
-	backend = backend_new("in_locator", settings);
+	backend = backend_new("in_locate", settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	ssize_t       ssize;
@@ -51,7 +49,7 @@ START_TEST (test_backend_locator){
 		fail("chain file create key2 failed");	
 	buffer_read(buffer, 0, &new_key2, MIN(ssize, sizeof(off_t)));
 		
-		fail_unless(new_key2 - new_key1 == 1,                 "backend in_locator offsets invalid");
+		fail_unless(new_key2 - new_key1 == 1,                 "backend in_locate offsets invalid");
 	
 
 	hash_t  hash_write1[] = {
@@ -62,7 +60,7 @@ START_TEST (test_backend_locator){
 	};
 	buffer_write(buffer, 0, &key1_data, 10);
 	ssize = backend_query(backend, hash_write1, buffer);
-		fail_unless(ssize == 1,  "backend in_locator write 1 failed");
+		fail_unless(ssize == 1,  "backend in_locate write 1 failed");
 	
 	
 	hash_t  hash_write2[] = {
@@ -73,7 +71,7 @@ START_TEST (test_backend_locator){
 	};
 	buffer_write(buffer, 0, &key2_data, 10);
 	ssize = backend_query(backend, hash_write2, buffer);
-		fail_unless(ssize == 1,  "backend in_locator write 2 failed");
+		fail_unless(ssize == 1,  "backend in_locate write 2 failed");
 	
 	
 	hash_t  hash_read1[] = {
@@ -84,10 +82,10 @@ START_TEST (test_backend_locator){
 	};
 	buffer_cleanup(buffer);
 	ssize = backend_query(backend, hash_read1, buffer);
-		fail_unless(ssize == 1,                             "backend in_locator read 1 failed");
+		fail_unless(ssize == 1,                             "backend in_locate read 1 failed");
 		fail_unless(
 			buffer_memcmp(buffer, 0, key1_buffer, 0, 10) == 0,
-			"backend in_locator read 1 data failed"
+			"backend in_locate read 1 data failed"
 		);
 	
 	hash_t  hash_read2[] = {
@@ -99,10 +97,10 @@ START_TEST (test_backend_locator){
 	buffer_cleanup(buffer);
 		
 	ssize = backend_query(backend, hash_read2, buffer);
-		fail_unless(ssize == 1,                             "backend in_locator read 2 failed");
+		fail_unless(ssize == 1,                             "backend in_locate read 2 failed");
 		fail_unless(
 			buffer_memcmp(buffer, 0, key2_buffer, 0, 10) == 0,
-			"backend in_locator read 2 data failed"
+			"backend in_locate read 2 data failed"
 		);
 	
 	buffer_free(buffer);
@@ -113,5 +111,5 @@ START_TEST (test_backend_locator){
 	backend_destroy(backend);
 }
 END_TEST
-REGISTER_TEST(core, test_backend_locator)
+REGISTER_TEST(core, test_backend_locate)
 

@@ -69,7 +69,7 @@ REGISTER_MACRO(`DATA_PTR_SIZET(value)', `TYPE_SIZET, value, sizeof(size_t)')
 REGISTER_PROTO(
 	`{
 		.type                   = TYPE_SIZET,
-		.type_str               = "sizet",
+		.type_str               = "size_t",
 		.size_type              = SIZE_FIXED,
 		.func_bare_cmp          = &data_sizet_cmp,
 		.func_bare_arithmetic   = &data_sizet_bare_arith,

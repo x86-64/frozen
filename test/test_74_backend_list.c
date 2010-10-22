@@ -3,12 +3,10 @@
 START_TEST (test_backend_list){
 	backend_t *backend;
 	
-	hash_set(global_settings, "homedir", DATA_STRING("."));
-	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
 			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_list")        },
+			{ "filename",    DATA_STRING("data_backend_list.dat")    },
 			hash_end
 		)},
 		{ NULL, DATA_HASHT(

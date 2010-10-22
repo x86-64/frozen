@@ -4,12 +4,10 @@
 START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
-	hash_set(global_settings, "homedir", DATA_STRING("."));
-	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_insert_sort") },
+			{ "name",        DATA_STRING("file")                         },
+			{ "filename",    DATA_STRING("data_backend_insert_sort.dat") },
 			hash_end
 		)},
 		{ NULL, DATA_HASHT(
@@ -46,7 +44,6 @@ START_TEST (test_backend_insert_sort){
 		buff = (char)(0x61 + (tv.tv_usec % 26));
 		hash_t  req_write[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-			{ "key",    DATA_OFFT(0)                  },
 			{ "size",   DATA_INT32(sizeof(buff))      },
 			hash_end
 		};

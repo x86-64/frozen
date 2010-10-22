@@ -7,9 +7,10 @@ test_SOURCES   = 	test.c        test.h              \
 			$(top_builddir)/src/libfrozen.h
 benchmark_CFLAGS  = -I$(top_builddir)/src/
 benchmark_SOURCES = benchmark.c
+benchmark_LDADD   = $(top_builddir)/src/libfrozen.la
 
 EXTRA_DIST     = test_valgrind test_gdb tests_list.c test_*.c
 
 clean-local:
-	rm -rf data_backend_*.dat
+	rm -rf data_*.dat
 

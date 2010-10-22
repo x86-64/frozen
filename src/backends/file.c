@@ -78,9 +78,9 @@ static int file_configure(chain_t *chain, hash_t *config){
 	*filepath = '\0';
 	
 	if(hash_get_typed(global_settings, TYPE_STRING, "homedir", (void **)&temp, NULL) != 0)
-		goto cleanup;
+		temp = "./";
 	
-	if(snprintf(filepath, 256, "%s/%s.dat", temp, filename) >= 256){
+	if(snprintf(filepath, 256, "%s/%s", temp, filename) >= 256){
 		/* snprintf can truncate strings, so malicious user can use it to access another file.
 		 * we check string len such way to ensure none of strings was truncated */
 		goto cleanup;
@@ -118,50 +118,73 @@ cleanup:
 	return -EINVAL;
 }
 
-static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer){
+static int file_new_offset(chain_t *chain, off_t *new_key, unsigned int size){
 	int               fd;
 	int               ret;
-	off_t             new_key;
+	off_t             key;
 	pthread_mutex_t  *mutex;
-	hash_t           *r_value_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
-	
-	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
-		return -EINVAL;
 	
 	fd    =  data->handle;
 	mutex = &data->create_lock;
 	
 	pthread_mutex_lock(mutex);
 		
-		new_key = lseek(fd, 0, SEEK_END);
-		ret = ftruncate(fd, new_key + HVALUE(r_value_size, unsigned int));
-		if(ret == -1){
-			return -errno;
+		key = lseek(fd, 0, SEEK_END);
+		ret = ftruncate(fd, key + size);
+		if(ret != -1){
+			data->file_stat_status = STAT_NEED_UPDATE;
+			*new_key               = key;
+			ret                    = 0;
+		}else{
+			ret                    = -errno;
 		}
 		
-		buffer_write(buffer, 0, &new_key, sizeof(off_t)); 
-		
-		data->file_stat_status = STAT_NEED_UPDATE;
-		
 	pthread_mutex_unlock(mutex);
+	
+	return ret;
+}
+
+static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer){
+	off_t             new_key;
+	hash_t           *r_value_size;
+	
+	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+		return -EINVAL;
+	
+	if( file_new_offset(chain, &new_key, HVALUE(r_value_size, unsigned int)) != 0)
+		return -EFAULT;
+	
+	if(buffer != NULL)
+		buffer_write(buffer, 0, &new_key, sizeof(off_t)); 
 	
 	return sizeof(off_t);
 }
 
 static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
-	ssize_t           ret = -1;
 	unsigned int      write_size;
+	off_t             key;
+	int               create_mode =  0;
+	ssize_t           ret         = -1;
 	
 	hash_t           *r_key;
 	hash_t           *r_value_size;
-	
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
-		return -EINVAL;
 	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
+	
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  != NULL){
+		key = HVALUE(r_key, off_t);
+	}else{
+		if( file_new_offset(chain, &key, HVALUE(r_value_size, unsigned int)) != 0)
+			return -EFAULT;
+		
+		if(buffer != NULL){
+			buffer_write(buffer, 0, &key, sizeof(key));
+			create_mode = 1;
+		}
+	}
 	
 redo:
 	write_size = 0;
@@ -172,11 +195,11 @@ redo:
 				((file_user_data *)chain->user_data)->handle,
 				chunk,
 				size,
-				HVALUE(r_key, off_t) + offset
+				key + offset
 			);
 			if(ret == -1){
 				if(errno == EINTR) goto redo;
-				return -errno;
+				goto exit;
 			}
 			
 			write_size += ret;
@@ -188,7 +211,7 @@ redo:
 exit:
 	data->file_stat_status = STAT_NEED_UPDATE; // coz can write to end, without calling create
 	
-	return write_size;
+	return (create_mode == 1) ? sizeof(off_t) : write_size;
 }
 
 static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
@@ -198,7 +221,7 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t           *r_key;
 	hash_t           *r_value_size;
 	
-	if( (r_key        = hash_find_typed(request, TYPE_OFFT, "key"))  == NULL)
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
 	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
@@ -229,14 +252,15 @@ exit:
 static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer){
 	int               fd;
 	int               forced = 0;
+	ssize_t           ret;
 	pthread_mutex_t  *mutex;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	hash_t           *r_key;
 	hash_t           *r_value_size;
 	hash_t           *r_force;
 	
-
-	if( (r_key        = hash_find_typed(request, TYPE_OFFT, "key"))  == NULL)
+	
+	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
 	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
 		return -EINVAL;
@@ -246,24 +270,31 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 	fd    =  data->handle;
 	mutex = &data->create_lock;
 	
+	ret = 0;
 	pthread_mutex_lock(mutex);
 		
-		if(file_update_count(data) == STAT_ERROR)
-			return -EFAULT;
+		if(file_update_count(data) == STAT_ERROR){
+			ret = -EFAULT;
+			goto exit;
+		}
 		
 		if(
 			HVALUE(r_key, off_t) + HVALUE(r_value_size, unsigned int) != data->file_stat.st_size
 			&& forced == 0
-		) // truncating only last elements
-			return -EFAULT;
+		){ // truncating only last elements
+			ret = -EFAULT;
+			goto exit;
+		}
 		
-		if(ftruncate(fd, HVALUE(r_key, off_t)) == -1)
-			return -errno;
+		if(ftruncate(fd, HVALUE(r_key, off_t)) == -1){
+			ret = -errno;
+			goto exit;
+		}
 		
 		data->file_stat_status = STAT_NEED_UPDATE;
 		
+exit:		
 	pthread_mutex_unlock(mutex);
-	
 	return 0;
 }
 
@@ -330,7 +361,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 			break;
 		}
 		if(ssize == 0){
-			ret = -EINVAL;
+			ret = -EFAULT;
 			break;
 		}
 		

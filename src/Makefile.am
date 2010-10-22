@@ -3,7 +3,7 @@ backends_sources =                  \
 	backends/null-proxy.c       \
 	backends/file.c             \
 	backends/list.c             \
-	backends/oid-locator.c      \
+	backends/locate.c           \
 	backends/insert-sort.c      \
 	backends/blocks-adressing.c \
 	backends/blocks.c
@@ -46,8 +46,8 @@ data.c: ${data_sources}
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
 
-backends/oid-locator.c: 
-	${M4} -sP backends/oid-locator.c.m4 > $@
+backends/locate.c: 
+	${M4} -sP backends/locate.c.m4 > $@
 backends/insert-sort.c:
 	${M4} -sP backends/insert-sort.c.m4 > $@
 
@@ -60,7 +60,7 @@ data/uint32.c:
 data/uint64.c:
 	${M4} -sP -DBITS=64 data/uint.c.m4 > $@
 
-CLEANFILES= backends/oid-locator.c backends/insert-sort.c          \
+CLEANFILES= backends/locate.c backends/insert-sort.c               \
 	    data.c data.h                                          \
             data/uint8.c data/uint16.c data/uint32.c data/uint64.c
 
