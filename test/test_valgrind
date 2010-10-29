@@ -1,5 +1,5 @@
 #!/bin/sh
 
 rm -rf data_*.dat      &>/dev/null
-LD_LIBRARY_PATH="../src/.libs/" valgrind -v --leak-check=full --show-reachable=yes $1 $2 $3 $4 $5 $6 $7  .libs/test
+LD_LIBRARY_PATH="../src/.libs/" valgrind -v --leak-check=full --show-reachable=yes --suppressions=./test_valgrind_supp  $1 $2 $3 $4 $5 $6 $7  .libs/test
 

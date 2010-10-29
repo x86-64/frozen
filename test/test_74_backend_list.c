@@ -5,18 +5,21 @@ START_TEST (test_backend_list){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_list.dat")    },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("list")                     },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                     },
+				{ "filename",    DATA_STRING("data_backend_list.dat")    },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("list")                     },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 		
-	backend = backend_new("in_list", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	ssize_t       ssize;

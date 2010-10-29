@@ -11,11 +11,15 @@ typedef enum locate_mode {
 
 typedef struct locate_ud {
 	locate_mode    mode;
-	data_type      oid_type;
 	unsigned int   linear_scale;
 	data_ctx_t     ctx;
 	backend_t     *backend;
-
+	data_type      backend_type;
+	
+	off_t          oid;
+	data_type      oid_type;
+	buffer_t       oid_buffer;
+	buffer_t       idx_buffer;
 } locate_ud;
 
 static int locate_init(chain_t *chain){
@@ -31,6 +35,11 @@ static int locate_destroy(chain_t *chain){
 	locate_ud *data = (locate_ud *)chain->user_data;
 	
 	data_ctx_destroy(&data->ctx);
+	if(data->backend != NULL)
+		backend_destroy(data->backend);
+	
+	buffer_destroy(&data->oid_buffer);
+	buffer_destroy(&data->idx_buffer);
 	
 	free(data);
 	chain->user_data = NULL;
@@ -38,11 +47,12 @@ static int locate_destroy(chain_t *chain){
 }
 
 static int locate_configure(chain_t *chain, hash_t *config){
-	char          *mode_str;
 	unsigned int   linear_scale;
+	char          *mode_str;
 	void          *temp;
+	hash_t        *r_backend;
 	locate_ud     *data                = (locate_ud *)chain->user_data;
-	
+
 	if(hash_get_typed(config, TYPE_STRING, "mode", (void **)&mode_str, NULL) != 0)
 		return_error(-EINVAL, "locate 'mode' not defined\n");
 	
@@ -60,17 +70,24 @@ static int locate_configure(chain_t *chain, hash_t *config){
 	
 	if(hash_get_typed(config, TYPE_STRING, "oid-type", &temp, NULL) != 0)
 		return_error(-EINVAL, "locate 'oid-type' not defined\n");
-	
 	if( (data->oid_type = data_type_from_string((char *)temp)) == -1)
 		return_error(-EINVAL, "locate 'oid-type' invalid\n");
+	buffer_init_from_bare(&data->oid_buffer, &data->oid, sizeof(data->oid)); // TODO support any oid
+	
+	buffer_init(&data->idx_buffer);
 	
 	linear_scale =
 		(hash_get_typed(config, TYPE_INT32, "size", &temp, NULL) == 0) ?
 		*(unsigned int *)temp : 0;
 	
-	if(hash_get_typed(config, TYPE_HASHT, "backend", &temp, NULL) == 0){
-		if( (data->backend = backend_new("blocks_map", (hash_t *)temp)) == NULL)
+	if( (r_backend = hash_find(config, "backend")) != NULL){
+		if( (data->backend = backend_new(r_backend)) == NULL)
 			return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
+		
+		if(hash_get_typed(config, TYPE_STRING, "backend-type", &temp, NULL) != 0)
+			return_error(-EINVAL, "locate 'backend-type' not defined\n");
+		if( (data->backend_type = data_type_from_string((char *)temp)) == -1)
+			return_error(-EINVAL, "locate 'backend-type' invalid\n");
 	}
 	
 	/* check everything */
@@ -187,15 +204,21 @@ static ssize_t locate_create(chain_t *chain, request_t *request, buffer_t *buffe
 }
 
 static ssize_t locate_setgetdelete(chain_t *chain, request_t *request, buffer_t *buffer){
-	ssize_t      ret  = -1;
-	locate_ud  *data = (locate_ud *)chain->user_data;
-	hash_t      *r_key, *r_size;
+	hash_t      *r_key, *r_size, *r_action;
 	void        *o_key, *o_size;
+	unsigned int action;
+	ssize_t      ret  = -1;
+	locate_ud   *data = (locate_ud *)chain->user_data;
+	
+	r_action = hash_find(request, "action");
+	r_key    = hash_find(request, "key");
+	r_size   = hash_find(request, "size");
+	
+	action = HVALUE(r_action, unsigned int);
 	
 	switch(data->mode){
 		case LINEAR_INCAPSULATED:
-			if( (r_key  = hash_find(request, "key"))  == NULL) return -EINVAL;
-			if( (r_size = hash_find(request, "size")) == NULL) return -EINVAL;
+			if(r_key == NULL || r_size == NULL) return -EINVAL;
 			
 			o_key  = alloca(r_key->value_size);
 			o_size = alloca(r_size->value_size);
@@ -218,13 +241,35 @@ static ssize_t locate_setgetdelete(chain_t *chain, request_t *request, buffer_t 
 			break;
 			
 		case INDEX_INCAPSULATED:
-			// ret = check_existance(key, buffer);
-			// if(ret <= 0)
-			// 	return ret;
-			//
-			// hash_set(request, "key", *buffer, ret);
+			// if no key supplied - create new item
+			if(action == ACTION_CRWD_WRITE && r_key == NULL){
+				return locate_create(chain, request, buffer);
+			}
 			
-			ret = chain_next_query(chain, request, buffer);
+			// query index
+			hash_t  idx_req_get[] = {
+				{ "action",   DATA_INT32(ACTION_CRWD_READ) },
+				{ "size",     DATA_INT32(1)                },
+				hash_next(request)
+			};
+			ret = backend_query(data->backend, idx_req_get, &data->idx_buffer);
+			
+			// convert idx_buffer to oid_buffer
+			// data->backend_type
+			buffer_read(&data->idx_buffer, 0, &data->oid, sizeof(data->oid));
+			
+			// query data
+			hash_t  data_request[] = {
+				{ "key",  data->backend_type, &data->oid, sizeof(data->oid) },
+				hash_next(request)
+			};
+			ret = chain_next_query(chain, data_request, buffer);
+			if(ret <= 0)
+				return ret;
+			
+			if(action == ACTION_CRWD_DELETE){
+				// delete from index
+			}
 			break;
 			
 		case INDEX_ORIGINAL:

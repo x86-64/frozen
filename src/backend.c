@@ -100,6 +100,9 @@ static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chai
 	char      *chain_name;
 	hash_t    *chain_config;
 	
+	if(config->type != TYPE_HASHT)
+		return ITER_CONTINUE;
+	
 	chain_config = (hash_t *)config->value;
 	if(hash_get_typed(chain_config, TYPE_STRING, "name", (void **)&chain_name, NULL) != 0)
 		return ITER_BREAK;
@@ -136,35 +139,43 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 /* }}}1 */
 /* backends - public {{{1 */
 
-backend_t *  backend_new      (char *name, hash_t *config){
-	int ret;
+backend_t *  backend_new      (hash_t *config){
+	int         ret;
+	char       *name;
+	hash_t     *backend_config;
+	backend_t  *backend = NULL;
 	
-	if(name == NULL || config == NULL)
-		return NULL;	
-	
-	backend_t *backend = (backend_t *)malloc(sizeof(backend_t));
-	if(backend == NULL)
-		return NULL;
-	
-	backend->name  = strdup(name);
-	backend->chain = NULL;
-	
-	ret = hash_iter(config, &backend_iter_chain_init, backend, &backend->chain);
-	if(ret == ITER_BREAK){
-		backend_destroy(backend);
-		return NULL;
-	}
-	
-	list_push(&backends, backend);
-	
-	return backend;
-}
-
-backend_t *  backend_find_by_name(char *name){
-	backend_t *backend = NULL;
-	
-	list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
-	
+	switch(hash_get_data_type(config)){
+		case TYPE_STRING: // search backend name
+			name = hash_get_value_ptr(config);
+			
+			list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
+			backend->refs++;
+			
+			break;
+		case TYPE_HASHT:  // create new backend with config
+			if( (backend = malloc(sizeof(backend_t))) == NULL)
+				return NULL;
+			
+			backend->chain = NULL;
+			backend->refs  = 1;
+			backend->name  = 
+				( hash_get_typed(config, TYPE_STRING, "name", (void **)&name, NULL) == 0) ?
+				name : NULL;
+			
+			backend_config = hash_get_value_ptr(config);
+			
+			ret = hash_iter(backend_config, &backend_iter_chain_init, backend, &backend->chain);
+			if(ret == ITER_BREAK){
+				backend_destroy(backend);
+				return NULL;
+			}
+			
+			list_push(&backends, backend);
+			break;
+		default:
+			return NULL;
+	};
 	return backend;
 }
 
@@ -177,6 +188,9 @@ ssize_t      backend_query        (backend_t *backend, request_t *request, buffe
 
 void         backend_destroy  (backend_t *backend){
 	if(backend == NULL)
+		return;
+	
+	if(--backend->refs > 0)
 		return;
 	
 	list_unlink(&backends, backend); 
@@ -254,3 +268,15 @@ buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached){ // {{{
 } // }}}
 
 /* }}} */
+
+request_actions request_str_to_action(char *string){
+	if(strcasecmp(string, "create") == 0) return ACTION_CRWD_CREATE;
+	if(strcasecmp(string, "write")  == 0) return ACTION_CRWD_WRITE;
+	if(strcasecmp(string, "read")   == 0) return ACTION_CRWD_READ;
+	if(strcasecmp(string, "delete") == 0) return ACTION_CRWD_DELETE;
+	if(strcasecmp(string, "move")   == 0) return ACTION_CRWD_MOVE;
+	if(strcasecmp(string, "count")  == 0) return ACTION_CRWD_COUNT;
+	if(strcasecmp(string, "custom") == 0) return ACTION_CRWD_CUSTOM;
+	return -1;
+}
+

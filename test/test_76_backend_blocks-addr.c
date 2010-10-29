@@ -17,19 +17,22 @@ START_TEST (test_backend_blocks_addrs){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",      DATA_STRING("file")                   },
-			{ "filename",  DATA_STRING("data_backend_addrs.dat") },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",      DATA_STRING("blocks-address")     },
-			{ "per-level", DATA_INT32(4)                     },
+			{ NULL, DATA_HASHT(
+				{ "name",      DATA_STRING("file")                   },
+				{ "filename",  DATA_STRING("data_backend_addrs.dat") },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",      DATA_STRING("blocks-address")     },
+				{ "per-level", DATA_INT32(4)                     },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
-	backend = backend_new("addrs", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	// create 30 blocks with size VSIZE {{{

@@ -5,19 +5,22 @@ START_TEST (test_backends_two_chains){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_file.dat")    },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("null-proxy")               },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                     },
+				{ "filename",    DATA_STRING("data_backend_file.dat")    },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("null-proxy")               },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
 	/* create backend */
-	backend = backend_new("in_file", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	/* test read/writes */

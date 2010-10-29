@@ -1,23 +1,23 @@
 #include "test.h"
 
 START_TEST (test_backends){
-	backend_t *backend, *found;
+	backend_t *backend;
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_file.dat")    },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                     },
+				{ "filename",    DATA_STRING("data_backend_file.dat")    },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
 	/* re-run with good parameters */
-	backend = backend_new("in_file", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
-	
-	found = backend_find_by_name("in_file");
-		fail_unless(backend == found, "backend_find_by_name not working");
 	
 	backend_destroy(backend);
 }

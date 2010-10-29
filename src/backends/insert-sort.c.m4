@@ -109,8 +109,7 @@ static ssize_t sorts_create(chain_t *chain, request_t *request, buffer_t *buffer
 }
 
 static ssize_t sorts_set   (chain_t *chain, request_t *request, buffer_t *buffer){
-	ssize_t       ret;
-	
+	ssize_t          ret;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
 	// TODO underlying locking and threading
@@ -129,9 +128,15 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request, buffer_t *buffer
 		{ "insert", DATA_INT32(1)              },
 		hash_next(request)
 	};
+	ret = chain_next_query(chain, set_request, buffer);
+	if(ret <= 0)
+		return ret;
+	
+	buffer_write(buffer, 0, &data->key, sizeof(data->key));
+	ret = sizeof(data->key);
 	
 	// next("unlock");
-	return chain_next_query(chain, set_request, buffer);
+	return ret;
 }
 
 static ssize_t sorts_custom(chain_t *chain, request_t *request, buffer_t *buffer){

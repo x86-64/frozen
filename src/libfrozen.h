@@ -28,8 +28,8 @@
 
 #define error(...)            do{ fprintf(stdout,__VA_ARGS__);    }while(0);
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
+#define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
 #define MIN(a,b)              ( (a > b) ? b : a )
-
 
 /* Own headers */
 #include <list.h>            // internal data storage

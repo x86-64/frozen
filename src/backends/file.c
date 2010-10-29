@@ -78,7 +78,7 @@ static int file_configure(chain_t *chain, hash_t *config){
 	*filepath = '\0';
 	
 	if(hash_get_typed(global_settings, TYPE_STRING, "homedir", (void **)&temp, NULL) != 0)
-		temp = "./";
+		temp = ".";
 	
 	if(snprintf(filepath, 256, "%s/%s", temp, filename) >= 256){
 		/* snprintf can truncate strings, so malicious user can use it to access another file.
@@ -155,10 +155,11 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	if( file_new_offset(chain, &new_key, HVALUE(r_value_size, unsigned int)) != 0)
 		return -EFAULT;
 	
-	if(buffer != NULL)
+	if(buffer != NULL){
 		buffer_write(buffer, 0, &new_key, sizeof(off_t)); 
-	
-	return sizeof(off_t);
+		return sizeof(off_t);
+	}
+	return 0;
 }
 
 static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
@@ -180,10 +181,7 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 		if( file_new_offset(chain, &key, HVALUE(r_value_size, unsigned int)) != 0)
 			return -EFAULT;
 		
-		if(buffer != NULL){
-			buffer_write(buffer, 0, &key, sizeof(key));
-			create_mode = 1;
-		}
+		create_mode = 1;
 	}
 	
 redo:
@@ -211,6 +209,9 @@ redo:
 exit:
 	data->file_stat_status = STAT_NEED_UPDATE; // coz can write to end, without calling create
 	
+	if(buffer != NULL && create_mode == 1){
+		buffer_write(buffer, 0, &key, sizeof(key));
+	}
 	return (create_mode == 1) ? sizeof(off_t) : write_size;
 }
 

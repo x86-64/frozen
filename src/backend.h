@@ -56,24 +56,23 @@ _inline int chain_configure    (chain_t *chain, hash_t *config);
 
 /* }}}1 */
 
-/* PRIVATE - backends {{{1 */
+/* backends {{{ */
 
 typedef struct backend_t {
-	char *    name;
-	chain_t * chain;
-	
+	char           *name;
+	chain_t        *chain;
+	unsigned int    refs;
 } backend_t;
 
-API backend_t *  backend_new          (char *name, hash_t *config);
-API ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer);
-API void         backend_destroy      (backend_t *backend);
-API backend_t *  backend_find_by_name (char *name);
+API backend_t *     backend_new             (hash_t *config);
+API ssize_t         backend_query           (backend_t *backend, request_t *request, buffer_t *buffer);
+API void            backend_destroy         (backend_t *backend);
 
-/* }}}1 */
-
-/* buffer_io {{{ */
 API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
 API buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
+
 /* }}} */
+
+request_actions     request_str_to_action   (char *string);
 
 #endif // BACKEND_H

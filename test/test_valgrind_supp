@@ -1,0 +1,12 @@
+{
+	suppress-memcpy
+	Memcheck:Overlap
+	fun:memcpy
+}
+{
+	suppress-chainreg
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:_chain_register
+}

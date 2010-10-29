@@ -70,6 +70,7 @@ API void *          buffer_add_tail_chunk      (buffer_t *buffer, size_t size);
 API void            buffer_add_head_raw        (buffer_t *buffer, void *ptr, size_t size);
 API void            buffer_add_tail_raw        (buffer_t *buffer, void *ptr, size_t size);
 
+API ssize_t         buffer_memcpy              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size);
 API ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size);
 API ssize_t         buffer_strcmp              (buffer_t *buffer1, buffer_t *buffer_2);
 API size_t          buffer_strlen              (buffer_t *buffer);

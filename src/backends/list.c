@@ -88,12 +88,8 @@ static chain_t chain_lists = {
 	&lists_configure,
 	&lists_destroy,
 	{{
-		.func_create = &chain_next_query,
 		.func_set    = &lists_set,
-		.func_get    = &chain_next_query,
-		.func_delete = &lists_delete,
-		.func_move   = &chain_next_query,
-		.func_count  = &chain_next_query
+		.func_delete = &lists_delete
 	}}
 };
 CHAIN_REGISTER(chain_lists)

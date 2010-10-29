@@ -65,14 +65,17 @@ START_TEST (test_backend_file){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_file.dat")    },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                     },
+				{ "filename",    DATA_STRING("data_backend_file.dat")    },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
-	backend = backend_new("in_file", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	hash_t hash_create[] = {

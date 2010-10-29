@@ -1,7 +1,7 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
-typedef enum request_action {
+typedef enum request_actions {
 	ACTION_CRWD_CREATE,
 	ACTION_CRWD_READ,
 	ACTION_CRWD_WRITE,
@@ -9,7 +9,7 @@ typedef enum request_action {
 	ACTION_CRWD_MOVE,
 	ACTION_CRWD_COUNT,
 	ACTION_CRWD_CUSTOM
-} request_action;
+} request_actions;
 
 typedef hash_t  request_t;
 

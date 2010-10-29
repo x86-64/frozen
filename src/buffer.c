@@ -236,7 +236,7 @@ static int      buffer_seek                (buffer_t *buffer, off_t b_offset, vo
 				return 0;
 			}
 			
-			buffer_process(buffer, (size_t)b_offset, 0,
+			buffer_process(buffer, buffer_get_size(buffer), 0,
 				do{
 					if((offset + chunk_size) > b_offset){
 						*p_chunk     = s_chunk;
@@ -306,6 +306,38 @@ ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off
 		chunk1_size -= cmp_size;
 		chunk2_size -= cmp_size;
 		size        -= cmp_size;
+	}
+	return 0;
+} // }}}
+ssize_t         buffer_memcpy              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size){ // {{{
+	size_t  chunk2_size, cpy_size;
+	void   *chunk2;
+	void   *s_chunk2 = buffer2->head;
+	char    chunk2_buf[MEMCMP_BUFF_SIZE];
+	
+	chunk2_size = 0;
+	while(size > 0){
+		if(chunk2_size == 0){
+			switch(buffer_seek(buffer2, buffer2_off, &s_chunk2, &chunk2, &chunk2_size)){
+				case -1:      // invalid seek offset
+					return -EINVAL;
+				case  0:      // seek ok
+					break;
+				case -EINVAL: // seeking io buffer, need manual read
+					chunk2       = &chunk2_buf;
+					chunk2_size  = buffer_read(buffer2, buffer2_off, &chunk2_buf, MEMCMP_BUFF_SIZE);
+					break;
+			};
+			buffer2_off += chunk2_size;
+		}
+		
+		cpy_size = (chunk2_size < size) ? chunk2_size : size;
+		
+		buffer_write(buffer1, buffer1_off, chunk2, cpy_size);
+		
+		chunk2      += cpy_size;
+		chunk2_size -= cpy_size;
+		size        -= cpy_size;
 	}
 	return 0;
 } // }}}

@@ -5,21 +5,24 @@ START_TEST (test_backend_locate){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                     },
-			{ "filename",    DATA_STRING("data_backend_locate.dat")  },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("locate")                   },
-			{ "mode",        DATA_STRING("linear-incapsulated")      },
-			{ "oid-type",    DATA_STRING("int32")                    },
-			{ "size",        DATA_INT32(19)                          },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                     },
+				{ "filename",    DATA_STRING("data_backend_locate.dat")  },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("locate")                   },
+				{ "mode",        DATA_STRING("linear-incapsulated")      },
+				{ "oid-type",    DATA_STRING("int32")                    },
+				{ "size",        DATA_INT32(19)                          },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
-	backend = backend_new("in_locate", settings);
+	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	ssize_t       ssize;

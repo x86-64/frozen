@@ -1,6 +1,7 @@
 
 backends_sources =                  \
 	backends/null-proxy.c       \
+	backends/rewrite.c          \
 	backends/file.c             \
 	backends/list.c             \
 	backends/locate.c           \

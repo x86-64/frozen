@@ -11,6 +11,7 @@
 #include <test_75_backend_insert-sort.c>
 #include <test_76_backend_blocks-addr.c>
 #include <test_77_backend_blocks.c>
+#include <test_78_backend_rewrite.c>
 #include <test_99_real_oid_value.c>
 
 void test_list(void){
@@ -27,5 +28,6 @@ void test_list(void){
 	tcase_add_test(tc_core, test_backend_insert_sort);
 	tcase_add_test(tc_core, test_backend_blocks_addrs);
 	tcase_add_test(tc_core, test_backend_blocks);
+	tcase_add_test(tc_core, test_backend_rewrite);
 	tcase_add_test(tc_core, test_real_oid_value);
 }

@@ -6,24 +6,27 @@ START_TEST (test_backend_insert_sort){
 	
 	hash_t  settings[] = {
 		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("file")                         },
-			{ "filename",    DATA_STRING("data_backend_insert_sort.dat") },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("list")                     },
-			hash_end
-		)},
-		{ NULL, DATA_HASHT(
-			{ "name",        DATA_STRING("insert-sort")              },
-			{ "sort-engine", DATA_STRING("binsearch")                },
-			{ "type",        DATA_STRING("int8")                     },
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("file")                         },
+				{ "filename",    DATA_STRING("data_backend_insert_sort.dat") },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("list")                     },
+				hash_end
+			)},
+			{ NULL, DATA_HASHT(
+				{ "name",        DATA_STRING("insert-sort")              },
+				{ "sort-engine", DATA_STRING("binsearch")                },
+				{ "type",        DATA_STRING("int8")                     },
+				hash_end
+			)},
 			hash_end
 		)},
 		hash_end
 	};
 	
-	if( (backend = backend_new("in_sort", settings)) == NULL){
+	if( (backend = backend_new(settings)) == NULL){
 		fail("backend creation failed");
 		return;
 	}
@@ -48,7 +51,7 @@ START_TEST (test_backend_insert_sort){
 			hash_end
 		};
 		ret = backend_query(backend, req_write, &buffer);
-			fail_unless(ret == sizeof(buff),  "chain in_sort write failed");
+			fail_unless(ret > 0,  "chain in_sort write failed");
 	}
 	
 	hash_t  req_read[] = {

@@ -219,7 +219,7 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 			)},
 			hash_end
 		};
-		backend_t *backend = backend_new("bench_file", b_config);
+		backend_t *backend = backend_new(b_config);
 		if(backend == NULL){
 			printf("test_frozen_seqwrite backend create failed\n");
 			goto exit;
@@ -269,7 +269,7 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 			)},
 			hash_end
 		};
-		backend_t *backend = backend_new("bench_file", b_config);
+		backend_t *backend = backend_new(b_config);
 		if(backend == NULL){
 			printf("test_frozen_seqread backend create failed\n");
 			goto exit;

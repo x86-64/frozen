@@ -304,6 +304,7 @@ static int blocks_destroy(chain_t *chain){
 
 static int blocks_configure(chain_t *chain, hash_t *config){
 	void             *temp;
+	hash_t           *r_backend;
 	blocks_user_data *data         = (blocks_user_data *)chain->user_data;
 	
 	data->block_size =
@@ -313,10 +314,10 @@ static int blocks_configure(chain_t *chain, hash_t *config){
 	if( data->block_size == 0)
 		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
 	
-	if(hash_get_typed(config, TYPE_HASHT, "backend", &temp, NULL) != 0)
+	if( (r_backend = hash_find(config, "backend")) == NULL)
 		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set\n");
 	
-	if( (data->bk_map = backend_new("blocks_map", (hash_t *)temp)) == NULL)
+	if( (data->bk_map = backend_new(r_backend)) == NULL)
 		return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
 	
 	data->ch_real = chain;
