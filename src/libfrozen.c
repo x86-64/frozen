@@ -1,7 +1,16 @@
+/**
+ * @file libfrozen.c
+ * @brief Library main functions
+ */
+
 #include "libfrozen.h"
 
-hash_t *global_settings;
+hash_t *global_settings; ///< Global settings
 
+/** @brief Initialize library
+ * @return 0 on success
+ * @return -1 on error
+ */
 int frozen_init(void){
 	hash_t  global_proto[20] = {
 		[0 ... 18] = hash_null,
@@ -13,6 +22,10 @@ int frozen_init(void){
 	return 0;
 }
 
+/** @brief Destroy library
+ * @return 0 on success
+ * @return -1 on error
+ */
 int frozen_destroy(void){
 	free(global_settings);
 	return 0;

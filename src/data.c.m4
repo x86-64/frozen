@@ -1,3 +1,7 @@
+/**
+ * @file data.c
+ * @brief Data manipulations
+ */
 #include <libfrozen.h>
 
 /* m4 {{{
@@ -14,7 +18,7 @@ size_t       data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);
 // }}}
 
 int                  data_type_is_valid     (data_type type){ // {{{
-	if(type != -1 && (unsigned)type < data_protos_size){
+	if(type != TYPE_INVALID && (unsigned)type < data_protos_size){
 		return 1;
 	}
 	return 0;
@@ -27,7 +31,7 @@ data_type            data_type_from_string  (char *string){ // {{{
 			return data_protos[i].type;
 	}
 	
-	return -1;
+	return TYPE_INVALID;
 } // }}}
 data_proto_t *       data_proto_from_type   (data_type type){ // {{{
 	if((unsigned)type >= data_protos_size)
@@ -36,6 +40,13 @@ data_proto_t *       data_proto_from_type   (data_type type){ // {{{
 	return &data_protos[type];
 } // }}}
 
+/** @brief Create data context
+ *  @param[out] ctx      Place to write data ctx
+ *  @param[in]  type     Data type
+ *  @param[in]  context  String with context or NULL
+ *  @return 0 on success
+ *  @return -EINVAL on invalid type
+ */
 int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context){ // {{{
 	f_data_ctx_n   func_ctx_parse;
 	void          *user_data;
@@ -54,6 +65,11 @@ int                  data_ctx_init          (data_ctx_t *ctx, data_type type, vo
 	ctx->user_data      = user_data;
 	return 0;
 } // }}}
+
+/** @brief Destory data context
+ *  @param[in] ctx Data context
+ *  @return 0
+ */
 int                  data_ctx_destroy       (data_ctx_t *ctx){ // {{{
 	if( ctx->data_proto != NULL && ctx->data_proto->func_ctx_free != NULL)
 		ctx->data_proto->func_ctx_free(ctx->user_data);

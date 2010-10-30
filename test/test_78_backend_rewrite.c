@@ -168,7 +168,25 @@ START_TEST (test_backend_rewrite){
 		buffer_read(buffer, 8,            &bfb2, MIN(ret, sizeof(bfb2)));
 		fail_unless(bfb1 == bfb2, "backend rewrite rules rules_set_buffer_from_buffer data failed\n");
 	// }}}
+	// calc length of key {{{
+	hash_t  rules_length_key[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",         DATA_STRING("set")             },
+			{ "src_buffer",     DATA_INT32(1)                  },
+			{ "dst_buffer",     DATA_INT32(1)                  },
+			{ "dst_buffer_off", DATA_OFFT(8)                   },
+			{ "after",          DATA_INT32(1)                  },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_length_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_set_buffer_from_buffer failed\n");
+		buffer_read(buffer, 0,            &bfb1, MIN(ret, sizeof(bfb1)));
+		buffer_read(buffer, 8,            &bfb2, MIN(ret, sizeof(bfb2)));
+		fail_unless(bfb1 == bfb2, "backend rewrite rules rules_set_buffer_from_buffer data failed\n");
 	
+	// }}}
 	buffer_free(buffer);
 }
 END_TEST

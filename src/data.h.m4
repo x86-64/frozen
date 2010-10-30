@@ -18,7 +18,10 @@ m4_divert(0)
 
 MACRO_ARRAY()
 
-typedef enum data_type { TYPES_ARRAY() } data_type;
+typedef enum data_type {
+	TYPES_ARRAY()
+	TYPE_INVALID = -1
+} data_type;
 
 typedef void                   data_t;
 typedef struct data_proto_t    data_proto_t;

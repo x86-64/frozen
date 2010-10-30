@@ -1,3 +1,9 @@
+/**
+ * @file buffer.h
+ * @ingroup buffer
+ * @brief Buffers header
+ */
+
 #ifndef BUFFER_H
 #define BUFFER_H
 
@@ -5,35 +11,38 @@ typedef struct buffer_t buffer_t;
 
 typedef ssize_t (*func_buffer)(buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
 
-
+/// @brief Buffer types
 typedef enum buff_type {
 	BUFF_TYPE_CHUNKED,
 	BUFF_TYPE_IO_DIRECT,
 	BUFF_TYPE_IO_CACHED
 } buff_type;
 
+/// @brief Chunk types
 typedef enum chunk_type {
 	CHUNK_TYPE_ALLOCATED,
 	CHUNK_TYPE_BARE
 } chunk_type;
 
+/// @brief chunk_t structure
 typedef struct chunk_t {
-	chunk_type   type;
-	size_t       size;
-	void        *next;
+	chunk_type   type;       ///< Chunk type
+	size_t       size;       ///< Chunk size
+	void        *next;       ///< Next chunk ptr
 	
-	void        *bare_ptr; // only CHUNK_TYPE_BARE
+	void        *bare_ptr;   ///< Ptr to raw memory (only CHUNK_TYPE_BARE)
 } chunk_t;
 
+/// @brief buffer_t structure
 struct buffer_t {
-	buff_type    type;
-	size_t       size;
-	void        *head;
-	void        *tail;
+	buff_type    type;       ///< Buffer type
+	size_t       size;       ///< Buffer length
+	void        *head;       ///< First buffer chunk
+	void        *tail;       ///< Last buffer chunk
 	
-	void        *io_context;
-	func_buffer  io_read;
-	func_buffer  io_write;
+	void        *io_context; ///< IO context
+	func_buffer  io_read;    ///< IO read function
+	func_buffer  io_write;   ///< IO write function
 };
 
 void *          chunk_alloc                (size_t size);

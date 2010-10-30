@@ -16,18 +16,18 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_PATH_PROGS(M4, [gm4 m4], no)
 
-PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
-	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
-)
+#PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
+#	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
+#)
+
+AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))
+if test "x${enable_coverage}" = "xyes"; then
+	CFLAGS="$CFLAGS --coverage"
+fi
 
 AC_ARG_ENABLE(debug,  AS_HELP_STRING([--enable-debug],  [compile with debug symbols]))
 if test "x$enable_debug" == "xyes"; then
         CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror"
-fi
-
-AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))
-if test "x${enable_cov}" = "xyes"; then
-	CFLAGS="-fprofile-arcs -ftest-coverage $CFLAGS"
 fi
 
 AC_ARG_ENABLE(profile,  AS_HELP_STRING([--enable-profile],  [enable code profiling]))

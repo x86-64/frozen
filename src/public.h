@@ -8,7 +8,9 @@ typedef enum request_actions {
 	ACTION_CRWD_DELETE,
 	ACTION_CRWD_MOVE,
 	ACTION_CRWD_COUNT,
-	ACTION_CRWD_CUSTOM
+	ACTION_CRWD_CUSTOM,
+	
+	REQUEST_INVALID = -1
 } request_actions;
 
 typedef hash_t  request_t;

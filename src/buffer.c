@@ -1,3 +1,9 @@
+/**
+ * @file buffer.c
+ * @ingroup buffer
+ * @brief Working with buffer_t
+ */
+
 #include <libfrozen.h>
 
 #define MEMCMP_BUFF_SIZE 1024
@@ -39,16 +45,31 @@ inline void   chunk_free     (void *chunk){ free( ((chunk_t *)chunk) - 1); }
 
 /* }}} */
 /* buffers - public {{{1 */
+
+/** @brief Initialize buffer
+ *  @param buffer  Place for buffer
+ */
 void            buffer_init                (buffer_t *buffer){ // {{{
 	memset(buffer, 0, sizeof(buffer_t));
 	buffer->type = BUFF_TYPE_CHUNKED;
 } // }}}
+
+/** @brief Allocate new buffer
+ *  @return buffer_t * or NULL
+ */
 buffer_t *      buffer_alloc               (void){ // {{{
 	buffer_t *buffer = (buffer_t *)malloc(sizeof(buffer_t));
 	buffer_init(buffer);
 	return buffer;
 } // }}}
 
+/** @brief Associate buffer with read and write functions
+ *  @param[out] buffer   Place to write buffer structure
+ *  @param[in]  context  IO context for functions
+ *  @param[in]  read     IO read function
+ *  @param[in]  write    IO write function
+ *  @param[in]  cached   Cache returned io buffers
+ */
 void            buffer_io_init             (buffer_t *buffer, void *context, func_buffer read, func_buffer write, int cached){ // {{{
 	memset(buffer, 0, sizeof(buffer_t));
 	buffer->type = (cached == 1) ? BUFF_TYPE_IO_CACHED : BUFF_TYPE_IO_DIRECT;
@@ -56,21 +77,45 @@ void            buffer_io_init             (buffer_t *buffer, void *context, fun
 	buffer->io_read    = read;
 	buffer->io_write   = write;
 } // }}}
+
+/** @brief Associate buffer with read and write functions
+ *  @param[in]  context  IO context for functions
+ *  @param[in]  read     IO read function
+ *  @param[in]  write    IO write function
+ *  @param[in]  cached   Cache returned io buffers
+ *  @return buffer_t *
+ *  @return NULL
+ */
 buffer_t *      buffer_io_alloc            (void *context, func_buffer read, func_buffer write, int cached){ // {{{
 	buffer_t *buffer = (buffer_t *)malloc(sizeof(buffer_t));
 	buffer_io_init(buffer, context, read, write, cached);
 	return buffer;
 } // }}}
 
+/** @brief Associate raw memory with buffer
+ *  @param buffer Place to write buffer structure
+ *  @param ptr    Pointer to raw memory
+ *  @param size   Length of memory
+ */
 void            buffer_init_from_bare      (buffer_t *buffer, void *ptr, size_t size){ // {{{
 	buffer_init(buffer);
 	buffer_add_head_raw(buffer, ptr, size);
 } // }}}
+/** @brief Allocate new buffer associated with raw memory
+ *  @param ptr    Pointer to raw memory
+ *  @param size   Length of memory
+ */
 buffer_t *      buffer_alloc_from_bare     (void *ptr, size_t size){ // {{{
 	buffer_t *buffer = (buffer_t *)malloc(sizeof(buffer_t));
 	buffer_init_from_bare(buffer, ptr, size);
 	return buffer;
 } // }}}
+
+/** @brief Copy raw memory to new buffer
+ *  @param buffer Place to write buffer structure
+ *  @param ptr    Raw memory
+ *  @param size   Length of memory
+ */
 void            buffer_init_from_copy      (buffer_t *buffer, void *ptr, size_t size){ // {{{
 	void *chunk;
 
@@ -78,15 +123,27 @@ void            buffer_init_from_copy      (buffer_t *buffer, void *ptr, size_t 
 	chunk = buffer_add_head_chunk(buffer, size);
 	memcpy(chunk, ptr, size);
 } // }}}
+
+/** @brief Copy raw memory to allocated buffer
+ *  @param ptr    Raw memory
+ *  @param size   Length of memory
+ */
 buffer_t *      buffer_alloc_from_copy     (void *ptr, size_t size){ // {{{
 	buffer_t *buffer = (buffer_t *)malloc(sizeof(buffer_t));
 	buffer_init_from_copy(buffer, ptr, size);
 	return buffer;
 } // }}}
 
+/** @brief Destory buffer
+ *  @param  buffer  Buffer to destory
+ */
 void            buffer_destroy             (buffer_t *buffer){ // {{{
 	buffer_cleanup(buffer);
 } // }}}
+
+/** @brief Free allocated buffer
+ *  @param  buffer  Buffer to free
+ */
 void            buffer_free                (buffer_t *buffer){ // {{{
 	buffer_destroy(buffer);
 	free(buffer);
@@ -95,6 +152,10 @@ void            buffer_free                (buffer_t *buffer){ // {{{
 void            buffer_defragment          (buffer_t *buffer){ // {{{
 
 } // }}}
+
+/** @brief Empty buffer
+ *  @param buffer Buffer to empty
+ */
 void            buffer_cleanup             (buffer_t *buffer){ // {{{
 	void *chunk = buffer->head;
 	void *chunkn;
@@ -113,6 +174,10 @@ void            buffer_cleanup             (buffer_t *buffer){ // {{{
 			break;
 	}
 } // }}}
+
+/** @brief Get buffer length
+ *  @param buffer Buffer
+ */
 inline size_t   buffer_get_size            (buffer_t *buffer){ // {{{
 	if(buffer->type == BUFF_TYPE_CHUNKED)
 		return buffer->size;
@@ -142,6 +207,7 @@ static void     buffer_add_tail_any        (buffer_t *buffer, void *chunk){ // {
 	}
 	buffer->tail = chunk;
 } // }}}
+
 void *          buffer_add_head_chunk      (buffer_t *buffer, size_t size){ // {{{
 	void *chunk = chunk_data_alloc(size);
 	if(chunk == NULL) return NULL;
@@ -169,6 +235,15 @@ void            buffer_add_tail_raw        (buffer_t *buffer, void *ptr, size_t 
 	buffer_add_tail_any(buffer, chunk);
 } // }}}
 
+/** @brief Write to buffer
+ *  @param[in] buffer        Buffer
+ *  @param[in] write_offset  Offset to start writing
+ *  @param[in] buf           Ptr to memory
+ *  @param[in] buf_size      Write length
+ *  @return Number of bytes written
+ *  @return IO function error
+ *  @return -1
+ */
 ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset, void *buf, size_t buf_size){ // {{{
 	size_t offset_diff;
 
@@ -196,6 +271,16 @@ ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset
 	}
 	return -1;
 } // }}}
+
+/** @brief Read from buffer
+ *  @param[in]  buffer       Buffer
+ *  @param[in]  read_offset  Offset to start writing
+ *  @param[out] buf          Read to ptr
+ *  @param[in]  buf_size     Read length
+ *  @return Number of bytes read
+ *  @return IO function error
+ *  @return -1
+ */
 ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset, void *buf, size_t buf_size){ // {{{
 	ssize_t processed = 0;
 	size_t  offset_diff;
@@ -225,6 +310,7 @@ ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset,
 	}
 	return -1;
 } // }}}
+
 static int      buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_chunk, void **p_ptr, size_t *p_rest_size){ // {{{
 	switch(buffer->type){
 		case BUFF_TYPE_CHUNKED:
@@ -256,6 +342,15 @@ static int      buffer_seek                (buffer_t *buffer, off_t b_offset, vo
 	return -1;
 } // }}}
 
+/** @brief Compare two buffers
+ *  @param[in]  buffer1      First buffer
+ *  @param[in]  buffer1_off  First buffer offset
+ *  @param[in]  buffer2      Second buffer
+ *  @param[in]  buffer2_off  Second buffer offset
+ *  @param[in]  size         Size to compare
+ *  @return 0 if buffers equal
+ *  @return 1 or -1 if buffers differs
+ */
 ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size){ // {{{
 	int     ret;
 	size_t  chunk1_size, chunk2_size, cmp_size;
@@ -309,6 +404,16 @@ ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off
 	}
 	return 0;
 } // }}}
+
+/** @brief Copy from one buffer to another
+ *  @param[in]  buffer1      First buffer
+ *  @param[in]  buffer1_off  First buffer offset
+ *  @param[in]  buffer2      Second buffer
+ *  @param[in]  buffer2_off  Second buffer offset
+ *  @param[in]  size         Size to copy
+ *  @return 0 on success
+ *  @return -EINVAL on error
+ */
 ssize_t         buffer_memcpy              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size){ // {{{
 	size_t  chunk2_size, cpy_size;
 	void   *chunk2;
@@ -345,52 +450,7 @@ ssize_t         buffer_memcpy              (buffer_t *buffer1, off_t buffer1_off
 ssize_t         buffer_strcmp              (buffer_t *buffer1, buffer_t *buffer_2);
 size_t          buffer_strlen              (buffer_t *buffer);
 
-/* {{{
-ssize_t         buffer_memcmp              (buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off, size_t size){ // {{{
-	int     ret;
-	size_t  chunk1_size, chunk2_size, cmp_size;
-	void   *chunk1, *chunk2;
-	void   *s_chunk1 = buffer1->head;
-	void   *s_chunk2 = buffer2->head;
-	
-	if(buffer_seek(buffer1, buffer1_off, &s_chunk1, &chunk1, &chunk1_size) != 0)
-		return -EINVAL;
-	if(buffer_seek(buffer2, buffer2_off, &s_chunk2, &chunk2, &chunk2_size) != 0)
-		return -EINVAL;
-	
-	goto start;
-	while(size > 0){
-		if(chunk1_size == 0){
-			s_chunk1    = chunk_next(s_chunk1);
-			
-			if(s_chunk1 == NULL) return  1;
-			chunk1      = chunk_get_ptr  (s_chunk1);
-			chunk1_size = chunk_get_size (s_chunk1);
-		}
-		if(chunk2_size == 0){
-			s_chunk2    = chunk_next(s_chunk2);
-			
-			if(s_chunk2 == NULL) return -1;
-			chunk2      = chunk_get_ptr  (s_chunk2);
-			chunk2_size = chunk_get_size (s_chunk2);
-		}
-	
-	start:	
-		cmp_size = (chunk1_size < chunk2_size) ? chunk1_size : chunk2_size;
-		cmp_size = (cmp_size    < size)        ? cmp_size    : size;
-		
-		ret = memcmp(chunk1, chunk2, cmp_size);
-		if(ret != 0)
-			return ret;
-		
-		chunk1_size -= cmp_size;
-		chunk2_size -= cmp_size;
-		size        -= cmp_size;
-	}
-	return 0;
-} // }}}
-
-
+/*
 int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
 	int     ret = -1;
 	size_t  size;
