@@ -77,7 +77,7 @@ static int locate_configure(chain_t *chain, hash_t *config){
 	buffer_init(&data->idx_buffer);
 	
 	linear_scale =
-		(hash_get_typed(config, TYPE_INT32, "size", &temp, NULL) == 0) ?
+		(hash_get_typed(config, TYPE_SIZET, "size", &temp, NULL) == 0) ?
 		*(unsigned int *)temp : 0;
 	
 	if( (r_backend = hash_find(config, "backend")) != NULL){
@@ -180,7 +180,7 @@ static ssize_t locate_create(chain_t *chain, request_t *request, buffer_t *buffe
 			// write to index new key
 			hash_t  idx_request[] = {
 				{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-				{ "size",   DATA_INT32(1)                 },
+				{ "size",   DATA_SIZET(1)                 },
 				hash_end
 			};
 			ret = backend_query(data->backend, idx_request, buffer);
@@ -249,7 +249,7 @@ static ssize_t locate_setgetdelete(chain_t *chain, request_t *request, buffer_t 
 			// query index
 			hash_t  idx_req_get[] = {
 				{ "action",   DATA_INT32(ACTION_CRWD_READ) },
-				{ "size",     DATA_INT32(1)                },
+				{ "size",     DATA_SIZET(1)                },
 				hash_next(request)
 			};
 			ret = backend_query(data->backend, idx_req_get, &data->idx_buffer);

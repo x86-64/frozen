@@ -31,7 +31,7 @@ START_TEST (test_backend_rewrite){
 	
 	hash_t  req_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",   DATA_INT32(10)                 },
+		{ "size",   DATA_SIZET(10)                 },
 		hash_end
 	};
 	
@@ -98,7 +98,7 @@ START_TEST (test_backend_rewrite){
 			{ "src_config", DATA_STRING("default_size")    },
 			{ "dst_key",    DATA_STRING("size")            },
 			
-			{ "default_size", DATA_INT32(20)               },
+			{ "default_size", DATA_SIZET(20)               },
 			hash_end
 		)},
 		hash_end
@@ -139,7 +139,7 @@ START_TEST (test_backend_rewrite){
 			{ "dst_buffer",     DATA_INT32(1)                  },
 			{ "dst_buffer_off", DATA_OFFT(8)                   },
 			
-			{ "default_size",   DATA_INT32(30)                 },
+			{ "default_size",   DATA_SIZET(30)                 },
 			hash_end
 		)},
 		hash_end
@@ -171,21 +171,40 @@ START_TEST (test_backend_rewrite){
 	// calc length of key {{{
 	hash_t  rules_length_key[] = {
 		{ NULL, DATA_HASHT(
-			{ "action",         DATA_STRING("set")             },
-			{ "src_buffer",     DATA_INT32(1)                  },
-			{ "dst_buffer",     DATA_INT32(1)                  },
-			{ "dst_buffer_off", DATA_OFFT(8)                   },
-			{ "after",          DATA_INT32(1)                  },
+			{ "action",     DATA_STRING("length")          },
+			{ "src_config", DATA_STRING("default_size")    },
+			{ "dst_key",    DATA_STRING("size")            },
+			
+			{ "default_size", DATA_SIZET(30)               },
 			hash_end
 		)},
 		hash_end
 	};
 	ret = test_rewrite(rules_length_key, req_create, buffer);
-		fail_unless(ret > 0, "backend rewrite rules rules_set_buffer_from_buffer failed\n");
-		buffer_read(buffer, 0,            &bfb1, MIN(ret, sizeof(bfb1)));
-		buffer_read(buffer, 8,            &bfb2, MIN(ret, sizeof(bfb2)));
-		fail_unless(bfb1 == bfb2, "backend rewrite rules rules_set_buffer_from_buffer data failed\n");
-	
+		fail_unless(ret > 0, "backend rewrite rules rules_length_key 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_length_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_length_key 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 4, "backend rewrite rules rules_length_key failed\n");
+	// }}}
+	// calc length of buffer {{{
+	hash_t  rules_length_buffer[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",     DATA_STRING("length")          },
+			{ "src_buffer", DATA_INT32(1)                  },
+			{ "dst_key",    DATA_STRING("size")            },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_length_buffer, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_length_buffer 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_length_buffer, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_length_buffer 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 16, "backend rewrite rules rules_length_buffer failed\n");
 	// }}}
 	buffer_free(buffer);
 }

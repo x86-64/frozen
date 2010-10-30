@@ -233,7 +233,7 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 			hash_t  request[] = {
 				{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 				{ "key",    DATA_OFFT(off)                },
-				{ "size",   DATA_INT32(opt_item_size)     },
+				{ "size",   DATA_SIZET(opt_item_size)     },
 				hash_end
 			};
 			
@@ -283,7 +283,7 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 			hash_t  request[] = {
 				{ "action", DATA_INT32(ACTION_CRWD_READ)  },
 				{ "key",    DATA_OFFT(off)                },
-				{ "size",   DATA_INT32(opt_item_size)     },
+				{ "size",   DATA_SIZET(opt_item_size)     },
 				hash_end
 			};
 			

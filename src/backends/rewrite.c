@@ -47,7 +47,7 @@
  * Action can be one of following:
  * 	- "set"           - set key or buffer value
  * 		@param[in]  src_*    Source key or buffer
- * 		@param[in]  fatal    Return error on failed rule
+ * 		@param[in]  fatal    Return error on failed rule [TYPE_INT32]
  * 		@param[out] dst_*    Destination key or buffer
  *
  * 	- "unset"         - unset key or buffer
@@ -57,24 +57,22 @@
  * 		Actual length of buffer corrected according buffer_off + buffer_len window. For example
  * 		if buffer length is 10, and buffer_off is 2 - function return 8. If buffer_len supplied,
  * 		for example 5, function return 5.
- * 		
  * 		@param[in]  src_*    Source key or buffer
  * 		@param[out] dst_*    Destination key or buffer
  *
  * 	- "data_length"   - calc length of data_t 
  * 		Resulted data length corrected according buffer window, see above "length".
- *
  * 		@param[in]  src_*    Source key or buffer
- * 		@param[in]  type     Data type
- * 		@param[in]  data_ctx Data context for buffers
+ * 		@param[in]  type     Data type [TYPE_STRING]
+ * 		@param[in]  data_ctx Data context for buffers [TYPE_STRING]
  * 		@param[out] dst_*    Destination key or buffer
  *
  * 	- "arith"         - do arithmetic with target
  * 		@param[in]  src_*      Source key or buffer
- * 		@param[in]  type       Data type
- * 		@param[in]  data_ctx   Data context for buffers
- * 		@param[in]  operation  Operation to do: '+' '-' '*' '/'
- * 		@param[in]  operand    Operand
+ * 		@param[in]  type       Data type [TYPE_STRING]
+ * 		@param[in]  data_ctx   Data context for buffers [TYPE_STRING]
+ * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
+ * 		@param[in]  operand    Operand [TYPE_INT32]
  * 		@param[out] dst_*      Destination key or buffer
  *
  * 	- "backend"       - call backend
@@ -166,7 +164,6 @@ static void rewrite_rule_free(rewrite_rule_t *rule){ // {{{
 	if(rule->data_ctx_inited == 1)
 		data_ctx_destroy(&rule->data_ctx);
 } // }}}
-
 static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	void                *temp;
 	hash_t              *htemp, *config;
@@ -258,7 +255,7 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 				data_type_from_string((char *)htemp->value) : TYPE_INVALID;
 			new_rule.dst_key_size =
 				( (htemp = hash_find_typed(config, TYPE_SIZET, "dst_size")) != NULL) ?
-				HVALUE(htemp, size_t) : 0;
+				HVALUE(htemp, size_t) : (size_t)-1;
 			break;
 		}
 		if( hash_find(config, "dst_buffer") != NULL){
@@ -293,15 +290,17 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 					label_error(cleanup, "rewrite rule can't fill dst key. supply dst_type and dst_size\n");
 			}
 			break;
-		case CALC_LENGTH:
 		case CALC_DATA_LENGTH:
+			if(new_rule.data_type == TYPE_INVALID)
+				label_error(cleanup, "rewrite rule missing data type\n");
+			
+			/* fallthrough */
+		case CALC_LENGTH:
 			if(new_rule.src_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule missing src target\n");
 			if(new_rule.dst_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule missing dst target\n");
 			
-			if(new_rule.data_type == TYPE_INVALID)
-				label_error(cleanup, "rewrite rule missing data type\n");
 			break;
 		case VALUE_DELETE:
 			if(new_rule.dst_type == THING_NOTHING)
@@ -438,7 +437,14 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 						my_thing      = THING_BUFFER;
 						my_buffer     = buffer;
 						my_buffer_off = rule->src_buffer_off;
+						
 						my_buffer_len = buffer_get_size(buffer);
+						if(my_buffer_off > my_buffer_len){
+							if(rule->fatal == 1) return -EFAULT;
+							my_buffer_len = 0;
+						}else{
+							my_buffer_len -= my_buffer_off;
+						}
 						my_buffer_len = (rule->src_buffer_len != -1) ?
 							MIN(rule->src_buffer_len, my_buffer_len) : my_buffer_len;
 						break;
@@ -472,25 +478,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 			case CALC_LENGTH:; // {{{
 				size_t calc_length = 0;
 				switch(my_thing){
-					case THING_BUFFER:
-						calc_length = buffer_get_size(my_buffer);
-						if(calc_length < my_buffer_off){
-							if(rule->fatal == 1) return -EFAULT;
-							calc_length = 0;
-						}else{
-							calc_length -= my_buffer_off;
-						}
-						if(calc_length > my_buffer_len){
-							calc_length = my_buffer_len;
-						}
-						break;
-					case THING_KEY:
-						calc_length = my_key_size;
-						break;
-					default:
-						break;
+					case THING_BUFFER: calc_length = my_buffer_len; break;
+					case THING_KEY:    calc_length = my_key_size;  	break;
+					default: break;
 				};
 				my_thing    = THING_KEY;
+				my_key_type = TYPE_SIZET;
 				my_key_ptr  = alloca(sizeof(calc_length));
 				my_key_size = sizeof(calc_length);
 				memcpy(my_key_ptr, &calc_length, sizeof(calc_length));

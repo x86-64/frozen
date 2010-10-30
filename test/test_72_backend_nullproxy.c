@@ -28,7 +28,7 @@ START_TEST (test_backends_two_chains){
 	ssize_t         ssize;
 	hash_t          request[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE)  },
-		{ "size",    DATA_INT32( 0xBEEF )            },
+		{ "size",    DATA_SIZET( 0xBEEF )            },
 		hash_end
 	};
 	

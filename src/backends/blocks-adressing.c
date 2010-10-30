@@ -166,7 +166,7 @@ static int      tree_recalc(tree_t *tree){ // {{{
 		hash_t    req_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)               },
 			{ "key",    DATA_OFFT (ptr * sizeof(block_info))       },
-			{ "size",   DATA_INT32(read_size * sizeof(block_info)) },
+			{ "size",   DATA_SIZET(read_size * sizeof(block_info)) },
 			hash_end
 		};
 		if( (ret_size = chain_next_query(tree->chain, req_read, buffer)) <= 0)
@@ -238,7 +238,7 @@ static int      tree_insert(tree_t *tree, unsigned int block_vid, unsigned int b
 	hash_t    req_write[] = {
 		{ "action", DATA_INT32( ACTION_CRWD_WRITE              ) },
 		{ "key",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_INT32( sizeof(block_info)             ) },
+		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_write, &req_buffer)) <= 0)
@@ -272,7 +272,7 @@ static int      tree_delete_block(tree_t *tree, unsigned int block_vid){ // {{{
 	hash_t    req_delete[] = {
 		{ "action", DATA_INT32( ACTION_CRWD_DELETE                            ) },
 		{ "key",    DATA_OFFT ( (tree->blocks_count - 1) * sizeof(block_info) ) },
-		{ "size",   DATA_INT32( sizeof(block_info)                            ) },
+		{ "size",   DATA_SIZET( sizeof(block_info)                            ) },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_delete, NULL)) != 0)
@@ -300,7 +300,7 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	hash_t    req_read[] = {
 		{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
 		{ "key",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_INT32( sizeof(block_info)             ) },
+		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_read, &req_buffer)) <= 0){
@@ -316,7 +316,7 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	hash_t    req_write[] = {
 		{ "action", DATA_INT32( ACTION_CRWD_WRITE              ) },
 		{ "key",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_INT32( sizeof(block_info)             ) },
+		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
 		hash_end
 	};
 	chain_next_query(tree->chain, req_write, &req_buffer);
@@ -371,7 +371,7 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 			hash_t    req_read[] = {
 				{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
 				{ "key",    DATA_OFFT ( ptr * sizeof(block_info)       ) },
-				{ "size",   DATA_INT32( sizeof(block_info)             ) },
+				{ "size",   DATA_SIZET( sizeof(block_info)             ) },
 				hash_end
 			};
 			if(chain_next_query(tree->chain, req_read, &req_buffer) <= 0)
@@ -403,7 +403,7 @@ static int      tree_get_block(tree_t *tree, unsigned int block_vid, block_info 
 	hash_t    req_read[] = {
 		{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
 		{ "key",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_INT32( sizeof(block_info)             ) },
+		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
 		hash_end
 	};
 	if(chain_next_query(tree->chain, req_read, &req_buffer) <= 0)

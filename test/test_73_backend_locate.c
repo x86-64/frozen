@@ -14,7 +14,7 @@ START_TEST (test_backend_locate){
 				{ "name",        DATA_STRING("locate")                   },
 				{ "mode",        DATA_STRING("linear-incapsulated")      },
 				{ "oid-type",    DATA_STRING("int32")                    },
-				{ "size",        DATA_INT32(19)                          },
+				{ "size",        DATA_SIZET(19)                          },
 				hash_end
 			)},
 			hash_end
@@ -36,7 +36,7 @@ START_TEST (test_backend_locate){
 	
 	hash_t  hash_create1[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",   DATA_INT32(1)                  },
+		{ "size",   DATA_SIZET(1)                  },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create1, buffer)) != sizeof(off_t) )
@@ -45,7 +45,7 @@ START_TEST (test_backend_locate){
 		
 	hash_t  hash_create2[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",   DATA_INT32(1)                  },
+		{ "size",   DATA_SIZET(1)                  },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create2, buffer)) != sizeof(off_t) )
@@ -58,7 +58,7 @@ START_TEST (test_backend_locate){
 	hash_t  hash_write1[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 		{ "key",    DATA_OFFT(new_key1)           },
-		{ "size",   DATA_INT32(1)                 },
+		{ "size",   DATA_SIZET(1)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key1_data, 10);
@@ -69,7 +69,7 @@ START_TEST (test_backend_locate){
 	hash_t  hash_write2[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 		{ "key",    DATA_OFFT(new_key2)           },
-		{ "size",   DATA_INT32(1)                 },
+		{ "size",   DATA_SIZET(1)                 },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key2_data, 10);
@@ -80,7 +80,7 @@ START_TEST (test_backend_locate){
 	hash_t  hash_read1[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
 		{ "key",    DATA_OFFT(new_key1)           },
-		{ "size",   DATA_INT32(1)                 },
+		{ "size",   DATA_SIZET(1)                 },
 		hash_end
 	};
 	buffer_cleanup(buffer);
@@ -94,7 +94,7 @@ START_TEST (test_backend_locate){
 	hash_t  hash_read2[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
 		{ "key",    DATA_OFFT(new_key2)          },
-		{ "size",   DATA_INT32(1)                },
+		{ "size",   DATA_SIZET(1)                },
 		hash_end
 	};
 	buffer_cleanup(buffer);

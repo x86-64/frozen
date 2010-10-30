@@ -10,7 +10,7 @@ void read_all(buffer_t *buffer, backend_t *backend, off_t *key_off, unsigned int
 		hash_t  req_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ) },
 			{ "key",    DATA_PTR_OFFT(&key_off[k])   },
-			{ "size",   DATA_INT32(1)                },
+			{ "size",   DATA_SIZET(1)                },
 			hash_end
 		};
 		if( (ssize = backend_query(backend, req_read, buffer)) == 1){
@@ -70,7 +70,7 @@ START_TEST (test_backend_blocks){
 	for(k=0; k < key_count; k++){
 		hash_t  req_create[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-			{ "size",   DATA_INT32(1)                  },
+			{ "size",   DATA_SIZET(1)                  },
 			hash_end
 		};
 		
@@ -87,11 +87,11 @@ START_TEST (test_backend_blocks){
 		hash_t  req_write[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 			{ "key",    DATA_PTR_OFFT(&key_off[k])    },
-			{ "size",   DATA_INT32(1)                 },
+			{ "size",   DATA_SIZET(1)                 },
 			hash_end
 		};
 		
-		buffer_write(buffer, 0, key_data, ssize);
+		buffer_write(buffer, 0, key_data, 1);
 		
 		ssize = backend_query(backend, req_write, buffer);
 			fail_unless(ssize == 1, "backend in_block write failed");

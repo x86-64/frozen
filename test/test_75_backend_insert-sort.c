@@ -47,7 +47,7 @@ START_TEST (test_backend_insert_sort){
 		buff = (char)(0x61 + (tv.tv_usec % 26));
 		hash_t  req_write[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-			{ "size",   DATA_INT32(sizeof(buff))      },
+			{ "size",   DATA_SIZET(sizeof(buff))      },
 			hash_end
 		};
 		ret = backend_query(backend, req_write, &buffer);
@@ -57,7 +57,7 @@ START_TEST (test_backend_insert_sort){
 	hash_t  req_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
 		{ "key",    DATA_OFFT(0)                 },
-		{ "size",   DATA_INT32(iters)            },
+		{ "size",   DATA_SIZET(iters)            },
 		hash_end
 	};
 	ret = backend_query(backend, req_read, &temp);

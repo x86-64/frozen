@@ -23,7 +23,7 @@ START_TEST (test_real_oid_value){
 						{ "name",        DATA_STRING("locate")                       },
 						{ "mode",        DATA_STRING("linear-incapsulated")          },
 						{ "oid-type",    DATA_STRING("int32")                        },
-						{ "size",        DATA_INT32(8)                               },
+						{ "size",        DATA_SIZET(8)                               },
 						hash_end
 					)},
 					{ NULL, DATA_HASHT(
@@ -66,7 +66,7 @@ START_TEST (test_real_oid_value){
 	while(*data_ptr != NULL){
 		hash_t request[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_WRITE)     }, // without key 'write' will call 'create' to obtain key
-			{ "size",   DATA_INT32(strlen(*data_ptr) + 1) },
+			{ "size",   DATA_SIZET(strlen(*data_ptr) + 1) },
 			hash_end
 		};
 		buffer_write(buffer, 0, *data_ptr, strlen(*data_ptr) + 1);
@@ -85,7 +85,7 @@ START_TEST (test_real_oid_value){
 	char   result[21] = {0};
 	hash_t req_read[] = {
 		{ "action",   DATA_INT32(ACTION_CRWD_READ)   },
-		{ "size",     DATA_INT32(20)                 },
+		{ "size",     DATA_SIZET(20)                 },
 		{ "key",      DATA_OFFT(2)                   },
 		hash_end
 	};
@@ -95,16 +95,17 @@ START_TEST (test_real_oid_value){
 		fail_unless(strcmp(result, "http://bing.com/") == 0, "chain 'real_oid_value' read data failed");
 	
 	// search
+	/*
 	char search_str[] = "http://hell.com";
 	hash_t req_search[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CUSTOM)     },
-		{ "size",    DATA_INT32(strlen(search_str) + 1) },
+		{ "size",    DATA_SIZET(strlen(search_str) + 1) },
 		hash_end
 	};
 	buffer_write(buffer, 0, &search_str, strlen(search_str) + 1);
 	ret = backend_query(backend, req_search, buffer);
 		//printf("search: %x\n", ret);
-	
+	*/
 	
 	
 	backend_destroy(backend);

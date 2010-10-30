@@ -99,7 +99,7 @@ static int file_configure(chain_t *chain, hash_t *config){
 	}
 	
 	copy_buffer_size =
-		(hash_get_typed(config, TYPE_INT32, "copy_buffer_size", (void **)&temp, NULL) == 0) ?
+		(hash_get_typed(config, TYPE_SIZET, "copy_buffer_size", (void **)&temp, NULL) == 0) ?
 		*(unsigned int *)temp : 512;
 	
 	file_user_data *data = (file_user_data *)chain->user_data;
@@ -149,7 +149,7 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	off_t             new_key;
 	hash_t           *r_value_size;
 	
-	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	
 	if( file_new_offset(chain, &new_key, HVALUE(r_value_size, unsigned int)) != 0)
@@ -172,7 +172,7 @@ static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
 	hash_t           *r_value_size;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
-	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  != NULL){
@@ -224,7 +224,7 @@ static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
-	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	
 	fd = ((file_user_data *)chain->user_data)->handle;
@@ -263,7 +263,7 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 	
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
-	if( (r_value_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	if( (r_force      = hash_find_typed(request, TYPE_INT32, "imcrazybitch")) != NULL)
 		forced = HVALUE(r_force, int);
@@ -322,7 +322,7 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	
 	if(
 		!(
-			(r_value_size = hash_find_typed(request, TYPE_INT32, "size")) != NULL &&
+			(r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) != NULL &&
 			(move_size = (size_t)HVALUE(r_value_size, unsigned int)) != (unsigned int)-1
 		)
 	){

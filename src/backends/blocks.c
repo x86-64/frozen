@@ -126,7 +126,7 @@ static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_o
 	
 	hash_t    req_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE ) },
-		{ "size"  , DATA_INT32(data->block_size   ) },
+		{ "size"  , DATA_SIZET(data->block_size   ) },
 		hash_end
 	};
 	
@@ -142,7 +142,7 @@ static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t t
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
 		{ "key_from", DATA_PTR_OFFT(&from)         },
 		{ "key_to",   DATA_PTR_OFFT(&to)           },
-		{ "size"  ,   DATA_INT32(size)             },
+		{ "size"  ,   DATA_SIZET(size)             },
 		hash_end
 	};
 	
@@ -337,7 +337,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	ssize_t           ret;
 	hash_t           *r_size;
 	
-	if( (r_size = hash_find_typed (request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	element_size = HVALUE(r_size, unsigned int);
 	
@@ -416,7 +416,7 @@ static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffe
 	
 	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "key")) == NULL)
 		return -EINVAL;
-	if( (r_size = hash_find_typed(request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
 	
 	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
@@ -450,7 +450,7 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	}
 	
 	// manage bottom of move
-	if( (r_size = hash_find_typed (request, TYPE_INT32, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_SIZET, "size")) == NULL)
 		return 0;
 	size = HVALUE(r_size, unsigned int);
 	if(size == -1)
