@@ -504,6 +504,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 						break;
 				};
 				my_thing    = THING_KEY;
+				my_key_type = TYPE_SIZET;
 				my_key_ptr  = alloca(sizeof(calc_data_len));
 				my_key_size = sizeof(calc_data_len);
 				memcpy(my_key_ptr, &calc_data_len, sizeof(calc_data_len));

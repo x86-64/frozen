@@ -206,6 +206,48 @@ START_TEST (test_backend_rewrite){
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 16, "backend rewrite rules rules_length_buffer failed\n");
 	// }}}
+	// calc data length of key {{{
+	hash_t  rules_data_length_key[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",     DATA_STRING("data_length")     },
+			{ "type",       DATA_STRING("size_t")          },
+			{ "src_config", DATA_STRING("default_size")    },
+			{ "dst_key",    DATA_STRING("size")            },
+			
+			{ "default_size", DATA_SIZET(30)               },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_data_length_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_data_length_key 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_data_length_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_data_length_key 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 8, "backend rewrite rules rules_data_length_key failed\n");
+	// }}}
+	// calc data length of buffer {{{
+	hash_t  rules_data_length_buffer[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",     DATA_STRING("data_length")     },
+			{ "type",       DATA_STRING("size_t")          },
+			{ "src_buffer", DATA_INT32(1)                  },
+			{ "dst_key",    DATA_STRING("size")            },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_data_length_buffer, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_data_length_buffer 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_data_length_buffer, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_data_length_buffer 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 8, "backend rewrite rules rules_data_length_buffer failed\n");
+	// }}}
+	
+
 	buffer_free(buffer);
 }
 END_TEST
