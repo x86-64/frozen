@@ -67,7 +67,7 @@ API void            buffer_destroy             (buffer_t *buffer);
 API void            buffer_free                (buffer_t *buffer);
 
 
-API void            buffer_defragment          (buffer_t *buffer);
+API void *          buffer_defragment          (buffer_t *buffer);
 API void            buffer_cleanup             (buffer_t *buffer);
 API _inline size_t  buffer_get_size            (buffer_t *buffer);
 

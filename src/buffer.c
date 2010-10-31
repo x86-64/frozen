@@ -8,6 +8,9 @@
 
 #define MEMCMP_BUFF_SIZE 1024
 
+static void     buffer_add_head_any        (buffer_t *buffer, void *chunk);
+static void     buffer_add_tail_any        (buffer_t *buffer, void *chunk);
+
 /* chunks - public {{{ */
 void *      chunk_data_alloc (size_t size){ // {{{
 	chunk_t *chunk;
@@ -149,8 +152,21 @@ void            buffer_free                (buffer_t *buffer){ // {{{
 	free(buffer);
 } // }}}
 
-void            buffer_defragment          (buffer_t *buffer){ // {{{
-
+/** @brief Defragment buffer to one chunk and return pointer to this chunk
+ *  @param  buffer Buffer to defragment
+ *  @return ptr to defragmented memory
+ *  @return NULL if buffer was empty
+ */
+void *          buffer_defragment          (buffer_t *buffer){ // {{{
+	if(buffer->head == buffer->tail)
+		return buffer->head;
+	
+	void *chunk = chunk_data_alloc(buffer->size);
+	buffer_read(buffer, 0, chunk, buffer->size);
+	buffer_cleanup(buffer);
+	buffer_add_tail_any(buffer, chunk);
+	
+	return chunk;
 } // }}}
 
 /** @brief Empty buffer

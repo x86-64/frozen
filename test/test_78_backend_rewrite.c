@@ -289,8 +289,47 @@ START_TEST (test_backend_rewrite){
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 25, "backend rewrite rules rules_arith_buffer failed\n");
 	// }}}
-	
-	
+	// do backend call {{{
+	hash_t  rules_call_backend[] = {
+		{ NULL, DATA_HASHT( // set request's "size"=30 for rule 2
+			{ "action",        DATA_STRING("set")             },
+			{ "src_config",    DATA_STRING("default_size")    },
+			{ "dst_backend",   DATA_STRING("size")            },
+			{ "dst_rule",      DATA_INT32(2)                  },
+			
+			{ "default_size",  DATA_SIZET(30)                 },
+			hash_end
+		)},
+		{ NULL, DATA_HASHT( // call backend using source buffer. Resulted offset set as "size" of main request
+			{ "action",        DATA_STRING("backend")         },
+			{ "src_buffer",    DATA_INT32(1)                  },
+			{ "dst_key",       DATA_STRING("size")            },
+			{ "dst_type",      DATA_STRING("size_t")          },
+			{ "backend",       DATA_HASHT(
+				{ NULL, DATA_HASHT(
+					{ "name",         DATA_STRING("file")                               },
+					{ "filename",     DATA_STRING("data_backend_rewrite_backend.dat")   },
+					hash_end
+				)},
+				hash_end
+			)},
+			{ "request_proto", DATA_HASHT(
+				{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
+				hash_end
+			)},
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_call_backend, req_create, buffer); // first call will be with "size"=0
+		fail_unless(ret > 0, "backend rewrite rules rules_call_backend 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_call_backend, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_call_backend 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 0, "backend rewrite rules rules_call_backend failed\n");
+	// }}}
+
 	buffer_free(buffer);
 }
 END_TEST
