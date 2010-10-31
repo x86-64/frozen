@@ -440,6 +440,7 @@ ssize_t         buffer_memcpy              (buffer_t *buffer1, off_t buffer1_off
 		
 		buffer_write(buffer1, buffer1_off, chunk2, cpy_size);
 		
+		buffer1_off += cpy_size;
 		chunk2      += cpy_size;
 		chunk2_size -= cpy_size;
 		size        -= cpy_size;

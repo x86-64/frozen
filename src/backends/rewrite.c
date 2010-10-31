@@ -53,21 +53,22 @@
  * 	- "unset"         - unset key or buffer
  * 		@param[out] dst_*    Destination key or buffer
  *
- * 	- "length"        - get length of source (key->value_size and buffer->size)
+ * 	- "length"        - get length of source (key->value_size and buffer->size).
  * 		Actual length of buffer corrected according buffer_off + buffer_len window. For example
  * 		if buffer length is 10, and buffer_off is 2 - function return 8. If buffer_len supplied,
- * 		for example 5, function return 5.
+ * 		for example 5, function return 5. Output type is TYPE_SIZET
  * 		@param[in]  src_*    Source key or buffer
  * 		@param[out] dst_*    Destination key or buffer
  *
- * 	- "data_length"   - calc length of data_t 
- * 		Resulted data length corrected according buffer window, see above "length".
+ * 	- "data_length"   - calc length of data_t.
+ * 		Resulted data length corrected according buffer window, see above "length". Output type is TYPE_SIZET
  * 		@param[in]  src_*    Source key or buffer
  * 		@param[in]  type     Data type [TYPE_STRING]
  * 		@param[in]  data_ctx Data context for buffers [TYPE_STRING]
  * 		@param[out] dst_*    Destination key or buffer
  *
- * 	- "arith"         - do arithmetic with target
+ * 	- "arith"         - do arithmetic with target. On keys one can override data type with "type" parameter or original
+ * 		key type be used instead. Buffers require data type specified.
  * 		@param[in]  src_*      Source key or buffer
  * 		@param[in]  type       Data type [TYPE_STRING]
  * 		@param[in]  data_ctx   Data context for buffers [TYPE_STRING]
@@ -133,9 +134,14 @@ typedef struct rewrite_rule_t {
 		data_type     data_type;
 		data_ctx_t    data_ctx;
 		unsigned int  data_ctx_inited;
+		char          operator;
+		char          op_inited;
+		unsigned int  operand;
+		
+		backend_t    *backend;
+		
 		unsigned int  copy;
 		unsigned int  fatal;
-		backend_t    *backend;
 } rewrite_rule_t;
 
 typedef struct rewrite_user_data {
@@ -200,6 +206,23 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	new_rule.fatal = 0;
 	if( hash_find(config, "fatal") != NULL)
 		new_rule.fatal = 1;
+	// }}}
+	// parse copy {{{
+	new_rule.copy = 0;
+	if( hash_find(config, "copy") != NULL)
+		new_rule.copy = 1;
+	// }}}
+	// parse operator and operand {{{
+	new_rule.operator  = 0;
+	new_rule.operand   = 0;
+	new_rule.op_inited = 0;
+	if( hash_get_typed(config, TYPE_STRING, "operator", &temp, NULL) == 0){
+		new_rule.operator  = *(char *)temp;
+	}
+	if( (htemp = hash_find_typed(config, TYPE_INT32, "operand")) != NULL){
+		new_rule.operand   = HVALUE(htemp, unsigned int);
+		new_rule.op_inited = 1;
+	}
 	// }}}
 	// parse data type and ctx {{{
 	new_rule.data_type       = TYPE_INVALID;
@@ -300,6 +323,21 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 				label_error(cleanup, "rewrite rule missing src target\n");
 			if(new_rule.dst_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule missing dst target\n");
+			
+			break;
+		case CALL_ARITH:
+			if(new_rule.operator == 0)
+				label_error(cleanup, "rewrite rule missing operator\n");
+			if(new_rule.op_inited == 0)
+				label_error(cleanup, "rewrite rule missing operand\n");
+			
+			if(new_rule.src_type == THING_NOTHING)
+				label_error(cleanup, "rewrite rule missing src target\n");
+			if(new_rule.dst_type == THING_NOTHING)
+				label_error(cleanup, "rewrite rule missing dst target\n");
+			
+			if(new_rule.data_type == TYPE_INVALID && new_rule.src_type == THING_BUFFER)
+				label_error(cleanup, "rewrite rule missing data type\n");
 			
 			break;
 		case VALUE_DELETE:
@@ -425,8 +463,13 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 						}
 						my_thing    = THING_KEY;
 						my_key_type = hash_get_data_type(r_src_key);
-						my_key_ptr  = hash_get_value_ptr(r_src_key);
 						my_key_size = hash_get_value_size(r_src_key);
+						if(rule->copy == 0){
+							my_key_ptr  = hash_get_value_ptr(r_src_key);
+						}else{
+							my_key_ptr  = alloca(my_key_size);
+							memcpy(my_key_ptr, hash_get_value_ptr(r_src_key), my_key_size);
+						}
 						break;
 					case THING_BUFFER:
 						if(buffer == NULL){
@@ -512,6 +555,19 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 			case CALL_BACKEND:
 				break;
 			case CALL_ARITH:
+				switch(my_thing){
+					case THING_BUFFER:
+						data_buffer_arithmetic(&rule->data_ctx, my_buffer, my_buffer_off, rule->operator, rule->operand);
+						break;
+					case THING_KEY:;
+						data_type new_key_type = (rule->data_type == TYPE_INVALID) ?
+							my_key_type : rule->data_type;
+						
+						data_bare_arithmetic(new_key_type, my_key_ptr, rule->operator, rule->operand);
+						break;
+					default:
+						break;
+				};
 				break;
 			default:
 				break;

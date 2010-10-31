@@ -106,6 +106,16 @@ int                  data_buffer_cmp        (data_ctx_t *ctx, buffer_t *buffer1,
 	
 	return func_cmp(ctx, buffer1, buffer1_off, buffer2, buffer2_off);
 } // }}}
+
+/** @brief Do some math with data
+ *  @param[in]  ctx         Data context
+ *  @param      buffer      Buffer to manipulate
+ *  @param[in]  buffer_off  Offset to data
+ *  @param[in]  operator    Action to do, for example '+', '-', '*', '/'
+ *  @param[in]  operand     Second operand for operation
+ *  @return 0 on success
+ *  @return -EINVAL on error
+ */
 int                  data_buffer_arithmetic (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off, char operator, unsigned int operand){ // {{{
 	f_data_arith_b  func_arith;
 	
@@ -147,6 +157,15 @@ int                  data_bare_cmp          (data_type type, data_t *data1, data
 	
 	return func_cmp(data1, data2);
 } // }}}
+
+/** @brief Do some math with data
+ *  @param[in]  type        Data type
+ *  @param      data        Memory ptr to manipulate
+ *  @param[in]  operator    Action to do, for example '+', '-', '*', '/'
+ *  @param[in]  operand     Second operand for operation
+ *  @return 0 on success
+ *  @return -EINVAL on error
+ */
 int                  data_bare_arithmetic   (data_type type, data_t *data, char operator, unsigned int operand){ // {{{
 	f_data_arith_r  func_arith;
 	

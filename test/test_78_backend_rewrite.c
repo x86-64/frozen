@@ -204,7 +204,7 @@ START_TEST (test_backend_rewrite){
 	ret = test_rewrite(rules_length_buffer, req_create, buffer);
 		fail_unless(ret > 0, "backend rewrite rules rules_length_buffer 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
-		fail_unless(key2 - key1 == 16, "backend rewrite rules rules_length_buffer failed\n");
+		fail_unless(key2 - key1 == buffer_get_size(buffer), "backend rewrite rules rules_length_buffer failed\n");
 	// }}}
 	// calc data length of key {{{
 	hash_t  rules_data_length_key[] = {
@@ -246,8 +246,51 @@ START_TEST (test_backend_rewrite){
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 8, "backend rewrite rules rules_data_length_buffer failed\n");
 	// }}}
+	// do arith of key {{{
+	hash_t  rules_arith_key[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",     DATA_STRING("arith")           },
+			{ "src_key",    DATA_STRING("size")            },
+			{ "dst_key",    DATA_STRING("size")            },
+			{ "operator",   DATA_STRING("+")               },
+			{ "operand",    DATA_INT32(10)                 },
+			{ "copy",       DATA_INT32(1)                  },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_arith_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_arith_key 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_arith_key, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_arith_key 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 20, "backend rewrite rules rules_arith_key failed\n");
+	// }}}
+	// do arith of buffer {{{
+	hash_t  rules_arith_buffer[] = {
+		{ NULL, DATA_HASHT(
+			{ "action",     DATA_STRING("arith")           },
+			{ "type",       DATA_STRING("off_t")           },
+			{ "src_buffer", DATA_INT32(1)                  },
+			{ "dst_buffer", DATA_INT32(1)                  },
+			{ "operator",   DATA_STRING("+")               },
+			{ "operand",    DATA_INT32(15)                 },
+			{ "after",      DATA_INT32(1)                  },
+			hash_end
+		)},
+		hash_end
+	};
+	ret = test_rewrite(rules_none, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_arith_buffer 1 failed\n");
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules_arith_buffer, req_create, buffer);
+		fail_unless(ret > 0, "backend rewrite rules rules_arith_buffer 2 failed\n");
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		fail_unless(key2 - key1 == 25, "backend rewrite rules rules_arith_buffer failed\n");
+	// }}}
 	
-
+	
 	buffer_free(buffer);
 }
 END_TEST
