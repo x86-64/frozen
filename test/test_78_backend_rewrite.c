@@ -1,6 +1,6 @@
 #include <test.h>
 
-static ssize_t test_rewrite(hash_t *rules, request_t *request, buffer_t *buffer){
+static ssize_t test_rewrite(hash_t *rules, request_t *request){
 	ssize_t ret;
 	hash_t  config[] = {
 		{ NULL, DATA_HASHT(
@@ -20,7 +20,7 @@ static ssize_t test_rewrite(hash_t *rules, request_t *request, buffer_t *buffer)
 	};
 	backend_t  *backend = backend_new(config);
 	
-	ret = backend_query(backend, request, buffer);
+	ret = backend_query(backend, request);
 	backend_destroy(backend);
 	return ret;
 }
@@ -29,15 +29,19 @@ START_TEST (test_backend_rewrite){
 	ssize_t   ret;
 	buffer_t *buffer = buffer_alloc();
 	
+	fail("not work");
+	return;
+	
 	hash_t  req_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",   DATA_SIZET(10)                 },
+		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 	
 	// null request {{{
 	hash_t  rules_none[] = { hash_end };
-	ret = test_rewrite(rules_none, req_create, buffer);
+	ret = test_rewrite(rules_none, req_create);
 		fail_unless(ret > 0, "backend rewrite rules none failed\n");
 	// }}}
 	// unset key {{{
@@ -49,7 +53,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_unset_key, req_create, buffer);
+	ret = test_rewrite(rules_unset_key, req_create);
 		fail_unless(ret < 0, "backend rewrite rules unset_key failed\n");
 	// }}}
 	// unset buffer {{{
@@ -61,7 +65,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_unset_buf, req_create, buffer);
+	ret = test_rewrite(rules_unset_buf, req_create);
 		fail_unless(ret == 0, "backend rewrite rules unset_buf failed\n");
 	// }}}
 	// test filter {{{
@@ -74,7 +78,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_unset_buf_filter, req_create, buffer);
+	ret = test_rewrite(rules_unset_buf_filter, req_create);
 		fail_unless(ret > 0, "backend rewrite rules unset_buf_filter failed\n");
 	// }}}
 	// set key from key {{{
@@ -87,7 +91,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_set_key_from_key, req_create, buffer);
+	ret = test_rewrite(rules_set_key_from_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules set_key_from_key failed\n");
 	// }}}
 	// set key from config key {{{
@@ -103,10 +107,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_set_key_from_config, req_create, buffer);
+	ret = test_rewrite(rules_set_key_from_config, req_create);
 		fail_unless(ret > 0, "backend rewrite rules set_key_from_config 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_set_key_from_config, req_create, buffer);
+	ret = test_rewrite(rules_set_key_from_config, req_create);
 		fail_unless(ret > 0, "backend rewrite rules set_key_from_config 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key1)));
 		fail_unless(key2 - key1 == 20, "backend rewrite rules set_key_from_config failed\n");
@@ -125,7 +129,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_set_buffer_from_key, req_create, buffer);
+	ret = test_rewrite(rules_set_buffer_from_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_set_buffer_from_key failed\n");
 		buffer_read(buffer, 8, &bfk1, MIN(ret, sizeof(bfk1)));
 		fail_unless(bfk1 == 10, "backend rewrite rules rules_set_buffer_from_key data failed\n");
@@ -144,7 +148,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_set_buffer_from_config, req_create, buffer);
+	ret = test_rewrite(rules_set_buffer_from_config, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_set_buffer_from_config failed\n");
 		buffer_read(buffer, 8, &bfc1, MIN(ret, sizeof(bfc1)));
 		fail_unless(bfc1 == 30, "backend rewrite rules rules_set_buffer_from_config data failed\n");
@@ -162,7 +166,7 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_set_buffer_from_buffer, req_create, buffer);
+	ret = test_rewrite(rules_set_buffer_from_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_set_buffer_from_buffer failed\n");
 		buffer_read(buffer, 0,            &bfb1, MIN(ret, sizeof(bfb1)));
 		buffer_read(buffer, 8,            &bfb2, MIN(ret, sizeof(bfb2)));
@@ -180,10 +184,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_length_key, req_create, buffer);
+	ret = test_rewrite(rules_length_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_length_key 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_length_key, req_create, buffer);
+	ret = test_rewrite(rules_length_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_length_key 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 4, "backend rewrite rules rules_length_key failed\n");
@@ -198,10 +202,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_length_buffer, req_create, buffer);
+	ret = test_rewrite(rules_length_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_length_buffer 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_length_buffer, req_create, buffer);
+	ret = test_rewrite(rules_length_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_length_buffer 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == buffer_get_size(buffer), "backend rewrite rules rules_length_buffer failed\n");
@@ -219,10 +223,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_data_length_key, req_create, buffer);
+	ret = test_rewrite(rules_data_length_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_data_length_key 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_data_length_key, req_create, buffer);
+	ret = test_rewrite(rules_data_length_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_data_length_key 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 8, "backend rewrite rules rules_data_length_key failed\n");
@@ -238,10 +242,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_data_length_buffer, req_create, buffer);
+	ret = test_rewrite(rules_data_length_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_data_length_buffer 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_data_length_buffer, req_create, buffer);
+	ret = test_rewrite(rules_data_length_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_data_length_buffer 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 8, "backend rewrite rules rules_data_length_buffer failed\n");
@@ -259,10 +263,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_arith_key, req_create, buffer);
+	ret = test_rewrite(rules_arith_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_arith_key 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_arith_key, req_create, buffer);
+	ret = test_rewrite(rules_arith_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_arith_key 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 20, "backend rewrite rules rules_arith_key failed\n");
@@ -281,10 +285,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_none, req_create, buffer);
+	ret = test_rewrite(rules_none, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_arith_buffer 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_arith_buffer, req_create, buffer);
+	ret = test_rewrite(rules_arith_buffer, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_arith_buffer 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 25, "backend rewrite rules rules_arith_buffer failed\n");
@@ -321,10 +325,10 @@ START_TEST (test_backend_rewrite){
 		)},
 		hash_end
 	};
-	ret = test_rewrite(rules_call_backend, req_create, buffer); // first call will be with "size"=0
+	ret = test_rewrite(rules_call_backend, req_create); // first call will be with "size"=0
 		fail_unless(ret > 0, "backend rewrite rules rules_call_backend 1 failed\n");
 		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_call_backend, req_create, buffer);
+	ret = test_rewrite(rules_call_backend, req_create);
 		fail_unless(ret > 0, "backend rewrite rules rules_call_backend 2 failed\n");
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 0, "backend rewrite rules rules_call_backend failed\n");

@@ -43,11 +43,11 @@ data_proto_t *       data_proto_from_type   (data_type type){ // {{{
 /** @brief Create data context
  *  @param[out] ctx      Place to write data ctx
  *  @param[in]  type     Data type
- *  @param[in]  context  String with context or NULL
+ *  @param[in]  context  Hash with context parameters or NULL
  *  @return 0 on success
  *  @return -EINVAL on invalid type
  */
-int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context){ // {{{
+int                  data_ctx_init          (data_ctx_t *ctx, data_type type, hash_t *context){ // {{{
 	f_data_ctx_n   func_ctx_parse;
 	void          *user_data;
 	

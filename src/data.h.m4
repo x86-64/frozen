@@ -18,16 +18,12 @@ m4_divert(0)
 
 MACRO_ARRAY()
 
-typedef enum data_type {
+enum data_type {
 	TYPES_ARRAY()
 	TYPE_INVALID = -1
-} data_type;
+};
 
-typedef void                   data_t;
-typedef struct data_proto_t    data_proto_t;
-typedef struct data_ctx_t      data_ctx_t;
-
-typedef void * (*f_data_ctx_n)   (void *);
+typedef void * (*f_data_ctx_n)   (hash_t *);
 typedef void   (*f_data_ctx_f)   (void *);
 
 typedef size_t (*f_data_len_b)   (data_ctx_t *, buffer_t *, off_t);
@@ -75,7 +71,7 @@ API data_proto_t *       data_proto_from_type   (data_type type);
 API int                  data_type_is_valid     (data_type type);
 API data_type            data_type_from_string  (char *string);
 
-API int                  data_ctx_init          (data_ctx_t *ctx, data_type type, void *context);
+API int                  data_ctx_init          (data_ctx_t *ctx, data_type type, hash_t *context);
 API int                  data_ctx_destroy       (data_ctx_t *ctx);
 
 API size_t               data_buffer_len        (data_ctx_t *ctx, buffer_t *buffer, off_t buffer_off);

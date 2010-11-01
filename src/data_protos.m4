@@ -9,4 +9,5 @@ m4_include(data/uint64.c)
 m4_include(data/off_t.c)
 m4_include(data/size_t.c)
 m4_include(data/hash_t.c)
+m4_include(data/buffer_t.c)
 

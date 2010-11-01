@@ -8,10 +8,11 @@ void  db_read(backend_t *backend, off_t key, size_t size, char *buf, ssize_t *ss
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
 		{ "key",    DATA_PTR_OFFT(&key)          },
 		{ "size",   DATA_PTR_SIZET(&size)        },
+		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
 	};
 	
-	ret = backend_query(backend, hash, buffer);
+	ret = backend_query(backend, hash);
 	if(ret > 0){
 		buffer_read(buffer, 0, buf, ret);
 	}
@@ -30,10 +31,11 @@ void  db_write(backend_t *backend, off_t key, char *buf, unsigned int buf_size, 
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 		{ "key",    DATA_PTR_OFFT(&key)           },
 		{ "size",   DATA_PTR_SIZET(&buf_size)     },
+		{ "buffer", DATA_BUFFERT(&buffer)         },
 		hash_end
 	};
 		
-	*ssize = backend_query(backend, hash, &buffer);
+	*ssize = backend_query(backend, hash);
 	
 	buffer_destroy(&buffer);
 }
@@ -48,10 +50,11 @@ void  db_move(backend_t *backend, off_t key_from, off_t key_to, size_t key_size,
 		{ "key_from", DATA_PTR_OFFT(&key_from)     },
 		{ "key_to",   DATA_PTR_OFFT(&key_to)       },
 		{ "size",     DATA_PTR_SIZET(&key_size)    },
+		{ "buffer",   DATA_BUFFERT(&buffer)        },
 		hash_end
 	};
 	
-	*ssize = backend_query(backend, hash, &buffer);
+	*ssize = backend_query(backend, hash);
 		
 	buffer_destroy(&buffer);
 }
@@ -81,14 +84,15 @@ START_TEST (test_backend_file){
 	hash_t hash_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",   DATA_SIZET(10)                 },
+		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 		
-	if( (ssize = backend_query(backend, hash_create, buffer)) != sizeof(off_t) )
+	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("backend file create key1 failed");	
 	buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
 	
-	if( (ssize = backend_query(backend, hash_create, buffer)) != sizeof(off_t) )
+	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("backend file create key2 failed");	
 	buffer_read(buffer, 0, &new_key2, MIN(ssize, sizeof(off_t)));
 		fail_unless(new_key2 - new_key1 == 10,                 "backend file offsets invalid");
@@ -126,10 +130,11 @@ START_TEST (test_backend_file){
 	
 	hash_t hash_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
+		{ "buffer", DATA_BUFFERT(buffer)          },
 		hash_end
 	};
 		
-	ssize = backend_query(backend, hash_count, buffer);
+	ssize = backend_query(backend, hash_count);
 		fail_unless(ssize > 0,                                "backend file count failed");
 	
 	buffer_read(buffer, 0, &count, MIN(ssize, sizeof(size_t)));
@@ -170,10 +175,11 @@ START_TEST (test_backend_file){
 		{ "action", DATA_INT32(ACTION_CRWD_DELETE) },
 		{ "key",    DATA_PTR_OFFT(&new_key1)       },
 		{ "size",   DATA_PTR_SIZET(&ssize)         },
+		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 	
-	ssize = backend_query(backend, hash_delete, buffer);
+	ssize = backend_query(backend, hash_delete);
 		fail_unless(ssize == 0,                                "backend file key 1 delete failed");
 		
 	/* }}}1 */

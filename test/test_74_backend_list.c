@@ -38,9 +38,10 @@ START_TEST (test_backend_list){
 	hash_t  hash_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",   DATA_SIZET(10)                 },
+		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
-	if( (ssize = backend_query(backend, hash_create, buffer)) != sizeof(off_t) )
+	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("chain in_list create failed");	
 	buffer_read(buffer, 0, &key_off, MIN(ssize, sizeof(off_t)));
 	
@@ -50,10 +51,11 @@ START_TEST (test_backend_list){
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE)  },
 		{ "key",    DATA_OFFT(key_off)             },
 		{ "size",   DATA_SIZET(10)                 },
+		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key_data, 10);
-	ssize = backend_query(backend, hash_write, buffer);
+	ssize = backend_query(backend, hash_write);
 		fail_unless(ssize == 10, "backend in_list write 1 failed");
 	
 	// insert key
@@ -62,10 +64,11 @@ START_TEST (test_backend_list){
 		{ "key",    DATA_OFFT(key_off + 2)        },
 		{ "insert", DATA_INT32(1)                 },
 		{ "size",   DATA_SIZET(1)                 },
+		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
 	};
 	buffer_write(buffer, 0, &key_insert, 1);
-	ssize = backend_query(backend, hash_insert, buffer);
+	ssize = backend_query(backend, hash_insert);
 		fail_unless(ssize == 1,  "backend in_list write 2 failed");
 	
 	// check
@@ -73,10 +76,11 @@ START_TEST (test_backend_list){
 		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
 		{ "key",    DATA_OFFT(key_off)            },
 		{ "size",   DATA_SIZET(11)                },
+		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
 	};
 	buffer_cleanup(buffer);
-	ssize = backend_query(backend, hash_read, buffer);
+	ssize = backend_query(backend, hash_read);
 		fail_unless(ssize == 11,                                "backend in_list read 1 failed");
 		fail_unless(
 			buffer_memcmp(buffer, 0, key_inserted_buff, 0, ssize) == 0,
@@ -88,9 +92,10 @@ START_TEST (test_backend_list){
 		{ "action", DATA_INT32(ACTION_CRWD_DELETE)   },
 		{ "key",    DATA_OFFT(key_off + 3)           },
 		{ "size",   DATA_SIZET(1)                    },
+		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_delete, buffer);
+	ssize = backend_query(backend, hash_delete);
 		fail_unless(ssize == 0,  "backend in_list delete failed");
 	
 	// check
@@ -98,9 +103,10 @@ START_TEST (test_backend_list){
 		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
 		{ "key",    DATA_OFFT(key_off)               },
 		{ "size",   DATA_SIZET(10)                   },
+		{ "buffer", DATA_BUFFERT(buffer)             },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_read2, buffer);
+	ssize = backend_query(backend, hash_read2);
 		fail_unless(ssize == 10,                                "backend in_list read 1 failed");
 		fail_unless(
 			buffer_memcmp(buffer, 0, key_delete_buff, 0, 10) == 0,

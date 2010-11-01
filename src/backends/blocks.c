@@ -26,7 +26,7 @@ static ssize_t   map_new            (blocks_user_data *data, unsigned int b_off,
 		{ "block_size", DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
-	return backend_query(data->bk_map, req_write, NULL);
+	return backend_query(data->bk_map, req_write);
 } // }}}
 static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
@@ -36,7 +36,7 @@ static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid,
 		{ "block_size", DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
-	return backend_query(data->bk_map, req_write, NULL);
+	return backend_query(data->bk_map, req_write);
 } // }}}
 static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid, unsigned int new_size){ // {{{
 	hash_t  req_write[] = {
@@ -45,7 +45,7 @@ static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid,
 		{ "block_size", DATA_PTR_INT32(&new_size)      },
 		hash_end
 	};
-	return backend_query(data->bk_map, req_write, NULL);
+	return backend_query(data->bk_map, req_write);
 } // }}}
 /*static ssize_t   map_delete         (blocks_user_data *data, unsigned int b_vid){ // {{{
 	hash_t  req_delete[] = {
@@ -53,7 +53,7 @@ static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid,
 		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
 		hash_end
 	};
-	return backend_query(data->bk_map, req_delete, NULL);
+	return backend_query(data->bk_map, req_delete);
 } // }}}*/
 static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
 	ssize_t  ret;
@@ -65,10 +65,11 @@ static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, uns
 	hash_t    req_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
 		{ "offset", DATA_PTR_OFFT(&virt_off)     },
+		{ "buffer", DATA_BUFFERT(&req_buffer)    },
 		hash_end
 	};
 	
-	ret = backend_query(data->bk_map, req_read, &req_buffer);
+	ret = backend_query(data->bk_map, req_read);
 	if(ret > 0){
 		buf_ptr += buffer_read(&req_buffer, buf_ptr, real_off,  sizeof(off_t));
 		buf_ptr += buffer_read(&req_buffer, buf_ptr, block_vid, sizeof(unsigned int));
@@ -87,10 +88,11 @@ static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_
 		{ "action",     DATA_INT32(ACTION_CRWD_READ) },
 		{ "blocks",     DATA_INT32(1)                },
 		{ "block_vid",  DATA_PTR_INT32(&block_vid)   },
+		{ "buffer",     DATA_BUFFERT(&req_buffer)    },
 		hash_end
 	};
 	
-	ret = backend_query(data->bk_map, req_read, &req_buffer);
+	ret = backend_query(data->bk_map, req_read);
 	if(ret > 0){
 		*real_off   = 0;
 		*block_size = 0;
@@ -112,9 +114,10 @@ static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
 	hash_t  req_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
 		{ "blocks", DATA_INT32(1)                 },
+		{ "buffer", DATA_BUFFERT(&req_buffer)     },
 		hash_end
 	};
-	ret = backend_query(data->bk_map, req_count, &req_buffer);
+	ret = backend_query(data->bk_map, req_count);
 	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
@@ -127,10 +130,11 @@ static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_o
 	hash_t    req_create[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_CREATE ) },
 		{ "size"  , DATA_SIZET(data->block_size   ) },
+		{ "buffer", DATA_BUFFERT(&req_buffer)       },
 		hash_end
 	};
 	
-	ret = chain_next_query(data->ch_real, req_create, &req_buffer);
+	ret = chain_next_query(data->ch_real, req_create);
 	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
@@ -146,7 +150,7 @@ static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t t
 		hash_end
 	};
 	
-	return chain_next_query(data->ch_real, req_move, NULL);
+	return chain_next_query(data->ch_real, req_move);
 } // }}}
 static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_t size){ // {{{
 	off_t         src_real,      dst_real;
@@ -327,7 +331,7 @@ static int blocks_configure(chain_t *chain, hash_t *config){
 }
 /* }}} */
 
-static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	unsigned int      element_size;
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
@@ -379,9 +383,9 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	/* calc virt_ptr */
 	hash_t  req_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
-		hash_end
+		hash_next(request)
 	};
-	ret = backend_query(data->bk_map, req_count, buffer); 
+	ret = backend_query(data->bk_map, req_count); 
 	
 	/* really add item */
 	if(map_resize(data, block_vid, block_size + element_size) != 0)
@@ -389,7 +393,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request, buffer_t *buffe
 	
 	return ret;
 } // }}}
-static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	off_t             key_real;
 	unsigned int      block_vid;
 	hash_t           *r_key_virt;
@@ -409,9 +413,9 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request, buffer_t *buffe
 		hash_next(request)
 	};
 	
-	return chain_next_query(chain, req_layer, buffer);
+	return chain_next_query(chain, req_layer);
 } // }}}
-static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+static ssize_t blocks_delete(chain_t *chain, request_t *request){ // {{{
 	hash_t *r_key, *r_size;
 	
 	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "key")) == NULL)
@@ -421,7 +425,7 @@ static ssize_t blocks_delete(chain_t *chain, request_t *request, buffer_t *buffe
 	
 	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
 } // }}}
-static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	off_t             from, to;
 	unsigned int      size;
 	hash_t           *r_from, *r_to, *r_size;
@@ -468,10 +472,10 @@ static ssize_t blocks_move(chain_t *chain, request_t *request, buffer_t *buffer)
 	}
 	return 0;
 } // }}}
-static ssize_t blocks_count(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
+static ssize_t blocks_count(chain_t *chain, request_t *request){ // {{{
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	return backend_query(data->bk_map, request, buffer);  // transfer query to map backend _COUNT
+	return backend_query(data->bk_map, request);  // transfer query to map backend _COUNT
 } // }}}
 
 static chain_t chain_blocks = {

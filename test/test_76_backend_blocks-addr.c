@@ -48,7 +48,7 @@ START_TEST (test_backend_blocks_addrs){
 		};
 		block_off += RSIZE;
 		
-		ssize = backend_query(backend, req_write, NULL);
+		ssize = backend_query(backend, req_write);
 			fail_unless(ssize == 0, "chain 'blocks-addressing' insert block failed");
 	}
 	// }}}
@@ -58,9 +58,10 @@ START_TEST (test_backend_blocks_addrs){
 	// count blocks {{{
 	hash_t  req_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
+		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
 	};
-	if( (ssize = backend_query(backend, req_count, buffer)) > 0)
+	if( (ssize = backend_query(backend, req_count)) > 0)
 		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count))); 
 	
 		fail_unless(count == match_size, "chain 'blocks-addressing' tree size invalid");
@@ -73,9 +74,10 @@ START_TEST (test_backend_blocks_addrs){
 		hash_t  req_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ) },
 			{ "offset", DATA_PTR_OFFT(&offset_virt)  },
+			{ "buffer", DATA_BUFFERT(buffer)         },
 			hash_end
 		};
-		if( (ssize = backend_query(backend, req_read, buffer)) > 0){
+		if( (ssize = backend_query(backend, req_read)) > 0){
 			buffer_read(buffer, 0, &offset_real, MIN(ssize, sizeof(offset_real))); 
 		}
 			fail_unless(ssize >= sizeof(off_t),     "chain 'blocks-addressing' read offset failed");
@@ -94,11 +96,11 @@ START_TEST (test_backend_blocks_addrs){
 		{ "block_size", DATA_INT32(0x110)             },
 		hash_end
 	};
-	ssize = backend_query(backend, req_write2, NULL);
+	ssize = backend_query(backend, req_write2);
 		fail_unless(ssize == 0, "chain 'blocks-adressing' block_resize failed");
 	// }}}
 	// check overall size {{{
-	if( (ssize = backend_query(backend, req_count, buffer)) > 0)
+	if( (ssize = backend_query(backend, req_count)) > 0)
 		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count)));
 	
 		fail_unless(count == match_size + 0x10, "chain 'blocks-adressing' block_resize tree size invalid");
@@ -109,12 +111,12 @@ START_TEST (test_backend_blocks_addrs){
 		{ "block_vid",  DATA_INT32(2)                  },
 		hash_end
 	};
-	ssize = backend_query(backend, req_delete, NULL);
+	ssize = backend_query(backend, req_delete);
 		fail_unless(ssize == 0, "chain 'blocks-adressing' delete failed");
 	
 	// }}}
 	// check overall size {{{
-	if( (ssize = backend_query(backend, req_count, buffer)) > 0)
+	if( (ssize = backend_query(backend, req_count)) > 0)
 		buffer_read(buffer, 0, &count, MIN(ssize, sizeof(count))); 
 		
 		fail_unless(count == match_size + 0x10 - VSIZE, "chain 'blocks-adressing' delete tree size invalid");

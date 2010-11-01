@@ -29,10 +29,11 @@ START_TEST (test_backends_two_chains){
 	hash_t          request[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE)  },
 		{ "size",    DATA_SIZET( 0xBEEF )            },
+		{ "buffer",  DATA_BUFFERT(buffer)            },
 		hash_end
 	};
 	
-	ssize = backend_query(backend, request, buffer);
+	ssize = backend_query(backend, request);
 		fail_unless(ssize == 0x0000BEEF, "backend chain incorrectly set");
 		
 	buffer_free(buffer);

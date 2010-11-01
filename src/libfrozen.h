@@ -32,13 +32,13 @@
 #define MIN(a,b)              ( (a > b) ? b : a )
 
 /* Own headers */
+#include <public.h>
+
 #include <list.h>            // internal data storage
 #include <buffer.h>          //
 #include <data.h>            //
 #include <hash.h>            //
 #include <structs.h>         //
-
-#include <public.h>
 
 #include <backend.h>         // db logic 
 

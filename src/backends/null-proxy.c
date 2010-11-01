@@ -15,7 +15,7 @@ static int null_configure(chain_t *chain, hash_t *config){
 	return 0;
 }
 
-static ssize_t null_create(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t null_create(chain_t *chain, request_t *request){
 	hash_t       *r_value_size;
 	
 	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
@@ -24,7 +24,7 @@ static ssize_t null_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	if(HVALUE(r_value_size, unsigned int) == 0x0000BEEF) // this check for backend tests
 		return HVALUE(r_value_size, unsigned int);
 	
-	return chain_next_query(chain, request, buffer);
+	return chain_next_query(chain, request);
 }
 
 static chain_t chain_null_proxy = {

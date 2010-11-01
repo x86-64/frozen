@@ -48,9 +48,10 @@ START_TEST (test_backend_insert_sort){
 		hash_t  req_write[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 			{ "size",   DATA_SIZET(sizeof(buff))      },
+			{ "buffer", DATA_BUFFERT(&buffer)         },
 			hash_end
 		};
-		ret = backend_query(backend, req_write, &buffer);
+		ret = backend_query(backend, req_write);
 			fail_unless(ret > 0,  "chain in_sort write failed");
 	}
 	
@@ -58,9 +59,10 @@ START_TEST (test_backend_insert_sort){
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
 		{ "key",    DATA_OFFT(0)                 },
 		{ "size",   DATA_SIZET(iters)            },
+		{ "buffer", DATA_BUFFERT(&temp)          },
 		hash_end
 	};
-	ret = backend_query(backend, req_read, &temp);
+	ret = backend_query(backend, req_read);
 		fail_unless(ret == iters, "chain in_sort read failed");
 	
 	for(i=0; i<iters-1; i++){

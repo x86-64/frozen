@@ -234,10 +234,11 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 				{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 				{ "key",    DATA_OFFT(off)                },
 				{ "size",   DATA_SIZET(opt_item_size)     },
+				{ "buffer", DATA_BUFFERT(&buffer)         },
 				hash_end
 			};
 			
-			ret = backend_query(backend, request, &buffer);
+			ret = backend_query(backend, request);
 			if(ret <= 0){
 				ret = -1;
 				goto cleanup;
@@ -284,10 +285,11 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 				{ "action", DATA_INT32(ACTION_CRWD_READ)  },
 				{ "key",    DATA_OFFT(off)                },
 				{ "size",   DATA_SIZET(opt_item_size)     },
+				{ "buffer", DATA_BUFFERT(&buffer)         },
 				hash_end
 			};
 			
-			ret = backend_query(backend, request, &buffer);
+			ret = backend_query(backend, request);
 			if(ret <= 0){
 				ret = -1;
 				goto cleanup;

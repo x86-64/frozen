@@ -59,7 +59,7 @@ void chain_destroy(chain_t *chain){
 }
 inline int  chain_configure    (chain_t *chain, hash_t *config){ return chain->func_configure(chain, config); }
 
-ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer){
+ssize_t     chain_query        (chain_t *chain, request_t *request){
 	f_crwd        func       = NULL;
 	hash_t       *r_action;
 	
@@ -82,13 +82,13 @@ ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *bu
 	};	
 	
 	if(func == NULL)
-		return chain_query(chain->next, request, buffer);
+		return chain_query(chain->next, request);
 	
-	return func(chain, request, buffer);
+	return func(chain, request);
 }
 
-ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *buffer){
-	return chain_query(chain->next, request, buffer);
+ssize_t     chain_next_query   (chain_t *chain, request_t *request){
+	return chain_query(chain->next, request);
 }
 
 /* }}}1 */
@@ -179,11 +179,11 @@ backend_t *  backend_new      (hash_t *config){
 	return backend;
 }
 
-ssize_t      backend_query        (backend_t *backend, request_t *request, buffer_t *buffer){
+ssize_t      backend_query        (backend_t *backend, request_t *request){
 	if(backend == NULL || request == NULL)
 		return -EINVAL;
 	
-	return chain_query(backend->chain, request, buffer);
+	return chain_query(backend->chain, request);
 }
 
 void         backend_destroy  (backend_t *backend){
@@ -218,6 +218,7 @@ static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void 
 		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
 		{ "key",    DATA_PTR_OFFT(&offset)        },
 		{ "size",   DATA_SIZET(buf_size)          },
+		{ "buffer", DATA_BUFFERT(&buffer_read)    },
 		hash_null,
 		hash_null,
 		hash_null,
@@ -228,7 +229,7 @@ static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void 
 	};
 	buffer_init_from_bare(&buffer_read, buf, buf_size);
 	
-	ret = chain_query( (chain_t *)buffer->io_context, hash, &buffer_read);	
+	ret = chain_query( (chain_t *)buffer->io_context, hash);	
 	
 	buffer_destroy(&buffer_read);
 	return ret;
@@ -242,6 +243,7 @@ static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void 
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
 		{ "key",    DATA_PTR_OFFT(&offset)        },
 		{ "size",   DATA_SIZET(buf_size)          },
+		{ "buffer", DATA_BUFFERT(&buffer_write)   },
 		hash_null,
 		hash_null,
 		hash_null,
@@ -252,7 +254,7 @@ static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void 
 	};
 	buffer_init_from_bare(&buffer_write, buf, buf_size);
 	
-	ret = chain_query( (chain_t *)buffer->io_context, hash, &buffer_write);	
+	ret = chain_query( (chain_t *)buffer->io_context, hash);	
 	
 	buffer_destroy(&buffer_write);
 	

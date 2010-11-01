@@ -259,7 +259,7 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			return_error(-EINVAL, "rewrite rule: parameter 'backend' invalid\n");
 	}
 	// }}}
-	// parse data type and ctx {{{
+	/* parse data type and ctx {{{
 	new_rule.data_type       = TYPE_INVALID;
 	new_rule.data_ctx_inited = 0;
 	if( hash_get_typed(config, TYPE_STRING, "type", &temp, NULL) == 0){
@@ -267,11 +267,11 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			label_error(cleanup, "rewrite rule: 'type' invalid");
 		
 		temp = NULL;
-		hash_get_typed(config, TYPE_STRING, "data_ctx", &temp, NULL);
-		data_ctx_init(&new_rule.data_ctx, new_rule.data_type, temp);
+		htemp = hash_find(config, "data_ctx");
+		data_ctx_init(&new_rule.data_ctx, new_rule.data_type, htemp);
 		new_rule.data_ctx_inited = 1;
 	}
-	// }}}
+	*/// }}}
 	do{ // src parse {{{
 		if( hash_get_typed(config, TYPE_STRING, "src_key", &temp, NULL) == 0){
 			new_rule.src_type     = THING_KEY;
@@ -453,20 +453,19 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 /* }}} */
 
-static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *buffer, int pass){
+static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 	unsigned int        i;
 	int                 have_after;
 	ssize_t             ret;
-	size_t              dst_size, cpy_size;
+	size_t              dst_size;
+	//cpy_size;
 	data_type           dst_type;
 	hash_t             *r_action, *r_src_key;
 	request_t          *new_request;
-	buffer_t           *new_buffer;
 	rewrite_rule_t     *rule;
 	rewrite_user_data  *data      = (rewrite_user_data *)chain->user_data;
 	
 	new_request = request;
-	new_buffer  = buffer;
 	r_action    = NULL;
 	have_after  = 0;
 	ret         = 0;
@@ -539,6 +538,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 							memcpy(my_key_ptr, hash_get_value_ptr(r_src_key), my_key_size);
 						}
 						break;
+					/*
 					case THING_BUFFER:
 						if(buffer == NULL){
 							if(rule->fatal == 1) return -EINVAL;
@@ -559,6 +559,8 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 						my_buffer_len = (rule->src_buffer_len != -1) ?
 							MIN(rule->src_buffer_len, my_buffer_len) : my_buffer_len;
 						break;
+					*/
+					case THING_BUFFER:
 					case THING_NOTHING:
 						break;
 				};
@@ -573,7 +575,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 		switch(rule->action){
 			case VALUE_DELETE: // {{{
 				switch(rule->dst_type){
-					case THING_BUFFER: new_buffer = NULL; break;
+					//case THING_BUFFER: new_buffer = NULL; break; // TODO
 					case THING_KEY:;
 						hash_t  del_request[] = {
 							{ rule->dst_key_name, DATA_VOID },
@@ -621,7 +623,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 				memcpy(my_key_ptr, &calc_data_len, sizeof(calc_data_len));
 				break; // }}}
 			case CALL_BACKEND:
-				backend_query(rule->backend, rule->request_curr, my_buffer);
+				backend_query(rule->backend, rule->request_curr);
 				break;
 			case CALL_ARITH:
 				switch(my_thing){
@@ -651,6 +653,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 			case CALL_ARITH:
 			case CALL_BACKEND: // {{{
 				switch(rule->dst_type){
+					/*
 					case THING_BUFFER: // {{{
 						switch(my_thing){
 							case THING_BUFFER: // {{{
@@ -676,6 +679,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 								return -EFAULT; // }}}
 						};
 						break; // }}}
+					*/
 					case THING_KEY:
 					case THING_REQUEST_KEY:; // {{{
 						void *new_ptr;
@@ -718,10 +722,10 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 		// }}}
 	}
 	if(pass == 0){
-		ret = chain_next_query(chain, new_request, new_buffer);
+		ret = chain_next_query(chain, new_request);
 		
 		if(have_after == 1){
-			ssize_t rec_ret = rewrite_func_one(chain, request, buffer, 1);
+			ssize_t rec_ret = rewrite_func_one(chain, request, 1);
 			if(rec_ret != 0)
 				return rec_ret;
 		}
@@ -729,8 +733,8 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, buffer_t *bu
 	return ret;
 }
 
-static ssize_t rewrite_func(chain_t *chain, request_t *request, buffer_t *buffer){ // {{{
-	return rewrite_func_one(chain, request, buffer, 0);
+static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
+	return rewrite_func_one(chain, request, 0);
 } // }}}
 
 static chain_t chain_rewrite = {

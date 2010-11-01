@@ -159,7 +159,7 @@ void            buffer_free                (buffer_t *buffer){ // {{{
  */
 void *          buffer_defragment          (buffer_t *buffer){ // {{{
 	if(buffer->head == buffer->tail)
-		return buffer->head;
+		return chunk_get_ptr(buffer->head);
 	
 	void *chunk = chunk_data_alloc(buffer->size);
 	buffer_read(buffer, 0, chunk, buffer->size);

@@ -1,25 +1,27 @@
 
 backends_sources =                  \
 	backends/null-proxy.c       \
-	backends/rewrite.c          \
 	backends/file.c             \
+	backends/rewrite.c          \
 	backends/list.c             \
-	backends/locate.c           \
 	backends/insert-sort.c      \
 	backends/blocks-adressing.c \
 	backends/blocks.c
 
+#	backends/locate.c           
 
-data_sources=          \
-	data/void.c    \
-	data/binary.c  \
-	data/uint8.c   \
-	data/uint16.c  \
-	data/uint32.c  \
-	data/uint64.c  \
-	data/off_t.c   \
-	data/size_t.c  \
-	data/hash_t.c  \
+
+data_sources=           \
+	data/void.c     \
+	data/binary.c   \
+	data/uint8.c    \
+	data/uint16.c   \
+	data/uint32.c   \
+	data/uint64.c   \
+	data/off_t.c    \
+	data/size_t.c   \
+	data/hash_t.c   \
+	data/buffer_t.c \
 	data/string.c 
 
 AUTOMAKE_OPTIONS = subdir-objects
@@ -47,8 +49,6 @@ data.c: ${data_sources}
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
 
-backends/locate.c: 
-	${M4} -sP backends/locate.c.m4 > $@
 backends/insert-sort.c:
 	${M4} -sP backends/insert-sort.c.m4 > $@
 

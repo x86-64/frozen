@@ -1,6 +1,18 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
+enum request_actions {
+	ACTION_CRWD_CREATE,
+	ACTION_CRWD_READ,
+	ACTION_CRWD_WRITE,
+	ACTION_CRWD_DELETE,
+	ACTION_CRWD_MOVE,
+	ACTION_CRWD_COUNT,
+	ACTION_CRWD_CUSTOM,
+	
+	REQUEST_INVALID = -1
+};
+
 /* PRIVATE - chains {{{1 */
 
 typedef struct chain_t    chain_t;
@@ -16,7 +28,7 @@ typedef enum chain_types {
 
 /* chain type crwd */
 
-typedef ssize_t (*f_crwd) (chain_t *, request_t *, buffer_t *);
+typedef ssize_t (*f_crwd) (chain_t *, request_t *);
 
 struct chain_t {
 	char *      name;
@@ -49,8 +61,8 @@ struct chain_t {
 
 void        _chain_register    (chain_t *chain);
 chain_t *   chain_new          (char *name);
-ssize_t     chain_query        (chain_t *chain, request_t *request, buffer_t *buffer);
-ssize_t     chain_next_query   (chain_t *chain, request_t *request, buffer_t *buffer);
+ssize_t     chain_query        (chain_t *chain, request_t *request);
+ssize_t     chain_next_query   (chain_t *chain, request_t *request);
 void        chain_destroy      (chain_t *chain);
 _inline int chain_configure    (chain_t *chain, hash_t *config);
 
@@ -65,7 +77,7 @@ typedef struct backend_t {
 } backend_t;
 
 API backend_t *     backend_new             (hash_t *config);
-API ssize_t         backend_query           (backend_t *backend, request_t *request, buffer_t *buffer);
+API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
 
 API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);

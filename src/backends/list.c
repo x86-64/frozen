@@ -15,7 +15,7 @@ static int lists_configure(chain_t *chain, hash_t *config){
 	return 0;
 }
 
-static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t lists_set(chain_t *chain, request_t *request){
 	ssize_t           ret;
 	hash_t           *r_insert, *r_key;
 	void             *o_key_from, *o_key_to;
@@ -45,15 +45,15 @@ static ssize_t lists_set(chain_t *chain, request_t *request, buffer_t *buffer){
 			hash_next(request)
 		};
 		
-		ret = chain_next_query(chain, new_request, buffer); 
+		ret = chain_next_query(chain, new_request); 
 		if(ret != 0)
 			return ret;
 	}
 	
-	return chain_next_query(chain, request, buffer);
+	return chain_next_query(chain, request);
 }
 
-static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t lists_delete(chain_t *chain, request_t *request){
 	ssize_t           ret;
 	hash_t           *r_key, *r_size;
 	void             *o_key_from, *o_key_to;
@@ -77,7 +77,7 @@ static ssize_t lists_delete(chain_t *chain, request_t *request, buffer_t *buffer
 		hash_next(request)
 	};
 	
-	ret = chain_next_query(chain, new_request, buffer); 
+	ret = chain_next_query(chain, new_request);
 	return ret;
 }
 

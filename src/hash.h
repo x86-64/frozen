@@ -1,13 +1,13 @@
 #ifndef HASH_H
 #define HASH_H
 
-typedef struct hash_t {
+struct hash_t {
 	char *          key;
 	
 	data_type       type;         // DATA_* macros can init this
 	void *          value;        //
 	size_t          value_size;   //
-} hash_t;
+};
 
 typedef int  (*hash_iterator)(hash_t *, void *, void *);
 

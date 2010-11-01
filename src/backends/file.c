@@ -145,9 +145,10 @@ static int file_new_offset(chain_t *chain, off_t *new_key, unsigned int size){
 	return ret;
 }
 
-static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_create(chain_t *chain, request_t *request){
 	off_t             new_key;
 	hash_t           *r_value_size;
+	hash_t           *r_buffer;
 	
 	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
@@ -155,24 +156,26 @@ static ssize_t file_create(chain_t *chain, request_t *request, buffer_t *buffer)
 	if( file_new_offset(chain, &new_key, HVALUE(r_value_size, unsigned int)) != 0)
 		return -EFAULT;
 	
-	if(buffer != NULL){
-		buffer_write(buffer, 0, &new_key, sizeof(off_t)); 
+	if( (r_buffer = hash_find_typed(request, TYPE_BUFFERT, "buffer")) != NULL ){
+		buffer_write(hash_get_value_ptr(r_buffer), 0, &new_key, sizeof(off_t)); 
 		return sizeof(off_t);
 	}
 	return 0;
 }
 
-static ssize_t file_set(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_set(chain_t *chain, request_t *request){
 	unsigned int      write_size;
 	off_t             key;
 	int               create_mode =  0;
 	ssize_t           ret         = -1;
 	
-	hash_t           *r_key;
-	hash_t           *r_value_size;
+	hash_t           *r_key, *r_value_size;
+	buffer_t         *buffer;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
 	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
+		return -EINVAL;
+	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
 		return -EINVAL;
 	
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  != NULL){
@@ -215,13 +218,15 @@ exit:
 	return (create_mode == 1) ? sizeof(off_t) : write_size;
 }
 
-static ssize_t file_get(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_get(chain_t *chain, request_t *request){
 	int               fd;
 	ssize_t           ret;
 	unsigned int      read_size;
-	hash_t           *r_key;
-	hash_t           *r_value_size;
+	hash_t           *r_key, *r_value_size;
+	buffer_t         *buffer;
 	
+	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
+		return -EINVAL;
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
 	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
@@ -250,7 +255,7 @@ exit:
 	return read_size;
 }
 
-static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_delete(chain_t *chain, request_t *request){
 	int               fd;
 	int               forced = 0;
 	ssize_t           ret;
@@ -259,7 +264,6 @@ static ssize_t file_delete(chain_t *chain, request_t *request, buffer_t *buffer)
 	hash_t           *r_key;
 	hash_t           *r_value_size;
 	hash_t           *r_force;
-	
 	
 	if( (r_key        = hash_find_typed(request, TYPE_OFFT,  "key"))  == NULL)
 		return -EINVAL;
@@ -299,7 +303,7 @@ exit:
 	return 0;
 }
 
-static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_move(chain_t *chain, request_t *request){
 	off_t            from, to;
 	
 	size_t           move_size;
@@ -389,8 +393,12 @@ static ssize_t file_move(chain_t *chain, request_t *request, buffer_t *buffer){
 	return ret;
 }
 
-static ssize_t file_count(chain_t *chain, request_t *request, buffer_t *buffer){
+static ssize_t file_count(chain_t *chain, request_t *request){
+	buffer_t        *buffer;
 	file_user_data  *data = ((file_user_data *)chain->user_data);
+	
+	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
+		return -EINVAL;
 	
 	if(file_update_count(data) == STAT_ERROR)
 		return -EINVAL;
