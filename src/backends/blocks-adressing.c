@@ -512,38 +512,36 @@ static ssize_t addrs_set(chain_t *chain, request_t *request){
 // get block_size - get("blocks", "block_vid")
 
 static ssize_t addrs_get(chain_t *chain, request_t *request){
+	off_t             def_real_offset;
+	unsigned int      def_block_vid;
+	unsigned int      def_block_size;
+	off_t            *o_real_offset = &def_real_offset;
+	unsigned int     *o_block_vid   = &def_block_vid;
+	unsigned int     *o_block_size  = &def_block_size;
+	block_info        block;
+	hash_t           *r_virt_key, *r_block_vid;
 	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
 	
-	off_t             real_key;
-	unsigned int      block_vid;
-	block_info        block;
-	ssize_t           buf_ptr = 0;
-	hash_t           *r_virt_key, *r_block_vid;
-	buffer_t         *buffer;
-	
-	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
-		return -EINVAL;
+	hash_get_typed(request, TYPE_OFFT,  "real_offset", (void **)&o_real_offset, NULL);
+	hash_get_typed(request, TYPE_INT32, "block_vid",   (void **)&o_block_vid,   NULL);
+	hash_get_typed(request, TYPE_INT32, "block_size",  (void **)&o_block_size,  NULL);
 	
 	if(hash_find(request, "blocks") == NULL){
 		if( (r_virt_key = hash_find_typed(request, TYPE_OFFT, "offset")) == NULL)
 			return -EINVAL;
 		
-		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), &block_vid, &real_key) != 0)
+		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), o_block_vid, o_real_offset) != 0)
 			return -EFAULT;
-		
-		buf_ptr += buffer_write(buffer, buf_ptr, &real_key,  sizeof(real_key));
-		buf_ptr += buffer_write(buffer, buf_ptr, &block_vid, sizeof(block_vid));
 	}else{
 		if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
 			return -EINVAL;
-		
 		if(tree_get_block(data->tree, HVALUE(r_block_vid, unsigned int), &block) != 0)
 			return -EFAULT;
 		
-		buf_ptr += buffer_write(buffer, buf_ptr, &block.size,           sizeof(block.size));
-		buf_ptr += buffer_write(buffer, buf_ptr, &block.real_block_off, sizeof(block.real_block_off));
+		*o_real_offset = (off_t)(block.real_block_off);
+		*o_block_size  = (unsigned int)(block.size);
 	}
-	return buf_ptr;
+	return 0;
 }
 
 static ssize_t addrs_delete(chain_t *chain, request_t *request){

@@ -1,12 +1,13 @@
 #include <libfrozen.h>
 
-int     data_string_cmp(void *data1, void *data2){
-	return strcmp(data1, data2);
+// TODO possible crash here
+
+int     data_string_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){
+	return strcmp(data1->data_ptr, data2->data_ptr);
 }
 
-// TODO possible crash here
-size_t  data_string_len(void *data, size_t buffer_size){
-	return (size_t) MIN( strlen(data) + 1, buffer_size );
+size_t  data_string_len(data_t *data, data_ctx_t *ctx){
+	return (size_t) MIN( strlen(data->data_ptr) + 1, data->data_size );
 }
 
 /*
@@ -18,7 +19,7 @@ REGISTER_PROTO(
 		.type          = TYPE_STRING,
 		.type_str      = "string",
 		.size_type     = SIZE_VARIABLE,
-		.func_bare_cmp = &data_string_cmp,
-		.func_bare_len = &data_string_len
+		.func_cmp      = &data_string_cmp,
+		.func_len      = &data_string_len
 	}')
 */

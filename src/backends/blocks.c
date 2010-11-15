@@ -56,52 +56,27 @@ static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid,
 	return backend_query(data->bk_map, req_delete);
 } // }}}*/
 static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
-	ssize_t  ret;
-	ssize_t  buf_ptr = 0;
-	
-	buffer_t  req_buffer;
-	buffer_init(&req_buffer);
-	
 	hash_t    req_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ) },
-		{ "offset", DATA_PTR_OFFT(&virt_off)     },
-		{ "buffer", DATA_BUFFERT(&req_buffer)    },
+		{ "action",       DATA_INT32(ACTION_CRWD_READ) },
+		{ "offset",       DATA_PTR_OFFT(&virt_off)     },
+		{ "real_offset",  DATA_PTR_OFFT(real_off)      },
+		{ "block_vid",    DATA_PTR_INT32(block_vid)    },
 		hash_end
 	};
 	
-	ret = backend_query(data->bk_map, req_read);
-	if(ret > 0){
-		buf_ptr += buffer_read(&req_buffer, buf_ptr, real_off,  sizeof(off_t));
-		buf_ptr += buffer_read(&req_buffer, buf_ptr, block_vid, sizeof(unsigned int));
-	}
-	buffer_destroy(&req_buffer);
-	return ret;
+	return backend_query(data->bk_map, req_read);
 } // }}}
 static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
-	ssize_t  ret;
-	ssize_t  buf_ptr = 0;
-	
-	buffer_t  req_buffer;
-	buffer_init(&req_buffer);
-	
 	hash_t    req_read[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_READ) },
-		{ "blocks",     DATA_INT32(1)                },
-		{ "block_vid",  DATA_PTR_INT32(&block_vid)   },
-		{ "buffer",     DATA_BUFFERT(&req_buffer)    },
+		{ "action",      DATA_INT32(ACTION_CRWD_READ) },
+		{ "blocks",      DATA_INT32(1)                },
+		{ "block_vid",   DATA_PTR_INT32(&block_vid)   },
+		{ "block_size",  DATA_PTR_INT32(block_size)   },
+		{ "real_offset", DATA_PTR_OFFT(real_off)      },
 		hash_end
 	};
 	
-	ret = backend_query(data->bk_map, req_read);
-	if(ret > 0){
-		*real_off   = 0;
-		*block_size = 0;
-		
-		buf_ptr += buffer_read(&req_buffer, buf_ptr, block_size, MIN(ret, sizeof(unsigned int))); // TODO bad
-		buf_ptr += buffer_read(&req_buffer, buf_ptr, real_off,   MIN(ret, sizeof(unsigned int)));
-	}
-	buffer_destroy(&req_buffer);
-	return ret;
+	return backend_query(data->bk_map, req_read);
 } // }}}
 static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
 	ssize_t  ret;
@@ -169,16 +144,16 @@ static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+	if(map_off(data, src, &src_block_vid, &src_real) != 0)
 		return -EINVAL;
-	if(map_off(data, dst, &dst_block_vid, &dst_real) <= 0)
+	if(map_off(data, dst, &dst_block_vid, &dst_real) != 0)
 		return -EINVAL;
 	
 	dst_block_off = dst_real % data->block_size;
 	
 	/*
 	if(src_block_vid == dst_block_vid){
-		if(map_get_block(data, src_block_vid, &block_roff, &block_size) <= 0)
+		if(map_get_block(data, src_block_vid, &block_roff, &block_size) != 0)
 			return -EFAULT;
 		
 		if(block_size + size <= data->block_size){
@@ -206,18 +181,18 @@ static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_
 			return -EFAULT;
 	}
 	
-	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+	if(map_off(data, src, &src_block_vid, &src_real) != 0)
 		return -EINVAL;
 	
 	new_block_vid = src_block_vid;
 	
 	goto start;
 	while(size > 0){
-		if(map_off(data, src, &src_block_vid, &src_real) <= 0)
+		if(map_off(data, src, &src_block_vid, &src_real) != 0)
 			return -EINVAL;
 		
 	start:
-		if(map_get_block(data, src_block_vid, &src_block_roff, &block_size) <= 0)
+		if(map_get_block(data, src_block_vid, &src_block_roff, &block_size) != 0)
 			return -EFAULT;
 		
 		block_size = MIN(size, block_size);
@@ -248,9 +223,9 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	if(map_off(data, start,        &start_block_vid, &start_real) <= 0)
+	if(map_off(data, start,        &start_block_vid, &start_real) != 0)
 		return -EFAULT;
-	if(map_off(data, start + size, &end_block_vid,   &end_real)   <= 0){
+	if(map_off(data, start + size, &end_block_vid,   &end_real)   != 0){
 		end_block_vid = (data->blocks_count - 1);
 		end_block_off = data->block_size;
 	}else{
@@ -261,7 +236,7 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	
 	for(i_vid = start_block_vid; i_vid <= end_block_vid; i_vid++){
 		if(i_vid == end_block_vid){
-			if(map_get_block(data, end_block_vid, &block_roff, &block_size) <= 0)
+			if(map_get_block(data, end_block_vid, &block_roff, &block_size) != 0)
 				return -EFAULT;
 			
 			if(real_move(data, end_real, block_roff, block_size - end_block_off) != 0) // TODO WRRRRRROOOOOOOOOOOONGG
@@ -362,7 +337,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	
 	/* try write into last block */
 	block_vid = data->blocks_count - 1;
-	if(map_get_block(data, block_vid, &block_off, &block_size) <= 0)
+	if(map_get_block(data, block_vid, &block_off, &block_size) != 0)
 		return -EFAULT;
 	
 	/* if not enough space - create new one */
@@ -394,9 +369,9 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	return ret;
 } // }}}
 static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
-	off_t             key_real;
 	unsigned int      block_vid;
 	hash_t           *r_key_virt;
+	data_t            key_real;
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
 	// TODO r_size > block_size
@@ -405,11 +380,13 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, "key")) == NULL)
 		return -EINVAL;
 	
-	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, &key_real) <= 0)
+	data_copy_local(&key_real, hash_get_data(r_key_virt));
+	
+	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, data_value_ptr(&key_real)) != 0)
 		return -EINVAL;
 	
 	hash_t  req_layer[] = {
-		{ r_key_virt->key, r_key_virt->type, &key_real, r_key_virt->value_size },
+		{ "key", key_real             },
 		hash_next(request)
 	};
 	
@@ -547,7 +524,7 @@ static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_
 			return -EINVAL;
 		
 	start:
-		if(map_get_block(data, src_block_vid, &src_block_roff, &block_size) <= 0)
+		if(map_get_block(data, src_block_vid, &src_block_roff, &block_size) != 0)
 			return -EFAULT;
 		
 		block_size = MIN(size, block_size);
@@ -578,9 +555,9 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	
 	blocks_user_data *data = (blocks_user_data *)chain->user_data;
 	
-	if(map_off(data, start,        &start_block_vid, &start_real) <= 0)
+	if(map_off(data, start,        &start_block_vid, &start_real) != 0)
 		return -EFAULT;
-	if(map_off(data, start + size, &end_block_vid,   &end_real)   <= 0){
+	if(map_off(data, start + size, &end_block_vid,   &end_real)   != 0){
 		end_block_vid = (data->blocks_count - 1);
 		end_block_off = data->block_size;
 	}else{
@@ -591,7 +568,7 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	
 	for(i_vid = start_block_vid; i_vid <= end_block_vid; i_vid++){
 		if(i_vid == end_block_vid){
-			if(map_get_block(data, end_block_vid, &block_roff, &block_size) <= 0)
+			if(map_get_block(data, end_block_vid, &block_roff, &block_size) != 0)
 				return -EFAULT;
 			
 			if(real_move(data, end_real, block_roff, block_size - end_block_off) != 0) // TODO WRRRRRROOOOOOOOOOOONGG

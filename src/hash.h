@@ -3,10 +3,7 @@
 
 struct hash_t {
 	char *          key;
-	
-	data_type       type;         // DATA_* macros can init this
-	void *          value;        //
-	size_t          value_size;   //
+	data_t          data;
 };
 
 typedef int  (*hash_iterator)(hash_t *, void *, void *);
@@ -14,11 +11,11 @@ typedef int  (*hash_iterator)(hash_t *, void *, void *);
 #define hash_ptr_null  (void *)-1
 #define hash_ptr_end   (void *)-2 
 
-#define hash_null       {hash_ptr_null, 0, hash_ptr_null, 0}
-#define hash_next(hash) {hash_ptr_end,  0, (void *)hash,  0}
+#define hash_null       {hash_ptr_null, {0, hash_ptr_null, 0}}
+#define hash_next(hash) {hash_ptr_end,  {0, (void *)hash,  0}}
 #define hash_end        hash_next(NULL)
 
-#define HVALUE(_hash_t,_type)  *(_type *)_hash_t->value
+#define HVALUE(_hash_t,_type)  *(_type *)_hash_t->data.data_ptr
 
 API int                hash_get                     (hash_t *hash, char *key, data_type *type, void **value, size_t *value_size);
 API int                hash_get_typed               (hash_t *hash, data_type type, char *key, void **value, size_t *value_size);
@@ -30,7 +27,10 @@ API int                hash_iter                    (hash_t *hash, hash_iterator
 API hash_t *           hash_find                    (hash_t *hash, char *key);
 API hash_t *           hash_find_typed              (hash_t *hash, data_type type, char *key);
 
-API data_type          hash_get_data_type           (hash_t *hash);
+_inline
+API data_t *           hash_get_data                (hash_t *hash);
+
+API data_type          hash_get_data_type           (hash_t *hash); // TODO deprecate
 API void *             hash_get_value_ptr           (hash_t *hash);
 API size_t             hash_get_value_size          (hash_t *hash);
 

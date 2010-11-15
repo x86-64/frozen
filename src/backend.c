@@ -100,10 +100,10 @@ static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chai
 	char      *chain_name;
 	hash_t    *chain_config;
 	
-	if(config->type != TYPE_HASHT)
+	if(hash_get_data_type(config) != TYPE_HASHT)
 		return ITER_CONTINUE;
 	
-	chain_config = (hash_t *)config->value;
+	chain_config = (hash_t *)hash_get_value_ptr(config);
 	if(hash_get_typed(chain_config, TYPE_STRING, "name", (void **)&chain_name, NULL) != 0)
 		return ITER_BREAK;
 	

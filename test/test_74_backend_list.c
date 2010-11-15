@@ -36,14 +36,15 @@ START_TEST (test_backend_list){
 	
 	// create new
 	hash_t  hash_create[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",   DATA_SIZET(10)                 },
-		{ "buffer", DATA_BUFFERT(buffer)           },
+		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",    DATA_SIZET(10)                 },
+		{ "buffer",  DATA_BUFFERT(buffer)           },
+		{ "key_out", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("chain in_list create failed");	
-	buffer_read(buffer, 0, &key_off, MIN(ssize, sizeof(off_t)));
+	buffer_read(buffer, 0, &key_off, sizeof(off_t));
 	
 	
 	// write keys

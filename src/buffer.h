@@ -70,6 +70,7 @@ API void            buffer_free                (buffer_t *buffer);
 API void *          buffer_defragment          (buffer_t *buffer);
 API void            buffer_cleanup             (buffer_t *buffer);
 API _inline size_t  buffer_get_size            (buffer_t *buffer);
+API int             buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_chunk, void **p_ptr, size_t *p_rest_size);
 
 API ssize_t         buffer_write               (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
 API ssize_t         buffer_read                (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);

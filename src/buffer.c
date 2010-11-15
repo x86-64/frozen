@@ -327,7 +327,16 @@ ssize_t         buffer_read                (buffer_t *buffer, off_t read_offset,
 	return -1;
 } // }}}
 
-static int      buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_chunk, void **p_ptr, size_t *p_rest_size){ // {{{
+/** @brief Seek chunk in buffer
+ *  @param[in]  buffer        Buffer to seek
+ *  @param[in]  b_offset      Offset
+ *  @param[in]  p_chunk       Found chunk pointer
+ *  @param[in]  p_ptr         Memory ptr
+ *  @param[in]  p_rest_size   Memory size
+ *  @return 0 on success
+ *  @return -EINVAL on error
+ */
+int      buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_chunk, void **p_ptr, size_t *p_rest_size){ // {{{
 	switch(buffer->type){
 		case BUFF_TYPE_CHUNKED:
 			if(b_offset == 0){

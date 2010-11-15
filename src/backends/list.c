@@ -17,8 +17,10 @@ static int lists_configure(chain_t *chain, hash_t *config){
 
 static ssize_t lists_set(chain_t *chain, request_t *request){
 	ssize_t           ret;
+	data_t           *key_orig;
+	data_t            key_from, key_to;
+	data_t            d_one = DATA_OFFT(1);
 	hash_t           *r_insert, *r_key;
-	void             *o_key_from, *o_key_to;
 	
 	if(
 		(r_insert = hash_find_typed(request, TYPE_INT32, "insert")) != NULL &&
@@ -28,19 +30,18 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 		// recommended use of 'blocks' chain as under-lying chain to improve perfomance
 		
 		if( (r_key = hash_find(request, "key")) == NULL) return -EINVAL;
+		key_orig = hash_get_data(r_key);
+		
+		data_copy_local(&key_from, key_orig);
+		data_copy_local(&key_to,   key_orig);
 			
-		o_key_from = alloca(r_key->value_size);
-		o_key_to   = alloca(r_key->value_size);
-			
-		memcpy(o_key_from, r_key->value, r_key->value_size);
-		memcpy(o_key_to,   r_key->value, r_key->value_size);
-			
-		if(data_bare_arithmetic(r_key->type, o_key_to, '+', 1) != 0) return -EINVAL;
+		if(data_arithmetic('+', &key_to, NULL, &d_one, NULL) != 0) // TODO contexts
+			return -EINVAL;
 		
 		hash_t  new_request[] = {
 			{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
-			{ "key_from", r_key->type, o_key_from, r_key->value_size },
-			{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
+			{ "key_from", key_from                                   },
+			{ "key_to",   key_to                                     },
 			{ "size",     DATA_VOID                                  },
 			hash_next(request)
 		};
@@ -55,24 +56,25 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 
 static ssize_t lists_delete(chain_t *chain, request_t *request){
 	ssize_t           ret;
+	data_t           *key_orig;
+	data_t            key_from, key_to;
 	hash_t           *r_key, *r_size;
-	void             *o_key_from, *o_key_to;
 	
 	if( (r_key  = hash_find(request, "key"))  == NULL) return -EINVAL;
 	if( (r_size = hash_find(request, "size")) == NULL) return -EINVAL;
-		
-	o_key_from = alloca(r_key->value_size);
-	o_key_to   = alloca(r_key->value_size);
-		
-	memcpy(o_key_from, r_key->value, r_key->value_size);
-	memcpy(o_key_to,   r_key->value, r_key->value_size);
-		
-	if(data_bare_arithmetic(r_key->type, o_key_from, '+', HVALUE(r_size, unsigned int)) != 0) return -EINVAL;
+	
+	key_orig = hash_get_data(r_key);
+	data_copy_local(&key_from, key_orig);
+	data_copy_local(&key_to,   key_orig);
+	
+	data_t  d_size = DATA_OFFT(HVALUE(r_size, unsigned int));     // TODO pass real data from hash
+	if(data_arithmetic('+', &key_from, NULL, &d_size, NULL) != 0) // TODO contexts
+		return -EINVAL;
 	
 	hash_t  new_request[] = {
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
-		{ "key_from", r_key->type, o_key_from, r_key->value_size },
-		{ "key_to",   r_key->type, o_key_to,   r_key->value_size },
+		{ "key_from", key_from                                   },
+		{ "key_to",   key_to                                     },
 		{ "size",     DATA_VOID                                  },
 		hash_next(request)
 	};

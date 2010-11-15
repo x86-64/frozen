@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 
+/*
 static int  struct_iter_init(hash_t *config, void *p_structure, void *null){
 	size_t    member_id;
 	data_type member_data_type;
@@ -77,6 +78,7 @@ member_t *  struct_get_member_by_name    (struct_t *structure, char *name){
 	return NULL;
 }
 inline size_t  struct_get_size              (struct_t *structure){ return structure->size; }
+*/
 
 // TODO rewrite to handle buffer having data splitted between two chunks
 // TODO SEC dangerous function

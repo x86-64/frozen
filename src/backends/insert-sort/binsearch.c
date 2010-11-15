@@ -8,6 +8,7 @@ ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffe
 	range_start = range_end = 0;
 	
 	buffer_init_from_bare(&buffer_count, &range_end, sizeof(range_end));
+	
 	hash_t  req_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
 		{ "buffer", DATA_BUFFERT(&buffer_count)   },
