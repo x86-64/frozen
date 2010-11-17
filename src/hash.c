@@ -14,8 +14,8 @@ hash_t *         hash_find              (hash_t *hash, char *key){ // {{{
 			(
 				value->key == key ||
 				(
-					key != hash_ptr_null && value->key != hash_ptr_null &&
-					key != hash_ptr_end  &&
+					key != hash_ptr_null && key != hash_ptr_end &&
+					value->key != hash_ptr_null &&
 					strcmp(value->key, key) == 0
 				)
 			)

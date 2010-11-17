@@ -228,7 +228,7 @@ static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, 
 	d_offset += offset;
 	d_size   -= offset;
 	
-	d_size    = MIN(*buffer_size, d_size);
+	*buffer_size = d_size = MIN(*buffer_size, d_size);
 	
 	if(d_size == 0)
 		return -1;       // EOF
@@ -285,7 +285,7 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 	f_data_write    func_write;
 	
 	func_read  = data_protos[src->type].func_read;
-	func_read  = func_read  ? func_read : data_def_read;
+	func_read  = func_read  ? func_read  : data_def_read;
 	
 	func_write = data_protos[dst->type].func_write;
 	func_write = func_write ? func_write : data_def_write;
@@ -295,22 +295,23 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 		buffer      = buffer_local;
 		buffer_size = DEF_BUFFER_SIZE;
 		
-		rret = func_read  (src, src_ctx, offset, &buffer, &buffer_size);
-		if(rret == -1) // EOF
-			return transferred;
-		if(rret < 0) // error
+		if( (rret = func_read  (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
 			return -EINVAL;
 		
-		wret = func_write (dst, dst_ctx, offset, buffer, buffer_size);
-		if(wret < 0)
-			return -EINVAL;
-		if(rret != wret)
-			return -EFAULT;
+		if(rret == -1) // EOF from read side
+			break;
 		
-		transferred += rret;
+		if( (wret = func_write (dst, dst_ctx, offset,  buffer,  buffer_size)) < 0)
+			return -EINVAL;
+		
+		transferred += wret;
 		offset      += rret;
+		
+		if(rret != wret) // EOF from write side
+			break;
 	}while(1);
-	return -EFAULT;
+	
+	return transferred;
 }
 
 /* vim: set filetype=c: */

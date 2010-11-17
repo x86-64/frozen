@@ -27,6 +27,7 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	ssize_t ret;
 	int     handle;
 	off_t   key;
+	size_t  size_min = size;
 	hash_t *temp;
 	
 	handle =
@@ -36,10 +37,15 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 		( (temp = hash_find_typed(context, TYPE_OFFT,  "key")) != NULL) ?
 		HVALUE(temp, off_t) : 0;
 	
+	// apply size limits
+	if( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL){
+		size_min = MIN(size, HVALUE(temp, size_t));
+	}
+	
 redo:   ret = pwrite(
 		handle,
 		buffer,
-		size,
+		size_min,
 		key + offset
 	);
 	if(ret == -1){
@@ -56,10 +62,7 @@ static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	size =
 		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
-		HVALUE(temp, size_t) : 0;
-	if(size == 0)
-		return 0;
-	
+		HVALUE(temp, size_t) : *buffer_size;
 	handle =
 		( (temp = hash_find_typed(context, TYPE_INT32, "handle")) != NULL) ?
 		HVALUE(temp, int) : 0;
@@ -244,7 +247,9 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	data_ctx_t       *buffer_ctx;
 	hash_t           *r_buffer, *r_buffer_ctx;
 	
-	data_t           *key, *size;
+	off_t             def_key;
+	data_t            def_key_data = DATA_PTR_OFFT(&def_key);
+	data_t           *key = &def_key_data, *size;
 	hash_t           *r_key, *r_size;
 	
 	data_ctx_t       *key_out_ctx;
@@ -263,43 +268,40 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 		(data_ctx_t *)hash_get_data(r_buffer_ctx) : NULL;
 	
 	/* get file io related info */
-	key  =
-		( (r_key  = hash_find(request, "key"))  != NULL) ?
-		hash_get_data(r_key)  : NULL;
-	size =
-		( (r_size = hash_find(request, "size")) != NULL) ?
-		hash_get_data(r_size) : NULL;
-	
-	/* check params */
-	if(size == NULL) // user must supply size
-		return -EINVAL;
-	
-	if(key == NULL){ // user may not supply key
-		off_t   new_key;
+	if( (r_key = hash_find(request, "key")) != NULL){
+		key = hash_get_data(r_key);
+	}else{
 		size_t  new_size;
 		
-		new_size = *(unsigned int *)size; // TODO replace with data_read
+		new_size = data_len(buffer, buffer_ctx);
 		
-		if( file_new_offset(chain, &new_key, new_size) != 0)
+		if( file_new_offset(chain, &def_key, new_size) != 0)
 			return -EFAULT;
 	}
 	
 	/* prepare contexts */
-	hash_t  file_ctx[] = {
+	hash_t file_ctx_size = hash_null;
+	
+	// if size supplied - apply it as file output restruction
+	if( (r_size = hash_find(request, "size")) != NULL){
+		size = hash_get_data(r_size);
+		
+		hash_t new_size = { "size", *size };
+		
+		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
+	}
+	
+	data_ctx_t  file_ctx[] = {
 		{ "handle", DATA_INT32(data->handle) },
 		{ "key",    *key                     },
-		{ "size",   *size                    },
+		file_ctx_size,
 		hash_end
-	};
-	hash_t  buff_ctx[] = {
-		{ "size",   *size                    },
-		hash_next(buffer_ctx)
 	};
 	
 	/* write info to file */
 	ret = data_transfer(
 		&file_io, file_ctx,
-		buffer,   buff_ctx
+		buffer,   buffer_ctx
 	);
 	
 	/* write key if requested */
@@ -341,22 +343,26 @@ static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
 		(data_ctx_t *)hash_get_data(r_buffer_ctx) : NULL;
 	
 	/* get file io related info */
-	key  =
-		( (r_key  = hash_find(request, "key"))  != NULL) ?
-		hash_get_data(r_key)  : NULL;
-	size =
-		( (r_size = hash_find(request, "size")) != NULL) ?
-		hash_get_data(r_size) : NULL;
-	
-	/* check params */
-	if(key == NULL || size == NULL) // user must supply key & size
+	if( (r_key  = hash_find(request, "key")) == NULL)
 		return -EINVAL;
+		
+	key = hash_get_data(r_key);
+	
+	/* get size restructions */
+	hash_t file_ctx_size = hash_null;
+	if( (r_size = hash_find(request, "size")) != NULL){
+		size = hash_get_data(r_size);
+		
+		hash_t new_size = { "size", *size };
+		
+		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
+	}
 	
 	/* prepare file context */
-	hash_t  file_ctx[] = {
+	data_ctx_t  file_ctx[] = {
 		{ "handle", DATA_INT32(data->handle) },
 		{ "key",    *key                     },
-		{ "size",   *size                    },
+		file_ctx_size,
 		hash_end
 	};
 	
