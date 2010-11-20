@@ -73,7 +73,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libfrozen_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = backends/libfrozen_la-null-proxy.lo \
-	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo
+	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo \
+	backends/libfrozen_la-rewrite.lo
 am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
 	libfrozen_la-list.lo libfrozen_la-buffer.lo \
 	libfrozen_la-data.lo libfrozen_la-hash.lo \
@@ -219,13 +220,14 @@ top_srcdir = @top_srcdir@
 backends_sources = \
 	backends/null-proxy.c       \
 	backends/file.c             \
-	backends/list.c             
+	backends/list.c             \
+	backends/rewrite.c          
+
 
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
 
 #	backends/insert-sort.c      
-#	backends/rewrite.c          
 data_sources = \
 	data/void.c     \
 	data/binary.c   \
@@ -339,6 +341,8 @@ backends/libfrozen_la-file.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-list.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
+backends/libfrozen_la-rewrite.lo: backends/$(am__dirstamp) \
+	backends/$(DEPDIR)/$(am__dirstamp)
 libfrozen.la: $(libfrozen_la_OBJECTS) $(libfrozen_la_DEPENDENCIES) 
 	$(libfrozen_la_LINK) -rpath $(libdir) $(libfrozen_la_OBJECTS) $(libfrozen_la_LIBADD) $(LIBS)
 
@@ -350,6 +354,8 @@ mostlyclean-compile:
 	-rm -f backends/libfrozen_la-list.lo
 	-rm -f backends/libfrozen_la-null-proxy.$(OBJEXT)
 	-rm -f backends/libfrozen_la-null-proxy.lo
+	-rm -f backends/libfrozen_la-rewrite.$(OBJEXT)
+	-rm -f backends/libfrozen_la-rewrite.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -364,6 +370,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-rewrite.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -451,6 +458,13 @@ backends/libfrozen_la-list.lo: backends/list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/list.c' object='backends/libfrozen_la-list.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
+
+backends/libfrozen_la-rewrite.lo: backends/rewrite.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-rewrite.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-rewrite.Tpo -c -o backends/libfrozen_la-rewrite.lo `test -f 'backends/rewrite.c' || echo '$(srcdir)/'`backends/rewrite.c
+@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-rewrite.Tpo backends/$(DEPDIR)/libfrozen_la-rewrite.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite.c' object='backends/libfrozen_la-rewrite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-rewrite.lo `test -f 'backends/rewrite.c' || echo '$(srcdir)/'`backends/rewrite.c
 
 libfrozen_la-backend.lo: backend.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-backend.Tpo -c -o libfrozen_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c

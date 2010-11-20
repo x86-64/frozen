@@ -20,17 +20,13 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 	data_t           *key_orig;
 	data_t            key_from, key_to;
 	data_t            d_one = DATA_OFFT(1);
-	hash_t           *r_insert, *r_key;
 	
-	if(
-		(r_insert = hash_find_typed(request, TYPE_INT32, "insert")) != NULL &&
-		HVALUE(r_insert, unsigned int) == 1
-	){
+	if(hash_find(request, "insert") != NULL){
 		// on insert we move all items from 'key' to 'key'+1
 		// recommended use of 'blocks' chain as under-lying chain to improve perfomance
 		
-		if( (r_key = hash_find(request, "key")) == NULL) return -EINVAL;
-		key_orig = hash_get_data(r_key);
+		if( (key_orig = hash_get_data(request, "key")) == NULL)
+			return -EINVAL;
 		
 		data_copy_local(&key_from, key_orig);
 		data_copy_local(&key_to,   key_orig);
@@ -58,12 +54,11 @@ static ssize_t lists_delete(chain_t *chain, request_t *request){
 	ssize_t           ret;
 	data_t           *key_orig;
 	data_t            key_from, key_to;
-	hash_t           *r_key, *r_size;
+	hash_t           *r_size;
 	
-	if( (r_key  = hash_find(request, "key"))  == NULL) return -EINVAL;
-	if( (r_size = hash_find(request, "size")) == NULL) return -EINVAL;
+	if( (key_orig = hash_get_data(request, "key"))  == NULL) return -EINVAL;
+	if( (r_size   = hash_find    (request, "size")) == NULL) return -EINVAL;
 	
-	key_orig = hash_get_data(r_key);
 	data_copy_local(&key_from, key_orig);
 	data_copy_local(&key_to,   key_orig);
 	

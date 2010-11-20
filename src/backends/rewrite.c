@@ -32,59 +32,51 @@
  * Rewrite rule can contain action, source and destination targets and optional parameters.
  * Source and destination targets defined as follows:
  * @code
- * 	{ src_key     = "source_key"                                     }  // for src key
- * 	{ src_config  = "config_key"                                     }  // for config key
- * 	{ src_backend = "backend_key", src_rule = 2                      }  // for request_proto key of second rule
- * 	{ dst_key     = "target_key", dst_type = "binary", dst_size = 10 }  // for dst key
- * 	{ dst_same    = 1                                                }  // for dst key eq src
- * 	{ src_buffer  = 1                                                }  // for src buffer
- * 	{ src_buffer  = 1, src_buffer_off = 0                            }  // for src buffer
- * 	{ src_buffer  = 1, src_buffer_off = 0, src_buffer_len = 10       }  // for src buffer
- * 	{ dst_buffer  = 1, dst_buffer_off = 0, dst_buffer_len = 10       }  // for dst buffer
+ * 	{ src_key     = "source_key"                              }  // for request key
+ * 	{ src_config  = "config_key"                              }  // for config key
+ * 	{ src_backend = "backend_key", src_rule = 2               }  // for 2nd rule backend's request_proto key
+ * 	{ src_key     = "source_key",  src_info = 1,              }  // for data in request key
+ * 	{ src_config  = "source_key",  src_info = 1,              }  // for data in config key
+ * 	{ src_backend = "source_key",  src_info = 1, src_rule = 2 }  // for data in backend's request_proto key
+ *
+ * 	{ dst_key     = "destination_key"                                 }  // for request key
+ * 	{ dst_key     = "target_key",  dst_type = "binary", dst_size = 10 }  // for dst key with unknown source type and size
+ * 	{ dst_backend = "backend_key", dst_rule = 2                       }  // for 2nd rule backend's request_proto key
+ * 	{ dst_key     = "destination_key", dst_info = 1,                  }  // for data in request key
+ * 	{ dst_backend = "destination_key", dst_info = 1, dst_rule = 2     }  // for data in backend's request_proto key
  * @endcode
- * dst_type and dst_size is optional then source target can provide these values.
  *  
- *
  * Action can be one of following:
- * 	- "set"           - set key or buffer value
- * 		@param[in]  src_*    Source key or buffer
- * 		@param[in]  fatal    Return error on failed rule [TYPE_INT32]
- * 		@param[out] dst_*    Destination key or buffer
+ * 	- "set"           - read from src and write it to dst
+ * 		@param[in]  src_*    Source target
+ * 		@param[out] dst_*    Destination target
  *
- * 	- "unset"         - unset key or buffer
- * 		@param[out] dst_*    Destination key or buffer
+ * 	- "unset"         - unset key
+ * 		@param[out] dst_*    Destination target
  *
- * 	- "length"        - get length of source (key->value_size and buffer->size).
- * 		Actual length of buffer corrected according buffer_off + buffer_len window. For example
- * 		if buffer length is 10, and buffer_off is 2 - function return 8. If buffer_len supplied,
- * 		for example 5, function return 5. Output type is TYPE_SIZET
- * 		@param[in]  src_*    Source key or buffer
- * 		@param[out] dst_*    Destination key or buffer
- *
- * 	- "data_length"   - calc length of data_t.
- * 		Resulted data length corrected according buffer window, see above "length". Output type is TYPE_SIZET
- * 		@param[in]  src_*    Source key or buffer
- * 		@param[in]  type     Data type [TYPE_STRING]
- * 		@param[in]  data_ctx Data context for buffers [TYPE_STRING]
- * 		@param[out] dst_*    Destination key or buffer
- *
- * 	- "arith"         - do arithmetic with target. On keys one can override data type with "type" parameter or original
- * 		key type be used instead. Buffers require data type specified.
- * 		@param[in]  src_*      Source key or buffer
- * 		@param[in]  type       Data type [TYPE_STRING]
- * 		@param[in]  data_ctx   Data context for buffers [TYPE_STRING]
- * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
- * 		@param[in]  operand    Operand [TYPE_INT32]
- * 		@param[out] dst_*      Destination key or buffer
+ * 	- "length"        - get length of source (key->value_size). Output type is TYPE_SIZET
+ * 		@param[in]  src_*    Source target
+ * 		@param[out] dst_*    Destination target
  *
  * 	- "backend"       - call backend
  * 		@param[in]  backend         Backend name or config
  * 		@param[in]  request_proto   Prototype of request
- * 		@param[in]  src_*           Buffer for request or NULL
+ *
+ * 	- "data_length"   - calc length of data_t. Output type is TYPE_SIZET
+ * 		@param[in]  src_*    Source target
+ * 		@param[out] dst_*    Destination target
+ *
+ * 	- "data_arith"    - do arithmetic with targets. [ Dst = Dst (operation) Src ]
+ * 		@param      dst_*      Destination target
+ * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
+ * 		@param[in]  src_*      Source target
  *
  * Other parameters:
- * @param[in] before  Do request before chain_next (default)
- * @param[in] after   Do request after  chain_next
+ * 	@param[in] on-request  Do action only on this ACTION_* supplied [TYPE_INT32]
+ * 	@param[in] before      Do request before calling next chain (default)
+ * 	@param[in] after       Do request after  calling next chain
+ * 	@param[in] fatal       Return error on failed rule
+ * 	@param[in] copy        Do action on copy of source target (useful for arithmetic)
  */
 
 #include <libfrozen.h>
@@ -93,19 +85,21 @@
 /* typedefs {{{ */
 typedef enum rewrite_actions {
 	VALUE_SET,
-	VALUE_DELETE,
-	CALC_LENGTH,
-	CALC_DATA_LENGTH,
+	VALUE_UNSET,
+	VALUE_LENGTH,
 	CALL_BACKEND,
-	CALL_ARITH
+	DATA_LENGTH,
+	DATA_ARITH,
+	
+	DO_NOTHING = -1
 } rewrite_actions;
 
 typedef enum things {
 	THING_NOTHING,
-	THING_CONFIG,
+	
 	THING_KEY,
-	THING_REQUEST_KEY,
-	THING_BUFFER
+	THING_CONFIG,
+	THING_REQUEST
 } things;
 
 typedef enum rewrite_times {
@@ -120,30 +114,26 @@ typedef struct rewrite_rule_t {
 	
 	// source
 		things        src_type;
-		char         *src_key_name;
-		off_t         src_buffer_off;
-		size_t        src_buffer_len;
-		data_type     src_config_type;
-		void         *src_config_data;
-		size_t        src_config_size;
+		
+		char         *src_key;
+		data_t        src_config;
+		data_ctx_t   *src_config_ctx;
+		
+		unsigned int  src_info;
 		unsigned int  src_rule_num;
 		
 	// destination
 		things        dst_type;
-		char         *dst_key_name;
+		
+		char         *dst_key;
 		data_type     dst_key_type;
 		size_t        dst_key_size;
-		off_t         dst_buffer_off;
-		size_t        dst_buffer_len;
+		
+		unsigned int  dst_info;
 		unsigned int  dst_rule_num;
 		
 	// rest
-		data_type     data_type;
-		data_ctx_t    data_ctx;
-		unsigned int  data_ctx_inited;
 		char          operator;
-		char          op_inited;
-		unsigned int  operand;
 		
 		backend_t    *backend;
 		request_t    *request_proto;
@@ -161,27 +151,23 @@ typedef struct rewrite_user_data {
 
 static rewrite_actions  rewrite_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "set")            == 0) return VALUE_SET;
-	if(strcasecmp(string, "unset")          == 0) return VALUE_DELETE;
-	if(strcasecmp(string, "length")         == 0) return CALC_LENGTH;
-	if(strcasecmp(string, "data_length")    == 0) return CALC_DATA_LENGTH;
+	if(strcasecmp(string, "unset")          == 0) return VALUE_UNSET;
+	if(strcasecmp(string, "length")         == 0) return VALUE_LENGTH;
 	if(strcasecmp(string, "backend")        == 0) return CALL_BACKEND;
-	if(strcasecmp(string, "arith")          == 0) return CALL_ARITH;
-	return -1;
+	if(strcasecmp(string, "data_length")    == 0) return DATA_LENGTH;
+	if(strcasecmp(string, "data_arith")     == 0) return DATA_ARITH;
+	return DO_NOTHING;
 } // }}}
 
 static void rewrite_rule_free(rewrite_rule_t *rule){ // {{{
-	if(rule->src_config_data != NULL)
-		free(rule->src_config_data);
-	if(rule->src_key_name != NULL)
-		free(rule->src_key_name);
-	if(rule->dst_key_name != NULL)
-		free(rule->dst_key_name);
-	if(rule->data_ctx_inited == 1)
-		data_ctx_destroy(&rule->data_ctx);
+	if(rule->src_key != NULL) free(rule->src_key);
+	if(rule->dst_key != NULL) free(rule->dst_key);
+	
 	if(rule->request_proto != NULL)
 		free(rule->request_proto);
 	if(rule->backend != NULL)
 		backend_destroy(rule->backend);
+	
 } // }}}
 static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	void                *temp;
@@ -200,8 +186,8 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	// parse action {{{
 	if(hash_get_typed(config, TYPE_STRING, "action", &temp, NULL) != 0)
 		label_error(cleanup, "rewrite rule: 'action' not supplied\n");
-	if( (new_rule.action = rewrite_str_to_action(temp)) == -1)
-		label_error(cleanup, "rewrite rule: 'action' invalid\n");
+	new_rule.action = rewrite_str_to_action(temp);
+	
 	// }}}
 	// parse filter {{{
 	new_rule.filter =
@@ -227,14 +213,8 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	// }}}
 	// parse operator and operand {{{
 	new_rule.operator  = 0;
-	new_rule.operand   = 0;
-	new_rule.op_inited = 0;
 	if( hash_get_typed(config, TYPE_STRING, "operator", &temp, NULL) == 0){
 		new_rule.operator  = *(char *)temp;
-	}
-	if( (htemp = hash_find_typed(config, TYPE_INT32, "operand")) != NULL){
-		new_rule.operand   = HVALUE(htemp, unsigned int);
-		new_rule.op_inited = 1;
 	}
 	// }}}
 	// parse request_proto {{{
@@ -259,150 +239,94 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			return_error(-EINVAL, "rewrite rule: parameter 'backend' invalid\n");
 	}
 	// }}}
-	/* parse data type and ctx {{{
-	new_rule.data_type       = TYPE_INVALID;
-	new_rule.data_ctx_inited = 0;
-	if( hash_get_typed(config, TYPE_STRING, "type", &temp, NULL) == 0){
-		if( (new_rule.data_type = data_type_from_string((char *)temp)) == TYPE_INVALID)
-			label_error(cleanup, "rewrite rule: 'type' invalid");
-		
-		temp = NULL;
-		htemp = hash_find(config, "data_ctx");
-		data_ctx_init(&new_rule.data_ctx, new_rule.data_type, htemp);
-		new_rule.data_ctx_inited = 1;
+	// src parse {{{
+	if( hash_get_typed(config, TYPE_STRING, "src_key", &temp, NULL) == 0){
+		new_rule.src_type     = THING_KEY;
+		new_rule.src_key      = strdup(temp);
 	}
-	*/// }}}
-	do{ // src parse {{{
-		if( hash_get_typed(config, TYPE_STRING, "src_key", &temp, NULL) == 0){
-			new_rule.src_type     = THING_KEY;
-			new_rule.src_key_name = strdup(temp);
-			break;
-		}
-		if( hash_get_typed(config, TYPE_STRING, "src_backend", &temp, NULL) == 0){
-			new_rule.src_type     = THING_REQUEST_KEY;
-			new_rule.src_key_name = strdup(temp);
-			if( (htemp = hash_find_typed(config, TYPE_INT32, "src_rule")) == NULL)
-				label_error(cleanup, "rewrite rule: 'src_rule' not supplied for 'src_backend'\n");
-			
-			new_rule.src_rule_num = HVALUE(htemp, unsigned int) - 1;
-			break;
-		}
-		if( hash_get_typed(config, TYPE_STRING, "src_config", &temp, NULL) == 0){
-			new_rule.src_type        = THING_CONFIG;
-			if( (htemp = hash_find(config, (char *)temp)) == NULL)
-				label_error(cleanup, "rewrite rule: 'src_config' have wrong parameter\n");
-			
-			new_rule.src_config_type = hash_get_data_type(htemp);
-			new_rule.src_config_size = hash_get_value_size(htemp);
-			new_rule.src_config_data = malloc(new_rule.src_config_size);
-			memcpy(
-				new_rule.src_config_data,
-				hash_get_value_ptr(htemp),
-				new_rule.src_config_size
-			);
-			break;
-		}
-		if( hash_find(config, "src_buffer") != NULL){
-			new_rule.src_type       = THING_BUFFER;
-			new_rule.src_buffer_off =
-				( (htemp = hash_find_typed(config, TYPE_OFFT, "src_buffer_off")) != NULL) ?
-				HVALUE(htemp, off_t) : 0;
-			new_rule.src_buffer_len = 
-				( (htemp = hash_find_typed(config, TYPE_SIZET, "src_buffer_len")) != NULL) ?
-				HVALUE(htemp, size_t) : (size_t)-1;
-			break;
-		}
-	}while(0); // src parse }}}
-	do{ // dst parse {{{
-		if( hash_get_typed(config, TYPE_STRING, "dst_key", &temp, NULL) == 0){
-			new_rule.dst_type     = THING_KEY;
-			new_rule.dst_key_name = strdup(temp);
-			new_rule.dst_key_type =
-				( (htemp = hash_find_typed(config, TYPE_STRING, "dst_type")) != NULL) ?
-				data_type_from_string((char *)htemp->value) : TYPE_INVALID;
-			new_rule.dst_key_size =
-				( (htemp = hash_find_typed(config, TYPE_SIZET, "dst_size")) != NULL) ?
-				HVALUE(htemp, size_t) : (size_t)-1;
-			break;
-		}
-		if( hash_get_typed(config, TYPE_STRING, "dst_backend", &temp, NULL) == 0){
-			new_rule.dst_type     = THING_REQUEST_KEY;
-			new_rule.dst_key_name = strdup(temp);
-			new_rule.dst_key_type =
-				( (htemp = hash_find_typed(config, TYPE_STRING, "dst_type")) != NULL) ?
-				data_type_from_string((char *)htemp->value) : TYPE_INVALID;
-			new_rule.dst_key_size =
-				( (htemp = hash_find_typed(config, TYPE_SIZET, "dst_size")) != NULL) ?
-				HVALUE(htemp, size_t) : (size_t)-1;
-			
-			if( (htemp = hash_find_typed(config, TYPE_INT32, "dst_rule")) == NULL)
-				label_error(cleanup, "rewrite rule: 'dst_rule' not supplied for 'dst_backend'\n");
-			
-			new_rule.dst_rule_num = HVALUE(htemp, unsigned int) - 1;
-			break;
-		}
-		if( hash_find(config, "dst_buffer") != NULL){
-			new_rule.dst_type       = THING_BUFFER;
-			new_rule.dst_buffer_off =
-				( (htemp = hash_find_typed(config, TYPE_OFFT, "dst_buffer_off")) != NULL) ?
-				HVALUE(htemp, off_t) : 0;
-			new_rule.dst_buffer_len = 
-				( (htemp = hash_find_typed(config, TYPE_SIZET, "dst_buffer_len")) != NULL) ?
-				HVALUE(htemp, size_t) : (size_t)-1;
-			break;
-		}
-	}while(0); // dst parse }}}
-	
+	if( hash_get_typed(config, TYPE_STRING, "src_backend", &temp, NULL) == 0){
+		new_rule.src_type     = THING_REQUEST;
+		new_rule.src_key      = strdup(temp);
+		if( (htemp = hash_find_typed(config, TYPE_INT32, "src_rule")) == NULL)
+			label_error(cleanup, "rewrite rule: 'src_rule' not supplied for 'src_backend'\n");
+		
+		new_rule.src_rule_num = HVALUE(htemp, unsigned int) - 1;
+	}
+	if( hash_get_typed(config, TYPE_STRING, "src_config", &temp, NULL) == 0){
+		data_t *my_config;
+
+		new_rule.src_type     = THING_CONFIG;
+		if( (my_config = hash_get_data(config, (char *)temp)) == NULL)
+			label_error(cleanup, "rewrite rule: 'src_config' have wrong parameter\n");
+		
+		if(data_copy(&new_rule.src_config, my_config) != 0)
+			label_error(cleanup, "rewrite rule: 'src_config' too big\n");
+		
+		new_rule.src_config_ctx = hash_get_data_ctx(config, (char *)temp);
+	}
+	new_rule.src_info =
+		( (htemp = hash_find(config, "src_info")) != NULL) ?
+		1 : 0;
+	// src parse }}}
+	// dst parse {{{
+	if( hash_get_typed(config, TYPE_STRING, "dst_key", &temp, NULL) == 0){
+		new_rule.dst_type     = THING_KEY;
+		new_rule.dst_key      = strdup(temp);
+	}
+	if( hash_get_typed(config, TYPE_STRING, "dst_backend", &temp, NULL) == 0){
+		new_rule.dst_type     = THING_REQUEST;
+		new_rule.dst_key      = strdup(temp);
+		
+		if( (htemp = hash_find_typed(config, TYPE_INT32, "dst_rule")) == NULL)
+			label_error(cleanup, "rewrite rule: 'dst_rule' not supplied for 'dst_backend'\n");
+		
+		new_rule.dst_rule_num = HVALUE(htemp, unsigned int) - 1;
+	}
+	new_rule.dst_info =
+		( (htemp = hash_find(config, "dst_info")) != NULL) ?
+		1 : 0;
+	new_rule.dst_key_type =
+		( (htemp = hash_find_typed(config, TYPE_STRING, "dst_type")) != NULL) ?
+		data_type_from_string(hash_get_value_ptr(htemp)) : TYPE_INVALID;
+	new_rule.dst_key_size =
+		( (htemp = hash_find_typed(config, TYPE_SIZET, "dst_size")) != NULL) ?
+		HVALUE(htemp, size_t) : (size_t)-1;
+	// dst parse }}}
 	
 	// check parameters {{{
 	switch(new_rule.action){
-		case VALUE_SET:
-			if(new_rule.src_type == THING_NOTHING)
-				label_error(cleanup, "rewrite rule: missing src target\n");
-			if(new_rule.dst_type == THING_NOTHING)
-				label_error(cleanup, "rewrite rule: missing dst target\n");
-			if(new_rule.dst_type == THING_KEY){
-				if(
-					new_rule.src_type == THING_BUFFER &&
-					( new_rule.dst_key_type == TYPE_INVALID || new_rule.dst_key_size == 0)
-				)
-					label_error(cleanup, "rewrite rule: can't fill dst key. supply dst_type and dst_size\n");
-			}
-			break;
-		case CALC_DATA_LENGTH:
-			if(new_rule.data_type == TYPE_INVALID)
-				label_error(cleanup, "rewrite rule: missing data type\n");
-			
-			/* fallthrough */
-		case CALC_LENGTH:
-			if(new_rule.src_type == THING_NOTHING)
-				label_error(cleanup, "rewrite rule: missing src target\n");
-			if(new_rule.dst_type == THING_NOTHING)
-				label_error(cleanup, "rewrite rule: missing dst target\n");
-			
-			break;
-		case CALL_ARITH:
+		case DATA_ARITH:
 			if(new_rule.operator == 0)
 				label_error(cleanup, "rewrite rule: missing operator\n");
-			if(new_rule.op_inited == 0)
-				label_error(cleanup, "rewrite rule: missing operand\n");
 			
+			/* fallthrough */
+		case VALUE_SET:
+		case VALUE_LENGTH:
+		case DATA_LENGTH:
 			if(new_rule.src_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule: missing src target\n");
-			if(new_rule.dst_type == THING_NOTHING)
-				label_error(cleanup, "rewrite rule: missing dst target\n");
 			
-			if(new_rule.data_type == TYPE_INVALID && new_rule.src_type == THING_BUFFER)
-				label_error(cleanup, "rewrite rule: missing data type\n");
-			
-			break;
-		case VALUE_DELETE:
+			/* fallthrough */
+		case VALUE_UNSET:
 			if(new_rule.dst_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule: missing dst target\n");
 			break;
 		case CALL_BACKEND:
+			if(new_rule.backend == NULL || new_rule.request_proto == NULL)
+				label_error(cleanup, "rewrite rule: missing backend or request_proto\n");
+			break;
+		case DO_NOTHING:
 			break;
 	};
+	/*
+		if(new_rule.dst_type == THING_KEY){
+			if(
+				new_rule.src_type == THING_BUFFER &&
+				( new_rule.dst_key_type == TYPE_INVALID || new_rule.dst_key_size == 0)
+			)
+				label_error(cleanup, "rewrite rule: can't fill dst key. supply dst_type and dst_size\n");
+		}
+	*/
 	// }}}
 	
 	// copy rule
@@ -453,14 +377,20 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 /* }}} */
 
+static rewrite_rule_t *find_rule(rewrite_user_data *data, unsigned int rule_num){
+	if(rule_num >= data->rules_count)
+		return NULL;
+	
+	return &data->rules[rule_num];
+}
+
 static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 	unsigned int        i;
 	int                 have_after;
 	ssize_t             ret;
-	size_t              dst_size;
-	//cpy_size;
-	data_type           dst_type;
-	hash_t             *r_action, *r_src_key;
+	//size_t              dst_size;
+	//data_type           dst_type;
+	hash_t             *r_action;
 	request_t          *new_request;
 	rewrite_rule_t     *rule;
 	rewrite_user_data  *data      = (rewrite_user_data *)chain->user_data;
@@ -487,164 +417,133 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 		}
 		// }}}
 		
-		things      my_thing      = THING_NOTHING;
-		data_type   my_key_type   = TYPE_INVALID;
-		void       *my_key_ptr    = NULL;
-		size_t      my_key_size   = 0;
-		buffer_t   *my_buffer     = NULL;
-		off_t       my_buffer_off = 0;
-		size_t      my_buffer_len = -1;
+		data_t     *my_src        = NULL;
+		data_t      my_src_data   = DATA_INVALID;
+		data_ctx_t *my_src_ctx    = NULL;
+		data_t     *my_dst        = NULL;
+		data_ctx_t *my_dst_ctx    = NULL;
 		
 		// read src {{{
 		switch(rule->action){
 			case VALUE_SET:
-			case CALC_LENGTH:
-			case CALC_DATA_LENGTH:
-			case CALL_ARITH:
-			case CALL_BACKEND:
+			case VALUE_LENGTH:
+			case DATA_LENGTH:
+			case DATA_ARITH:
 				switch(rule->src_type){
 					case THING_CONFIG:
-						my_thing    = THING_KEY;
-						my_key_type = rule->src_config_type;
-						my_key_ptr  = rule->src_config_data;
-						my_key_size = rule->src_config_size;
+						memcpy(&my_src_data, &rule->src_config, sizeof(rule->src_config));
+						my_src     = &my_src_data;
+						my_src_ctx = rule->src_config_ctx;
 						break;
-					case THING_REQUEST_KEY:
+					
 					case THING_KEY:
+					case THING_REQUEST:
 						if(rule->src_type == THING_KEY){
-							r_src_key   = hash_find(request, rule->src_key_name);
+							my_src     = hash_get_data     (request, rule->src_key);
+							my_src_ctx = hash_get_data_ctx (request, rule->src_key);
 						}else{
 							rewrite_rule_t *req_rule;
-							if(rule->src_rule_num >= data->rules_count){
-								if(rule->fatal == 1) return -EINVAL;
-								my_thing = THING_NOTHING;
-								break;
+							if( (req_rule = find_rule(data, rule->src_rule_num)) == NULL){
+								if(rule->fatal == 1) return -EINVAL; else break;
 							}
-							req_rule  = &data->rules[rule->src_rule_num];
-							r_src_key = hash_find(req_rule->request_curr, rule->src_key_name);
+							my_src     = hash_get_data     (req_rule->request_curr, rule->src_key);
+							my_src_ctx = hash_get_data_ctx (req_rule->request_curr, rule->src_key); 
 						}
-						if(r_src_key == NULL){
+						if(my_src == NULL){
 							if(rule->fatal == 1) return -EINVAL;
-							my_thing = THING_NOTHING;
 							break;
 						}
-						my_thing    = THING_KEY;
-						my_key_type = hash_get_data_type(r_src_key);
-						my_key_size = hash_get_value_size(r_src_key);
-						if(rule->copy == 0){
-							my_key_ptr  = hash_get_value_ptr(r_src_key);
-						}else{
-							my_key_ptr  = alloca(my_key_size);
-							memcpy(my_key_ptr, hash_get_value_ptr(r_src_key), my_key_size);
+						if(rule->copy){
+							data_copy_local(&my_src_data, my_src);
+							my_src = &my_src_data;
 						}
 						break;
-					/*
-					case THING_BUFFER:
-						if(buffer == NULL){
-							if(rule->fatal == 1) return -EINVAL;
-							my_thing = THING_NOTHING;
-							break;
-						}
-						my_thing      = THING_BUFFER;
-						my_buffer     = buffer;
-						my_buffer_off = rule->src_buffer_off;
-						
-						my_buffer_len = buffer_get_size(buffer);
-						if(my_buffer_off > my_buffer_len){
-							if(rule->fatal == 1) return -EFAULT;
-							my_buffer_len = 0;
-						}else{
-							my_buffer_len -= my_buffer_off;
-						}
-						my_buffer_len = (rule->src_buffer_len != -1) ?
-							MIN(rule->src_buffer_len, my_buffer_len) : my_buffer_len;
-						break;
-					*/
-					case THING_BUFFER:
+					
 					case THING_NOTHING:
 						break;
 				};
+				if(my_src == NULL){
+					if(rule->fatal == 1) return -EINVAL; else break;
+				}
 				break;
-			case VALUE_DELETE:
+			
+			case DO_NOTHING:
+			case VALUE_UNSET:
+			case CALL_BACKEND:
 				break;
-			default:
-				return -EINVAL;
 		}; // }}}
-		
+		// TODO read dst
 		// modify {{{
 		switch(rule->action){
-			case VALUE_DELETE: // {{{
+			case VALUE_UNSET: // {{{
 				switch(rule->dst_type){
-					//case THING_BUFFER: new_buffer = NULL; break; // TODO
 					case THING_KEY:;
-						hash_t  del_request[] = {
-							{ rule->dst_key_name, DATA_VOID },
+						hash_t  del_req_key[] = {
+							{ rule->dst_key, DATA_VOID },
 							hash_next(request)
 						};
-						new_request = alloca(sizeof(del_request));
-						memcpy(new_request, del_request, sizeof(del_request));
+						
+						new_request = alloca(sizeof(del_req_key));
+						memcpy(new_request, del_req_key, sizeof(del_req_key));
 						break;
-					default:
-						break;
-				};
-				break; // }}}
-			case CALC_LENGTH:; // {{{
-				size_t calc_length = 0;
-				switch(my_thing){
-					case THING_BUFFER: calc_length = my_buffer_len; break;
-					case THING_KEY:    calc_length = my_key_size;  	break;
-					default: break;
-				};
-				my_thing    = THING_KEY;
-				my_key_type = TYPE_SIZET;
-				my_key_ptr  = alloca(sizeof(calc_length));
-				my_key_size = sizeof(calc_length);
-				memcpy(my_key_ptr, &calc_length, sizeof(calc_length));
-				break; // }}}
-			case CALC_DATA_LENGTH:; // {{{
-				size_t calc_data_len = 0;
-				switch(my_thing){
-					case THING_BUFFER:
-						calc_data_len = data_buffer_len(&rule->data_ctx, my_buffer, my_buffer_off);
-						if(calc_data_len > my_buffer_len){
-							calc_data_len = my_buffer_len;
+					
+					case THING_REQUEST:;
+						rewrite_rule_t *req_rule;
+						
+						if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
+							if(rule->fatal == 1) return -EINVAL; else break;
 						}
+						
+						hash_t  del_proto_key[] = {
+							{ rule->dst_key, DATA_VOID },
+							hash_next(req_rule->request_curr)
+						};
+						
+						req_rule->request_curr = alloca(sizeof(del_proto_key));
+						memcpy(req_rule->request_curr, del_proto_key, sizeof(del_proto_key));
 						break;
-					case THING_KEY:
-						calc_data_len = data_bare_len(rule->data_type, my_key_ptr, my_key_size);
-						break;
-					default:
+					
+					case THING_CONFIG:
+						return -EINVAL;
+					
+					case THING_NOTHING:
 						break;
 				};
-				my_thing    = THING_KEY;
-				my_key_type = TYPE_SIZET;
-				my_key_ptr  = alloca(sizeof(calc_data_len));
-				my_key_size = sizeof(calc_data_len);
-				memcpy(my_key_ptr, &calc_data_len, sizeof(calc_data_len));
 				break; // }}}
+			case VALUE_LENGTH:; // {{{
+				data_t  my_vlength = DATA_PTR_SIZET(&my_src->data_size);
+				data_copy_local(&my_src_data, &my_vlength);
+				my_src = &my_src_data;
+				break; // }}}
+			
+			case DATA_LENGTH:; // {{{
+				size_t  my_dlength_mem = 0;
+				data_t  my_dlength     = DATA_PTR_SIZET(&my_dlength_mem);
+				
+				my_dlength_mem = data_len(my_src, my_src_ctx);
+				data_copy_local(&my_src_data, &my_dlength);
+				my_src = &my_src_data;
+				break; // }}}
+			
+			case DATA_ARITH:
+				data_arithmetic(
+					rule->operator,
+					my_dst, my_dst_ctx,
+					my_src, my_src_ctx
+				);
+				break;
+			
 			case CALL_BACKEND:
 				backend_query(rule->backend, rule->request_curr);
 				break;
-			case CALL_ARITH:
-				switch(my_thing){
-					case THING_BUFFER:
-						data_buffer_arithmetic(&rule->data_ctx, my_buffer, my_buffer_off, rule->operator, rule->operand);
-						break;
-					case THING_KEY:;
-						data_type new_key_type = (rule->data_type == TYPE_INVALID) ?
-							my_key_type : rule->data_type;
-						
-						data_bare_arithmetic(new_key_type, my_key_ptr, rule->operator, rule->operand);
-						break;
-					default:
-						break;
-				};
-				break;
-			default:
+			
+			case DO_NOTHING:
+			case VALUE_SET:
 				break;
 		};
 		// }}}
 		
+	/*
 		// write dst {{{
 		switch(rule->action){
 			case VALUE_SET:
@@ -653,33 +552,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case CALL_ARITH:
 			case CALL_BACKEND: // {{{
 				switch(rule->dst_type){
-					/*
-					case THING_BUFFER: // {{{
-						switch(my_thing){
-							case THING_BUFFER: // {{{
-								cpy_size = (rule->dst_buffer_len == -1) ?
-									my_buffer_len : MIN(my_buffer_len, rule->dst_buffer_len);
-								
-								buffer_memcpy(
-									buffer,    rule->dst_buffer_off,
-									my_buffer, my_buffer_off,
-									cpy_size
-								);
-								break; // }}}
-							case THING_KEY: // {{{
-								cpy_size  = (rule->dst_buffer_len == -1) ?
-									my_key_size : MIN(my_key_size, rule->dst_buffer_len);
-								
-								buffer_write(
-									buffer, rule->dst_buffer_off,
-									my_key_ptr, cpy_size
-								);
-								break; // }}}
-							default: // {{{
-								return -EFAULT; // }}}
-						};
-						break; // }}}
-					*/
 					case THING_KEY:
 					case THING_REQUEST_KEY:; // {{{
 						void *new_ptr;
@@ -720,6 +592,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			// }}}
 		};
 		// }}}
+*/
 	}
 	if(pass == 0){
 		ret = chain_next_query(chain, new_request);

@@ -27,8 +27,9 @@ API int                hash_iter                    (hash_t *hash, hash_iterator
 API hash_t *           hash_find                    (hash_t *hash, char *key);
 API hash_t *           hash_find_typed              (hash_t *hash, data_type type, char *key);
 
-_inline
-API data_t *           hash_get_data                (hash_t *hash);
+API data_t *           hash_get_data                (hash_t *hash, char *key);
+API data_t *           hash_get_typed_data          (hash_t *hash, data_type type, char *key);
+API data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key);
 
 API data_type          hash_get_data_type           (hash_t *hash); // TODO deprecate
 API void *             hash_get_value_ptr           (hash_t *hash);

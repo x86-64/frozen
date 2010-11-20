@@ -116,9 +116,36 @@ int                hash_get_typed               (hash_t *hash, data_type type, c
 	
 	return 0;
 } // }}}
-inline data_t *    hash_get_data                (hash_t *hash){ // {{{
-	return &hash->data;
+
+data_t *           hash_get_data                (hash_t *hash, char *key){ // {{{
+	hash_t *htemp;
+	
+	if( (htemp = hash_find(hash, key)) == NULL)
+		return NULL;
+	
+	return &htemp->data;
 } // }}}
+data_t *           hash_get_typed_data          (hash_t *hash, data_type type, char *key){ // {{{
+	hash_t *htemp;
+	
+	if( (htemp = hash_find_typed(hash, type, key)) == NULL)
+		return NULL;
+	
+	return &htemp->data;
+} // }}}
+data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key){ // {{{
+	hash_t *htemp;
+	char *ctx_str = alloca(strlen(key) + 4 + 1);
+	
+	strcpy(ctx_str, key);
+	strcat(ctx_str, "_ctx");
+	
+	if( (htemp = hash_find(hash, ctx_str)) != NULL)
+		return htemp->data.data_ptr;
+	
+	return NULL;
+} // }}}
+
 
 #ifdef DEBUG
 void hash_dump(hash_t *hash){

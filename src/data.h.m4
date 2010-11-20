@@ -22,6 +22,7 @@ m4_include(data_protos.m4)
 m4_divert(0)
 }}} */
 
+
 enum data_type {
 	TYPES_ARRAY()
 	TYPE_INVALID = -1
@@ -41,6 +42,8 @@ typedef ssize_t (*f_data_read)      (data_t *, data_ctx_t *, off_t, void **, siz
 
 STRUCT_ARRAY()
 MACRO_ARRAY()
+
+#define DATA_INVALID  { TYPE_INVALID, NULL, 0 }
 
 struct data_ctx_t {
 	data_proto_t   *data_proto;
@@ -85,6 +88,8 @@ API int                  data_write             (data_t *dst, data_ctx_t *dst_ct
 
 API int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 API int                  data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
+API ssize_t              data_copy              (data_t *dst, data_t *src);
+API void                 data_free              (data_t *data);
 
 API data_type            data_value_type        (data_t *data);
 API void *               data_value_ptr         (data_t *data);

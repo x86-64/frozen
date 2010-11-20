@@ -2,12 +2,13 @@
 backends_sources =                  \
 	backends/null-proxy.c       \
 	backends/file.c             \
-	backends/list.c             
+	backends/list.c             \
+	backends/rewrite.c          
+
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
 
 #	backends/insert-sort.c      
-#	backends/rewrite.c          
 
 data_sources=           \
 	data/void.c     \

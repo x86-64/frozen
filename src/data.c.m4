@@ -19,6 +19,65 @@ data_proto_t data_protos[]    = { VAR_ARRAY() };
 size_t       data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);
 // }}}
 
+static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){ // {{{
+	off_t    d_offset;
+	size_t   d_size;
+	hash_t  *temp;
+	
+	d_offset =
+		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		HVALUE(temp, off_t) : 0;
+	d_size =
+		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
+		HVALUE(temp, size_t) : data->data_size;
+	
+	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
+		return -EINVAL;  // invalid context parameters
+	
+	if(offset > d_size)
+		return -EINVAL;  // invalid request
+	
+	d_offset += offset;
+	d_size   -= offset;
+	
+	*buffer_size = d_size = MIN(*buffer_size, d_size);
+	
+	if(d_size == 0)
+		return -1;       // EOF
+	
+	memcpy(*buffer, data->data_ptr + d_offset, d_size);
+	return d_size;
+} // }}}
+static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
+	off_t    d_offset;
+	size_t   d_size;
+	hash_t  *temp;
+	
+	d_offset =
+		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		HVALUE(temp, off_t) : 0;
+	d_size =
+		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
+		HVALUE(temp, size_t) : data->data_size;
+	
+	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
+		return -EINVAL;  // invalid context parameters
+	
+	if(offset > d_size)
+		return -EINVAL;  // invalid request
+	
+	d_offset += offset;
+	d_size   -= offset;
+	
+	d_size    = MIN(size, d_size);
+	
+	if(d_size == 0)
+		return -EINVAL;  // bad request
+	
+	memcpy(data->data_ptr + d_offset, buffer, d_size);
+	return d_size;
+} // }}}
+
 int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 
 int                  data_read              (data_t *src, data_ctx_t *src_ctx, void *buffer, size_t size);
@@ -207,65 +266,6 @@ int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, d
 	return -1;
 }
 
-static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){ // {{{
-	off_t    d_offset;
-	size_t   d_size;
-	hash_t  *temp;
-	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
-	
-	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
-		return -EINVAL;  // invalid context parameters
-	
-	if(offset > d_size)
-		return -EINVAL;  // invalid request
-	
-	d_offset += offset;
-	d_size   -= offset;
-	
-	*buffer_size = d_size = MIN(*buffer_size, d_size);
-	
-	if(d_size == 0)
-		return -1;       // EOF
-	
-	memcpy(*buffer, data->data_ptr + d_offset, d_size);
-	return d_size;
-} // }}}
-static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
-	off_t    d_offset;
-	size_t   d_size;
-	hash_t  *temp;
-	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
-	
-	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
-		return -EINVAL;  // invalid context parameters
-	
-	if(offset > d_size)
-		return -EINVAL;  // invalid request
-	
-	d_offset += offset;
-	d_size   -= offset;
-	
-	d_size    = MIN(size, d_size);
-	
-	if(d_size == 0)
-		return -EINVAL;  // bad request
-	
-	memcpy(data->data_ptr + d_offset, buffer, d_size);
-	return d_size;
-} // }}}
-
 /** @brief Transfer info from one data to another
  *  @param[in]   dst      Destination data
  *  @param[in] dst_ctx    Destination data context
@@ -275,7 +275,7 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
  *  @return -EINVAL on error
  *  @return -EFAULT on write error
  */
-ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){
+ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	char            buffer_local[DEF_BUFFER_SIZE];
 	void           *buffer;
 	size_t          buffer_size;
@@ -312,6 +312,33 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 	}while(1);
 	
 	return transferred;
+} // }}}
+
+/** @brief Copy data structure and data
+ *  @param[out]  dst    Destination data
+ *  @param[in]   src    Source data
+ *  @return 0 on success
+ *  @return -EFAULT on error
+ *  @post Free structure with data_free to avoid memory leak
+ */
+ssize_t             data_copy                (data_t *dst, data_t *src){
+	void *data_ptr; // support dst eq src
+	
+	data_ptr       = src->data_ptr;
+	dst->type      = src->type;
+	dst->data_size = src->data_size;
+	if( (dst->data_ptr = malloc(src->data_size)) == NULL)
+		return -EFAULT;
+	
+	memcpy(dst->data_ptr, data_ptr, src->data_size);
+	return 0;
+}
+
+/** @brief Free data structure
+ *  @param[in]  data  Data structure
+ */
+void                data_free                (data_t *data){
+	free(data->data_ptr);
 }
 
 /* vim: set filetype=c: */

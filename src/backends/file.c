@@ -245,47 +245,40 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
-	hash_t           *r_buffer, *r_buffer_ctx;
 	
 	off_t             def_key;
 	data_t            def_key_data = DATA_PTR_OFFT(&def_key);
-	data_t           *key = &def_key_data, *size;
-	hash_t           *r_key, *r_size;
+	data_t           *key, *size;
 	
+	data_t           *key_out;
 	data_ctx_t       *key_out_ctx;
-	hash_t           *r_key_out, *r_key_out_ctx;
 	
 	ssize_t           ret         = -1;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
 	/* get buffer info */
-	if( (r_buffer     = hash_find(request, "buffer")) == NULL)
+	if( (buffer = hash_get_data(request, "buffer")) == NULL)
 		return -EINVAL;
 	
-	buffer     = hash_get_data(r_buffer);
-	buffer_ctx = 
-		( (r_buffer_ctx = hash_find(request, "buffer_ctx")) != NULL) ?
-		(data_ctx_t *)hash_get_data(r_buffer_ctx) : NULL;
+	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
 	/* get file io related info */
-	if( (r_key = hash_find(request, "key")) != NULL){
-		key = hash_get_data(r_key);
-	}else{
+	if( (key = hash_get_data(request, "key")) == NULL){
 		size_t  new_size;
 		
 		new_size = data_len(buffer, buffer_ctx);
 		
 		if( file_new_offset(chain, &def_key, new_size) != 0)
 			return -EFAULT;
+		
+		key = &def_key_data;
 	}
 	
 	/* prepare contexts */
 	hash_t file_ctx_size = hash_null;
 	
 	// if size supplied - apply it as file output restruction
-	if( (r_size = hash_find(request, "size")) != NULL){
-		size = hash_get_data(r_size);
-		
+	if( (size = hash_get_data(request, "size")) != NULL){
 		hash_t new_size = { "size", *size };
 		
 		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
@@ -305,16 +298,12 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	);
 	
 	/* write key if requested */
-	if( (r_key_out = hash_find(request, "key_out")) != NULL){
-		key_out_ctx =
-			( (r_key_out_ctx = hash_find(request, "key_out_ctx")) != NULL) ?
-			(data_ctx_t *)hash_get_data(r_key_out_ctx) : NULL;
+	if( (key_out = hash_get_data(request, "key_out")) != NULL){
+		key_out_ctx = hash_get_data_ctx(request, "key_out");
 		
 		data_transfer(
-			hash_get_data(r_key_out),
-			key_out_ctx,
-			key,
-			NULL
+			key_out, key_out_ctx,
+			key,     NULL
 		);
 	}
 	
@@ -325,34 +314,24 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
-	hash_t           *r_buffer, *r_buffer_ctx;
 	
 	data_t           *key, *size;
-	hash_t           *r_key, *r_size;
 	
 	ssize_t           ret         = -1;
 	file_user_data   *data        = ((file_user_data *)chain->user_data);
 	
 	/* get buffer info */
-	if( (r_buffer     = hash_find(request, "buffer")) == NULL)
+	if( (buffer = hash_get_data(request, "buffer")) == NULL)
 		return -EINVAL;
-	
-	buffer     = hash_get_data(r_buffer);
-	buffer_ctx = 
-		( (r_buffer_ctx = hash_find(request, "buffer_ctx")) != NULL) ?
-		(data_ctx_t *)hash_get_data(r_buffer_ctx) : NULL;
+	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
 	/* get file io related info */
-	if( (r_key  = hash_find(request, "key")) == NULL)
+	if( (key = hash_get_data(request, "key")) == NULL)
 		return -EINVAL;
-		
-	key = hash_get_data(r_key);
 	
 	/* get size restructions */
 	hash_t file_ctx_size = hash_null;
-	if( (r_size = hash_find(request, "size")) != NULL){
-		size = hash_get_data(r_size);
-		
+	if( (size = hash_get_data(request, "size")) != NULL){
 		hash_t new_size = { "size", *size };
 		
 		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
