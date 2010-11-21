@@ -14,7 +14,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 TESTS = test$(EXEEXT)
-noinst_PROGRAMS = benchmark$(EXEEXT)
 check_PROGRAMS = test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -50,16 +48,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-PROGRAMS = $(noinst_PROGRAMS)
-am_benchmark_OBJECTS = benchmark-benchmark.$(OBJEXT)
-benchmark_OBJECTS = $(am_benchmark_OBJECTS)
-benchmark_DEPENDENCIES = $(top_builddir)/src/libfrozen.la
-benchmark_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(benchmark_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_test_OBJECTS = test-test.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
-test_DEPENDENCIES = $(top_builddir)/src/libfrozen.la
+test_DEPENDENCIES = $(top_builddir)/src/libfrozen/libfrozen.la
 test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(test_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -76,8 +67,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(benchmark_SOURCES) $(test_SOURCES)
-DIST_SOURCES = $(benchmark_SOURCES) $(test_SOURCES)
+SOURCES = $(test_SOURCES)
+DIST_SOURCES = $(test_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -198,14 +189,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-test_LDADD = -lcheck $(top_builddir)/src/libfrozen.la
-test_CFLAGS = -I$(top_builddir)/src/
-test_SOURCES = test.c        test.h              \
-			$(top_builddir)/src/libfrozen.h
-
-benchmark_CFLAGS = -I$(top_builddir)/src/
-benchmark_SOURCES = benchmark.c
-benchmark_LDADD = $(top_builddir)/src/libfrozen.la
+test_SOURCES = test.c test.h 
+test_CFLAGS = -I$(top_builddir)/src/libfrozen/
+test_LDADD = -lcheck $(top_builddir)/src/libfrozen/libfrozen.la
 EXTRA_DIST = test_valgrind test_gdb tests_list.c test_*.c
 all: all-am
 
@@ -250,18 +236,6 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
-benchmark$(EXEEXT): $(benchmark_OBJECTS) $(benchmark_DEPENDENCIES) 
-	@rm -f benchmark$(EXEEXT)
-	$(benchmark_LINK) $(benchmark_OBJECTS) $(benchmark_LDADD) $(LIBS)
 test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) 
 	@rm -f test$(EXEEXT)
 	$(test_LINK) $(test_OBJECTS) $(test_LDADD) $(LIBS)
@@ -272,7 +246,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/benchmark-benchmark.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-test.Po@am__quote@
 
 .c.o:
@@ -295,20 +268,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-benchmark-benchmark.o: benchmark.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(benchmark_CFLAGS) $(CFLAGS) -MT benchmark-benchmark.o -MD -MP -MF $(DEPDIR)/benchmark-benchmark.Tpo -c -o benchmark-benchmark.o `test -f 'benchmark.c' || echo '$(srcdir)/'`benchmark.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/benchmark-benchmark.Tpo $(DEPDIR)/benchmark-benchmark.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='benchmark.c' object='benchmark-benchmark.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(benchmark_CFLAGS) $(CFLAGS) -c -o benchmark-benchmark.o `test -f 'benchmark.c' || echo '$(srcdir)/'`benchmark.c
-
-benchmark-benchmark.obj: benchmark.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(benchmark_CFLAGS) $(CFLAGS) -MT benchmark-benchmark.obj -MD -MP -MF $(DEPDIR)/benchmark-benchmark.Tpo -c -o benchmark-benchmark.obj `if test -f 'benchmark.c'; then $(CYGPATH_W) 'benchmark.c'; else $(CYGPATH_W) '$(srcdir)/benchmark.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/benchmark-benchmark.Tpo $(DEPDIR)/benchmark-benchmark.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='benchmark.c' object='benchmark-benchmark.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(benchmark_CFLAGS) $(CFLAGS) -c -o benchmark-benchmark.obj `if test -f 'benchmark.c'; then $(CYGPATH_W) 'benchmark.c'; else $(CYGPATH_W) '$(srcdir)/benchmark.c'; fi`
 
 test-test.o: test.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CFLAGS) $(CFLAGS) -MT test-test.o -MD -MP -MF $(DEPDIR)/test-test.Tpo -c -o test-test.o `test -f 'test.c' || echo '$(srcdir)/'`test.c
@@ -508,7 +467,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -538,7 +497,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
-	clean-noinstPROGRAMS mostlyclean-am
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -610,14 +569,14 @@ uninstall-am:
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
 	clean-checkPROGRAMS clean-generic clean-libtool clean-local \
-	clean-noinstPROGRAMS ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	ctags distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am

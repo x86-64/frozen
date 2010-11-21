@@ -39,5 +39,9 @@ fi
 AC_CONFIG_FILES([Makefile
 		doc/Makefile
 		src/Makefile
+		src/libfrozen/Makefile
+		src/frozend/Makefile
+		src/frozenfs/Makefile
+		src/benchmark/Makefile
 		test/Makefile])
 AC_OUTPUT

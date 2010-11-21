@@ -545,7 +545,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				break;
 		};
 		// }}}
-		
 		// write dst {{{
 		switch(rule->action){
 			case VALUE_SET:
@@ -553,35 +552,42 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case VALUE_LENGTH:
 			case DATA_LENGTH:		
 			case DATA_ARITH:
-				switch(rule->dst_type){
-					case THING_KEY:;
-						hash_t  req_key[] = {
-							{ rule->dst_key, *my_src },
-							hash_next(request)
-						};
+				if(rule->src_info == 1 || rule->dst_info == 1){
+					data_transfer(
+						my_dst, my_dst_ctx,
+						my_src, my_src_ctx
+					);
+				}else{
+					switch(rule->dst_type){
+						case THING_KEY:;
+							hash_t  req_key[] = {
+								{ rule->dst_key, *my_src },
+								hash_next(request)
+							};
+							
+							new_request = alloca(sizeof(req_key));
+							memcpy(new_request, req_key, sizeof(req_key));
+							break;
 						
-						new_request = alloca(sizeof(req_key));
-						memcpy(new_request, req_key, sizeof(req_key));
-						break;
-					
-					case THING_REQUEST:;
-						rewrite_rule_t *req_rule;
-						
-						if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
-							if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-						}
-						
-						hash_t  proto_key[] = {
-							{ rule->dst_key, *my_src },
-							hash_next(req_rule->request_curr)
-						};
-						
-						req_rule->request_curr = alloca(sizeof(proto_key));
-						memcpy(req_rule->request_curr, proto_key, sizeof(proto_key));
-						break;
-					default: // {{{
-						break; // }}}
-				};
+						case THING_REQUEST:;
+							rewrite_rule_t *req_rule;
+							
+							if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
+								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
+							}
+							
+							hash_t  proto_key[] = {
+								{ rule->dst_key, *my_src },
+								hash_next(req_rule->request_curr)
+							};
+							
+							req_rule->request_curr = alloca(sizeof(proto_key));
+							memcpy(req_rule->request_curr, proto_key, sizeof(proto_key));
+							break;
+						default: // {{{
+							break; // }}}
+					};
+				}
 				break; // }}}
 			case DO_NOTHING:
 			case CALL_BACKEND:
