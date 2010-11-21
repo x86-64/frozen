@@ -2,4 +2,3 @@
 
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src . test doc
-EXTRA_DIST = makeall.sh

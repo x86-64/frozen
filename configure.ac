@@ -1,5 +1,10 @@
 AC_PREREQ(2.61)
 AC_INIT([frozen], [0.1.0], [x86mail@gmail.com])
+
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
+
 AM_INIT_AUTOMAKE([foreign])
 
 AC_PROG_CC
@@ -8,13 +13,11 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h])
 AC_FUNC_MALLOC
 
-
 PKG_CHECK_MODULES([CHECK], [check >= 0.8.2])
 
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_MACRO_DIR([m4])
-
 AC_PATH_PROGS(M4, [gm4 m4], no)
+AC_PATH_PROGS(LS, [ls], no)
+AC_PATH_PROGS(AWK, [gawk awk], no)
 
 #PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
 #	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
