@@ -227,8 +227,11 @@ cleanup:
 // Requests
 static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	off_t             new_key;
+	data_t            new_key_data = DATA_PTR_OFFT(&new_key);
+	data_t           *key_out;
+	data_ctx_t       *key_out_ctx;
 	hash_t           *r_value_size;
-	hash_t           *r_buffer;
+	//hash_t           *r_buffer;
 	
 	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
@@ -236,12 +239,23 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	if( file_new_offset(chain, &new_key, HVALUE(r_value_size, unsigned int)) != 0)
 		return -EFAULT;
 	
+	/*
 	if( (r_buffer = hash_find_typed(request, TYPE_BUFFERT, "buffer")) != NULL ){
 		buffer_write(hash_get_value_ptr(r_buffer), 0, &new_key, sizeof(off_t)); 
+		return sizeof(off_t);
+	}*/
+	if( (key_out = hash_get_data(request, "key_out")) != NULL){
+		key_out_ctx = hash_get_data_ctx(request, "key_out");
+		
+		data_transfer(
+			key_out,       key_out_ctx,
+			&new_key_data, NULL
+		);
 		return sizeof(off_t);
 	}
 	return 0;
 } // }}}
+
 static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;

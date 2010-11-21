@@ -422,6 +422,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 		data_ctx_t *my_src_ctx    = NULL;
 		data_t     *my_dst        = NULL;
 		data_ctx_t *my_dst_ctx    = NULL;
+		data_t      my_dst_data   = DATA_INVALID;
 		
 		// read src {{{
 		switch(rule->action){
@@ -444,26 +445,18 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 						}else{
 							rewrite_rule_t *req_rule;
 							if( (req_rule = find_rule(data, rule->src_rule_num)) == NULL){
-								if(rule->fatal == 1) return -EINVAL; else break;
+								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
 							}
 							my_src     = hash_get_data     (req_rule->request_curr, rule->src_key);
 							my_src_ctx = hash_get_data_ctx (req_rule->request_curr, rule->src_key); 
 						}
-						if(my_src == NULL){
-							if(rule->fatal == 1) return -EINVAL;
-							break;
-						}
-						if(rule->copy){
-							data_copy_local(&my_src_data, my_src);
-							my_src = &my_src_data;
-						}
 						break;
-					
+						
 					case THING_NOTHING:
 						break;
 				};
 				if(my_src == NULL){
-					if(rule->fatal == 1) return -EINVAL; else break;
+					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
 				}
 				break;
 			
@@ -473,42 +466,51 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				break;
 		}; // }}}
 		// TODO read dst
-		// modify {{{
 		switch(rule->action){
-			case VALUE_UNSET: // {{{
+			case DATA_ARITH:
 				switch(rule->dst_type){
-					case THING_KEY:;
-						hash_t  del_req_key[] = {
-							{ rule->dst_key, DATA_VOID },
-							hash_next(request)
-						};
-						
-						new_request = alloca(sizeof(del_req_key));
-						memcpy(new_request, del_req_key, sizeof(del_req_key));
-						break;
-					
-					case THING_REQUEST:;
-						rewrite_rule_t *req_rule;
-						
-						if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
-							if(rule->fatal == 1) return -EINVAL; else break;
+					case THING_KEY:
+					case THING_REQUEST:
+						if(rule->dst_type == THING_KEY){
+							my_dst     = hash_get_data     (request, rule->dst_key);
+							my_dst_ctx = hash_get_data_ctx (request, rule->dst_key);
+						}else{
+							rewrite_rule_t *req_rule;
+							if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
+								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
+							}
+							my_dst     = hash_get_data     (req_rule->request_curr, rule->dst_key);
+							my_dst_ctx = hash_get_data_ctx (req_rule->request_curr, rule->dst_key); 
 						}
-						
-						hash_t  del_proto_key[] = {
-							{ rule->dst_key, DATA_VOID },
-							hash_next(req_rule->request_curr)
-						};
-						
-						req_rule->request_curr = alloca(sizeof(del_proto_key));
-						memcpy(req_rule->request_curr, del_proto_key, sizeof(del_proto_key));
 						break;
-					
+						
 					case THING_CONFIG:
-						return -EINVAL;
-					
 					case THING_NOTHING:
 						break;
 				};
+				if(my_dst == NULL){
+					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
+				}
+				if(rule->copy){
+					data_copy_local(&my_dst_data, my_dst);
+					my_dst = &my_dst_data;
+				}
+				break;
+			
+			case DO_NOTHING:
+			case VALUE_SET:
+			case VALUE_UNSET:
+			case VALUE_LENGTH:
+			case DATA_LENGTH:
+			case CALL_BACKEND:
+				break;
+		};
+		// modify {{{
+		switch(rule->action){
+			case VALUE_UNSET:; // {{{
+				data_t d_void = DATA_VOID;
+				data_copy_local(&my_src_data, &d_void);
+				my_src = &my_src_data;
 				break; // }}}
 			case VALUE_LENGTH:; // {{{
 				data_t  my_vlength = DATA_PTR_SIZET(&my_src->data_size);
@@ -531,6 +533,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 					my_dst, my_dst_ctx,
 					my_src, my_src_ctx
 				);
+				my_src = my_dst;
 				break;
 			
 			case CALL_BACKEND:
@@ -543,56 +546,49 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 		};
 		// }}}
 		
-	/*
 		// write dst {{{
 		switch(rule->action){
 			case VALUE_SET:
-			case CALC_LENGTH:
-			case CALC_DATA_LENGTH:
-			case CALL_ARITH:
-			case CALL_BACKEND: // {{{
+			case VALUE_UNSET:
+			case VALUE_LENGTH:
+			case DATA_LENGTH:		
+			case DATA_ARITH:
 				switch(rule->dst_type){
-					case THING_KEY:
-					case THING_REQUEST_KEY:; // {{{
-						void *new_ptr;
-						dst_type = (rule->dst_key_type != TYPE_INVALID) ? rule->dst_key_type : my_key_type;
-						dst_size = (rule->dst_key_size != -1) ? MIN(rule->dst_key_size, my_key_size) : my_key_size;
-						
-						switch(my_thing){
-							case THING_KEY:    new_ptr = my_key_ptr; break; 
-							case THING_BUFFER: new_ptr = buffer_defragment(my_buffer); break;
-							default: return -EFAULT;
-						};
-						hash_t  key_to_key_req[] = {
-							{ rule->dst_key_name, dst_type, new_ptr, dst_size },
+					case THING_KEY:;
+						hash_t  req_key[] = {
+							{ rule->dst_key, *my_src },
 							hash_next(request)
 						};
-						if(rule->dst_type == THING_KEY){
-							new_request = alloca(sizeof(key_to_key_req));
-							memcpy(new_request, key_to_key_req, sizeof(key_to_key_req));
-						}else{
-							rewrite_rule_t *req_rule;
-							if(rule->dst_rule_num >= data->rules_count){
-								if(rule->fatal == 1) return -EINVAL;
-								break;
-							}
-							req_rule  = &data->rules[rule->dst_rule_num];
-							req_rule->request_curr = alloca(sizeof(key_to_key_req));
-							memcpy(req_rule->request_curr, key_to_key_req, sizeof(key_to_key_req));
+						
+						new_request = alloca(sizeof(req_key));
+						memcpy(new_request, req_key, sizeof(req_key));
+						break;
+					
+					case THING_REQUEST:;
+						rewrite_rule_t *req_rule;
+						
+						if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
+							if(rule->fatal == 1) return -EINVAL; else goto next_rule;
 						}
-						break; // }}}
+						
+						hash_t  proto_key[] = {
+							{ rule->dst_key, *my_src },
+							hash_next(req_rule->request_curr)
+						};
+						
+						req_rule->request_curr = alloca(sizeof(proto_key));
+						memcpy(req_rule->request_curr, proto_key, sizeof(proto_key));
+						break;
 					default: // {{{
 						break; // }}}
 				};
 				break; // }}}
-			case VALUE_DELETE: // {{{
-				break; // }}}
-			default: // {{{
-				return -EINVAL;
-			// }}}
+			case DO_NOTHING:
+			case CALL_BACKEND:
+				break;
 		};
 		// }}}
-*/
+	next_rule:;
 	}
 	if(pass == 0){
 		ret = chain_next_query(chain, new_request);

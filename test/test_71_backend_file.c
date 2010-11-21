@@ -82,9 +82,9 @@ START_TEST (test_backend_file){
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	hash_t hash_create[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",   DATA_SIZET(10)                 },
-		{ "buffer", DATA_BUFFERT(buffer)           },
+		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ "size",    DATA_SIZET(10)                 },
+		{ "key_out", DATA_BUFFERT(buffer)           },
 		hash_end
 	};
 		

@@ -6,8 +6,12 @@ m4_ifelse(BYTES(), `1', `m4_define(`TYPE', `unsigned char')')
 m4_ifelse(BYTES(), `2', `m4_define(`TYPE', `unsigned short')')
 m4_ifelse(BYTES(), `4', `m4_define(`TYPE', `unsigned int')')
 m4_ifelse(BYTES(), `8', `m4_define(`TYPE', `unsigned long long')')
+
 m4_ifelse(NAME(), `size_t', `m4_define(`TYPE', `size_t')') 
+m4_ifelse(NAME(), `size_t', `m4_define(`BYTES', `sizeof(size_t)')')
+
 m4_ifelse(NAME(), `off_t',  `m4_define(`TYPE', `off_t')') 
+m4_ifelse(NAME(), `off_t',  `m4_define(`BYTES', `sizeof(off_t)')') 
 m4_changequote([,])
 */
 #ifndef __MAX
