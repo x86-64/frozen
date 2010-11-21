@@ -3,7 +3,19 @@
 Suite *s;
 TCase *tc_core;
 
-#include <tests_list.c>
+/* m4 {{{
+m4_define(`REGISTER_TEST', `
+        m4_define(`TESTS_ARRAY',
+		m4_defn(`TESTS_ARRAY')
+		`tcase_add_test(tc_$1, $2);
+')')
+}}} */
+
+m4_include(tests.m4)
+
+void test_list(void){
+	TESTS_ARRAY()
+}
 
 int main (void){
 	int number_failed;
@@ -25,3 +37,5 @@ int main (void){
 	
 	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+/* vim: set filetype=c: */

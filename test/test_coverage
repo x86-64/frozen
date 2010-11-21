@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# cleanup
+find . -name '*.gcov' -delete
+
+cd src
+if [[ -e libfrozen_la-libfrozen.gcno ]]; then
+	find . -maxdepth 1 -name '*.gcno' | sed "s/\.gcno//g" | awk '{print "gcov " $1 " -o .libs/" $1 ".gnco" }' | sh &>/dev/null
+	find . -name '*.gcno' -delete
+	find . -name '*.gcda' -delete 
+	find . -name '*.h.gcov' -delete
+fi;
+cd ..
+
