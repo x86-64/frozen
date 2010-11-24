@@ -14,6 +14,7 @@ AC_CHECK_HEADERS([stdlib.h])
 AC_FUNC_MALLOC
 
 PKG_CHECK_MODULES([CHECK], [check >= 0.8.2])
+PKG_CHECK_MODULES([FUSE], [fuse >= 2.6.0])
 
 AC_PATH_PROGS(M4, [gm4 m4], no)
 AC_PATH_PROGS(LS, [ls], no)

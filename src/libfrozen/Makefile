@@ -127,6 +127,8 @@ ECHO_T =
 EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
+FUSE_CFLAGS = -D_FILE_OFFSET_BITS=64 -I/usr/include/fuse  
+FUSE_LIBS = -pthread -lfuse -lrt -ldl  
 GREP = /bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644

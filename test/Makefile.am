@@ -1,9 +1,9 @@
-TESTS          = test
+TESTS          = test test_frozenfs
 check_PROGRAMS = test
 
 test_SOURCES      = test.c test.h 
-test_CFLAGS       = -I$(top_builddir)/src/libfrozen/
-test_LDADD        = -lcheck $(top_builddir)/src/libfrozen/libfrozen.la
+test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_builddir)/src/libfrozen/
+test_LDADD        = @CHECK_LIBS@ $(top_builddir)/src/libfrozen/libfrozen.la
 
 EXTRA_DIST        = test_valgrind test_gdb test_coverage test_*.c
 
