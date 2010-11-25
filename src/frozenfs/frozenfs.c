@@ -1,22 +1,25 @@
 #define FUSE_USE_VERSION 26
+#define _GNU_SOURCE
 
 #include <libfrozen.h>
 #include <fuse.h>
+#include <string.h>
+#include <sys/time.h>
 
 /* typedefs {{{ */
-typedef struct my_data {
-	char     *mountpoint;
+struct my_opts {
 	char     *datadir;
-} my_data;
+};
 
-typedef enum virt_type {
+typedef struct virtfs_item   virtfs_item;
+typedef enum virt_type       virt_type;
+
+enum virt_type {
 	VIRTFS_DIRECTORY,
 	VIRTFS_FILE,
 	
 	VIRTFS_INVALID = -1
-} virt_type;
-
-typedef struct virtfs_item virtfs_item;
+};
 
 struct virtfs_item {
 	virtfs_item   *next;
@@ -30,10 +33,16 @@ struct virtfs_item {
 	struct stat    stat;
 };
 
-#define FUSE_DATA ((my_data *) fuse_get_context()->private_data)
+enum frozenfs_keys {
+	KEY_HELP,
+};
+
 /* }}} */
 /* global variables {{{ */
-backend_t *backend;
+static struct my_opts opts;
+
+backend_t     *backend;
+unsigned int   cnt_unnamed = 0;
 
 virtfs_item  virtfs = {
 	.next       = NULL,
@@ -42,13 +51,235 @@ virtfs_item  virtfs = {
 	.name       = "",
 	.fullname   = "/",
 	.stat       = {
-		.st_mode = S_IFDIR | 0755,
-		.st_size = 0,
+		.st_mode  = S_IFDIR | 0755,
+		.st_size  = 0,
 		.st_nlink = 1
 	}
 };
+
+static struct fuse_opt frozenfs_opts[] = {
+	FUSE_OPT_KEY("-h",             KEY_HELP),
+	FUSE_OPT_KEY("--help",         KEY_HELP),
+	FUSE_OPT_END
+};
+
 /* }}} */
 
+/* virtfs {{{ */
+static int            match_path(char *folderpath, char *filepath){
+	char c1, c2;
+	int  folder_len = 0;
+	
+	do{
+		c1 = *folderpath++;
+		c2 = *filepath++;
+		
+		if(c2 == 0)
+			goto invalid;
+		if(c1 == 0)
+			goto check_slash;
+		
+		folder_len++;
+	}while(c1 == c2);
+invalid:
+	return 0;
+
+check_slash:
+	if(folder_len == 1 || c2 == '/')
+		return (strchr(filepath, '/') == NULL) ? 2 : 1;
+	return 0;
+}
+
+static virtfs_item *  virtfs_find(char *path){
+	virtfs_item    *folder;
+	
+	if(strcmp(path, "") == 0 || strcmp(path, "/") == 0)
+		return &virtfs;
+	
+	//printf("find: %s\n", path);
+	for(folder = &virtfs; folder != NULL;){
+		//printf("find: do: %s\n", folder->fullname);
+		
+		if(strcmp(folder->fullname, path) == 0)
+			return folder;
+		
+		if(
+			folder->type == VIRTFS_DIRECTORY &&
+			match_path(folder->fullname, path) != 0
+		){
+			//printf("find: move into %s\n", folder->fullname);
+			folder = folder->childs;
+			continue;
+		}
+		
+		folder = folder->next;
+	}
+	return NULL;
+}
+
+static virtfs_item *  virtfs_create(char *path, virt_type type){
+	char           *name, *fullname;
+	size_t          path_len;
+	virtfs_item    *folder, *new_item;
+	struct timeval  tv;
+	
+	if( (name = strrchr(path, '/')) == NULL)
+		return NULL;
+	name++;
+	path_len = name - path - 1;
+	fullname = strndupa(path, path_len);
+	
+	if( (folder = virtfs_find(fullname)) == NULL)
+		return NULL;
+	
+	if( (new_item = calloc(sizeof(virtfs_item), 1)) == NULL)
+		return NULL;
+	
+	gettimeofday(&tv, NULL);
+	
+	new_item->type         = type;
+	new_item->name         = strdup(name);
+	new_item->fullname     = strdup(path);
+	
+	mode_t new_mode;
+	switch(type){
+		case VIRTFS_DIRECTORY: new_mode = S_IFDIR | 0755; break;
+		case VIRTFS_FILE:      new_mode = S_IFREG | 0666; break;
+		case VIRTFS_INVALID:   new_mode = 0; break;
+	};
+	new_item->stat.st_mode  = new_mode;
+	new_item->stat.st_nlink = 1;
+	new_item->stat.st_uid   = getuid();
+	new_item->stat.st_gid   = getgid();
+	new_item->stat.st_atime = tv.tv_sec;
+	new_item->stat.st_mtime = tv.tv_sec;
+	new_item->stat.st_ctime = tv.tv_sec;
+	
+	// link it
+	new_item->next = folder->childs;
+	folder->childs = new_item;
+	return new_item;
+}
+/* }}} */
+
+/* frozen wrappers {{{ */
+static backend_t *  wfrozen_backend_new(hash_t *config){
+	backend_t *backend;
+	char      *backend_name, tmp[1024];
+	
+	if( (backend = backend_new(config)) == NULL)
+		return NULL;
+	
+	if( (backend_name = backend_get_name(backend)) == NULL){
+		snprintf(tmp, 1024, "/backends/unnamed_%d", cnt_unnamed++);
+	}else{
+		snprintf(tmp, 1024, "/backends/%s", backend_name);
+	}
+	virtfs_create(tmp, VIRTFS_FILE);
+	
+	return backend;
+};
+
+static void         wfrozen_backend_destory(backend_t *backend){
+	backend_destroy(backend);
+};
+
+static void wfrozen_init(void){
+	virtfs_create("/backends",     VIRTFS_DIRECTORY);
+	virtfs_create("/config",       VIRTFS_FILE);
+	
+	frozen_init();
+	
+	hash_set(global_settings, "homedir", TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
+	
+	hash_t config[] = {
+		{ NULL,    DATA_HASHT(
+			{ NULL, DATA_HASHT(
+				{ "name",      DATA_STRING("file")                 },
+				{ "filename",  DATA_STRING("data_ffs_test.dat")    },
+				hash_end
+			)},
+			hash_end
+		)},
+		{ "name",  DATA_STRING("be_file")                         },
+		hash_end
+	};
+	
+	backend = wfrozen_backend_new(config);
+}
+
+static void wfrozen_destroy(void){
+	wfrozen_backend_destory(backend);
+
+	frozen_destroy();
+}
+/* }}} */
+
+/* FUSE functions {{{ */
+/* folders {{{ */
+static int fusef_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t off, struct fuse_file_info *fi){
+	virtfs_item *folder, *child;
+	
+	if( (folder = virtfs_find((char *)path)) == NULL)
+		return -ENOENT;
+	
+	filler(buf, ".",  NULL, 0);
+	filler(buf, "..", NULL, 0);
+	
+	child = folder->childs;
+	while(child != NULL){
+		filler(buf, child->name, NULL, 0);
+		
+		child = child->next;
+	}
+	return 0;
+}
+
+static int fusef_getattr(const char *path, struct stat *buf){
+	virtfs_item *item;
+	
+	if( (item = virtfs_find((char *)path)) == NULL)
+		return -ENOENT;
+	
+	memcpy(buf, &(item->stat), sizeof(struct stat));
+	return 0;
+}
+/* }}} */
+/* files {{{ 
+static int fusef_open(const char *path, struct fuse_file_info *fi){
+	return 0;
+}
+
+static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+	request_t r_read[] = {
+		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
+		{ "key",    DATA_OFFT(data_ptrs[i])          },
+		{ "buffer", DATA_PTR_INT32(&data_read)       },
+		hash_end
+	};
+	ret = backend_query(backend, r_read);
+		fail_unless(ret == 4,                   "chain 'real_store_nums': read array failed");
+		fail_unless(data_read == data_array[i], "chain 'real_store_nums': read array data failed");
+	return -ENOSYS;
+}
+
+static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+	request_t r_write[] = {
+		{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
+		{ "key_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
+		{ "buffer",  DATA_PTR_INT32 (&data_array[i]) },
+		hash_end
+	};
+	ret = backend_query(backend, r_write);
+		fail_unless(ret == 4, "chain 'real_store_nums': write array failed");
+	return -ENOSYS;
+}
+
+
+static int fusef_release(const char *path, struct fuse_file_info *fi){
+	return 0;
+}
+}}} */
 /* stubs {{{
 static int fusef_flush(const char *path, struct fuse_file_info *fi){
 	return -ENOSYS;
@@ -161,169 +392,6 @@ static int fusef_releasedir(const char *path, struct fuse_file_info *fi){
 	return 0;
 }
  }}} */
-
-static int            match_path(char *folderpath, char *filepath){
-	char c1, c2;
-	int  folder_len = 0;
-	
-	do{
-		c1 = *folderpath++;
-		c2 = *filepath++;
-		
-		if(c2 == 0)
-			goto invalid;
-		if(c1 == 0)
-			goto check_slash;
-		
-		folder_len++;
-	}while(c1 == c2);
-invalid:
-	return 0;
-
-check_slash:
-	if(folder_len == 1 || c2 == '/')
-		return (strchr(filepath, '/') == NULL) ? 2 : 1;
-	return 0;
-}
-
-static virtfs_item *  virtfs_create(char *path, virt_type type){
-	char           *name;   
-	size_t          path_len;
-	virtfs_item    *folder;
-	
-	if( (name = strrchr(path, '/')) == NULL)
-		return NULL;
-	name++;
-	path_len = path - name;
-	
-	for(folder = &virtfs; folder != NULL; folder = folder->next){
-	redo:
-		if(folder->type != VIRTFS_DIRECTORY)
-			continue;
-		
-		switch(match_path(folder->fullname, path)){
-			case 0:
-				continue;
-			case 1:
-				folder = folder->childs;
-				goto redo;
-			case 2:
-				//printf("creating %s under %s\n", path, folder->fullname);
-				
-				virtfs_item *new_item = calloc(sizeof(virtfs_item), 1);
-				if(new_item == NULL)
-					return NULL;
-				
-				new_item->type         = type;
-				new_item->name         = strdup(name);
-				new_item->fullname     = strdup(path);
-				
-				mode_t new_mode;
-				switch(type){
-					case VIRTFS_DIRECTORY: new_mode = S_IFDIR | 0755; break;
-					case VIRTFS_FILE:      new_mode = S_IFREG | 0444; break;
-					case VIRTFS_INVALID:   new_mode = 0; break;
-				};
-				new_item->stat.st_mode  = new_mode;
-				new_item->stat.st_nlink = 1;
-				
-				// link it
-				new_item->next = folder->childs;
-				folder->childs = new_item;
-				break;
-		};
-	}
-	return NULL;
-}
-
-static virtfs_item *  virtfs_find(char *path){
-	virtfs_item    *folder;
-	
-	//printf("find: %s\n", path);
-	for(folder = &virtfs; folder != NULL; folder = folder->next){
-	redo:
-		//printf("find: do: %s\n", folder->fullname);
-		
-		if(strcmp(folder->fullname, path) == 0)
-			return folder;
-		
-		if(
-			folder->type == VIRTFS_DIRECTORY &&
-			match_path(folder->fullname, path) != 0
-		){
-			//printf("find: move into %s\n", folder->fullname);
-			folder = folder->childs;
-			goto redo;
-		}
-	}
-	return NULL;
-}
-
-/* folders {{{ */
-static int fusef_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t off, struct fuse_file_info *fi){
-	virtfs_item *folder, *child;
-	
-	if( (folder = virtfs_find((char *)path)) == NULL)
-		return -ENOENT;
-	
-	filler(buf, ".",  NULL, 0);
-	filler(buf, "..", NULL, 0);
-	
-	child = folder->childs;
-	while(child != NULL){
-		filler(buf, child->name, NULL, 0);
-		
-		child = child->next;
-	}
-	return 0;
-}
-
-static int fusef_getattr(const char *path, struct stat *buf){
-	virtfs_item *item;
-	
-	if( (item = virtfs_find((char *)path)) == NULL)
-		return -ENOENT;
-	
-	memcpy(buf, &(item->stat), sizeof(struct stat));
-	return 0;
-}
-/* }}} */
-/* files {{{ 
-static int fusef_open(const char *path, struct fuse_file_info *fi){
-	return 0;
-}
-
-static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
-	request_t r_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "key",    DATA_OFFT(data_ptrs[i])          },
-		{ "buffer", DATA_PTR_INT32(&data_read)       },
-		hash_end
-	};
-	ret = backend_query(backend, r_read);
-		fail_unless(ret == 4,                   "chain 'real_store_nums': read array failed");
-		fail_unless(data_read == data_array[i], "chain 'real_store_nums': read array data failed");
-	return -ENOSYS;
-}
-
-static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
-	request_t r_write[] = {
-		{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
-		{ "key_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
-		{ "buffer",  DATA_PTR_INT32 (&data_array[i]) },
-		hash_end
-	};
-	ret = backend_query(backend, r_write);
-		fail_unless(ret == 4, "chain 'real_store_nums': write array failed");
-	return -ENOSYS;
-}
-
-
-static int fusef_release(const char *path, struct fuse_file_info *fi){
-	return 0;
-}
-}}} */
-
 struct fuse_operations fuse_operations = { // {{{
 	/*
 	.readlink = fusef_readlink,
@@ -362,49 +430,57 @@ struct fuse_operations fuse_operations = { // {{{
 	.readdir = fusef_readdir,
 	.getattr = fusef_getattr,
 }; // }}}
-int main(int argc, char *argv[]){ // {{{
-	my_data *data;
-	int      ret;
-	
-	if( (data = calloc(sizeof(my_data), 1)) == NULL)
-		return ENOMEM;
-	
-	data->mountpoint = realpath(argv[3], NULL);
-	data->datadir    = realpath(argv[4], NULL);
-	
-	virtfs_create("/hello1",       VIRTFS_DIRECTORY);
-	virtfs_create("/hello1/test1", VIRTFS_FILE);
-	virtfs_create("/hello1/test2", VIRTFS_FILE);
-	virtfs_create("/hello1/test3", VIRTFS_FILE);
-	virtfs_create("/hello2",       VIRTFS_DIRECTORY);
-	virtfs_create("/hello2/woot1", VIRTFS_FILE);
-	virtfs_create("/hello2/woot2", VIRTFS_FILE);
-	virtfs_create("/hello2/woot3", VIRTFS_FILE);
-	virtfs_create("/hello3",       VIRTFS_FILE);
-	
-	/*
-	frozen_init();
-	hash_set(global_settings, "homedir", TYPE_STRING, data->datadir, strlen(data->datadir) + 1);
-	
-	hash_t config[] = {
-		{ NULL, DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("file")        },
-				{ "filename",  DATA_STRING("test.dat")    },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+/* }}} */
+
+/* options and usage {{{ */
+static void usage(void){
+	printf("usage: frozenfs datadir mountpoint [options]\n");
+}
+
+static int frozenfs_opt_proc(void *data, const char *arg, int key, struct fuse_args *outargs){
+	switch(key){
+		case FUSE_OPT_KEY_OPT:
+			//printf("fuse: key opt: %s\n", arg);
+				//tmp = g_strdup_printf("-o%s", arg);
+				//ssh_add_arg(tmp);
+				//g_free(tmp);
+				//return 0;
+			return 1;
+		
+		case FUSE_OPT_KEY_NONOPT:
+			if(!opts.datadir){
+				opts.datadir = strdup(arg);
+				return 0;
+			}
+			return 1;
+		
+		case KEY_HELP:
+			usage();
+			fuse_opt_add_arg(outargs, "-ho");
+			fuse_main(outargs->argc, outargs->argv, NULL, NULL);
+			exit(1);
+			
+		default:
+			return -1;
 	};
+}
+
+int main(int argc, char *argv[]){
+	int              ret;
+	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 	
-	backend = backend_new(config);
-	*/
-	ret = fuse_main(argc, argv, &fuse_operations, data);
-	/*
-	backend_destroy(backend);
-	frozen_destroy();
-	*/
+	if(fuse_opt_parse(&args, &opts, frozenfs_opts, frozenfs_opt_proc) == -1)
+		exit(1);
+	
+	if(!opts.datadir){
+		fprintf(stderr, "missing datadir");
+		exit(1);
+	}
+	
+	wfrozen_init();
+	ret = fuse_main(args.argc, args.argv, &fuse_operations, NULL);
+	wfrozen_destroy();
 	return ret;
-} // }}}
+}
+/* }}} */
 

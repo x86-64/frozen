@@ -145,12 +145,16 @@ backend_t *  backend_new      (hash_t *config){
 	hash_t     *backend_config;
 	backend_t  *backend = NULL;
 	
+	// TODO rewrite this to correctly handle hashes with names
+	// currenly config must have hash_t with config as first item and name as second item
+	
 	switch(hash_get_data_type(config)){
 		case TYPE_STRING: // search backend name
 			name = hash_get_value_ptr(config);
 			
 			list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
-			backend->refs++;
+			if(backend != NULL)
+				backend->refs++;
 			
 			break;
 		case TYPE_HASHT:  // create new backend with config
@@ -161,7 +165,7 @@ backend_t *  backend_new      (hash_t *config){
 			backend->refs  = 1;
 			backend->name  = 
 				( hash_get_typed(config, TYPE_STRING, "name", (void **)&name, NULL) == 0) ?
-				name : NULL;
+				strdup(name) : NULL;
 			
 			backend_config = hash_get_value_ptr(config);
 			
@@ -176,7 +180,12 @@ backend_t *  backend_new      (hash_t *config){
 		default:
 			return NULL;
 	};
+	
 	return backend;
+}
+
+char *       backend_get_name     (backend_t *backend){
+	return backend->name;
 }
 
 ssize_t      backend_query        (backend_t *backend, request_t *request){
@@ -204,7 +213,8 @@ void         backend_destroy  (backend_t *backend){
 		chain_curr = chain_next;
 	}
 	
-	free(backend->name);
+	if(backend->name != NULL)
+		free(backend->name);
 	free(backend);
 }
 /* }}}1 */

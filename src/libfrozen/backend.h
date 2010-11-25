@@ -80,6 +80,8 @@ API backend_t *     backend_new             (hash_t *config);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
 
+API char *          backend_get_name        (backend_t *backend);
+
 API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
 API buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
 
