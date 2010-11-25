@@ -1,4 +1,5 @@
 m4_include(data/void.c)
+m4_include(data/memory.c)
 m4_include(data/binary.c)
 m4_include(data/uint8.c)
 m4_include(data/uint16.c)

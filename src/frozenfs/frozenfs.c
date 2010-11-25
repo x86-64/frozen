@@ -29,6 +29,8 @@ struct virtfs_item {
 	char          *name;
 	char          *fullname;
 	
+	void          *userdata;
+	
 	// fs related
 	struct stat    stat;
 };
@@ -36,6 +38,20 @@ struct virtfs_item {
 enum frozenfs_keys {
 	KEY_HELP,
 };
+
+typedef enum frozen_type {
+	CONFIG_FILE,
+
+	BACKEND_HOLDER,
+	BACKEND_IO
+} frozen_type;
+
+typedef struct frozen_userdata {
+	frozen_type    type;
+	backend_t     *backend;
+	
+	// callbacks
+} frozen_userdata;
 
 /* }}} */
 /* global variables {{{ */
@@ -154,6 +170,7 @@ static virtfs_item *  virtfs_create(char *path, virt_type type){
 	new_item->stat.st_atime = tv.tv_sec;
 	new_item->stat.st_mtime = tv.tv_sec;
 	new_item->stat.st_ctime = tv.tv_sec;
+	new_item->stat.st_size  = 1000;
 	
 	// link it
 	new_item->next = folder->childs;
@@ -163,21 +180,48 @@ static virtfs_item *  virtfs_create(char *path, virt_type type){
 /* }}} */
 
 /* frozen wrappers {{{ */
+static virtfs_item *  wfrozen_vfs_create(char *basepath, char *itempath, virt_type vfs_type, frozen_type type, backend_t *backend){
+	frozen_userdata  *ud;
+	virtfs_item      *item;
+	char              tmp[1024];
+	
+	snprintf(tmp, 1024, "%s%s", basepath, itempath);
+	
+	if( (item = virtfs_create(tmp, vfs_type)) == NULL)
+		return NULL;
+	
+	if( (ud = calloc(sizeof(frozen_userdata), 1)) == NULL)
+		return NULL;
+	
+	ud->type = type;
+	ud->backend = backend;
+	
+	item->userdata = (void *)ud;
+	
+	return item;
+}
+
 static backend_t *  wfrozen_backend_new(hash_t *config){
-	backend_t *backend;
-	char      *backend_name, tmp[1024];
+	backend_t    *backend;
+	char         *backend_name, bp[1024];
 	
 	if( (backend = backend_new(config)) == NULL)
 		return NULL;
 	
 	if( (backend_name = backend_get_name(backend)) == NULL){
-		snprintf(tmp, 1024, "/backends/unnamed_%d", cnt_unnamed++);
+		snprintf(bp, 1024, "/backends/unnamed_%d", cnt_unnamed++);
 	}else{
-		snprintf(tmp, 1024, "/backends/%s", backend_name);
+		snprintf(bp, 1024, "/backends/%s", backend_name);
 	}
-	virtfs_create(tmp, VIRTFS_FILE);
+	
+	if(wfrozen_vfs_create(bp, "",              VIRTFS_DIRECTORY, BACKEND_HOLDER,   backend) == NULL) goto cleanup;
+	if(wfrozen_vfs_create(bp, "/whole",        VIRTFS_FILE,      BACKEND_IO,       backend) == NULL) goto cleanup;
 	
 	return backend;
+	
+cleanup:
+	backend_destroy(backend);
+	return NULL;
 };
 
 static void         wfrozen_backend_destory(backend_t *backend){
@@ -185,8 +229,8 @@ static void         wfrozen_backend_destory(backend_t *backend){
 };
 
 static void wfrozen_init(void){
-	virtfs_create("/backends",     VIRTFS_DIRECTORY);
-	virtfs_create("/config",       VIRTFS_FILE);
+	wfrozen_vfs_create("/", "backends", VIRTFS_DIRECTORY, BACKEND_HOLDER, NULL);
+	wfrozen_vfs_create("/", "config",   VIRTFS_FILE,      CONFIG_FILE,    NULL);
 	
 	frozen_init();
 	
@@ -245,41 +289,70 @@ static int fusef_getattr(const char *path, struct stat *buf){
 	return 0;
 }
 /* }}} */
-/* files {{{ 
+/* files {{{ */ 
 static int fusef_open(const char *path, struct fuse_file_info *fi){
+	virtfs_item *item;
+	
+	if( (item = virtfs_find((char *)path)) == NULL)
+		return -ENOENT;
+	
+	// TODO check access
+	
+	fi->fh = (unsigned long) item;
+	
+	// TODO lock item
+	
 	return 0;
 }
 
 static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+	ssize_t           ret;
+	virtfs_item      *item;
+	frozen_userdata  *ud;
+	
+	item = (virtfs_item     *)(uintptr_t)fi->fh;
+	ud   = (frozen_userdata *)item->userdata;
+	
 	request_t r_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "key",    DATA_OFFT(data_ptrs[i])          },
-		{ "buffer", DATA_PTR_INT32(&data_read)       },
+		{ "key",    DATA_PTR_OFFT(&off)              },
+		{ "buffer", DATA_MEM(buf, size)              },
 		hash_end
 	};
-	ret = backend_query(backend, r_read);
-		fail_unless(ret == 4,                   "chain 'real_store_nums': read array failed");
-		fail_unless(data_read == data_array[i], "chain 'real_store_nums': read array data failed");
-	return -ENOSYS;
+	ret = backend_query(ud->backend, r_read);
+	
+	//printf("read: %x bytes from %llx. ret: %x, data: %s\n", (int)size, off, (int)ret, buf);
+	
+	return (ret < 0) ? 0 : (int)size;
 }
 
 static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+	ssize_t           ret;
+	virtfs_item      *item;
+	frozen_userdata  *ud;
+	
+	item = (virtfs_item     *)(uintptr_t)fi->fh;
+	ud   = (frozen_userdata *)item->userdata;
+	
 	request_t r_write[] = {
-		{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
-		{ "key_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
-		{ "buffer",  DATA_PTR_INT32 (&data_array[i]) },
+		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
+		//{ "key",     DATA_PTR_OFFT(&off)            },
+		{ "key",     DATA_OFFT(0)                   },
+		{ "buffer",  DATA_MEM((char *)buf, size)    },
 		hash_end
 	};
-	ret = backend_query(backend, r_write);
-		fail_unless(ret == 4, "chain 'real_store_nums': write array failed");
-	return -ENOSYS;
+	ret = backend_query(ud->backend, r_write);
+	
+	//printf("write: %x bytes from %llx. ret: %x\n", (int)size, off, (int)ret);
+	
+	return (ret < 0) ? 0 : (int)size;
 }
-
 
 static int fusef_release(const char *path, struct fuse_file_info *fi){
+	// TODO unlock item
 	return 0;
 }
-}}} */
+/* }}} */
 /* stubs {{{
 static int fusef_flush(const char *path, struct fuse_file_info *fi){
 	return -ENOSYS;
@@ -405,9 +478,6 @@ struct fuse_operations fuse_operations = { // {{{
 	.chmod = fusef_chmod,
 	.chown = fusef_chown,
 	.truncate = fusef_truncate,
-	.open = fusef_open,
-	.read = fusef_read,
-	.write = fusef_write,
 	.statfs = fusef_statfs,
 	.flush = fusef_flush,
 	.release = fusef_release,
@@ -429,6 +499,10 @@ struct fuse_operations fuse_operations = { // {{{
 	*/
 	.readdir = fusef_readdir,
 	.getattr = fusef_getattr,
+	.open    = fusef_open,
+	.read    = fusef_read,
+	.write   = fusef_write,
+	.release = fusef_release,
 }; // }}}
 /* }}} */
 
