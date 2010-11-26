@@ -504,16 +504,24 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	return ret;
 } // }}}
 static ssize_t file_count(chain_t *chain, request_t *request){ // {{{
-	buffer_t        *buffer;
+	data_t          *buffer;
+	data_ctx_t      *buffer_ctx;
 	file_user_data  *data = ((file_user_data *)chain->user_data);
 	
-	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
+	if( (buffer = hash_get_data(request, "buffer")) == NULL)
 		return -EINVAL;
+	
+	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
 	if(file_update_count(data) == STAT_ERROR)
 		return -EINVAL;
 	
-	return buffer_write(buffer, 0, &(data->file_stat.st_size), sizeof(data->file_stat.st_size));
+	data_t count = DATA_PTR_OFFT(&(data->file_stat.st_size));
+	
+	return data_transfer(
+		buffer, buffer_ctx,
+		&count,  NULL
+	);
 } // }}}
 
 static chain_t chain_file = {

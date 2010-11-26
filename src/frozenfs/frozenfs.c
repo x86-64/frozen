@@ -170,7 +170,7 @@ static virtfs_item *  virtfs_create(char *path, virt_type type){
 	new_item->stat.st_atime = tv.tv_sec;
 	new_item->stat.st_mtime = tv.tv_sec;
 	new_item->stat.st_ctime = tv.tv_sec;
-	new_item->stat.st_size  = 1000;
+	//new_item->stat.st_size  = 1000;
 	
 	// link it
 	new_item->next = folder->childs;
@@ -280,10 +280,22 @@ static int fusef_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 }
 
 static int fusef_getattr(const char *path, struct stat *buf){
-	virtfs_item *item;
+	virtfs_item      *item;
+	frozen_userdata  *ud;
 	
 	if( (item = virtfs_find((char *)path)) == NULL)
 		return -ENOENT;
+	
+	ud = (frozen_userdata *)item->userdata;
+	if(ud && ud->type == BACKEND_IO){
+		// updating size
+		request_t r_count[] = {
+			{ "action",  DATA_INT32(ACTION_CRWD_COUNT)       },
+			{ "buffer",  DATA_PTR_OFFT(&item->stat.st_size)  },
+			hash_end
+		};
+		backend_query(ud->backend, r_count);
+	}
 	
 	memcpy(buf, &(item->stat), sizeof(struct stat));
 	return 0;
@@ -336,8 +348,7 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	
 	request_t r_write[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-		//{ "key",     DATA_PTR_OFFT(&off)            },
-		{ "key",     DATA_OFFT(0)                   },
+		{ "key",     DATA_PTR_OFFT(&off)            },
 		{ "buffer",  DATA_MEM((char *)buf, size)    },
 		hash_end
 	};
