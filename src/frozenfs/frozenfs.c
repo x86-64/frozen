@@ -4,7 +4,7 @@
 #include <libfrozen.h>
 #include <fuse.h>
 #include <string.h>
-#include <sys/time.h>
+#include <time.h>
 
 /* typedefs {{{ */
 struct my_opts {
@@ -52,6 +52,12 @@ typedef struct frozen_userdata {
 	
 	// callbacks
 } frozen_userdata;
+
+typedef struct frozen_fh {
+	virtfs_item     *item;
+	frozen_userdata *ud;
+	char            *param;
+} frozen_fh;
 
 /* }}} */
 /* global variables {{{ */
@@ -106,7 +112,7 @@ check_slash:
 	return 0;
 }
 
-static virtfs_item *  virtfs_find(char *path){
+static virtfs_item *  virtfs_find(char *path, size_t path_len){
 	virtfs_item    *folder;
 	
 	if(strcmp(path, "") == 0 || strcmp(path, "/") == 0)
@@ -116,7 +122,7 @@ static virtfs_item *  virtfs_find(char *path){
 	for(folder = &virtfs; folder != NULL;){
 		//printf("find: do: %s\n", folder->fullname);
 		
-		if(strcmp(folder->fullname, path) == 0)
+		if(strncmp(folder->fullname, path, path_len) == 0)
 			return folder;
 		
 		if(
@@ -134,24 +140,20 @@ static virtfs_item *  virtfs_find(char *path){
 }
 
 static virtfs_item *  virtfs_create(char *path, virt_type type){
-	char           *name, *fullname;
+	char           *name;
 	size_t          path_len;
 	virtfs_item    *folder, *new_item;
-	struct timeval  tv;
 	
 	if( (name = strrchr(path, '/')) == NULL)
 		return NULL;
 	name++;
 	path_len = name - path - 1;
-	fullname = strndupa(path, path_len);
 	
-	if( (folder = virtfs_find(fullname)) == NULL)
+	if( (folder = virtfs_find(path, path_len)) == NULL)
 		return NULL;
 	
 	if( (new_item = calloc(sizeof(virtfs_item), 1)) == NULL)
 		return NULL;
-	
-	gettimeofday(&tv, NULL);
 	
 	new_item->type         = type;
 	new_item->name         = strdup(name);
@@ -167,10 +169,9 @@ static virtfs_item *  virtfs_create(char *path, virt_type type){
 	new_item->stat.st_nlink = 1;
 	new_item->stat.st_uid   = getuid();
 	new_item->stat.st_gid   = getgid();
-	new_item->stat.st_atime = tv.tv_sec;
-	new_item->stat.st_mtime = tv.tv_sec;
-	new_item->stat.st_ctime = tv.tv_sec;
-	//new_item->stat.st_size  = 1000;
+	new_item->stat.st_atime = 
+	new_item->stat.st_mtime =
+	new_item->stat.st_ctime = time(NULL);
 	
 	// link it
 	new_item->next = folder->childs;
@@ -260,11 +261,30 @@ static void wfrozen_destroy(void){
 /* }}} */
 
 /* FUSE functions {{{ */
+/* private {{{ */
+static int fusef_vfs_find(const char *path, virtfs_item **item, char **param){
+	char        *s;
+	size_t       path_len = ~0;
+	
+	if( (s = strchr(path, ':')) != NULL){
+		path_len = s - path - 1;
+		*param = s;
+	}else{
+		*param = NULL;
+	}
+	
+	if( (*item = virtfs_find((char *)path, path_len)) == NULL)
+		return -1;
+	
+	return 0;
+}
+
+/* }}} */
 /* folders {{{ */
 static int fusef_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t off, struct fuse_file_info *fi){
 	virtfs_item *folder, *child;
 	
-	if( (folder = virtfs_find((char *)path)) == NULL)
+	if( (folder = virtfs_find((char *)path, ~0)) == NULL)
 		return -ENOENT;
 	
 	filler(buf, ".",  NULL, 0);
@@ -282,8 +302,9 @@ static int fusef_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 static int fusef_getattr(const char *path, struct stat *buf){
 	virtfs_item      *item;
 	frozen_userdata  *ud;
+	char             *param;
 	
-	if( (item = virtfs_find((char *)path)) == NULL)
+	if(fusef_vfs_find(path, &item, &param) != 0)
 		return -ENOENT;
 	
 	ud = (frozen_userdata *)item->userdata;
@@ -304,13 +325,26 @@ static int fusef_getattr(const char *path, struct stat *buf){
 /* files {{{ */ 
 static int fusef_open(const char *path, struct fuse_file_info *fi){
 	virtfs_item *item;
+	frozen_fh   *fh;
+	char        *param;
 	
-	if( (item = virtfs_find((char *)path)) == NULL)
+	if(fusef_vfs_find(path, &item, &param) != 0)
 		return -ENOENT;
+	
+	if( (fh = malloc(sizeof(frozen_fh))) == NULL)
+		return -ENOMEM;
+	
+	fh->item  = item;
+	fh->ud    = (frozen_userdata *)(item->userdata);
+	fh->param = NULL;
+	if(param){
+		if( (fh->param = strdup(param + 1)) == NULL)
+			return -ENOMEM;
+	}
 	
 	// TODO check access
 	
-	fi->fh = (unsigned long) item;
+	fi->fh = (unsigned long) fh;
 	
 	// TODO lock item
 	
@@ -319,19 +353,25 @@ static int fusef_open(const char *path, struct fuse_file_info *fi){
 
 static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
-	virtfs_item      *item;
-	frozen_userdata  *ud;
+	off_t             offset = 0;
+	frozen_fh        *fh;
 	
-	item = (virtfs_item     *)(uintptr_t)fi->fh;
-	ud   = (frozen_userdata *)item->userdata;
+	fh = (frozen_fh *)(uintptr_t)fi->fh;
+	
+	// TODO move out
+	if(fh->param){
+		offset = (off_t) strtoul(fh->param, NULL, 10);
+	}
+	// END TODO
+	offset += off;
 	
 	request_t r_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "key",    DATA_PTR_OFFT(&off)              },
+		{ "key",    DATA_PTR_OFFT(&offset)           },
 		{ "buffer", DATA_MEM(buf, size)              },
 		hash_end
 	};
-	ret = backend_query(ud->backend, r_read);
+	ret = backend_query(fh->ud->backend, r_read);
 	
 	//printf("read: %x bytes from %llx. ret: %x, data: %s\n", (int)size, off, (int)ret, buf);
 	
@@ -340,19 +380,25 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 
 static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
-	virtfs_item      *item;
-	frozen_userdata  *ud;
+	frozen_fh        *fh;
+	off_t             offset = 0;
 	
-	item = (virtfs_item     *)(uintptr_t)fi->fh;
-	ud   = (frozen_userdata *)item->userdata;
+	fh = (frozen_fh *)(uintptr_t)fi->fh;
+	
+	// TODO move out
+	if(fh->param){
+		offset = (off_t) strtoul(fh->param, NULL, 10);
+	}
+	// END TODO
+	offset += off;
 	
 	request_t r_write[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "key",     DATA_PTR_OFFT(&off)            },
+		{ "key",     DATA_PTR_OFFT(&offset)         },
 		{ "buffer",  DATA_MEM((char *)buf, size)    },
 		hash_end
 	};
-	ret = backend_query(ud->backend, r_write);
+	ret = backend_query(fh->ud->backend, r_write);
 	
 	//printf("write: %x bytes from %llx. ret: %x\n", (int)size, off, (int)ret);
 	
@@ -360,7 +406,16 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 }
 
 static int fusef_release(const char *path, struct fuse_file_info *fi){
+	frozen_fh        *fh;
+	
+	fh = (frozen_fh *)(uintptr_t)fi->fh;
+	
 	// TODO unlock item
+	
+	if(fh->param)
+		free(fh->param);
+	
+	free(fh);
 	return 0;
 }
 /* }}} */
