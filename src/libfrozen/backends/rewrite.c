@@ -71,6 +71,10 @@
  * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
  * 		@param[in]  src_*      Source target
  *
+ * 	- "data_convert"  - convert targets
+ * 		@param[out] dst_*      Destination target
+ * 		@param[in]  src_*      Source target
+ *
  * Other parameters:
  * 	@param[in] on-request  Do action only on this ACTION_* supplied [TYPE_INT32]
  * 	@param[in] before      Do request before calling next chain (default)
@@ -90,7 +94,13 @@ typedef enum rewrite_actions {
 	CALL_BACKEND,
 	DATA_LENGTH,
 	DATA_ARITH,
-	
+	DATA_CONVERT,
+	DATA_FREE,
+
+#ifdef DEBUG
+	HASH_DUMP,
+#endif
+
 	DO_NOTHING = -1
 } rewrite_actions;
 
@@ -156,12 +166,20 @@ static rewrite_actions  rewrite_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "backend")        == 0) return CALL_BACKEND;
 	if(strcasecmp(string, "data_length")    == 0) return DATA_LENGTH;
 	if(strcasecmp(string, "data_arith")     == 0) return DATA_ARITH;
+	if(strcasecmp(string, "data_convert")   == 0) return DATA_CONVERT;
+	if(strcasecmp(string, "data_free")      == 0) return DATA_FREE;
+
+#ifdef DEBUG
+	if(strcasecmp(string, "hash_dump")      == 0) return HASH_DUMP;
+#endif
 	return DO_NOTHING;
 } // }}}
 
 static void rewrite_rule_free(rewrite_rule_t *rule){ // {{{
 	if(rule->src_key != NULL) free(rule->src_key);
 	if(rule->dst_key != NULL) free(rule->dst_key);
+	
+	data_free(&rule->src_config);
 	
 	if(rule->request_proto != NULL)
 		free(rule->request_proto);
@@ -303,6 +321,7 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 		case VALUE_SET:
 		case VALUE_LENGTH:
 		case DATA_LENGTH:
+		case DATA_CONVERT:
 			if(new_rule.src_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule: missing src target\n");
 			
@@ -317,6 +336,15 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			break;
 		case DO_NOTHING:
 			break;
+		case DATA_FREE:
+			if(new_rule.src_type == THING_NOTHING)
+				label_error(cleanup, "rewrite rule: missing src target\n");
+			break;
+		
+	#ifdef DEBUG
+		case HASH_DUMP:
+			break;
+	#endif
 	};
 	/*
 		if(new_rule.dst_type == THING_KEY){
@@ -430,6 +458,8 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case VALUE_LENGTH:
 			case DATA_LENGTH:
 			case DATA_ARITH:
+			case DATA_CONVERT:
+			case DATA_FREE:
 				switch(rule->src_type){
 					case THING_CONFIG:
 						memcpy(&my_src_data, &rule->src_config, sizeof(rule->src_config));
@@ -440,8 +470,8 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 					case THING_KEY:
 					case THING_REQUEST:
 						if(rule->src_type == THING_KEY){
-							my_src     = hash_get_data     (request, rule->src_key);
-							my_src_ctx = hash_get_data_ctx (request, rule->src_key);
+							my_src     = hash_get_data     (new_request, rule->src_key);
+							my_src_ctx = hash_get_data_ctx (new_request, rule->src_key);
 						}else{
 							rewrite_rule_t *req_rule;
 							if( (req_rule = find_rule(data, rule->src_rule_num)) == NULL){
@@ -463,17 +493,21 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case DO_NOTHING:
 			case VALUE_UNSET:
 			case CALL_BACKEND:
+		#ifdef DEBUG
+			case HASH_DUMP:
+		#endif
 				break;
 		}; // }}}
-		// TODO read dst
+		// read dst {{{
 		switch(rule->action){
 			case DATA_ARITH:
+			case DATA_CONVERT:
 				switch(rule->dst_type){
 					case THING_KEY:
 					case THING_REQUEST:
 						if(rule->dst_type == THING_KEY){
-							my_dst     = hash_get_data     (request, rule->dst_key);
-							my_dst_ctx = hash_get_data_ctx (request, rule->dst_key);
+							my_dst     = hash_get_data     (new_request, rule->dst_key);
+							my_dst_ctx = hash_get_data_ctx (new_request, rule->dst_key);
 						}else{
 							rewrite_rule_t *req_rule;
 							if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
@@ -503,8 +537,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case VALUE_LENGTH:
 			case DATA_LENGTH:
 			case CALL_BACKEND:
+			case DATA_FREE:
+		#ifdef DEBUG
+			case HASH_DUMP:
+		#endif
 				break;
-		};
+		}; // }}}
 		// modify {{{
 		switch(rule->action){
 			case VALUE_UNSET:; // {{{
@@ -535,7 +573,15 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				);
 				my_src = my_dst;
 				break;
-			
+			case DATA_CONVERT:
+				if(data_convert(my_dst, my_dst_ctx, my_src, my_src_ctx) != 0){
+					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
+				}
+				my_src = my_dst;
+				break;
+			case DATA_FREE:
+				data_free(my_src);
+				break;
 			case CALL_BACKEND:
 				backend_query(rule->backend, rule->request_curr);
 				break;
@@ -543,6 +589,11 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case DO_NOTHING:
 			case VALUE_SET:
 				break;
+		#ifdef DEBUG
+			case HASH_DUMP:
+				hash_dump(new_request);
+				break;
+		#endif
 		};
 		// }}}
 		// write dst {{{
@@ -552,6 +603,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			case VALUE_LENGTH:
 			case DATA_LENGTH:		
 			case DATA_ARITH:
+			case DATA_CONVERT:
 				if(rule->src_info == 1 || rule->dst_info == 1){
 					data_transfer(
 						my_dst, my_dst_ctx,
@@ -591,6 +643,10 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				break; // }}}
 			case DO_NOTHING:
 			case CALL_BACKEND:
+			case DATA_FREE:
+		#ifdef DEBUG
+			case HASH_DUMP:
+		#endif
 				break;
 		};
 		// }}}

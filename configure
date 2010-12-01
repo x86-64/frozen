@@ -11073,7 +11073,7 @@ if test "${enable_debug+set}" = set; then :
 fi
 
 if test "x$enable_debug" == "xyes"; then
-        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror"
+        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror -DDEBUG=1"
 fi
 
 # Check whether --enable-profile was given.

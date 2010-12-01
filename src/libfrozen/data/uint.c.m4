@@ -22,7 +22,7 @@ m4_changequote([,])
 	#define __MAX(type) ((type)~__MIN(type))
 #endif
 
-[int data_]NAME()_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){ // {{{
+int data_[]NAME()_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){ // {{{
 	int           cret;
 	TYPE          data1_val, data2_val;
 	
@@ -37,8 +37,7 @@ m4_changequote([,])
 	
 	return cret;
 } // }}}
-
-[int data_]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_t *operand2, data_ctx_t *ctx2){ // {{{
+int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_t *operand2, data_ctx_t *ctx2){ // {{{
 	int           ret = 0;
 	TYPE          operand1_val, operand2_val, result;
 	
@@ -82,6 +81,35 @@ m4_changequote([,])
 	*(TYPE *)(operand1->data_ptr) = result;
 	return ret;
 } // }}}
+ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+	char                  buffer_local[[DEF_BUFFER_SIZE]];
+	void                 *buffer = (void *)&buffer_local;
+	size_t                buffer_size = DEF_BUFFER_SIZE;
+	unsigned long         value;
+	
+	switch(src->type){
+	#ifdef TYPE_STRING
+		case TYPE_STRING:
+			if(data_read(src, src_ctx, 0, &buffer, &buffer_size) < 0)
+				return -EINVAL;
+			
+			value = strtoul(buffer, NULL, 10);
+			
+			if( (dst->data_ptr = malloc(BYTES())) == NULL)
+				return -ENOMEM;
+			
+			dst->type      = TYPE_[]DEF();
+			dst->data_size = BYTES();
+			
+			*(TYPE *)(dst->data_ptr) = (TYPE )value;
+			return 0;
+	#endif
+		
+		default:
+			break;
+	};
+	return -ENOSYS;
+} // }}}
 
 /*
 REGISTER_TYPE([TYPE_]DEF())
@@ -94,6 +122,7 @@ REGISTER_PROTO([
 		.size_type              = SIZE_FIXED,
 		.func_cmp               = &data_]NAME()[_cmp,
 		.func_arithmetic        = &data_]NAME()[_arith,
+		.func_convert           = &data_]NAME()[_convert,
 		.fixed_size             = ]BYTES()[
 	}'
 ])

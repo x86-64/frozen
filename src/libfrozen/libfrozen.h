@@ -2,7 +2,6 @@
 #include <config.h>
 #endif
 
-#define DEBUG
 #define _inline extern inline
 
 #define _FILE_OFFSET_BITS 64

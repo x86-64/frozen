@@ -1,4 +1,4 @@
 #!/bin/sh
 rm -rf data_*.dat      &>/dev/null
-LD_LIBRARY_PATH="../src/.libs/" cgdb --args .libs/test
+LD_LIBRARY_PATH="../src/libfrozen/.libs/" cgdb --args .libs/test
 

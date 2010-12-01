@@ -31,7 +31,7 @@ fi
 
 AC_ARG_ENABLE(debug,  AS_HELP_STRING([--enable-debug],  [compile with debug symbols]))
 if test "x$enable_debug" == "xyes"; then
-        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror"
+        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror -DDEBUG=1"
 fi
 
 AC_ARG_ENABLE(profile,  AS_HELP_STRING([--enable-profile],  [enable code profiling]))

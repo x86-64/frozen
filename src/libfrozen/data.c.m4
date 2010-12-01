@@ -4,8 +4,6 @@
  */
 #include <libfrozen.h>
 
-#define DEF_BUFFER_SIZE 1024
-
 /* m4 {{{
 m4_define(`REGISTER_PROTO', `
         m4_define(`VAR_ARRAY', m4_defn(`VAR_ARRAY')`$1,
@@ -78,10 +76,54 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
 	return d_size;
 } // }}}
 
-int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
+/** @brief Read from data to buffer
+ *  @param[out]  dst       Data structure
+ *  @param[in]   dst_ctx   Data context
+ *  @param[in]   offset    Offset to start from
+ *  @param       buffer    Pointer to buffer pointer
+ *  @param       size      Pointer to size of buffer
+ *  @return number of bytes read on success
+ *  @return -1 on EOF
+ *  @return -EINVAL on error
+ */
+ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size){ // {{{
+	f_data_read     func_read;
+	
+	func_read  = data_protos[src->type].func_read;
+	func_read  = func_read  ? func_read  : data_def_read;
+	
+	return func_read(src, src_ctx, offset, buffer, size);
+} // }}}
 
-int                  data_read              (data_t *src, data_ctx_t *src_ctx, void *buffer, size_t size);
-int                  data_write             (data_t *dst, data_ctx_t *dst_ctx, void *buffer, size_t size);
+/** @brief Write to data from buffer
+ *  @param[out]  dst       Data structure
+ *  @param[in]   dst_ctx   Data context
+ *  @param[in]   offset    Offset to start from
+ *  @param[in]   buffer    Memory pointer
+ *  @param[in]   size      Size of buffer
+ *  @return number of bytes written on success
+ *  @return -EINVAL on error
+ */
+ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void  *buffer, size_t  size){ // {{{
+	f_data_write    func_write;
+	
+	func_write = data_protos[dst->type].func_write;
+	func_write = func_write ? func_write : data_def_write;
+	
+	return func_write(dst, dst_ctx, offset, buffer, size);
+} // }}}
+
+/** @brief Initialize data structure with new info
+ *  @param[out]   dst      Data structure
+ *  @param[in]    type     New data type
+ *  @param[in]    data_ptr New data ptr
+ *  @param[in]    data_size New data size
+ */
+void                 data_reinit            (data_t *dst, data_type type, void *data_ptr, size_t data_size){ // {{{
+	dst->type      = type;
+	dst->data_ptr  = data_ptr;
+	dst->data_size = data_size;
+} // }}}
 
 /** @brief Get data type
  *  @param[in] data  Data structure
@@ -123,57 +165,13 @@ data_type            data_type_from_string  (char *string){ // {{{
 	
 	return TYPE_INVALID;
 } // }}}
-data_proto_t *       data_proto_from_type   (data_type type){ // {{{
-	if((unsigned)type >= data_protos_size)
-		return 0;
-	
-	return &data_protos[type];
-} // }}}
-size_type            data_size_type         (data_type type){ // {{{
-	if((unsigned)type >= data_protos_size)
-		return 0;
-	
-	return data_protos[type].size_type;
-} // }}}
 
-/** @brief Create data context
- *  @param[out] ctx      Place to write data ctx
- *  @param[in]  type     Data type
- *  @param[in]  context  Hash with context parameters or NULL
- *  @return 0 on success
- *  @return -EINVAL on invalid type
- */
-/*
-int                  data_ctx_init          (data_ctx_t *ctx, data_type type, hash_t *context){ // {{{
-	f_data_ctx_new   func_ctx_new;
-	void            *user_data;
+char *               data_string_from_type  (data_type type){ // {{{
+	if(!data_type_is_valid(type))
+		return "INVALID";
 	
-	if((unsigned)type >= data_protos_size){
-		memset(ctx, 0, sizeof(data_ctx_t));
-		return -EINVAL;
-	}
-	
-	user_data = NULL;
-	if( (func_ctx_new = data_protos[type].func_ctx_new) != NULL){
-		user_data = func_ctx_new(context);
-	}
-	
-	ctx->data_proto     = &(data_protos[type]);
-	ctx->user_data      = user_data;
-	return 0;
-} // }}} */
-
-/** @brief Destory data context
- *  @param[in] ctx Data context
- *  @return 0
- */
-/*
-int                  data_ctx_destroy       (data_ctx_t *ctx){ // {{{
-	if( ctx->data_proto != NULL && ctx->data_proto->func_ctx_free != NULL)
-		ctx->data_proto->func_ctx_free(ctx->user_data);
-	
-	return 0;
-} // }}} */
+	return data_protos[type].type_str;
+} // }}}
 
 /** @brief Calculate length of data
  *  @param[in] data       data_t structure
@@ -186,7 +184,7 @@ size_t               data_len               (data_t *data, data_ctx_t *data_ctx)
 	data_type    type;
 	
 	type = data->type;
-	if((unsigned)type >= data_protos_size)
+	if(!data_type_is_valid(type))
 		return 0;
 	
 	switch(data_protos[type].size_type){
@@ -209,12 +207,13 @@ size_t               data_len               (data_t *data, data_ctx_t *data_ctx)
  *  @param[in] data2_ctx  Second data context
  *  @return -EINVAL on error
  *  @return -EFAULT on unsupported action
+ *  @return -ENOSYS if data not support converting
  *  @return 0 or 1 or -1 as result of compare
  */
 int                  data_cmp               (data_t *data1, data_ctx_t *data1_ctx, data_t *data2, data_ctx_t *data2_ctx){ // {{{
 	f_data_cmp   func_cmp;
 	
-	if((unsigned)data1->type >= data_protos_size || (unsigned)data2->type >= data_protos_size)
+	if(!data_type_is_valid(data1->type) || !data_type_is_valid(data2->type))
 		return -EINVAL;
 	
 	if(data1->type != data2->type){
@@ -223,7 +222,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 	}
 	
 	if( (func_cmp = data_protos[data1->type].func_cmp) == NULL)
-		return -EFAULT;
+		return -ENOSYS;
 	
 	return func_cmp(data1, data1_ctx, data2, data2_ctx);
 } // }}}
@@ -241,7 +240,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 int                  data_arithmetic        (char operator, data_t *operand1, data_ctx_t *operand1_ctx, data_t *operand2, data_ctx_t *operand2_ctx){ // {{{
 	f_data_arith  func_arith;
 	
-	if((unsigned)operand1->type >= data_protos_size || (unsigned)operand2->type >= data_protos_size)
+	if(!data_type_is_valid(operand1->type) || !data_type_is_valid(operand2->type))
 		return -EINVAL;
 	
 	if(operand1->type != operand2->type){
@@ -261,10 +260,22 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
  *  @param[in] src        Source data
  *  @param[in] src_ctx    Source data context
  *  @return 0 on success
+ *  @return -EINVAL on invalid input data
+ *  @return -ENOSYS if data not support converting
+ *  @pre  Fill dst->type to desired value
+ *  @post Free dst structure with data_free to avoid memory leak
  */
-int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){
-	return -1;
-}
+ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+	f_data_convert  func_convert;
+	
+	if(!data_type_is_valid(dst->type) || !data_type_is_valid(src->type))
+		return -EINVAL;
+	
+	if( (func_convert = data_protos[dst->type].func_convert) == NULL)
+		return -ENOSYS;
+	
+	return func_convert(dst, dst_ctx, src, src_ctx);
+} // }}}
 
 /** @brief Transfer info from one data to another
  *  @param[in]   dst      Destination data
@@ -281,27 +292,22 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 	size_t          buffer_size;
 	ssize_t         rret, wret, transferred;
 	off_t           offset;
-	f_data_read     func_read;
-	f_data_write    func_write;
 	
-	func_read  = data_protos[src->type].func_read;
-	func_read  = func_read  ? func_read  : data_def_read;
-	
-	func_write = data_protos[dst->type].func_write;
-	func_write = func_write ? func_write : data_def_write;
+	if(!data_type_is_valid(dst->type) || !data_type_is_valid(src->type))
+		return -EINVAL;
 	
 	offset = transferred = 0;
 	do {
 		buffer      = buffer_local;
 		buffer_size = DEF_BUFFER_SIZE;
 		
-		if( (rret = func_read  (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
+		if( (rret = data_read  (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
 			return -EINVAL;
 		
 		if(rret == -1) // EOF from read side
 			break;
 		
-		if( (wret = func_write (dst, dst_ctx, offset,  buffer,  buffer_size)) < 0)
+		if( (wret = data_write (dst, dst_ctx, offset,  buffer,  buffer_size)) < 0)
 			return -EINVAL;
 		
 		transferred += wret;
@@ -321,7 +327,7 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
  *  @return -EFAULT on error
  *  @post Free structure with data_free to avoid memory leak
  */
-ssize_t             data_copy                (data_t *dst, data_t *src){
+ssize_t             data_copy                (data_t *dst, data_t *src){ // {{{
 	void *data_ptr; // support dst eq src
 	
 	data_ptr       = src->data_ptr;
@@ -332,13 +338,17 @@ ssize_t             data_copy                (data_t *dst, data_t *src){
 	
 	memcpy(dst->data_ptr, data_ptr, src->data_size);
 	return 0;
-}
+} // }}}
 
 /** @brief Free data structure
  *  @param[in]  data  Data structure
  */
-void                data_free                (data_t *data){
-	free(data->data_ptr);
-}
+void                data_free                (data_t *data){ // {{{
+	if(data->data_ptr != NULL){
+		free(data->data_ptr);
+		data->data_ptr  = NULL;
+		data->data_size = 0;
+	}
+} // }}}
 
 /* vim: set filetype=c: */

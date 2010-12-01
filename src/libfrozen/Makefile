@@ -111,7 +111,7 @@ AUTOMAKE = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing 
 AWK = /usr/bin/gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 --coverage -g3 -O0 -Wall -Werror
+CFLAGS = -g -O2 --coverage -g3 -O0 -Wall -Werror -DDEBUG=1
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E

@@ -36,7 +36,7 @@ ssize_t   data_string_read  (data_t *data, data_ctx_t *context, off_t offset, vo
 		return -1;       // EOF
 	
 	*buffer      = data->data_ptr + d_offset;
-	*buffer_size = str_l;
+	*buffer_size = str_l + 1;
 	
 	return str_l;
 }

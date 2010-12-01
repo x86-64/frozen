@@ -244,6 +244,48 @@ static void wfrozen_init(void){
 				{ "filename",  DATA_STRING("data_ffs_test.dat")    },
 				hash_end
 			)},
+			{ NULL, DATA_HASHT(
+				{ "name",      DATA_STRING("rewrite")              },
+				{ "rules",     DATA_HASHT(
+					{ NULL, DATA_HASHT(
+						{ "action",     DATA_STRING("set")          },
+						{ "src_config", DATA_STRING("def_goff")     },
+						{ "dst_key",    DATA_STRING("goff")         },
+						{ "def_goff",   DATA_OFFT(0)                },
+						hash_end
+					)},
+					{ NULL, DATA_HASHT(
+						{ "action",  DATA_STRING("data_convert")    },
+						{ "src_key", DATA_STRING("param")           },
+						{ "dst_key", DATA_STRING("goff")            },
+						hash_end
+					)},
+					{ NULL, DATA_HASHT(
+						{ "action",   DATA_STRING("data_arith")     },
+						{ "dst_key",  DATA_STRING("key")            },
+						{ "src_key",  DATA_STRING("goff")           },
+						{ "operator", DATA_STRING("+")              },
+						hash_end
+					)},
+					/*
+					{ NULL, DATA_HASHT(
+						{ "action",     DATA_STRING("hash_dump")     },
+						{ "on-request", DATA_INT32(ACTION_CRWD_READ) },
+						hash_end
+					)},
+					*/
+					/*
+					{ NULL, DATA_HASHT(
+						{ "action",  DATA_STRING("data_free")      },
+						{ "src_key", DATA_STRING("goff")           },
+						{ "after",   DATA_INT32(1)                 },
+						hash_end
+					)},
+					*/
+					hash_end
+				)},
+				hash_end
+			)},
 			hash_end
 		)},
 		{ "name",  DATA_STRING("be_file")                         },
@@ -303,20 +345,28 @@ static int fusef_getattr(const char *path, struct stat *buf){
 	virtfs_item      *item;
 	frozen_userdata  *ud;
 	char             *param;
+	off_t             size = 0;
 	
 	if(fusef_vfs_find(path, &item, &param) != 0)
 		return -ENOENT;
+	
+	// TODO move out
+	//offset = (param) ? (off_t) strtoul(param, NULL, 10) : 0;
+	// END TODO
 	
 	ud = (frozen_userdata *)item->userdata;
 	if(ud && ud->type == BACKEND_IO){
 		// updating size
 		request_t r_count[] = {
 			{ "action",  DATA_INT32(ACTION_CRWD_COUNT)       },
-			{ "buffer",  DATA_PTR_OFFT(&item->stat.st_size)  },
+			{ "buffer",  DATA_PTR_OFFT(&size)                },
 			hash_end
 		};
 		backend_query(ud->backend, r_count);
 	}
+	item->stat.st_size = size; //(param) ?
+	//	((offset > size) ? 0 : size - offset) :
+	//	size;
 	
 	memcpy(buf, &(item->stat), sizeof(struct stat));
 	return 0;
@@ -353,56 +403,58 @@ static int fusef_open(const char *path, struct fuse_file_info *fi){
 
 static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
-	off_t             offset = 0;
 	frozen_fh        *fh;
+	data_t            d_param = DATA_VOID;
 	
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
-	// TODO move out
 	if(fh->param){
-		offset = (off_t) strtoul(fh->param, NULL, 10);
+		data_reinit(&d_param, TYPE_STRING, fh->param, strlen(fh->param) + 1);
 	}
-	// END TODO
-	offset += off;
 	
 	request_t r_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "key",    DATA_PTR_OFFT(&offset)           },
-		{ "buffer", DATA_MEM(buf, size)              },
+		{ "action", DATA_INT32(ACTION_CRWD_READ)                    },
+		{ "key",    DATA_PTR_OFFT(&off)                             },
+		{ "buffer", DATA_MEM(buf, size)                             },
+		
+		{ "param",  d_param                                         },
+		{ "path",   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_read);
 	
 	//printf("read: %x bytes from %llx. ret: %x, data: %s\n", (int)size, off, (int)ret, buf);
 	
-	return (ret < 0) ? 0 : (int)size;
+	return (ret < 0) ? 0 : (int)ret; //(int)size;
 }
 
 static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
 	frozen_fh        *fh;
-	off_t             offset = 0;
+	data_t            d_param = DATA_VOID;
 	
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
-	// TODO move out
 	if(fh->param){
-		offset = (off_t) strtoul(fh->param, NULL, 10);
+		data_reinit(&d_param, TYPE_STRING, fh->param, strlen(fh->param) + 1);
 	}
-	// END TODO
-	offset += off;
 	
 	request_t r_write[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "key",     DATA_PTR_OFFT(&offset)         },
-		{ "buffer",  DATA_MEM((char *)buf, size)    },
+		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)                   },
+		{ "key",     DATA_PTR_OFFT(&off)                             },
+		{ "buffer",  DATA_MEM((char *)buf, size)                     },
+		
+		{ "param",   d_param                                         },
+		{ "path",    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_write);
 	
 	//printf("write: %x bytes from %llx. ret: %x\n", (int)size, off, (int)ret);
 	
-	return (ret < 0) ? 0 : (int)size;
+	return (ret < 0) ?
+		0 :
+		((ret > size) ? size : (int)ret);
 }
 
 static int fusef_release(const char *path, struct fuse_file_info *fi){

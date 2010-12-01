@@ -1,7 +1,5 @@
 #include <libfrozen.h>
 
-#define DEBUG
-
 hash_t *         hash_find              (hash_t *hash, char *key){ // {{{
 	hash_t      *value = hash;
 	
@@ -157,10 +155,10 @@ void hash_dump(hash_t *hash){
 		if(element->key == hash_ptr_null)
 			continue;
 		
-		printf(" - el: %x %s -> %p", (unsigned int)element->data.type, (char *)element->key, element->data.data_ptr);
+		printf(" - %s [%s] -> %p", (char *)element->key, data_string_from_type(element->data.type), element->data.data_ptr);
 		for(k=0; k<element->data.data_size; k++){
-			if((k % 8) == 0)
-				printf("\n   0x%.4x: ", k);
+			if((k % 32) == 0)
+				printf("\n   0x%.5x: ", k);
 			
 			printf("%.2x ", (unsigned int)(*((char *)element->data.data_ptr + k)));
 		}
