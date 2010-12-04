@@ -147,7 +147,6 @@ typedef struct rewrite_rule_t {
 		
 		backend_t    *backend;
 		request_t    *request_proto;
-		request_t    *request_curr;
 		
 		unsigned int  copy;
 		unsigned int  fatal;
@@ -248,7 +247,6 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 		request_proto_size = sizeof(request_null);
 	}
 	new_rule.request_proto = malloc(request_proto_size);
-	new_rule.request_curr  = new_rule.request_proto;
 	memcpy(new_rule.request_proto, request_proto, request_proto_size);
 	// }}}
 	// parse backend {{{
@@ -405,14 +403,14 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 /* }}} */
 
-static rewrite_rule_t *find_rule(rewrite_user_data *data, unsigned int rule_num){
+static request_t ** find_proto(rewrite_user_data *data, request_t **protos, unsigned int rule_num){
 	if(rule_num >= data->rules_count)
 		return NULL;
 	
-	return &data->rules[rule_num];
+	return &protos[rule_num];
 }
 
-static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
+static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, request_t **protos){
 	unsigned int        i;
 	int                 have_after;
 	ssize_t             ret;
@@ -434,7 +432,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 			if(r_action == NULL)
 				r_action = hash_find_typed(request, TYPE_INT32, "action");
 			
-			if(HVALUE(r_action, request_actions) != rule->filter)
+			if(!(HVALUE(r_action, request_actions) & rule->filter))
 				continue;
 		}
 		// }}}
@@ -473,21 +471,20 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 							my_src     = hash_get_data     (new_request, rule->src_key);
 							my_src_ctx = hash_get_data_ctx (new_request, rule->src_key);
 						}else{
-							rewrite_rule_t *req_rule;
-							if( (req_rule = find_rule(data, rule->src_rule_num)) == NULL){
-								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-							}
-							my_src     = hash_get_data     (req_rule->request_curr, rule->src_key);
-							my_src_ctx = hash_get_data_ctx (req_rule->request_curr, rule->src_key); 
+							request_t **req_proto;
+							if( (req_proto = find_proto(data, protos, rule->src_rule_num)) == NULL)
+								goto parse_error;
+							
+							my_src     = hash_get_data     (*req_proto, rule->src_key);
+							my_src_ctx = hash_get_data_ctx (*req_proto, rule->src_key); 
 						}
 						break;
 						
 					case THING_NOTHING:
 						break;
 				};
-				if(my_src == NULL){
-					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-				}
+				if(my_src == NULL)
+					goto parse_error;
 				break;
 			
 			case DO_NOTHING:
@@ -509,12 +506,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 							my_dst     = hash_get_data     (new_request, rule->dst_key);
 							my_dst_ctx = hash_get_data_ctx (new_request, rule->dst_key);
 						}else{
-							rewrite_rule_t *req_rule;
-							if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
-								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-							}
-							my_dst     = hash_get_data     (req_rule->request_curr, rule->dst_key);
-							my_dst_ctx = hash_get_data_ctx (req_rule->request_curr, rule->dst_key); 
+							request_t **req_proto;
+							if( (req_proto = find_proto(data, protos, rule->dst_rule_num)) == NULL)
+								goto parse_error;
+							
+							my_dst     = hash_get_data     (*req_proto, rule->dst_key);
+							my_dst_ctx = hash_get_data_ctx (*req_proto, rule->dst_key); 
 						}
 						break;
 						
@@ -522,9 +519,9 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 					case THING_NOTHING:
 						break;
 				};
-				if(my_dst == NULL){
-					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-				}
+				if(my_dst == NULL)
+					goto parse_error;
+				
 				if(rule->copy){
 					data_copy_local(&my_dst_data, my_dst);
 					my_dst = &my_dst_data;
@@ -574,16 +571,20 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				my_src = my_dst;
 				break;
 			case DATA_CONVERT:
-				if(data_convert(my_dst, my_dst_ctx, my_src, my_src_ctx) != 0){
-					if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-				}
+				if(data_convert(my_dst, my_dst_ctx, my_src, my_src_ctx) != 0)
+					goto parse_error;
+				
 				my_src = my_dst;
 				break;
 			case DATA_FREE:
 				data_free(my_src);
 				break;
-			case CALL_BACKEND:
-				backend_query(rule->backend, rule->request_curr);
+			case CALL_BACKEND:;
+				request_t **req_proto;
+				if( (req_proto = find_proto(data, protos, i)) == NULL)
+					goto parse_error;
+				
+				backend_query(rule->backend, *req_proto);
 				break;
 			
 			case DO_NOTHING:
@@ -622,19 +623,18 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 							break;
 						
 						case THING_REQUEST:;
-							rewrite_rule_t *req_rule;
+							request_t **req_proto;
 							
-							if( (req_rule = find_rule(data, rule->dst_rule_num)) == NULL){
-								if(rule->fatal == 1) return -EINVAL; else goto next_rule;
-							}
+							if( (req_proto = find_proto(data, protos, rule->dst_rule_num)) == NULL)
+								goto parse_error;
 							
 							hash_t  proto_key[] = {
 								{ rule->dst_key, *my_src },
-								hash_next(req_rule->request_curr)
+								hash_next(*req_proto)
 							};
 							
-							req_rule->request_curr = alloca(sizeof(proto_key));
-							memcpy(req_rule->request_curr, proto_key, sizeof(proto_key));
+							*req_proto = alloca(sizeof(proto_key));
+							memcpy(*req_proto, proto_key, sizeof(proto_key));
 							break;
 						default: // {{{
 							break; // }}}
@@ -650,13 +650,16 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 				break;
 		};
 		// }}}
-	next_rule:;
+		continue;
+	parse_error:
+		if(rule->fatal == 1)
+			return -EINVAL;
 	}
 	if(pass == 0){
 		ret = chain_next_query(chain, new_request);
 		
 		if(have_after == 1){
-			ssize_t rec_ret = rewrite_func_one(chain, request, 1);
+			ssize_t rec_ret = rewrite_func_one(chain, request, 1, protos);
 			if(rec_ret != 0)
 				return rec_ret;
 		}
@@ -665,7 +668,20 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass){
 }
 
 static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
-	return rewrite_func_one(chain, request, 0);
+	rewrite_user_data  *data      = (rewrite_user_data *)chain->user_data;
+	request_t         **protos;
+	size_t              protos_size;
+	unsigned int        i;
+	
+	protos_size = data->rules_count * sizeof(request_t *);
+	protos = alloca(protos_size);
+	memset(protos, 0, protos_size);
+	
+	for(i=0; i<data->rules_count; i++){
+		protos[i] = data->rules[i].request_proto;
+	}
+	
+	return rewrite_func_one(chain, request, 0, protos);
 } // }}}
 
 static chain_t chain_rewrite = {
