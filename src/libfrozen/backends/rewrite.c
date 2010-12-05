@@ -410,7 +410,7 @@ static request_t ** find_proto(rewrite_user_data *data, request_t **protos, unsi
 	return &protos[rule_num];
 }
 
-static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, request_t **protos){
+static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_times pass, request_t **protos){
 	unsigned int        i;
 	int                 have_after;
 	ssize_t             ret;
@@ -427,6 +427,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, re
 	ret         = 0;
 	
 	for(i=0, rule=data->rules; i<data->rules_count; i++, rule++){
+		// filter before/after {{{
+		if(rule->time == TIME_AFTER && pass == TIME_BEFORE)
+			have_after = 1;
+		if(rule->time != pass)
+			continue;
+		// }}}
 		// filter requests {{{
 		if(rule->filter != REQUEST_INVALID){
 			if(r_action == NULL)
@@ -434,12 +440,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, re
 			
 			if(!(HVALUE(r_action, request_actions) & rule->filter))
 				continue;
-		}
-		// }}}
-		// filter before/after {{{
-		if(rule->time == TIME_AFTER && pass == 0){
-			have_after = 1;
-			continue;
 		}
 		// }}}
 		
@@ -497,6 +497,11 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, re
 		}; // }}}
 		// read dst {{{
 		switch(rule->action){
+			case VALUE_SET:
+				if(rule->dst_info != 1)
+					break;
+				
+				/* fallthrought */
 			case DATA_ARITH:
 			case DATA_CONVERT:
 				switch(rule->dst_type){
@@ -529,7 +534,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, re
 				break;
 			
 			case DO_NOTHING:
-			case VALUE_SET:
 			case VALUE_UNSET:
 			case VALUE_LENGTH:
 			case DATA_LENGTH:
@@ -659,7 +663,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, int pass, re
 		ret = chain_next_query(chain, new_request);
 		
 		if(have_after == 1){
-			ssize_t rec_ret = rewrite_func_one(chain, request, 1, protos);
+			ssize_t rec_ret = rewrite_func_one(chain, new_request, TIME_AFTER, protos);
 			if(rec_ret != 0)
 				return rec_ret;
 		}
@@ -681,7 +685,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 		protos[i] = data->rules[i].request_proto;
 	}
 	
-	return rewrite_func_one(chain, request, 0, protos);
+	return rewrite_func_one(chain, request, TIME_BEFORE, protos);
 } // }}}
 
 static chain_t chain_rewrite = {

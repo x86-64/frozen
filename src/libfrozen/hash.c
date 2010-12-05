@@ -151,6 +151,7 @@ void hash_dump(hash_t *hash){
 	hash_t       *element = hash;
 	
 	printf("hash: %p\n", hash);
+start:
 	while(element->key != hash_ptr_end){
 		if(element->key == hash_ptr_null)
 			continue;
@@ -160,12 +161,17 @@ void hash_dump(hash_t *hash){
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);
 			
-			printf("%.2x ", (unsigned int)(*((char *)element->data.data_ptr + k)));
+			printf("%.2hhx ", (unsigned int)(*((char *)element->data.data_ptr + k)));
 		}
 		printf("\n");
 		element++;
 	}
 	printf("end_hash\n");
+	if(element->data.data_ptr != NULL){
+		printf("recursive hash: %p\n", element->data.data_ptr);
+		element = element->data.data_ptr;
+		goto start;
+	}
 }
 #endif
 
