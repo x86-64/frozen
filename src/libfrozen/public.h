@@ -3,6 +3,7 @@
 
 typedef enum request_actions   request_actions;
 
+typedef struct chain_t    chain_t;
 
 typedef struct hash_t          hash_t;
 typedef hash_t                 request_t;

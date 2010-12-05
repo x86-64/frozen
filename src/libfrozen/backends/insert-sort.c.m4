@@ -7,8 +7,7 @@
 typedef struct sort_proto_t     sort_proto_t;
 typedef struct sorts_user_data  sorts_user_data;
 
-typedef ssize_t (*func_find_key)(sorts_user_data *data, buffer_t *buffer1, buffer_t *key_oid);
-// TODO move usage key_oid to data struct
+typedef ssize_t (*func_find_key)(sorts_user_data *data, data_t *, data_ctx_t *, data_t *, data_ctx_t *);
 
 struct sort_proto_t {
 	char           *name;
@@ -18,10 +17,6 @@ struct sort_proto_t {
 struct sorts_user_data {
 	chain_t         *chain;
 	sort_proto_t    *engine;
-	data_ctx_t       cmp_ctx;
-	
-	off_t            key;
-	buffer_t         key_buffer;
 };
 
 /* m4 {{{
@@ -50,32 +45,21 @@ static int sorts_init(chain_t *chain){ // {{{
 static int sorts_destroy(chain_t *chain){ // {{{
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
-	// TODO destroy without configure cause crash
-
-	data_ctx_destroy(&data->cmp_ctx);
-	
-	buffer_destroy(&data->key_buffer);
-	
-	free(chain->user_data);
-	
+	free(data);
 	chain->user_data = NULL;
 	
 	return 0;
 } // }}}
 static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
-	char       *sort_engine_str;
-	char       *info_type_str;
-	hash_t     *r_context;
-	data_type   info_type;
-	int         i;
-	
+	int              i;
+	char            *sort_engine_str;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
 	data->chain = chain;
 	
 	/* get engine info */
-	if(hash_get_typed(config, TYPE_STRING, "sort-engine", (void **)&sort_engine_str, NULL) != 0)
-		return_error(-EINVAL, "chain 'insert-sort' parameter 'sort-engine' not supplied\n");
+	if(hash_get_typed(config, TYPE_STRING, "engine", (void **)&sort_engine_str, NULL) != 0)
+		return_error(-EINVAL, "chain 'insert-sort' parameter 'engine' not supplied\n");
 	
 	for(i=0, data->engine = NULL; i<sort_protos_size; i++){
 		if(strcasecmp(sort_protos[i].name, sort_engine_str) == 0){
@@ -85,20 +69,6 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	}
 	if(data->engine == NULL)
 		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
-	
-	/* get type of data */
-	if(hash_get_typed(config, TYPE_STRING, "type", (void **)&info_type_str, NULL) != 0)
-		return_error(-EINVAL, "chain 'insert-sort' type not defined\n");
-	if( (info_type = data_type_from_string(info_type_str)) == -1)
-		return_error(-EINVAL, "chain 'insert-sort' type invalid\n");
-	
-	/* get context */
-	r_context = hash_find(config, "type-context");
-	if( data_ctx_init(&data->cmp_ctx, info_type, r_context) != 0)
-		return_error(-EINVAL, "chain 'insert-sort' data ctx create failed\n");
-	
-	buffer_init_from_bare(&data->key_buffer, &data->key, sizeof(data->key));
-	// TODO fix mem leak
 	
 	return 0;
 } // }}}
@@ -110,22 +80,22 @@ static ssize_t sorts_create(chain_t *chain, request_t *request){
 
 static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	ssize_t          ret;
+	data_t          *buffer, *key_out;
+	data_ctx_t      *buffer_ctx, *key_out_ctx;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
-	buffer_t        *buffer, *keyout_buffer;
-	void            *key_ptr;
 	
-	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
+	if( (buffer = hash_get_data(request, "buffer")) == NULL)
 		return -EINVAL;
-	if( hash_get_typed(request, TYPE_BUFFERT, "key_buffer", (void **)&keyout_buffer, NULL) != 0)
-		keyout_buffer = &data->key_buffer;
+	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
-	// TODO TOP think about conversion and in/out keys. key_buffer can be just key pointing to buffer and expanding
-	// where it need. User also can supply non-buffer value and reject any outgoing keys
+	if( (key_out = hash_get_data(request, "key_out")) == NULL)
+		return -EINVAL;
+	key_out_ctx = hash_get_data_ctx(request, "key_out");
 	
 	// TODO underlying locking and threading
 	// next("lock");
 	
-	ret = data->engine->func_find(data, buffer, keyout_buffer);
+	ret = data->engine->func_find(data, buffer, buffer_ctx, key_out, key_out_ctx);
 	/*
 	if(ret == KEY_FOUND){
 		
@@ -133,33 +103,33 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 		
 	}
 	*/
-	key_ptr = buffer_defragment(keyout_buffer);
-	hash_t set_request[] = {
-		{ "key",    DATA_PTR_OFFT(key_ptr)      },
+	request_t req_insert[] = {
+		{ "key",    *key_out                    },
 		{ "insert", DATA_INT32(1)               },
 		hash_next(request)
 	};
-	ret = chain_next_query(chain, set_request);
+	ret = chain_next_query(chain, req_insert);
 	if(ret <= 0)
 		return ret;
 	
+	/*
 	if(keyout_buffer == &data->key_buffer){
 		ret = buffer_get_size(keyout_buffer);
 		buffer_memcpy(buffer, 0, keyout_buffer, 0, ret);
 	}
+	*/
 	// next("unlock");
 	return ret;
 }
 
 static ssize_t sorts_custom(chain_t *chain, request_t *request){
+	/*
 	hash_t *r_funcname;
-	
-	//sorts_user_data *data = (sorts_user_data *)chain->user_data;
+	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
 	if( (r_funcname = hash_find_typed(request, TYPE_STRING, "function")) == NULL)
 		return -EINVAL;
 	
-	/*
 	if(strcmp((char *)r_funcname->value, "search") == 0){
 		return data->engine->func_find(data, buffer, &data->key_buffer); // do search
 	}

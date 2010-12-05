@@ -619,7 +619,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 						case THING_KEY:;
 							hash_t  req_key[] = {
 								{ rule->dst_key, *my_src },
-								hash_next(request)
+								hash_next(new_request)
 							};
 							
 							new_request = alloca(sizeof(req_key));

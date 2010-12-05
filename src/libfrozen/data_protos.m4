@@ -11,4 +11,5 @@ m4_include(data/string.c)
 m4_include(data/hash_t.c)
 m4_include(data/buffer_t.c)
 m4_include(data/io_t.c)
+m4_include(data/chain_t.c)
 

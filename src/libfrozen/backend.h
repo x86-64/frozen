@@ -15,7 +15,6 @@ enum request_actions {
 
 /* PRIVATE - chains {{{1 */
 
-typedef struct chain_t    chain_t;
 
 typedef int (*f_init)      (chain_t *);
 typedef int (*f_configure) (chain_t *, hash_t *);

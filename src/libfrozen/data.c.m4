@@ -211,14 +211,60 @@ size_t               data_len               (data_t *data, data_ctx_t *data_ctx)
  *  @return 0 or 1 or -1 as result of compare
  */
 int                  data_cmp               (data_t *data1, data_ctx_t *data1_ctx, data_t *data2, data_ctx_t *data2_ctx){ // {{{
-	f_data_cmp   func_cmp;
+	char            buffer1_local[DEF_BUFFER_SIZE], buffer2_local[DEF_BUFFER_SIZE];
+	void           *buffer1, *buffer2;
+	size_t          buffer1_size, buffer2_size, cmp_size;
+	ssize_t         ret;
+	off_t           offset1, offset2, goffset1, goffset2;
+	f_data_cmp      func_cmp;
 	
 	if(!data_type_is_valid(data1->type) || !data_type_is_valid(data2->type))
 		return -EINVAL;
 	
 	if(data1->type != data2->type){
 		// TODO call convert
-		return -EFAULT;
+		
+		goffset1     = goffset2     = 0;
+		buffer1_size = buffer2_size = 0;
+		do {
+			if(buffer1_size == 0){
+				buffer1      = buffer1_local;
+				buffer1_size = DEF_BUFFER_SIZE;
+				
+				if( (ret = data_read  (data1, data1_ctx, goffset1, &buffer1, &buffer1_size)) < -1)
+					return -EINVAL;
+				
+				if(ret == -1 && buffer2_size != 0)
+					return 1;
+				
+				goffset1 += buffer1_size;
+				offset1 = 0;
+			}
+			if(buffer2_size == 0){
+				buffer2      = buffer2_local;
+				buffer2_size = DEF_BUFFER_SIZE;
+				
+				if( (ret = data_read  (data2, data2_ctx, goffset2, &buffer2, &buffer2_size)) < -1)
+					return -EINVAL;
+				
+				if(ret == -1)
+					return (buffer1_size == 0) ? 0 : -1;
+				
+				goffset2 += buffer2_size;
+				offset2   = 0;
+			}
+			
+			cmp_size = (buffer1_size < buffer2_size) ? buffer1_size : buffer2_size;
+			
+			ret = memcmp(buffer1 + offset1, buffer2 + offset2, cmp_size);
+			if(ret != 0)
+				return ret;
+			
+			offset1      += cmp_size;
+			offset2      += cmp_size;
+			buffer1_size -= cmp_size;
+			buffer2_size -= cmp_size;
+		}while(1);
 	}
 	
 	if( (func_cmp = data_protos[data1->type].func_cmp) == NULL)

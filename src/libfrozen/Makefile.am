@@ -3,12 +3,12 @@ backends_sources =                  \
 	backends/null-proxy.c       \
 	backends/file.c             \
 	backends/list.c             \
-	backends/rewrite.c          
+	backends/rewrite.c          \
+	backends/insert-sort.c      
 
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
 
-#	backends/insert-sort.c      
 
 data_sources=           \
 	data/void.c     \
@@ -22,6 +22,7 @@ data_sources=           \
 	data/hash_t.c   \
 	data/buffer_t.c \
 	data/io_t.c     \
+	data/chain_t.c  \
 	data/string.c 
 
 AUTOMAKE_OPTIONS = subdir-objects

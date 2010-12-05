@@ -219,68 +219,6 @@ void         backend_destroy  (backend_t *backend){
 }
 /* }}}1 */
 
-/* buffer_io {{{ */
-static ssize_t  backend_buffer_func_read  (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
-	buffer_t        buffer_read;
-	ssize_t         ret;
-	
-	hash_t  hash[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
-		{ "key",    DATA_PTR_OFFT(&offset)        },
-		{ "size",   DATA_SIZET(buf_size)          },
-		{ "buffer", DATA_BUFFERT(&buffer_read)    },
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_end
-	};
-	buffer_init_from_bare(&buffer_read, buf, buf_size);
-	
-	ret = chain_query( (chain_t *)buffer->io_context, hash);	
-	
-	buffer_destroy(&buffer_read);
-	return ret;
-} // }}}
-
-static ssize_t  backend_buffer_func_write (buffer_t *buffer, off_t offset, void *buf, size_t buf_size){ // {{{
-	buffer_t        buffer_write;
-	ssize_t         ret;
-	
-	hash_t  hash[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-		{ "key",    DATA_PTR_OFFT(&offset)        },
-		{ "size",   DATA_SIZET(buf_size)          },
-		{ "buffer", DATA_BUFFERT(&buffer_write)   },
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_null,
-		hash_end
-	};
-	buffer_init_from_bare(&buffer_write, buf, buf_size);
-	
-	ret = chain_query( (chain_t *)buffer->io_context, hash);	
-	
-	buffer_destroy(&buffer_write);
-	
-	return ret;
-} // }}}
-
-void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached){ // {{{
-	buffer_io_init(buffer, (void *)chain, &backend_buffer_func_read, &backend_buffer_func_write, cached);
-} // }}}
-
-buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached){ // {{{
-	return buffer_io_alloc((void *)chain, &backend_buffer_func_read, &backend_buffer_func_write, cached);
-} // }}}
-
-/* }}} */
-
 request_actions request_str_to_action(char *string){
 	if(strcasecmp(string, "create") == 0) return ACTION_CRWD_CREATE;
 	if(strcasecmp(string, "write")  == 0) return ACTION_CRWD_WRITE;

@@ -1,40 +1,43 @@
-// TODO rewrite using data_* functions
 
-ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffer1, buffer_t *key_out){
+ssize_t             sorts_binsearch_find (sorts_user_data *data, data_t *buffer1, data_ctx_t *buffer1_ctx, data_t *key_out, data_ctx_t *key_out_ctx){
 	ssize_t         ret;
 	off_t           range_start, range_end, current;
-	buffer_t        buffer_backend, buffer_count;
+	data_t          d_current = DATA_PTR_OFFT(&current);
 	
 	range_start = range_end = 0;
 	
-	buffer_init_from_bare(&buffer_count, &range_end, sizeof(range_end));
-	
 	hash_t  req_count[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
-		{ "buffer", DATA_BUFFERT(&buffer_count)   },
+		{ "buffer", DATA_PTR_OFFT(&range_end)     },
+		hash_end
+	};
+	ret = chain_next_query(data->chain, req_count);
+	if(ret <= 0 || range_start == range_end){
+		current = range_end;
+		
+		ret = KEY_NOT_FOUND;
+		goto exit;
+	}
+	
+	data_t  backend = DATA_CHAINT(data->chain);
+	hash_t  backend_ctx[] = {
+		{ "offset",  DATA_PTR_OFFT(&current)  },
 		hash_end
 	};
 	
-	ret = chain_next_query(data->chain, req_count);
-	if(ret <= 0 || range_start == range_end){
-		buffer_write(key_out, 0, &range_end, sizeof(range_end));
-		ret = KEY_NOT_FOUND;
-		goto cleanup2;
-	}
-	
-	backend_buffer_io_init(&buffer_backend, (void *)data->chain, 0);
-	
 	/* check last element of list to fast-up incremental inserts */
-	if( (ret = data_buffer_cmp(&data->cmp_ctx, buffer1, 0, &buffer_backend, range_end - 1)) >= 0){
-		buffer_write(key_out, 0, &range_end, sizeof(range_end));
+	current = range_end - 1;
+	if( (ret = data_cmp(buffer1, buffer1_ctx, &backend, backend_ctx)) >= 0){
+		current = range_end;
 		ret = (ret == 0) ? KEY_FOUND : KEY_NOT_FOUND;
-		goto cleanup1;
+		
+		goto exit;
 	}
 	
 	while(range_start + 1 < range_end){
 		current = range_start + ((range_end - range_start) / 2);
 		
-		ret = data_buffer_cmp(&data->cmp_ctx, buffer1, 0, &buffer_backend, current);
+		ret = data_cmp(buffer1, buffer1_ctx, &backend, backend_ctx);
 		
 		/*
 		printf("range: %x-%x curr: %x ret: %x\n",
@@ -44,27 +47,26 @@ ssize_t             sorts_binsearch_find (sorts_user_data *data, buffer_t *buffe
 		*/
 		
 		if(ret == 0){
-			buffer_write(key_out, 0, &current, sizeof(current));
 			ret = KEY_FOUND;
-			goto cleanup1;
+			goto exit;
 		}else if(ret < 0){
 			range_end   = current;
 		}else{
 			range_start = current;
 		}
 	}
-	if(data_buffer_cmp(&data->cmp_ctx, buffer1, 0, &buffer_backend, range_start) <= 0)
+	current = range_start;
+	if(data_cmp(buffer1, buffer1_ctx, &backend, backend_ctx) <= 0)
 		current = range_start;
 	else
 		current = range_end;
 	
-	buffer_write(key_out, 0, &current, sizeof(current));
 	ret = KEY_NOT_FOUND;
-	
-cleanup1:
-	buffer_destroy(&buffer_backend);
-cleanup2:
-	buffer_destroy(&buffer_count);
+exit:
+	data_transfer(
+		key_out,    key_out_ctx,
+		&d_current, NULL
+	);
 	return ret;
 }
 
