@@ -86,6 +86,8 @@
 #include <libfrozen.h>
 #include <alloca.h>
 
+#define MAX_ALLOCA_SIZE 0x1000
+
 /* typedefs {{{ */
 typedef enum rewrite_actions {
 	VALUE_SET,
@@ -95,8 +97,9 @@ typedef enum rewrite_actions {
 	DATA_LENGTH,
 	DATA_ARITH,
 	DATA_CONVERT,
+	DATA_ALLOCA,
 	DATA_FREE,
-
+	
 #ifdef DEBUG
 	HASH_DUMP,
 #endif
@@ -147,6 +150,7 @@ typedef struct rewrite_rule_t {
 		
 		backend_t    *backend;
 		request_t    *request_proto;
+		int           ret_override;
 		
 		unsigned int  copy;
 		unsigned int  fatal;
@@ -166,6 +170,7 @@ static rewrite_actions  rewrite_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "data_length")    == 0) return DATA_LENGTH;
 	if(strcasecmp(string, "data_arith")     == 0) return DATA_ARITH;
 	if(strcasecmp(string, "data_convert")   == 0) return DATA_CONVERT;
+	if(strcasecmp(string, "data_alloca")    == 0) return DATA_ALLOCA;
 	if(strcasecmp(string, "data_free")      == 0) return DATA_FREE;
 
 #ifdef DEBUG
@@ -255,6 +260,9 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			return_error(-EINVAL, "rewrite rule: parameter 'backend' invalid\n");
 	}
 	// }}}
+	// parse override {{{
+	new_rule.ret_override = (hash_find(config, "ret_override") != NULL) ? 1 : 0;
+	// }}}
 	// src parse {{{
 	if( hash_get_typed(config, TYPE_STRING, "src_key", &temp, NULL) == 0){
 		new_rule.src_type     = THING_KEY;
@@ -338,21 +346,23 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 			if(new_rule.src_type == THING_NOTHING)
 				label_error(cleanup, "rewrite rule: missing src target\n");
 			break;
-		
+		case DATA_ALLOCA:
+			if(new_rule.dst_type == THING_NOTHING)
+				label_error(cleanup, "rewrite rule: missing dst target\n");
+			
+			if(new_rule.dst_key_type == TYPE_INVALID || new_rule.dst_key_size == (size_t)-1)
+				label_error(cleanup, "rewrite rule: missing dst_type or dst_size\n");
+			
+			if(new_rule.dst_key_size > MAX_ALLOCA_SIZE)
+				label_error(cleanup, "rewrite rule: dst_size is too big\n");
+			
+			break;
+			
 	#ifdef DEBUG
 		case HASH_DUMP:
 			break;
 	#endif
 	};
-	/*
-		if(new_rule.dst_type == THING_KEY){
-			if(
-				new_rule.src_type == THING_BUFFER &&
-				( new_rule.dst_key_type == TYPE_INVALID || new_rule.dst_key_size == 0)
-			)
-				label_error(cleanup, "rewrite rule: can't fill dst key. supply dst_type and dst_size\n");
-		}
-	*/
 	// }}}
 	
 	// copy rule
@@ -412,8 +422,8 @@ static request_t ** find_proto(rewrite_user_data *data, request_t **protos, unsi
 
 static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_times pass, request_t **protos){
 	unsigned int        i;
-	int                 have_after;
-	ssize_t             ret;
+	int                 have_after, ret_overriden;
+	ssize_t             ret, ret2;
 	//size_t              dst_size;
 	//data_type           dst_type;
 	hash_t             *r_action;
@@ -421,10 +431,11 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 	rewrite_rule_t     *rule;
 	rewrite_user_data  *data      = (rewrite_user_data *)chain->user_data;
 	
-	new_request = request;
-	r_action    = NULL;
-	have_after  = 0;
-	ret         = 0;
+	new_request   = request;
+	r_action      = NULL;
+	have_after    = 0;
+	ret           = 0;
+	ret_overriden = 0;
 	
 	for(i=0, rule=data->rules; i<data->rules_count; i++, rule++){
 		// filter before/after {{{
@@ -488,6 +499,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 				break;
 			
 			case DO_NOTHING:
+			case DATA_ALLOCA:
 			case VALUE_UNSET:
 			case CALL_BACKEND:
 		#ifdef DEBUG
@@ -536,8 +548,9 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 			case DO_NOTHING:
 			case VALUE_UNSET:
 			case VALUE_LENGTH:
-			case DATA_LENGTH:
 			case CALL_BACKEND:
+			case DATA_LENGTH:
+			case DATA_ALLOCA:
 			case DATA_FREE:
 		#ifdef DEBUG
 			case HASH_DUMP:
@@ -556,7 +569,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 				data_copy_local(&my_src_data, &my_vlength);
 				my_src = &my_src_data;
 				break; // }}}
-			
 			case DATA_LENGTH:; // {{{
 				size_t  my_dlength_mem = 0;
 				data_t  my_dlength     = DATA_PTR_SIZET(&my_dlength_mem);
@@ -580,6 +592,11 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 				
 				my_src = my_dst;
 				break;
+			case DATA_ALLOCA:;
+				// TODO this is dangerous! Rewrite with data_alloc, or something..
+				data_reinit(&my_src_data, rule->dst_key_type, alloca(rule->dst_key_size), rule->dst_key_size);
+				my_src = &my_src_data;
+				break;
 			case DATA_FREE:
 				data_free(my_src);
 				break;
@@ -588,7 +605,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 				if( (req_proto = find_proto(data, protos, i)) == NULL)
 					goto parse_error;
 				
-				backend_query(rule->backend, *req_proto);
+				hash_dump(*req_proto);
+				ret2 = backend_query(rule->backend, *req_proto);
+				if(rule->ret_override == 1){
+					ret = ret2;
+					ret_overriden = 1;
+				}
 				break;
 			
 			case DO_NOTHING:
@@ -609,6 +631,7 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 			case DATA_LENGTH:		
 			case DATA_ARITH:
 			case DATA_CONVERT:
+			case DATA_ALLOCA:
 				if(rule->src_info == 1 || rule->dst_info == 1){
 					data_transfer(
 						my_dst, my_dst_ctx,
@@ -660,12 +683,12 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 			return -EINVAL;
 	}
 	if(pass == 0){
-		ret = chain_next_query(chain, new_request);
+		ret2 = chain_next_query(chain, new_request);
+		if(ret_overriden == 0) ret = ret2;
 		
 		if(have_after == 1){
-			ssize_t rec_ret = rewrite_func_one(chain, new_request, TIME_AFTER, protos);
-			if(rec_ret != 0)
-				return rec_ret;
+			if( (ret2 = rewrite_func_one(chain, new_request, TIME_AFTER, protos)) != 0)
+				return ret2;
 		}
 	}
 	return ret;

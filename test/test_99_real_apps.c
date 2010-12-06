@@ -157,7 +157,6 @@ START_TEST (test_real_store_idx_strings){
 						{ "dst_key",    DATA_STRING("key_from")             },
 						{ "src_config", DATA_STRING("operand")              },
 						{ "operand",    DATA_OFFT(8)                        },
-						//{ "copy",       DATA_INT32(1)                       },
 						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
 						hash_end
 					)},
@@ -167,7 +166,6 @@ START_TEST (test_real_store_idx_strings){
 						{ "dst_key",    DATA_STRING("key_to")               },
 						{ "src_config", DATA_STRING("operand")              },
 						{ "operand",    DATA_OFFT(8)                        },
-						//{ "copy",       DATA_INT32(1)                       },
 						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
 						hash_end
 					)},
@@ -177,7 +175,7 @@ START_TEST (test_real_store_idx_strings){
 						{ "action",        DATA_STRING("set")               },
 						{ "src_key",       DATA_STRING("buffer")            },
 						{ "dst_backend",   DATA_STRING("buffer")            },
-						{ "dst_rule",      DATA_INT32(6)                    },
+						{ "dst_rule",      DATA_INT32(7)                    },
 						{ "on-request",
 							DATA_INT32(
 								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
@@ -185,10 +183,10 @@ START_TEST (test_real_store_idx_strings){
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 5
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("key_out")           },
-						{ "dst_backend",   DATA_STRING("key_out")           },
-						{ "dst_rule",      DATA_INT32(6)                    },
+						{ "action",        DATA_STRING("data_alloca")       },
+						{ "dst_type",      DATA_STRING("memory")            },
+						{ "dst_size",      DATA_SIZET(8)                    },
+						{ "dst_key",       DATA_STRING("buffer")            },
 						{ "on-request",
 							DATA_INT32(
 								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
@@ -196,12 +194,10 @@ START_TEST (test_real_store_idx_strings){
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 6
-						{ "action",          DATA_STRING("backend")         },
-						{ "backend",         DATA_STRING("b_data")          },
-						{ "request_proto",   DATA_HASHT(
-							{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-							hash_end
-						)},
+						{ "action",        DATA_STRING("set")               },
+						{ "src_key",       DATA_STRING("buffer")            },
+						{ "dst_backend",   DATA_STRING("key_out")           },
+						{ "dst_rule",      DATA_INT32(7)                    },
 						{ "on-request",
 							DATA_INT32(
 								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
@@ -209,9 +205,13 @@ START_TEST (test_real_store_idx_strings){
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 7
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("key_out")           },
-						{ "dst_key",       DATA_STRING("buffer")            },
+						{ "action",          DATA_STRING("backend")         },
+						{ "backend",         DATA_STRING("b_data")          },
+						{ "request_proto",   DATA_HASHT(
+							{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
+							hash_end
+						)},
+						{ "ret_override",    DATA_INT32(1)                  },
 						{ "on-request",
 							DATA_INT32(
 								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
@@ -234,30 +234,26 @@ START_TEST (test_real_store_idx_strings){
 					{ NULL, DATA_HASHT( // 9
 						{ "action",        DATA_STRING("set")               },
 						{ "src_key",       DATA_STRING("buffer")            },
-						{ "src_info",      DATA_INT32(1)                    },
-						{ "dst_key",       DATA_STRING("key")               },
-						{ "dst_info",      DATA_INT32(1)                    },
+						{ "dst_backend",   DATA_STRING("buffer")            },
+						{ "dst_rule",      DATA_INT32(12)                   },
 						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						{ "after",         DATA_INT32(1)                    },
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 10
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("key")               },
-						{ "dst_backend",   DATA_STRING("key")               },
-						{ "dst_rule",      DATA_INT32(12)                   },
+						{ "action",        DATA_STRING("data_alloca")       },
+						{ "dst_type",      DATA_STRING("off_t")             },
+						{ "dst_size",      DATA_SIZET(8)                    },
+						{ "dst_key",       DATA_STRING("buffer")            },
 						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						{ "after",         DATA_INT32(1)                    },
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 11
 						{ "action",        DATA_STRING("set")               },
 						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("buffer")            },
+						{ "dst_backend",   DATA_STRING("key")               },
 						{ "dst_rule",      DATA_INT32(12)                   },
 						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
 						{ "after",         DATA_INT32(1)                    },
-						{ "fatal",         DATA_INT32(1)                    },
 						hash_end
 					)},
 					{ NULL, DATA_HASHT( // 12
@@ -267,6 +263,7 @@ START_TEST (test_real_store_idx_strings){
 							{ "action",  DATA_INT32(ACTION_CRWD_READ)   },
 							hash_end
 						)},
+						{ "ret_override",    DATA_INT32(1)                  },
 						{ "on-request",      DATA_INT32(ACTION_CRWD_READ)   },
 						{ "after",           DATA_INT32(1)                  },
 						hash_end
@@ -329,7 +326,7 @@ START_TEST (test_real_store_idx_strings){
 			fail_unless(ret > 0,           "chain 'real_store_idx_str': write array failed");
 			//fail_unless(data_ptrs[i] == i, "chain 'real_store_idx_str': write index not linear");
 		
-		printf("ret: %x, ptr: %d\n", ret, (unsigned int)data_ptrs[i]);
+		printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptrs[i], data_array[i]);
 	}
 	
 	// check
@@ -347,7 +344,7 @@ START_TEST (test_real_store_idx_strings){
 			fail_unless(ret > 0,                               "chain 'real_store_idx_str': read array failed");
 			//fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'real_store_idx_str': read array data failed");
 		
-		printf("ret: %x, str: %s\n", ret, data_read);
+		printf("reading: ret: %x, ptr: %d, str: %s\n", ret, i, data_read);
 	}
 	
 	backend_destroy(b_idx);
