@@ -352,7 +352,7 @@ static void wfrozen_init(void){
 					)},
 					{ NULL, DATA_HASHT( // 5
 						{ "action",        DATA_STRING("data_alloca")       },
-						{ "dst_type",      DATA_STRING("memory")            },
+						{ "dst_type",      DATA_STRING("off_t")             },
 						{ "dst_size",      DATA_SIZET(8)                    },
 						{ "dst_key",       DATA_STRING("buffer")            },
 						{ "on-request",
@@ -615,7 +615,6 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	if(fh->param){
 		data_reinit(&d_param, TYPE_STRING, fh->param, strlen(fh->param) + 1);
 	}
-	
 	request_t r_write[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)                   },
 		//{ "key",     DATA_PTR_OFFT(&off)                             },

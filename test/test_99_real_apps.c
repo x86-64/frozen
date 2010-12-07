@@ -326,7 +326,7 @@ START_TEST (test_real_store_idx_strings){
 			fail_unless(ret > 0,           "chain 'real_store_idx_str': write array failed");
 			//fail_unless(data_ptrs[i] == i, "chain 'real_store_idx_str': write index not linear");
 		
-		printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptrs[i], data_array[i]);
+		//printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptrs[i], data_array[i]);
 	}
 	
 	// check
@@ -344,7 +344,7 @@ START_TEST (test_real_store_idx_strings){
 			fail_unless(ret > 0,                               "chain 'real_store_idx_str': read array failed");
 			//fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'real_store_idx_str': read array data failed");
 		
-		printf("reading: ret: %x, ptr: %d, str: %s\n", ret, i, data_read);
+		//printf("reading: ret: %x, ptr: %d, str: %s\n", ret, i, data_read);
 	}
 	
 	backend_destroy(b_idx);

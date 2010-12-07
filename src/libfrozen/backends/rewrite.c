@@ -185,8 +185,8 @@ static void rewrite_rule_free(rewrite_rule_t *rule){ // {{{
 	
 	data_free(&rule->src_config);
 	
-	if(rule->request_proto != NULL)
-		free(rule->request_proto);
+	hash_free(rule->request_proto);
+	
 	if(rule->backend != NULL)
 		backend_destroy(rule->backend);
 	
@@ -241,18 +241,13 @@ static int  rewrite_rule_parse(hash_t *rules, void *p_data, void *null2){ // {{{
 	// }}}
 	// parse request_proto {{{
 	hash_t     request_null[] = { hash_end };
-	request_t *request_proto;
-	size_t     request_proto_size;
 	
-	if( (htemp = hash_find_typed(config, TYPE_HASHT, "request_proto")) != NULL){
-		request_proto      = hash_get_value_ptr(htemp);
-		request_proto_size = hash_get_value_size(htemp);
-	}else{
-		request_proto      = request_null;
-		request_proto_size = sizeof(request_null);
-	}
-	new_rule.request_proto = malloc(request_proto_size);
-	memcpy(new_rule.request_proto, request_proto, request_proto_size);
+	new_rule.request_proto =
+		hash_copy(
+			( (htemp = hash_find_typed(config, TYPE_HASHT, "request_proto")) != NULL) ?
+			hash_get_value_ptr(htemp) : 
+			request_null
+		);
 	// }}}
 	// parse backend {{{
 	if( (htemp = hash_find(config, "backend")) != NULL){
@@ -605,7 +600,6 @@ static ssize_t rewrite_func_one(chain_t *chain, request_t *request, rewrite_time
 				if( (req_proto = find_proto(data, protos, i)) == NULL)
 					goto parse_error;
 				
-				hash_dump(*req_proto);
 				ret2 = backend_query(rule->backend, *req_proto);
 				if(rule->ret_override == 1){
 					ret = ret2;

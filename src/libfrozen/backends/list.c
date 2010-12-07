@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <alloca.h>
 
 // 'list' chain provide insert capability using underlying chains.
 // This is useful for upper-level chains like 'insert-sort'

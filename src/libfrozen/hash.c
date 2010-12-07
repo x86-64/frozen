@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <alloca.h>
 
 hash_t *         hash_find              (hash_t *hash, char *key){ // {{{
 	hash_t      *value = hash;
@@ -115,6 +116,53 @@ int                hash_get_typed               (hash_t *hash, data_type type, c
 	return 0;
 } // }}}
 
+hash_t *           hash_copy                    (hash_t *hash){ // {{{
+	unsigned int  k;
+	hash_t       *el, *el_new, *new_hash;
+	
+	if(hash == NULL)
+		return NULL;
+	
+	for(el = hash, k=0; el->key != hash_ptr_end; el++){
+		if(el->key == hash_ptr_null)
+			continue;
+		
+		k++;
+	}
+	if( (new_hash = malloc((k+1)*sizeof(hash_t))) == NULL )
+		return NULL;
+	
+	for(el = hash, el_new = new_hash; el->key != hash_ptr_end; el++){
+		if(el->key == hash_ptr_null)
+			continue;
+		
+		el_new->key = (el->key) ? strdup(el->key) : NULL;
+		data_copy(&el_new->data, &el->data);
+		
+		el_new++;
+	}
+	el_new->key           = hash_ptr_end;
+	el_new->data.data_ptr = (el->data.data_ptr != NULL) ? hash_copy(el->data.data_ptr) : NULL;
+	
+	return new_hash;
+} // }}}
+
+void               hash_free                    (hash_t *hash){ // {{{
+	hash_t       *el;
+	
+	if(hash == NULL)
+		return;
+	
+	for(el = hash; el->key != hash_ptr_end; el++){
+		if(el->key == hash_ptr_null)
+			continue;
+		
+		if(el->key)
+			free(el->key);
+		data_free(&el->data);
+	}
+} // }}}
+
 data_t *           hash_get_data                (hash_t *hash, char *key){ // {{{
 	hash_t *htemp;
 	
@@ -133,7 +181,7 @@ data_t *           hash_get_typed_data          (hash_t *hash, data_type type, c
 } // }}}
 data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key){ // {{{
 	hash_t *htemp;
-	char *ctx_str = alloca(strlen(key) + 4 + 1);
+	char *ctx_str = alloca(strlen(key) + 4 + 1); // TODO remove alloca
 	
 	strcpy(ctx_str, key);
 	strcat(ctx_str, "_ctx");
@@ -154,7 +202,7 @@ void hash_dump(hash_t *hash){
 start:
 	while(element->key != hash_ptr_end){
 		if(element->key == hash_ptr_null)
-			continue;
+			goto next_item;
 		
 		printf(" - %s [%s] -> %p", (char *)element->key, data_string_from_type(element->data.type), element->data.data_ptr);
 		for(k=0; k<element->data.data_size; k++){
@@ -164,6 +212,8 @@ start:
 			printf("%.2hhx ", (unsigned int)(*((char *)element->data.data_ptr + k)));
 		}
 		printf("\n");
+	
+	next_item:
 		element++;
 	}
 	printf("end_hash\n");
