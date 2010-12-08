@@ -74,8 +74,10 @@ libfrozen_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo \
-	backends/libfrozen_la-rewrite.lo \
-	backends/libfrozen_la-insert-sort.lo
+	backends/rewrite/libfrozen_la-rewrite.lo \
+	backends/rewrite/libfrozen_la-rule_parser.tab.lo \
+	backends/rewrite/libfrozen_la-rule_parser.lex.lo \
+	backends/insert-sort/libfrozen_la-insert-sort.lo
 am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
 	libfrozen_la-list.lo libfrozen_la-buffer.lo \
 	libfrozen_la-data.lo libfrozen_la-hash.lo \
@@ -110,6 +112,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -128,6 +131,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
 GREP = @GREP@
@@ -222,13 +226,16 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 backends_sources = \
-	backends/null-proxy.c       \
-	backends/file.c             \
-	backends/list.c             \
-	backends/rewrite.c          \
-	backends/insert-sort.c      
+	backends/null-proxy.c                \
+	backends/file.c                      \
+	backends/list.c                      \
+	backends/rewrite/rewrite.c           \
+	backends/rewrite/rule_parser.tab.c   \
+	backends/rewrite/rule_parser.lex.c   \
+	backends/insert-sort/insert-sort.c
 
 
+#	backends/rewrite/rule_parser.c       \
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
 data_sources = \
@@ -264,6 +271,9 @@ libfrozen_la_SOURCES = data.h \
 			public.h
 
 CLEANFILES = backends/locate.c backends/insert-sort.c               \
+                backends/rewrite/rule_parser.tab.c                     \
+                backends/rewrite/rule_parser.tab.h                     \
+                backends/rewrite/rule_parser.lex.c                     \
 		data.c data.h                                          \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c
@@ -345,25 +355,49 @@ backends/libfrozen_la-file.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-list.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-rewrite.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-insert-sort.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
+backends/rewrite/$(am__dirstamp):
+	@$(MKDIR_P) backends/rewrite
+	@: > backends/rewrite/$(am__dirstamp)
+backends/rewrite/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) backends/rewrite/$(DEPDIR)
+	@: > backends/rewrite/$(DEPDIR)/$(am__dirstamp)
+backends/rewrite/libfrozen_la-rewrite.lo:  \
+	backends/rewrite/$(am__dirstamp) \
+	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
+backends/rewrite/libfrozen_la-rule_parser.tab.lo:  \
+	backends/rewrite/$(am__dirstamp) \
+	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
+backends/rewrite/libfrozen_la-rule_parser.lex.lo:  \
+	backends/rewrite/$(am__dirstamp) \
+	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
+backends/insert-sort/$(am__dirstamp):
+	@$(MKDIR_P) backends/insert-sort
+	@: > backends/insert-sort/$(am__dirstamp)
+backends/insert-sort/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) backends/insert-sort/$(DEPDIR)
+	@: > backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
+backends/insert-sort/libfrozen_la-insert-sort.lo:  \
+	backends/insert-sort/$(am__dirstamp) \
+	backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
 libfrozen.la: $(libfrozen_la_OBJECTS) $(libfrozen_la_DEPENDENCIES) 
 	$(libfrozen_la_LINK) -rpath $(libdir) $(libfrozen_la_OBJECTS) $(libfrozen_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f backends/insert-sort/libfrozen_la-insert-sort.$(OBJEXT)
+	-rm -f backends/insert-sort/libfrozen_la-insert-sort.lo
 	-rm -f backends/libfrozen_la-file.$(OBJEXT)
 	-rm -f backends/libfrozen_la-file.lo
-	-rm -f backends/libfrozen_la-insert-sort.$(OBJEXT)
-	-rm -f backends/libfrozen_la-insert-sort.lo
 	-rm -f backends/libfrozen_la-list.$(OBJEXT)
 	-rm -f backends/libfrozen_la-list.lo
 	-rm -f backends/libfrozen_la-null-proxy.$(OBJEXT)
 	-rm -f backends/libfrozen_la-null-proxy.lo
-	-rm -f backends/libfrozen_la-rewrite.$(OBJEXT)
-	-rm -f backends/libfrozen_la-rewrite.lo
+	-rm -f backends/rewrite/libfrozen_la-rewrite.$(OBJEXT)
+	-rm -f backends/rewrite/libfrozen_la-rewrite.lo
+	-rm -f backends/rewrite/libfrozen_la-rule_parser.lex.$(OBJEXT)
+	-rm -f backends/rewrite/libfrozen_la-rule_parser.lex.lo
+	-rm -f backends/rewrite/libfrozen_la-rule_parser.tab.$(OBJEXT)
+	-rm -f backends/rewrite/libfrozen_la-rule_parser.tab.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -376,10 +410,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-structs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-file.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-insert-sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-rewrite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -468,19 +504,33 @@ backends/libfrozen_la-list.lo: backends/list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
 
-backends/libfrozen_la-rewrite.lo: backends/rewrite.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-rewrite.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-rewrite.Tpo -c -o backends/libfrozen_la-rewrite.lo `test -f 'backends/rewrite.c' || echo '$(srcdir)/'`backends/rewrite.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-rewrite.Tpo backends/$(DEPDIR)/libfrozen_la-rewrite.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite.c' object='backends/libfrozen_la-rewrite.lo' libtool=yes @AMDEPBACKSLASH@
+backends/rewrite/libfrozen_la-rewrite.lo: backends/rewrite/rewrite.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rewrite.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo -c -o backends/rewrite/libfrozen_la-rewrite.lo `test -f 'backends/rewrite/rewrite.c' || echo '$(srcdir)/'`backends/rewrite/rewrite.c
+@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rewrite.c' object='backends/rewrite/libfrozen_la-rewrite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-rewrite.lo `test -f 'backends/rewrite.c' || echo '$(srcdir)/'`backends/rewrite.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rewrite.lo `test -f 'backends/rewrite/rewrite.c' || echo '$(srcdir)/'`backends/rewrite/rewrite.c
 
-backends/libfrozen_la-insert-sort.lo: backends/insert-sort.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-insert-sort.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-insert-sort.Tpo -c -o backends/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-insert-sort.Tpo backends/$(DEPDIR)/libfrozen_la-insert-sort.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/insert-sort.c' object='backends/libfrozen_la-insert-sort.lo' libtool=yes @AMDEPBACKSLASH@
+backends/rewrite/libfrozen_la-rule_parser.tab.lo: backends/rewrite/rule_parser.tab.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rule_parser.tab.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Tpo -c -o backends/rewrite/libfrozen_la-rule_parser.tab.lo `test -f 'backends/rewrite/rule_parser.tab.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.tab.c
+@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rule_parser.tab.c' object='backends/rewrite/libfrozen_la-rule_parser.tab.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rule_parser.tab.lo `test -f 'backends/rewrite/rule_parser.tab.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.tab.c
+
+backends/rewrite/libfrozen_la-rule_parser.lex.lo: backends/rewrite/rule_parser.lex.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rule_parser.lex.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Tpo -c -o backends/rewrite/libfrozen_la-rule_parser.lex.lo `test -f 'backends/rewrite/rule_parser.lex.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.lex.c
+@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rule_parser.lex.c' object='backends/rewrite/libfrozen_la-rule_parser.lex.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rule_parser.lex.lo `test -f 'backends/rewrite/rule_parser.lex.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.lex.c
+
+backends/insert-sort/libfrozen_la-insert-sort.lo: backends/insert-sort/insert-sort.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/insert-sort/libfrozen_la-insert-sort.lo -MD -MP -MF backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Tpo -c -o backends/insert-sort/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort/insert-sort.c
+@am__fastdepCC_TRUE@	$(am__mv) backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Tpo backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/insert-sort/insert-sort.c' object='backends/insert-sort/libfrozen_la-insert-sort.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/insert-sort/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort/insert-sort.c
 
 libfrozen_la-backend.lo: backend.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-backend.Tpo -c -o libfrozen_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
@@ -495,6 +545,8 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf backends/.libs backends/_libs
+	-rm -rf backends/insert-sort/.libs backends/insert-sort/_libs
+	-rm -rf backends/rewrite/.libs backends/rewrite/_libs
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -609,6 +661,10 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f backends/$(DEPDIR)/$(am__dirstamp)
 	-rm -f backends/$(am__dirstamp)
+	-rm -f backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
+	-rm -f backends/insert-sort/$(am__dirstamp)
+	-rm -f backends/rewrite/$(DEPDIR)/$(am__dirstamp)
+	-rm -f backends/rewrite/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -619,7 +675,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/rewrite/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -665,7 +721,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/rewrite/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -707,8 +763,16 @@ data.c: ${data_sources}
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
 
-backends/insert-sort.c:
-	${M4} -sP backends/insert-sort.c.m4 > $@
+backends/insert-sort/insert-sort.c:
+	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
+
+backends/rewrite/rule_parser.tab.c:
+	${BISON} -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
+backends/rewrite/rule_parser.lex.c:
+	${FLEX} --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
+
+backends/rewrite/rewrite.c: backends/rewrite/rule_parser.tab.c backends/rewrite/rule_parser.lex.c
+backends/rewrite/rule_parser.lex.c: backends/rewrite/rule_parser.tab.c
 
 data/uint8.c:
 	${M4} -sP -DBITS=8  -DNAME=int8  -DDEF=INT8  data/uint.c.m4 > $@

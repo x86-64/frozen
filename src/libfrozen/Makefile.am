@@ -1,14 +1,15 @@
+backends_sources =                           \
+	backends/null-proxy.c                \
+	backends/file.c                      \
+	backends/list.c                      \
+	backends/rewrite/rewrite.c           \
+	backends/rewrite/rule_parser.tab.c   \
+	backends/rewrite/rule_parser.lex.c   \
+	backends/insert-sort/insert-sort.c
 
-backends_sources =                  \
-	backends/null-proxy.c       \
-	backends/file.c             \
-	backends/list.c             \
-	backends/rewrite.c          \
-	backends/insert-sort.c      
-
+#	backends/rewrite/rule_parser.c       \
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
-
 
 data_sources=           \
 	data/void.c     \
@@ -43,6 +44,7 @@ libfrozen_la_SOURCES=   data.h \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			public.h
+			
 
 libfrozen.c: data.h data.c
 data.c: ${data_sources}
@@ -50,8 +52,16 @@ data.c: ${data_sources}
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
 
-backends/insert-sort.c:
-	${M4} -sP backends/insert-sort.c.m4 > $@
+backends/insert-sort/insert-sort.c:
+	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
+
+backends/rewrite/rule_parser.tab.c:
+	${BISON} -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
+backends/rewrite/rule_parser.lex.c:
+	${FLEX} --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
+
+backends/rewrite/rewrite.c: backends/rewrite/rule_parser.tab.c backends/rewrite/rule_parser.lex.c
+backends/rewrite/rule_parser.lex.c: backends/rewrite/rule_parser.tab.c
 
 data/uint8.c:
 	${M4} -sP -DBITS=8  -DNAME=int8  -DDEF=INT8  data/uint.c.m4 > $@
@@ -67,6 +77,9 @@ data/off_t.c:
 	${M4} -sP -DBITS=64 -DNAME=off_t -DDEF=OFFT data/uint.c.m4 > $@
 
 CLEANFILES =	backends/locate.c backends/insert-sort.c               \
+                backends/rewrite/rule_parser.tab.c                     \
+                backends/rewrite/rule_parser.tab.h                     \
+                backends/rewrite/rule_parser.lex.c                     \
 		data.c data.h                                          \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c

@@ -594,8 +594,8 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 		{ "key",    DATA_PTR_OFFT(&off)                             },
 		{ "buffer", DATA_MEM(buf, size)                             },
 		
-	//	{ "param",  d_param                                         },
-	//	{ "path",   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
+		{ "param",  d_param                                         },
+		{ "path",   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_read);
@@ -621,8 +621,8 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 		{ "key_out", DATA_PTR_OFFT(&off)                             },
 		{ "buffer",  DATA_MEM((char *)buf, size)                     },
 		
-	//	{ "param",   d_param                                         },
-	//	{ "path",    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
+		{ "param",   d_param                                         },
+		{ "path",    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_write);

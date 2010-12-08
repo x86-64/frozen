@@ -19,6 +19,8 @@ PKG_CHECK_MODULES([FUSE], [fuse >= 2.6.0])
 AC_PATH_PROGS(M4, [gm4 m4], no)
 AC_PATH_PROGS(LS, [ls], no)
 AC_PATH_PROGS(AWK, [gawk awk], no)
+AC_PATH_PROGS(BISON, [bison], no)
+AC_PATH_PROGS(FLEX, [flex], no)
 
 #PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
 #	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
