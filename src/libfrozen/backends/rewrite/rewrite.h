@@ -2,9 +2,9 @@
 
 typedef enum rewrite_actions {
 	VALUE_SET,
-	VALUE_UNSET,
 	VALUE_LENGTH,
 	CALL_BACKEND,
+	CALL_PASS,
 	DATA_LENGTH,
 	DATA_ARITH,
 	DATA_CONVERT,
@@ -19,53 +19,59 @@ typedef enum rewrite_actions {
 } rewrite_actions;
 
 typedef enum things {
-	THING_NOTHING,
-	THING_REQUEST,
-	THING_CONFIG
+	THING_ARRAY_REQUEST,
+	THING_ARRAY_REQUEST_KEY,
+	THING_CONST,
+	THING_VARIABLE,
+	THING_LIST
 } things;
 
-typedef enum rewrite_times {
-	TIME_BEFORE,
-	TIME_AFTER
-} rewrite_times;
-
-typedef struct target_t {
-	things        type;
+typedef struct rewrite_thing_t rewrite_thing_t;
+struct rewrite_thing_t {
+	things            type;
+	rewrite_thing_t  *next;
 	
-	// optional
-	char         *subkey;
-	unsigned int  rule_num;
-	data_t        data;
-	data_ctx_t   *data_ctx;
-} target_t;
+	// THING_ARRAY_REQUEST
+	char             *array_key;
+	
+	// THING_CONST or THING_VARIABLE
+	unsigned int      id;
+	
+	// THING_LIST
+	rewrite_thing_t  *list;
+};
 
-typedef struct rewrite_rule_t {
-	request_actions       filter;
-	rewrite_times         time;
+typedef struct rewrite_variable_t {
+	unsigned int          id;
+	data_t                data;
+	data_ctx_t           *data_ctx;
+} rewrite_variable_t;
+
+typedef struct rewrite_action_t {
+	unsigned int          id;
 	rewrite_actions       action;
-	
-	// source
-		target_t      src;
-		unsigned int  src_info;
-		
-	// destination
-		target_t      dst;
-		
-		data_type     dst_key_type;
-		size_t        dst_key_size;
-		unsigned int  dst_info;
-		
-	// rest
-		char          operator;
-		
-		backend_t    *backend;
-		request_t    *request_proto;
-		int           ret_override;
-		
-		unsigned int  copy;
-		unsigned int  fatal;
-} rewrite_rule_t;
+	rewrite_thing_t      *params;
+	unsigned int          ret_var_id;
+} rewrite_action_t;
 
-int  rewrite_rule_parse (rewrite_rule_t *new_rule, char *string);
-void rewrite_rule_free  (rewrite_rule_t *rule);
+typedef struct rewrite_script_t {
+	char                 *script;
+	
+	rewrite_action_t     *actions;
+	unsigned int          actions_count;
+	rewrite_variable_t   *constants;
+	unsigned int          constants_count;
+	unsigned int          variables_count;
+	unsigned int          requests_count;
+	
+} rewrite_script_t;
+
+typedef struct rewrite_script_env_t {
+	rewrite_script_t     *script;
+	rewrite_variable_t   *variables;
+	request_t           **requests;
+} rewrite_script_env_t;
+
+ssize_t  rewrite_script_parse (rewrite_script_t *script, char *string);
+void     rewrite_script_free  (rewrite_script_t *script);
 

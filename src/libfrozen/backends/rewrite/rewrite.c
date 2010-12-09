@@ -89,8 +89,7 @@
 
 
 typedef struct rewrite_user_data {
-	rewrite_rule_t   *rules;
-	unsigned int      rules_count;
+	rewrite_script_t  script;
 } rewrite_user_data;
 /* }}} */
 
@@ -102,61 +101,29 @@ static int rewrite_init(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int rewrite_destroy(chain_t *chain){ // {{{
-	unsigned int       i;
 	rewrite_user_data *data = (rewrite_user_data *)chain->user_data;
 	
-	for(i=0; i<data->rules_count; i++){
-		rewrite_rule_free(&data->rules[i]);
-	}
-	if(data->rules != NULL)      // TODO iter and free
-		free(data->rules);
+	rewrite_script_free(&data->script);
 	
 	free(data);
 	chain->user_data = NULL;
 	return 0;
 } // }}}
-	
-static int rewrite_configure_one(hash_t *config, void *p_data, void *p_null){
-	rewrite_rule_t      new_rule;
-	char               *rule_string;
-	rewrite_user_data  *data = (rewrite_user_data *)p_data;
-	
-	if(hash_get_data_type(config) != TYPE_STRING)
-		goto error;
-	
-	rule_string = hash_get_value_ptr(config);
-	if(rewrite_rule_parse(&new_rule, rule_string) != 0)
-		goto error;
-	
-	// copy rule
-	unsigned int rule_id = data->rules_count++;
-	data->rules = realloc(data->rules, data->rules_count * sizeof(rewrite_rule_t));
-	memcpy(&data->rules[rule_id], &new_rule, sizeof(new_rule));
-	
-	return ITER_CONTINUE;
-error:
-	return ITER_BREAK;
-}
-
 static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
-	hash_t            *r_rules, *v_rules;
+	data_t            *script;
 	rewrite_user_data *data = (rewrite_user_data *)chain->user_data;
 	
-	data->rules_count = 0;
-	data->rules       = NULL;
+	if( (script = hash_get_typed_data(config, TYPE_STRING, "script")) == NULL)
+		return_error(-EINVAL, "chain 'rewrite' parameter 'script' not supplied\n");
 	
-	if( (r_rules = hash_find_typed(config, TYPE_HASHT, "rules")) == NULL)
-		return_error(-EINVAL, "chain 'rewrite' parameter 'rules' not supplied\n");
-	
-	v_rules = hash_get_value_ptr(r_rules);
-	
-	if( hash_iter(v_rules, &rewrite_configure_one, (void *)data, NULL) == ITER_BREAK)
+	if(rewrite_script_parse(&data->script, data_value_ptr(script)) != 0)
 		return -EINVAL;
 	
 	return 0;
 } // }}}
 /* }}} */
 
+/*
 static request_t ** find_proto(rewrite_user_data *data, request_t **protos, unsigned int rule_num){
 	if(rule_num == 0)
 		return protos;
@@ -166,8 +133,9 @@ static request_t ** find_proto(rewrite_user_data *data, request_t **protos, unsi
 	
 	return &protos[rule_num];
 }
-
-static ssize_t rewrite_func_one(chain_t *chain, rewrite_times pass, request_t **protos){
+*/
+	/*
+static ssize_t rewrite_func_one(chain_t *chain, rewrite_script_t *script, request_t **requests){
 	unsigned int        i;
 	int                 have_after, ret_overriden;
 	ssize_t             ret, ret2;
@@ -254,7 +222,6 @@ static ssize_t rewrite_func_one(chain_t *chain, rewrite_times pass, request_t **
 				if(rule->dst_info != 1)
 					break;
 				
-				/* fallthrought */
 			case DATA_ARITH:
 			case DATA_CONVERT:
 				switch(rule->dst.type){
@@ -415,24 +382,124 @@ static ssize_t rewrite_func_one(chain_t *chain, rewrite_times pass, request_t **
 		}
 	}
 	return ret;
+	return -1;
 }
+	*/
 
+static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t **data, data_ctx_t **data_ctx){ // {{{
+	switch(thing->type){
+		case THING_ARRAY_REQUEST_KEY:;
+			request_t *request = env->requests[thing->id];
+			
+			*data     = hash_get_data     (request, thing->array_key);
+			*data_ctx = hash_get_data_ctx (request, thing->array_key);
+			break;
+		
+		case THING_CONST:;
+			rewrite_variable_t *constant = &env->script->constants[thing->id];
+			
+			*data     = &constant->data;
+			*data_ctx =  constant->data_ctx;
+			break;
+		
+		default:
+			*data     = NULL;
+			*data_ctx = NULL;
+			return;
+	};
+} // }}}
+__inline__ void  rewrite_thing_set_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t *data, data_ctx_t *ctx){ // {{{
+	switch(thing->type){
+		case THING_ARRAY_REQUEST_KEY:;
+			request_t **request = &env->requests[thing->id];
+			
+			hash_t  proto_key[] = {
+				{ thing->array_key, *data },
+				// TODO ctx
+				hash_next(*request)
+			};
+			
+			*request = alloca(sizeof(proto_key));
+			memcpy(*request, proto_key, sizeof(proto_key));
+			break;
+		default:
+			break;
+	};
+} // }}}
 static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
-	rewrite_user_data  *data      = (rewrite_user_data *)chain->user_data;
-	request_t         **protos;
-	size_t              protos_size;
-	unsigned int        i;
+	unsigned int          action_id;
+	size_t                temp_size;
+	ssize_t               ret = 0;
+	//data_t                d_ret = DATA_PTR_SIZET(&ret);
+	rewrite_script_env_t  env;
+	rewrite_action_t     *action;
+	rewrite_user_data    *data = (rewrite_user_data *)chain->user_data;
 	
-	protos_size = (data->rules_count + 1) * sizeof(request_t *);
-	protos = alloca(protos_size);
-	memset(protos, 0, protos_size);
+	/* if no actions - pass to next chain */
+	if(data->script.actions_count == 0)
+		return chain_next_query(chain, request);
 	
-	protos[0] = request;
-	for(i=1; i<=data->rules_count; i++){
-		protos[i] = data->rules[i-1].request_proto;
+	env.script = &data->script;
+	
+	/* alloc requests */
+	temp_size = (data->script.requests_count + 1) * sizeof(request_t *);
+	env.requests = alloca(temp_size);
+	memset(env.requests, 0, temp_size);
+	
+	/* alloc variables */
+	temp_size = (data->script.variables_count) * sizeof(rewrite_variable_t *);
+	env.variables = alloca(temp_size);
+	memset(env.variables, 0, temp_size);
+	
+	env.requests[0] = request;
+	
+	for(
+		action_id = 0, action = data->script.actions;
+		action_id < data->script.actions_count;
+		action_id++, action++
+	){
+		switch(action->action){
+			case VALUE_SET:;
+				rewrite_thing_t *to   = action->params->list;
+				rewrite_thing_t *from = to->next;
+				data_t          *data;
+				data_ctx_t      *data_ctx;
+				
+				rewrite_thing_get_data(&env, from, &data, &data_ctx);
+				//rewrite_thing_set_data(&env, to,    data,  data_ctx);
+				
+				switch(to->type){
+					case THING_ARRAY_REQUEST_KEY:;
+						request_t **request = &env.requests[to->id];
+						
+						hash_t  proto_key[] = {
+							{ to->array_key, *data },
+							// TODO ctx
+							hash_next(*request)
+						};
+						
+						*request = alloca(sizeof(proto_key));
+						memcpy(*request, proto_key, sizeof(proto_key));
+						break;
+					default:
+						break;
+				};
+				break;
+			case CALL_PASS:;
+				rewrite_thing_t *t_request     = action->params->list;
+				if(t_request == NULL || t_request->type != THING_ARRAY_REQUEST)
+					return -EINVAL;
+				
+				request_t       *pass_request  = env.requests[t_request->id];
+				
+				ret = chain_next_query(chain, pass_request);
+				break;
+			default:
+				return -ENOSYS;
+		};
 	}
 	
-	return rewrite_func_one(chain, TIME_BEFORE, protos);
+	return ret;
 } // }}}
 
 static chain_t chain_rewrite = {

@@ -1,6 +1,6 @@
 #include <test.h>
 
-static ssize_t test_rewrite(hash_t *rules, request_t *request){
+static ssize_t test_rewrite(char *rules, request_t *request){
 	ssize_t ret;
 	hash_t  config[] = {
 		{ NULL, DATA_HASHT(
@@ -11,7 +11,7 @@ static ssize_t test_rewrite(hash_t *rules, request_t *request){
 			)},
 			{ NULL, DATA_HASHT(
 				{ "name",         DATA_STRING("rewrite")                    },
-				{ "rules",        DATA_PTR_HASHT(rules)                     },
+				{ "script",       DATA_STRING(rules)                        },
 				hash_end
 			)},
 			hash_end
@@ -23,6 +23,18 @@ static ssize_t test_rewrite(hash_t *rules, request_t *request){
 	ret = backend_query(backend, request);
 	backend_destroy(backend);
 	return ret;
+}
+
+static size_t test_diff_rewrite(char *rules, request_t *request, buffer_t *buffer){
+	off_t   key1, key2;
+	ssize_t ret;
+	
+	ret = test_rewrite(rules, request);
+		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+	ret = test_rewrite(rules, request);
+		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+	
+	return (key2-key1);
 }
 
 START_TEST (test_backend_rewrite){
@@ -37,40 +49,32 @@ START_TEST (test_backend_rewrite){
 	};
 	
 	// null request {{{
-	hash_t  rules_none[] = { hash_end };
-	ret = test_rewrite(rules_none, req_create);
+	ret = test_rewrite("", req_create);
 		fail_unless(ret > 0, "backend rewrite rules none failed\n");
 	// }}}
 	// unset key {{{
-	hash_t  rules_unset_key[] = {
-		{ NULL, DATA_STRING("request['size'] = VOID") },
-		hash_end
-	};
+	char rules_unset_key[] =
+		"request['size'] = (void)''; "
+		"pass(request);";
+	
 	ret = test_rewrite(rules_unset_key, req_create);
 		fail_unless(ret < 0, "backend rewrite rules unset_key failed\n");
 	// }}}
 	// set key from key {{{
-	hash_t  rules_set_key_from_key[] = {
-		{ NULL, DATA_STRING("request['size'] = request['size']") },
-		hash_end
-	};
+	char rules_set_key_from_key[] =
+		"request['size'] = request['size'];"
+		"pass(request);";
 	ret = test_rewrite(rules_set_key_from_key, req_create);
 		fail_unless(ret > 0, "backend rewrite rules set_key_from_key failed\n");
 	// }}}
 	// set key from config key {{{
-	off_t   key1, key2;
-	hash_t  rules_set_key_from_config[] = {
-		{ NULL, DATA_STRING("request['size'] = (size_t)'20'")  },
-		hash_end
-	};
-	ret = test_rewrite(rules_set_key_from_config, req_create);
-		fail_unless(ret > 0, "backend rewrite rules set_key_from_config 1 failed\n");
-		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
-	ret = test_rewrite(rules_set_key_from_config, req_create);
-		fail_unless(ret > 0, "backend rewrite rules set_key_from_config 2 failed\n");
-		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key1)));
-		fail_unless(key2 - key1 == 20, "backend rewrite rules set_key_from_config failed\n");
+	char rules_set_key_from_config[] =
+		"request['size'] = (size_t)'20';"
+		"pass(request);";
+	ret = test_diff_rewrite(rules_set_key_from_config, req_create, buffer);
+		fail_unless(ret == 20, "backend rewrite rules set_key_from_config failed\n");
 	// }}}
+	/*
 	// calc length of key {{{
 	hash_t  rules_length_key[] = {
 		{ NULL, DATA_HASHT(
@@ -91,7 +95,6 @@ START_TEST (test_backend_rewrite){
 		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
 		fail_unless(key2 - key1 == 4, "backend rewrite rules rules_length_key failed\n");
 	// }}}
-	/*
 	// calc data length of key {{{
 	hash_t  rules_data_length_key[] = {
 		{ NULL, DATA_HASHT(
