@@ -92,7 +92,7 @@ API int                  data_arithmetic        (char operator, data_t *operand1
 
 API void                 data_reinit            (data_t *dst, data_type type, void *data_ptr, size_t data_size);
 
-API ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size);
+API ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void *buffer, size_t size);
 API ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void *buffer, size_t size);
 
 API int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
@@ -104,12 +104,17 @@ API data_type            data_value_type        (data_t *data);
 API void *               data_value_ptr         (data_t *data);
 API size_t               data_value_len         (data_t *data);
 
+#define data_alloc_local(_dst,_type,_size) { \
+	(_dst)->type      = _type;           \
+	(_dst)->data_size = _size;           \
+	(_dst)->data_ptr  = alloca(_size);   \
+}
+
 #define data_copy_local(_dst,_src) {                                     \
-	(_dst)->type      = (_src)->type;                                \
-	(_dst)->data_size = (_src)->data_size;                           \
-	(_dst)->data_ptr  = alloca((_src)->data_size);                   \
+	data_alloc_local(_dst, (_src)->type, (_src)->data_size);         \
 	memcpy((_dst)->data_ptr, (_src)->data_ptr, (_src)->data_size);   \
 }
+
 
 #endif // DATA_H
 

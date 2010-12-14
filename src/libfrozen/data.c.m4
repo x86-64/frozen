@@ -86,8 +86,48 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
  *  @return -1 on EOF
  *  @return -EINVAL on error
  */
-ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size){ // {{{
+ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void *buffer, size_t size){ // {{{
+	ssize_t         rret, ret;
+	void           *temp;
+	size_t          temp_size, read_size;
 	f_data_read     func_read;
+	
+	if(src == NULL || !data_type_is_valid(src->type))
+		return -EINVAL;
+	
+	func_read  = data_protos[src->type].func_read;
+	func_read  = func_read  ? func_read  : data_def_read;
+	ret      = 0;
+	
+	while(size > 0){
+		temp      = buffer;
+		temp_size = size;
+		
+		rret = func_read(src, src_ctx, offset, &temp, &temp_size);
+		if(rret == -1) // EOF
+			break;
+		if(rret < 0)
+			return rret;
+		
+		read_size = MIN(size, temp_size);
+		if(temp != buffer){
+			memcpy(buffer, temp, read_size);
+		}
+		
+		buffer   += read_size;
+		size     -= read_size;
+		
+		offset   += read_size;
+		ret      += read_size;
+	}
+	return ret;
+} // }}}
+
+static ssize_t       data_read_raw          (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size){ // {{{
+	f_data_read     func_read;
+	
+	if(src == NULL || !data_type_is_valid(src->type))
+		return -EINVAL;
 	
 	func_read  = data_protos[src->type].func_read;
 	func_read  = func_read  ? func_read  : data_def_read;
@@ -106,6 +146,9 @@ ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, o
  */
 ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void  *buffer, size_t  size){ // {{{
 	f_data_write    func_write;
+	
+	if(dst == NULL || !data_type_is_valid(dst->type))
+		return -EINVAL;
 	
 	func_write = data_protos[dst->type].func_write;
 	func_write = func_write ? func_write : data_def_write;
@@ -231,7 +274,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 				buffer1      = buffer1_local;
 				buffer1_size = DEF_BUFFER_SIZE;
 				
-				if( (ret = data_read  (data1, data1_ctx, goffset1, &buffer1, &buffer1_size)) < -1)
+				if( (ret = data_read_raw  (data1, data1_ctx, goffset1, &buffer1, &buffer1_size)) < -1)
 					return -EINVAL;
 				
 				if(ret == -1 && buffer2_size != 0)
@@ -244,7 +287,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 				buffer2      = buffer2_local;
 				buffer2_size = DEF_BUFFER_SIZE;
 				
-				if( (ret = data_read  (data2, data2_ctx, goffset2, &buffer2, &buffer2_size)) < -1)
+				if( (ret = data_read_raw  (data2, data2_ctx, goffset2, &buffer2, &buffer2_size)) < -1)
 					return -EINVAL;
 				
 				if(ret == -1)
@@ -347,7 +390,7 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 		buffer      = buffer_local;
 		buffer_size = DEF_BUFFER_SIZE;
 		
-		if( (rret = data_read  (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
+		if( (rret = data_read_raw (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
 			return -EINVAL;
 		
 		if(rret == -1) // EOF from read side

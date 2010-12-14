@@ -82,15 +82,13 @@ int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_
 	return ret;
 } // }}}
 ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
-	char                  buffer_local[[DEF_BUFFER_SIZE]];
-	void                 *buffer = (void *)&buffer_local;
-	size_t                buffer_size = DEF_BUFFER_SIZE;
+	char                  buffer[[DEF_BUFFER_SIZE]];
 	unsigned long         value;
 	
 	switch(src->type){
 	#ifdef TYPE_STRING
 		case TYPE_STRING:
-			if(data_read(src, src_ctx, 0, &buffer, &buffer_size) < 0)
+			if(data_read(src, src_ctx, 0, &buffer, DEF_BUFFER_SIZE) < 0)
 				return -EINVAL;
 			
 			value = strtoul(buffer, NULL, 10);

@@ -23,7 +23,8 @@ typedef enum things {
 	THING_ARRAY_REQUEST_KEY,
 	THING_CONST,
 	THING_VARIABLE,
-	THING_LIST
+	THING_LIST,
+	THING_RET
 } things;
 
 typedef struct rewrite_thing_t rewrite_thing_t;
@@ -51,7 +52,7 @@ typedef struct rewrite_action_t {
 	unsigned int          id;
 	rewrite_actions       action;
 	rewrite_thing_t      *params;
-	unsigned int          ret_var_id;
+	rewrite_thing_t      *ret;
 } rewrite_action_t;
 
 typedef struct rewrite_script_t {
@@ -70,6 +71,7 @@ typedef struct rewrite_script_env_t {
 	rewrite_script_t     *script;
 	rewrite_variable_t   *variables;
 	request_t           **requests;
+	data_t               *ret_data;
 } rewrite_script_env_t;
 
 ssize_t  rewrite_script_parse (rewrite_script_t *script, char *string);

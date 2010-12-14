@@ -30,7 +30,8 @@ static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing);
 }
 %token <value>    DIGITS
 %token <string>   NAME STRING
-%type  <thing>    array array_key
+%type  <thing>    array_key
+%type  <thing>    label
 %type  <thing>    constant args_list function
 %type  <thing>    any_target src_target dst_target
 
@@ -61,8 +62,8 @@ statement :
      | function
      ;
 
-dst_target : array_key;
-src_target : constant | function | array;
+dst_target : array_key | label;
+src_target : constant | function | label;
 any_target : src_target | dst_target;
 
 function : NAME '(' args_list ')' {
@@ -71,16 +72,16 @@ function : NAME '(' args_list ')' {
 		yyerror(script, "unknown function\n"); YYERROR;
 	}
 	
+	/* fill output type */
+	$$.type = THING_VARIABLE;
+	$$.id   = rewrite_new_variable(script);
+	$$.next = NULL;
+	
 	/* make new action */
 	rewrite_action_t *action = rewrite_new_action(script);
 	action->action     = func;
 	action->params     = rewrite_copy_thing(&$3);
-	action->ret_var_id = rewrite_new_variable(script);
-	
-	/* fill output type */
-	$$.type = THING_VARIABLE;
-	$$.id   = action->ret_var_id;
-	$$.next = NULL;
+	action->ret        = rewrite_copy_thing(&$$);
 };
 
 constant : '(' NAME ')' STRING {
@@ -91,7 +92,7 @@ constant : '(' NAME ')' STRING {
 	data_reinit(&constant->data, data_type_from_string($2), NULL, 0);
 	if(data_convert(
 		&constant->data, NULL,
-		&d_str,         NULL
+		&d_str,          NULL
 	) != 0){
 		yyerror(script, "failed convert data\n"); YYERROR;
 	}
@@ -114,14 +115,16 @@ array_key : NAME '[' STRING ']' {
 	}
 };
 
-array : NAME {
+label : NAME {
 	if(strcmp($1, "request") == 0){
 		$$.type      = THING_ARRAY_REQUEST;
 		$$.id        = 0;
-		$$.next      = NULL;
+	}else if(strcmp($1, "ret") == 0){
+		$$.type      = THING_RET;
 	}else{
 		yyerror(script, "invalid target array\n"); YYERROR;
 	}
+	$$.next = NULL;
 };
 
 args_list : /* empty args */ {
@@ -137,13 +140,17 @@ args_list : /* empty args */ {
 		}
 	| args_list ',' any_target {
 			/* append item to args_list */
-			rewrite_thing_t *last = &$1;
-			while(last->next != NULL){ last = last->next; }
+			rewrite_thing_t *last = $1.list, *new_thing = rewrite_copy_thing(&$3);
+			if(last != NULL){
+				while(last->next != NULL){ last = last->next; }
+				last->next = new_thing;
+			}else{
+				last->list = new_thing;
+			}
 			
-			last->next = rewrite_copy_thing(&$3);
-			
-			/* return old args_list */
-			$$ = $1;
+			$$.type = THING_LIST;
+			$$.list = $1.list;
+			$$.next = NULL;
 		};
 
 %%
