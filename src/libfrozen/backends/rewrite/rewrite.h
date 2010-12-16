@@ -55,6 +55,14 @@ typedef struct rewrite_action_t {
 	rewrite_thing_t      *ret;
 } rewrite_action_t;
 
+typedef struct rewrite_name_t rewrite_name_t;
+struct rewrite_name_t {
+	rewrite_name_t   *next;
+	char             *name;
+	things            type;
+	unsigned int      id;
+};
+
 typedef struct rewrite_script_t {
 	char                 *script;
 	
@@ -64,6 +72,8 @@ typedef struct rewrite_script_t {
 	unsigned int          constants_count;
 	unsigned int          variables_count;
 	unsigned int          requests_count;
+	
+	rewrite_name_t       *names;
 	
 } rewrite_script_t;
 

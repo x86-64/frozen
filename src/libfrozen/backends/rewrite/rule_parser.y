@@ -13,8 +13,14 @@ extern int yylex(YYSTYPE *);
 static rewrite_actions      rewrite_get_function(char *string);
 static rewrite_action_t *   rewrite_new_action(rewrite_script_t *script);
 static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script);
+static rewrite_name_t *     rewrite_find_name(rewrite_script_t *script, char *name);
 static unsigned int         rewrite_new_variable(rewrite_script_t *script);
+static unsigned int         rewrite_new_request(rewrite_script_t *script, char *req_name);
+static unsigned int         rewrite_new_named_variable(rewrite_script_t *script, char *var_name);
+
 static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing);
+static void                 rewrite_free_thing(rewrite_thing_t *thing);
+
 
 %}
 
@@ -30,12 +36,11 @@ static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing);
 }
 %token <value>    DIGITS
 %token <string>   NAME STRING
+%token REQUEST VAR
 %type  <thing>    array_key
 %type  <thing>    label
 %type  <thing>    constant args_list function
 %type  <thing>    any_target src_target dst_target
-
-%destructor { free($$); } <string>
 
 %%
 
@@ -44,8 +49,7 @@ input : /* empty */
       ;
 
 statement :
-	dst_target '=' any_target /* set or unset */
-		{
+	dst_target '=' any_target /* set or unset */ {
 			rewrite_thing_t  set_params;
 			
 			$1.next = &$3;
@@ -58,8 +62,16 @@ statement :
 			rewrite_action_t *action = rewrite_new_action(script);
 			action->action     = VALUE_SET;
 			action->params     = rewrite_copy_thing(&set_params);
-		}
+	}
      | function
+     | REQUEST NAME {
+		rewrite_new_request(script, $2);
+		free($2);
+     	}
+     | VAR NAME {
+     		rewrite_new_named_variable(script, $2);
+		free($2);
+	}
      ;
 
 dst_target : array_key | label;
@@ -82,6 +94,8 @@ function : NAME '(' args_list ')' {
 	action->action     = func;
 	action->params     = rewrite_copy_thing(&$3);
 	action->ret        = rewrite_copy_thing(&$$);
+
+	free($1);
 };
 
 constant : '(' NAME ')' STRING {
@@ -101,6 +115,9 @@ constant : '(' NAME ')' STRING {
 	$$.type = THING_CONST;
 	$$.id   = constant->id;
 	$$.next = NULL;
+	
+	free($2);
+	free($4);
 };
 
 array_key : NAME '[' STRING ']' {
@@ -110,21 +127,69 @@ array_key : NAME '[' STRING ']' {
 		$$.array_key = $3;
 		$$.id        = 0;
 		$$.next      = NULL;
-	}else{
-		yyerror(script, "invalid target array\n"); YYERROR;
+		
+		free($1);
+		break;
 	}
+	
+	rewrite_name_t *curr;
+	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_ARRAY_REQUEST){
+		$$.type      = THING_ARRAY_REQUEST_KEY;
+		$$.array_key = $3;
+		$$.id        = curr->id;
+		$$.next      = NULL;
+		
+		free($1);
+		break;
+	}
+	
+	yyerror(script, "invalid target array\n"); YYERROR;
 };
 
 label : NAME {
 	if(strcmp($1, "request") == 0){
-		$$.type      = THING_ARRAY_REQUEST;
-		$$.id        = 0;
-	}else if(strcmp($1, "ret") == 0){
-		$$.type      = THING_RET;
-	}else{
-		yyerror(script, "invalid target array\n"); YYERROR;
+		$$.type = THING_ARRAY_REQUEST;
+		$$.id   = 0;
+		$$.next = NULL;
+		
+		free($1);
+		break;
 	}
-	$$.next = NULL;
+	if(strcmp($1, "ret") == 0){
+		$$.type = THING_RET;
+		$$.next = NULL;
+		
+		free($1);
+		break;
+	}
+	
+	rewrite_name_t *curr;
+	if((curr = rewrite_find_name(script, $1)) != NULL){
+		$$.type = curr->type;
+		$$.id   = curr->id;
+		$$.next = NULL;
+		
+		free($1);
+		break;
+	}
+	
+	request_actions action;
+	if((action = request_str_to_action($1)) != REQUEST_INVALID){
+		rewrite_variable_t *constant = rewrite_new_constant(script);
+		data_t              d_act    = DATA_INT32(action);
+		
+		data_copy(&constant->data, &d_act);
+		
+		/* fill output type */
+		$$.type = THING_CONST;
+		$$.id   = constant->id;
+		$$.next = NULL;
+		
+		free($1);
+		break;
+	}
+	
+	yyerror(script, "invalid target array\n"); YYERROR;
 };
 
 args_list : /* empty args */ {
@@ -178,6 +243,12 @@ static rewrite_action_t *   rewrite_new_action(rewrite_script_t *script){ // {{{
 	
 	return &script->actions[id];
 } // }}}
+static void                 rewrite_free_action(rewrite_script_t *script, unsigned int id){ // {{{
+	rewrite_action_t *action = &script->actions[id];
+	
+	rewrite_free_thing(action->params);
+	rewrite_free_thing(action->ret);
+} // }}}
 static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script){ // {{{
 	unsigned int id = script->constants_count++;
 	script->constants = realloc(script->constants, script->constants_count * sizeof(rewrite_variable_t));
@@ -186,9 +257,50 @@ static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script){ // {
 	
 	return &script->constants[id];
 } // }}}
+static void                 rewrite_free_constant(rewrite_script_t *script, unsigned int id){ // {{{
+	rewrite_variable_t *constant = &script->constants[id];
+	
+	data_free(&constant->data);
+} // }}}
+
 static unsigned int         rewrite_new_variable(rewrite_script_t *script){ // {{{
 	return script->variables_count++;
 } // }}}
+static unsigned int         rewrite_new_named_variable (rewrite_script_t *script, char *var_name){ // {{{
+	unsigned int id = script->variables_count++;
+	rewrite_name_t *name = malloc(sizeof(rewrite_name_t));
+	name->type = THING_VARIABLE;
+	name->id   = id;
+	name->name = strdup(var_name);
+	
+	name->next = script->names;
+	script->names = name;
+	
+	return id;
+} // }}}
+static unsigned int         rewrite_new_request (rewrite_script_t *script, char *req_name){ // {{{
+	unsigned int id = script->requests_count++;
+	rewrite_name_t *name = malloc(sizeof(rewrite_name_t));
+	name->type = THING_ARRAY_REQUEST;
+	name->id   = id;
+	name->name = strdup(req_name);
+	
+	name->next = script->names;
+	script->names = name;
+	
+	return id;
+} // }}}
+static rewrite_name_t *     rewrite_find_name(rewrite_script_t *script, char *name){ // {{{
+	rewrite_name_t *curr = script->names;
+	while(curr != NULL){
+		if(strcmp(curr->name, name) == 0)
+			return curr;
+		
+		curr = curr->next;
+	}
+	return NULL;
+} // }}}
+
 static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing){ // {{{
 	rewrite_thing_t *new_thing;
 	
@@ -202,6 +314,20 @@ static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing){ // {{{
 	
 	return new_thing;
 } // }}}
+static void                 rewrite_free_thing(rewrite_thing_t *thing){ // {{{
+	if(thing == NULL)
+		return;
+	
+	if(thing->type == THING_ARRAY_REQUEST_KEY)
+		free(thing->array_key);
+	
+	if(thing->next)
+		rewrite_free_thing(thing->next);
+	if(thing->type == THING_LIST)
+		rewrite_free_thing(thing->list);
+	
+	free(thing);
+} // }}}
 
 void yyerror(rewrite_script_t *script, const char *msg){
 	error("rewrite rule error: '%s': %s\n",
@@ -214,7 +340,8 @@ ssize_t  rewrite_script_parse(rewrite_script_t *script, char *string){ // {{{
 	ssize_t      ret;
 	
 	memset(script, 0, sizeof(rewrite_script_t));
-	script->script = string;
+	script->script         = string;
+	script->requests_count = 1; // one initial request
 	
 	yy_scan_string(string);
 	switch(yyparse(script)){
@@ -230,16 +357,22 @@ exit:
 } // }}}
 
 void rewrite_script_free(rewrite_script_t *script){ // {{{
-	/*
-	if(rule->src_key != NULL) free(rule->src_key);
-	if(rule->dst_key != NULL) free(rule->dst_key);
+	unsigned int i;
 	
-	data_free(&rule->src_config);
+	rewrite_name_t *curr, *next = script->names;
+	while((curr = next) != NULL){
+		next = curr->next;
+		
+		free(curr->name);
+		free(curr);
+	}
 	
-	hash_free(rule->request_proto);
+	for(i=0; i<script->constants_count; i++)
+		rewrite_free_constant(script, i);
+	free(script->constants);
 	
-	if(rule->backend != NULL)
-		backend_destroy(rule->backend);
-	*/
+	for(i=0; i<script->actions_count; i++)
+		rewrite_free_action(script, i);
+	free(script->actions);
 } // }}}
 

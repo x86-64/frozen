@@ -129,6 +129,9 @@ cleanup:
 
 static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	backend_t *backend = (backend_t *)p_backend;
+	if(backend->name == NULL)
+		return ITER_CONTINUE;
+	
 	if(strcmp(backend->name, p_name) == 0){
 		*(backend_t **)p_backend_t = backend;
 		return ITER_BREAK;
