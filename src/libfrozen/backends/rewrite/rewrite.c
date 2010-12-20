@@ -65,8 +65,8 @@
 #include <alloca.h>
 #include <backends/rewrite/rewrite.h>
 
-
 typedef struct rewrite_user_data {
+	unsigned int      inited;
 	rewrite_script_t  script;
 } rewrite_user_data;
 /* }}} */
@@ -81,10 +81,10 @@ static int rewrite_init(chain_t *chain){ // {{{
 static int rewrite_destroy(chain_t *chain){ // {{{
 	rewrite_user_data *data = (rewrite_user_data *)chain->user_data;
 	
-	rewrite_script_free(&data->script);
-	
+	if(data->inited == 1){
+		rewrite_script_free(&data->script);
+	}
 	free(data);
-	chain->user_data = NULL;
 	return 0;
 } // }}}
 static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
@@ -97,6 +97,7 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 	if(rewrite_script_parse(&data->script, data_value_ptr(script)) != 0)
 		return -EINVAL;
 	
+	data->inited = 1;
 	return 0;
 } // }}}
 /* }}} */
@@ -146,7 +147,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 	rewrite_thing_t      *param1, *param2, *param3;
 	
 	/* if no actions - pass to next chain */
-	if(data->script.actions_count == 0)
+	if(data->script.main->actions_count == 0)
 		return chain_next_query(chain, request);
 	
 	env.script   = &data->script;
@@ -165,8 +166,8 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 	env.requests[0] = request;
 	
 	for(
-		action_id = 0, action = data->script.actions;
-		action_id < data->script.actions_count;
+		action_id = 0, action = data->script.main->actions;
+		action_id < data->script.main->actions_count;
 		action_id++, action++
 	){
 		rewrite_thing_t *to;

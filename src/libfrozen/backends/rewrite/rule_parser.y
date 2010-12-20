@@ -10,21 +10,35 @@ extern YY_BUFFER_STATE yy_scan_string (const char *string);
 extern int yylex_destroy(void);
 extern int yylex(YYSTYPE *);
 
-static rewrite_actions      rewrite_get_function(char *string);
-static rewrite_action_t *   rewrite_new_action(rewrite_script_t *script);
-static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script);
-static rewrite_name_t *     rewrite_find_name(rewrite_script_t *script, char *name);
-static unsigned int         rewrite_new_variable(rewrite_script_t *script);
-static unsigned int         rewrite_new_request(rewrite_script_t *script, char *req_name);
-static unsigned int         rewrite_new_named_variable(rewrite_script_t *script, char *var_name);
+static rewrite_actions           rewrite_get_function(char *string);
 
-static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing);
-static void                 rewrite_free_thing(rewrite_thing_t *thing);
+static rewrite_action_block_t *  rewrite_enter_action_block(rewrite_script_t *script);
+static ssize_t                   rewrite_leave_action_block(rewrite_script_t *script);
+static void                      rewrite_free_action_block(rewrite_action_block_t *ablock);
+
+static rewrite_action_t *        rewrite_new_action(rewrite_script_t *script);
+static void                      rewrite_free_action(rewrite_action_t *action);
+
+static rewrite_variable_t *      rewrite_new_constant(rewrite_script_t *script);
+static void                      rewrite_free_constants(rewrite_script_t *script);
+
+static rewrite_name_t *          rewrite_new_name(rewrite_script_t *script, char *name);
+static rewrite_name_t *          rewrite_find_name(rewrite_script_t *script, char *name);
+static void                      rewrite_free_names(rewrite_script_t *script);
+
+static unsigned int              rewrite_new_variable(rewrite_script_t *script);
+static unsigned int              rewrite_new_request(rewrite_script_t *script, char *req_name);
+static unsigned int              rewrite_new_named_variable(rewrite_script_t *script, char *var_name);
+
+static rewrite_thing_t *         rewrite_copy_list2(rewrite_thing_t *arg1, rewrite_thing_t *arg2);
+
+static rewrite_thing_t *         rewrite_copy_thing(rewrite_thing_t *thing);
+static void                      rewrite_free_thing(rewrite_thing_t *thing);
 
 
 %}
 
-%start  input
+%start  start
 
 %define api.pure
 %parse-param {rewrite_script_t *script}
@@ -37,6 +51,8 @@ static void                 rewrite_free_thing(rewrite_thing_t *thing);
 %token <value>    DIGITS
 %token <string>   NAME STRING
 %token REQUEST VAR
+%type  <thing>    action_block
+%type  <thing>    action compare
 %type  <thing>    array_key
 %type  <thing>    label
 %type  <thing>    constant args_list function
@@ -44,35 +60,70 @@ static void                 rewrite_free_thing(rewrite_thing_t *thing);
 
 %%
 
-input : /* empty */
-      | input statement ';'
+start : action_block { /* set starting block as main procedure */ script->main = $1.block; };
+
+action_block : /* empty */ {
+		/* enter new action block */
+		rewrite_action_block_t *new_block = rewrite_enter_action_block(script);
+		if(new_block == NULL){
+			yyerror(script, "no memory\n"); YYERROR;
+		}
+		$$.type  = THING_ACTION_BLOCK;
+		$$.block = new_block;
+	}
+      | action_block statements {
+		/* leave block */
+		if(rewrite_leave_action_block(script) < 0){
+			yyerror(script, "internal error\n"); YYERROR;
+		}
+        }
       ;
 
-statement :
-	dst_target '=' any_target /* set or unset */ {
-			rewrite_thing_t  set_params;
-			
-			$1.next = &$3;
-			/* set_params = (list)(dst_target, any_target) */
-			set_params.type = THING_LIST;
-			set_params.list = rewrite_copy_thing(&$1);
-			set_params.next = NULL;
+statements:
+	  statement ';'
+	| statements statement ';'
+	;
 
-			/* make new action */
-			rewrite_action_t *action = rewrite_new_action(script);
-			action->action     = VALUE_SET;
-			action->params     = rewrite_copy_thing(&set_params);
+statement: /* empty */
+	| '(' statement ')'
+	| define
+	| action
+	;
+
+define :
+       REQUEST NAME { rewrite_new_request(script, $2);        free($2); }
+     | VAR NAME     { rewrite_new_named_variable(script, $2); free($2); }
+     ;
+
+action :
+	dst_target '=' any_target /* set or unset */ {
+		/* make new action */
+		rewrite_action_t *action = rewrite_new_action(script);
+		action->action  = VALUE_SET;
+		action->params  = rewrite_copy_list2(&$1, &$3);
 	}
      | function
-     | REQUEST NAME {
-		rewrite_new_request(script, $2);
-		free($2);
-     	}
-     | VAR NAME {
-     		rewrite_new_named_variable(script, $2);
-		free($2);
-	}
+     | compare
      ;
+
+
+compare :
+	  any_target '=' '=' any_target {
+		/* fill output type */
+		$$.type = THING_VARIABLE;
+		$$.id   = rewrite_new_variable(script);
+		$$.next = NULL;
+		
+		rewrite_action_t *action = rewrite_new_action(script);
+		action->action  = VALUE_CMP;
+		//action->params  = rewrite_copy_list3( &$1, &$4);
+		action->ret        = rewrite_copy_thing(&$$);
+	  }
+/*	| any_target '<' '=' any_target { }
+	| any_target '>' '=' any_target { }
+	| any_target '>'     any_target { }
+	| any_target '<'     any_target { }*/
+	;
 
 dst_target : array_key | label;
 src_target : constant | function | label;
@@ -94,7 +145,7 @@ function : NAME '(' args_list ')' {
 	action->action     = func;
 	action->params     = rewrite_copy_thing(&$3);
 	action->ret        = rewrite_copy_thing(&$$);
-
+	
 	free($1);
 };
 
@@ -114,30 +165,17 @@ constant : '(' NAME ')' STRING {
 	/* fill output type */
 	$$.type = THING_CONST;
 	$$.id   = constant->id;
-	$$.next = NULL;
 	
 	free($2);
 	free($4);
 };
 
 array_key : NAME '[' STRING ']' {
-	if(strcmp($1, "request") == 0){
-		/* fill output type */
-		$$.type      = THING_ARRAY_REQUEST_KEY;
-		$$.array_key = $3;
-		$$.id        = 0;
-		$$.next      = NULL;
-		
-		free($1);
-		break;
-	}
-	
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_ARRAY_REQUEST){
 		$$.type      = THING_ARRAY_REQUEST_KEY;
 		$$.array_key = $3;
 		$$.id        = curr->id;
-		$$.next      = NULL;
 		
 		free($1);
 		break;
@@ -147,27 +185,10 @@ array_key : NAME '[' STRING ']' {
 };
 
 label : NAME {
-	if(strcmp($1, "request") == 0){
-		$$.type = THING_ARRAY_REQUEST;
-		$$.id   = 0;
-		$$.next = NULL;
-		
-		free($1);
-		break;
-	}
-	if(strcmp($1, "ret") == 0){
-		$$.type = THING_RET;
-		$$.next = NULL;
-		
-		free($1);
-		break;
-	}
-	
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, $1)) != NULL){
 		$$.type = curr->type;
 		$$.id   = curr->id;
-		$$.next = NULL;
 		
 		free($1);
 		break;
@@ -183,7 +204,6 @@ label : NAME {
 		/* fill output type */
 		$$.type = THING_CONST;
 		$$.id   = constant->id;
-		$$.next = NULL;
 		
 		free($1);
 		break;
@@ -198,12 +218,16 @@ args_list : /* empty args */ {
 			$$.next = NULL;
 		}
 	| any_target {
+			$1.next = NULL;
+			
 			/* fill output type */
 			$$.type = THING_LIST;
 			$$.list = rewrite_copy_thing(&$1);
 			$$.next = NULL;
 		}
 	| args_list ',' any_target {
+			$3.next = NULL;
+			
 			/* append item to args_list */
 			rewrite_thing_t *last = $1.list, *new_thing = rewrite_copy_thing(&$3);
 			if(last != NULL){
@@ -235,20 +259,53 @@ static rewrite_actions   rewrite_get_function(char *string){
 	return DO_NOTHING;
 }
 
-static rewrite_action_t *   rewrite_new_action(rewrite_script_t *script){ // {{{
-	unsigned int id = script->actions_count++;
-	script->actions = realloc(script->actions, script->actions_count * sizeof(rewrite_action_t));
-	memset(&script->actions[id], 0, sizeof(rewrite_action_t));
-	script->actions[id].id = id;
+/* action blocks {{{ */
+static rewrite_action_block_t * rewrite_enter_action_block(rewrite_script_t *script){ // {{{
+	rewrite_action_block_t *ablock;
 	
-	return &script->actions[id];
+	if( (ablock = malloc(sizeof(rewrite_action_block_t))) == NULL)
+		return NULL;
+	
+	ablock->actions       = NULL;
+	ablock->actions_count = 0;
+	ablock->next          = script->main;
+	script->main          = ablock;
+	
+	return ablock;
 } // }}}
-static void                 rewrite_free_action(rewrite_script_t *script, unsigned int id){ // {{{
-	rewrite_action_t *action = &script->actions[id];
+static ssize_t              rewrite_leave_action_block(rewrite_script_t *script){ // {{{
+	rewrite_action_block_t *leaved;
 	
+	if( (leaved = script->main) == NULL)
+		return -1;
+	
+	script->main = leaved->next;
+	return 0;
+} // }}}
+static void                 rewrite_free_action_block(rewrite_action_block_t *ablock){ // {{{
+	unsigned int id;
+	
+	for(id=0; id < ablock->actions_count; id++)
+		rewrite_free_action( &ablock->actions[id] );
+	free(ablock->actions);
+	free(ablock);
+} // }}}
+/* }}} */
+/* action {{{ */
+static rewrite_action_t *   rewrite_new_action(rewrite_script_t *script){ // {{{
+	unsigned int id = script->main->actions_count++;
+	script->main->actions = realloc(script->main->actions, script->main->actions_count * sizeof(rewrite_action_t));
+	memset(&script->main->actions[id], 0, sizeof(rewrite_action_t));
+	script->main->actions[id].id = id;
+	
+	return &script->main->actions[id];
+} // }}}
+static void                 rewrite_free_action(rewrite_action_t *action){ // {{{
 	rewrite_free_thing(action->params);
 	rewrite_free_thing(action->ret);
 } // }}}
+/* }}} */
+/* constants {{{ */
 static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script){ // {{{
 	unsigned int id = script->constants_count++;
 	script->constants = realloc(script->constants, script->constants_count * sizeof(rewrite_variable_t));
@@ -257,38 +314,46 @@ static rewrite_variable_t * rewrite_new_constant(rewrite_script_t *script){ // {
 	
 	return &script->constants[id];
 } // }}}
-static void                 rewrite_free_constant(rewrite_script_t *script, unsigned int id){ // {{{
-	rewrite_variable_t *constant = &script->constants[id];
+static void                 rewrite_free_constants(rewrite_script_t *script){ // {{{
+	unsigned int i;
 	
-	data_free(&constant->data);
+	for(i=0; i<script->constants_count; i++){
+		rewrite_variable_t *constant = &script->constants[i];
+		
+		data_free(&constant->data);
+	}
+	free(script->constants);
 } // }}}
-
+/* }}} */
+/* variables {{{ */
 static unsigned int         rewrite_new_variable(rewrite_script_t *script){ // {{{
 	return script->variables_count++;
 } // }}}
 static unsigned int         rewrite_new_named_variable (rewrite_script_t *script, char *var_name){ // {{{
-	unsigned int id = script->variables_count++;
-	rewrite_name_t *name = malloc(sizeof(rewrite_name_t));
+	rewrite_name_t *name = rewrite_new_name(script, var_name);
 	name->type = THING_VARIABLE;
-	name->id   = id;
-	name->name = strdup(var_name);
-	
-	name->next = script->names;
-	script->names = name;
-	
-	return id;
+	name->id   = script->variables_count++;
+	return name->id;
 } // }}}
+/* }}} */
+/* requests {{{ */
 static unsigned int         rewrite_new_request (rewrite_script_t *script, char *req_name){ // {{{
-	unsigned int id = script->requests_count++;
-	rewrite_name_t *name = malloc(sizeof(rewrite_name_t));
+	rewrite_name_t *name = rewrite_new_name(script, req_name);
 	name->type = THING_ARRAY_REQUEST;
-	name->id   = id;
-	name->name = strdup(req_name);
+	name->id   = script->requests_count++;
+	return name->id;
+} // }}}
+/* }}} */
+
+/* names {{{ */
+static rewrite_name_t *     rewrite_new_name(rewrite_script_t *script, char *name){ // {{{
+	rewrite_name_t *tname = malloc(sizeof(rewrite_name_t));
+	tname->name = strdup(name);
 	
-	name->next = script->names;
-	script->names = name;
+	tname->next   = script->names;
+	script->names = tname;
 	
-	return id;
+	return tname;
 } // }}}
 static rewrite_name_t *     rewrite_find_name(rewrite_script_t *script, char *name){ // {{{
 	rewrite_name_t *curr = script->names;
@@ -300,6 +365,43 @@ static rewrite_name_t *     rewrite_find_name(rewrite_script_t *script, char *na
 	}
 	return NULL;
 } // }}}
+static void                 rewrite_free_names(rewrite_script_t *script){ // {{{
+	rewrite_name_t *curr, *next = script->names;
+	while((curr = next) != NULL){
+		next = curr->next;
+		
+		free(curr->name);
+		free(curr);
+	}
+} // }}}
+/* }}} */
+
+static rewrite_thing_t *    rewrite_copy_list2(rewrite_thing_t *arg1, rewrite_thing_t *arg2){ // {{{
+	rewrite_thing_t  set_params;
+	
+	arg1->next = arg2;
+	arg2->next = NULL;
+	
+	/* set_params = (list)(arg1, arg2) */
+	set_params.type = THING_LIST;
+	set_params.list = rewrite_copy_thing(arg1);
+	set_params.next = NULL;
+	return rewrite_copy_thing(&set_params);
+}
+/*
+static rewrite_thing_t *    rewrite_copy_list3(rewrite_thing_t *arg1, rewrite_thing_t *arg2, rewrite_thing_t *arg3){ // {{{
+	rewrite_thing_t  set_params;
+	
+	arg1->next = arg2;
+	arg2->next = arg3;
+	arg3->next = NULL;
+	
+	 set_params = (list)(arg1, arg2, arg3) 
+	set_params.type = THING_LIST;
+	set_params.list = rewrite_copy_thing(arg1);
+	set_params.next = NULL;
+	return rewrite_copy_thing(&set_params);
+}*/
 
 static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing){ // {{{
 	rewrite_thing_t *new_thing;
@@ -325,6 +427,8 @@ static void                 rewrite_free_thing(rewrite_thing_t *thing){ // {{{
 		rewrite_free_thing(thing->next);
 	if(thing->type == THING_LIST)
 		rewrite_free_thing(thing->list);
+	if(thing->type == THING_ACTION_BLOCK)
+		rewrite_free_action_block(thing->block);
 	
 	free(thing);
 } // }}}
@@ -337,11 +441,17 @@ void yyerror(rewrite_script_t *script, const char *msg){
 }
 
 ssize_t  rewrite_script_parse(rewrite_script_t *script, char *string){ // {{{
-	ssize_t      ret;
+	ssize_t          ret;
+	rewrite_name_t  *name;
 	
 	memset(script, 0, sizeof(rewrite_script_t));
-	script->script         = string;
-	script->requests_count = 1; // one initial request
+	script->script = string;
+	
+	/* add special keywords */
+	rewrite_new_request(script, "request"); // id=0
+	
+	name = rewrite_new_name(script, "ret");
+	name->type = THING_RET;
 	
 	yy_scan_string(string);
 	switch(yyparse(script)){
@@ -355,24 +465,9 @@ exit:
 	yylex_destroy();
 	return ret;
 } // }}}
-
 void rewrite_script_free(rewrite_script_t *script){ // {{{
-	unsigned int i;
-	
-	rewrite_name_t *curr, *next = script->names;
-	while((curr = next) != NULL){
-		next = curr->next;
-		
-		free(curr->name);
-		free(curr);
-	}
-	
-	for(i=0; i<script->constants_count; i++)
-		rewrite_free_constant(script, i);
-	free(script->constants);
-	
-	for(i=0; i<script->actions_count; i++)
-		rewrite_free_action(script, i);
-	free(script->actions);
+	rewrite_free_names(script);
+	rewrite_free_constants(script);
+	rewrite_free_action_block(script->main);
 } // }}}
 
