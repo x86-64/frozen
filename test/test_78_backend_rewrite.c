@@ -134,6 +134,33 @@ START_TEST (test_backend_rewrite){
 	
 	backend_destroy(rewrite_be_test);
 	// }}}
+	// if's {{{
+	// not obvious compares, but data_cmp return 0 on equal datas
+	char rules_if_1[] =
+		"if(data_cmp( (size_t)'10', (size_t)'10' )){ ret = (size_t)'10'; };";
+	
+	ret = test_rewrite(rules_if_1, req_create);
+		fail_unless(ret == 0, "backend rewrite rules if_1 failed\n");
+	
+	char rules_if_2[] =
+		"if(data_cmp( (size_t)'10', (size_t)'20' )){ ret = (size_t)'10'; };";
+	
+	ret = test_rewrite(rules_if_2, req_create);
+		fail_unless(ret == 10, "backend rewrite rules if_2 failed\n");
+	// negs
+	char rules_if_neg_1[] =
+		"if(!data_cmp( (size_t)'10', (size_t)'10' )){ ret = (size_t)'10'; };";
+	
+	ret = test_rewrite(rules_if_neg_1, req_create);
+		fail_unless(ret == 10, "backend rewrite rules if_neg_1 failed\n");
+	
+	char rules_if_neg_2[] =
+		"if(!data_cmp( (size_t)'10', (size_t)'20' )){ ret = (size_t)'10'; };";
+	
+	ret = test_rewrite(rules_if_neg_2, req_create);
+		fail_unless(ret == 0, "backend rewrite rules if_neg_2 failed\n");
+	
+	// }}}
 	
 	buffer_free(buffer);
 }

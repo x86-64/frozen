@@ -6,7 +6,7 @@ START_TEST (test_data){
 	data_t d_from = DATA_STRING("12345");
 	data_t d_to   = DATA_INT32(0);
 	
-	if(data_convert(&d_to, NULL, &d_from, NULL) == 0){
+	if(data_convert(TYPE_INT32, &d_to, NULL, &d_from, NULL) == 0){
 		fail_unless( *(unsigned int *)d_to.data_ptr == 12345, "data_convert data failed");
 		
 		data_free(&d_to);

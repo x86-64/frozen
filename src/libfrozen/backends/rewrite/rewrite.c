@@ -136,38 +136,40 @@ static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_th
 			return;
 	};
 } // }}}
-static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
-	unsigned int          action_id;
-	size_t                temp_size;
-	ssize_t               ret = 0;
-	data_t                ret_data = DATA_PTR_SIZET(&ret);
-	rewrite_script_env_t  env;
-	rewrite_action_t     *action;
-	rewrite_user_data    *data = (rewrite_user_data *)chain->user_data;
-	rewrite_thing_t      *param1, *param2, *param3;
+
+typedef struct rewrite_stack_frame_t rewrite_stack_frame_t;
+struct rewrite_stack_frame_t {
+	rewrite_action_block_t  *ablock;
+	rewrite_action_t        *action;
+	unsigned int             action_id;
+};
+#define ablock_call(block) do { frame->action = action; frame->action_id = action_id + 1; ablock = block; goto ablock_enter; }while(0);
+
+static ssize_t rewrite_func_ablock(rewrite_script_env_t *env, rewrite_action_block_t *ablock){ // {{{
+	unsigned int           action_id;
+	ssize_t                ret = 0;
+	data_t                 ret_data = DATA_PTR_SIZET(&ret);
+	rewrite_thing_t       *param1, *param2, *param3;
+	rewrite_action_t      *action;
+	rewrite_stack_frame_t *stack, *frame;
+	unsigned int           frame_id, stack_items;
 	
-	/* if no actions - pass to next chain */
-	if(data->script.main->actions_count == 0)
-		return chain_next_query(chain, request);
+	env->ret_data = &ret_data;
+	stack         = NULL;
+	stack_items   = 0;
 	
-	env.script   = &data->script;
-	env.ret_data = &ret_data;
+ablock_enter:
+	frame_id = stack_items++;
+	stack = realloc(stack, stack_items * sizeof(rewrite_stack_frame_t));
+	frame = &stack[frame_id];
+	frame->action_id = 0;
+	frame->action    = ablock->actions;
+	frame->ablock    = ablock;
 	
-	/* alloc requests */
-	temp_size = (data->script.requests_count + 1) * sizeof(request_t *);
-	env.requests = alloca(temp_size);
-	memset(env.requests, 0, temp_size);
-	
-	/* alloc variables */
-	temp_size = (data->script.variables_count) * sizeof(rewrite_variable_t);
-	env.variables = alloca(temp_size);
-	memset(env.variables, 0, temp_size);
-	
-	env.requests[0] = request;
-	
+ablock_continue:
 	for(
-		action_id = 0, action = data->script.main->actions;
-		action_id < data->script.main->actions_count;
+		action_id = frame->action_id, action = frame->action;
+		action_id < ablock->actions_count;
 		action_id++, action++
 	){
 		rewrite_thing_t *to;
@@ -182,7 +184,53 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				to     = action->params->list;
 				param1 = action->params->list->next;
 				
-				rewrite_thing_get_data(&env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				break;
+			case VALUE_CMP:
+				param1 = action->params->list;
+				param2 = action->params->list->next;
+				
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				
+				// TODO call data_is_null
+				unsigned int cmp_res = 0;
+				switch(from_data->type){
+					case TYPE_SIZET:;
+					case TYPE_INT32:;
+						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
+						cmp_res = (m_i32 == 0) ? 0 : 1;
+						break;
+					default:
+						printf("no cmp!\n");
+						return -EINVAL;
+				};
+				
+				if(cmp_res == 1){
+					ablock_call(param2->block);
+				}			
+				break;
+			case VALUE_NEG:
+				to     = action->params->list;
+				param1 = action->params->list->next;
+				
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				
+				// TODO call data_is_null
+				unsigned int cmp_res2 = 0;
+				switch(from_data->type){
+					case TYPE_SIZET:;
+					case TYPE_INT32:;
+						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
+						cmp_res2 = (m_i32 == 0) ? 0 : 1;
+						break;
+					default:
+						printf("no cmp!\n");
+						return -EINVAL;
+				};
+				
+				temp_ret      = (cmp_res2 == 0) ? 1 : 0;
+				from_data     = &temp_ret_data;
+				from_data_ctx = NULL;
 				break;
 			case CALL_PASS:
 				to     = action->ret;
@@ -191,7 +239,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				if(param1 == NULL || param1->type != THING_ARRAY_REQUEST)
 					return -EINVAL;
 				
-				temp_ret = chain_next_query(chain, env.requests[param1->id]);
+				temp_ret = chain_next_query(env->chain, env->requests[param1->id]);
 				
 				from_data     = &temp_ret_data;
 				from_data_ctx = NULL;
@@ -200,7 +248,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				to     = action->ret;
 				param1 = action->params->list;
 				
-				rewrite_thing_get_data(&env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				temp_ret = data_value_len(from_data);
 				
@@ -211,7 +259,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				to     = action->ret;
 				param1 = action->params->list;
 				
-				rewrite_thing_get_data(&env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				temp_ret = data_len(from_data, from_data_ctx);
 				
@@ -227,9 +275,9 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				data_t      *dst_data,     *src_data;
 				data_ctx_t  *dst_data_ctx, *src_data_ctx;
 				
-				rewrite_thing_get_data(&env, param1, &from_data, &from_data_ctx);
-				rewrite_thing_get_data(&env, param2, &dst_data,  &dst_data_ctx);
-				rewrite_thing_get_data(&env, param3, &src_data,  &src_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param2, &dst_data,  &dst_data_ctx);
+				rewrite_thing_get_data(env, param3, &src_data,  &src_data_ctx);
 				
 				if(data_value_type(from_data) != TYPE_STRING)
 					return -EINVAL;
@@ -238,6 +286,22 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				data_read(from_data, from_data_ctx, 0, &operator, sizeof(operator));
 				
 				temp_ret = data_arithmetic(operator, dst_data, dst_data_ctx, src_data, src_data_ctx);
+				
+				from_data     = &temp_ret_data;
+				from_data_ctx = NULL;
+				break;
+			case DATA_CMP:
+				to     = action->ret;
+				param1 = action->params->list; // TODO error handling
+				param2 = action->params->list->next;
+				
+				data_t      *data1,     *data2;
+				data_ctx_t  *data1_ctx, *data2_ctx;
+				
+				rewrite_thing_get_data(env, param1, &data1,  &data1_ctx);
+				rewrite_thing_get_data(env, param2, &data2,  &data2_ctx);
+				
+				temp_ret = data_cmp(data1, data1_ctx, data2, data2_ctx);
 				
 				from_data     = &temp_ret_data;
 				from_data_ctx = NULL;
@@ -251,8 +315,8 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				data_t      *type_data,     *size_data;
 				data_ctx_t  *type_data_ctx, *size_data_ctx;
 				
-				rewrite_thing_get_data(&env, param1, &type_data, &type_data_ctx);
-				rewrite_thing_get_data(&env, param2, &size_data, &size_data_ctx);
+				rewrite_thing_get_data(env, param1, &type_data, &type_data_ctx);
+				rewrite_thing_get_data(env, param2, &size_data, &size_data_ctx);
 				
 				data_type  new_type;
 				if((new_type = data_type_from_string(data_value_ptr(type_data))) == TYPE_INVALID)
@@ -274,7 +338,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				if(param1 == NULL || param1->type != THING_CONST)         return -EINVAL;
 				if(param2 == NULL || param2->type != THING_ARRAY_REQUEST) return -EINVAL;
 				
-				rewrite_thing_get_data(&env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				hash_t find_backend[] = {
 					{ NULL, *from_data }, // TODO ctx
@@ -285,7 +349,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				if( (backend = backend_new(find_backend)) == NULL)
 					return -EINVAL;
 				
-				temp_ret = backend_query(backend, env.requests[param2->id]);
+				temp_ret = backend_query(backend, env->requests[param2->id]);
 				
 				backend_destroy(backend);
 				
@@ -298,7 +362,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 		
 		switch(to->type){
 			case THING_ARRAY_REQUEST_KEY:;
-				request_t **request = &env.requests[to->id];
+				request_t **request = &env->requests[to->id];
 				
 				hash_t  proto_key[] = {
 					{ to->array_key, *from_data },
@@ -314,7 +378,7 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				break;
 			
 			case THING_VARIABLE:;
-				rewrite_variable_t *pass_var = &env.variables[to->id];
+				rewrite_variable_t *pass_var = &env->variables[to->id];
 				
 				data_copy_local(&pass_var->data, from_data);
 				pass_var->data_ctx = NULL;
@@ -324,8 +388,41 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 				
 		};
 	}
+//ablock_leave:
+	frame_id = --stack_items - 1;
+	if(stack_items == 0)
+		return ret;
 	
-	return ret;
+	stack  = realloc(stack, stack_items * sizeof(rewrite_stack_frame_t));
+	frame  = &stack[frame_id];
+	ablock = frame->ablock;
+	goto ablock_continue;
+} // }}}
+static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
+	size_t                temp_size;
+	rewrite_script_env_t  env;
+	rewrite_user_data    *data = (rewrite_user_data *)chain->user_data;
+	
+	/* if no actions - pass to next chain */
+	if(data->script.main->actions_count == 0)
+		return chain_next_query(chain, request);
+	
+	env.script   = &data->script;
+	env.chain    = chain;
+	
+	/* alloc requests */
+	temp_size = (data->script.requests_count + 1) * sizeof(request_t *);
+	env.requests = alloca(temp_size);
+	memset(env.requests, 0, temp_size);
+	
+	/* alloc variables */
+	temp_size = (data->script.variables_count) * sizeof(rewrite_variable_t);
+	env.variables = alloca(temp_size);
+	memset(env.variables, 0, temp_size);
+	
+	env.requests[0] = request;
+	
+	return rewrite_func_ablock(&env, data->script.main);
 } // }}}
 
 static chain_t chain_rewrite = {

@@ -30,7 +30,7 @@ static unsigned int              rewrite_new_variable(rewrite_script_t *script);
 static unsigned int              rewrite_new_request(rewrite_script_t *script, char *req_name);
 static unsigned int              rewrite_new_named_variable(rewrite_script_t *script, char *var_name);
 
-static rewrite_thing_t *         rewrite_copy_list2(rewrite_thing_t *arg1, rewrite_thing_t *arg2);
+static rewrite_thing_t *         rewrite_copy_list(rewrite_thing_t *arg1, rewrite_thing_t *arg2, rewrite_thing_t *arg3);
 
 static rewrite_thing_t *         rewrite_copy_thing(rewrite_thing_t *thing);
 static void                      rewrite_free_thing(rewrite_thing_t *thing);
@@ -48,11 +48,12 @@ static void                      rewrite_free_thing(rewrite_thing_t *thing);
 	char            *string;
 	rewrite_thing_t  thing;
 }
+%token IF ELSE
 %token <value>    DIGITS
 %token <string>   NAME STRING
 %token REQUEST VAR
 %type  <thing>    action_block
-%type  <thing>    action compare
+%type  <thing>    action statement neg_statement define
 %type  <thing>    array_key
 %type  <thing>    label
 %type  <thing>    constant args_list function
@@ -68,10 +69,10 @@ action_block : /* empty */ {
 		if(new_block == NULL){
 			yyerror(script, "no memory\n"); YYERROR;
 		}
-		$$.type  = THING_ACTION_BLOCK;
-		$$.block = new_block;
+		$<thing>$.type  = THING_ACTION_BLOCK;
+		$<thing>$.block = new_block;
 	}
-      | action_block statements {
+        statements {
 		/* leave block */
 		if(rewrite_leave_action_block(script) < 0){
 			yyerror(script, "internal error\n"); YYERROR;
@@ -79,13 +80,13 @@ action_block : /* empty */ {
         }
       ;
 
-statements:
-	  statement ';'
+statements: /* empty */
 	| statements statement ';'
 	;
 
-statement: /* empty */
-	| '(' statement ')'
+statement: 
+	  '(' statement ')' { $$ = $2; }
+	| neg_statement
 	| define
 	| action
 	;
@@ -100,30 +101,29 @@ action :
 		/* make new action */
 		rewrite_action_t *action = rewrite_new_action(script);
 		action->action  = VALUE_SET;
-		action->params  = rewrite_copy_list2(&$1, &$3);
+		action->params  = rewrite_copy_list(&$1, &$3, NULL);
 	}
      | function
-     | compare
-     ;
-
-
-compare :
-	  any_target '=' '=' any_target {
-		/* fill output type */
-		$$.type = THING_VARIABLE;
-		$$.id   = rewrite_new_variable(script);
-		$$.next = NULL;
-		
+     | any_target
+     | IF statement '{' action_block '}' {
+		/* make new action */
 		rewrite_action_t *action = rewrite_new_action(script);
 		action->action  = VALUE_CMP;
-		//action->params  = rewrite_copy_list3( &$1, &$4);
-		action->ret        = rewrite_copy_thing(&$$);
-	  }
-/*	| any_target '<' '=' any_target { }
-	| any_target '>' '=' any_target { }
-	| any_target '>'     any_target { }
-	| any_target '<'     any_target { }*/
-	;
+		action->params  = rewrite_copy_list(&$2, &$4, NULL);
+     }
+     ;
+
+neg_statement : '!' statement {
+	$$.type = THING_VARIABLE;
+	$$.id   = rewrite_new_variable(script);
+	$$.next = NULL;
+	
+	/* make new action */
+	rewrite_action_t *action = rewrite_new_action(script);
+	action->action     = VALUE_NEG;
+	action->params     = rewrite_copy_list(&$$, &$2, NULL);
+	action->ret        = rewrite_copy_thing(&$$);
+};
 
 dst_target : array_key | label;
 src_target : constant | function | label;
@@ -154,8 +154,8 @@ constant : '(' NAME ')' STRING {
 	data_t              d_str    = DATA_PTR_STRING($4, strlen($4)+1);
 	
 	/* convert string to needed data */
-	data_reinit(&constant->data, data_type_from_string($2), NULL, 0);
 	if(data_convert(
+		data_type_from_string($2),
 		&constant->data, NULL,
 		&d_str,          NULL
 	) != 0){
@@ -251,6 +251,7 @@ static rewrite_actions   rewrite_get_function(char *string){
 	if(strcasecmp(string, "data_length")    == 0) return DATA_LENGTH;
 	if(strcasecmp(string, "data_arith")     == 0) return DATA_ARITH;
 	if(strcasecmp(string, "data_convert")   == 0) return DATA_CONVERT;
+	if(strcasecmp(string, "data_cmp")       == 0) return DATA_CMP;
 	if(strcasecmp(string, "data_alloca")    == 0) return DATA_ALLOCA;
 	if(strcasecmp(string, "data_free")      == 0) return DATA_FREE;
 #ifdef DEBUG
@@ -376,11 +377,14 @@ static void                 rewrite_free_names(rewrite_script_t *script){ // {{{
 } // }}}
 /* }}} */
 
-static rewrite_thing_t *    rewrite_copy_list2(rewrite_thing_t *arg1, rewrite_thing_t *arg2){ // {{{
+static rewrite_thing_t *    rewrite_copy_list(rewrite_thing_t *arg1, rewrite_thing_t *arg2, rewrite_thing_t *arg3){ // {{{
 	rewrite_thing_t  set_params;
 	
 	arg1->next = arg2;
-	arg2->next = NULL;
+	if(arg2 != NULL)
+		arg2->next = arg3;
+	if(arg3 != NULL)
+		arg3->next = NULL;
 	
 	/* set_params = (list)(arg1, arg2) */
 	set_params.type = THING_LIST;
@@ -396,7 +400,7 @@ static rewrite_thing_t *    rewrite_copy_list3(rewrite_thing_t *arg1, rewrite_th
 	arg2->next = arg3;
 	arg3->next = NULL;
 	
-	 set_params = (list)(arg1, arg2, arg3) 
+	// set_params = (list)(arg1, arg2, arg3) 
 	set_params.type = THING_LIST;
 	set_params.list = rewrite_copy_thing(arg1);
 	set_params.next = NULL;

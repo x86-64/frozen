@@ -344,6 +344,7 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
 } // }}}
 
 /** @brief Convert data from one type to another
+ *  @param[in] type       Dsetination data type
  *  @param[in] dst        Destination data
  *  @param[in] dst_ctx    Destination data context
  *  @param[in] src        Source data
@@ -354,13 +355,13 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
  *  @pre  Fill dst->type to desired value
  *  @post Free dst structure with data_free to avoid memory leak
  */
-ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+ssize_t              data_convert           (data_type type, data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	f_data_convert  func_convert;
 	
-	if(!data_type_is_valid(dst->type) || !data_type_is_valid(src->type))
+	if(!data_type_is_valid(type) || !data_type_is_valid(src->type))
 		return -EINVAL;
 	
-	if( (func_convert = data_protos[dst->type].func_convert) == NULL)
+	if( (func_convert = data_protos[type].func_convert) == NULL)
 		return -ENOSYS;
 	
 	return func_convert(dst, dst_ctx, src, src_ctx);

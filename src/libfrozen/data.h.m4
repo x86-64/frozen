@@ -95,7 +95,7 @@ API void                 data_reinit            (data_t *dst, data_type type, vo
 API ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void *buffer, size_t size);
 API ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void *buffer, size_t size);
 
-API int                  data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
+API int                  data_convert           (data_type type, data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 API int                  data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 API ssize_t              data_copy              (data_t *dst, data_t *src);
 API void                 data_free              (data_t *data);

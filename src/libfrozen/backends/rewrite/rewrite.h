@@ -4,6 +4,7 @@ typedef enum rewrite_actions {
 	VALUE_SET,
 	VALUE_LENGTH,
 	VALUE_CMP,
+	VALUE_NEG,
 	CALL_BACKEND,
 	CALL_PASS,
 	DATA_LENGTH,
@@ -11,7 +12,7 @@ typedef enum rewrite_actions {
 	DATA_CONVERT,
 	DATA_ALLOCA,
 	DATA_FREE,
-	
+	DATA_CMP,
 
 #ifdef DEBUG
 	HASH_DUMP,
@@ -35,20 +36,20 @@ typedef struct rewrite_action_block_t rewrite_action_block_t;
 
 typedef struct rewrite_thing_t rewrite_thing_t;
 struct rewrite_thing_t {
-	things            type;
-	rewrite_thing_t  *next;
+	things                   type;
+	rewrite_thing_t         *next;
 	
 	// THING_ARRAY_REQUEST
-	char             *array_key;
+	char                    *array_key;
 	
 	// THING_CONST or THING_VARIABLE
-	unsigned int      id;
+	unsigned int             id;
 	
 	// THING_ACTION_BLOCK
-	rewrite_action_block_t *block;
-
+	rewrite_action_block_t  *block;
+	
 	// THING_LIST
-	rewrite_thing_t  *list;
+	rewrite_thing_t         *list;
 };
 
 typedef struct rewrite_variable_t {
@@ -97,6 +98,8 @@ typedef struct rewrite_script_env_t {
 	rewrite_variable_t      *variables;
 	request_t              **requests;
 	data_t                  *ret_data;
+	chain_t                 *chain;
+
 } rewrite_script_env_t;
 
 ssize_t  rewrite_script_parse (rewrite_script_t *script, char *string);

@@ -56,7 +56,7 @@ backends/insert-sort/insert-sort.c:
 	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
 
 backends/rewrite/rule_parser.tab.c:
-	${BISON} -Wall -Werror -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
+	${BISON} -Wall -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
 backends/rewrite/rule_parser.lex.c:
 	${FLEX} --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
 
