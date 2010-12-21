@@ -143,7 +143,7 @@ struct rewrite_stack_frame_t {
 	rewrite_action_t        *action;
 	unsigned int             action_id;
 };
-#define ablock_call(block) do { frame->action = action; frame->action_id = action_id + 1; ablock = block; goto ablock_enter; }while(0);
+#define ablock_call(block) do { frame->action = action + 1; frame->action_id = action_id + 1; ablock = block; goto ablock_enter; }while(0);
 
 static ssize_t rewrite_func_ablock(rewrite_script_env_t *env, rewrite_action_block_t *ablock){ // {{{
 	unsigned int           action_id;
@@ -380,7 +380,8 @@ ablock_continue:
 			case THING_VARIABLE:;
 				rewrite_variable_t *pass_var = &env->variables[to->id];
 				
-				data_copy_local(&pass_var->data, from_data);
+				//data_copy_local(&pass_var->data, from_data);
+				memcpy(&pass_var->data, from_data, sizeof(data_t));
 				pass_var->data_ctx = NULL;
 				break;
 			default:

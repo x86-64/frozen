@@ -135,154 +135,49 @@ START_TEST (test_real_store_idx_strings){
 			)},
 			{ NULL, DATA_HASHT(
 				{ "name",         DATA_STRING("rewrite")                            },
-				{ "script",       DATA_STRING("")                                   },
-				{ "rules",        DATA_HASHT(
-					{ NULL, DATA_HASHT( // 1
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key")                  },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "copy",       DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(
-							ACTION_CRWD_READ |
-							ACTION_CRWD_WRITE |
-							ACTION_CRWD_DELETE
-						)},
-						hash_end
-					)},
-					// move {{{
-					{ NULL, DATA_HASHT( // 2
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key_from")             },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 3
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key_to")               },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
-						hash_end
-					)},
-					// }}}
-					// write {{{
-					{ NULL, DATA_HASHT( // 4
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("buffer")            },
-						{ "dst_rule",      DATA_INT32(7)                    },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 5
-						{ "action",        DATA_STRING("data_alloca")       },
-						{ "dst_type",      DATA_STRING("memory")            },
-						{ "dst_size",      DATA_SIZET(8)                    },
-						{ "dst_key",       DATA_STRING("buffer")            },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 6
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("key_out")           },
-						{ "dst_rule",      DATA_INT32(7)                    },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 7
-						{ "action",          DATA_STRING("backend")         },
-						{ "backend",         DATA_STRING("b_data")          },
-						{ "request_proto",   DATA_HASHT(
-							{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-							hash_end
-						)},
-						{ "ret_override",    DATA_INT32(1)                  },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 8
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("/")                    },
-						{ "dst_key",    DATA_STRING("key_out")              },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "after",      DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(
-							ACTION_CRWD_CREATE | ACTION_CRWD_WRITE)     },
-						hash_end
-					)},
-					// }}}
-					// read {{{
-					{ NULL, DATA_HASHT( // 9
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("buffer")            },
-						{ "dst_rule",      DATA_INT32(12)                   },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 10
-						{ "action",        DATA_STRING("data_alloca")       },
-						{ "dst_type",      DATA_STRING("off_t")             },
-						{ "dst_size",      DATA_SIZET(8)                    },
-						{ "dst_key",       DATA_STRING("buffer")            },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 11
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("key")               },
-						{ "dst_rule",      DATA_INT32(12)                   },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						{ "after",         DATA_INT32(1)                    },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 12
-						{ "action",          DATA_STRING("backend")         },
-						{ "backend",         DATA_STRING("b_data")          },
-						{ "request_proto",   DATA_HASHT(
-							{ "action",  DATA_INT32(ACTION_CRWD_READ)   },
-							hash_end
-						)},
-						{ "ret_override",    DATA_INT32(1)                  },
-						{ "on-request",      DATA_INT32(ACTION_CRWD_READ)   },
-						{ "after",           DATA_INT32(1)                  },
-						hash_end
-					)},
-					// }}}
-					// count {{{
-					{ NULL, DATA_HASHT( // 13
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("/")                    },
-						{ "dst_key",    DATA_STRING("buffer")               },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "after",      DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(ACTION_CRWD_COUNT)       },
-						hash_end
-					)},
-					// }}}
-					hash_end
+				{ "script",       DATA_STRING(
+					"request_t rq_data;"
+					
+					"if(!data_cmp(request['action'], read)){ "
+					"   data_arith((string)'*', request['key'], (off_t)'8'); "
+					""
+					"   rq_data['buffer'] = request['buffer']; "
+					""
+					"   request['buffer'] = data_alloca((string)'off_t', (size_t)'8'); "
+					"   pass(request); "
+					""
+					"   rq_data['action'] = read; "
+					"   rq_data['key']    = request['buffer']; "   
+					"   ret = backend((string)'b_data', rq_data); "
+					"}; "
+					
+					"if(!data_cmp(request['action'], write)){ "
+					"   rq_data['action']  = write; "
+					"   rq_data['buffer']  = request['buffer']; "
+					"   rq_data['key_out'] = data_alloca((string)'memory', (size_t)'8'); "
+					"   ret = backend((string)'b_data', rq_data); "
+					""
+					"   request['buffer'] = rq_data['key_out']; "
+		 			"   data_arith((string)'*', request['key'], (off_t)'8'); "
+					"   pass(request); "
+					"   data_arith((string)'/', request['key_out'], (off_t)'8'); "
+					"}; "
+					
+					"if(!data_cmp(request['action'], delete)){ "
+					"   data_arith((string)'*', request['key'], (off_t)'8'); "
+					"   ret = pass(request); "
+					"}; "
+					
+					"if(!data_cmp(request['action'], move)){ "
+					"   data_arith((string)'*', request['key_to'],   (off_t)'8'); "
+					"   data_arith((string)'*', request['key_from'], (off_t)'8'); "
+					"   ret = pass(request); "
+					"}; "
+					
+					"if(!data_cmp(request['action'], count)){ "
+					"   ret = pass(request); "
+					"   data_arith((string)'/', request['buffer'], (off_t)'8'); "
+					"}; "
 				)},
 				hash_end
 			)},

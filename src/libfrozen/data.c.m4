@@ -329,6 +329,9 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 int                  data_arithmetic        (char operator, data_t *operand1, data_ctx_t *operand1_ctx, data_t *operand2, data_ctx_t *operand2_ctx){ // {{{
 	f_data_arith  func_arith;
 	
+	if(operand1 == NULL || operand2 == NULL)
+		return -EINVAL;
+
 	if(!data_type_is_valid(operand1->type) || !data_type_is_valid(operand2->type))
 		return -EINVAL;
 	
