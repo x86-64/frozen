@@ -29,10 +29,12 @@
  * 
  * Rewrite script consist of statements. All statements must end with ';'.
  * Possible statements:
- *      - variable define: 'var_t   variable_name;'
- *      - request define:  'request_t   subrequest;' 
+ *      - variable define: 'var_t      variable_name;'
+ *      - request define:  'request_t  subrequest;' 
  * 	- assignment:  'something = something;'
  * 	- function call: 'something = somefunc(param1, param2, param3);'
+ * 	- if 'if(statement){};' NOTE ; after closing bracket
+ * 	- negotiation 'if(!statement){};'
  *
  * User defined constants: (type)'string', where 'type' is data type, and 'string'
  * 	any string that can be converted to desired type (data_convert must exist)
@@ -55,6 +57,7 @@
  * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
  * 		@param      dst_*      Destination target
  * 		@param[in]  src_*      Source target
+ *
  * 	- "data_alloca((string)'type', (size_t)'100')" - allocate new data
  * 		@param[in]  type       Data type to alloc
  * 		@param[in]  size       Size in units to alloc
@@ -325,7 +328,7 @@ ablock_continue:
 				size_t     new_size;
 				data_read(size_data, size_data_ctx, 0, &new_size, sizeof(new_size));
 				
-				data_reinit(&temp_any, new_type, alloca(new_size), new_size);
+				data_alloc_local(&temp_any, new_type, new_size);
 				
 				from_data     = &temp_any;
 				from_data_ctx = NULL;
@@ -391,8 +394,10 @@ ablock_continue:
 	}
 //ablock_leave:
 	frame_id = --stack_items - 1;
-	if(stack_items == 0)
+	if(stack_items == 0){
+		free(stack);
 		return ret;
+	}
 	
 	stack  = realloc(stack, stack_items * sizeof(rewrite_stack_frame_t));
 	frame  = &stack[frame_id];

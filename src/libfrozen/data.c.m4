@@ -92,7 +92,7 @@ ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, o
 	size_t          temp_size, read_size;
 	f_data_read     func_read;
 	
-	if(src == NULL || !data_type_is_valid(src->type))
+	if(src == NULL || !data_validate(src))
 		return -EINVAL;
 	
 	func_read  = data_protos[src->type].func_read;
@@ -126,7 +126,7 @@ ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, o
 static ssize_t       data_read_raw          (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size){ // {{{
 	f_data_read     func_read;
 	
-	if(src == NULL || !data_type_is_valid(src->type))
+	if(src == NULL || !data_validate(src))
 		return -EINVAL;
 	
 	func_read  = data_protos[src->type].func_read;
@@ -147,25 +147,13 @@ static ssize_t       data_read_raw          (data_t *src, data_ctx_t *src_ctx, o
 ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void  *buffer, size_t  size){ // {{{
 	f_data_write    func_write;
 	
-	if(dst == NULL || !data_type_is_valid(dst->type))
+	if(dst == NULL || !data_validate(dst))
 		return -EINVAL;
 	
 	func_write = data_protos[dst->type].func_write;
 	func_write = func_write ? func_write : data_def_write;
 	
 	return func_write(dst, dst_ctx, offset, buffer, size);
-} // }}}
-
-/** @brief Initialize data structure with new info
- *  @param[out]   dst      Data structure
- *  @param[in]    type     New data type
- *  @param[in]    data_ptr New data ptr
- *  @param[in]    data_size New data size
- */
-void                 data_reinit            (data_t *dst, data_type type, void *data_ptr, size_t data_size){ // {{{
-	dst->type      = type;
-	dst->data_ptr  = data_ptr;
-	dst->data_size = data_size;
 } // }}}
 
 /** @brief Get data type
@@ -192,11 +180,17 @@ inline size_t        data_value_len         (data_t *data){ // {{{
 	return data->data_size;
 } // }}}
 
-int                  data_type_is_valid     (data_type type){ // {{{
+ssize_t              data_type_validate     (data_type type){ // {{{
 	if(type != TYPE_INVALID && (unsigned)type < data_protos_size){
 		return 1;
 	}
 	return 0;
+} // }}}
+ssize_t              data_validate(data_t *data){ // {{{
+	if(data == NULL || !data_type_validate(data->type))
+		return 0;
+	
+	return 1;
 } // }}}
 data_type            data_type_from_string  (char *string){ // {{{
 	int i;
@@ -208,9 +202,8 @@ data_type            data_type_from_string  (char *string){ // {{{
 	
 	return TYPE_INVALID;
 } // }}}
-
 char *               data_string_from_type  (data_type type){ // {{{
-	if(!data_type_is_valid(type))
+	if(!data_type_validate(type))
 		return "INVALID";
 	
 	return data_protos[type].type_str;
@@ -226,9 +219,10 @@ size_t               data_len               (data_t *data, data_ctx_t *data_ctx)
 	f_data_len   func_len;
 	data_type    type;
 	
-	type = data->type;
-	if(!data_type_is_valid(type))
+	if(!data_validate(data))
 		return 0;
+	
+	type = data->type;
 	
 	switch(data_protos[type].size_type){
 		case SIZE_FIXED:
@@ -261,7 +255,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 	off_t           offset1, offset2, goffset1, goffset2;
 	f_data_cmp      func_cmp;
 	
-	if(!data_type_is_valid(data1->type) || !data_type_is_valid(data2->type))
+	if(!data_validate(data1) || !data_validate(data2))
 		return -EINVAL;
 	
 	if(data1->type != data2->type){
@@ -329,10 +323,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 int                  data_arithmetic        (char operator, data_t *operand1, data_ctx_t *operand1_ctx, data_t *operand2, data_ctx_t *operand2_ctx){ // {{{
 	f_data_arith  func_arith;
 	
-	if(operand1 == NULL || operand2 == NULL)
-		return -EINVAL;
-
-	if(!data_type_is_valid(operand1->type) || !data_type_is_valid(operand2->type))
+	if(!data_validate(operand1) || !data_validate(operand2))
 		return -EINVAL;
 	
 	if(operand1->type != operand2->type){
@@ -361,7 +352,7 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
 ssize_t              data_convert           (data_type type, data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	f_data_convert  func_convert;
 	
-	if(!data_type_is_valid(type) || !data_type_is_valid(src->type))
+	if(!data_type_validate(type) || !data_validate(src))
 		return -EINVAL;
 	
 	if( (func_convert = data_protos[type].func_convert) == NULL)
@@ -386,7 +377,7 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 	ssize_t         rret, wret, transferred;
 	off_t           offset;
 	
-	if(!data_type_is_valid(dst->type) || !data_type_is_valid(src->type))
+	if(!data_validate(dst) || !data_validate(src))
 		return -EINVAL;
 	
 	offset = transferred = 0;
@@ -413,15 +404,48 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 	return transferred;
 } // }}}
 
+/** @brief Allocate memory for data and fill structure
+ *  @param[out]  dst    Destination data
+ *  @param[in]   type   Data type
+ *  @param[in]   size   Buffer size
+ *  @return 0 on success
+ *  @return -ENOMEM on memory exhaust
+ *  @return -EINVAL on invalid input data
+ *  @post Free structure with data_free to avoid memory leak
+ */
+ssize_t              data_alloc             (data_t *dst, data_type type, size_t size){
+	// TODO IMPORTANT data related allocs
+	
+	if(dst == NULL)
+		return -EINVAL;
+	
+	dst->type      = type;
+	dst->data_size = size;
+	
+	if(size == 0){ // no zero length memory chunks
+		dst->data_ptr = NULL;
+		return 0;
+	}
+	
+	if( (dst->data_ptr = malloc(size)) == NULL)
+		return -ENOMEM;
+	
+	return 0;
+}
+
 /** @brief Copy data structure and data
  *  @param[out]  dst    Destination data
  *  @param[in]   src    Source data
  *  @return 0 on success
  *  @return -EFAULT on error
+ *  @return -EINVAL on invalid input data
  *  @post Free structure with data_free to avoid memory leak
  */
 ssize_t             data_copy                (data_t *dst, data_t *src){ // {{{
-	void *data_ptr; // support dst eq src
+	void *data_ptr; // to support (dst eq src)
+	
+	if(dst == NULL || !data_validate(src))
+		return -EINVAL;
 	
 	data_ptr       = src->data_ptr;
 	dst->type      = src->type;
@@ -437,11 +461,12 @@ ssize_t             data_copy                (data_t *dst, data_t *src){ // {{{
  *  @param[in]  data  Data structure
  */
 void                data_free                (data_t *data){ // {{{
-	if(data->data_ptr != NULL){
-		free(data->data_ptr);
-		data->data_ptr  = NULL;
-		data->data_size = 0;
-	}
+	if(data == NULL || data->data_ptr == NULL)
+		return;
+	
+	free(data->data_ptr);
+	data->data_ptr  = NULL;
+	data->data_size = 0;
 } // }}}
 
 /* vim: set filetype=c: */

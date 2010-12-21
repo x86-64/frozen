@@ -767,9 +767,9 @@ backends/insert-sort/insert-sort.c:
 	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
 
 backends/rewrite/rule_parser.tab.c:
-	${BISON} -Wall -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
+	${BISON} -p rewrite_ -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
 backends/rewrite/rule_parser.lex.c:
-	${FLEX} --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
+	${FLEX}  -P rewrite_ --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
 
 backends/rewrite/rewrite.c: backends/rewrite/rule_parser.tab.c backends/rewrite/rule_parser.lex.c
 backends/rewrite/rule_parser.lex.c: backends/rewrite/rule_parser.tab.c

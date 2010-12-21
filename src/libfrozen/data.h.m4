@@ -25,7 +25,6 @@ m4_include(data_protos.m4)
 m4_divert(0)
 }}} */
 
-
 enum data_type {
 	TYPES_ARRAY()
 	TYPE_INVALID = -1
@@ -82,27 +81,27 @@ extern data_proto_t  data_protos[];
 extern size_t        data_protos_size;
 
 /* api's */
-API int                  data_type_is_valid     (data_type type);
+
+API ssize_t              data_type_validate     (data_type type);
 API data_type            data_type_from_string  (char *string);
 API char *               data_string_from_type  (data_type type);
 
 API size_t               data_len               (data_t *data, data_ctx_t *data_ctx);
 API int                  data_cmp               (data_t *data1, data_ctx_t *data1_ctx, data_t *data2, data_ctx_t *data2_ctx);
 API int                  data_arithmetic        (char operator, data_t *operand1, data_ctx_t *operand1_ctx, data_t *operand2, data_ctx_t *operand2_ctx);
-
-API void                 data_reinit            (data_t *dst, data_type type, void *data_ptr, size_t data_size);
-
-API ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void *buffer, size_t size);
-API ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void *buffer, size_t size);
-
 API int                  data_convert           (data_type type, data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 API int                  data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
+
+API ssize_t              data_alloc             (data_t *dst, data_type type, size_t size);
 API ssize_t              data_copy              (data_t *dst, data_t *src);
+API ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, off_t offset, void *buffer, size_t size);
+API ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void *buffer, size_t size);
+API ssize_t              data_validate          (data_t *data);
 API void                 data_free              (data_t *data);
 
-API data_type            data_value_type        (data_t *data);
-API void *               data_value_ptr         (data_t *data);
-API size_t               data_value_len         (data_t *data);
+API data_type            data_value_type        (data_t *data); // TODO deprecate this
+API void *               data_value_ptr         (data_t *data); // TODO deprecate this
+API size_t               data_value_len         (data_t *data); // TODO deprecate this
 
 #define data_alloc_local(_dst,_type,_size) { \
 	(_dst)->type      = _type;           \

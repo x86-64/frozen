@@ -6,9 +6,9 @@
 void yyerror (rewrite_script_t *, const char *);
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
-extern YY_BUFFER_STATE yy_scan_string (const char *string);  
-extern int yylex_destroy(void);
-extern int yylex(YYSTYPE *);
+extern YY_BUFFER_STATE rewrite__scan_string (const char *string);  
+extern int rewrite_lex_destroy(void);
+extern int rewrite_lex(YYSTYPE *);
 
 static rewrite_actions           rewrite_get_function(char *string);
 
@@ -457,7 +457,7 @@ ssize_t  rewrite_script_parse(rewrite_script_t *script, char *string){ // {{{
 	name = rewrite_new_name(script, "ret");
 	name->type = THING_RET;
 	
-	yy_scan_string(string);
+	rewrite__scan_string(string);
 	switch(yyparse(script)){
 		case 0:  ret = 0;       goto exit;
 		case 1:  ret = -EINVAL; break;
@@ -466,7 +466,7 @@ ssize_t  rewrite_script_parse(rewrite_script_t *script, char *string){ // {{{
 	};
 	rewrite_script_free(script);
 exit:
-	yylex_destroy();
+	rewrite_lex_destroy();
 	return ret;
 } // }}}
 void rewrite_script_free(rewrite_script_t *script){ // {{{

@@ -142,7 +142,7 @@ static file_stat_status  file_update_count(file_user_data *data){ // {{{
 	return data->file_stat_status;
 } // }}}
 
-// Init and destory
+// Init and destroy
 static int file_init(chain_t *chain){ // {{{
 	file_user_data *user_data = calloc(1, sizeof(file_user_data));
 	if(user_data == NULL)

@@ -136,48 +136,48 @@ START_TEST (test_real_store_idx_strings){
 			{ NULL, DATA_HASHT(
 				{ "name",         DATA_STRING("rewrite")                            },
 				{ "script",       DATA_STRING(
-					"request_t rq_data;"
+					"request_t rq_data;                                                  "
 					
-					"if(!data_cmp(request['action'], read)){ "
-					"   data_arith((string)'*', request['key'], (off_t)'8'); "
-					""
-					"   rq_data['buffer'] = request['buffer']; "
-					""
-					"   request['buffer'] = data_alloca((string)'off_t', (size_t)'8'); "
-					"   pass(request); "
-					""
-					"   rq_data['action'] = read; "
-					"   rq_data['key']    = request['buffer']; "   
-					"   ret = backend((string)'b_data', rq_data); "
-					"}; "
+					"if(!data_cmp(request['action'], read)){                             "
+					"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"                                                                    "
+					"   rq_data['buffer'] = request['buffer'];                           "
+					"                                                                    "
+					"   request['buffer'] = data_alloca((string)'off_t', (size_t)'8');   "
+					"   pass(request);                                                   "
+					"                                                                    "
+					"   rq_data['action'] = read;                                        "
+					"   rq_data['key']    = request['buffer'];                           " 
+					"   ret = backend((string)'b_data', rq_data);                        "
+					"};                                                                  "
 					
-					"if(!data_cmp(request['action'], write)){ "
-					"   rq_data['action']  = write; "
-					"   rq_data['buffer']  = request['buffer']; "
+					"if(!data_cmp(request['action'], write)){                            "
+					"   rq_data['action']  = write;                                      "
+					"   rq_data['buffer']  = request['buffer'];                          "
 					"   rq_data['key_out'] = data_alloca((string)'memory', (size_t)'8'); "
-					"   ret = backend((string)'b_data', rq_data); "
-					""
-					"   request['buffer'] = rq_data['key_out']; "
-		 			"   data_arith((string)'*', request['key'], (off_t)'8'); "
-					"   pass(request); "
-					"   data_arith((string)'/', request['key_out'], (off_t)'8'); "
-					"}; "
+					"   ret = backend((string)'b_data', rq_data);                        "
+					"                                                                    "
+					"   request['buffer'] = rq_data['key_out'];                          "
+		 			"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"   pass(request);                                                   "
+					"   data_arith((string)'/', request['key_out'], (off_t)'8');         "
+					"};                                                                  "
 					
-					"if(!data_cmp(request['action'], delete)){ "
-					"   data_arith((string)'*', request['key'], (off_t)'8'); "
-					"   ret = pass(request); "
-					"}; "
+					"if(!data_cmp(request['action'], delete)){                           "
+					"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"   ret = pass(request);                                             "
+					"};                                                                  "
 					
-					"if(!data_cmp(request['action'], move)){ "
-					"   data_arith((string)'*', request['key_to'],   (off_t)'8'); "
-					"   data_arith((string)'*', request['key_from'], (off_t)'8'); "
-					"   ret = pass(request); "
-					"}; "
+					"if(!data_cmp(request['action'], move)){                             "
+					"   data_arith((string)'*', request['key_to'],   (off_t)'8');        "
+					"   data_arith((string)'*', request['key_from'], (off_t)'8');        "
+					"   ret = pass(request);                                             "
+					"};                                                                  " 
 					
-					"if(!data_cmp(request['action'], count)){ "
-					"   ret = pass(request); "
-					"   data_arith((string)'/', request['buffer'], (off_t)'8'); "
-					"}; "
+					"if(!data_cmp(request['action'], count)){                            "
+					"   ret = pass(request);                                             "
+					"   data_arith((string)'/', request['buffer'], (off_t)'8');          "
+					"};                                                                  "
 				)},
 				hash_end
 			)},
@@ -219,17 +219,18 @@ START_TEST (test_real_store_idx_strings){
 			hash_end
 		};
 		ret = backend_query(b_idx, r_write);
-			fail_unless(ret > 0,           "chain 'real_store_idx_str': write array failed");
-			//fail_unless(data_ptrs[i] == i, "chain 'real_store_idx_str': write index not linear");
+			fail_unless(ret > 0,    "chain 'real_store_idx_str': write array failed");
 		
 		//printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptrs[i], data_array[i]);
 	}
 	
 	// check
-	char data_read[1024];
+	char data_read[1024], data_last[1024];
+	
+	memset(data_last, 0, 1024);
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		memset(data_read, 0, 1024);
-
+		
 		request_t r_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)      },
 			{ "key",    DATA_OFFT(i)                      },
@@ -237,10 +238,12 @@ START_TEST (test_real_store_idx_strings){
 			hash_end
 		};
 		ret = backend_query(b_idx, r_read);
-			fail_unless(ret > 0,                               "chain 'real_store_idx_str': read array failed");
-			//fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'real_store_idx_str': read array data failed");
+			fail_unless(ret > 0,                                "chain 'real_store_idx_str': read array failed");
+			fail_unless(memcmp(data_read, data_last, 1024) > 0, "chain 'real_store_idx_str': sort array failed");
 		
 		//printf("reading: ret: %x, ptr: %d, str: %s\n", ret, i, data_read);
+		
+		memcpy(data_last, data_read, 1024);
 	}
 	
 	backend_destroy(b_idx);

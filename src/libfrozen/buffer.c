@@ -137,8 +137,8 @@ buffer_t *      buffer_alloc_from_copy     (void *ptr, size_t size){ // {{{
 	return buffer;
 } // }}}
 
-/** @brief Destory buffer
- *  @param  buffer  Buffer to destory
+/** @brief Destroy buffer
+ *  @param  buffer  Buffer to destroy
  */
 void            buffer_destroy             (buffer_t *buffer){ // {{{
 	buffer_cleanup(buffer);

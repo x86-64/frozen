@@ -56,7 +56,7 @@ typedef struct frozen_userdata {
 typedef struct frozen_fh {
 	virtfs_item     *item;
 	frozen_userdata *ud;
-	char            *param;
+	data_t           param;
 } frozen_fh;
 
 /* }}} */
@@ -225,7 +225,7 @@ cleanup:
 	return NULL;
 };
 
-static void         wfrozen_backend_destory(backend_t *backend){
+static void         wfrozen_backend_destroy(backend_t *backend){
 	backend_destroy(backend);
 };
 
@@ -237,49 +237,6 @@ static void wfrozen_init(void){
 	
 	hash_set(global_settings, "homedir", TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
 	
-	/*
-	hash_t config[] = {
-		{ NULL,    DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("file")                 },
-				{ "filename",  DATA_STRING("data_ffs_test.dat")    },
-				hash_end
-			)},
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("rewrite")              },
-				{ "rules",     DATA_HASHT(
-					{ NULL, DATA_HASHT(
-						{ "action",     DATA_STRING("set")          },
-						{ "src_config", DATA_STRING("def_goff")     },
-						{ "dst_key",    DATA_STRING("goff")         },
-						{ "def_goff",   DATA_OFFT(0)                },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT(
-						{ "action",  DATA_STRING("data_convert")    },
-						{ "src_key", DATA_STRING("param")           },
-						{ "dst_key", DATA_STRING("goff")            },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT(
-						{ "action",   DATA_STRING("data_arith")     },
-						{ "dst_key",  DATA_STRING("key")            },
-						{ "src_key",  DATA_STRING("goff")           },
-						{ "operator", DATA_STRING("+")              },
-						hash_end
-					)},
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ "name",  DATA_STRING("be_file")                         },
-		hash_end
-	};
-	
-	backend = wfrozen_backend_new(config);
-	*/
 	hash_t c_data[] = {
 		{ NULL, DATA_HASHT(
 			{ NULL, DATA_HASHT(
@@ -303,153 +260,49 @@ static void wfrozen_init(void){
 			)},
 			{ NULL, DATA_HASHT(
 				{ "name",         DATA_STRING("rewrite")                            },
-				{ "rules",        DATA_HASHT(
-					{ NULL, DATA_HASHT( // 1
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key")                  },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "copy",       DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(
-							ACTION_CRWD_READ |
-							ACTION_CRWD_WRITE |
-							ACTION_CRWD_DELETE
-						)},
-						hash_end
-					)},
-					// move {{{
-					{ NULL, DATA_HASHT( // 2
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key_from")             },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 3
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("*")                    },
-						{ "dst_key",    DATA_STRING("key_to")               },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "on-request", DATA_INT32(ACTION_CRWD_MOVE)        },
-						hash_end
-					)},
-					// }}}
-					// write {{{
-					{ NULL, DATA_HASHT( // 4
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("buffer")            },
-						{ "dst_rule",      DATA_INT32(7)                    },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 5
-						{ "action",        DATA_STRING("data_alloca")       },
-						{ "dst_type",      DATA_STRING("off_t")             },
-						{ "dst_size",      DATA_SIZET(8)                    },
-						{ "dst_key",       DATA_STRING("buffer")            },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 6
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("key_out")           },
-						{ "dst_rule",      DATA_INT32(7)                    },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 7
-						{ "action",          DATA_STRING("backend")         },
-						{ "backend",         DATA_STRING("b_data")          },
-						{ "request_proto",   DATA_HASHT(
-							{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-							hash_end
-						)},
-						{ "ret_override",    DATA_INT32(1)                  },
-						{ "on-request",
-							DATA_INT32(
-								ACTION_CRWD_CREATE | ACTION_CRWD_WRITE
-							)},
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 8
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("/")                    },
-						{ "dst_key",    DATA_STRING("key_out")              },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "after",      DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(
-							ACTION_CRWD_CREATE | ACTION_CRWD_WRITE)     },
-						hash_end
-					)},
-					// }}}
-					// read {{{
-					{ NULL, DATA_HASHT( // 9
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("buffer")            },
-						{ "dst_rule",      DATA_INT32(12)                   },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 10
-						{ "action",        DATA_STRING("data_alloca")       },
-						{ "dst_type",      DATA_STRING("off_t")             },
-						{ "dst_size",      DATA_SIZET(8)                    },
-						{ "dst_key",       DATA_STRING("buffer")            },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 11
-						{ "action",        DATA_STRING("set")               },
-						{ "src_key",       DATA_STRING("buffer")            },
-						{ "dst_backend",   DATA_STRING("key")               },
-						{ "dst_rule",      DATA_INT32(12)                   },
-						{ "on-request",    DATA_INT32(ACTION_CRWD_READ)     },
-						{ "after",         DATA_INT32(1)                    },
-						hash_end
-					)},
-					{ NULL, DATA_HASHT( // 12
-						{ "action",          DATA_STRING("backend")         },
-						{ "backend",         DATA_STRING("b_data")          },
-						{ "request_proto",   DATA_HASHT(
-							{ "action",  DATA_INT32(ACTION_CRWD_READ)   },
-							hash_end
-						)},
-						{ "ret_override",    DATA_INT32(1)                  },
-						{ "on-request",      DATA_INT32(ACTION_CRWD_READ)   },
-						{ "after",           DATA_INT32(1)                  },
-						hash_end
-					)},
-					// }}}
-					// count {{{
-					{ NULL, DATA_HASHT( // 13
-						{ "action",     DATA_STRING("data_arith")           },
-						{ "operator",   DATA_STRING("/")                    },
-						{ "dst_key",    DATA_STRING("buffer")               },
-						{ "src_config", DATA_STRING("operand")              },
-						{ "operand",    DATA_OFFT(8)                        },
-						{ "after",      DATA_INT32(1)                       },
-						{ "on-request", DATA_INT32(ACTION_CRWD_COUNT)       },
-						hash_end
-					)},
-					// }}}
-					hash_end
+				{ "script",       DATA_STRING(
+					"request_t rq_data;                                                  "
+					
+					"if(!data_cmp(request['action'], read)){                             "
+					"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"                                                                    "
+					"   rq_data['buffer'] = request['buffer'];                           "
+					"                                                                    "
+					"   request['buffer'] = data_alloca((string)'off_t', (size_t)'8');   "
+					"   pass(request);                                                   "
+					"                                                                    "
+					"   rq_data['action'] = read;                                        "
+					"   rq_data['key']    = request['buffer'];                           " 
+					"   ret = backend((string)'b_data', rq_data);                        "
+					"};                                                                  "
+					
+					"if(!data_cmp(request['action'], write)){                            "
+					"   rq_data['action']  = write;                                      "
+					"   rq_data['buffer']  = request['buffer'];                          "
+					"   rq_data['key_out'] = data_alloca((string)'memory', (size_t)'8'); "
+					"   ret = backend((string)'b_data', rq_data);                        "
+					"                                                                    "
+					"   request['buffer'] = rq_data['key_out'];                          "
+		 			"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"   pass(request);                                                   "
+					"   data_arith((string)'/', request['key_out'], (off_t)'8');         "
+					"};                                                                  "
+					
+					"if(!data_cmp(request['action'], delete)){                           "
+					"   data_arith((string)'*', request['key'], (off_t)'8');             "
+					"   ret = pass(request);                                             "
+					"};                                                                  "
+					
+					"if(!data_cmp(request['action'], move)){                             "
+					"   data_arith((string)'*', request['key_to'],   (off_t)'8');        "
+					"   data_arith((string)'*', request['key_from'], (off_t)'8');        "
+					"   ret = pass(request);                                             "
+					"};                                                                  " 
+					
+					"if(!data_cmp(request['action'], count)){                            "
+					"   ret = pass(request);                                             "
+					"   data_arith((string)'/', request['buffer'], (off_t)'8');          "
+					"};                                                                  "
 				)},
 				hash_end
 			)},
@@ -472,8 +325,8 @@ static void wfrozen_init(void){
 }
 
 static void wfrozen_destroy(void){
-	wfrozen_backend_destory(backend);
-	wfrozen_backend_destory(backend2);
+	wfrozen_backend_destroy(backend);
+	wfrozen_backend_destroy(backend2);
 	
 	frozen_destroy();
 }
@@ -563,10 +416,13 @@ static int fusef_open(const char *path, struct fuse_file_info *fi){
 	
 	fh->item  = item;
 	fh->ud    = (frozen_userdata *)(item->userdata);
-	fh->param = NULL;
 	if(param){
-		if( (fh->param = strdup(param + 1)) == NULL)
+		data_t d_param = DATA_STRING(param + 1);
+		
+		if(data_copy(&fh->param, &d_param) < 0)
 			return -ENOMEM;
+	}else{
+		data_alloc(&fh->param, TYPE_VOID, 0);
 	}
 	
 	// TODO check access
@@ -574,27 +430,21 @@ static int fusef_open(const char *path, struct fuse_file_info *fi){
 	fi->fh = (unsigned long) fh;
 	
 	// TODO lock item
-	
 	return 0;
 }
 
 static int fusef_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
 	frozen_fh        *fh;
-	data_t            d_param = DATA_VOID;
 	
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
-	
-	if(fh->param){
-		data_reinit(&d_param, TYPE_STRING, fh->param, strlen(fh->param) + 1);
-	}
 	
 	request_t r_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)                    },
 		{ "key",    DATA_PTR_OFFT(&off)                             },
 		{ "buffer", DATA_MEM(buf, size)                             },
 		
-		{ "param",  d_param                                         },
+		{ "param",  fh->param                                       },
 		{ "path",   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
@@ -608,20 +458,16 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 static int fusef_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
 	ssize_t           ret;
 	frozen_fh        *fh;
-	data_t            d_param = DATA_VOID;
 	
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
-	if(fh->param){
-		data_reinit(&d_param, TYPE_STRING, fh->param, strlen(fh->param) + 1);
-	}
 	request_t r_write[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)                   },
 		//{ "key",     DATA_PTR_OFFT(&off)                             },
 		{ "key_out", DATA_PTR_OFFT(&off)                             },
 		{ "buffer",  DATA_MEM((char *)buf, size)                     },
 		
-		{ "param",   d_param                                         },
+		{ "param",   fh->param                                       },
 		{ "path",    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
@@ -641,8 +487,7 @@ static int fusef_release(const char *path, struct fuse_file_info *fi){
 	
 	// TODO unlock item
 	
-	if(fh->param)
-		free(fh->param);
+	data_free(&fh->param);
 	
 	free(fh);
 	return 0;
