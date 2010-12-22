@@ -30,6 +30,8 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	size_t  size_min = size;
 	hash_t *temp;
 	
+	(void)data;
+	
 	handle =
 		( (temp = hash_find_typed(context, TYPE_INT32, "handle")) != NULL) ?
 		HVALUE(temp, int) : 0;
@@ -59,6 +61,8 @@ static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, vo
 	off_t   key;
 	size_t  size;
 	hash_t *temp;
+	
+	(void)data;
 	
 	size =
 		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
@@ -417,8 +421,8 @@ exit:
 static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	off_t            from, to;
 	
-	size_t           move_size;
-	size_t           ssize, size, max_size;
+	size_t           move_size, size, max_size;
+	ssize_t          ssize;
 	char *           buff;
 	int              direction;
 	int              ret         = 0;
@@ -527,9 +531,9 @@ static ssize_t file_count(chain_t *chain, request_t *request){ // {{{
 static chain_t chain_file = {
 	"file",
 	CHAIN_TYPE_CRWD,
-	&file_init,
-	&file_configure,
-	&file_destroy,
+	.func_init      = &file_init,
+	.func_configure = &file_configure,
+	.func_destroy   = &file_destroy,
 	{{
 		.func_create = &file_create,
 		.func_set    = &file_set,

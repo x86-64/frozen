@@ -51,7 +51,7 @@ static int sorts_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
-	int              i;
+	unsigned int     i;
 	char            *sort_engine_str;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
@@ -74,10 +74,6 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 /* }}} */
 /* crwd handlers {{{ */
-static ssize_t sorts_create(chain_t *chain, request_t *request){
-	return -1;
-}
-
 static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	ssize_t          ret;
 	data_t          *buffer, *key_out;
@@ -134,7 +130,7 @@ static ssize_t sorts_custom(chain_t *chain, request_t *request){
 		return data->engine->func_find(data, buffer, &data->key_buffer); // do search
 	}
 	*/
-	
+	(void)chain; (void)request;
 	return -EINVAL;
 }
 /* }}} */
@@ -142,11 +138,10 @@ static ssize_t sorts_custom(chain_t *chain, request_t *request){
 static chain_t chain_insert_sort = {
 	"insert-sort",
 	CHAIN_TYPE_CRWD,
-	&sorts_init,
-	&sorts_configure,
-	&sorts_destroy,
+	.func_init      = &sorts_init,
+	.func_configure = &sorts_configure,
+	.func_destroy   = &sorts_destroy,
 	{{
-		.func_create = &sorts_create,
 		.func_set    = &sorts_set,
 		.func_custom = &sorts_custom
 	}}

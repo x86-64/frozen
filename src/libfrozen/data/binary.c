@@ -31,7 +31,8 @@ void *  data_binary_ptr(data_t *data){
 
 size_t  data_binary_len(data_t *data, data_ctx_t *ctx){
 	unsigned int data_size;
-	
+	(void)ctx;
+
 	if(data->data_size < sizeof(data_binary_t))
 		return 0;
 	

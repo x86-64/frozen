@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 
 size_t  data_memory_len(data_t *data, data_ctx_t *ctx){
+	(void)ctx; // TODO add ctx parse
 	return data->data_size;
 }
 

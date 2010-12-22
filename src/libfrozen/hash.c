@@ -54,7 +54,7 @@ void               hash_delete                (hash_t *hash, char *key){ // {{{
 	
 	hvalue->key = hash_ptr_null;
 } // }}}
-void               hash_assign                  (hash_t *hash, hash_t *hash_next){ // {{{
+void               hash_chain                   (hash_t *hash, hash_t *hash_next){ // {{{
 	hash_t *hend = hash_find(hash, hash_ptr_end);
 	hend->data.data_ptr = hash_next;
 } // }}}
@@ -147,7 +147,11 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 	return new_hash;
 } // }}}
 
-void               hash_free                    (hash_t *hash){ // {{{
+/** @brief Free hash
+ *  @param[in]  hash        Hash to free
+ *  @param[in]  recursive   Also free recurive hashes
+ */
+void               hash_free                    (hash_t *hash, int recursive){ // {{{
 	hash_t       *el;
 	
 	if(hash == NULL)
@@ -161,6 +165,23 @@ void               hash_free                    (hash_t *hash){ // {{{
 			free(el->key);
 		data_free(&el->data);
 	}
+	if(recursive != 0)
+		hash_free(el->data.data_ptr, recursive);
+	
+	free(hash);
+} // }}}
+
+size_t             hash_get_nelements           (hash_t *hash){ // {{{
+	hash_t       *el;
+	unsigned int  i;
+	
+	if(hash == NULL)
+		return 0;
+	
+	for(el = hash, i=0; el->key != hash_ptr_end; el++){
+		i++;
+	}
+	return i + 1;
 } // }}}
 
 data_t *           hash_get_data                (hash_t *hash, char *key){ // {{{

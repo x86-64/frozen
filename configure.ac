@@ -22,10 +22,6 @@ AC_PATH_PROGS(AWK, [gawk awk], no)
 AC_PATH_PROGS(BISON, [bison], no)
 AC_PATH_PROGS(FLEX, [flex], no)
 
-#PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
-#	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
-#)
-
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))
 if test "x${enable_coverage}" = "xyes"; then
 	CFLAGS="$CFLAGS --coverage"

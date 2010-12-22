@@ -38,6 +38,7 @@
 #include <hash.h>            //
 #include <structs.h>         //
 
+#include <configs/config.h>  // confiurations
 #include <backend.h>         // db logic 
 
 /* Global variables */

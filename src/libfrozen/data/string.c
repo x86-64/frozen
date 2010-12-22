@@ -79,17 +79,19 @@ ssize_t   data_string_write (data_t *data, data_ctx_t *context, off_t offset, vo
 // TODO possible crash here
 
 int     data_string_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){
-	// TODO IMPORTANT use ctx
+	(void)ctx1; (void)ctx2; // TODO IMPORTANT use ctx
 	return strcmp(data1->data_ptr, data2->data_ptr);
 }
 
 size_t  data_string_len(data_t *data, data_ctx_t *ctx){
-	// TODO IMPORTANT use ctx
+	(void)ctx; // TODO IMPORTANT use ctx
 	return (size_t) MIN( strlen(data->data_ptr) + 1, data->data_size );
 }
 
 ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	size_t size;
+	
+	(void)dst_ctx; // TODO use ctx
 	
 	switch(src->type){
 		case TYPE_STRING:

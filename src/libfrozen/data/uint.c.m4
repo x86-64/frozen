@@ -26,6 +26,8 @@ int data_[]NAME()_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t
 	int           cret;
 	TYPE          data1_val, data2_val;
 	
+	(void)ctx1; (void)ctx2; // TODO use ctx
+	
 	if(data1->data_size < BYTES() || data2->data_size < BYTES())
 		return -EINVAL;
 	
@@ -40,6 +42,8 @@ int data_[]NAME()_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t
 int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_t *operand2, data_ctx_t *ctx2){ // {{{
 	int           ret = 0;
 	TYPE          operand1_val, operand2_val, result;
+	
+	(void)ctx1; (void)ctx2; // TODO use ctx
 	
 	if(operand1->data_size < BYTES() || operand2->data_size < BYTES())
 		return -EINVAL;
@@ -84,6 +88,8 @@ int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_
 ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	char                  buffer[[DEF_BUFFER_SIZE]];
 	unsigned long         value;
+	
+	(void)dst_ctx; (void)src_ctx; // TODO use ctx
 	
 	switch(src->type){
 	#ifdef TYPE_STRING

@@ -41,6 +41,8 @@ typedef int    (*f_data_arith)     (char, data_t *, data_ctx_t *, data_t *, data
 
 typedef ssize_t (*f_data_write)     (data_t *, data_ctx_t *, off_t, void *, size_t);
 typedef ssize_t (*f_data_read)      (data_t *, data_ctx_t *, off_t, void **, size_t *);
+typedef void    (*f_data_alloc)     (data_t *, size_t);
+typedef void    (*f_data_free)      (data_t *);
 
 typedef ssize_t (*f_data_convert)   (data_t *, data_ctx_t *, data_t *, data_ctx_t *);
 
@@ -67,6 +69,9 @@ struct data_proto_t {
 	data_type       type;
 	size_type       size_type;
 	size_t          fixed_size;
+	
+	f_data_alloc    func_alloc;
+	f_data_free     func_free;
 	
 	f_data_len      func_len;
 	f_data_cmp      func_cmp;
@@ -114,6 +119,15 @@ API size_t               data_value_len         (data_t *data); // TODO deprecat
 	memcpy((_dst)->data_ptr, (_src)->data_ptr, (_src)->data_size);   \
 }
 
+#define data_assign_data_t(_dst,_src){           \
+	memcpy((_dst), (_src), sizeof(data_t));  \
+}
+
+#define data_assign_raw(_dst,_type,_ptr,_size){  \
+	(_dst)->type      = _type;               \
+	(_dst)->data_size = _size;               \
+	(_dst)->data_ptr  = _ptr;                \
+}
 
 #endif // DATA_H
 

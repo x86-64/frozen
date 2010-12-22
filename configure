@@ -11148,10 +11148,6 @@ done
 test -n "$FLEX" || FLEX="no"
 
 
-#PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
-#	AC_MSG_ERROR([libconfig++ 1.4 or newer not found.])
-#)
-
 # Check whether --enable-coverage was given.
 if test "${enable_coverage+set}" = set; then :
   enableval=$enable_coverage;

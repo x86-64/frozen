@@ -17,12 +17,23 @@ typedef int  (*hash_iterator)(hash_t *, void *, void *);
 
 #define HVALUE(_hash_t,_type)  *(_type *)_hash_t->data.data_ptr
 
+#define hash_assign_hash_t(_dst, _src) {        \
+	memcpy((_dst), (_src), sizeof(hash_t)); \
+}
+#define hash_assign_hash_null(_dst) { \
+	(_dst)->key = hash_ptr_null;  \
+}
+#define hash_assign_hash_end(_dst) {  \
+	(_dst)->key = hash_ptr_end;   \
+	(_dst)->data.data_ptr = NULL; \
+}
+
 API int                hash_get                     (hash_t *hash, char *key, data_type *type, void **value, size_t *value_size);
 API int                hash_get_typed               (hash_t *hash, data_type type, char *key, void **value, size_t *value_size);
 API hash_t *           hash_set                     (hash_t *hash, char *key, data_type type, void *value, size_t value_size);
 API void               hash_delete                  (hash_t *hash, char *key);
 
-API void               hash_assign                  (hash_t *hash, hash_t *hash_next);
+API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
 API int                hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
 API hash_t *           hash_find                    (hash_t *hash, char *key);
 API hash_t *           hash_find_typed              (hash_t *hash, data_type type, char *key);
@@ -36,7 +47,8 @@ API void *             hash_get_value_ptr           (hash_t *hash);
 API size_t             hash_get_value_size          (hash_t *hash);
 
 API hash_t *           hash_copy                    (hash_t *hash);
-API void               hash_free                    (hash_t *hash);
+API void               hash_free                    (hash_t *hash, int recursive);
+API size_t             hash_get_nelements           (hash_t *hash);
 
 #ifdef DEBUG
 API void               hash_dump                    (hash_t *hash);

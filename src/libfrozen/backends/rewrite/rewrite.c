@@ -434,9 +434,9 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 static chain_t chain_rewrite = {
 	"rewrite",
 	CHAIN_TYPE_CRWD,
-	&rewrite_init,
-	&rewrite_configure,
-	&rewrite_destroy,
+	.func_init      = &rewrite_init,
+	.func_configure = &rewrite_configure,
+	.func_destroy   = &rewrite_destroy,
 	{{
 		.func_create = &rewrite_func,
 		.func_set    = &rewrite_func,

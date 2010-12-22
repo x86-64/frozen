@@ -4,14 +4,17 @@
 /* this module must be used only as example */
 
 static int null_init(chain_t *chain){
+	(void)chain;
 	return 0;
 }
 
 static int null_destroy(chain_t *chain){
+	(void)chain;
 	return 0;
 }
 
 static int null_configure(chain_t *chain, hash_t *config){
+	(void)chain; (void)config;
 	return 0;
 }
 
@@ -30,9 +33,9 @@ static ssize_t null_create(chain_t *chain, request_t *request){
 static chain_t chain_null_proxy = {
 	"null-proxy",
 	CHAIN_TYPE_CRWD,
-	&null_init,
-	&null_configure,
-	&null_destroy,
+	.func_init      = &null_init,
+	.func_configure = &null_configure,
+	.func_destroy   = &null_destroy,
 	{{
 		.func_create = &null_create,
 	}}

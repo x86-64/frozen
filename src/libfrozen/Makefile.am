@@ -43,14 +43,20 @@ libfrozen_la_SOURCES=   data.h \
 			structs.c           structs.h           \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
+			configs/config_parser.tab.c             \
+			configs/config_parser.lex.c             \
 			public.h
-			
 
 libfrozen.c: data.h data.c
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
+
+configs/config_parser.tab.c:
+	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
+configs/config_parser.lex.c:
+	${FLEX}  -P config_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
 
 backends/insert-sort/insert-sort.c:
 	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
@@ -76,10 +82,13 @@ data/size_t.c:
 data/off_t.c:
 	${M4} -sP -DBITS=64 -DNAME=off_t -DDEF=OFFT data/uint.c.m4 > $@
 
-CLEANFILES =	backends/locate.c backends/insert-sort.c               \
+CLEANFILES =	backends/locate.c backends/insert-sort/insert-sort.c   \
                 backends/rewrite/rule_parser.tab.c                     \
                 backends/rewrite/rule_parser.tab.h                     \
                 backends/rewrite/rule_parser.lex.c                     \
+		configs/config_parser.tab.c                            \
+		configs/config_parser.tab.h                            \
+		configs/config_parser.lex.c                            \
 		data.c data.h                                          \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c

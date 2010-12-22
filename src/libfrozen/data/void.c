@@ -1,10 +1,14 @@
 #include <libfrozen.h>
 
 size_t  data_void_len(data_t *data, data_ctx_t *ctx){
+	(void)ctx;
 	return data->data_size;
 }
 
 ssize_t data_void_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+	(void)dst_ctx;
+	(void)src;
+	(void)src_ctx;
 	dst->type      = TYPE_VOID;
 	dst->data_ptr  = NULL;
 	dst->data_size = 0;

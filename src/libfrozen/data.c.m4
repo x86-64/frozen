@@ -193,7 +193,7 @@ ssize_t              data_validate(data_t *data){ // {{{
 	return 1;
 } // }}}
 data_type            data_type_from_string  (char *string){ // {{{
-	int i;
+	unsigned int i;
 	
 	for(i=0; i<data_protos_size; i++){
 		if(strcasecmp(data_protos[i].type_str, string) == 0)
@@ -461,8 +461,15 @@ ssize_t             data_copy                (data_t *dst, data_t *src){ // {{{
  *  @param[in]  data  Data structure
  */
 void                data_free                (data_t *data){ // {{{
+	f_data_free  func_free;
+	
 	if(data == NULL || data->data_ptr == NULL)
 		return;
+	
+	if( (func_free = data_protos[data->type].func_free) != NULL){
+		func_free(data);
+		return;
+	}
 	
 	free(data->data_ptr);
 	data->data_ptr  = NULL;

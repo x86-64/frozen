@@ -477,7 +477,7 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	
 	return (ret < 0) ?
 		0 :
-		((ret > size) ? size : (int)ret);
+		((ret > (ssize_t)size) ? size : (int)ret);
 }
 
 static int fusef_release(const char *path, struct fuse_file_info *fi){

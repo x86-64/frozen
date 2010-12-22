@@ -5,14 +5,17 @@
 // This is useful for upper-level chains like 'insert-sort'
 
 static int lists_init(chain_t *chain){
+	(void)chain;
 	return 0;
 }
 
 static int lists_destroy(chain_t *chain){
+	(void)chain;
 	return 0;
 }
 
 static int lists_configure(chain_t *chain, hash_t *config){
+	(void)chain; (void)config;
 	return 0;
 }
 
@@ -82,9 +85,9 @@ static ssize_t lists_delete(chain_t *chain, request_t *request){
 static chain_t chain_lists = {
 	"list",
 	CHAIN_TYPE_CRWD,
-	&lists_init,
-	&lists_configure,
-	&lists_destroy,
+	.func_init      = &lists_init,
+	.func_configure = &lists_configure,
+	.func_destroy   = &lists_destroy,
 	{{
 		.func_set    = &lists_set,
 		.func_delete = &lists_delete
