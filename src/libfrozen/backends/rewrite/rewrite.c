@@ -344,7 +344,7 @@ ablock_continue:
 				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				hash_t find_backend[] = {
-					{ NULL, *from_data }, // TODO ctx
+					{ "name", *from_data }, // TODO ctx
 					hash_end
 				};
 				

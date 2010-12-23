@@ -11,7 +11,9 @@
 name    [a-z][a-z0-9_]*
 string1 \'[^\']*\'
 string2 \"[^\"]*\"
-string  {string1}|{string2}
+string3 #[^#]*#
+string4 @[^@]*@
+string  {string1}|{string2}|{string3}|{string4}
 assign1 :
 assign2 =>?
 assign  {assign1}|{assign2}

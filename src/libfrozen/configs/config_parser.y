@@ -52,14 +52,15 @@ hash_items :
 	}
 	;
 
-hash_item : hash_name ASSIGN hash_value {
-		$$.key = $1;
-		data_assign_data_t(&$$.data, &$3);
+hash_item : hash_name hash_value {
+	$$.key = $1;
+	data_assign_data_t(&$$.data, &$2);
 };
 
 hash_name :
-	  NAME   { $$ = $1    }
-	| TNULL  { $$ = NULL; };
+          /* empty */  { $$ = NULL  }
+	| NAME  ASSIGN { $$ = $1    }
+	| TNULL ASSIGN { $$ = NULL; };
 
 hash_value :
 	  STRING             { data_assign_raw(&$$, TYPE_STRING, $1, strlen($1) + 1);  }  // fucking macro nesting
@@ -95,6 +96,28 @@ hash_t *   configs_string_parse(char *string){ // {{{
 	yyparse(&new_hash);
 	
 	config_lex_destroy();
+	return new_hash;
+} // }}}
+
+hash_t *   configs_file_parse(char *filename){ // {{{
+	int     size = 0;
+	hash_t *new_hash = NULL;
+	char   *string;
+	FILE   *f;
+	
+	if( (f = fopen(filename, "rb")) == NULL)
+		return NULL;
+	
+	fseek(f, 0, SEEK_END); size = ftell(f); fseek(f, 0, SEEK_SET);
+	
+	if( (string = malloc(size+1)) != NULL){
+		if(fread(string, sizeof(char), size, f) == size){
+			string[size] = '\0';
+			new_hash = configs_string_parse(string);
+		} 
+		free(string);
+	}
+	fclose(f);
 	return new_hash;
 } // }}}
 

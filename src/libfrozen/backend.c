@@ -113,7 +113,6 @@ static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chai
 	
 	chain->next = *(chain_t **)p_chain;
 	
-	//printf("initing: %s\n", chain_name);
 	ret = chain_configure(chain, chain_config);
 	if(ret != 0)
 		goto cleanup;
@@ -128,11 +127,13 @@ cleanup:
 }
 
 static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
+	data_t    *name    = (data_t *)p_name;
 	backend_t *backend = (backend_t *)p_backend;
+	
 	if(backend->name == NULL)
 		return ITER_CONTINUE;
 	
-	if(strcmp(backend->name, p_name) == 0){
+	if(strcmp(backend->name, name->data_ptr) == 0){ // TODO replace backend->name with data_t
 		*(backend_t **)p_backend_t = backend;
 		return ITER_BREAK;
 	}
@@ -144,46 +145,41 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 
 backend_t *  backend_new      (hash_t *config){
 	int         ret;
-	char       *name;
+	data_t     *name, *chains;
 	hash_t     *backend_config;
 	backend_t  *backend = NULL;
 	
-	// TODO rewrite this to correctly handle hashes with names
-	// currenly config must have hash_t with config as first item and name as second item
+	name   = hash_get_typed_data(config, TYPE_STRING, "name");
+	chains = hash_get_typed_data(config, TYPE_HASHT,  "chains");
 	
-	switch(hash_get_data_type(config)){
-		case TYPE_STRING: // search backend name
-			name = hash_get_value_ptr(config);
-			
-			list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
-			if(backend != NULL)
-				backend->refs++;
-			
-			break;
-		case TYPE_HASHT:  // create new backend with config
-			if( (backend = malloc(sizeof(backend_t))) == NULL)
-				return NULL;
-			
-			backend->chain = NULL;
-			backend->refs  = 1;
-			backend->name  = 
-				( hash_get_typed(config, TYPE_STRING, "name", (void **)&name, NULL) == 0) ?
-				strdup(name) : NULL;
-			
-			backend_config = hash_get_value_ptr(config);
-			
-			ret = hash_iter(backend_config, &backend_iter_chain_init, backend, &backend->chain);
-			if(ret == ITER_BREAK){
-				backend_destroy(backend);
-				return NULL;
-			}
-			
-			list_push(&backends, backend);
-			break;
-		default:
+	if(name == NULL && chains == NULL) // nothing to do
+		return NULL;
+	
+	if(chains == NULL){
+		// find exising chain
+		list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
+		if(backend != NULL)
+			backend->refs++;
+	}else{
+		// register new one
+		if( (backend = malloc(sizeof(backend_t))) == NULL)
 			return NULL;
-	};
-	
+		
+		backend->chain = NULL;
+		backend->refs  = 1;
+		backend->name  = (name) ?
+			strdup(name->data_ptr) : NULL; // TODO replace with data_t
+		
+		backend_config = data_value_ptr(chains);
+		
+		ret = hash_iter(backend_config, &backend_iter_chain_init, backend, &backend->chain);
+		if(ret == ITER_BREAK){
+			backend_destroy(backend);
+			return NULL;
+		}
+		
+		list_push(&backends, backend);
+	}
 	return backend;
 }
 

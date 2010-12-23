@@ -4,7 +4,7 @@ START_TEST (test_backend_list){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",        DATA_STRING("file")                     },
 				{ "filename",    DATA_STRING("data_backend_list.dat")    },

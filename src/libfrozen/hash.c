@@ -151,7 +151,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
  *  @param[in]  hash        Hash to free
  *  @param[in]  recursive   Also free recurive hashes
  */
-void               hash_free                    (hash_t *hash, int recursive){ // {{{
+void               hash_free                    (hash_t *hash){ // {{{
 	hash_t       *el;
 	
 	if(hash == NULL)
@@ -165,8 +165,7 @@ void               hash_free                    (hash_t *hash, int recursive){ /
 			free(el->key);
 		data_free(&el->data);
 	}
-	if(recursive != 0)
-		hash_free(el->data.data_ptr, recursive);
+	hash_free(el->data.data_ptr);
 	
 	free(hash);
 } // }}}

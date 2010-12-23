@@ -2,7 +2,7 @@
 
 static void   data_hash_t_free(data_t *data){
 	if(data->data_size != 0)
-		hash_free(data->data_ptr, 1);
+		hash_free(data->data_ptr);
 }
 
 /*

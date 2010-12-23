@@ -15,7 +15,7 @@ START_TEST (test_configs){
 	fail_unless(strcmp(hash_get_value_ptr(key2), "hello2") == 0, "hash found wrong entry");
 	fail_unless(strcmp(hash_get_value_ptr(key3), "hello3") == 0, "hash found wrong entry");
 	
-	hash_free(hash, 1);
+	hash_free(hash);
 	
 	char   test2[] = "key1 => { key3 => 'hello1', key4 => \"hello2\"}, key2 => 'hello3', key5 => {}";
 	hash = configs_string_parse(test2);
@@ -33,7 +33,7 @@ START_TEST (test_configs){
 	fail_unless(strcmp(hash_get_value_ptr(key3), "hello1") == 0, "hash found wrong entry");
 	fail_unless(strcmp(hash_get_value_ptr(key4), "hello2") == 0, "hash found wrong entry");
 	
-	hash_free(hash, 1);
+	hash_free(hash);
 }
 END_TEST
 REGISTER_TEST(core, test_configs)

@@ -2,7 +2,7 @@
 
 START_TEST (test_real_store_nums){
 	hash_t config[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",      DATA_STRING("file")                        },
 				{ "filename",  DATA_STRING("data_real_store_nums.dat")    },
@@ -54,7 +54,7 @@ REGISTER_TEST(core, test_real_store_nums)
 
 START_TEST (test_real_store_strings){
 	hash_t config[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",      DATA_STRING("file")                        },
 				{ "filename",  DATA_STRING("data_real_store_strings.dat") },
@@ -112,90 +112,20 @@ END_TEST
 REGISTER_TEST(core, test_real_store_strings)
 
 START_TEST (test_real_store_idx_strings){
-	hash_t c_data[] = {
-		{ NULL, DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("file")                           },
-				{ "filename",  DATA_STRING("data_real_store_dat_string.dat") },
-				hash_end
-			)},
-			hash_end
-		)},
-		{ "name", DATA_STRING("b_data") },
-		hash_end
-	};
+	hash_t     *c_data = configs_string_parse(
+		"name  =>'b_data',"
+		"chains=>{ "
+			"NULL => { name='file', filename='data_real_store_dat_string.dat' }"
+		"}"
+	);
 	backend_t  *b_data = backend_new(c_data);
+	hash_free(c_data);
 	
-	hash_t c_idx[] = {
-		{ NULL, DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("file")                               },
-				{ "filename",     DATA_STRING("data_real_store_idx_string.dat")     },
-				hash_end
-			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("rewrite")                            },
-				{ "script",       DATA_STRING(
-					"request_t rq_data;                                                  "
-					
-					"if(!data_cmp(request['action'], read)){                             "
-					"   data_arith((string)'*', request['key'], (off_t)'8');             "
-					"                                                                    "
-					"   rq_data['buffer'] = request['buffer'];                           "
-					"                                                                    "
-					"   request['buffer'] = data_alloca((string)'off_t', (size_t)'8');   "
-					"   pass(request);                                                   "
-					"                                                                    "
-					"   rq_data['action'] = read;                                        "
-					"   rq_data['key']    = request['buffer'];                           " 
-					"   ret = backend((string)'b_data', rq_data);                        "
-					"};                                                                  "
-					
-					"if(!data_cmp(request['action'], write)){                            "
-					"   rq_data['action']  = write;                                      "
-					"   rq_data['buffer']  = request['buffer'];                          "
-					"   rq_data['key_out'] = data_alloca((string)'memory', (size_t)'8'); "
-					"   ret = backend((string)'b_data', rq_data);                        "
-					"                                                                    "
-					"   request['buffer'] = rq_data['key_out'];                          "
-		 			"   data_arith((string)'*', request['key'], (off_t)'8');             "
-					"   pass(request);                                                   "
-					"   data_arith((string)'/', request['key_out'], (off_t)'8');         "
-					"};                                                                  "
-					
-					"if(!data_cmp(request['action'], delete)){                           "
-					"   data_arith((string)'*', request['key'], (off_t)'8');             "
-					"   ret = pass(request);                                             "
-					"};                                                                  "
-					
-					"if(!data_cmp(request['action'], move)){                             "
-					"   data_arith((string)'*', request['key_to'],   (off_t)'8');        "
-					"   data_arith((string)'*', request['key_from'], (off_t)'8');        "
-					"   ret = pass(request);                                             "
-					"};                                                                  " 
-					
-					"if(!data_cmp(request['action'], count)){                            "
-					"   ret = pass(request);                                             "
-					"   data_arith((string)'/', request['buffer'], (off_t)'8');          "
-					"};                                                                  "
-				)},
-				hash_end
-			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("list")                               },
-				hash_end
-			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("insert-sort")                        },
-				{ "engine",       DATA_STRING("binsearch")                          },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
-	};
-	
+	hash_t     *c_idx = configs_file_parse("config_simple_idx.conf");
+		fail_unless(c_idx != NULL, "chain 'real_store_idx_str' config parse failed");
 	backend_t  *b_idx = backend_new(c_idx);
+		fail_unless(b_idx != NULL, "chain 'real_store_idx_str' backend create failed");
+	hash_free(c_idx);
 	
 	off_t  data_ptrs[6];
 	char  *data_array[] = {

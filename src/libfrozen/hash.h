@@ -47,7 +47,7 @@ API void *             hash_get_value_ptr           (hash_t *hash);
 API size_t             hash_get_value_size          (hash_t *hash);
 
 API hash_t *           hash_copy                    (hash_t *hash);
-API void               hash_free                    (hash_t *hash, int recursive);
+API void               hash_free                    (hash_t *hash);
 API size_t             hash_get_nelements           (hash_t *hash);
 
 #ifdef DEBUG

@@ -238,7 +238,7 @@ static void wfrozen_init(void){
 	hash_set(global_settings, "homedir", TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
 	
 	hash_t c_data[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",      DATA_STRING("file")                           },
 				{ "filename",  DATA_STRING("data_ffs_data.dat")              },
@@ -252,7 +252,7 @@ static void wfrozen_init(void){
 	backend2 = wfrozen_backend_new(c_data);
 	
 	hash_t c_idx[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",         DATA_STRING("file")                               },
 				{ "filename",     DATA_STRING("data_ffs_idx.dat")                   },

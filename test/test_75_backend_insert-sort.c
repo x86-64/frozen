@@ -5,7 +5,7 @@ START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
 	hash_t  settings[] = {
-		{ NULL, DATA_HASHT(
+		{ "chains", DATA_HASHT(
 			{ NULL, DATA_HASHT(
 				{ "name",        DATA_STRING("file")                         },
 				{ "filename",    DATA_STRING("data_backend_insert_sort.dat") },

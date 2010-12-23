@@ -212,7 +212,7 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 	
 	frozen_init();
 		hash_t  b_config[] = {
-			{ NULL, DATA_HASHT(
+			{ "chains", DATA_HASHT(
 				{ "name",     DATA_STRING("file")                                           },
 				{ "filename", DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
 				hash_end
@@ -263,7 +263,7 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 	
 	frozen_init();
 		hash_t  b_config[] = {
-			{ NULL, DATA_HASHT(
+			{ "chains", DATA_HASHT(
 				{ "name",     DATA_STRING("file")                                           },
 				{ "filename", DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
 				hash_end
