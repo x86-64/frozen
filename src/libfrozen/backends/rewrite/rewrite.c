@@ -343,13 +343,8 @@ ablock_continue:
 				
 				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
-				hash_t find_backend[] = {
-					{ "name", *from_data }, // TODO ctx
-					hash_end
-				};
-				
 				backend_t *backend;
-				if( (backend = backend_new(find_backend)) == NULL)
+				if( (backend = backend_acquire(from_data)) == NULL) // TODO ctx
 					return -EINVAL;
 				
 				temp_ret = backend_query(backend, env->requests[param2->id]);
@@ -365,6 +360,10 @@ ablock_continue:
 		
 		switch(to->type){
 			case THING_ARRAY_REQUEST_KEY:;
+				if(from_data == NULL){
+					data_alloc_local(&temp_any, TYPE_VOID, 0);
+					from_data = &temp_any;
+				}
 				request_t **request = &env->requests[to->id];
 				
 				hash_t  proto_key[] = {

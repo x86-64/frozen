@@ -74,6 +74,9 @@ libfrozen_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo \
+	backends/mphf/libfrozen_la-mphf.lo \
+	backends/mphf/libfrozen_la-mphf_chm_imp.lo \
+	backends/mphf/libfrozen_la-hash_jenkins.lo \
 	backends/rewrite/libfrozen_la-rewrite.lo \
 	backends/rewrite/libfrozen_la-rule_parser.tab.lo \
 	backends/rewrite/libfrozen_la-rule_parser.lex.lo \
@@ -231,6 +234,9 @@ backends_sources = \
 	backends/null-proxy.c                \
 	backends/file.c                      \
 	backends/list.c                      \
+	backends/mphf/mphf.c                 \
+	backends/mphf/mphf_chm_imp.c         \
+	backends/mphf/hash_jenkins.c         \
 	backends/rewrite/rewrite.c           \
 	backends/rewrite/rule_parser.tab.c   \
 	backends/rewrite/rule_parser.lex.c   \
@@ -362,6 +368,20 @@ backends/libfrozen_la-file.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-list.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
+backends/mphf/$(am__dirstamp):
+	@$(MKDIR_P) backends/mphf
+	@: > backends/mphf/$(am__dirstamp)
+backends/mphf/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) backends/mphf/$(DEPDIR)
+	@: > backends/mphf/$(DEPDIR)/$(am__dirstamp)
+backends/mphf/libfrozen_la-mphf.lo: backends/mphf/$(am__dirstamp) \
+	backends/mphf/$(DEPDIR)/$(am__dirstamp)
+backends/mphf/libfrozen_la-mphf_chm_imp.lo:  \
+	backends/mphf/$(am__dirstamp) \
+	backends/mphf/$(DEPDIR)/$(am__dirstamp)
+backends/mphf/libfrozen_la-hash_jenkins.lo:  \
+	backends/mphf/$(am__dirstamp) \
+	backends/mphf/$(DEPDIR)/$(am__dirstamp)
 backends/rewrite/$(am__dirstamp):
 	@$(MKDIR_P) backends/rewrite
 	@: > backends/rewrite/$(am__dirstamp)
@@ -409,6 +429,12 @@ mostlyclean-compile:
 	-rm -f backends/libfrozen_la-list.lo
 	-rm -f backends/libfrozen_la-null-proxy.$(OBJEXT)
 	-rm -f backends/libfrozen_la-null-proxy.lo
+	-rm -f backends/mphf/libfrozen_la-hash_jenkins.$(OBJEXT)
+	-rm -f backends/mphf/libfrozen_la-hash_jenkins.lo
+	-rm -f backends/mphf/libfrozen_la-mphf.$(OBJEXT)
+	-rm -f backends/mphf/libfrozen_la-mphf.lo
+	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.$(OBJEXT)
+	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.lo
 	-rm -f backends/rewrite/libfrozen_la-rewrite.$(OBJEXT)
 	-rm -f backends/rewrite/libfrozen_la-rewrite.lo
 	-rm -f backends/rewrite/libfrozen_la-rule_parser.lex.$(OBJEXT)
@@ -434,6 +460,9 @@ include backends/$(DEPDIR)/libfrozen_la-file.Plo
 include backends/$(DEPDIR)/libfrozen_la-list.Plo
 include backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo
 include backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo
+include backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo
+include backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
+include backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Plo
 include backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo
 include backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo
 include backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Plo
@@ -527,6 +556,27 @@ backends/libfrozen_la-list.lo: backends/list.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
 
+backends/mphf/libfrozen_la-mphf.lo: backends/mphf/mphf.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c
+	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
+#	source='backends/mphf/mphf.c' object='backends/mphf/libfrozen_la-mphf.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c
+
+backends/mphf/libfrozen_la-mphf_chm_imp.lo: backends/mphf/mphf_chm_imp.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf_chm_imp.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Tpo -c -o backends/mphf/libfrozen_la-mphf_chm_imp.lo `test -f 'backends/mphf/mphf_chm_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_chm_imp.c
+	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Plo
+#	source='backends/mphf/mphf_chm_imp.c' object='backends/mphf/libfrozen_la-mphf_chm_imp.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf_chm_imp.lo `test -f 'backends/mphf/mphf_chm_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_chm_imp.c
+
+backends/mphf/libfrozen_la-hash_jenkins.lo: backends/mphf/hash_jenkins.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-hash_jenkins.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Tpo -c -o backends/mphf/libfrozen_la-hash_jenkins.lo `test -f 'backends/mphf/hash_jenkins.c' || echo '$(srcdir)/'`backends/mphf/hash_jenkins.c
+	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo
+#	source='backends/mphf/hash_jenkins.c' object='backends/mphf/libfrozen_la-hash_jenkins.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-hash_jenkins.lo `test -f 'backends/mphf/hash_jenkins.c' || echo '$(srcdir)/'`backends/mphf/hash_jenkins.c
+
 backends/rewrite/libfrozen_la-rewrite.lo: backends/rewrite/rewrite.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rewrite.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo -c -o backends/rewrite/libfrozen_la-rewrite.lo `test -f 'backends/rewrite/rewrite.c' || echo '$(srcdir)/'`backends/rewrite/rewrite.c
 	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo
@@ -583,6 +633,7 @@ clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf backends/.libs backends/_libs
 	-rm -rf backends/insert-sort/.libs backends/insert-sort/_libs
+	-rm -rf backends/mphf/.libs backends/mphf/_libs
 	-rm -rf backends/rewrite/.libs backends/rewrite/_libs
 	-rm -rf configs/.libs configs/_libs
 
@@ -701,6 +752,8 @@ distclean-generic:
 	-rm -f backends/$(am__dirstamp)
 	-rm -f backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
 	-rm -f backends/insert-sort/$(am__dirstamp)
+	-rm -f backends/mphf/$(DEPDIR)/$(am__dirstamp)
+	-rm -f backends/mphf/$(am__dirstamp)
 	-rm -f backends/rewrite/$(DEPDIR)/$(am__dirstamp)
 	-rm -f backends/rewrite/$(am__dirstamp)
 	-rm -f configs/$(DEPDIR)/$(am__dirstamp)
@@ -715,7 +768,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -761,7 +814,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

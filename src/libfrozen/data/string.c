@@ -118,8 +118,9 @@ ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_
 
 /*
 REGISTER_TYPE(`TYPE_STRING')
-REGISTER_MACRO(`DATA_STRING(value)',      `TYPE_STRING, value, sizeof(value)')
+REGISTER_MACRO(`DATA_STRING(value)',          `TYPE_STRING, value, sizeof(value)')
 REGISTER_MACRO(`DATA_PTR_STRING(value,size)', `TYPE_STRING, value, size')
+REGISTER_MACRO(`DATA_PTR_STRING_AUTO(value)', `TYPE_STRING, value, strlen(value)+1')
 REGISTER_PROTO(
 	`{
 		.type          = TYPE_STRING,

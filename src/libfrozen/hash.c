@@ -62,6 +62,9 @@ int                hash_iter                    (hash_t *hash, hash_iterator fun
 	hash_t      *value = hash;
 	int          ret;
 	
+	if(hash == NULL)
+		return ITER_BREAK;
+	
 	while(value->key != hash_ptr_end){
 		if( value->key == hash_ptr_null )
 			goto next;

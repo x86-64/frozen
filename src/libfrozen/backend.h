@@ -70,12 +70,15 @@ _inline int chain_configure    (chain_t *chain, hash_t *config);
 /* backends {{{ */
 
 typedef struct backend_t {
-	char           *name;
 	chain_t        *chain;
+	data_t          name;
 	unsigned int    refs;
 } backend_t;
 
 API backend_t *     backend_new             (hash_t *config);
+API ssize_t         backend_bulk_new        (hash_t *config);
+API backend_t *     backend_acquire         (data_t *name);
+API backend_t *     backend_find            (data_t *name);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
 

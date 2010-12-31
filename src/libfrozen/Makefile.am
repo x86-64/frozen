@@ -2,6 +2,9 @@ backends_sources =                           \
 	backends/null-proxy.c                \
 	backends/file.c                      \
 	backends/list.c                      \
+	backends/mphf/mphf.c                 \
+	backends/mphf/mphf_chm_imp.c         \
+	backends/mphf/hash_jenkins.c         \
 	backends/rewrite/rewrite.c           \
 	backends/rewrite/rule_parser.tab.c   \
 	backends/rewrite/rule_parser.lex.c   \

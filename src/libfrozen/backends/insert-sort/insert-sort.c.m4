@@ -17,6 +17,7 @@ struct sort_proto_t {
 struct sorts_user_data {
 	chain_t         *chain;
 	sort_proto_t    *engine;
+	char            *sort_field;
 };
 
 /* m4 {{{
@@ -45,6 +46,7 @@ static int sorts_init(chain_t *chain){ // {{{
 static int sorts_destroy(chain_t *chain){ // {{{
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
+	free(data->sort_field);
 	free(data);
 	chain->user_data = NULL;
 	
@@ -53,6 +55,7 @@ static int sorts_destroy(chain_t *chain){ // {{{
 static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	unsigned int     i;
 	char            *sort_engine_str;
+	char            *sort_field;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
 	data->chain = chain;
@@ -70,6 +73,11 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	if(data->engine == NULL)
 		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
 	
+	if(hash_get_typed(config, TYPE_STRING, "field", (void **)&sort_field, NULL) != 0)
+		sort_field = "buffer";
+	
+	data->sort_field = strdup(sort_field);
+	
 	return 0;
 } // }}}
 /* }}} */
@@ -80,9 +88,9 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	data_ctx_t      *buffer_ctx, *key_out_ctx;
 	sorts_user_data *data = (sorts_user_data *)chain->user_data;
 	
-	if( (buffer = hash_get_data(request, "buffer")) == NULL)
+	if( (buffer = hash_get_data(request, data->sort_field)) == NULL)
 		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, "buffer");
+	buffer_ctx = hash_get_data_ctx(request, data->sort_field);
 	
 	if( (key_out = hash_get_data(request, "key_out")) == NULL)
 		return -EINVAL;

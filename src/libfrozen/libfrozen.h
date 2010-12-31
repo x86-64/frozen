@@ -10,6 +10,7 @@
 #define _XOPEN_SOURCE 500 
 
 /* Standart libraries */
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -28,6 +29,7 @@
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
 #define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
 #define MIN(a,b)              ( (a > b) ? b : a )
+#define TYPE_MAX(type)        ( (type)-1 )
 
 /* Own headers */
 #include <public.h>

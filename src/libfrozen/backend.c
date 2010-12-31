@@ -130,14 +130,15 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	data_t    *name    = (data_t *)p_name;
 	backend_t *backend = (backend_t *)p_backend;
 	
-	if(backend->name == NULL)
-		return ITER_CONTINUE;
-	
-	if(strcmp(backend->name, name->data_ptr) == 0){ // TODO replace backend->name with data_t
+	if(data_cmp(&backend->name, NULL, name, NULL) == 0){
 		*(backend_t **)p_backend_t = backend;
 		return ITER_BREAK;
 	}
 	return ITER_CONTINUE;
+}
+
+static int backend_iter_backend_new(hash_t *config, void *null1, void *null2){
+	return (backend_new(hash_get_value_ptr(config)) == NULL) ? ITER_BREAK : ITER_CONTINUE;
 }
 
 /* }}}1 */
@@ -146,45 +147,59 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 backend_t *  backend_new      (hash_t *config){
 	int         ret;
 	data_t     *name, *chains;
-	hash_t     *backend_config;
+	data_t      name_null = DATA_VOID;
 	backend_t  *backend = NULL;
 	
-	name   = hash_get_typed_data(config, TYPE_STRING, "name");
-	chains = hash_get_typed_data(config, TYPE_HASHT,  "chains");
-	
-	if(name == NULL && chains == NULL) // nothing to do
+	if( (chains = hash_get_typed_data(config, TYPE_HASHT,  "chains")) == NULL)
 		return NULL;
 	
-	if(chains == NULL){
-		// find exising chain
-		list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
-		if(backend != NULL)
-			backend->refs++;
-	}else{
-		// register new one
-		if( (backend = malloc(sizeof(backend_t))) == NULL)
-			return NULL;
-		
-		backend->chain = NULL;
-		backend->refs  = 1;
-		backend->name  = (name) ?
-			strdup(name->data_ptr) : NULL; // TODO replace with data_t
-		
-		backend_config = data_value_ptr(chains);
-		
-		ret = hash_iter(backend_config, &backend_iter_chain_init, backend, &backend->chain);
-		if(ret == ITER_BREAK){
-			backend_destroy(backend);
-			return NULL;
-		}
-		
-		list_push(&backends, backend);
+	if( (name   = hash_get_typed_data(config, TYPE_STRING, "name")) == NULL)
+		name = &name_null;
+	
+	// register new one
+	if( (backend = malloc(sizeof(backend_t))) == NULL)
+		return NULL;
+	
+	backend->chain = NULL;
+	backend->refs  = 1;
+	data_copy(&backend->name, name);
+	
+	ret = hash_iter(data_value_ptr(chains), &backend_iter_chain_init, backend, &backend->chain);
+	if(ret == ITER_BREAK){
+		backend_destroy(backend);
+		return NULL;
 	}
+	
+	list_push(&backends, backend);
+	
 	return backend;
 }
 
-char *       backend_get_name     (backend_t *backend){
-	return backend->name;
+backend_t *  backend_find(data_t *name){
+	backend_t  *backend = NULL;
+	
+	list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
+	return backend;
+}
+
+backend_t *  backend_acquire(data_t *name){
+	backend_t  *backend = backend_find(name);
+	if(backend != NULL)
+		backend->refs++;
+	
+	return backend;
+}
+
+ssize_t      backend_bulk_new(hash_t *config){
+	if(hash_iter(config, &backend_iter_backend_new, NULL, NULL) == ITER_BREAK){
+		// TODO destory previosly allocated backends
+		return -EINVAL;
+	}
+	return 0;
+}
+
+char *          backend_get_name        (backend_t *backend){
+	return backend->name.data_ptr; // TODO BAAAAD
 }
 
 ssize_t      backend_query        (backend_t *backend, request_t *request){
@@ -212,8 +227,7 @@ void         backend_destroy  (backend_t *backend){
 		chain_curr = chain_next;
 	}
 	
-	if(backend->name != NULL)
-		free(backend->name);
+	data_free(&backend->name);
 	free(backend);
 }
 /* }}}1 */
