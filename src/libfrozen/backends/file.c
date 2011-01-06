@@ -9,7 +9,7 @@ typedef enum file_stat_status {
 	STAT_ERROR
 } file_stat_status;
 
-typedef struct file_user_data {
+typedef struct file_userdata {
 	char *           path;
 	int              handle;
 	size_t           buffer_size;
@@ -19,7 +19,7 @@ typedef struct file_user_data {
 	pthread_mutex_t  create_lock;
 	
 	data_t           file_io;
-} file_user_data;
+} file_userdata;
 
 
 // IO's
@@ -107,7 +107,7 @@ static int               file_new_offset(chain_t *chain, off_t *new_key, unsigne
 	int               ret;
 	off_t             key;
 	pthread_mutex_t  *mutex;
-	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	file_userdata   *data        = ((file_userdata *)chain->userdata);
 	
 	fd    =  data->handle;
 	mutex = &data->create_lock;
@@ -128,7 +128,7 @@ static int               file_new_offset(chain_t *chain, off_t *new_key, unsigne
 	
 	return ret;
 } // }}}
-static file_stat_status  file_update_count(file_user_data *data){ // {{{
+static file_stat_status  file_update_count(file_userdata *data){ // {{{
 	int              ret;
 	
 	switch(data->file_stat_status){
@@ -148,16 +148,16 @@ static file_stat_status  file_update_count(file_user_data *data){ // {{{
 
 // Init and destroy
 static int file_init(chain_t *chain){ // {{{
-	file_user_data *user_data = calloc(1, sizeof(file_user_data));
-	if(user_data == NULL)
+	file_userdata *userdata = calloc(1, sizeof(file_userdata));
+	if(userdata == NULL)
 		return -ENOMEM;
 	
-	chain->user_data = user_data;
+	chain->userdata = userdata;
 	
 	return 0;
 } // }}}
 static int file_destroy(chain_t *chain){ // {{{
-	file_user_data *data = (file_user_data *)chain->user_data;
+	file_userdata *data = (file_userdata *)chain->userdata;
 	
 	if(data->path){
 		// was inited
@@ -168,9 +168,9 @@ static int file_destroy(chain_t *chain){ // {{{
 		pthread_mutex_destroy(&(data->create_lock));
 	}
 	
-	free(chain->user_data);
+	free(chain->userdata);
 	
-	chain->user_data = NULL;
+	chain->userdata = NULL;
 	
 	return 0;
 } // }}}
@@ -210,9 +210,9 @@ static int file_configure(chain_t *chain, hash_t *config){ // {{{
 	
 	buffer_size =
 		(hash_get_typed(config, TYPE_SIZET, "buffer_size", (void **)&temp, NULL) == 0) ?
-		*(unsigned int *)temp : DEF_BUFFER_SIZE;
+		*(size_t *)temp : DEF_BUFFER_SIZE;
 	
-	file_user_data *data = (file_user_data *)chain->user_data;
+	file_userdata *data = (file_userdata *)chain->userdata;
 	
 	data->path             = filepath;
 	data->handle           = handle;
@@ -259,7 +259,6 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	}
 	return 0;
 } // }}}
-
 static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
@@ -272,7 +271,7 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	data_ctx_t       *key_out_ctx;
 	
 	ssize_t           ret         = -1;
-	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	file_userdata    *data        = ((file_userdata *)chain->userdata);
 	
 	/* get buffer info */
 	if( (buffer = hash_get_data(request, "buffer")) == NULL)
@@ -336,7 +335,7 @@ static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
 	data_t           *key, *size;
 	
 	ssize_t           ret         = -1;
-	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	file_userdata   *data        = ((file_userdata *)chain->userdata);
 	
 	/* get buffer info */
 	if( (buffer = hash_get_data(request, "buffer")) == NULL)
@@ -376,7 +375,7 @@ static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 	int               forced = 0;
 	ssize_t           ret;
 	pthread_mutex_t  *mutex;
-	file_user_data   *data        = ((file_user_data *)chain->user_data);
+	file_userdata   *data        = ((file_userdata *)chain->userdata);
 	hash_t           *r_key;
 	hash_t           *r_value_size;
 	hash_t           *r_force;
@@ -426,7 +425,7 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	char *           buff;
 	int              direction;
 	int              ret         = 0;
-	file_user_data  *data        = ((file_user_data *)chain->user_data);
+	file_userdata  *data        = ((file_userdata *)chain->userdata);
 	hash_t           *r_key_from;
 	hash_t           *r_key_to;
 	hash_t           *r_value_size;
@@ -510,7 +509,7 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 static ssize_t file_count(chain_t *chain, request_t *request){ // {{{
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
-	file_user_data  *data = ((file_user_data *)chain->user_data);
+	file_userdata  *data = ((file_userdata *)chain->userdata);
 	
 	if( (buffer = hash_get_data(request, "buffer")) == NULL)
 		return -EINVAL;

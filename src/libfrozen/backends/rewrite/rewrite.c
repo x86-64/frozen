@@ -68,21 +68,21 @@
 #include <alloca.h>
 #include <backends/rewrite/rewrite.h>
 
-typedef struct rewrite_user_data {
+typedef struct rewrite_userdata {
 	unsigned int      inited;
 	rewrite_script_t  script;
-} rewrite_user_data;
+} rewrite_userdata;
 /* }}} */
 
 /* init {{{ */
 static int rewrite_init(chain_t *chain){ // {{{
-	if( (chain->user_data = malloc(sizeof(rewrite_user_data))) == NULL)
+	if( (chain->userdata = malloc(sizeof(rewrite_userdata))) == NULL)
 		return -ENOMEM;
 	
 	return 0;
 } // }}}
 static int rewrite_destroy(chain_t *chain){ // {{{
-	rewrite_user_data *data = (rewrite_user_data *)chain->user_data;
+	rewrite_userdata *data = (rewrite_userdata *)chain->userdata;
 	
 	if(data->inited == 1){
 		rewrite_script_free(&data->script);
@@ -92,7 +92,7 @@ static int rewrite_destroy(chain_t *chain){ // {{{
 } // }}}
 static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 	data_t            *script;
-	rewrite_user_data *data = (rewrite_user_data *)chain->user_data;
+	rewrite_userdata *data = (rewrite_userdata *)chain->userdata;
 	
 	if( (script = hash_get_typed_data(config, TYPE_STRING, "script")) == NULL)
 		return_error(-EINVAL, "chain 'rewrite' parameter 'script' not supplied\n");
@@ -406,7 +406,7 @@ ablock_continue:
 static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 	size_t                temp_size;
 	rewrite_script_env_t  env;
-	rewrite_user_data    *data = (rewrite_user_data *)chain->user_data;
+	rewrite_userdata    *data = (rewrite_userdata *)chain->userdata;
 	
 	/* if no actions - pass to next chain */
 	if(data->script.main->actions_count == 0)

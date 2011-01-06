@@ -1,5 +1,5 @@
 
-ssize_t             sorts_binsearch_find (sorts_user_data *data, data_t *buffer1, data_ctx_t *buffer1_ctx, data_t *key_out, data_ctx_t *key_out_ctx){
+ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1, data_ctx_t *buffer1_ctx, data_t *key_out, data_ctx_t *key_out_ctx){
 	ssize_t         ret;
 	off_t           range_start, range_end, current;
 	data_t          d_current = DATA_PTR_OFFT(&current);

@@ -121,6 +121,8 @@ REGISTER_TYPE(`TYPE_STRING')
 REGISTER_MACRO(`DATA_STRING(value)',          `TYPE_STRING, value, sizeof(value)')
 REGISTER_MACRO(`DATA_PTR_STRING(value,size)', `TYPE_STRING, value, size')
 REGISTER_MACRO(`DATA_PTR_STRING_AUTO(value)', `TYPE_STRING, value, strlen(value)+1')
+REGISTER_RAW_MACRO(`DT_STRING', `char *')
+REGISTER_RAW_MACRO(`GET_TYPE_STRING(value)', `(char *)value->data_ptr')
 REGISTER_PROTO(
 	`{
 		.type          = TYPE_STRING,

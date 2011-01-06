@@ -5,16 +5,16 @@
 #define KEY_NOT_FOUND 1
 
 typedef struct sort_proto_t     sort_proto_t;
-typedef struct sorts_user_data  sorts_user_data;
+typedef struct sorts_userdata  sorts_userdata;
 
-typedef ssize_t (*func_find_key)(sorts_user_data *data, data_t *, data_ctx_t *, data_t *, data_ctx_t *);
+typedef ssize_t (*func_find_key)(sorts_userdata *data, data_t *, data_ctx_t *, data_t *, data_ctx_t *);
 
 struct sort_proto_t {
 	char           *name;
 	func_find_key   func_find;
 };
 
-struct sorts_user_data {
+struct sorts_userdata {
 	chain_t         *chain;
 	sort_proto_t    *engine;
 	char            *sort_field;
@@ -35,20 +35,20 @@ sort_proto_t  sort_protos[] = { VAR_ARRAY() };
 
 /* init {{{ */
 static int sorts_init(chain_t *chain){ // {{{
-	sorts_user_data *user_data = calloc(1, sizeof(sorts_user_data));
-	if(user_data == NULL)
+	sorts_userdata *userdata = calloc(1, sizeof(sorts_userdata));
+	if(userdata == NULL)
 		return -ENOMEM;
 	
-	chain->user_data = user_data;
+	chain->userdata = userdata;
 	
 	return 0;
 } // }}}
 static int sorts_destroy(chain_t *chain){ // {{{
-	sorts_user_data *data = (sorts_user_data *)chain->user_data;
+	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
 	free(data->sort_field);
 	free(data);
-	chain->user_data = NULL;
+	chain->userdata = NULL;
 	
 	return 0;
 } // }}}
@@ -56,7 +56,7 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	unsigned int     i;
 	char            *sort_engine_str;
 	char            *sort_field;
-	sorts_user_data *data = (sorts_user_data *)chain->user_data;
+	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
 	data->chain = chain;
 	
@@ -86,7 +86,7 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	ssize_t          ret;
 	data_t          *buffer, *key_out;
 	data_ctx_t      *buffer_ctx, *key_out_ctx;
-	sorts_user_data *data = (sorts_user_data *)chain->user_data;
+	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
 	if( (buffer = hash_get_data(request, data->sort_field)) == NULL)
 		return -EINVAL;
@@ -129,7 +129,7 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 static ssize_t sorts_custom(chain_t *chain, request_t *request){
 	/*
 	hash_t *r_funcname;
-	sorts_user_data *data = (sorts_user_data *)chain->user_data;
+	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
 	if( (r_funcname = hash_find_typed(request, TYPE_STRING, "function")) == NULL)
 		return -EINVAL;

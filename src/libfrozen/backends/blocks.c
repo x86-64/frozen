@@ -7,19 +7,19 @@ typedef struct block_info {
 	unsigned int  size;
 } block_info;
 
-typedef struct blocks_user_data {
+typedef struct blocks_userdata {
 	backend_t    *bk_map;
 	chain_t      *ch_real;
 	
 	size_t        block_size;
 	off_t         blocks_count;
 	
-} blocks_user_data;
+} blocks_userdata;
 
 // 'blocks' chain splits underlying data space into blocks.
 // This is useful for reducing copy time in insert operations
 
-static ssize_t   map_new            (blocks_user_data *data, unsigned int b_off, unsigned int b_size){ // {{{
+static ssize_t   map_new            (blocks_userdata *data, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
 		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
 		{ "block_off",  DATA_PTR_INT32(&b_off)         },
@@ -28,7 +28,7 @@ static ssize_t   map_new            (blocks_user_data *data, unsigned int b_off,
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
-static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
+static ssize_t   map_insert         (blocks_userdata *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
 		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
 		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
@@ -38,7 +38,7 @@ static ssize_t   map_insert         (blocks_user_data *data, unsigned int b_vid,
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
-static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid, unsigned int new_size){ // {{{
+static ssize_t   map_resize         (blocks_userdata *data, unsigned int b_vid, unsigned int new_size){ // {{{
 	hash_t  req_write[] = {
 		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
 		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
@@ -47,7 +47,7 @@ static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid,
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
-/*static ssize_t   map_delete         (blocks_user_data *data, unsigned int b_vid){ // {{{
+/*static ssize_t   map_delete         (blocks_userdata *data, unsigned int b_vid){ // {{{
 	hash_t  req_delete[] = {
 		{ "action",     DATA_INT32(ACTION_CRWD_DELETE) },
 		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
@@ -55,7 +55,7 @@ static ssize_t   map_resize         (blocks_user_data *data, unsigned int b_vid,
 	};
 	return backend_query(data->bk_map, req_delete);
 } // }}}*/
-static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
+static ssize_t   map_off            (blocks_userdata *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
 	hash_t    req_read[] = {
 		{ "action",       DATA_INT32(ACTION_CRWD_READ) },
 		{ "offset",       DATA_PTR_OFFT(&virt_off)     },
@@ -66,7 +66,7 @@ static ssize_t   map_off            (blocks_user_data *data, off_t virt_off, uns
 	
 	return backend_query(data->bk_map, req_read);
 } // }}}
-static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
+static ssize_t   map_get_block      (blocks_userdata *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
 	hash_t    req_read[] = {
 		{ "action",      DATA_INT32(ACTION_CRWD_READ) },
 		{ "blocks",      DATA_INT32(1)                },
@@ -78,7 +78,7 @@ static ssize_t   map_get_block      (blocks_user_data *data, unsigned int block_
 	
 	return backend_query(data->bk_map, req_read);
 } // }}}
-static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
+static ssize_t   map_blocks         (blocks_userdata *data){ // {{{
 	ssize_t  ret;
 	
 	buffer_t req_buffer;
@@ -96,7 +96,7 @@ static ssize_t   map_blocks         (blocks_user_data *data){ // {{{
 	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
-static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_off){ // {{{
+static ssize_t   real_new           (blocks_userdata *data, off_t *real_block_off){ // {{{
 	ssize_t   ret;
 	
 	buffer_t  req_buffer;
@@ -113,7 +113,7 @@ static ssize_t   real_new           (blocks_user_data *data, off_t *real_block_o
 	buffer_destroy(&req_buffer);
 	return ret;
 } // }}}
-static ssize_t   real_move          (blocks_user_data *data, off_t from, off_t to, size_t size){ // {{{
+static ssize_t   real_move          (blocks_userdata *data, off_t from, off_t to, size_t size){ // {{{
 	if(from == to || size == 0)
 		return 0;
 	
@@ -142,7 +142,7 @@ static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_
 	// TODO eh.. how it works?
 	// NOTE this is HELL!
 	
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	if(map_off(data, src, &src_block_vid, &src_real) != 0)
 		return -EINVAL;
@@ -221,7 +221,7 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	off_t         block_roff;
 	size_t        block_size;
 	
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	if(map_off(data, start,        &start_block_vid, &start_real) != 0)
 		return -EFAULT;
@@ -262,29 +262,29 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 
 /* init {{{ */
 static int blocks_init(chain_t *chain){
-	blocks_user_data *user_data = calloc(1, sizeof(blocks_user_data));
-	if(user_data == NULL)
+	blocks_userdata *userdata = calloc(1, sizeof(blocks_userdata));
+	if(userdata == NULL)
 		return -ENOMEM;
 	
-	chain->user_data = user_data;
+	chain->userdata = userdata;
 	
 	return 0;
 }
 
 static int blocks_destroy(chain_t *chain){
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	backend_destroy(data->bk_map);
-	free(chain->user_data);
+	free(chain->userdata);
 	
-	chain->user_data = NULL;
+	chain->userdata = NULL;
 	return 0;
 }
 
 static int blocks_configure(chain_t *chain, hash_t *config){
 	void             *temp;
 	hash_t           *r_backend;
-	blocks_user_data *data         = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data         = (blocks_userdata *)chain->userdata;
 	
 	data->block_size =
 		(hash_get_typed(config, TYPE_INT32, "block_size", &temp, NULL) == 0) ?
@@ -309,7 +309,7 @@ static int blocks_configure(chain_t *chain, hash_t *config){
 static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	unsigned int      element_size;
 	
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	off_t             block_off;
 	size_t            block_size;
 	off_t             block_vid;
@@ -372,7 +372,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	unsigned int      block_vid;
 	hash_t           *r_key_virt;
 	data_t            key_real;
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	// TODO r_size > block_size
 	// TODO remove TYPE_OFFT from code, support all
@@ -450,7 +450,7 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	return 0;
 } // }}}
 static ssize_t blocks_count(chain_t *chain, request_t *request){ // {{{
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	return backend_query(data->bk_map, request);  // transfer query to map backend _COUNT
 } // }}}
@@ -488,7 +488,7 @@ static ssize_t   itms_insert_copy   (chain_t *chain, off_t src, off_t dst, size_
 	// TODO eh.. how it works?
 	// NOTE this is HELL!
 	
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	if(map_off(data, src, &src_block_vid, &src_real) <= 0)
 		return -EINVAL;
@@ -553,7 +553,7 @@ static ssize_t   itms_delete        (chain_t *chain, off_t start, size_t size){ 
 	off_t         block_roff;
 	size_t        block_size;
 	
-	blocks_user_data *data = (blocks_user_data *)chain->user_data;
+	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	if(map_off(data, start,        &start_block_vid, &start_real) != 0)
 		return -EFAULT;

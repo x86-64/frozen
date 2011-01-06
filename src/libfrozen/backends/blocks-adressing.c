@@ -15,10 +15,10 @@ typedef struct tree_t {
 	unsigned int   read_per_calc;
 } tree_t;
 
-typedef struct addrs_user_data {
+typedef struct addrs_userdata {
 	tree_t       *tree;
 
-} addrs_user_data;
+} addrs_userdata;
 
 typedef struct block_info {
 	unsigned int  real_block_off; 
@@ -432,23 +432,23 @@ static unsigned int tree_blocks_count(tree_t *tree){ // {{{
 
 /* init {{{ */
 static int addrs_init(chain_t *chain){
-	addrs_user_data *user_data = calloc(1, sizeof(addrs_user_data));
-	if(user_data == NULL)
+	addrs_userdata *userdata = calloc(1, sizeof(addrs_userdata));
+	if(userdata == NULL)
 		return -ENOMEM;
 	
-	chain->user_data = user_data;
+	chain->userdata = userdata;
 	
 	return 0;
 }
 
 static int addrs_destroy(chain_t *chain){
-	addrs_user_data *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata *data = (addrs_userdata *)chain->userdata;
 	
 	tree_free(data->tree);
 	
-	free(chain->user_data);
+	free(chain->userdata);
 	
-	chain->user_data = NULL;
+	chain->userdata = NULL;
 	return 0;
 }
 
@@ -457,7 +457,7 @@ static int addrs_configure(chain_t *chain, hash_t *config){
 	unsigned int      elements_per_level;
 	unsigned int      read_per_calc;
 	
-	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	elements_per_level =
 		(hash_get_typed(config, TYPE_INT32, "per-level", &temp, NULL) == 0) ?
@@ -488,7 +488,7 @@ static ssize_t addrs_set(chain_t *chain, request_t *request){
 	unsigned int      block_vid;
 	unsigned int      insert       = 1;
 	hash_t           *r_block_size, *r_block_vid, *r_block_off;
-	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	if( (r_block_size = hash_find_typed(request, TYPE_INT32, "block_size")) == NULL) 
 		return -EINVAL;
@@ -520,7 +520,7 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 	unsigned int     *o_block_size  = &def_block_size;
 	block_info        block;
 	hash_t           *r_virt_key, *r_block_vid;
-	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	hash_get_typed(request, TYPE_OFFT,  "real_offset", (void **)&o_real_offset, NULL);
 	hash_get_typed(request, TYPE_INT32, "block_vid",   (void **)&o_block_vid,   NULL);
@@ -546,7 +546,7 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 
 static ssize_t addrs_delete(chain_t *chain, request_t *request){
 	hash_t           *r_block_vid;
-	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
 		return -EINVAL;
@@ -557,7 +557,7 @@ static ssize_t addrs_delete(chain_t *chain, request_t *request){
 static ssize_t addrs_count(chain_t *chain, request_t *request){
 	size_t            units_count; 
 	buffer_t         *buffer;
-	addrs_user_data  *data = (addrs_user_data *)chain->user_data;
+	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
 		return -EINVAL;

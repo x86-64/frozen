@@ -14,6 +14,12 @@ m4_define(`REGISTER_MACRO', `
 		`#define $1 { $2 }'
 	)
 ')
+m4_define(`REGISTER_RAW_MACRO', `
+	m4_define(`MACRO_ARRAY',
+		m4_defn(`MACRO_ARRAY')
+		`#define $1 $2 '
+	)
+')
 m4_define(`REGISTER_STRUCT', `
 	m4_define(`STRUCT_ARRAY',
 		m4_defn(`STRUCT_ARRAY')
@@ -52,11 +58,6 @@ MACRO_ARRAY()
 
 #define DATA_INVALID  { TYPE_INVALID, NULL, 0 }
 #define DEF_BUFFER_SIZE 1024
-
-struct data_ctx_t {
-	data_proto_t   *data_proto;
-	void           *user_data;
-};
 
 struct data_t {
 	data_type       type;

@@ -49,7 +49,7 @@ struct chain_t {
 	};
 	
 	chain_t *   next;
-	void *      user_data;
+	void *      userdata;
 }; 
 
 #define CHAIN_REGISTER(chain_info) \

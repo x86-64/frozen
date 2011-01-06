@@ -57,4 +57,11 @@ API void               hash_dump                    (hash_t *hash);
 API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
+
+#define hash_copy_data(_hash,_type,_key,_out,_default) {        \
+	data_t *temp;                                           \
+	_out = ((temp = hash_get_data(_hash, _key)) != NULL) ?  \
+		GET_##_type(temp) : _default;                   \
+}
+
 #endif // HASH_H

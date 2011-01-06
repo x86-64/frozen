@@ -1,3 +1,4 @@
+#include "libfrozen.h"
 #include "hash_jenkins.h"
 
 #define hashsize(n) ((uint32_t)1<<(n))
@@ -70,7 +71,7 @@ acceptable.  Do NOT use for cryptographic purposes.
 --------------------------------------------------------------------
  */
 
-uint32_t     jenkins32_hash(uint32_t seed, void *k, size_t keylen){
+uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen){
 	register uint32_t len;
 	register uint32_t a,b,c;
 	
