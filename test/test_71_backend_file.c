@@ -61,7 +61,7 @@ void  db_move(backend_t *backend, off_t key_from, off_t key_to, size_t key_size,
 
 START_TEST (test_backend_file){
 	ssize_t         ssize;
-	off_t           new_key1, new_key2;
+	off_t           new_key1, new_key2, temp;
 	buffer_t       *buffer  = buffer_alloc();
 	
 	backend_t *backend;
@@ -84,17 +84,17 @@ START_TEST (test_backend_file){
 	hash_t hash_create[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",    DATA_SIZET(10)                 },
-		{ "key_out", DATA_BUFFERT(buffer)           },
+		{ "key_out", DATA_PTR_OFFT(&temp)           },
 		hash_end
 	};
 		
 	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("backend file create key1 failed");	
-	buffer_read(buffer, 0, &new_key1, MIN(ssize, sizeof(off_t)));
+	new_key1 = temp;
 	
 	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
 		fail("backend file create key2 failed");	
-	buffer_read(buffer, 0, &new_key2, MIN(ssize, sizeof(off_t)));
+	new_key2 = temp;
 		fail_unless(new_key2 - new_key1 == 10,                 "backend file offsets invalid");
 	
 	char  key1_data[]  = "test167890";

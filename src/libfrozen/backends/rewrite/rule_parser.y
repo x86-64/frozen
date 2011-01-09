@@ -154,11 +154,10 @@ constant : '(' NAME ')' STRING {
 	data_t              d_str    = DATA_PTR_STRING($4, strlen($4)+1);
 	
 	/* convert string to needed data */
-	if(data_convert(
-		data_type_from_string($2),
-		&constant->data, NULL,
-		&d_str,          NULL
-	) != 0){
+	ssize_t retval;
+
+	data_convert_to_alloc(retval, data_type_from_string($2), &constant->data, &d_str, NULL);
+	if(retval != 0){
 		yyerror(script, "failed convert data\n"); YYERROR;
 	}
 	

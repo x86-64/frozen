@@ -88,6 +88,8 @@ ssize_t         mphf_load        (mphf_t *mphf, backend_t *backend, uint64_t off
 	
 	mphf->backend = backend;
 	
+	memset(&mphf->params, 0, sizeof(mphf_params_t));
+	
 	// pre-read
 	request_t  r_preread[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_READ)                    },
@@ -164,6 +166,9 @@ mphf_types      mphf_type_from_string(char *string){
 /* }}} */
 /* store {{{ */
 ssize_t         mphf_store_new   (mphf_t *mphf, uint32_t id, uint64_t size){
+	if(id >= mphf->params.nstores)
+		return -EINVAL;
+	
 	mphf_store_t *store = &mphf->stores[id];
 	
 	request_t  r_create[] = {
@@ -177,6 +182,9 @@ ssize_t         mphf_store_new   (mphf_t *mphf, uint32_t id, uint64_t size){
 }
 
 ssize_t         mphf_store_read  (mphf_t *mphf, uint32_t id, uint64_t offset, void *buffer, size_t buffer_size){
+	if(id >= mphf->params.nstores)
+		return -EINVAL;
+	
 	mphf_store_t *store = &mphf->stores[id];
 	
 	uint64_t foffset = store->offset + offset;
@@ -192,6 +200,9 @@ ssize_t         mphf_store_read  (mphf_t *mphf, uint32_t id, uint64_t offset, vo
 }
 
 ssize_t         mphf_store_write (mphf_t *mphf, uint32_t id, uint64_t offset, void *buffer, size_t buffer_size){
+	if(id >= mphf->params.nstores)
+		return -EINVAL;
+	
 	mphf_store_t *store = &mphf->stores[id];
 	
 	uint64_t foffset = store->offset + offset;
@@ -227,6 +238,7 @@ static int mphf_destroy(chain_t *chain){ // {{{
 	mphf_userdata *userdata = (mphf_userdata *)chain->userdata;
 	
 	backend_destroy(userdata->backend);
+	mphf_free(&userdata->main_mphf);
 	free(userdata->key);
 	free(userdata);
 	return 0;

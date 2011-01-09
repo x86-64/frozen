@@ -66,14 +66,12 @@ hash_value :
 	  STRING             { data_assign_raw(&$$, TYPE_STRING, $1, strlen($1) + 1);  }  // fucking macro nesting
 	| '{' hash_items '}' { data_assign_raw(&$$, TYPE_HASHT,  $2, 1 /*allocated*/); }; // no DATA_PTR_HASHT_FREE here
 	| '(' NAME ')' STRING {
-		data_t d_str = DATA_PTR_STRING($4, strlen($4)+1);
+		ssize_t  retval;
+		data_t   d_str = DATA_PTR_STRING($4, strlen($4)+1);
 		
 		/* convert string to needed data */
-		if(data_convert(
-			data_type_from_string($2),
-			&$$,     NULL,
-			&d_str,  NULL
-		) != 0){
+		data_convert_to_alloc(retval, data_type_from_string($2), &$$, &d_str, NULL);
+		if(retval != 0){
 			yyerror(hash, "failed convert data\n"); YYERROR;
 		}
 		

@@ -12,6 +12,12 @@ m4_define(`REGISTER_PROTO', `
 
 m4_include(data_protos.m4)
 
+#define DATA_FUNC(_type,_name) ( data_protos[_type].func_##_name ? data_protos[_type].func_##_name : data_def_##_name )
+#define DATA_FUNC_CALL(_type,_name,...) {             \
+	f_data_##_name func = DATA_FUNC(_type,_name); \
+	return func(__VA_ARGS__);                     \
+}
+
 /* data protos {{{ */
 data_proto_t data_protos[]    = { VAR_ARRAY() };
 size_t       data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);
@@ -75,6 +81,18 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
 	memcpy(data->data_ptr + d_offset, buffer, d_size);
 	return d_size;
 } // }}}
+static size_t        data_def_len           (data_t *data, data_ctx_t *context){ // {{{
+	return data->data_size;
+} // }}}
+static size_t        data_def_len2raw       (size_t unitsize){ // {{{
+	return unitsize;
+} // }}}
+static size_t        data_def_rawlen        (data_t *data, data_ctx_t *context){ // {{{
+	return data->data_size;
+} // }}}
+static ssize_t       data_def_convert       (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+	return -ENOSYS;
+} // }}}
 
 /** @brief Read from data to buffer
  *  @param[out]  dst       Data structure
@@ -95,9 +113,8 @@ ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, o
 	if(src == NULL || !data_validate(src))
 		return -EINVAL;
 	
-	func_read  = data_protos[src->type].func_read;
-	func_read  = func_read  ? func_read  : data_def_read;
-	ret      = 0;
+	func_read  = DATA_FUNC(src->type, read);
+	ret        = 0;
 	
 	while(size > 0){
 		temp      = buffer;
@@ -123,16 +140,13 @@ ssize_t              data_read              (data_t *src, data_ctx_t *src_ctx, o
 	return ret;
 } // }}}
 
-static ssize_t       data_read_raw          (data_t *src, data_ctx_t *src_ctx, off_t offset, void **buffer, size_t *size){ // {{{
-	f_data_read     func_read;
-	
-	if(src == NULL || !data_validate(src))
+static ssize_t       data_read_raw          (data_t *data, data_ctx_t *data_ctx, off_t offset, void **buffer, size_t *size){ // {{{
+	if(!data_validate(data))
 		return -EINVAL;
 	
-	func_read  = data_protos[src->type].func_read;
-	func_read  = func_read  ? func_read  : data_def_read;
-	
-	return func_read(src, src_ctx, offset, buffer, size);
+	DATA_FUNC_CALL(data->type, read,
+		data, data_ctx, offset, buffer, size
+	);
 } // }}}
 
 /** @brief Write to data from buffer
@@ -144,16 +158,13 @@ static ssize_t       data_read_raw          (data_t *src, data_ctx_t *src_ctx, o
  *  @return number of bytes written on success
  *  @return -EINVAL on error
  */
-ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ctx, off_t offset, void  *buffer, size_t  size){ // {{{
-	f_data_write    func_write;
-	
-	if(dst == NULL || !data_validate(dst))
+ssize_t              data_write             (data_t *data, data_ctx_t *data_ctx, off_t offset, void  *buffer, size_t  size){ // {{{
+	if(!data_validate(data))
 		return -EINVAL;
 	
-	func_write = data_protos[dst->type].func_write;
-	func_write = func_write ? func_write : data_def_write;
-	
-	return func_write(dst, dst_ctx, offset, buffer, size);
+	DATA_FUNC_CALL(data->type, write,
+		data, data_ctx, offset, buffer, size
+	);
 } // }}}
 
 /** @brief Get data type
@@ -216,25 +227,31 @@ char *               data_string_from_type  (data_type type){ // {{{
  *  @return 0 on error or zero data length
  */
 size_t               data_len               (data_t *data, data_ctx_t *data_ctx){ // {{{
-	f_data_len   func_len;
-	data_type    type;
-	
 	if(!data_validate(data))
 		return 0;
 	
-	type = data->type;
+	DATA_FUNC_CALL(data->type, len,
+		data, data_ctx
+	);
+} // }}}
+size_t               data_rawlen            (data_t *data, data_ctx_t *data_ctx){ // {{{
+	if(!data_validate(data))
+		return 0;
 	
-	switch(data_protos[type].size_type){
-		case SIZE_FIXED:
-			return data_protos[type].fixed_size; // TODO respect buffer size, struct.c need rewrite for this
-			
-		case SIZE_VARIABLE:
-			if( (func_len = data_protos[type].func_len) == NULL || data == NULL)
-				return 0;
-					
-			return func_len(data, data_ctx);
-	}
-	return 0;
+	DATA_FUNC_CALL(data->type, rawlen,
+		data, data_ctx
+	);
+} // }}}
+size_t               data_len2raw           (data_type type, size_t unitsize){ // {{{
+	if(!data_type_validate(type))
+		return 0;
+	
+	if(data_protos[type].size_type == SIZE_FIXED)
+		return data_protos[type].fixed_size;
+	
+	DATA_FUNC_CALL(type, len2raw,
+		unitsize
+	);
 } // }}}
 
 /** @brief Compare data
@@ -346,19 +363,15 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
  *  @return 0 on success
  *  @return -EINVAL on invalid input data
  *  @return -ENOSYS if data not support converting
- *  @pre  Fill dst->type to desired value
  *  @post Free dst structure with data_free to avoid memory leak
  */
-ssize_t              data_convert           (data_type type, data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
-	f_data_convert  func_convert;
-	
-	if(!data_type_validate(type) || !data_validate(src))
+ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){
+	if(!data_validate(dst) || !data_validate(src))
 		return -EINVAL;
 	
-	if( (func_convert = data_protos[type].func_convert) == NULL)
-		return -ENOSYS;
-	
-	return func_convert(dst, dst_ctx, src, src_ctx);
+	DATA_FUNC_CALL(dst->type, convert,
+		dst, dst_ctx, src, src_ctx
+	);
 } // }}}
 
 /** @brief Transfer info from one data to another
@@ -413,7 +426,7 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
  *  @return -EINVAL on invalid input data
  *  @post Free structure with data_free to avoid memory leak
  */
-ssize_t              data_alloc             (data_t *dst, data_type type, size_t size){
+ssize_t              data_alloc             (data_t *dst, data_type type, size_t size){ // {{{
 	// TODO IMPORTANT data related allocs
 	
 	if(dst == NULL)
@@ -431,7 +444,7 @@ ssize_t              data_alloc             (data_t *dst, data_type type, size_t
 		return -ENOMEM;
 	
 	return 0;
-}
+} // }}}
 
 /** @brief Copy data structure and data
  *  @param[out]  dst    Destination data

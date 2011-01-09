@@ -68,6 +68,8 @@ START_TEST (test_backend_mphf){
 	// check
 	char data_read[1024];
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
+		memset(data_read, 0, 1024);
+		
 		request_t r_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)                              },
 			{ "key",    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },

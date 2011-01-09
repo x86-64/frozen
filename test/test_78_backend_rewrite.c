@@ -1,6 +1,6 @@
 #include <test.h>
 
-buffer_t *buffer;
+off_t     buffer;
 
 static ssize_t test_rewrite(char *rules, request_t *request){
 	ssize_t ret;
@@ -32,9 +32,9 @@ static size_t test_diff_rewrite(char *rules, request_t *request){
 	ssize_t ret;
 	
 	ret = test_rewrite(rules, request);
-		buffer_read(buffer, 0, &key1, MIN(ret, sizeof(key1)));
+		key1 = buffer;
 	ret = test_rewrite(rules, request);
-		buffer_read(buffer, 0, &key2, MIN(ret, sizeof(key2)));
+		key2 = buffer;
 	
 	return (key2-key1);
 }
@@ -42,12 +42,10 @@ static size_t test_diff_rewrite(char *rules, request_t *request){
 START_TEST (test_backend_rewrite){
 	ssize_t   ret;
 	
-	buffer = buffer_alloc();
-	
 	hash_t  req_create[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",    DATA_SIZET(10)                 },
-		{ "key_out", DATA_BUFFERT(buffer)           },
+		{ "key_out", DATA_PTR_OFFT(&buffer)         },
 		hash_end
 	};
 	
@@ -174,7 +172,6 @@ START_TEST (test_backend_rewrite){
 		fail_unless(ret == 0, "backend rewrite rules if_real_2 failed\n");
 	// }}}
 	
-	buffer_free(buffer);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_rewrite)

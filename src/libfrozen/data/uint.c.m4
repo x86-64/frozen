@@ -87,9 +87,7 @@ int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_
 } // }}}
 ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	char                  buffer[[DEF_BUFFER_SIZE]];
-	unsigned long         value;
-	
-	(void)dst_ctx; (void)src_ctx; // TODO use ctx
+	TYPE                  value = 0;
 	
 	switch(src->type){
 	#ifdef TYPE_STRING
@@ -97,18 +95,31 @@ ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, dat
 			if(data_read(src, src_ctx, 0, &buffer, DEF_BUFFER_SIZE) < 0)
 				return -EINVAL;
 			
-			value = strtoul(buffer, NULL, 10);
+			value = (TYPE )strtoul(buffer, NULL, 10);
 			
-			if( (dst->data_ptr = malloc(BYTES())) == NULL)
-				return -ENOMEM;
-			
-			dst->type      = TYPE_[]DEF();
-			dst->data_size = BYTES();
-			
-			*(TYPE *)(dst->data_ptr) = (TYPE )value;
+			data_write(dst, dst_ctx, 0, &value, sizeof(value));
 			return 0;
 	#endif
-		
+	#ifdef TYPE_INT8
+		case TYPE_INT8:
+	#endif
+	#ifdef TYPE_INT16
+		case TYPE_INT16:
+	#endif
+	#ifdef TYPE_INT32
+		case TYPE_INT32:
+	#endif
+	#ifdef TYPE_INT64
+		case TYPE_INT64:
+	#endif
+	#ifdef TYPE_OFFT
+		case TYPE_OFFT:
+	#endif
+	#ifdef TYPE_SIZET
+		case TYPE_SIZET:
+	#endif
+			data_write(dst, dst_ctx, 0, &value, sizeof(value));
+			return (data_transfer(dst, dst_ctx, src, src_ctx) > 0) ? 0 : -EFAULT;
 		default:
 			break;
 	};

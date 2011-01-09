@@ -88,25 +88,21 @@ size_t  data_string_len(data_t *data, data_ctx_t *ctx){
 	return (size_t) MIN( strlen(data->data_ptr) + 1, data->data_size );
 }
 
+size_t data_string_len2raw(size_t unitsize){ // {{{
+	return unitsize + 1;
+} // }}}
+
+
 ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
-	size_t size;
-	
-	(void)dst_ctx; // TODO use ctx
+	ssize_t size;
+	char    nullchar = '\0';
 	
 	switch(src->type){
 		case TYPE_STRING:
-			size = data_len(src, src_ctx) + 1;
+			if( (size = data_transfer(dst, dst_ctx, src, src_ctx)) < 0)
+				return -EFAULT;
 			
-			if( (dst->data_ptr = malloc(size)) == NULL)
-				return -ENOMEM;
-			
-			dst->type      = TYPE_STRING;
-			dst->data_size = size;
-			
-			if(data_read(src, src_ctx, 0, dst->data_ptr, size) < 0)
-				return -EINVAL;
-			
-			*((char *)dst->data_ptr + size - 1) = '\0';
+			data_write(dst, dst_ctx, size, &nullchar, sizeof(nullchar));
 			return 0;
 		
 		default:
@@ -114,7 +110,6 @@ ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_
 	};
 	return -ENOSYS;
 } // }}}
-
 
 /*
 REGISTER_TYPE(`TYPE_STRING')
@@ -132,6 +127,7 @@ REGISTER_PROTO(
 		.func_len      = &data_string_len,
 		.func_read     = &data_string_read,
 		.func_write    = &data_string_write,
-		.func_convert  = &data_string_convert
+		.func_convert  = &data_string_convert,
+		.func_len2raw  = &data_string_len2raw
 	}')
 */
