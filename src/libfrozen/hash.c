@@ -215,6 +215,23 @@ data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key){ // {{
 	return NULL;
 } // }}}
 
+/*
+ssize_t            hash_copy_data               (data_type type, void *dt, hash_t *hash, char *key){
+	ssize_t     ret;
+	data_t     *temp;
+	data_ctx_t *temp_ctx;
+	
+	if( (temp = hash_get_data(hash,key)) == NULL)
+		return -EINVAL;
+	
+	if(data_value_type(temp) == type){
+		COPY
+	}
+
+	temp_ctx = hash_get_data_ctx(hash,key);
+	
+	data_to_dt(_ret,_type,_out,temp,NULL);
+}*/
 
 #ifdef DEBUG
 void hash_dump(hash_t *hash){

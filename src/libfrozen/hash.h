@@ -28,10 +28,12 @@ typedef int  (*hash_iterator)(hash_t *, void *, void *);
 	(_dst)->data.data_ptr = NULL; \
 }
 
+// TODO deprecate this
 API int                hash_get                     (hash_t *hash, char *key, data_type *type, void **value, size_t *value_size);
 API int                hash_get_typed               (hash_t *hash, data_type type, char *key, void **value, size_t *value_size);
 API hash_t *           hash_set                     (hash_t *hash, char *key, data_type type, void *value, size_t value_size);
 API void               hash_delete                  (hash_t *hash, char *key);
+// END TODO
 
 API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
 API int                hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
@@ -46,6 +48,8 @@ API data_type          hash_get_data_type           (hash_t *hash); // TODO depr
 API void *             hash_get_value_ptr           (hash_t *hash);
 API size_t             hash_get_value_size          (hash_t *hash);
 
+//API ssize_t            hash_copy_data               (data_type type, void *dt, hash_t *hash, char *key);
+
 API hash_t *           hash_copy                    (hash_t *hash);
 API void               hash_free                    (hash_t *hash);
 API size_t             hash_get_nelements           (hash_t *hash);
@@ -57,11 +61,11 @@ API void               hash_dump                    (hash_t *hash);
 API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
-
-#define hash_copy_data(_hash,_type,_key,_out,_default) {        \
-	data_t *temp;                                           \
-	_out = ((temp = hash_get_data(_hash, _key)) != NULL) ?  \
-		GET_##_type(temp) : _default;                   \
+#define hash_copy_data(_ret,_type,_dt,_hash,_key){       \
+	data_t *temp;                                    \
+	if( (temp = hash_get_data(_hash,_key)) != NULL){ \
+		data_to_dt(_ret,_type,_dt,temp,NULL);    \
+	}                                                \
 }
 
 #endif // HASH_H

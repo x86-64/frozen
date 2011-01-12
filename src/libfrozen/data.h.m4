@@ -166,6 +166,15 @@ API size_t               data_value_len         (data_t *data); // TODO deprecat
 	_retval = data_convert(&m_dst,NULL,_src,_src_ctx);        \
 }
 
+#define data_to_dt(_retval,_type,_dt,_src,_src_ctx){                 \
+	if((_src)->type == _type){                                   \
+		_dt = GET_##_type(_src);                             \
+		_retval = 0;                                         \
+	}else{                                                       \
+		data_convert_to_dt(_retval,_type,_dt,_src,_src_ctx); \
+	}                                                            \
+}
+
 #endif // DATA_H
 
 /* vim: set filetype=c: */

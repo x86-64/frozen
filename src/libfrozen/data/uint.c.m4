@@ -131,7 +131,7 @@ REGISTER_TYPE([TYPE_]DEF())
 REGISTER_MACRO([DATA_]DEF()[(value)],     `[TYPE_]DEF()[, (]TYPE()[ []){ value }, sizeof(]TYPE()[)]')
 REGISTER_MACRO([DATA_PTR_]DEF()[(value)], `[TYPE_]DEF()[, value, sizeof(]TYPE()[)]')
 REGISTER_RAW_MACRO([DT_]DEF(), `TYPE()')
-REGISTER_RAW_MACRO([GET_TYPE_]DEF()[(value)], `[*((]TYPE()[ *)(value)->data_ptr)]')
+REGISTER_RAW_MACRO([GET_TYPE_]DEF()[(value)],  `[*((]TYPE()[ *)(value)->data_ptr)]')
 REGISTER_PROTO([
 	`{
 		.type                   = TYPE_]DEF()[,
