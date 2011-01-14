@@ -29,7 +29,7 @@ START_TEST (test_real_store_idx_strings){
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		request_t r_write[] = {
 			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)                           },
-			{ "key_out", DATA_PTR_OFFT   (&data_ptrs[i])                          },
+			{ "offset_out", DATA_PTR_OFFT   (&data_ptrs[i])                          },
 			{ "buffer",  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
 			hash_end
 		};
@@ -48,7 +48,7 @@ START_TEST (test_real_store_idx_strings){
 		
 		request_t r_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)      },
-			{ "key",    DATA_OFFT(i)                      },
+			{ "offset",    DATA_OFFT(i)                      },
 			{ "buffer", DATA_PTR_STRING(&data_read, 1024) },
 			hash_end
 		};

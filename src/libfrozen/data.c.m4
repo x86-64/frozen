@@ -24,16 +24,12 @@ size_t       data_protos_size = sizeof(data_protos) / sizeof(data_proto_t);
 // }}}
 
 static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){ // {{{
-	off_t    d_offset;
-	size_t   d_size;
-	hash_t  *temp;
+	ssize_t      ret;
+	DT_OFFT      d_offset = 0;
+	DT_SIZET     d_size   = data->data_size;
 	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
+	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, "offset");
+	hash_copy_data(ret, TYPE_SIZET, d_size,    context, "size");
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters
@@ -53,16 +49,12 @@ static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, 
 	return d_size;
 } // }}}
 static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
-	off_t    d_offset;
-	size_t   d_size;
-	hash_t  *temp;
+	ssize_t      ret;
+	DT_OFFT      d_offset = 0;
+	DT_SIZET     d_size   = data->data_size;
 	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
+	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, "offset");
+	hash_copy_data(ret, TYPE_SIZET, d_size,    context, "size");
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters

@@ -35,7 +35,7 @@ START_TEST (test_real_dns){
 	for(i=0; i < sizeof(data_array) / sizeof(struct dns_entry); i++){
 		request_t r_write[] = {
 			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)                           },
-			{ "key_out", DATA_PTR_OFFT   (&data_ptr)                              },
+			{ "offset_out", DATA_PTR_OFFT   (&data_ptr)                              },
 			
 			{ "dns_domain", DATA_PTR_STRING_AUTO(data_array[i].domain)            },
 			{ "dns_ip",     DATA_INT32  (data_array[i].ip)                        },
@@ -58,7 +58,7 @@ START_TEST (test_real_dns){
 		
 		request_t r_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)      },
-			{ "key",    DATA_OFFT(i)                      },
+			{ "offset",    DATA_OFFT(i)                      },
 			{ "buffer", DATA_PTR_STRING(&data_read, 1024) },
 			hash_end
 		};

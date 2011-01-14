@@ -32,7 +32,7 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	(void)data;
 	
 	hash_copy_data(ret, TYPE_INT32, handle,    context, "handle"); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,  key,       context, "key");    if(ret != 0) return -EINVAL;
+	hash_copy_data(ret, TYPE_OFFT,  key,       context, "offset"); if(ret != 0) return -EINVAL;
 	hash_copy_data(ret, TYPE_SIZET, size_min,  context, "size");   if(ret != 0) return -EINVAL;
 	
 	// apply size limits
@@ -58,7 +58,7 @@ static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, vo
 	(void)data;
 	
 	hash_copy_data(ret, TYPE_INT32, handle,    context, "handle"); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,  key,       context, "key");
+	hash_copy_data(ret, TYPE_OFFT,  key,       context, "offset");
 	hash_copy_data(ret, TYPE_SIZET, size,      context, "size");
 	
 	if(offset >= size)
@@ -231,8 +231,8 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	if( file_new_offset(chain, &new_key, size) != 0)
 		return -EFAULT;
 	
-	if( (key_out = hash_get_data(request, "key_out")) != NULL){
-		key_out_ctx = hash_get_data_ctx(request, "key_out");
+	if( (key_out = hash_get_data(request, "offset_out")) != NULL){
+		key_out_ctx = hash_get_data_ctx(request, "offset_out");
 		
 		data_transfer(
 			key_out,       key_out_ctx,
@@ -263,7 +263,7 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
 	/* get file io related info */
-	if( (key = hash_get_data(request, "key")) == NULL){
+	if( (key = hash_get_data(request, "offset")) == NULL || data_value_type(key) == TYPE_VOID){
 		size_t  new_size;
 		
 		new_size = data_len(buffer, buffer_ctx);
@@ -286,7 +286,7 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	
 	data_ctx_t  file_ctx[] = {
 		{ "handle", DATA_INT32(data->handle) },
-		{ "key",    *key                     },
+		{ "offset",    *key                     },
 		file_ctx_size,
 		hash_end
 	};
@@ -298,8 +298,8 @@ static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
 	);
 	
 	/* write key if requested */
-	if( (key_out = hash_get_data(request, "key_out")) != NULL){
-		key_out_ctx = hash_get_data_ctx(request, "key_out");
+	if( (key_out = hash_get_data(request, "offset_out")) != NULL){
+		key_out_ctx = hash_get_data_ctx(request, "offset_out");
 		
 		data_transfer(
 			key_out, key_out_ctx,
@@ -326,7 +326,7 @@ static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
 	buffer_ctx = hash_get_data_ctx(request, "buffer");
 	
 	/* get file io related info */
-	if( (key = hash_get_data(request, "key")) == NULL)
+	if( (key = hash_get_data(request, "offset")) == NULL)
 		return -EINVAL;
 	
 	/* get size restructions */
@@ -340,7 +340,7 @@ static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
 	/* prepare file context */
 	data_ctx_t  file_ctx[] = {
 		{ "handle", DATA_INT32(data->handle) },
-		{ "key",    *key                     },
+		{ "offset",    *key                     },
 		file_ctx_size,
 		hash_end
 	};
@@ -362,7 +362,7 @@ static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 	file_userdata    *data        = ((file_userdata *)chain->userdata);
 	
 	hash_copy_data(ret, TYPE_INT32, forced, request, "imcrazybitch");
-	hash_copy_data(ret, TYPE_OFFT,  key,    request, "key");  if(ret != 0) return -EINVAL;
+	hash_copy_data(ret, TYPE_OFFT,  key,    request, "offset");  if(ret != 0) return -EINVAL;
 	hash_copy_data(ret, TYPE_SIZET, size,   request, "size"); if(ret != 0) return -EINVAL;
 	
 	fd  = data->handle;
@@ -402,8 +402,8 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	DT_OFFT          from, to;
 	DT_SIZET         move_size = -1;
 	
-	hash_copy_data(ret, TYPE_OFFT,   from,      request, "key_from"); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,   to,        request, "key_to");   if(ret != 0) return -EINVAL;
+	hash_copy_data(ret, TYPE_OFFT,   from,      request, "offset_from"); if(ret != 0) return -EINVAL;
+	hash_copy_data(ret, TYPE_OFFT,   to,        request, "offset_to");   if(ret != 0) return -EINVAL;
 	hash_copy_data(ret, TYPE_SIZET,  move_size, request, "size");
 	
 	if(move_size == -1){

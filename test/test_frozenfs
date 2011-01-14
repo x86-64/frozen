@@ -1,0 +1,35 @@
+#!/bin/sh
+
+mkdir data_frozenfs 2>/dev/null
+../src/frozenfs/frozenfs -o sync_read,entry_timeout=0 -f -s `pwd`/ `pwd`/data_frozenfs &
+
+sleep 1
+#time find data_frozenfs/ -ls
+
+TEST_FILE=data_frozenfs/backends/be_file/whole
+#echo "*** write string"
+#	echo "Hello, world!" >> $TEST_FILE
+#	echo "Woott, world!" >> $TEST_FILE
+#echo "*** read string"
+#	cat $TEST_FILE
+#echo "*** read string:0"
+#	cat $TEST_FILE:0
+#echo "*** read string:14"
+#	cat $TEST_FILE:14
+
+echo "*** write data"
+	echo "Hello" >> $TEST_FILE
+	#echo "Zoo" >> $TEST_FILE
+	#echo "Atmosphere" >> $TEST_FILE
+	#echo "Helium" >> $TEST_FILE
+	#echo "Frog" >> $TEST_FILE
+echo "*** read data"
+	cat $TEST_FILE
+
+time find data_frozenfs/ -ls
+
+stat data_frozenfs/backends/b_data/whole
+
+fusermount -u data_frozenfs
+killall frozenfs 2>/dev/null
+exit 0

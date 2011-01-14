@@ -92,9 +92,9 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 		return -EINVAL;
 	buffer_ctx = hash_get_data_ctx(request, data->sort_field);
 	
-	if( (key_out = hash_get_data(request, "key_out")) == NULL)
+	if( (key_out = hash_get_data(request, "offset_out")) == NULL)
 		return -EINVAL;
-	key_out_ctx = hash_get_data_ctx(request, "key_out");
+	key_out_ctx = hash_get_data_ctx(request, "offset_out");
 	
 	// TODO underlying locking and threading
 	// next("lock");
@@ -108,7 +108,7 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	}
 	*/
 	request_t req_insert[] = {
-		{ "key",    *key_out                    },
+		{ "offset",    *key_out                    },
 		{ "insert", DATA_INT32(1)               },
 		hash_next(request)
 	};

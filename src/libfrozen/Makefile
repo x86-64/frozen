@@ -74,6 +74,7 @@ libfrozen_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo \
+	backends/libfrozen_la-cache.lo \
 	backends/mphf/libfrozen_la-mphf.lo \
 	backends/mphf/libfrozen_la-mphf_chm_imp.lo \
 	backends/mphf/libfrozen_la-hash_jenkins.lo \
@@ -120,7 +121,7 @@ AWK = /usr/bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 --coverage -g3 -O0 -Wall -Werror -DDEBUG=1
+CFLAGS = -g -O2 -g3 -O0 -Wall -Werror -DDEBUG=1
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E
@@ -234,6 +235,7 @@ backends_sources = \
 	backends/null-proxy.c                \
 	backends/file.c                      \
 	backends/list.c                      \
+	backends/cache.c                     \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
 	backends/mphf/hash_jenkins.c         \
@@ -368,6 +370,8 @@ backends/libfrozen_la-file.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-list.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
+backends/libfrozen_la-cache.lo: backends/$(am__dirstamp) \
+	backends/$(DEPDIR)/$(am__dirstamp)
 backends/mphf/$(am__dirstamp):
 	@$(MKDIR_P) backends/mphf
 	@: > backends/mphf/$(am__dirstamp)
@@ -423,6 +427,8 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f backends/insert-sort/libfrozen_la-insert-sort.$(OBJEXT)
 	-rm -f backends/insert-sort/libfrozen_la-insert-sort.lo
+	-rm -f backends/libfrozen_la-cache.$(OBJEXT)
+	-rm -f backends/libfrozen_la-cache.lo
 	-rm -f backends/libfrozen_la-file.$(OBJEXT)
 	-rm -f backends/libfrozen_la-file.lo
 	-rm -f backends/libfrozen_la-list.$(OBJEXT)
@@ -456,6 +462,7 @@ include ./$(DEPDIR)/libfrozen_la-hash.Plo
 include ./$(DEPDIR)/libfrozen_la-libfrozen.Plo
 include ./$(DEPDIR)/libfrozen_la-list.Plo
 include ./$(DEPDIR)/libfrozen_la-structs.Plo
+include backends/$(DEPDIR)/libfrozen_la-cache.Plo
 include backends/$(DEPDIR)/libfrozen_la-file.Plo
 include backends/$(DEPDIR)/libfrozen_la-list.Plo
 include backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo
@@ -555,6 +562,13 @@ backends/libfrozen_la-list.lo: backends/list.c
 #	source='backends/list.c' object='backends/libfrozen_la-list.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
+
+backends/libfrozen_la-cache.lo: backends/cache.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-cache.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-cache.Tpo -c -o backends/libfrozen_la-cache.lo `test -f 'backends/cache.c' || echo '$(srcdir)/'`backends/cache.c
+	$(am__mv) backends/$(DEPDIR)/libfrozen_la-cache.Tpo backends/$(DEPDIR)/libfrozen_la-cache.Plo
+#	source='backends/cache.c' object='backends/libfrozen_la-cache.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-cache.lo `test -f 'backends/cache.c' || echo '$(srcdir)/'`backends/cache.c
 
 backends/mphf/libfrozen_la-mphf.lo: backends/mphf/mphf.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c

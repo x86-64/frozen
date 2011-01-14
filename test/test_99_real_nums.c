@@ -25,7 +25,7 @@ START_TEST (test_real_store_nums){
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_write[] = {
 			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
-			{ "key_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
+			{ "offset_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
 			{ "buffer",  DATA_PTR_INT32 (&data_array[i]) },
 			hash_end
 		};
@@ -38,7 +38,7 @@ START_TEST (test_real_store_nums){
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_read[] = {
 			{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-			{ "key",    DATA_OFFT(data_ptrs[i])          },
+			{ "offset",    DATA_OFFT(data_ptrs[i])          },
 			{ "buffer", DATA_PTR_INT32(&data_read)       },
 			hash_end
 		};

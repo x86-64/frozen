@@ -29,7 +29,7 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 		// on insert we move all items from 'key' to 'key'+1
 		// recommended use of 'blocks' chain as under-lying chain to improve perfomance
 		
-		if( (key_orig = hash_get_data(request, "key")) == NULL)
+		if( (key_orig = hash_get_data(request, "offset")) == NULL)
 			return -EINVAL;
 		
 		data_copy_local(&key_from, key_orig);
@@ -40,8 +40,8 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 		
 		hash_t  new_request[] = {
 			{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
-			{ "key_from", key_from                                   },
-			{ "key_to",   key_to                                     },
+			{ "offset_from", key_from                                   },
+			{ "offset_to",   key_to                                     },
 			{ "size",     DATA_VOID                                  },
 			hash_next(request)
 		};
@@ -60,7 +60,7 @@ static ssize_t lists_delete(chain_t *chain, request_t *request){
 	data_t            key_from, key_to;
 	hash_t           *r_size;
 	
-	if( (key_orig = hash_get_data(request, "key"))  == NULL) return -EINVAL;
+	if( (key_orig = hash_get_data(request, "offset"))  == NULL) return -EINVAL;
 	if( (r_size   = hash_find    (request, "size")) == NULL) return -EINVAL;
 	
 	data_copy_local(&key_from, key_orig);
@@ -72,8 +72,8 @@ static ssize_t lists_delete(chain_t *chain, request_t *request){
 	
 	hash_t  new_request[] = {
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE)               },
-		{ "key_from", key_from                                   },
-		{ "key_to",   key_to                                     },
+		{ "offset_from", key_from                                   },
+		{ "offset_to",   key_to                                     },
 		{ "size",     DATA_VOID                                  },
 		hash_next(request)
 	};

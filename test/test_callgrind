@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rm -rf data_*.dat      &>/dev/null
+rm -rf callgrind.out*  &>/dev/null
+LD_LIBRARY_PATH="../src/libfrozen/.libs/" valgrind --tool=callgrind  .libs/test
+callgrind_annotate --auto=yes callgrind.out.* > callgrind.result
+

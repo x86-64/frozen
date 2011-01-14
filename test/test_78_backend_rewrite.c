@@ -45,7 +45,7 @@ START_TEST (test_backend_rewrite){
 	hash_t  req_create[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",    DATA_SIZET(10)                 },
-		{ "key_out", DATA_PTR_OFFT(&buffer)         },
+		{ "offset_out", DATA_PTR_OFFT(&buffer)         },
 		hash_end
 	};
 	
@@ -117,12 +117,12 @@ START_TEST (test_backend_rewrite){
 		"subr['action']  = create; "
 		"subr['size']    = (size_t)'35'; "
 		
-		"subr['key_out'] = data_alloca((string)'size_t', (size_t)'8'); "
+		"subr['offset_out'] = data_alloca((string)'size_t', (size_t)'8'); "
 		
 		"backend((string)'rewrite_be_test', subr); " // returns 0
 		"backend((string)'rewrite_be_test', subr); " // returns 35
 		
-		"request['size'] = subr['key_out']; "
+		"request['size'] = subr['offset_out']; "
 		
 		"ret = pass(request); "
 		;

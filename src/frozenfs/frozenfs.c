@@ -441,7 +441,7 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 	
 	request_t r_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)                    },
-		{ "key",    DATA_PTR_OFFT(&off)                             },
+		{ "offset",    DATA_PTR_OFFT(&off)                             },
 		{ "buffer", DATA_MEM(buf, size)                             },
 		
 		{ "param",  fh->param                                       },
@@ -463,8 +463,8 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	
 	request_t r_write[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)                   },
-		//{ "key",     DATA_PTR_OFFT(&off)                             },
-		{ "key_out", DATA_PTR_OFFT(&off)                             },
+		//{ "offset",     DATA_PTR_OFFT(&off)                             },
+		{ "offset_out", DATA_PTR_OFFT(&off)                             },
 		{ "buffer",  DATA_MEM((char *)buf, size)                     },
 		
 		{ "param",   fh->param                                       },

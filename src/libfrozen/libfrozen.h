@@ -31,6 +31,13 @@
 #define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
 #define MIN(a,b)              ( (a > b) ? b : a )
 #define TYPE_MAX(type)        ( (type)-1 )
+#ifndef __MAX
+	#define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))
+	#define __MAX_SIGNED(type) (__HALF_MAX_SIGNED(type) - 1 + __HALF_MAX_SIGNED(type))
+	#define __MIN_SIGNED(type) (-1 - __MAX_SIGNED(type))
+	#define __MIN(type) ((type)-1 < 1?__MIN_SIGNED(type):(type)0)
+	#define __MAX(type) ((type)~__MIN(type))
+#endif
 
 /* Own headers */
 #include <public.h>

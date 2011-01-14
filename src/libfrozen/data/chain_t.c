@@ -12,7 +12,7 @@ ssize_t   data_chain_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void 
 	
 	request_t  req_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
-		{ "key",    DATA_PTR_OFFT(&d_offset)      },
+		{ "offset",    DATA_PTR_OFFT(&d_offset)      },
 		{ "size",   DATA_PTR_SIZET(size)          },
 		{ "buffer", DATA_MEM(*buffer, *size)      },
 		hash_end
@@ -42,7 +42,7 @@ ssize_t   data_chain_t_write (data_t *data, data_ctx_t *ctx, off_t offset, void 
 	
 	request_t  req_write[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-		{ "key",    DATA_PTR_OFFT(&d_offset)      },
+		{ "offset",    DATA_PTR_OFFT(&d_offset)      },
 		{ "size",   DATA_SIZET(size)              },
 		{ "buffer", DATA_MEM(buffer, size)        },
 		hash_end

@@ -6,7 +6,7 @@ void  db_read(backend_t *backend, off_t key, size_t size, char *buf, ssize_t *ss
 	
 	hash_t hash[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ) },
-		{ "key",    DATA_PTR_OFFT(&key)          },
+		{ "offset",    DATA_PTR_OFFT(&key)          },
 		{ "size",   DATA_PTR_SIZET(&size)        },
 		{ "buffer", DATA_BUFFERT(buffer)         },
 		hash_end
@@ -29,7 +29,7 @@ void  db_write(backend_t *backend, off_t key, char *buf, unsigned int buf_size, 
 	
 	hash_t hash[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-		{ "key",    DATA_PTR_OFFT(&key)           },
+		{ "offset",    DATA_PTR_OFFT(&key)           },
 		{ "size",   DATA_PTR_SIZET(&buf_size)     },
 		{ "buffer", DATA_BUFFERT(&buffer)         },
 		hash_end
@@ -47,8 +47,8 @@ void  db_move(backend_t *backend, off_t key_from, off_t key_to, size_t key_size,
 	
 	hash_t hash[] = {
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
-		{ "key_from", DATA_PTR_OFFT(&key_from)     },
-		{ "key_to",   DATA_PTR_OFFT(&key_to)       },
+		{ "offset_from", DATA_PTR_OFFT(&key_from)     },
+		{ "offset_to",   DATA_PTR_OFFT(&key_to)       },
 		{ "size",     DATA_PTR_SIZET(&key_size)    },
 		{ "buffer",   DATA_BUFFERT(&buffer)        },
 		hash_end
@@ -84,7 +84,7 @@ START_TEST (test_backend_file){
 	hash_t hash_create[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",    DATA_SIZET(10)                 },
-		{ "key_out", DATA_PTR_OFFT(&temp)           },
+		{ "offset_out", DATA_PTR_OFFT(&temp)           },
 		hash_end
 	};
 		
@@ -173,7 +173,7 @@ START_TEST (test_backend_file){
 	
 	hash_t hash_delete[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_DELETE) },
-		{ "key",    DATA_PTR_OFFT(&new_key1)       },
+		{ "offset",    DATA_PTR_OFFT(&new_key1)       },
 		{ "size",   DATA_PTR_SIZET(&ssize)         },
 		{ "buffer", DATA_BUFFERT(buffer)           },
 		hash_end

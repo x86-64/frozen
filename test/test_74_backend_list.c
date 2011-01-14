@@ -35,7 +35,7 @@ START_TEST (test_backend_list){
 	hash_t  hash_create[] = {
 		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
 		{ "size",    DATA_SIZET(10)                 },
-		{ "key_out", DATA_PTR_OFFT(&key_off)        },
+		{ "offset_out", DATA_PTR_OFFT(&key_off)        },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
@@ -44,7 +44,7 @@ START_TEST (test_backend_list){
 	// write keys
 	hash_t  hash_write[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "key",    DATA_OFFT(key_off)             },
+		{ "offset",    DATA_OFFT(key_off)             },
 		{ "size",   DATA_SIZET(10)                 },
 		{ "buffer", DATA_MEM(key_data, 10)         },
 		hash_end
@@ -55,7 +55,7 @@ START_TEST (test_backend_list){
 	// insert key
 	hash_t  hash_insert[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-		{ "key",    DATA_OFFT(key_off + 2)        },
+		{ "offset",    DATA_OFFT(key_off + 2)        },
 		{ "insert", DATA_INT32(1)                 },
 		{ "size",   DATA_SIZET(1)                 },
 		{ "buffer", DATA_MEM(key_insert, 1)       },
@@ -68,7 +68,7 @@ START_TEST (test_backend_list){
 	memset(temp, 0, 1024);
 	hash_t  hash_read[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
-		{ "key",    DATA_OFFT(key_off)            },
+		{ "offset",    DATA_OFFT(key_off)            },
 		{ "size",   DATA_SIZET(11)                },
 		{ "buffer", DATA_MEM(temp, 1024)          },
 		hash_end
@@ -83,7 +83,7 @@ START_TEST (test_backend_list){
 	// delete key
 	hash_t  hash_delete[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_DELETE)   },
-		{ "key",    DATA_OFFT(key_off + 3)           },
+		{ "offset",    DATA_OFFT(key_off + 3)           },
 		{ "size",   DATA_SIZET(1)                    },
 		hash_end
 	};
@@ -93,7 +93,7 @@ START_TEST (test_backend_list){
 	// check
 	hash_t  hash_read2[] = {
 		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "key",    DATA_OFFT(key_off)               },
+		{ "offset",    DATA_OFFT(key_off)               },
 		{ "size",   DATA_SIZET(10)                   },
 		{ "buffer", DATA_MEM(temp, 1024)             },
 		hash_end

@@ -119,8 +119,8 @@ static ssize_t   real_move          (blocks_userdata *data, off_t from, off_t to
 	
 	hash_t    req_move[] = {
 		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
-		{ "key_from", DATA_PTR_OFFT(&from)         },
-		{ "key_to",   DATA_PTR_OFFT(&to)           },
+		{ "offset_from", DATA_PTR_OFFT(&from)         },
+		{ "offset_to",   DATA_PTR_OFFT(&to)           },
 		{ "size"  ,   DATA_SIZET(size)             },
 		hash_end
 	};
@@ -377,7 +377,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	// TODO r_size > block_size
 	// TODO remove TYPE_OFFT from code, support all
 	
-	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, "key")) == NULL)
+	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, "offset")) == NULL)
 		return -EINVAL;
 	
 	data_copy_local(&key_real, hash_get_data(r_key_virt));
@@ -386,7 +386,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 		return -EINVAL;
 	
 	hash_t  req_layer[] = {
-		{ "key", key_real             },
+		{ "offset", key_real             },
 		hash_next(request)
 	};
 	
@@ -395,7 +395,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 static ssize_t blocks_delete(chain_t *chain, request_t *request){ // {{{
 	hash_t *r_key, *r_size;
 	
-	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "key")) == NULL)
+	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "offset")) == NULL)
 		return -EINVAL;
 	if( (r_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
 		return -EINVAL;
@@ -409,9 +409,9 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	
 	ssize_t           move_delta;
 	
-	if( (r_from = hash_find_typed (request, TYPE_OFFT, "key_from")) == NULL)
+	if( (r_from = hash_find_typed (request, TYPE_OFFT, "offset_from")) == NULL)
 		return -EINVAL;
-	if( (r_to   = hash_find_typed (request, TYPE_OFFT, "key_to"))   == NULL)
+	if( (r_to   = hash_find_typed (request, TYPE_OFFT, "offset_to"))   == NULL)
 		return -EINVAL;
 	
 	from = HVALUE(r_from, off_t);
