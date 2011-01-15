@@ -173,7 +173,7 @@ array_key : NAME '[' STRING ']' {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_ARRAY_REQUEST){
 		$$.type      = THING_ARRAY_REQUEST_KEY;
-		$$.array_key = $3;
+		$$.array_key = hash_string_to_key($3);
 		$$.id        = curr->id;
 		
 		free($1);
@@ -422,9 +422,6 @@ static rewrite_thing_t *    rewrite_copy_thing(rewrite_thing_t *thing){ // {{{
 static void                 rewrite_free_thing(rewrite_thing_t *thing){ // {{{
 	if(thing == NULL)
 		return;
-	
-	if(thing->type == THING_ARRAY_REQUEST_KEY)
-		free(thing->array_key);
 	
 	if(thing->next)
 		rewrite_free_thing(thing->next);

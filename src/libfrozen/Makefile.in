@@ -275,6 +275,7 @@ libfrozen_la_SOURCES = data.h \
 			data_protos.m4                          \
 			data.c                                  \
 			hash.c              hash.h              \
+			hashkeys.h                              \
 			structs.c           structs.h           \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
@@ -290,6 +291,7 @@ CLEANFILES = backends/locate.c backends/insert-sort/insert-sort.c   \
 		configs/config_parser.tab.h                            \
 		configs/config_parser.lex.c                            \
 		data.c data.h                                          \
+		hashkeys.h                                             \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c
 
@@ -865,10 +867,14 @@ uninstall-am: uninstall-libLTLIBRARIES
 
 
 libfrozen.c: data.h data.c
+hash.h: hashkeys.h
+
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@
 data.h: ${data_sources}
 	${M4} -sP data.h.m4 > $@
+hashkeys.h:
+	${M4} -sP hashkeys.h.m4 > $@
 
 configs/config_parser.tab.c:
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y

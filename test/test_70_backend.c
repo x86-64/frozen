@@ -4,10 +4,10 @@ START_TEST (test_backends){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("file")                     },
-				{ "filename",    DATA_STRING("data_backend_file.dat")    },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("file")                     },
+				{ HK(filename),    DATA_STRING("data_backend_file.dat")    },
 				hash_end
 			)},
 			hash_end

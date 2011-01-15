@@ -19,10 +19,10 @@ static ssize_t cache_flush(chain_t *chain, cache_userdata *userdata){
 		return 0;
 	
 	request_t r_write[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_WRITE)                   },
-		{ "offset", DATA_OFFT(0)                                    },
-		{ "buffer", DATA_MEM(userdata->cache, userdata->cache_size) },
-	//	{ "size",   DATA_PTR_INT64(&userdata->cache_size)           },
+		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE)                   },
+		{ HK(offset), DATA_OFFT(0)                                    },
+		{ HK(buffer), DATA_MEM(userdata->cache, userdata->cache_size) },
+	//	{ HK(size),   DATA_PTR_INT64(&userdata->cache_size)           },
 		hash_end
 	};
 	return chain_next_query(chain, r_write);
@@ -33,8 +33,8 @@ static ssize_t cache_read_all(chain_t *chain, cache_userdata *userdata){
 	userdata->cache_size = 0;
 	
 	request_t r_count[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_COUNT)         },
-		{ "buffer", DATA_PTR_INT64(&userdata->cache_size) },
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT)         },
+		{ HK(buffer), DATA_PTR_INT64(&userdata->cache_size) },
 		hash_end
 	};
 	if(chain_next_query(chain, r_count) < 0)
@@ -49,9 +49,9 @@ static ssize_t cache_read_all(chain_t *chain, cache_userdata *userdata){
 	memset(userdata->cache, 0, userdata->cache_size);
 	
 	request_t r_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)                    },
-		{ "offset", DATA_OFFT(0)                                    },
-		{ "buffer", DATA_MEM(userdata->cache, userdata->cache_size) },
+		{ HK(action), DATA_INT32(ACTION_CRWD_READ)                    },
+		{ HK(offset), DATA_OFFT(0)                                    },
+		{ HK(buffer), DATA_MEM(userdata->cache, userdata->cache_size) },
 		hash_end
 	};
 	if(chain_next_query(chain, r_read) < 0)
@@ -85,7 +85,7 @@ static int cache_configure(chain_t *chain, hash_t *config){ // {{{
 	cache_userdata  *userdata   = (cache_userdata *)chain->userdata;
 	DT_INT64         max_size   = 0;
 	
-	hash_copy_data(ret, TYPE_INT64, max_size, config, "max_size");
+	hash_copy_data(ret, TYPE_INT64, max_size, config, HK(max_size));
 	
 	userdata->max_size = max_size;
 	
@@ -112,48 +112,28 @@ static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 static ssize_t cache_backend_read(chain_t *chain, request_t *request){
 	ssize_t         ret;
 	DT_INT64        offset;
-	data_t          offset_data = DATA_PTR_INT64(&offset);
+	DT_SIZET        size;
+	//data_t          offset_data = DATA_PTR_INT64(&offset);
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
-	data_t         *buffer, *size;
+	data_t         *buffer;
 	data_ctx_t     *buffer_ctx;
 	
 	if(userdata->cache == NULL)
 		goto call_next;
 	
-	hash_copy_data(ret, TYPE_INT64, offset, request, "offset");
+	hash_copy_data(ret, TYPE_INT64, offset, request, HK(offset));
+	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size));
 	
 	if(offset >= userdata->cache_size)
 		goto call_next;
 	
-	
 	/* get buffer info */
-	if( (buffer = hash_get_data(request, "buffer")) == NULL)
+	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
 		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, "buffer");
+	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
 	
-	/* prepare contexts */
-	hash_t mem_ctx_size = hash_null; // if size supplied - apply it as mem output restruction
-	if( (size = hash_get_data(request, "size")) != NULL){
-		hash_t new_size = { "size", *size };
-		
-		memcpy(&mem_ctx_size, &new_size, sizeof(new_size));
-	}
-	
-	data_t      mem       = DATA_MEM(userdata->cache, userdata->cache_size);
-	data_ctx_t  mem_ctx[] = {
-		{ "offset",  offset_data },
-		mem_ctx_size,
-		hash_end
-	};
-	
-	/* read info from mem */
-	ret = data_transfer(
-		buffer,   buffer_ctx,
-		&mem,     mem_ctx
-	);
-	
+	ret = data_write(buffer, buffer_ctx, 0, userdata->cache + offset, size);
 	return ret;
-
 call_next:
 	return chain_next_query(chain, request);	
 }
@@ -161,45 +141,27 @@ call_next:
 static ssize_t cache_backend_write(chain_t *chain, request_t *request){
 	ssize_t         ret;
 	DT_INT64        offset;
-	data_t          offset_data = DATA_PTR_INT64(&offset);
+	DT_SIZET        size;
+	//data_t          offset_data = DATA_PTR_INT64(&offset);
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
-	data_t         *buffer, *size;
+	data_t         *buffer;
 	data_ctx_t     *buffer_ctx;
 	
 	if(userdata->cache == NULL)
 		goto call_next;
 	
-	hash_copy_data(ret, TYPE_INT64, offset, request, "offset");
+	hash_copy_data(ret, TYPE_INT64, offset, request, HK(offset));
+	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size));
 	
 	if(offset >= userdata->cache_size)
 		goto call_next;
 	
 	/* get buffer info */
-	if( (buffer = hash_get_data(request, "buffer")) == NULL)
+	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
 		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, "buffer");
+	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
 	
-	/* prepare contexts */
-	hash_t mem_ctx_size = hash_null; // if size supplied - apply it as mem output restruction
-	if( (size = hash_get_data(request, "size")) != NULL){
-		hash_t new_size = { "size", *size };
-		
-		memcpy(&mem_ctx_size, &new_size, sizeof(new_size));
-	}
-	
-	data_t      mem       = DATA_MEM(userdata->cache, userdata->cache_size);
-	data_ctx_t  mem_ctx[] = {
-		{ "offset",  offset_data },
-		mem_ctx_size,
-		hash_end
-	};
-	
-	/* write info to mem */
-	ret = data_transfer(
-		&mem,     mem_ctx,
-		buffer,   buffer_ctx
-	);
-	
+	ret = data_read(buffer, buffer_ctx, 0, userdata->cache + offset, size);
 	return ret;
 call_next:
 	return chain_next_query(chain, request);	

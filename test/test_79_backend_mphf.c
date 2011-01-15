@@ -3,31 +3,31 @@
 /*
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
-		{ NULL, DATA_HASHT(
-			{ "name",    DATA_STRING("backend_mphf_idx")                        },
-			{ "chains",  DATA_HASHT(
-				{ NULL, DATA_HASHT(
-					{ "name",      DATA_STRING("file")                  },
-					{ "filename",  DATA_STRING("data_backend_mphi.dat") },
+		{ 0, DATA_HASHT(
+			{ HK(name),    DATA_STRING("backend_mphf_idx")                        },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),      DATA_STRING("file")                  },
+					{ HK(filename),  DATA_STRING("data_backend_mphi.dat") },
 					hash_end
 				)},
 				hash_end
 			)},
 			hash_end
 		)},
-		{ NULL, DATA_HASHT(
-			{ "name",   DATA_STRING("backend_mphf")                             },
-			{ "chains", DATA_HASHT(
-				{ NULL, DATA_HASHT(
-					{ "name",      DATA_STRING("file")                  },
-					{ "filename",  DATA_STRING("data_backend_mphf.dat") },
+		{ 0, DATA_HASHT(
+			{ HK(name),   DATA_STRING("backend_mphf")                             },
+			{ HK(chains), DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),      DATA_STRING("file")                  },
+					{ HK(filename),  DATA_STRING("data_backend_mphf.dat") },
 					hash_end
 				)},
-				{ NULL, DATA_HASHT(
-					{ "name",       DATA_STRING("mphf")                 },
-					{ "mphf_type",  DATA_STRING("chm_imp")              },
-					{ "backend",    DATA_STRING("backend_mphf_idx")     },
-					{ "value_bits", DATA_INT32(31)                      },
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("mphf")                 },
+					{ HK(mphf_type),  DATA_STRING("chm_imp")              },
+					{ HK(backend),    DATA_STRING("backend_mphf_idx")     },
+					{ HK(value_bits), DATA_INT32(31)                      },
 					hash_end
 				)},
 				hash_end
@@ -58,9 +58,9 @@ START_TEST (test_backend_mphf){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		request_t r_write[] = {
-			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)                           },
-			{ "key",     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
-			{ "buffer",  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
+			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)                           },
+			{ HK(key),     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
+			{ HK(buffer),  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
 			hash_end
 		};
 		ret = backend_query(b_dat, r_write);
@@ -73,9 +73,9 @@ START_TEST (test_backend_mphf){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)                              },
-			{ "key",    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
-			{ "buffer", DATA_PTR_STRING (&data_read, 1024)                        },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)                              },
+			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
+			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
 			hash_end
 		};
 		ret = backend_query(b_dat, r_read);
@@ -92,36 +92,36 @@ REEEGISTER_TEST(core, test_backend_mphf)
 
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
-		{ NULL, DATA_HASHT(
-			{ "name",    DATA_STRING("backend_mphf_idx")                        },
-			{ "chains",  DATA_HASHT(
-				{ NULL, DATA_HASHT(
-					{ "name",      DATA_STRING("file")                  },
-					{ "filename",  DATA_STRING("data_backend_mphis.dat") },
+		{ 0, DATA_HASHT(
+			{ HK(name),    DATA_STRING("backend_mphf_idx")                        },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),      DATA_STRING("file")                  },
+					{ HK(filename),  DATA_STRING("data_backend_mphis.dat") },
 					hash_end
 				)},
-				{ NULL, DATA_HASHT(
-					{ "name",       DATA_STRING("cache")                 },
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                 },
 					hash_end
 				)},
 				hash_end
 			)},
 			hash_end
 		)},
-		{ NULL, DATA_HASHT(
-			{ "name",   DATA_STRING("backend_mphf")                              },
-			{ "chains", DATA_HASHT(
-				{ NULL, DATA_HASHT(
-					{ "name",       DATA_STRING("file")                  },
-					{ "filename",   DATA_STRING("data_backend_mphfs.dat")},
+		{ 0, DATA_HASHT(
+			{ HK(name),   DATA_STRING("backend_mphf")                              },
+			{ HK(chains), DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("file")                  },
+					{ HK(filename),   DATA_STRING("data_backend_mphfs.dat")},
 					hash_end
 				)},
-				{ NULL, DATA_HASHT(
-					{ "name",       DATA_STRING("mphf")                  },
-					{ "mphf_type",  DATA_STRING("chm_imp")               },
-					{ "backend",    DATA_STRING("backend_mphf_idx")      },
-					{ "n_initial",  DATA_INT64(10000)                    },
-					{ "value_bits", DATA_INT32(31)                       },
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("mphf")                  },
+					{ HK(type),       DATA_STRING("chm_imp")               },
+					{ HK(backend),    DATA_STRING("backend_mphf_idx")      },
+					{ HK(n_initial),  DATA_INT64(10000)                    },
+					{ HK(value_bits), DATA_INT32(31)                       },
 					hash_end
 				)},
 				hash_end
@@ -137,15 +137,23 @@ START_TEST (test_backend_mphf_speed){
 	backend_t *b_dat = backend_find(&n_dat);
 	backend_t *b_idx = backend_find(&n_idx);
 	
-	
 	// write array to file
 	int      i,j;
-	ssize_t  ret;
+	ssize_t  failed;
 	size_t   ntests = 2000;
 	char     test[10];
 	time_t   t1,t2;
 	
 	memset(test, 0, 10);
+	failed = 0;
+	
+	request_t r_write[] = {
+		{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)  },
+		{ HK(key),     DATA_MEM (test, 10)             },
+		{ HK(buffer),  DATA_MEM (test, 10)             },
+		hash_end
+	};
+	
 	t1 = time(NULL);
 	for(i=0; i < ntests; i++){
 		// inc test
@@ -153,17 +161,13 @@ START_TEST (test_backend_mphf_speed){
 			if(++test[j] != 0) break;
 		}
 		
-		request_t r_write[] = {
-			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
-			{ "key",     DATA_MEM (test, 10)             },
-			{ "buffer",  DATA_MEM (test, 10)             },
-			hash_end
-		};
-		ret = backend_query(b_dat, r_write);
-			fail_unless(ret >= 0, "chain 'backend_mphf': write array failed");
+		if(backend_query(b_dat, r_write) < 0)
+			failed = 1;
 	}
 	t2 = time(NULL);
 	printf("mphf: %d requests in %d seconds\n", ntests, (int)(t2-t1));
+	
+		fail_unless(failed == 0, "chain 'backend_mphf': write array failed");
 	
 	/*
 	// check
@@ -172,9 +176,9 @@ START_TEST (test_backend_mphf_speed){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)                              },
-			{ "key",    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
-			{ "buffer", DATA_PTR_STRING (&data_read, 1024)                        },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)                              },
+			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
+			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
 			hash_end
 		};
 		ret = backend_query(b_dat, r_read);

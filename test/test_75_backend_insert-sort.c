@@ -5,19 +5,19 @@ START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
 	hash_t  settings[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("file")                         },
-				{ "filename",    DATA_STRING("data_backend_insert_sort.dat") },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("file")                         },
+				{ HK(filename),    DATA_STRING("data_backend_insert_sort.dat") },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("list")                     },
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("list")                     },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("insert-sort")              },
-				{ "engine",      DATA_STRING("binsearch")                },
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("insert-sort")              },
+				{ HK(engine),      DATA_STRING("binsearch")                },
 				hash_end
 			)},
 			hash_end
@@ -42,9 +42,9 @@ START_TEST (test_backend_insert_sort){
 		
 		buff = (char)(0x61 + (tv.tv_usec % 26));
 		hash_t  req_write[] = {
-			{ "action",  DATA_INT32(ACTION_CRWD_WRITE) },
-			{ "offset_out", DATA_PTR_OFFT(&key)           },
-			{ "buffer",  DATA_PTR_INT8(&buff)          },
+			{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE) },
+			{ HK(offset_out), DATA_PTR_OFFT(&key)           },
+			{ HK(buffer),     DATA_PTR_INT8(&buff)          },
 			hash_end
 		};
 		ret = backend_query(backend, req_write);
@@ -52,10 +52,10 @@ START_TEST (test_backend_insert_sort){
 	}
 	
 	hash_t  req_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ) },
-		{ "offset",    DATA_OFFT(0)                 },
-		{ "size",   DATA_SIZET(iters)            },
-		{ "buffer", DATA_MEM(&temp, 256)         },
+		{ HK(action), DATA_INT32(ACTION_CRWD_READ) },
+		{ HK(offset), DATA_OFFT(0)                 },
+		{ HK(size),   DATA_SIZET(iters)            },
+		{ HK(buffer), DATA_MEM(&temp, 256)         },
 		hash_end
 	};
 	ret = backend_query(backend, req_read);

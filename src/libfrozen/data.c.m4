@@ -28,8 +28,8 @@ static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, 
 	DT_OFFT      d_offset = 0;
 	DT_SIZET     d_size   = data->data_size;
 	
-	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, "offset");
-	hash_copy_data(ret, TYPE_SIZET, d_size,    context, "size");
+	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, HK(offset));
+	hash_copy_data(ret, TYPE_SIZET, d_size,    context, HK(size));
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters
@@ -53,8 +53,8 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
 	DT_OFFT      d_offset = 0;
 	DT_SIZET     d_size   = data->data_size;
 	
-	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, "offset");
-	hash_copy_data(ret, TYPE_SIZET, d_size,    context, "size");
+	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, HK(offset));
+	hash_copy_data(ret, TYPE_SIZET, d_size,    context, HK(size));
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters
@@ -357,7 +357,7 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
  *  @return -ENOSYS if data not support converting
  *  @post Free dst structure with data_free to avoid memory leak
  */
-ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){
+ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	if(!data_validate(dst) || !data_validate(src))
 		return -EINVAL;
 	

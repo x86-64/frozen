@@ -94,7 +94,7 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 	data_t            *script;
 	rewrite_userdata *data = (rewrite_userdata *)chain->userdata;
 	
-	if( (script = hash_get_typed_data(config, TYPE_STRING, "script")) == NULL)
+	if( (script = hash_get_typed_data(config, TYPE_STRING, HK(script))) == NULL)
 		return_error(-EINVAL, "chain 'rewrite' parameter 'script' not supplied\n");
 	
 	if(rewrite_script_parse(&data->script, data_value_ptr(script)) != 0)

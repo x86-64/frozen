@@ -2,10 +2,10 @@
 
 START_TEST (test_real_store_nums){
 	hash_t config[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("file")                        },
-				{ "filename",  DATA_STRING("data_real_store_nums.dat")    },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),      DATA_STRING("file")                        },
+				{ HK(filename),  DATA_STRING("data_real_store_nums.dat")    },
 				hash_end
 			)},
 			hash_end
@@ -24,9 +24,9 @@ START_TEST (test_real_store_nums){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_write[] = {
-			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)  },
-			{ "offset_out", DATA_PTR_OFFT  (&data_ptrs[i])  },
-			{ "buffer",  DATA_PTR_INT32 (&data_array[i]) },
+			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)  },
+			{ HK(offset_out), DATA_PTR_OFFT  (&data_ptrs[i])  },
+			{ HK(buffer),  DATA_PTR_INT32 (&data_array[i]) },
 			hash_end
 		};
 		ret = backend_query(backend, r_write);
@@ -37,9 +37,9 @@ START_TEST (test_real_store_nums){
 	int data_read;
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-			{ "offset",    DATA_OFFT(data_ptrs[i])          },
-			{ "buffer", DATA_PTR_INT32(&data_read)       },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)     },
+			{ HK(offset),    DATA_OFFT(data_ptrs[i])          },
+			{ HK(buffer), DATA_PTR_INT32(&data_read)       },
 			hash_end
 		};
 		ret = backend_query(backend, r_read);

@@ -4,14 +4,14 @@ START_TEST (test_backends_two_chains){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("file")                     },
-				{ "filename",    DATA_STRING("data_backend_file.dat")    },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("file")                     },
+				{ HK(filename),    DATA_STRING("data_backend_file.dat")    },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("null-proxy")               },
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("null-proxy")               },
 				hash_end
 			)},
 			hash_end
@@ -27,9 +27,9 @@ START_TEST (test_backends_two_chains){
 	buffer_t       *buffer  = buffer_alloc();
 	ssize_t         ssize;
 	hash_t          request[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_CREATE)  },
-		{ "size",    DATA_SIZET( 0xBEEF )            },
-		{ "buffer",  DATA_BUFFERT(buffer)            },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE)  },
+		{ HK(size),    DATA_SIZET( 0xBEEF )            },
+		{ HK(buffer),  DATA_BUFFERT(buffer)            },
 		hash_end
 	};
 	

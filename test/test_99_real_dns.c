@@ -34,18 +34,18 @@ START_TEST (test_real_dns){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(struct dns_entry); i++){
 		request_t r_write[] = {
-			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)                           },
-			{ "offset_out", DATA_PTR_OFFT   (&data_ptr)                              },
+			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)                           },
+			{ HK(offset_out), DATA_PTR_OFFT   (&data_ptr)                           },
 			
-			{ "dns_domain", DATA_PTR_STRING_AUTO(data_array[i].domain)            },
-			{ "dns_ip",     DATA_INT32  (data_array[i].ip)                        },
-			{ "dns_tstamp", DATA_INT32  (data_array[i].timestamp)                 },
+			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)            },
+			{ HK(dns_ip),     DATA_INT32  (data_array[i].ip)                        },
+			{ HK(dns_tstamp), DATA_INT32  (data_array[i].timestamp)                 },
 			hash_end
 		};
 		ret = backend_query(b_idx, r_write);
 			fail_unless(ret > 0,    "chain 'real_dns': write array failed");
 		
-		printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptr, data_array[i].domain);
+		//printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptr, data_array[i].domain);
 	}
 	
 	/*
@@ -57,9 +57,9 @@ START_TEST (test_real_dns){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)      },
-			{ "offset",    DATA_OFFT(i)                      },
-			{ "buffer", DATA_PTR_STRING(&data_read, 1024) },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)      },
+			{ HK(offset),    DATA_OFFT(i)                      },
+			{ HK(buffer), DATA_PTR_STRING(&data_read, 1024) },
 			hash_end
 		};
 		ret = backend_query(b_idx, r_read);

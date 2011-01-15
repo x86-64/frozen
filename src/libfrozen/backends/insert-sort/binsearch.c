@@ -7,8 +7,8 @@ ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1,
 	range_start = range_end = 0;
 	
 	hash_t  req_count[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
-		{ "buffer", DATA_PTR_OFFT(&range_end)     },
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(buffer), DATA_PTR_OFFT(&range_end)     },
 		hash_end
 	};
 	ret = chain_next_query(data->chain, req_count);
@@ -21,7 +21,7 @@ ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1,
 	
 	data_t  backend = DATA_CHAINT(data->chain);
 	hash_t  backend_ctx[] = {
-		{ "offset",  DATA_PTR_OFFT(&current)  },
+		{ HK(offset),  DATA_PTR_OFFT(&current)  },
 		hash_end
 	};
 	

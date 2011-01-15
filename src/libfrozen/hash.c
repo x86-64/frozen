@@ -1,38 +1,43 @@
+#define HASH_C
 #include <libfrozen.h>
 #include <alloca.h>
 
-hash_t *         hash_find              (hash_t *hash, char *key){ // {{{
-	hash_t      *value = hash;
-	
+static int hash_bsearch_string(const void *m1, const void *m2){
+	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
+	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
+	return strcmp(mi1->key_str, mi2->key_str);
+}
+
+static int hash_bsearch_int(const void *m1, const void *m2){
+	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
+	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
+	return (mi1->key_val - mi2->key_val);
+}
+
+
+hash_t *         hash_find              (hash_t *hash, hash_key_t key){ // {{{
 	if(hash == NULL)
 		return NULL;
-	
-	while(value->key != hash_ptr_end){
-		if(
-			value->key != NULL &&
-			(
-				value->key == key ||
-				(
-					key != hash_ptr_null && key != hash_ptr_end &&
-					value->key != hash_ptr_null &&
-					strcmp(value->key, key) == 0
-				)
-			)
-		)
-			return value;
-		
-		value++;
-	}
-	if(value->data.data_ptr != NULL)
-		return hash_find((hash_t *)value->data.data_ptr, key);
+	do{
+		if(hash->key == key){
+			return hash;
+		}else if(hash->key == hash_ptr_end){
+			goto end;
+		}else{
+			hash++;
+		}
+	}while(1);
+end:
+	if(hash->data.data_ptr != NULL)
+		return hash_find((hash_t *)hash->data.data_ptr, key);
 	
 	return NULL;
 } // }}}
-hash_t *         hash_find_typed        (hash_t *hash, data_type type, char *key){ // {{{
-	hash_t      *hvalue = hash_find(hash, key);
+hash_t *         hash_find_typed        (hash_t *hash, data_type type, hash_key_t key){ // {{{
+	hash_t *hvalue = hash_find(hash, key);
 	return (hvalue != NULL) ? ((hvalue->data.type != type) ? NULL : hvalue) : NULL;
 } // }}}
-hash_t *         hash_set                     (hash_t *hash, char *key, data_type type, void *value, size_t value_size){ // {{{
+hash_t *         hash_set                     (hash_t *hash, hash_key_t key, data_type type, void *value, size_t value_size){ // {{{
 	hash_t      *hvalue;
 	
 	if( (hvalue = hash_find(hash, key)) == NULL){
@@ -46,7 +51,7 @@ hash_t *         hash_set                     (hash_t *hash, char *key, data_typ
 	hvalue->data.data_size = value_size;
 	return hvalue;
 } // }}}
-void               hash_delete                (hash_t *hash, char *key){ // {{{
+void               hash_delete                (hash_t *hash, hash_key_t key){ // {{{
 	hash_t       *hvalue;
 	
 	if( (hvalue = hash_find(hash, key)) == NULL)
@@ -90,7 +95,7 @@ void *             hash_get_value_ptr           (hash_t *hash){ // {{{
 size_t             hash_get_value_size          (hash_t *hash){ // {{{
 	return hash->data.data_size;
 } // }}}
-int                hash_get                     (hash_t *hash, char *key, data_type *type, void **value, size_t *value_size){ // {{{
+int                hash_get                     (hash_t *hash, hash_key_t key, data_type *type, void **value, size_t *value_size){ // {{{
 	hash_t *hvalue;
 	
 	if( (hvalue = hash_find(hash, key)) == NULL)
@@ -105,7 +110,7 @@ int                hash_get                     (hash_t *hash, char *key, data_t
 	
 	return 0;
 } // }}}
-int                hash_get_typed               (hash_t *hash, data_type type, char *key, void **value, size_t *value_size){ // {{{
+int                hash_get_typed               (hash_t *hash, data_type type, hash_key_t key, void **value, size_t *value_size){ // {{{
 	hash_t *hvalue;
 	
 	if( (hvalue = hash_find_typed(hash, type, key)) == NULL)
@@ -139,7 +144,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		if(el->key == hash_ptr_null)
 			continue;
 		
-		el_new->key = (el->key) ? strdup(el->key) : NULL;
+		el_new->key = el->key;
 		data_copy(&el_new->data, &el->data);
 		
 		el_new++;
@@ -164,8 +169,6 @@ void               hash_free                    (hash_t *hash){ // {{{
 		if(el->key == hash_ptr_null)
 			continue;
 		
-		if(el->key)
-			free(el->key);
 		data_free(&el->data);
 	}
 	hash_free(el->data.data_ptr);
@@ -186,23 +189,16 @@ size_t             hash_get_nelements           (hash_t *hash){ // {{{
 	return i + 1;
 } // }}}
 
-data_t *           hash_get_data                (hash_t *hash, char *key){ // {{{
+data_t *           hash_get_data                (hash_t *hash, hash_key_t key){ // {{{
 	hash_t *htemp;
-	
-	if( (htemp = hash_find(hash, key)) == NULL)
-		return NULL;
-	
-	return &htemp->data;
+	return ((htemp = hash_find(hash, key)) != NULL) ? &htemp->data : NULL;
 } // }}}
-data_t *           hash_get_typed_data          (hash_t *hash, data_type type, char *key){ // {{{
+data_t *           hash_get_typed_data          (hash_t *hash, data_type type, hash_key_t key){ // {{{
 	hash_t *htemp;
-	
-	if( (htemp = hash_find_typed(hash, type, key)) == NULL)
-		return NULL;
-	
-	return &htemp->data;
+	return ((htemp = hash_find_typed(hash, type, key)) != NULL) ? &htemp->data : NULL;
 } // }}}
-data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key){ // {{{
+data_ctx_t *       hash_get_data_ctx            (hash_t *hash, hash_key_t key){ // {{{
+	/*
 	hash_t *htemp;
 	char *ctx_str = alloca(strlen(key) + 4 + 1); // TODO remove alloca
 	
@@ -211,9 +207,52 @@ data_ctx_t *       hash_get_data_ctx            (hash_t *hash, char *key){ // {{
 	
 	if( (htemp = hash_find(hash, ctx_str)) != NULL)
 		return htemp->data.data_ptr;
-	
+	*/
+	// TODO IMPORTANT
 	return NULL;
 } // }}}
+
+hash_key_t         hash_string_to_key           (char *string){
+	hash_keypair_t  key, *ret;
+	key.key_str = string;
+	
+	if(string == NULL)
+		return 0;
+	
+	/*
+	// get valid ordering
+	qsort(hash_keys, hash_keys_nelements, hash_keys_size, &hash_bsearch_string);
+	int i;
+	for(i=0; i<hash_keys_nelements; i++){
+		printf("REGISTER_KEY(%s)\n", hash_keys[i].key_str);
+	}
+	exit(0);
+	*/	
+	
+	if((ret = bsearch(&key, hash_keys,
+		hash_keys_nelements, hash_keys_size,
+		&hash_bsearch_string)) == NULL)
+		return 0;
+	
+	return ret->key_val;
+}
+
+char *             hash_key_to_string           (hash_key_t key_val){
+	hash_keypair_t  key, *ret;
+	key.key_val = key_val;
+	
+	if(key_val == 0)
+		goto ret_null;
+	
+	if((ret = bsearch(&key, hash_keys,
+		hash_keys_nelements, hash_keys_size,
+		&hash_bsearch_int)) == NULL)
+		goto ret_null;
+	
+	return ret->key_str;
+ret_null:
+	return "(null)";
+}
 
 /*
 ssize_t            hash_copy_data               (data_type type, void *dt, hash_t *hash, char *key){
@@ -244,7 +283,7 @@ start:
 		if(element->key == hash_ptr_null)
 			goto next_item;
 		
-		printf(" - %s [%s] -> %p", (char *)element->key, data_string_from_type(element->data.type), element->data.data_ptr);
+		printf(" - %d [%s] -> %p", element->key, data_string_from_type(element->data.type), element->data.data_ptr);
 		for(k=0; k<element->data.data_size; k++){
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);

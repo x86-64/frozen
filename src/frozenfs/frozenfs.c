@@ -235,32 +235,32 @@ static void wfrozen_init(void){
 	
 	frozen_init();
 	
-	hash_set(global_settings, "homedir", TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
+	hash_set(global_settings, HK(homedir), TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
 	
 	hash_t c_data[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",      DATA_STRING("file")                           },
-				{ "filename",  DATA_STRING("data_ffs_data.dat")              },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),      DATA_STRING("file")                           },
+				{ HK(filename),  DATA_STRING("data_ffs_data.dat")              },
 				hash_end
 			)},
 			hash_end
 		)},
-		{ "name", DATA_STRING("b_data") },
+		{ HK(name), DATA_STRING("b_data") },
 		hash_end
 	};
 	backend2 = wfrozen_backend_new(c_data);
 	
 	hash_t c_idx[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("file")                               },
-				{ "filename",     DATA_STRING("data_ffs_idx.dat")                   },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),         DATA_STRING("file")                               },
+				{ HK(filename),     DATA_STRING("data_ffs_idx.dat")                   },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("rewrite")                            },
-				{ "script",       DATA_STRING(
+			{ 0, DATA_HASHT(
+				{ HK(name),         DATA_STRING("rewrite")                            },
+				{ HK(script),       DATA_STRING(
 					"request_t rq_data;                                                  "
 					
 					"if(!data_cmp(request['action'], read)){                             "
@@ -306,18 +306,18 @@ static void wfrozen_init(void){
 				)},
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("list")                               },
+			{ 0, DATA_HASHT(
+				{ HK(name),         DATA_STRING("list")                               },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",         DATA_STRING("insert-sort")                        },
-				{ "engine",       DATA_STRING("binsearch")                          },
+			{ 0, DATA_HASHT(
+				{ HK(name),         DATA_STRING("insert-sort")                        },
+				{ HK(engine),       DATA_STRING("binsearch")                          },
 				hash_end
 			)},
 			hash_end
 		)},
-		{ "name", DATA_STRING("be_file") },
+		{ HK(name), DATA_STRING("be_file") },
 		hash_end
 	};
 	
@@ -388,8 +388,8 @@ static int fusef_getattr(const char *path, struct stat *buf){
 	if(ud && ud->type == BACKEND_IO){
 		// updating size
 		request_t r_count[] = {
-			{ "action",  DATA_INT32(ACTION_CRWD_COUNT)       },
-			{ "buffer",  DATA_PTR_OFFT(&size)                },
+			{ HK(action),  DATA_INT32(ACTION_CRWD_COUNT)       },
+			{ HK(buffer),  DATA_PTR_OFFT(&size)                },
 			hash_end
 		};
 		backend_query(ud->backend, r_count);
@@ -440,12 +440,12 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
 	request_t r_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)                    },
-		{ "offset",    DATA_PTR_OFFT(&off)                             },
-		{ "buffer", DATA_MEM(buf, size)                             },
+		{ HK(action), DATA_INT32(ACTION_CRWD_READ)                    },
+		{ HK(offset),    DATA_PTR_OFFT(&off)                             },
+		{ HK(buffer), DATA_MEM(buf, size)                             },
 		
-		{ "param",  fh->param                                       },
-		{ "path",   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
+		{ HK(param),  fh->param                                       },
+		{ HK(path),   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_read);
@@ -462,13 +462,13 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
 	request_t r_write[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)                   },
-		//{ "offset",     DATA_PTR_OFFT(&off)                             },
-		{ "offset_out", DATA_PTR_OFFT(&off)                             },
-		{ "buffer",  DATA_MEM((char *)buf, size)                     },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)                   },
+		//{ HK(offset),     DATA_PTR_OFFT(&off)                             },
+		{ HK(offset_out), DATA_PTR_OFFT(&off)                             },
+		{ HK(buffer),  DATA_MEM((char *)buf, size)                     },
 		
-		{ "param",   fh->param                                       },
-		{ "path",    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
+		{ HK(param),   fh->param                                       },
+		{ HK(path),    DATA_PTR_STRING((char *)path, strlen(path)+1)   },
 		hash_end
 	};
 	ret = backend_query(fh->ud->backend, r_write);

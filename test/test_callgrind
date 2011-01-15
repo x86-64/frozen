@@ -1,7 +1,19 @@
 #!/bin/sh
 
-rm -rf data_*.dat      &>/dev/null
 rm -rf callgrind.out*  &>/dev/null
-LD_LIBRARY_PATH="../src/libfrozen/.libs/" valgrind --tool=callgrind  .libs/test
-callgrind_annotate --auto=yes callgrind.out.* > callgrind.result
+#rm -rf cachegrind.out*  &>/dev/null
+
+rm -rf data_*.dat      &>/dev/null
+LD_LIBRARY_PATH="../src/libfrozen/.libs/" valgrind --tool=callgrind \
+	--callgrind-out-file=callgrind.out \
+	--dump-instr=yes \
+	--collect-systime=yes \
+	--simulate-cache=yes \
+	--collect-jumps=yes \
+	.libs/test
+	
+#--cacheuse=yes \
+
+#rm -rf data_*.dat      &>/dev/null
+#LD_LIBRARY_PATH="../src/libfrozen/.libs/" valgrind --tool=cachegrind .libs/test
 

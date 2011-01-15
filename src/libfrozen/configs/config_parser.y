@@ -18,15 +18,17 @@ extern int config_lex(YYSTYPE *);
 %parse-param {hash_t **hash}
 
 %union {
-	hash_t   *hash_items;
-	hash_t    hash_item;
-	char     *name;
-	data_t    data;
+	hash_t     *hash_items;
+	hash_t      hash_item;
+	hash_key_t  key;
+	char       *name;
+	data_t      data;
 }
 %token NAME STRING ASSIGN TNULL
 %type  <hash_items>  hash_items
 %type  <hash_item>   hash_item
-%type  <name>        hash_name  NAME STRING
+%type  <key>         hash_name
+%type  <name>        NAME STRING
 %type  <data>        hash_value
 
 %%
@@ -58,13 +60,17 @@ hash_item : hash_name hash_value {
 };
 
 hash_name :
-          /* empty */  { $$ = NULL  }
-	| NAME  ASSIGN { $$ = $1    }
-	| TNULL ASSIGN { $$ = NULL; };
+          /* empty */  { $$ = 0; }
+	| TNULL ASSIGN { $$ = 0; }
+	| NAME  ASSIGN {
+		if( ($$ = hash_string_to_key($1)) == 0){
+			printf("unknown key: %s\n", $1); YYERROR;
+		}
+	};
 
 hash_value :
 	  STRING             { data_assign_raw(&$$, TYPE_STRING, $1, strlen($1) + 1);  }  // fucking macro nesting
-	| '{' hash_items '}' { data_assign_raw(&$$, TYPE_HASHT,  $2, 1 /*allocated*/); }; // no DATA_PTR_HASHT_FREE here
+	| '{' hash_items '}' { data_assign_raw(&$$, TYPE_HASHT,  $2, 1 /*allocated*/); }  // no DATA_PTR_HASHT_FREE here
 	| '(' NAME ')' STRING {
 		ssize_t  retval;
 		data_t   d_str = DATA_PTR_STRING($4, strlen($4)+1);

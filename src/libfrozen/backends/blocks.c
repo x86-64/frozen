@@ -21,46 +21,46 @@ typedef struct blocks_userdata {
 
 static ssize_t   map_new            (blocks_userdata *data, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "block_off",  DATA_PTR_INT32(&b_off)         },
-		{ "block_size", DATA_PTR_INT32(&b_size)        },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(block_off),  DATA_PTR_INT32(&b_off)         },
+		{ HK(block_size), DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
 static ssize_t   map_insert         (blocks_userdata *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
-		{ "block_off",  DATA_PTR_INT32(&b_off)         },
-		{ "block_size", DATA_PTR_INT32(&b_size)        },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(block_vid),  DATA_PTR_INT32(&b_vid)         },
+		{ HK(block_off),  DATA_PTR_INT32(&b_off)         },
+		{ HK(block_size), DATA_PTR_INT32(&b_size)        },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
 static ssize_t   map_resize         (blocks_userdata *data, unsigned int b_vid, unsigned int new_size){ // {{{
 	hash_t  req_write[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
-		{ "block_size", DATA_PTR_INT32(&new_size)      },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(block_vid),  DATA_PTR_INT32(&b_vid)         },
+		{ HK(block_size), DATA_PTR_INT32(&new_size)      },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_write);
 } // }}}
 /*static ssize_t   map_delete         (blocks_userdata *data, unsigned int b_vid){ // {{{
 	hash_t  req_delete[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_DELETE) },
-		{ "block_vid",  DATA_PTR_INT32(&b_vid)         },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_DELETE) },
+		{ HK(block_vid),  DATA_PTR_INT32(&b_vid)         },
 		hash_end
 	};
 	return backend_query(data->bk_map, req_delete);
 } // }}}*/
 static ssize_t   map_off            (blocks_userdata *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
 	hash_t    req_read[] = {
-		{ "action",       DATA_INT32(ACTION_CRWD_READ) },
-		{ "offset",       DATA_PTR_OFFT(&virt_off)     },
-		{ "real_offset",  DATA_PTR_OFFT(real_off)      },
-		{ "block_vid",    DATA_PTR_INT32(block_vid)    },
+		{ HK(action),       DATA_INT32(ACTION_CRWD_READ) },
+		{ HK(offset),       DATA_PTR_OFFT(&virt_off)     },
+		{ HK(real_offset),  DATA_PTR_OFFT(real_off)      },
+		{ HK(block_vid),    DATA_PTR_INT32(block_vid)    },
 		hash_end
 	};
 	
@@ -68,11 +68,11 @@ static ssize_t   map_off            (blocks_userdata *data, off_t virt_off, unsi
 } // }}}
 static ssize_t   map_get_block      (blocks_userdata *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
 	hash_t    req_read[] = {
-		{ "action",      DATA_INT32(ACTION_CRWD_READ) },
-		{ "blocks",      DATA_INT32(1)                },
-		{ "block_vid",   DATA_PTR_INT32(&block_vid)   },
-		{ "block_size",  DATA_PTR_INT32(block_size)   },
-		{ "real_offset", DATA_PTR_OFFT(real_off)      },
+		{ HK(action),      DATA_INT32(ACTION_CRWD_READ) },
+		{ HK(blocks),      DATA_INT32(1)                },
+		{ HK(block_vid),   DATA_PTR_INT32(&block_vid)   },
+		{ HK(block_size),  DATA_PTR_INT32(block_size)   },
+		{ HK(real_offset), DATA_PTR_OFFT(real_off)      },
 		hash_end
 	};
 	
@@ -87,9 +87,9 @@ static ssize_t   map_blocks         (blocks_userdata *data){ // {{{
 	data->blocks_count = 0;
 	
 	hash_t  req_count[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
-		{ "blocks", DATA_INT32(1)                 },
-		{ "buffer", DATA_BUFFERT(&req_buffer)     },
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(blocks), DATA_INT32(1)                 },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)     },
 		hash_end
 	};
 	ret = backend_query(data->bk_map, req_count);
@@ -103,9 +103,9 @@ static ssize_t   real_new           (blocks_userdata *data, off_t *real_block_of
 	buffer_init_from_bare(&req_buffer, real_block_off, sizeof(off_t));
 	
 	hash_t    req_create[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_CREATE ) },
-		{ "size"  , DATA_SIZET(data->block_size   ) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)       },
+		{ HK(action), DATA_INT32(ACTION_CRWD_CREATE ) },
+		{ HK(size)  , DATA_SIZET(data->block_size   ) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)       },
 		hash_end
 	};
 	
@@ -118,10 +118,10 @@ static ssize_t   real_move          (blocks_userdata *data, off_t from, off_t to
 		return 0;
 	
 	hash_t    req_move[] = {
-		{ "action",   DATA_INT32(ACTION_CRWD_MOVE) },
-		{ "offset_from", DATA_PTR_OFFT(&from)         },
-		{ "offset_to",   DATA_PTR_OFFT(&to)           },
-		{ "size"  ,   DATA_SIZET(size)             },
+		{ HK(action),   DATA_INT32(ACTION_CRWD_MOVE) },
+		{ HK(offset_from), DATA_PTR_OFFT(&from)         },
+		{ HK(offset_to),   DATA_PTR_OFFT(&to)           },
+		{ HK(size)  ,   DATA_SIZET(size)             },
 		hash_end
 	};
 	
@@ -287,13 +287,13 @@ static int blocks_configure(chain_t *chain, hash_t *config){
 	blocks_userdata *data         = (blocks_userdata *)chain->userdata;
 	
 	data->block_size =
-		(hash_get_typed(config, TYPE_INT32, "block_size", &temp, NULL) == 0) ?
+		(hash_get_typed(config, TYPE_INT32, HK(block_size), &temp, NULL) == 0) ?
 		*(unsigned int *)temp : 0;
 	
 	if( data->block_size == 0)
 		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
 	
-	if( (r_backend = hash_find(config, "backend")) == NULL)
+	if( (r_backend = hash_find(config, HK(backend))) == NULL)
 		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set\n");
 	
 	if( (data->bk_map = backend_new(r_backend)) == NULL)
@@ -316,7 +316,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	ssize_t           ret;
 	hash_t           *r_size;
 	
-	if( (r_size = hash_find_typed (request, TYPE_SIZET, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_SIZET, HK(size))) == NULL)
 		return -EINVAL;
 	element_size = HVALUE(r_size, unsigned int);
 	
@@ -357,7 +357,7 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	
 	/* calc virt_ptr */
 	hash_t  req_count[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
 		hash_next(request)
 	};
 	ret = backend_query(data->bk_map, req_count); 
@@ -377,7 +377,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	// TODO r_size > block_size
 	// TODO remove TYPE_OFFT from code, support all
 	
-	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, "offset")) == NULL)
+	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, HK(offset))) == NULL)
 		return -EINVAL;
 	
 	data_copy_local(&key_real, hash_get_data(r_key_virt));
@@ -386,7 +386,7 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 		return -EINVAL;
 	
 	hash_t  req_layer[] = {
-		{ "offset", key_real             },
+		{ HK(offset), key_real             },
 		hash_next(request)
 	};
 	
@@ -395,9 +395,9 @@ static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 static ssize_t blocks_delete(chain_t *chain, request_t *request){ // {{{
 	hash_t *r_key, *r_size;
 	
-	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  "offset")) == NULL)
+	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  HK(offset))) == NULL)
 		return -EINVAL;
-	if( (r_size = hash_find_typed(request, TYPE_SIZET, "size")) == NULL)
+	if( (r_size = hash_find_typed(request, TYPE_SIZET, HK(size))) == NULL)
 		return -EINVAL;
 	
 	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
@@ -409,9 +409,9 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	
 	ssize_t           move_delta;
 	
-	if( (r_from = hash_find_typed (request, TYPE_OFFT, "offset_from")) == NULL)
+	if( (r_from = hash_find_typed (request, TYPE_OFFT, HK(offset_from))) == NULL)
 		return -EINVAL;
-	if( (r_to   = hash_find_typed (request, TYPE_OFFT, "offset_to"))   == NULL)
+	if( (r_to   = hash_find_typed (request, TYPE_OFFT, HK(offset_to)))   == NULL)
 		return -EINVAL;
 	
 	from = HVALUE(r_from, off_t);
@@ -431,7 +431,7 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	}
 	
 	// manage bottom of move
-	if( (r_size = hash_find_typed (request, TYPE_SIZET, "size")) == NULL)
+	if( (r_size = hash_find_typed (request, TYPE_SIZET, HK(size))) == NULL)
 		return 0;
 	size = HVALUE(r_size, unsigned int);
 	if(size == -1)

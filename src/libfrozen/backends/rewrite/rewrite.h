@@ -40,7 +40,7 @@ struct rewrite_thing_t {
 	rewrite_thing_t         *next;
 	
 	// THING_ARRAY_REQUEST
-	char                    *array_key;
+	hash_key_t               array_key;
 	
 	// THING_CONST or THING_VARIABLE
 	unsigned int             id;

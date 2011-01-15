@@ -35,7 +35,7 @@ fi
 AC_ARG_ENABLE(profile,  AS_HELP_STRING([--enable-profile],  [enable code profiling]))
 if test "x$enable_profile" == "xyes"; then
         CFLAGS="$CFLAGS -pg"
-        LDFLAGS="$LDFLAGS -pg -nopie"
+        LDFLAGS="$LDFLAGS -pg"
 fi
 
 AC_CONFIG_FILES([Makefile

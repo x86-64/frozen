@@ -12,9 +12,9 @@ static int  struct_iter_init(hash_t *config, void *p_structure, void *null){
 	hash_t   *member_config;
 	
 	member_config = (hash_t *)config->value;
-	if( (c_name = hash_find_typed(member_config, TYPE_STRING, "name")) == NULL)
+	if( (c_name = hash_find_typed(member_config, TYPE_STRING, HK(name))) == NULL)
 		return ITER_BREAK;
-	if( (c_type = hash_find_typed(member_config, TYPE_STRING, "type")) == NULL)
+	if( (c_type = hash_find_typed(member_config, TYPE_STRING, HK(type))) == NULL)
 		return ITER_BREAK;
 	
 	member_name        = (char *)( c_name->value );

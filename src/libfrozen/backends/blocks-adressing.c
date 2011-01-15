@@ -50,8 +50,8 @@ static int      tree_reinit(tree_t *tree){ // {{{
 	buffer_init_from_bare(&req_buffer, &tree->blocks_count, sizeof(tree->blocks_count));
 	
 	hash_t    req_count[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_COUNT) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)     },
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)     },
 		hash_end
 	};
 	if(chain_next_query(tree->chain, req_count) <= 0){
@@ -166,10 +166,10 @@ static int      tree_recalc(tree_t *tree){ // {{{
 		read_size = ( (blocks_left > tree->read_per_calc) ? tree->read_per_calc : blocks_left );
 		
 		hash_t    req_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)               },
-			{ "offset",    DATA_OFFT (ptr * sizeof(block_info))       },
-			{ "size",   DATA_SIZET(read_size * sizeof(block_info)) },
-			{ "buffer", DATA_BUFFERT(buffer)                       },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)               },
+			{ HK(offset),    DATA_OFFT (ptr * sizeof(block_info))       },
+			{ HK(size),   DATA_SIZET(read_size * sizeof(block_info)) },
+			{ HK(buffer), DATA_BUFFERT(buffer)                       },
 			hash_end
 		};
 		if( (ret_size = chain_next_query(tree->chain, req_read)) <= 0)
@@ -231,18 +231,18 @@ static int      tree_insert(tree_t *tree, unsigned int block_vid, unsigned int b
 	block.size             = size;
 	
 	hash_t    req_move[] = {
-		{ "action",   DATA_INT32(ACTION_CRWD_MOVE)                     },
-		{ "offset_from", DATA_OFFT ((block_vid    ) * sizeof(block_info)) },
-		{ "offset_to",   DATA_OFFT ((block_vid + 1) * sizeof(block_info)) },
+		{ HK(action),   DATA_INT32(ACTION_CRWD_MOVE)                     },
+		{ HK(offset_from), DATA_OFFT ((block_vid    ) * sizeof(block_info)) },
+		{ HK(offset_to),   DATA_OFFT ((block_vid + 1) * sizeof(block_info)) },
 		hash_end
 	};
 	ret = chain_next_query(tree->chain, req_move);
 	
 	hash_t    req_write[] = {
-		{ "action", DATA_INT32( ACTION_CRWD_WRITE              ) },
-		{ "offset",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)                    },
+		{ HK(action), DATA_INT32( ACTION_CRWD_WRITE              ) },
+		{ HK(offset),    DATA_OFFT ( block_vid * sizeof(block_info) ) },
+		{ HK(size),   DATA_SIZET( sizeof(block_info)             ) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)                    },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_write)) <= 0)
@@ -265,18 +265,18 @@ static int      tree_delete_block(tree_t *tree, unsigned int block_vid){ // {{{
 	ssize_t           ret;
 	
 	hash_t    req_move[] = {
-		{ "action",   DATA_INT32( ACTION_CRWD_MOVE                     ) },
-		{ "offset_from", DATA_OFFT ( (block_vid + 1) * sizeof(block_info) ) },
-		{ "offset_to",   DATA_OFFT ( (block_vid    ) * sizeof(block_info) ) },
+		{ HK(action),   DATA_INT32( ACTION_CRWD_MOVE                     ) },
+		{ HK(offset_from), DATA_OFFT ( (block_vid + 1) * sizeof(block_info) ) },
+		{ HK(offset_to),   DATA_OFFT ( (block_vid    ) * sizeof(block_info) ) },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_move)) != 0)
 		return ret;
 	
 	hash_t    req_delete[] = {
-		{ "action", DATA_INT32( ACTION_CRWD_DELETE                            ) },
-		{ "offset",    DATA_OFFT ( (tree->blocks_count - 1) * sizeof(block_info) ) },
-		{ "size",   DATA_SIZET( sizeof(block_info)                            ) },
+		{ HK(action), DATA_INT32( ACTION_CRWD_DELETE                            ) },
+		{ HK(offset),    DATA_OFFT ( (tree->blocks_count - 1) * sizeof(block_info) ) },
+		{ HK(size),   DATA_SIZET( sizeof(block_info)                            ) },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_delete)) != 0)
@@ -302,10 +302,10 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	
 	/* read block_info */
 	hash_t    req_read[] = {
-		{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
-		{ "offset",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)                    },
+		{ HK(action), DATA_INT32( ACTION_CRWD_READ               ) },
+		{ HK(offset),    DATA_OFFT ( block_vid * sizeof(block_info) ) },
+		{ HK(size),   DATA_SIZET( sizeof(block_info)             ) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)                    },
 		hash_end
 	};
 	if( (ret = chain_next_query(tree->chain, req_read)) <= 0){
@@ -319,10 +319,10 @@ static int      tree_resize_block(tree_t *tree, unsigned int block_vid, unsigned
 	
 	/* write block info */
 	hash_t    req_write[] = {
-		{ "action", DATA_INT32( ACTION_CRWD_WRITE              ) },
-		{ "offset",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)                    },
+		{ HK(action), DATA_INT32( ACTION_CRWD_WRITE              ) },
+		{ HK(offset),    DATA_OFFT ( block_vid * sizeof(block_info) ) },
+		{ HK(size),   DATA_SIZET( sizeof(block_info)             ) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)                    },
 		hash_end
 	};
 	chain_next_query(tree->chain, req_write);
@@ -375,10 +375,10 @@ static int      tree_get(tree_t *tree, off_t offset, unsigned int *block_vid, of
 		/* read block_info */
 		for(j=0; j < tree->elements_per_level; j++, ptr++){
 			hash_t    req_read[] = {
-				{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
-				{ "offset",    DATA_OFFT ( ptr * sizeof(block_info)       ) },
-				{ "size",   DATA_SIZET( sizeof(block_info)             ) },
-				{ "buffer", DATA_BUFFERT(&req_buffer)                    },
+				{ HK(action), DATA_INT32( ACTION_CRWD_READ               ) },
+				{ HK(offset),    DATA_OFFT ( ptr * sizeof(block_info)       ) },
+				{ HK(size),   DATA_SIZET( sizeof(block_info)             ) },
+				{ HK(buffer), DATA_BUFFERT(&req_buffer)                    },
 				hash_end
 			};
 			if(chain_next_query(tree->chain, req_read) <= 0)
@@ -408,10 +408,10 @@ static int      tree_get_block(tree_t *tree, unsigned int block_vid, block_info 
 	buffer_init_from_bare(&req_buffer, block, sizeof(block_info));
 	
 	hash_t    req_read[] = {
-		{ "action", DATA_INT32( ACTION_CRWD_READ               ) },
-		{ "offset",    DATA_OFFT ( block_vid * sizeof(block_info) ) },
-		{ "size",   DATA_SIZET( sizeof(block_info)             ) },
-		{ "buffer", DATA_BUFFERT(&req_buffer)                    },
+		{ HK(action), DATA_INT32( ACTION_CRWD_READ               ) },
+		{ HK(offset),    DATA_OFFT ( block_vid * sizeof(block_info) ) },
+		{ HK(size),   DATA_SIZET( sizeof(block_info)             ) },
+		{ HK(buffer), DATA_BUFFERT(&req_buffer)                    },
 		hash_end
 	};
 	if(chain_next_query(tree->chain, req_read) <= 0)
@@ -460,14 +460,14 @@ static int addrs_configure(chain_t *chain, hash_t *config){
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
 	elements_per_level =
-		(hash_get_typed(config, TYPE_INT32, "per-level", &temp, NULL) == 0) ?
+		(hash_get_typed(config, TYPE_INT32, HK(perlevel), &temp, NULL) == 0) ?
 		*(unsigned int *)temp : 0;
 	
 	if( elements_per_level <= 1)
 		return_error(-EINVAL, "chain 'blocks-address' variable 'per-level' invalid");
 	
 	read_per_calc =
-		(hash_get_typed(config, TYPE_INT32, "recalc-read-size", &temp, NULL) == 0) ?
+		(hash_get_typed(config, TYPE_INT32, HK(read_size), &temp, NULL) == 0) ?
 		(*(unsigned int *)temp < 1) ? *(unsigned int *)temp : READ_PER_CALC_DEFAULT :
 		READ_PER_CALC_DEFAULT;
 	
@@ -490,15 +490,15 @@ static ssize_t addrs_set(chain_t *chain, request_t *request){
 	hash_t           *r_block_size, *r_block_vid, *r_block_off;
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
-	if( (r_block_size = hash_find_typed(request, TYPE_INT32, "block_size")) == NULL) 
+	if( (r_block_size = hash_find_typed(request, TYPE_INT32, HK(block_size))) == NULL) 
 		return -EINVAL;
 	
-	if( (r_block_vid  = hash_find_typed(request, TYPE_INT32, "block_vid"))  == NULL)
+	if( (r_block_vid  = hash_find_typed(request, TYPE_INT32, HK(block_vid)))  == NULL)
 		block_vid = tree_blocks_count(data->tree);
 	else
 		block_vid = HVALUE(r_block_vid, unsigned int);
 	
-	if( (r_block_off  = hash_find_typed(request, TYPE_INT32, "block_off"))  == NULL)
+	if( (r_block_off  = hash_find_typed(request, TYPE_INT32, HK(block_off)))  == NULL)
 		insert = 0;
 	
 	if(insert == 0){
@@ -522,18 +522,18 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 	hash_t           *r_virt_key, *r_block_vid;
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
-	hash_get_typed(request, TYPE_OFFT,  "real_offset", (void **)&o_real_offset, NULL);
-	hash_get_typed(request, TYPE_INT32, "block_vid",   (void **)&o_block_vid,   NULL);
-	hash_get_typed(request, TYPE_INT32, "block_size",  (void **)&o_block_size,  NULL);
+	hash_get_typed(request, TYPE_OFFT,  HK(real_offset), (void **)&o_real_offset, NULL);
+	hash_get_typed(request, TYPE_INT32, HK(block_vid),   (void **)&o_block_vid,   NULL);
+	hash_get_typed(request, TYPE_INT32, HK(block_size),  (void **)&o_block_size,  NULL);
 	
-	if(hash_find(request, "blocks") == NULL){
-		if( (r_virt_key = hash_find_typed(request, TYPE_OFFT, "offset")) == NULL)
+	if(hash_find(request, HK(blocks)) == NULL){
+		if( (r_virt_key = hash_find_typed(request, TYPE_OFFT, HK(offset))) == NULL)
 			return -EINVAL;
 		
 		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), o_block_vid, o_real_offset) != 0)
 			return -EFAULT;
 	}else{
-		if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
+		if( (r_block_vid = hash_find_typed(request, TYPE_INT32, HK(block_vid))) == NULL)
 			return -EINVAL;
 		if(tree_get_block(data->tree, HVALUE(r_block_vid, unsigned int), &block) != 0)
 			return -EFAULT;
@@ -548,7 +548,7 @@ static ssize_t addrs_delete(chain_t *chain, request_t *request){
 	hash_t           *r_block_vid;
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
-	if( (r_block_vid = hash_find_typed(request, TYPE_INT32, "block_vid")) == NULL)
+	if( (r_block_vid = hash_find_typed(request, TYPE_INT32, HK(block_vid))) == NULL)
 		return -EINVAL;
 	
 	return tree_delete_block(data->tree, HVALUE(r_block_vid, unsigned int));
@@ -559,10 +559,10 @@ static ssize_t addrs_count(chain_t *chain, request_t *request){
 	buffer_t         *buffer;
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
-	if( hash_get_typed(request, TYPE_BUFFERT, "buffer", (void **)&buffer, NULL) != 0)
+	if( hash_get_typed(request, TYPE_BUFFERT, HK(buffer), (void **)&buffer, NULL) != 0)
 		return -EINVAL;
 	
-	if(hash_find(request, "blocks") == NULL){
+	if(hash_find(request, HK(blocks)) == NULL){
 		if(tree_size(data->tree, &units_count) != 0)
 			return -EINVAL;
 	}else{

@@ -17,7 +17,7 @@ struct sort_proto_t {
 struct sorts_userdata {
 	chain_t         *chain;
 	sort_proto_t    *engine;
-	char            *sort_field;
+	hash_key_t       sort_field;
 };
 
 /* m4 {{{
@@ -46,7 +46,6 @@ static int sorts_init(chain_t *chain){ // {{{
 static int sorts_destroy(chain_t *chain){ // {{{
 	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
-	free(data->sort_field);
 	free(data);
 	chain->userdata = NULL;
 	
@@ -61,7 +60,7 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	data->chain = chain;
 	
 	/* get engine info */
-	if(hash_get_typed(config, TYPE_STRING, "engine", (void **)&sort_engine_str, NULL) != 0)
+	if(hash_get_typed(config, TYPE_STRING, HK(engine), (void **)&sort_engine_str, NULL) != 0)
 		return_error(-EINVAL, "chain 'insert-sort' parameter 'engine' not supplied\n");
 	
 	for(i=0, data->engine = NULL; i<sort_protos_size; i++){
@@ -73,10 +72,10 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	if(data->engine == NULL)
 		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
 	
-	if(hash_get_typed(config, TYPE_STRING, "field", (void **)&sort_field, NULL) != 0)
+	if(hash_get_typed(config, TYPE_STRING, HK(field), (void **)&sort_field, NULL) != 0)
 		sort_field = "buffer";
 	
-	data->sort_field = strdup(sort_field);
+	data->sort_field = hash_string_to_key(sort_field);
 	
 	return 0;
 } // }}}
@@ -86,15 +85,15 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	ssize_t          ret;
 	data_t          *buffer, *key_out;
 	data_ctx_t      *buffer_ctx, *key_out_ctx;
-	sorts_userdata *data = (sorts_userdata *)chain->userdata;
+	sorts_userdata  *data = (sorts_userdata *)chain->userdata;
 	
 	if( (buffer = hash_get_data(request, data->sort_field)) == NULL)
 		return -EINVAL;
 	buffer_ctx = hash_get_data_ctx(request, data->sort_field);
 	
-	if( (key_out = hash_get_data(request, "offset_out")) == NULL)
+	if( (key_out = hash_get_data(request, HK(offset_out))) == NULL)
 		return -EINVAL;
-	key_out_ctx = hash_get_data_ctx(request, "offset_out");
+	key_out_ctx = hash_get_data_ctx(request, HK(offset_out));
 	
 	// TODO underlying locking and threading
 	// next("lock");
@@ -108,8 +107,8 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	}
 	*/
 	request_t req_insert[] = {
-		{ "offset",    *key_out                    },
-		{ "insert", DATA_INT32(1)               },
+		{ HK(offset), *key_out                    },
+		{ HK(insert), DATA_INT32(1)               },
 		hash_next(request)
 	};
 	ret = chain_next_query(chain, req_insert);
@@ -131,7 +130,7 @@ static ssize_t sorts_custom(chain_t *chain, request_t *request){
 	hash_t *r_funcname;
 	sorts_userdata *data = (sorts_userdata *)chain->userdata;
 	
-	if( (r_funcname = hash_find_typed(request, TYPE_STRING, "function")) == NULL)
+	if( (r_funcname = hash_find_typed(request, TYPE_STRING, HK(function))) == NULL)
 		return -EINVAL;
 	
 	if(strcmp((char *)r_funcname->value, "search") == 0){

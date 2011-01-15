@@ -8,10 +8,10 @@ ssize_t   data_string_read  (data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	// read limits
 	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
 		HVALUE(temp, off_t) : 0;
 	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
 		HVALUE(temp, size_t) : data->data_size;
 	
 	// check consistency
@@ -47,10 +47,10 @@ ssize_t   data_string_write (data_t *data, data_ctx_t *context, off_t offset, vo
 	hash_t  *temp;
 	
 	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
 		HVALUE(temp, off_t) : 0;
 	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
 		HVALUE(temp, size_t) : data->data_size;
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
@@ -77,6 +77,7 @@ ssize_t   data_string_write (data_t *data, data_ctx_t *context, off_t offset, vo
 }
 
 // TODO possible crash here
+// TODO new api
 
 int     data_string_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){
 	(void)ctx1; (void)ctx2; // TODO IMPORTANT use ctx

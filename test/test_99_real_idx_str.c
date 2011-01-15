@@ -28,9 +28,9 @@ START_TEST (test_real_store_idx_strings){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		request_t r_write[] = {
-			{ "action",  DATA_INT32 (ACTION_CRWD_WRITE)                           },
-			{ "offset_out", DATA_PTR_OFFT   (&data_ptrs[i])                          },
-			{ "buffer",  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
+			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)                           },
+			{ HK(offset_out), DATA_PTR_OFFT   (&data_ptrs[i])                          },
+			{ HK(buffer),  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
 			hash_end
 		};
 		ret = backend_query(b_idx, r_write);
@@ -47,9 +47,9 @@ START_TEST (test_real_store_idx_strings){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ "action", DATA_INT32(ACTION_CRWD_READ)      },
-			{ "offset",    DATA_OFFT(i)                      },
-			{ "buffer", DATA_PTR_STRING(&data_read, 1024) },
+			{ HK(action), DATA_INT32(ACTION_CRWD_READ)      },
+			{ HK(offset),    DATA_OFFT(i)                      },
+			{ HK(buffer), DATA_PTR_STRING(&data_read, 1024) },
 			hash_end
 		};
 		ret = backend_query(b_idx, r_read);

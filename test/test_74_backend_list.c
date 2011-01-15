@@ -4,14 +4,14 @@ START_TEST (test_backend_list){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ "chains", DATA_HASHT(
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("file")                     },
-				{ "filename",    DATA_STRING("data_backend_list.dat")    },
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("file")                     },
+				{ HK(filename),    DATA_STRING("data_backend_list.dat")    },
 				hash_end
 			)},
-			{ NULL, DATA_HASHT(
-				{ "name",        DATA_STRING("list")                     },
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("list")                     },
 				hash_end
 			)},
 			hash_end
@@ -33,9 +33,9 @@ START_TEST (test_backend_list){
 	
 	// create new
 	hash_t  hash_create[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_CREATE) },
-		{ "size",    DATA_SIZET(10)                 },
-		{ "offset_out", DATA_PTR_OFFT(&key_off)        },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(size),    DATA_SIZET(10)                 },
+		{ HK(offset_out), DATA_PTR_OFFT(&key_off)        },
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
@@ -43,10 +43,10 @@ START_TEST (test_backend_list){
 	
 	// write keys
 	hash_t  hash_write[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "offset",    DATA_OFFT(key_off)             },
-		{ "size",   DATA_SIZET(10)                 },
-		{ "buffer", DATA_MEM(key_data, 10)         },
+		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(offset),    DATA_OFFT(key_off)             },
+		{ HK(size),   DATA_SIZET(10)                 },
+		{ HK(buffer), DATA_MEM(key_data, 10)         },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_write);
@@ -54,11 +54,11 @@ START_TEST (test_backend_list){
 	
 	// insert key
 	hash_t  hash_insert[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_WRITE) },
-		{ "offset",    DATA_OFFT(key_off + 2)        },
-		{ "insert", DATA_INT32(1)                 },
-		{ "size",   DATA_SIZET(1)                 },
-		{ "buffer", DATA_MEM(key_insert, 1)       },
+		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE) },
+		{ HK(offset),    DATA_OFFT(key_off + 2)        },
+		{ HK(insert), DATA_INT32(1)                 },
+		{ HK(size),   DATA_SIZET(1)                 },
+		{ HK(buffer), DATA_MEM(key_insert, 1)       },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_insert);
@@ -67,10 +67,10 @@ START_TEST (test_backend_list){
 	// check
 	memset(temp, 0, 1024);
 	hash_t  hash_read[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)  },
-		{ "offset",    DATA_OFFT(key_off)            },
-		{ "size",   DATA_SIZET(11)                },
-		{ "buffer", DATA_MEM(temp, 1024)          },
+		{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
+		{ HK(offset),    DATA_OFFT(key_off)            },
+		{ HK(size),   DATA_SIZET(11)                },
+		{ HK(buffer), DATA_MEM(temp, 1024)          },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_read);
@@ -82,9 +82,9 @@ START_TEST (test_backend_list){
 	
 	// delete key
 	hash_t  hash_delete[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_DELETE)   },
-		{ "offset",    DATA_OFFT(key_off + 3)           },
-		{ "size",   DATA_SIZET(1)                    },
+		{ HK(action), DATA_INT32(ACTION_CRWD_DELETE)   },
+		{ HK(offset),    DATA_OFFT(key_off + 3)           },
+		{ HK(size),   DATA_SIZET(1)                    },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_delete);
@@ -92,10 +92,10 @@ START_TEST (test_backend_list){
 	
 	// check
 	hash_t  hash_read2[] = {
-		{ "action", DATA_INT32(ACTION_CRWD_READ)     },
-		{ "offset",    DATA_OFFT(key_off)               },
-		{ "size",   DATA_SIZET(10)                   },
-		{ "buffer", DATA_MEM(temp, 1024)             },
+		{ HK(action), DATA_INT32(ACTION_CRWD_READ)     },
+		{ HK(offset),    DATA_OFFT(key_off)               },
+		{ HK(size),   DATA_SIZET(10)                   },
+		{ HK(buffer), DATA_MEM(temp, 1024)             },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_read2);

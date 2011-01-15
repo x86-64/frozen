@@ -10,8 +10,8 @@
 typedef struct mphf_userdata {
 	mphf_t       main_mphf;
 	backend_t   *backend;
-	char        *key_from;
-	char        *key_to;
+	hash_key_t   key_from;
+	hash_key_t   key_to;
 	unsigned int inited;
 } mphf_userdata;
 
@@ -47,9 +47,9 @@ ssize_t         mphf_new         (mphf_t *mphf, backend_t *backend, uint64_t *of
 	
 	// reserve space for mphf
 	request_t  r_create[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_CREATE)      },
-		{ "offset_out", DATA_PTR_INT64(offset)              },
-		{ "size",    DATA_PTR_INT64(&mphf_size)          },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE)      },
+		{ HK(offset_out), DATA_PTR_INT64(offset)              },
+		{ HK(size),    DATA_PTR_INT64(&mphf_size)          },
 		hash_end
 	};
 	if(backend_query(backend, r_create) < 0)
@@ -69,9 +69,9 @@ ssize_t         mphf_new         (mphf_t *mphf, backend_t *backend, uint64_t *of
 	buffer_add_tail_raw(&mphf_buffer, mphf->stores,  mphf_stores_size);
 	
 	request_t  r_write[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)       },
-		{ "offset",     DATA_PTR_INT64(offset)              },
-		{ "buffer",  DATA_BUFFERT(&mphf_buffer)          },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)       },
+		{ HK(offset),     DATA_PTR_INT64(offset)              },
+		{ HK(buffer),  DATA_BUFFERT(&mphf_buffer)          },
 		hash_end
 	};
 	ret = backend_query(backend, r_write);
@@ -98,10 +98,10 @@ ssize_t         mphf_load        (mphf_t *mphf, backend_t *backend, uint64_t off
 	
 	// pre-read
 	request_t  r_preread[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_READ)                    },
-		{ "offset",     DATA_PTR_INT64(&offset)                         },
-		{ "buffer",  DATA_MEM(&mphf->params, sizeof(mphf_params_t))  },
-		{ "size",    DATA_INT64(sizeof(mphf_params_t))               },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_READ)                    },
+		{ HK(offset),     DATA_PTR_INT64(&offset)                         },
+		{ HK(buffer),  DATA_MEM(&mphf->params, sizeof(mphf_params_t))  },
+		{ HK(size),    DATA_INT64(sizeof(mphf_params_t))               },
 		hash_end
 	};
 	if(backend_query(backend, r_preread) <= 0)
@@ -129,9 +129,9 @@ ssize_t         mphf_load        (mphf_t *mphf, backend_t *backend, uint64_t off
 	buffer_add_tail_raw(&mphf_buffer, mphf->stores,  mphf_stores_size);
 	
 	request_t  r_read[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_READ)        },
-		{ "offset",  DATA_PTR_INT64(&offset)             },
-		{ "buffer",  DATA_BUFFERT(&mphf_buffer)          },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_READ)        },
+		{ HK(offset),  DATA_PTR_INT64(&offset)             },
+		{ HK(buffer),  DATA_BUFFERT(&mphf_buffer)          },
 		hash_end
 	};
 	ret = backend_query(backend, r_read);
@@ -178,9 +178,9 @@ ssize_t         mphf_store_new   (mphf_t *mphf, uint32_t id, uint64_t size){
 	mphf_store_t *store = &mphf->stores[id];
 	
 	request_t  r_create[] = {
-		{ "action",     DATA_INT32(ACTION_CRWD_CREATE)     },
-		{ "size",       DATA_PTR_INT64(&size)              },
-		{ "offset_out", DATA_PTR_INT64(&store->offset)     },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE)     },
+		{ HK(size),       DATA_PTR_INT64(&size)              },
+		{ HK(offset_out), DATA_PTR_INT64(&store->offset)     },
 		hash_end
 	};
 	
@@ -195,10 +195,10 @@ ssize_t         mphf_store_read  (mphf_t *mphf, uint32_t id, uint64_t offset, vo
 	
 	uint64_t foffset = store->offset + offset;
 	request_t  r_read[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_READ)   },
-		{ "offset",  DATA_PTR_INT64(&foffset)       },
-		{ "buffer",  DATA_MEM(buffer, buffer_size)  },
-		{ "size",    DATA_PTR_SIZET(&buffer_size)   },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_READ)   },
+		{ HK(offset),  DATA_PTR_INT64(&foffset)       },
+		{ HK(buffer),  DATA_MEM(buffer, buffer_size)  },
+		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
 		hash_end
 	};
 	
@@ -213,10 +213,10 @@ ssize_t         mphf_store_write (mphf_t *mphf, uint32_t id, uint64_t offset, vo
 	
 	uint64_t foffset = store->offset + offset;
 	request_t  r_write[] = {
-		{ "action",  DATA_INT32(ACTION_CRWD_WRITE)  },
-		{ "offset",  DATA_PTR_INT64(&foffset)       },
-		{ "buffer",  DATA_MEM(buffer, buffer_size)  },
-		{ "size",    DATA_PTR_SIZET(&buffer_size)   },
+		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(offset),  DATA_PTR_INT64(&foffset)       },
+		{ HK(buffer),  DATA_MEM(buffer, buffer_size)  },
+		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
 		hash_end
 	};
 	
@@ -246,8 +246,6 @@ static int mphf_destroy(chain_t *chain){ // {{{
 	backend_destroy(userdata->backend);
 	if(userdata->inited == 1)
 		mphf_free(&userdata->main_mphf);
-	free(userdata->key_from);
-	free(userdata->key_to);
 	free(userdata);
 	return 0;
 } // }}}
@@ -255,26 +253,26 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_INT64         n_initial      = N_INITIAL_DEFAULT;
 	DT_INT32         value_bits     = VALUE_BITS_DEFAULT;
 	DT_STRING        mphf_type_str  = NULL;
-	DT_STRING        key_from_str   = "key";
-	DT_STRING        key_to_str     = "offset";
+	DT_INT32         key_from_str   = HK(key);
+	DT_INT32         key_to_str     = HK(offset);
 	mphf_types       mphf_type;
 	data_t          *backend_name;
 	ssize_t          ret;
 	uint64_t         offset;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_INT64,  n_initial,     config, "n_initial");
-	hash_copy_data(ret, TYPE_INT32,  value_bits,    config, "value_bits");
-	hash_copy_data(ret, TYPE_STRING, mphf_type_str, config, "mphf_type");
-	hash_copy_data(ret, TYPE_STRING, key_from_str,  config, "key_from");
-	hash_copy_data(ret, TYPE_STRING, key_to_str,    config, "key_to");
+	hash_copy_data(ret, TYPE_INT64,  n_initial,     config, HK(n_initial));
+	hash_copy_data(ret, TYPE_INT32,  value_bits,    config, HK(value_bits));
+	hash_copy_data(ret, TYPE_STRING, mphf_type_str, config, HK(type));
+	hash_copy_data(ret, TYPE_INT32,  key_from_str,  config, HK(key_from));
+	hash_copy_data(ret, TYPE_INT32,  key_to_str,    config, HK(key_to));
 	
-	if( (backend_name = hash_get_typed_data(config, TYPE_STRING, "backend")) == NULL)
+	if( (backend_name = hash_get_typed_data(config, TYPE_STRING, HK(backend))) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
 	
 	userdata->backend  = backend_acquire(backend_name);
-	userdata->key_from = strdup(key_from_str);
-	userdata->key_to   = strdup(key_to_str);
+	userdata->key_from = key_from_str;
+	userdata->key_to   = key_to_str;
 	
 	// try load
 	if(mphf_load(&userdata->main_mphf, userdata->backend, 0) == 0)
@@ -302,7 +300,7 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){
 		return chain_next_query(chain, request);
 	
 	request_t r_next[] = {
-		{ "offset_out",      DATA_PTR_INT64(&key_out) },
+		{ HK(offset_out),      DATA_PTR_INT64(&key_out) },
 		hash_next(request)
 	};
 	

@@ -66,7 +66,7 @@ ssize_t     chain_query        (chain_t *chain, request_t *request){
 	if(chain == NULL || request == NULL)
 		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
 	
-	if( (r_action = hash_find_typed(request, TYPE_INT32, "action")) == NULL)
+	if( (r_action = hash_find_typed(request, TYPE_INT32, HK(action))) == NULL)
 		return_error(-EINVAL, "chain_query request 'action' not set\n");
 	
 	switch(HVALUE(r_action, unsigned int)){
@@ -104,7 +104,7 @@ static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chai
 		return ITER_CONTINUE;
 	
 	chain_config = (hash_t *)hash_get_value_ptr(config);
-	if(hash_get_typed(chain_config, TYPE_STRING, "name", (void **)&chain_name, NULL) != 0)
+	if(hash_get_typed(chain_config, TYPE_STRING, HK(name), (void **)&chain_name, NULL) != 0)
 		return ITER_BREAK;
 	
 	chain = chain_new(chain_name);
@@ -150,10 +150,10 @@ backend_t *  backend_new      (hash_t *config){
 	data_t      name_null = DATA_VOID;
 	backend_t  *backend = NULL;
 	
-	if( (chains = hash_get_typed_data(config, TYPE_HASHT,  "chains")) == NULL)
+	if( (chains = hash_get_typed_data(config, TYPE_HASHT,  HK(chains))) == NULL)
 		return NULL;
 	
-	if( (name   = hash_get_typed_data(config, TYPE_STRING, "name")) == NULL)
+	if( (name   = hash_get_typed_data(config, TYPE_STRING, HK(name))) == NULL)
 		name = &name_null;
 	
 	// register new one

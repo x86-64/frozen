@@ -7,10 +7,10 @@ ssize_t   data_buffer_t_read  (data_t *data, data_ctx_t *context, off_t offset, 
 	void     *chunk;
 	
 	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
 		HVALUE(temp, off_t) : 0;
 	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, "size")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
 		HVALUE(temp, size_t) : 0;
 		
 	if(d_size != 0 && offset >= d_size)
@@ -29,7 +29,7 @@ ssize_t   data_buffer_t_write (data_t *data, data_ctx_t *context, off_t offset, 
 	hash_t  *temp;
 	
 	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, "offset")) != NULL) ?
+		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
 		HVALUE(temp, off_t) : 0;
 	
 	buffer_write((buffer_t *)data->data_ptr, d_offset + offset, buffer, size);
