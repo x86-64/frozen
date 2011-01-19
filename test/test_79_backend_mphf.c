@@ -149,8 +149,8 @@ START_TEST (test_backend_mphf_speed){
 	
 	request_t r_write[] = {
 		{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)  },
-		{ HK(key),     DATA_MEM (test, 10)             },
-		{ HK(buffer),  DATA_MEM (test, 10)             },
+		{ HK(key),     DATA_RAW (test, 10)             },
+		{ HK(buffer),  DATA_RAW (test, 10)             },
 		hash_end
 	};
 	

@@ -28,6 +28,8 @@ static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, 
 	DT_OFFT      d_offset = 0;
 	DT_SIZET     d_size   = data->data_size;
 	
+	// TODO SECURITY
+
 	hash_copy_data(ret, TYPE_OFFT,  d_offset,  context, HK(offset));
 	hash_copy_data(ret, TYPE_SIZET, d_size,    context, HK(size));
 	

@@ -66,6 +66,7 @@ hash_name :
 		if( ($$ = hash_string_to_key($1)) == 0){
 			printf("unknown key: %s\n", $1); YYERROR;
 		}
+		free($1);
 	};
 
 hash_value :

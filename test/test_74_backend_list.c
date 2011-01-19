@@ -46,7 +46,7 @@ START_TEST (test_backend_list){
 		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE)  },
 		{ HK(offset),    DATA_OFFT(key_off)             },
 		{ HK(size),   DATA_SIZET(10)                 },
-		{ HK(buffer), DATA_MEM(key_data, 10)         },
+		{ HK(buffer), DATA_RAW(key_data, 10)         },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_write);
@@ -58,7 +58,7 @@ START_TEST (test_backend_list){
 		{ HK(offset),    DATA_OFFT(key_off + 2)        },
 		{ HK(insert), DATA_INT32(1)                 },
 		{ HK(size),   DATA_SIZET(1)                 },
-		{ HK(buffer), DATA_MEM(key_insert, 1)       },
+		{ HK(buffer), DATA_RAW(key_insert, 1)       },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_insert);
@@ -70,7 +70,7 @@ START_TEST (test_backend_list){
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
 		{ HK(offset),    DATA_OFFT(key_off)            },
 		{ HK(size),   DATA_SIZET(11)                },
-		{ HK(buffer), DATA_MEM(temp, 1024)          },
+		{ HK(buffer), DATA_RAW(temp, 1024)          },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_read);
@@ -95,7 +95,7 @@ START_TEST (test_backend_list){
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ)     },
 		{ HK(offset),    DATA_OFFT(key_off)               },
 		{ HK(size),   DATA_SIZET(10)                   },
-		{ HK(buffer), DATA_MEM(temp, 1024)             },
+		{ HK(buffer), DATA_RAW(temp, 1024)             },
 		hash_end
 	};
 	ssize = backend_query(backend, hash_read2);

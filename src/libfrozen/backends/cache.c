@@ -3,66 +3,9 @@
 
 typedef struct cache_userdata {
 	uint64_t    max_size;
-	uint64_t    cache_size;
-	void       *cache;
+	
+	memory_t    memory;
 } cache_userdata;
-
-/* cache functions {{{ */
-static void    cache_free(cache_userdata *userdata){
-	free(userdata->cache);
-	userdata->cache      = NULL;
-	userdata->cache_size = 0;
-}
-
-static ssize_t cache_flush(chain_t *chain, cache_userdata *userdata){
-	if(userdata->cache == NULL)
-		return 0;
-	
-	request_t r_write[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE)                   },
-		{ HK(offset), DATA_OFFT(0)                                    },
-		{ HK(buffer), DATA_MEM(userdata->cache, userdata->cache_size) },
-	//	{ HK(size),   DATA_PTR_INT64(&userdata->cache_size)           },
-		hash_end
-	};
-	return chain_next_query(chain, r_write);
-}
-
-static ssize_t cache_read_all(chain_t *chain, cache_userdata *userdata){
-	userdata->cache      = NULL;
-	userdata->cache_size = 0;
-	
-	request_t r_count[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT)         },
-		{ HK(buffer), DATA_PTR_INT64(&userdata->cache_size) },
-		hash_end
-	};
-	if(chain_next_query(chain, r_count) < 0)
-		return -EFAULT;
-	
-	if(userdata->cache_size >= userdata->max_size && userdata->max_size != 0)
-		return -EFAULT;
-	
-	if( (userdata->cache = malloc(userdata->cache_size)) == NULL)
-		return -EFAULT;
-	
-	memset(userdata->cache, 0, userdata->cache_size);
-	
-	request_t r_read[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_READ)                    },
-		{ HK(offset), DATA_OFFT(0)                                    },
-		{ HK(buffer), DATA_MEM(userdata->cache, userdata->cache_size) },
-		hash_end
-	};
-	if(chain_next_query(chain, r_read) < 0)
-		goto error;
-	
-	return 0;
-error:
-	cache_free(userdata);
-	return -EFAULT;
-}
-/* }}} */
 
 static int cache_init(chain_t *chain){ // {{{
 	cache_userdata *userdata = chain->userdata = calloc(1, sizeof(cache_userdata));
@@ -74,43 +17,63 @@ static int cache_init(chain_t *chain){ // {{{
 static int cache_destroy(chain_t *chain){ // {{{
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	cache_flush(chain, userdata);
-	cache_free(userdata);
+	data_t d_memory = DATA_MEMORYT(&userdata->memory);
+	data_t d_chain  = DATA_CHAINT(chain);
+	data_transfer(&d_chain, NULL, &d_memory, NULL);
 	
+	memory_free(&userdata->memory);
 	free(userdata);
 	return 0;
 } // }}}
 static int cache_configure(chain_t *chain, hash_t *config){ // {{{
 	ssize_t          ret;
-	cache_userdata  *userdata   = (cache_userdata *)chain->userdata;
+	DT_INT64         file_size;
 	DT_INT64         max_size   = 0;
+	cache_userdata  *userdata   = (cache_userdata *)chain->userdata;
 	
 	hash_copy_data(ret, TYPE_INT64, max_size, config, HK(max_size));
-	
 	userdata->max_size = max_size;
 	
-	cache_read_all(chain, userdata);
+	/* get file size */
+	request_t r_count[] = {
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT)   },
+		{ HK(buffer), DATA_PTR_INT64(&file_size)      },
+		hash_end
+	};
+	if(chain_next_query(chain, r_count) < 0)
+		return -EFAULT;
+	
+	if(__MAX(size_t) < file_size)
+		return 0;
+	
+	memory_new(&userdata->memory, MEMORY_EXACT, ALLOC_MALLOC, 0);
+	if(memory_resize(&userdata->memory, (size_t)file_size) != 0)
+		return 0;
+	
+	data_t d_memory = DATA_MEMORYT(&userdata->memory);
+	data_t d_chain  = DATA_CHAINT(chain);
+	if(data_transfer(&d_memory, NULL, &d_chain, NULL) < 0)
+		goto error;
+	
+exit:
 	return 0;
+error:
+	memory_free(&userdata->memory);
+	goto exit;
 } // }}}
 
 static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 	ssize_t         ret;
-	cache_userdata *userdata = (cache_userdata *)chain->userdata;
+	//cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	if(userdata->cache != NULL){
-		cache_flush    (chain, userdata);
-		cache_free     (userdata);
-	}
 	
 	ret = chain_next_query(chain, request);
-	
-	cache_read_all (chain, userdata);
 	
 	return ret;
 }
 
 static ssize_t cache_backend_read(chain_t *chain, request_t *request){
-	ssize_t         ret;
+/*	ssize_t         ret;
 	DT_INT64        offset;
 	DT_SIZET        size;
 	//data_t          offset_data = DATA_PTR_INT64(&offset);
@@ -127,19 +90,18 @@ static ssize_t cache_backend_read(chain_t *chain, request_t *request){
 	if(offset >= userdata->cache_size)
 		goto call_next;
 	
-	/* get buffer info */
 	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
 		return -EINVAL;
 	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
 	
 	ret = data_write(buffer, buffer_ctx, 0, userdata->cache + offset, size);
 	return ret;
-call_next:
+call_next:*/
 	return chain_next_query(chain, request);	
 }
 
 static ssize_t cache_backend_write(chain_t *chain, request_t *request){
-	ssize_t         ret;
+/*	ssize_t         ret;
 	DT_INT64        offset;
 	DT_SIZET        size;
 	//data_t          offset_data = DATA_PTR_INT64(&offset);
@@ -151,19 +113,18 @@ static ssize_t cache_backend_write(chain_t *chain, request_t *request){
 		goto call_next;
 	
 	hash_copy_data(ret, TYPE_INT64, offset, request, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size));
+	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size)); // BUG not work if not know size
 	
 	if(offset >= userdata->cache_size)
 		goto call_next;
 	
-	/* get buffer info */
 	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
 		return -EINVAL;
 	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
 	
 	ret = data_read(buffer, buffer_ctx, 0, userdata->cache + offset, size);
 	return ret;
-call_next:
+call_next:*/
 	return chain_next_query(chain, request);	
 }
 

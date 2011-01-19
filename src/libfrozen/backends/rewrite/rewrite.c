@@ -205,7 +205,8 @@ ablock_continue:
 						break;
 					default:
 						printf("no cmp!\n");
-						return -EINVAL;
+						ret = -EINVAL;
+						goto exit;
 				};
 				
 				if(cmp_res == 1){
@@ -228,7 +229,8 @@ ablock_continue:
 						break;
 					default:
 						printf("no cmp!\n");
-						return -EINVAL;
+						ret = -EINVAL;
+						goto exit;
 				};
 				
 				temp_ret      = (cmp_res2 == 0) ? 1 : 0;
@@ -239,8 +241,11 @@ ablock_continue:
 				to     = action->ret;
 				param1 = action->params->list;
 				
-				if(param1 == NULL || param1->type != THING_ARRAY_REQUEST)
-					return -EINVAL;
+				if(param1 == NULL || param1->type != THING_ARRAY_REQUEST){
+					ret = -EINVAL;
+					printf("pass failed\n");
+					goto exit;
+				}
 				
 				temp_ret = chain_next_query(env->chain, env->requests[param1->id]);
 				
@@ -282,8 +287,11 @@ ablock_continue:
 				rewrite_thing_get_data(env, param2, &dst_data,  &dst_data_ctx);
 				rewrite_thing_get_data(env, param3, &src_data,  &src_data_ctx);
 				
-				if(data_value_type(from_data) != TYPE_STRING)
-					return -EINVAL;
+				if(data_value_type(from_data) != TYPE_STRING){
+					ret = -EINVAL;
+					printf("arith failed\n");
+					goto exit;
+				}
 				
 				char operator;
 				data_read(from_data, from_data_ctx, 0, &operator, sizeof(operator));
@@ -322,8 +330,11 @@ ablock_continue:
 				rewrite_thing_get_data(env, param2, &size_data, &size_data_ctx);
 				
 				data_type  new_type;
-				if((new_type = data_type_from_string(data_value_ptr(type_data))) == TYPE_INVALID)
-					return -EINVAL;
+				if((new_type = data_type_from_string(data_value_ptr(type_data))) == TYPE_INVALID){
+					ret = -EINVAL;
+					printf("alloca data invalid: %s\n", (char *)data_value_ptr(type_data));
+					goto exit;
+				}
 				
 				size_t     new_size;
 				data_read(size_data, size_data_ctx, 0, &new_size, sizeof(new_size));
@@ -338,14 +349,17 @@ ablock_continue:
 				param1 = action->params->list;
 				param2 = action->params->list->next;
 				
-				if(param1 == NULL || param1->type != THING_CONST)         return -EINVAL;
-				if(param2 == NULL || param2->type != THING_ARRAY_REQUEST) return -EINVAL;
+				if(param1 == NULL || param1->type != THING_CONST){         ret = -EINVAL; goto exit; }
+				if(param2 == NULL || param2->type != THING_ARRAY_REQUEST){ ret = -EINVAL; goto exit; }
 				
 				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				backend_t *backend;
-				if( (backend = backend_acquire(from_data)) == NULL) // TODO ctx
-					return -EINVAL;
+				if( (backend = backend_acquire(from_data)) == NULL){ // TODO ctx
+					ret = -EINVAL;
+					printf("backend acquire failed\n");
+					goto exit;
+				}
 				
 				temp_ret = backend_query(backend, env->requests[param2->id]);
 				
@@ -355,7 +369,8 @@ ablock_continue:
 				from_data_ctx = NULL;
 				break;
 			default:
-				return -ENOSYS;
+				ret = -ENOSYS;
+				goto exit;
 		};
 		
 		switch(to->type){
@@ -393,15 +408,16 @@ ablock_continue:
 	}
 //ablock_leave:
 	frame_id = --stack_items - 1;
-	if(stack_items == 0){
-		free(stack);
-		return ret;
-	}
+	if(stack_items == 0)
+		goto exit;
 	
 	stack  = realloc(stack, stack_items * sizeof(rewrite_stack_frame_t));
 	frame  = &stack[frame_id];
 	ablock = frame->ablock;
 	goto ablock_continue;
+exit:
+	free(stack);
+	return ret;
 } // }}}
 static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 	size_t                temp_size;

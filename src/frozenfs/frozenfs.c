@@ -279,7 +279,7 @@ static void wfrozen_init(void){
 					"if(!data_cmp(request['action'], write)){                            "
 					"   rq_data['action']  = write;                                      "
 					"   rq_data['buffer']  = request['buffer'];                          "
-					"   rq_data['key_out'] = data_alloca((string)'memory', (size_t)'8'); "
+					"   rq_data['key_out'] = data_alloca((string)'raw', (size_t)'8'); "
 					"   ret = backend((string)'b_data', rq_data);                        "
 					"                                                                    "
 					"   request['buffer'] = rq_data['key_out'];                          "
@@ -442,7 +442,7 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 	request_t r_read[] = {
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ)                    },
 		{ HK(offset),    DATA_PTR_OFFT(&off)                             },
-		{ HK(buffer), DATA_MEM(buf, size)                             },
+		{ HK(buffer), DATA_RAW(buf, size)                             },
 		
 		{ HK(param),  fh->param                                       },
 		{ HK(path),   DATA_PTR_STRING((char *)path, strlen(path)+1)   },
@@ -465,7 +465,7 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)                   },
 		//{ HK(offset),     DATA_PTR_OFFT(&off)                             },
 		{ HK(offset_out), DATA_PTR_OFFT(&off)                             },
-		{ HK(buffer),  DATA_MEM((char *)buf, size)                     },
+		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },
 		
 		{ HK(param),   fh->param                                       },
 		{ HK(path),    DATA_PTR_STRING((char *)path, strlen(path)+1)   },

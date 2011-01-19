@@ -26,6 +26,12 @@ m4_define(`REGISTER_STRUCT', `
 		`$1'
 	)
 ')
+m4_define(`REGISTER_API', `
+	m4_define(`API_ARRAY',
+		m4_defn(`API_ARRAY')
+		`$1'
+	)
+')
 m4_divert(-1)
 m4_include(data_protos.m4)
 m4_divert(0)
@@ -58,6 +64,7 @@ typedef ssize_t (*f_data_convert)   (data_t *, data_ctx_t *, data_t *, data_ctx_
 TDEFS_ARRAY()
 STRUCT_ARRAY()
 MACRO_ARRAY()
+API_ARRAY()
 
 #define DATA_INVALID  { TYPE_INVALID, NULL, 0 }
 #define DEF_BUFFER_SIZE 1024

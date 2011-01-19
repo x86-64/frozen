@@ -14,7 +14,7 @@ ssize_t   data_chain_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void 
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
 		{ HK(offset),    DATA_PTR_OFFT(&d_offset)      },
 		{ HK(size),   DATA_PTR_SIZET(size)          },
-		{ HK(buffer), DATA_MEM(*buffer, *size)      },
+		{ HK(buffer), DATA_RAW(*buffer, *size)      },
 		hash_end
 	};
 	ret = chain_next_query( *(chain_t **)(data->data_ptr), req_read);
@@ -44,7 +44,7 @@ ssize_t   data_chain_t_write (data_t *data, data_ctx_t *ctx, off_t offset, void 
 		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE) },
 		{ HK(offset),    DATA_PTR_OFFT(&d_offset)      },
 		{ HK(size),   DATA_SIZET(size)              },
-		{ HK(buffer), DATA_MEM(buffer, size)        },
+		{ HK(buffer), DATA_RAW(buffer, size)        },
 		hash_end
 	};
 	ret = chain_next_query( *(chain_t **)(data->data_ptr), req_write);

@@ -55,7 +55,7 @@ START_TEST (test_backend_insert_sort){
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ) },
 		{ HK(offset), DATA_OFFT(0)                 },
 		{ HK(size),   DATA_SIZET(iters)            },
-		{ HK(buffer), DATA_MEM(&temp, 256)         },
+		{ HK(buffer), DATA_RAW(&temp, 256)         },
 		hash_end
 	};
 	ret = backend_query(backend, req_read);

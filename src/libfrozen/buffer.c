@@ -340,8 +340,8 @@ int      buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_
 	switch(buffer->type){
 		case BUFF_TYPE_CHUNKED:
 			if(b_offset == 0){
-				if( (*p_chunk     = buffer->head) == NULL)
-					return -1;
+				if( (*p_chunk = buffer->head) == NULL)
+					goto error;
 				*p_ptr       = chunk_get_ptr (buffer->head);
 				*p_rest_size = chunk_get_size(buffer->head);
 				return 0;
@@ -364,6 +364,7 @@ int      buffer_seek                (buffer_t *buffer, off_t b_offset, void **p_
 			// check cache
 			return -EINVAL;
 	};
+error:
 	return -1;
 } // }}}
 

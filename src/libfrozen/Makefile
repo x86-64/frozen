@@ -248,8 +248,8 @@ backends_sources = \
 #	backends/rewrite/rule_parser.c       \
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
-data_sources = \
-	data/void.c     \
+data_sources = data/void.c     \
+	data/raw.c      \
 	data/binary.c   \
 	data/uint8.c    \
 	data/uint16.c   \
@@ -257,11 +257,12 @@ data_sources = \
 	data/uint64.c   \
 	data/size_t.c   \
 	data/off_t.c    \
+	data/string.c   \
 	data/hash_t.c   \
 	data/buffer_t.c \
+	data/memory_t.c \
 	data/io_t.c     \
-	data/chain_t.c  \
-	data/string.c 
+	data/chain_t.c
 
 AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = backends/*.m4 data/*.c data/*.m4 backends/insert-sort/*.c

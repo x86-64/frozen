@@ -177,6 +177,7 @@ array_key : NAME '[' STRING ']' {
 		$$.id        = curr->id;
 		
 		free($1);
+		free($3);
 		break;
 	}
 	

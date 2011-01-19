@@ -70,7 +70,7 @@ ssize_t mphf_chm_imp_new    (mphf_t *mphf, uint64_t nelements, uint32_t value_bi
 static ssize_t  mphf_chm_imp_getg(chm_imp_t *data, mphf_t *mphf, char *key, size_t key_len, gval *array){
 	uint32_t   hash1, hash2, hash3;
 	uint64_t   occupied_mask;
-	uint64_t   tmp = 0;
+	uint64_t   tmp;
 	
 	// TODO 64 bit version
 	hash1 = mphf_hash32(data->hash_type, data->hash1, key, key_len); 
@@ -87,14 +87,17 @@ static ssize_t  mphf_chm_imp_getg(chm_imp_t *data, mphf_t *mphf, char *key, size
 	
 	occupied_mask = ((uint64_t)1 << ((data->value_bytes << 3) - 1));
 	
+	tmp = 0;
 	mphf_store_read(mphf, CHM_IMP_STORE_G, array[0].offset, &tmp, data->value_bytes);
 	array[0].occupied = ( (tmp & occupied_mask) == 0) ? 0 : 1;
 	array[0].value    = tmp & ~occupied_mask; //tmp - ((array[0].occupied == 1) ? occupied_mask : 0);
 	
+	tmp = 0;
 	mphf_store_read(mphf, CHM_IMP_STORE_G, array[1].offset, &tmp, data->value_bytes);
 	array[1].occupied = ( (tmp & occupied_mask) == 0) ? 0 : 1;
 	array[1].value    = tmp & ~occupied_mask; //tmp - ((array[0].occupied == 1) ? occupied_mask : 0);
 	
+	tmp = 0;
 	mphf_store_read(mphf, CHM_IMP_STORE_G, array[2].offset, &tmp, data->value_bytes);
 	array[2].occupied = ( (tmp & occupied_mask) == 0) ? 0 : 1;
 	array[2].value    = tmp & ~occupied_mask; //tmp - ((array[0].occupied == 1) ? occupied_mask : 0);
