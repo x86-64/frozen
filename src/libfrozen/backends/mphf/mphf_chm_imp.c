@@ -119,22 +119,28 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  
 	}else if(array[2].occupied == 0){ g_free = &array[2].value;
 	}else{
 		// call rebuild
-		return_error(-EFAULT, "mphf g_free\n");
+		//return_error(-EFAULT, "mphf g_free\n");
+		return -EFAULT;
 	}
 	
 	*g_free = value - (array[0].value + array[1].value + array[2].value);
 	
 	occupied_mask = ((uint64_t)1 << ((data.value_bytes << 3) - 1));
 	
-	array[0].value |= occupied_mask;
-	array[1].value |= occupied_mask;
-	array[2].value |= occupied_mask;
-	
 	//printf("mphf: insert %.*s %.8llx\n", key_len, key, value);
 	
-	mphf_store_write(mphf, CHM_IMP_STORE_G, array[0].offset, &array[0].value, data.value_bytes);
-	mphf_store_write(mphf, CHM_IMP_STORE_G, array[1].offset, &array[1].value, data.value_bytes);
-	mphf_store_write(mphf, CHM_IMP_STORE_G, array[2].offset, &array[2].value, data.value_bytes);
+	if(array[0].occupied == 0){
+		array[0].value |= occupied_mask;
+		mphf_store_write(mphf, CHM_IMP_STORE_G, array[0].offset, &array[0].value, data.value_bytes);
+	}
+	if(array[1].occupied == 0){
+		array[1].value |= occupied_mask;
+		mphf_store_write(mphf, CHM_IMP_STORE_G, array[1].offset, &array[1].value, data.value_bytes);
+	}
+	if(array[2].occupied == 0){
+		array[2].value |= occupied_mask;
+		mphf_store_write(mphf, CHM_IMP_STORE_G, array[2].offset, &array[2].value, data.value_bytes);
+	}
 	return 0;
 }
 

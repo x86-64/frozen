@@ -51,7 +51,7 @@ START_TEST (test_backend_rewrite){
 	
 	// null request {{{
 	ret = test_rewrite("", req_create);
-		fail_unless(ret > 0, "backend rewrite rules none failed\n");
+		fail_unless(ret >= 0, "backend rewrite rules none failed\n");
 	// }}}
 	// unset key {{{
 	char rules_unset_key[] =
@@ -66,7 +66,7 @@ START_TEST (test_backend_rewrite){
 		"request['size'] = request['size'];"
 		"ret = pass(request);";
 	ret = test_rewrite(rules_set_key_from_key, req_create);
-		fail_unless(ret > 0, "backend rewrite rules set_key_from_key failed\n");
+		fail_unless(ret >= 0, "backend rewrite rules set_key_from_key failed\n");
 	// }}}
 	// set key from config key {{{
 	char rules_set_key_from_config[] =

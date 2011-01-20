@@ -39,7 +39,7 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	size_min = MIN(size, size_min);
 	
 	#ifdef DEBUG
-		if(size_min > 1000000 || offset > 1000000 || key > 1000000){
+		if(size_min > 10000000 || offset > 10000000 || key > 10000000){
 			printf("TOOMANY WRITE!\n");
 			
 			return -EFAULT + *((char *)0);
@@ -110,7 +110,7 @@ static int               file_new_offset(chain_t *chain, off_t *new_key, unsigne
 	pthread_mutex_lock(mutex);
 		
 	#ifdef DEBUG
-		if(size > 1000000){
+		if(size > 10000000){
 			printf("TOOMANY!\n");
 			return -EFAULT;
 		}
@@ -231,142 +231,67 @@ cleanup:
 } // }}}
 
 // Requests
-static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
-	ssize_t           ret;
-	off_t             new_key;
-	data_t            new_key_data = DATA_PTR_OFFT(&new_key);
-	data_t           *key_out;
-	data_ctx_t       *key_out_ctx;
-	DT_SIZET          size;
-	
-	hash_copy_data(ret, TYPE_SIZET, size, request, HK(size)); 
-	if(ret != 0)
-		return -EINVAL;
-	
-	if( file_new_offset(chain, &new_key, size) != 0)
-		return -EFAULT;
-	
-	if( (key_out = hash_get_data(request, HK(offset_out))) != NULL){
-		key_out_ctx = hash_get_data_ctx(request, HK(offset_out));
-		
-		data_transfer(
-			key_out,       key_out_ctx,
-			&new_key_data, NULL
-		);
-		return sizeof(off_t);
-	}
-	return 0;
-} // }}}
-static ssize_t file_set(chain_t *chain, request_t *request){ // {{{
+static ssize_t file_write(chain_t *chain, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
-	
-	off_t             def_key;
-	data_t            def_key_data = DATA_PTR_OFFT(&def_key);
-	data_t           *key, *size;
-	
-	data_t           *key_out;
-	data_ctx_t       *key_out_ctx;
-	
-	ssize_t           ret         = -1;
 	file_userdata    *data        = ((file_userdata *)chain->userdata);
-	
-	/* get buffer info */
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
-		return -EINVAL;
-	
-	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
-	
-	/* get file io related info */
-	if( (key = hash_get_data(request, HK(offset))) == NULL || data_value_type(key) == TYPE_VOID){
-		size_t  new_size;
-		
-		new_size = data_len(buffer, buffer_ctx);
-		
-		if( file_new_offset(chain, &def_key, new_size) != 0)
-			return -EFAULT;
-		
-		key = &def_key_data;
-	}
-	
-	/* prepare contexts */
-	hash_t file_ctx_size = hash_null;
-	
-	// if size supplied - apply it as file output restruction
-	if( (size = hash_get_data(request, HK(size))) != NULL){
-		hash_t new_size = { HK(size), *size };
-		
-		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
-	}
-	
-	data_ctx_t  file_ctx[] = {
-		{ HK(handle), DATA_INT32(data->handle) },
-		{ HK(offset),    *key                     },
-		file_ctx_size,
-		hash_end
-	};
-	
-	/* write info to file */
-	ret = data_transfer(
-		&file_io, file_ctx,
-		buffer,   buffer_ctx
-	);
-	
-	/* write key if requested */
-	if( (key_out = hash_get_data(request, HK(offset_out))) != NULL){
-		key_out_ctx = hash_get_data_ctx(request, HK(offset_out));
-		
-		data_transfer(
-			key_out, key_out_ctx,
-			key,     NULL
-		);
-	}
 	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
-	return ret;
-} // }}}
-static ssize_t file_get(chain_t *chain, request_t *request){ // {{{
-	data_t           *buffer;
-	data_ctx_t       *buffer_ctx;
+	buffer     = hash_get_data     (request, HK(buffer));
+	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
 	
-	data_t           *key, *size;
-	
-	ssize_t           ret         = -1;
-	file_userdata    *data        = ((file_userdata *)chain->userdata);
-	
-	/* get buffer info */
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
-		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
-	
-	/* get file io related info */
-	if( (key = hash_get_data(request, HK(offset))) == NULL)
-		return -EINVAL;
-	
-	/* get size restructions */
-	hash_t file_ctx_size = hash_null;
-	if( (size = hash_get_data(request, HK(size))) != NULL){
-		hash_t new_size = { HK(size), *size };
-		
-		memcpy(&file_ctx_size, &new_size, sizeof(new_size));
-	}
-	
-	/* prepare file context */
 	data_ctx_t  file_ctx[] = {
 		{ HK(handle), DATA_INT32(data->handle) },
-		{ HK(offset),    *key                     },
-		file_ctx_size,
-		hash_end
+		hash_next(request)
 	};
 	
-	/* read info from file */
-	ret = data_transfer(
-		buffer,   buffer_ctx,
-		&file_io, file_ctx
-	);
+	return data_transfer(&file_io, file_ctx, buffer, buffer_ctx);
+} // }}}
+static ssize_t file_read(chain_t *chain, request_t *request){ // {{{
+	data_t           *buffer;
+	data_ctx_t       *buffer_ctx;
+	file_userdata    *data        = ((file_userdata *)chain->userdata);
 	
-	return ret;
+	data->file_stat_status = STAT_NEED_UPDATE;
+	
+	buffer     = hash_get_data     (request, HK(buffer));
+	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
+	
+	data_ctx_t  file_ctx[] = {
+		{ HK(handle), DATA_INT32(data->handle) },
+		hash_next(request)
+	};
+	
+	return data_transfer(buffer, buffer_ctx, &file_io, file_ctx);
+} // }}}
+static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
+	DT_SIZET          size;
+	ssize_t           ret;
+	off_t             offset;
+	data_t            offset_data = DATA_PTR_OFFT(&offset);
+	data_t           *key_out;
+	data_ctx_t       *key_out_ctx;
+	
+	hash_copy_data(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	
+	if( file_new_offset(chain, &offset, size) != 0)
+		return -EFAULT;
+	
+	/* optional offset fill */
+	key_out     = hash_get_data     (request, HK(offset_out));
+	key_out_ctx = hash_get_data_ctx (request, HK(offset_out));
+	data_transfer(key_out, key_out_ctx, &offset_data, NULL);
+	
+	/* optional write from buffer */
+	request_t r_write[] = {
+		{ HK(offset), offset_data },
+		hash_next(request)
+	};
+	if( (ret = file_write(chain, r_write)) != -EINVAL)
+		return ret;
+	
+	return 0;
 } // }}}
 static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 	ssize_t           ret;
@@ -514,8 +439,8 @@ static chain_t chain_file = {
 	.func_destroy   = &file_destroy,
 	{{
 		.func_create = &file_create,
-		.func_set    = &file_set,
-		.func_get    = &file_get,
+		.func_set    = &file_write,
+		.func_get    = &file_read,
 		.func_delete = &file_delete,
 		.func_move   = &file_move,
 		.func_count  = &file_count

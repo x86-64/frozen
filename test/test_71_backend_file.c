@@ -82,17 +82,17 @@ START_TEST (test_backend_file){
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	hash_t hash_create[] = {
-		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE) },
-		{ HK(size),    DATA_SIZET(10)                 },
+		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(size),       DATA_SIZET(10)                 },
 		{ HK(offset_out), DATA_PTR_OFFT(&temp)           },
 		hash_end
 	};
 		
-	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
+	if( (ssize = backend_query(backend, hash_create)) < 0 )
 		fail("backend file create key1 failed");	
 	new_key1 = temp;
 	
-	if( (ssize = backend_query(backend, hash_create)) != sizeof(off_t) )
+	if( (ssize = backend_query(backend, hash_create)) < 0 )
 		fail("backend file create key2 failed");	
 	new_key2 = temp;
 		fail_unless(new_key2 - new_key1 == 10,                 "backend file offsets invalid");

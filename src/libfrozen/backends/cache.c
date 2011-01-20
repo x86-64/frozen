@@ -2,8 +2,6 @@
 #include <backend.h>
 
 typedef struct cache_userdata {
-	uint64_t    max_size;
-	
 	memory_t    memory;
 } cache_userdata;
 
@@ -26,13 +24,8 @@ static int cache_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int cache_configure(chain_t *chain, hash_t *config){ // {{{
-	ssize_t          ret;
 	DT_INT64         file_size;
-	DT_INT64         max_size   = 0;
 	cache_userdata  *userdata   = (cache_userdata *)chain->userdata;
-	
-	hash_copy_data(ret, TYPE_INT64, max_size, config, HK(max_size));
-	userdata->max_size = max_size;
 	
 	/* get file size */
 	request_t r_count[] = {
@@ -46,7 +39,7 @@ static int cache_configure(chain_t *chain, hash_t *config){ // {{{
 	if(__MAX(size_t) < file_size)
 		return 0;
 	
-	memory_new(&userdata->memory, MEMORY_EXACT, ALLOC_MALLOC, 0);
+	memory_new(&userdata->memory, MEMORY_EXACT, ALLOC_MALLOC, 0, 1);
 	if(memory_resize(&userdata->memory, (size_t)file_size) != 0)
 		return 0;
 	
@@ -62,70 +55,60 @@ error:
 	goto exit;
 } // }}}
 
-static ssize_t cache_backend_create(chain_t *chain, request_t *request){
-	ssize_t         ret;
-	//cache_userdata *userdata = (cache_userdata *)chain->userdata;
-	
-	
-	ret = chain_next_query(chain, request);
-	
-	return ret;
-}
-
 static ssize_t cache_backend_read(chain_t *chain, request_t *request){
-/*	ssize_t         ret;
-	DT_INT64        offset;
-	DT_SIZET        size;
-	//data_t          offset_data = DATA_PTR_INT64(&offset);
-	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	data_t         *buffer;
 	data_ctx_t     *buffer_ctx;
+	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	if(userdata->cache == NULL)
-		goto call_next;
+	buffer     = hash_get_data     (request, HK(buffer));
+	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
 	
-	hash_copy_data(ret, TYPE_INT64, offset, request, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size));
+	data_t     d_memory = DATA_MEMORYT(&userdata->memory);
 	
-	if(offset >= userdata->cache_size)
-		goto call_next;
-	
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
-		return -EINVAL;
-	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
-	
-	ret = data_write(buffer, buffer_ctx, 0, userdata->cache + offset, size);
-	return ret;
-call_next:*/
-	return chain_next_query(chain, request);	
+	return data_transfer(buffer, buffer_ctx, &d_memory, request);
 }
 
 static ssize_t cache_backend_write(chain_t *chain, request_t *request){
-/*	ssize_t         ret;
-	DT_INT64        offset;
-	DT_SIZET        size;
-	//data_t          offset_data = DATA_PTR_INT64(&offset);
-	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	data_t         *buffer;
 	data_ctx_t     *buffer_ctx;
+	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	if(userdata->cache == NULL)
-		goto call_next;
+	buffer     = hash_get_data     (request, HK(buffer));
+	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
 	
-	hash_copy_data(ret, TYPE_INT64, offset, request, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size)); // BUG not work if not know size
+	data_t     d_memory = DATA_MEMORYT(&userdata->memory);
 	
-	if(offset >= userdata->cache_size)
-		goto call_next;
+	return data_transfer(&d_memory, request, buffer, buffer_ctx);
+}
+
+static ssize_t cache_backend_create(chain_t *chain, request_t *request){
+	ssize_t         ret;
+	DT_SIZET        size;
+	DT_OFFT         offset;
+	data_t          offset_data = DATA_PTR_OFFT(&offset);
+	data_t         *offset_out;
+	data_ctx_t     *offset_out_ctx;
+	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
-		return -EINVAL;
-	buffer_ctx = NULL; //hash_get_data_ctx(request, HK(buffer));
+	hash_copy_data(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
 	
-	ret = data_read(buffer, buffer_ctx, 0, userdata->cache + offset, size);
-	return ret;
-call_next:*/
-	return chain_next_query(chain, request);	
+	if(memory_grow(&userdata->memory, size, &offset) != 0)
+		return -EFAULT;
+	
+	/* optional return of offset */
+	offset_out     = hash_get_data    (request, HK(offset_out));
+	offset_out_ctx = hash_get_data_ctx(request, HK(offset_out));
+	data_transfer(offset_out, offset_out_ctx, &offset_data, NULL);
+	
+	/* optional write from buffer */
+	request_t r_write[] = {
+		{ HK(offset), offset_data },
+		hash_next(request)
+	};
+	if( (ret = cache_backend_write(chain, r_write)) != -EINVAL)
+		return ret;
+	
+	return 0;
 }
 
 // TODO delete

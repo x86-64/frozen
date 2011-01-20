@@ -283,7 +283,7 @@ start:
 		if(element->key == hash_ptr_null)
 			goto next_item;
 		
-		printf(" - %d [%s] -> %p", element->key, data_string_from_type(element->data.type), element->data.data_ptr);
+		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.data_ptr);
 		for(k=0; k<element->data.data_size; k++){
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);

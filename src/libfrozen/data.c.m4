@@ -70,7 +70,7 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
 	d_size    = MIN(size, d_size);
 	
 	if(d_size == 0)
-		return -EINVAL;  // bad request
+		return 0;
 	
 	memcpy(data->data_ptr + d_offset, buffer, d_size);
 	return d_size;
@@ -393,13 +393,13 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 		buffer_size = DEF_BUFFER_SIZE;
 		
 		if( (rret = data_read_raw (src, src_ctx, offset, &buffer, &buffer_size)) < -1)
-			return -EINVAL;
+			return rret;
 		
 		if(rret == -1) // EOF from read side
 			break;
 		
 		if( (wret = data_write (dst, dst_ctx, offset,  buffer,  buffer_size)) < 0)
-			return -EINVAL;
+			return wret;
 		
 		transferred += wret;
 		offset      += rret;

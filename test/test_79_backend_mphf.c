@@ -90,6 +90,57 @@ END_TEST
 REEEGISTER_TEST(core, test_backend_mphf)
 */
 
+/* benchmarks {{{ */
+typedef struct bench_t {
+	struct timeval  tv_start;
+	struct timeval  tv_end;
+	struct timeval  tv_diff;
+	unsigned long   time_ms;
+	unsigned long   time_us;
+	char            string[255];
+} bench_t;
+
+void timeval_subtract (result, x, y)
+        struct timeval *result, *x, *y; 
+{
+    
+        if (x->tv_usec < y->tv_usec) {
+                int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+                y->tv_usec -= 1000000 * nsec;
+                y->tv_sec += nsec;
+        }   
+        if (x->tv_usec - y->tv_usec > 1000000) {
+                int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+                y->tv_usec += 1000000 * nsec;
+                y->tv_sec -= nsec;
+        }   
+        result->tv_sec = x->tv_sec - y->tv_sec;
+        result->tv_usec = x->tv_usec - y->tv_usec;
+}
+
+
+bench_t * bench_start(void){
+        bench_t *bench = calloc(sizeof(bench_t), 1); 
+        gettimeofday(&bench->tv_start, NULL);
+        return bench; 
+}
+void bench_free(bench_t *bench){
+	free(bench);
+}
+void bench_query(bench_t *bench){
+	gettimeofday(&bench->tv_end, NULL);
+    
+        timeval_subtract(&bench->tv_diff, &bench->tv_end, &bench->tv_start);
+        sprintf(bench->string, "%3u.%.6u", (unsigned int)bench->tv_diff.tv_sec, (unsigned int)bench->tv_diff.tv_usec);
+	
+	bench->time_ms = bench->tv_diff.tv_usec / 1000  + bench->tv_diff.tv_sec * 1000;
+	bench->time_us = bench->tv_diff.tv_usec         + bench->tv_diff.tv_sec * 1000000;
+	
+	if(bench->time_ms == 0) bench->time_ms = 1;
+	if(bench->time_us == 0) bench->time_us = 1;
+}
+/* }}} */
+
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
@@ -117,10 +168,14 @@ START_TEST (test_backend_mphf_speed){
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                 },
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("mphf")                  },
 					{ HK(type),       DATA_STRING("chm_imp")               },
 					{ HK(backend),    DATA_STRING("backend_mphf_idx")      },
-					{ HK(n_initial),  DATA_INT64(10000)                    },
+					{ HK(n_initial),  DATA_INT64(1000000)                  },
 					{ HK(value_bits), DATA_INT32(31)                       },
 					hash_end
 				)},
@@ -136,25 +191,26 @@ START_TEST (test_backend_mphf_speed){
 	data_t     n_dat = DATA_STRING("backend_mphf"), n_idx = DATA_STRING("backend_mphf_idx");
 	backend_t *b_dat = backend_find(&n_dat);
 	backend_t *b_idx = backend_find(&n_idx);
-	
+		fail_unless(b_dat != NULL && b_idx != NULL, "chain 'backend_mphf' backend creating failed");
+
 	// write array to file
 	int      i,j;
 	ssize_t  failed;
-	size_t   ntests = 2000;
-	char     test[10];
-	time_t   t1,t2;
+	size_t   ntests = 800000;
+	char     test[10], test2[10];
+	
+	request_t r_write[] = {
+		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(key),     DATA_RAW(test, 10)             },
+		{ HK(buffer),  DATA_RAW(test, 10)             },
+		{ HK(size),    DATA_SIZET(10)                 },
+		hash_end
+	};
 	
 	memset(test, 0, 10);
 	failed = 0;
 	
-	request_t r_write[] = {
-		{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)  },
-		{ HK(key),     DATA_RAW (test, 10)             },
-		{ HK(buffer),  DATA_RAW (test, 10)             },
-		hash_end
-	};
-	
-	t1 = time(NULL);
+	bench_t  *be = bench_start();
 	for(i=0; i < ntests; i++){
 		// inc test
 		for(j=0;j<10;j++){
@@ -162,29 +218,53 @@ START_TEST (test_backend_mphf_speed){
 		}
 		
 		if(backend_query(b_dat, r_write) < 0)
-			failed = 1;
+			failed++;
 	}
-	t2 = time(NULL);
-	printf("mphf: %d requests in %d seconds\n", ntests, (int)(t2-t1));
+	bench_query(be);
+	printf("mphf write: %u iters took %s sec; speed: %7lu iters/s (one: %10lu us) failed: %d\n",
+		ntests,
+		be->string,
+		( ntests * 1000 / be->time_ms), 
+		( be->time_us / ntests ),
+		(int)failed
+	);
 	
-		fail_unless(failed == 0, "chain 'backend_mphf': write array failed");
+	bench_free(be);
+	fail_unless(failed == 0, "chain 'backend_mphf': write array failed");
 	
-	/*
-	// check
-	char data_read[1024];
-	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
-		memset(data_read, 0, 1024);
+	
+	request_t r_read[] = {
+		{ HK(action),  DATA_INT32(ACTION_CRWD_READ)   },
+		{ HK(key),     DATA_RAW(test,  10)            },
+		{ HK(buffer),  DATA_RAW(test2, 10)            },
+		{ HK(size),    DATA_SIZET(10)                 },
+		hash_end
+	};
+	
+	memset(test, 0, 10);
+	failed = 0;
+	
+	be = bench_start();
+	for(i=0; i < ntests; i++){
+		// inc test
+		for(j=0;j<10;j++){
+			if(++test[j] != 0) break;
+		}
 		
-		request_t r_read[] = {
-			{ HK(action), DATA_INT32(ACTION_CRWD_READ)                              },
-			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
-			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
-			hash_end
-		};
-		ret = backend_query(b_dat, r_read);
-			fail_unless(ret >= 0,                              "chain 'backend_mphf': read array failed");
-			fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'backend_mphf': read array data failed");
-	}*/
+		if(backend_query(b_dat, r_read) < 0 || memcmp(test, test2, 10) != 0)
+			failed++;
+	}
+	bench_query(be);
+	printf("mphf  read: %u iters took %s sec; speed: %7lu iters/s (one: %10lu us) failed: %d\n",
+		ntests,
+		be->string,
+		( ntests * 1000 / be->time_ms), 
+		( be->time_us / ntests ),
+		(int)failed
+	);
+	
+	bench_free(be);
+	fail_unless(failed == 0, "chain 'backend_mphf': read array failed");
 	
 	backend_destroy(b_dat);
 	backend_destroy(b_idx);

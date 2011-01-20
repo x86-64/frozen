@@ -43,8 +43,8 @@ START_TEST (test_backend_insert_sort){
 		buff = (char)(0x61 + (tv.tv_usec % 26));
 		hash_t  req_write[] = {
 			{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE) },
-			{ HK(offset_out), DATA_PTR_OFFT(&key)           },
-			{ HK(buffer),     DATA_PTR_INT8(&buff)          },
+			{ HK(offset_out), DATA_PTR_OFFT(&key)            },
+			{ HK(buffer),     DATA_PTR_INT8(&buff)           },
 			hash_end
 		};
 		ret = backend_query(backend, req_write);
