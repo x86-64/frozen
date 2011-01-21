@@ -30,6 +30,7 @@
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
 #define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
 #define MIN(a,b)              ( (a > b) ? b : a )
+#define MAX(a,b)              ( (a > b) ? a : b )
 #define TYPE_MAX(type)        ( (type)-1 )
 #ifndef __MAX
 	#define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))

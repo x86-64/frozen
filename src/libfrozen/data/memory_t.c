@@ -26,17 +26,18 @@ void     memory_free(memory_t *memory){ // {{{
 ssize_t  memory_resize(memory_t *memory, size_t new_size){ // {{{
 	size_t t;
 	
+	memory->exact_size = new_size;
 	switch(memory->type){
 		case MEMORY_EXACT:
 			memory->ptr_size = new_size;
 			break;
 		case MEMORY_PAGE:
-			t = (new_size / memory->page_size) * memory->page_size;
+			t = ((new_size / memory->page_size) + 1) * memory->page_size;
 			
 			if(t == memory->ptr_size)
 				return 0;
 			
-			memory->ptr_size   = t;
+			memory->ptr_size = t;
 			break;
 		case MEMORY_DOUBLE:
 			for(t = 1; t < new_size; t <<= 1);
@@ -47,7 +48,6 @@ ssize_t  memory_resize(memory_t *memory, size_t new_size){ // {{{
 			memory->ptr_size = t;
 			break;
 	};
-	memory->exact_size = new_size;
 	
 	switch(memory->alloc){
 		case ALLOC_MALLOC:

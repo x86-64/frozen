@@ -77,6 +77,7 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-cache.lo \
 	backends/mphf/libfrozen_la-mphf.lo \
 	backends/mphf/libfrozen_la-mphf_chm_imp.lo \
+	backends/mphf/libfrozen_la-mphf_bdz_imp.lo \
 	backends/mphf/libfrozen_la-hash_jenkins.lo \
 	backends/rewrite/libfrozen_la-rewrite.lo \
 	backends/rewrite/libfrozen_la-rule_parser.tab.lo \
@@ -121,7 +122,7 @@ AWK = /usr/bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
+CFLAGS = -O3
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E
@@ -238,6 +239,7 @@ backends_sources = \
 	backends/cache.c                     \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
+	backends/mphf/mphf_bdz_imp.c         \
 	backends/mphf/hash_jenkins.c         \
 	backends/rewrite/rewrite.c           \
 	backends/rewrite/rule_parser.tab.c   \
@@ -386,6 +388,9 @@ backends/mphf/libfrozen_la-mphf.lo: backends/mphf/$(am__dirstamp) \
 backends/mphf/libfrozen_la-mphf_chm_imp.lo:  \
 	backends/mphf/$(am__dirstamp) \
 	backends/mphf/$(DEPDIR)/$(am__dirstamp)
+backends/mphf/libfrozen_la-mphf_bdz_imp.lo:  \
+	backends/mphf/$(am__dirstamp) \
+	backends/mphf/$(DEPDIR)/$(am__dirstamp)
 backends/mphf/libfrozen_la-hash_jenkins.lo:  \
 	backends/mphf/$(am__dirstamp) \
 	backends/mphf/$(DEPDIR)/$(am__dirstamp)
@@ -442,6 +447,8 @@ mostlyclean-compile:
 	-rm -f backends/mphf/libfrozen_la-hash_jenkins.lo
 	-rm -f backends/mphf/libfrozen_la-mphf.$(OBJEXT)
 	-rm -f backends/mphf/libfrozen_la-mphf.lo
+	-rm -f backends/mphf/libfrozen_la-mphf_bdz_imp.$(OBJEXT)
+	-rm -f backends/mphf/libfrozen_la-mphf_bdz_imp.lo
 	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.$(OBJEXT)
 	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.lo
 	-rm -f backends/rewrite/libfrozen_la-rewrite.$(OBJEXT)
@@ -472,6 +479,7 @@ include backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo
 include backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
+include backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Plo
 include backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo
 include backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo
@@ -586,6 +594,13 @@ backends/mphf/libfrozen_la-mphf_chm_imp.lo: backends/mphf/mphf_chm_imp.c
 #	source='backends/mphf/mphf_chm_imp.c' object='backends/mphf/libfrozen_la-mphf_chm_imp.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf_chm_imp.lo `test -f 'backends/mphf/mphf_chm_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_chm_imp.c
+
+backends/mphf/libfrozen_la-mphf_bdz_imp.lo: backends/mphf/mphf_bdz_imp.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf_bdz_imp.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Tpo -c -o backends/mphf/libfrozen_la-mphf_bdz_imp.lo `test -f 'backends/mphf/mphf_bdz_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_bdz_imp.c
+	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Plo
+#	source='backends/mphf/mphf_bdz_imp.c' object='backends/mphf/libfrozen_la-mphf_bdz_imp.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf_bdz_imp.lo `test -f 'backends/mphf/mphf_bdz_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_bdz_imp.c
 
 backends/mphf/libfrozen_la-hash_jenkins.lo: backends/mphf/hash_jenkins.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-hash_jenkins.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Tpo -c -o backends/mphf/libfrozen_la-hash_jenkins.lo `test -f 'backends/mphf/hash_jenkins.c' || echo '$(srcdir)/'`backends/mphf/hash_jenkins.c

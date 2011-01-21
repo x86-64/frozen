@@ -192,7 +192,7 @@ ssize_t              data_type_validate     (data_type type){ // {{{
 	return 0;
 } // }}}
 ssize_t              data_validate(data_t *data){ // {{{
-	if(data == NULL || !data_type_validate(data->type))
+	if(data == NULL || data->type == TYPE_INVALID || (unsigned)data->type >= data_protos_size)
 		return 0;
 	
 	return 1;

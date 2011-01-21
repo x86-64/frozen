@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <backends/mphf/mphf.h>
 #include <backends/mphf/mphf_chm_imp.h>
+#include <backends/mphf/mphf_bdz_imp.h>
 #include <backends/mphf/hash_jenkins.h>
 
 #define MAX_STORES_PER_MPHF  10000
@@ -25,6 +26,7 @@ ssize_t         mphf_new         (mphf_t *mphf, backend_t *backend, uint64_t *of
 	// calc space for stores
 	switch(type){
 		case MPHF_TYPE_CHM_IMP: nstores = mphf_chm_imp_nstores(nelements, value_bits); break;
+		case MPHF_TYPE_BDZ_IMP: nstores = mphf_bdz_imp_nstores(nelements, value_bits); break;
 		case MPHF_TYPE_INVALID:
 			return -EINVAL;
 		default: nstores = 0; break;
@@ -59,6 +61,7 @@ ssize_t         mphf_new         (mphf_t *mphf, backend_t *backend, uint64_t *of
 	// algo dependent
 	switch(type){
 		case MPHF_TYPE_CHM_IMP: ret = mphf_chm_imp_new(mphf, nelements, value_bits); break;
+		case MPHF_TYPE_BDZ_IMP: ret = mphf_bdz_imp_new(mphf, nelements, value_bits); break;
 		default:                ret = -1; break;
 	};
 	if(ret < 0)
@@ -111,6 +114,7 @@ ssize_t         mphf_load        (mphf_t *mphf, backend_t *backend, uint64_t off
 	
 	switch(mphf->params.type){
 		case MPHF_TYPE_CHM_IMP:
+		case MPHF_TYPE_BDZ_IMP:
 			break;
 		default:
 			return -EINVAL;
@@ -150,6 +154,7 @@ error:
 ssize_t         mphf_insert      (mphf_t *mphf, char *key, size_t keylen, uint64_t  value){
 	switch(mphf->params.type){
 		case MPHF_TYPE_CHM_IMP: return mphf_chm_imp_insert(mphf, key, keylen, value);
+		case MPHF_TYPE_BDZ_IMP: return mphf_bdz_imp_insert(mphf, key, keylen, value);
 	}
 	return -EFAULT;
 }
@@ -157,6 +162,7 @@ ssize_t         mphf_insert      (mphf_t *mphf, char *key, size_t keylen, uint64
 ssize_t         mphf_query       (mphf_t *mphf, char *key, size_t keylen, uint64_t *value){
 	switch(mphf->params.type){
 		case MPHF_TYPE_CHM_IMP: return mphf_chm_imp_query(mphf, key, keylen, value);
+		case MPHF_TYPE_BDZ_IMP: return mphf_chm_imp_query(mphf, key, keylen, value);
 	}
 	return -EFAULT;
 }
@@ -168,6 +174,7 @@ void            mphf_free        (mphf_t *mphf){
 mphf_types      mphf_string_to_type(char *string){
 	if(string == NULL)                 return MPHF_TYPE_INVALID;
 	if(strcmp(string, "chm_imp") == 0) return MPHF_TYPE_CHM_IMP;
+	if(strcmp(string, "bdz_imp") == 0) return MPHF_TYPE_BDZ_IMP;
 	return MPHF_TYPE_INVALID;
 }
 
@@ -227,9 +234,9 @@ ssize_t         mphf_store_write (mphf_t *mphf, uint32_t id, uint64_t offset, vo
 
 /* }}} */
 /* hashes {{{ */
-uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size){
+uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t *hashes[], size_t nhashes){
 	switch(type){
-		case MPHF_HASH_JENKINS32: return jenkins32_hash(seed, key, key_size);
+		case MPHF_HASH_JENKINS32: return jenkins32_hash(seed, key, key_size, hashes, nhashes);
 	};
 	return 0;
 }

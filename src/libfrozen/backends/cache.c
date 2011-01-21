@@ -39,7 +39,7 @@ static int cache_configure(chain_t *chain, hash_t *config){ // {{{
 	if(__MAX(size_t) < file_size)
 		return 0;
 	
-	memory_new(&userdata->memory, MEMORY_EXACT, ALLOC_MALLOC, 0, 1);
+	memory_new(&userdata->memory, MEMORY_PAGE, ALLOC_MALLOC, 0x1000, 1);
 	if(memory_resize(&userdata->memory, (size_t)file_size) != 0)
 		return 0;
 	

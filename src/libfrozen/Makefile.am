@@ -5,6 +5,7 @@ backends_sources =                           \
 	backends/cache.c                     \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
+	backends/mphf/mphf_bdz_imp.c         \
 	backends/mphf/hash_jenkins.c         \
 	backends/rewrite/rewrite.c           \
 	backends/rewrite/rule_parser.tab.c   \

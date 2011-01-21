@@ -71,7 +71,7 @@ acceptable.  Do NOT use for cryptographic purposes.
 --------------------------------------------------------------------
  */
 
-uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen){
+uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen, uint32_t *hashes[], size_t nhashes){
 	register uint32_t len;
 	register uint32_t a,b,c;
 	
@@ -121,6 +121,12 @@ uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen){
 	}
 	mix(a,b,c);
 	
-	return c;
+	switch(nhashes){
+		default:
+		case 3: hashes[2] = c;
+		case 2: hashes[1] = b;
+		case 1: hashes[0] = a;
+	};
+	return MIN(nhashes, 3);
 }
 
