@@ -104,6 +104,7 @@ extern size_t        data_protos_size;
 API ssize_t              data_type_validate     (data_type type);
 API data_type            data_type_from_string  (char *string);
 API char *               data_string_from_type  (data_type type);
+API data_proto_t *       data_proto_from_type   (data_type type);
 
 API size_t               data_len               (data_t *data, data_ctx_t *data_ctx);
 API size_t               data_rawlen            (data_t *data, data_ctx_t *data_ctx);

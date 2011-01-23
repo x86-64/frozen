@@ -1,4 +1,3 @@
-#include <test.h>
 
 struct dns_entry {
 	char          *domain;

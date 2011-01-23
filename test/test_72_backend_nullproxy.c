@@ -1,4 +1,3 @@
-#include <test.h>
 
 START_TEST (test_backends_two_chains){
 	backend_t *backend;

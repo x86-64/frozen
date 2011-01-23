@@ -1,4 +1,3 @@
-#include <test.h>
 
 START_TEST (test_real_store_strings){
 	hash_t config[] = {

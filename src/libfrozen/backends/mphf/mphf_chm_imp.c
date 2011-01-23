@@ -54,7 +54,7 @@ ssize_t mphf_chm_imp_new    (mphf_t *mphf, uint64_t nelements, uint32_t value_bi
 	
 	mphf_store_write (mphf, CHM_IMP_STORE_PARAMS, 0, &data, sizeof(chm_imp_t));
 	
-	printf("mphf new nelem: %lld hashelem: %lld g_size: %lld\n", nelements, data.r, g_size);
+	//printf("mphf new nelem: %lld hashelem: %lld g_size: %lld\n", nelements, data.r, g_size);
 	return 0;
 }
 
@@ -64,8 +64,8 @@ static ssize_t  mphf_chm_imp_getg(chm_imp_t *data, mphf_t *mphf, char *key, size
 	uint64_t   tmp;
 	
 	// TODO 64 bit version
-	mphf_hash32(data->hash_type, data->hash1, key, key_len, &hash[0], 1); 
-	mphf_hash32(data->hash_type, data->hash2, key, key_len, &hash[1], 1); 
+	mphf_hash32(data->hash_type, data->hash1, key, key_len, (uint32_t *)&hash[0], 1); 
+	mphf_hash32(data->hash_type, data->hash2, key, key_len, (uint32_t *)&hash[1], 1); 
 	
 	array[0].offset = (hash[0] % data->r) * data->value_bytes;
 	array[1].offset = (hash[1] % data->r /*+ data->r*/) * data->value_bytes;

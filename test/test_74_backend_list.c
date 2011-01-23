@@ -1,4 +1,3 @@
-#include "test.h"
 
 START_TEST (test_backend_list){
 	backend_t *backend;

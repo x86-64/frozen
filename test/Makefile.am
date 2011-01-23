@@ -1,7 +1,6 @@
 TESTS          = test test_frozenfs
 check_PROGRAMS = test
 
-test_SOURCES      = test.c test.h 
 test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_builddir)/src/libfrozen/
 test_LDADD        = @CHECK_LIBS@ $(top_builddir)/src/libfrozen/libfrozen.la
 

@@ -1,4 +1,8 @@
-#include <test.h>
+#include "libfrozen.h"
+#include <stdlib.h>
+#include <check.h>
+
+extern TCase *tc_core;
 
 Suite *s;
 TCase *tc_core;

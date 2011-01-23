@@ -85,8 +85,7 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/insert-sort/libfrozen_la-insert-sort.lo
 am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
 	libfrozen_la-list.lo libfrozen_la-buffer.lo \
-	libfrozen_la-data.lo libfrozen_la-hash.lo \
-	libfrozen_la-structs.lo $(am__objects_1) \
+	libfrozen_la-data.lo libfrozen_la-hash.lo $(am__objects_1) \
 	libfrozen_la-backend.lo \
 	configs/libfrozen_la-config_parser.tab.lo \
 	configs/libfrozen_la-config_parser.lex.lo
@@ -122,7 +121,7 @@ AWK = /usr/bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O3
+CFLAGS = -g -O2 -g3 -O0 -Wall -Werror -DDEBUG=1
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E
@@ -264,7 +263,8 @@ data_sources = data/void.c     \
 	data/buffer_t.c \
 	data/memory_t.c \
 	data/io_t.c     \
-	data/chain_t.c
+	data/chain_t.c  \
+	data/struct_t.c
 
 AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = backends/*.m4 data/*.c data/*.m4 backends/insert-sort/*.c
@@ -279,7 +279,6 @@ libfrozen_la_SOURCES = data.h \
 			data.c                                  \
 			hash.c              hash.h              \
 			hashkeys.h                              \
-			structs.c           structs.h           \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			configs/config_parser.tab.c             \
@@ -471,7 +470,6 @@ include ./$(DEPDIR)/libfrozen_la-data.Plo
 include ./$(DEPDIR)/libfrozen_la-hash.Plo
 include ./$(DEPDIR)/libfrozen_la-libfrozen.Plo
 include ./$(DEPDIR)/libfrozen_la-list.Plo
-include ./$(DEPDIR)/libfrozen_la-structs.Plo
 include backends/$(DEPDIR)/libfrozen_la-cache.Plo
 include backends/$(DEPDIR)/libfrozen_la-file.Plo
 include backends/$(DEPDIR)/libfrozen_la-list.Plo
@@ -545,13 +543,6 @@ libfrozen_la-hash.lo: hash.c
 #	source='hash.c' object='libfrozen_la-hash.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-
-libfrozen_la-structs.lo: structs.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-structs.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-structs.Tpo -c -o libfrozen_la-structs.lo `test -f 'structs.c' || echo '$(srcdir)/'`structs.c
-	$(am__mv) $(DEPDIR)/libfrozen_la-structs.Tpo $(DEPDIR)/libfrozen_la-structs.Plo
-#	source='structs.c' object='libfrozen_la-structs.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-structs.lo `test -f 'structs.c' || echo '$(srcdir)/'`structs.c
 
 backends/libfrozen_la-null-proxy.lo: backends/null-proxy.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-null-proxy.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-null-proxy.Tpo -c -o backends/libfrozen_la-null-proxy.lo `test -f 'backends/null-proxy.c' || echo '$(srcdir)/'`backends/null-proxy.c

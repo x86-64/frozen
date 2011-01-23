@@ -8,7 +8,7 @@ struct hash_t {
 	data_t          data;
 };
 
-typedef int  (*hash_iterator)(hash_t *, void *, void *);
+typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 
 #define hash_ptr_null  (hash_key_t)-1
 #define hash_ptr_end   (hash_key_t)-2 
@@ -38,7 +38,7 @@ API void               hash_delete                  (hash_t *hash, hash_key_t ke
 // END TODO
 
 API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
-API int                hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
+API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
 API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
 API hash_t *           hash_find_typed              (hash_t *hash, data_type type, hash_key_t key);
 

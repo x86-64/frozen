@@ -234,7 +234,7 @@ ssize_t         mphf_store_write (mphf_t *mphf, uint32_t id, uint64_t offset, vo
 
 /* }}} */
 /* hashes {{{ */
-uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t *hashes[], size_t nhashes){
+uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes){
 	switch(type){
 		case MPHF_HASH_JENKINS32: return jenkins32_hash(seed, key, key_size, hashes, nhashes);
 	};

@@ -30,7 +30,8 @@ data_sources= data/void.c     \
 	data/buffer_t.c \
 	data/memory_t.c \
 	data/io_t.c     \
-	data/chain_t.c
+	data/chain_t.c  \
+	data/struct_t.c
 
 AUTOMAKE_OPTIONS = subdir-objects
 
@@ -47,7 +48,6 @@ libfrozen_la_SOURCES=   data.h \
 			data.c                                  \
 			hash.c              hash.h              \
 			hashkeys.h                              \
-			structs.c           structs.h           \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			configs/config_parser.tab.c             \

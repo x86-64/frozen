@@ -63,9 +63,9 @@ void               hash_chain                   (hash_t *hash, hash_t *hash_next
 	hash_t *hend = hash_find(hash, hash_ptr_end);
 	hend->data.data_ptr = hash_next;
 } // }}}
-int                hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
+ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
 	hash_t      *value = hash;
-	int          ret;
+	ssize_t      ret;
 	
 	if(hash == NULL)
 		return ITER_BREAK;

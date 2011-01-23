@@ -2,8 +2,6 @@
 #include <config.h>
 #endif
 
-#define _inline extern inline
-
 #define _FILE_OFFSET_BITS 64
 #define _LARGEFILE64_SOURCE
 #define __USE_GNU
@@ -24,21 +22,21 @@
 #include <unistd.h>
 #include <alloca.h>
 
-#define API __attribute__((visibility("default")))
+#define _inline   extern inline
+#define API       __attribute__((visibility("default")))
 
 #define error(...)            do{ fprintf(stdout,__VA_ARGS__);    }while(0);
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
 #define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
+
 #define MIN(a,b)              ( (a > b) ? b : a )
 #define MAX(a,b)              ( (a > b) ? a : b )
-#define TYPE_MAX(type)        ( (type)-1 )
-#ifndef __MAX
-	#define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))
-	#define __MAX_SIGNED(type) (__HALF_MAX_SIGNED(type) - 1 + __HALF_MAX_SIGNED(type))
-	#define __MIN_SIGNED(type) (-1 - __MAX_SIGNED(type))
-	#define __MIN(type) ((type)-1 < 1?__MIN_SIGNED(type):(type)0)
-	#define __MAX(type) ((type)~__MIN(type))
-#endif
+
+#define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))
+#define __MAX_SIGNED(type) (__HALF_MAX_SIGNED(type) - 1 + __HALF_MAX_SIGNED(type))
+#define __MIN_SIGNED(type) (-1 - __MAX_SIGNED(type))
+#define __MIN(type) ((type)-1 < 1?__MIN_SIGNED(type):(type)0)
+#define __MAX(type) ((type)~__MIN(type))
 
 /* Own headers */
 #include <public.h>
@@ -47,7 +45,6 @@
 #include <buffer.h>          //
 #include <data.h>            //
 #include <hash.h>            //
-#include <structs.h>         //
 
 #include <configs/config.h>  // confiurations
 #include <backend.h>         // db logic 

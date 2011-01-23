@@ -82,6 +82,9 @@ static size_t        data_def_len2raw       (size_t unitsize){ // {{{
 	return unitsize;
 } // }}}
 static size_t        data_def_rawlen        (data_t *data, data_ctx_t *context){ // {{{
+	if(data_protos[data->type].size_type == SIZE_FIXED)
+		return data_protos[data->type].fixed_size;
+	
 	return data->data_size;
 } // }}}
 static ssize_t       data_def_convert       (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
@@ -212,6 +215,12 @@ char *               data_string_from_type  (data_type type){ // {{{
 		return "INVALID";
 	
 	return data_protos[type].type_str;
+} // }}}
+data_proto_t *       data_proto_from_type   (data_type type){ // {{{
+	if(type == TYPE_INVALID || (unsigned)type >= data_protos_size)
+		return NULL;
+	
+	return &data_protos[type];
 } // }}}
 
 /** @brief Calculate length of data

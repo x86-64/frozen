@@ -1,4 +1,3 @@
-#include <test.h>
 
 /*
 START_TEST (test_backend_mphf){
@@ -141,7 +140,7 @@ void bench_query(bench_t *bench){
 }
 /* }}} */
 
-#define NTESTS 1000000
+#define NTESTS 1000
 
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
@@ -175,7 +174,7 @@ START_TEST (test_backend_mphf_speed){
 				)},
 				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("mphf")                  },
-					{ HK(type),       DATA_STRING("bdz_imp")               },
+					{ HK(type),       DATA_STRING("chm_imp")               },
 					{ HK(backend),    DATA_STRING("backend_mphf_idx")      },
 					{ HK(n_initial),  DATA_INT64(NTESTS)                   },
 					{ HK(value_bits), DATA_INT32(31)                       },
@@ -225,13 +224,13 @@ START_TEST (test_backend_mphf_speed){
 			failed++;
 	}
 	bench_query(be);
-	printf("mphf write: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
+	/*printf("mphf write: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
 		ntests,
 		be->string,
 		( ntests * 1000 / be->time_ms), 
 		( be->time_us * 1000 / ntests ),
 		(int)failed
-	);
+	);*/
 	
 	bench_free(be);
 	fail_unless(failed == 0, "chain 'backend_mphf': write array failed");
@@ -260,13 +259,13 @@ START_TEST (test_backend_mphf_speed){
 			failed++;
 	}
 	bench_query(be);
-	printf("mphf  read: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
+	/*printf("mphf  read: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
 		ntests,
 		be->string,
 		( ntests * 1000 / be->time_ms), 
 		( be->time_us / ntests * 1000 ),
 		(int)failed
-	);
+	);*/
 	
 	bench_free(be);
 	fail_unless(failed == 0, "chain 'backend_mphf': read array failed");

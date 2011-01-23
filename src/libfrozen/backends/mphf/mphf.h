@@ -40,6 +40,6 @@ typedef enum mphf_hash_types {
 	MPHF_HASH_JENKINS32
 } mphf_hash_types;
 
-uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t *hashes[], size_t nhashes);
+uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes);
 
 #endif

@@ -1,4 +1,3 @@
-#include <test.h>
 #include <sys/time.h>
 
 START_TEST (test_backend_insert_sort){

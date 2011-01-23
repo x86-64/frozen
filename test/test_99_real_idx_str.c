@@ -1,4 +1,3 @@
-#include <test.h>
 
 START_TEST (test_real_store_idx_strings){
 	ssize_t  ret;

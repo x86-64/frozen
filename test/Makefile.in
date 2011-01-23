@@ -48,8 +48,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am_test_OBJECTS = test-test.$(OBJEXT)
-test_OBJECTS = $(am_test_OBJECTS)
+test_SOURCES = test.c
+test_OBJECTS = test-test.$(OBJEXT)
 test_DEPENDENCIES = $(top_builddir)/src/libfrozen/libfrozen.la
 test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(test_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -67,8 +67,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(test_SOURCES)
-DIST_SOURCES = $(test_SOURCES)
+SOURCES = test.c
+DIST_SOURCES = test.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -194,7 +194,6 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-test_SOURCES = test.c test.h 
 test_CFLAGS = @CHECK_CFLAGS@ -I$(top_builddir)/src/libfrozen/
 test_LDADD = @CHECK_LIBS@ $(top_builddir)/src/libfrozen/libfrozen.la
 EXTRA_DIST = test_valgrind test_gdb test_coverage test_*.c

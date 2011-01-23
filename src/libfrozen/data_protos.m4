@@ -13,4 +13,5 @@ m4_include(data/buffer_t.c)
 m4_include(data/memory_t.c)
 m4_include(data/io_t.c)
 m4_include(data/chain_t.c)
+m4_include(data/struct_t.c)
 
