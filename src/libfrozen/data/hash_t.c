@@ -10,6 +10,8 @@ REGISTER_TYPE(TYPE_HASHT)
 REGISTER_MACRO(`DATA_HASHT(...)',            `TYPE_HASHT, (hash_t []){ __VA_ARGS__ }, sizeof((hash_t []){ __VA_ARGS__ })')
 REGISTER_MACRO(`DATA_PTR_HASHT(_hash)',      `TYPE_HASHT, (void *)_hash, 0')
 REGISTER_MACRO(`DATA_PTR_HASHT_FREE(_hash)', `TYPE_HASHT, (void *)_hash, 1')
+REGISTER_RAW_MACRO(`DT_HASHT', `hash_t *')
+REGISTER_RAW_MACRO(`GET_TYPE_HASHT(value)', `(hash_t *)value->data_ptr')
 REGISTER_PROTO(
 	`{
 		.type                   = TYPE_HASHT,

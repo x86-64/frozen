@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <backend.h>
 
 /* this module must be used only as example */
 

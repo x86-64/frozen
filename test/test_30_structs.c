@@ -24,7 +24,7 @@ START_TEST (test_structs){
 	data_t  test_data = DATA_RAW(test, 100);
 	
 	ret = struct_pack(structure, values, &test_data, NULL);
-		fail_unless(ret == 0,                               "struct_pack failed");
+		fail_unless(ret > 0,                                "struct_pack failed");
 		fail_unless(memcmp(test, orig, sizeof(orig)) == 0,  "struct_pack data failed");
 	
 	DT_INT32  test1;
@@ -39,7 +39,7 @@ START_TEST (test_structs){
 	};
 	
 	ret = struct_unpack(structure, query, &test_data, NULL);
-		fail_unless(ret == 0,                               "struct_unpack failed");
+		fail_unless(ret > 0,                                "struct_unpack failed");
 	
 	hash_copy_data(ret, TYPE_INT32,  test1, query, HK(key1));
 		fail_unless(ret == 0 && test1 == 100,               "struct_unpack data 1 failed\n");

@@ -3,6 +3,7 @@ backends_sources =                           \
 	backends/file.c                      \
 	backends/list.c                      \
 	backends/cache.c                     \
+	backends/structs.c                   \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
 	backends/mphf/mphf_bdz_imp.c         \

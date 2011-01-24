@@ -59,7 +59,9 @@ REGISTER_KEY(real_offset)
 REGISTER_KEY(rewrite)
 REGISTER_KEY(script)
 REGISTER_KEY(size)
+REGISTER_KEY(structure)
 REGISTER_KEY(type)
+REGISTER_KEY(values)
 REGISTER_KEY(value_bits)
 
 #ifdef HASH_C
