@@ -7,6 +7,7 @@ typedef struct chain_t    chain_t;
 
 typedef struct hash_t          hash_t;
 typedef hash_t                 request_t;
+typedef hash_t                 config_t;
 
 typedef enum data_type         data_type;
 typedef enum size_type         size_type;

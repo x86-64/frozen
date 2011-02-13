@@ -1,3 +1,4 @@
+/*
 #include <libfrozen.h>
 #include <backends/mphf/mphf.h>
 
@@ -23,10 +24,19 @@ typedef struct gval {
 	char      occupied;
 } gval;
 
-ssize_t mphf_bdz_imp_new    (mphf_t *mphf, uint64_t nelements, uint32_t value_bits){
+#define N_INITIAL_DEFAULT    256
+#define VALUE_BITS_DEFAULT   31
+
+ssize_t mphf_bdz_imp_new    (mphf_t *mphf, config_t *config){
 	bdz_imp_t  data;
 	uint64_t   g_size;
 	uint32_t   value_bytes;
+	ssize_t    ret;
+	DT_INT64   nelements      = N_INITIAL_DEFAULT;
+	DT_INT32   value_bits     = VALUE_BITS_DEFAULT;
+	
+	hash_copy_data(ret, TYPE_INT64,  nelements,     config, HK(n_initial));
+	hash_copy_data(ret, TYPE_INT32,  value_bits,    config, HK(value_bits));
 	
 	srandom(time(NULL));
 	
@@ -154,9 +164,9 @@ ssize_t mphf_bdz_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *
 	return MPHF_QUERY_FOUND;
 }
 
-uint32_t mphf_bdz_imp_nstores  (uint64_t nelements, uint32_t value_bits){
-	(void)nelements; (void)value_bits;
-	
+uint32_t mphf_bdz_imp_nstores  (config_t *config){
+	(void)config;
+
 	return 2;
 }
-
+*/
