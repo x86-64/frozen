@@ -187,12 +187,14 @@ START_TEST (test_backend_mphf_speed){
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("mphf")                  },
-					{ HK(type),       DATA_STRING("chm_imp")               },
-					{ HK(backend),    DATA_STRING("backend_mphf_idx")      },
-					{ HK(nelements),  DATA_INT64(NTESTS)                   },
-					{ HK(value_bits), DATA_INT32(31)                       },
-					{ HK(persistent), DATA_INT32(1)                        },
+					{ HK(name),        DATA_STRING("mphf")                 },
+					{ HK(type),        DATA_STRING("chm_imp")              },
+					{ HK(backend),     DATA_STRING("backend_mphf_idx")     },
+					{ HK(nelements),   DATA_INT64(NTESTS)                  },
+					{ HK(value_bits),  DATA_INT32(31)                      },
+					{ HK(persistent),  DATA_INT32(1)                       },
+					{ HK(build_start), DATA_STRING("onload")               },
+					{ HK(build_end),   DATA_STRING("onunload")             },
 					hash_end
 				)},
 				hash_end

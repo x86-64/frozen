@@ -5,15 +5,26 @@
 
 #define MAX_STORES_PER_MPHF  10000
 
-typedef struct mphf_userdata {
-	mphf_t        mphf;
-	mphf_proto_t *mphf_proto;
+typedef enum mphf_build_control {
+	BUILD_ONLOAD,
+	BUILD_ONREQUEST,
+	//BUILD_ONTIMER
 	
-	hash_key_t    key_from;
-	hash_key_t    key_to;
+	BUILD_INVALID = -1
+} mphf_build_control;
+
+typedef struct mphf_userdata {
+	mphf_t               mphf;
+	mphf_proto_t        *mphf_proto;
+	mphf_build_control   build_start;
+	mphf_build_control   build_end;
+	uint32_t             in_build;
+	
+	hash_key_t           key_from;
+	hash_key_t           key_to;
 } mphf_userdata;
 
-mphf_proto_t *  mphf_string_to_proto(char *string){ // {{{
+mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
 	if(string == NULL)                 return NULL;
 	if(strcmp(string, "chm_imp") == 0) return &mphf_protos[MPHF_TYPE_CHM_IMP];
 	if(strcmp(string, "bdz_imp") == 0) return &mphf_protos[MPHF_TYPE_BDZ_IMP];
@@ -23,6 +34,34 @@ mphf_hash_proto_t *  mphf_string_to_hash_proto(char *string){ // {{{
 	if(string == NULL)                 return NULL;
 	if(strcmp(string, "jenkins") == 0) return &mphf_hash_protos[MPHF_HASH_JENKINS32];
 	return NULL;
+} // }}}
+mphf_build_control   mphf_string_to_build_control(char *string){ // {{{
+	if(string != NULL){
+		if(strcmp(string, "onload")       == 0 ||
+		   strcmp(string, "onunload")     == 0) return BUILD_ONLOAD;
+		if(strcmp(string, "onrequest")    == 0 ||
+		   strcmp(string, "onrequestend") == 0) return BUILD_ONREQUEST;
+	}
+	return BUILD_INVALID;
+} // }}}
+
+static ssize_t mphf_build_start(mphf_userdata *userdata, mphf_build_control event){ // {{{
+	if(userdata->build_start == event){
+		if(userdata->mphf_proto->func_build_start(&userdata->mphf) < 0)
+			return -EFAULT;
+		
+		userdata->in_build = 1;
+	}
+	return 0;
+} // }}}
+static ssize_t mphf_build_end(mphf_userdata *userdata, mphf_build_control event){ // {{{
+	if(userdata->in_build == 1 && userdata->build_end == event){
+		if(userdata->mphf_proto->func_build_end(&userdata->mphf) < 0)
+			return -EFAULT;
+		
+		userdata->in_build = 0;
+	}
+	return 0;
 } // }}}
 
 /* store {{{ */
@@ -90,23 +129,29 @@ static int mphf_init(chain_t *chain){ // {{{
 static int mphf_destroy(chain_t *chain){ // {{{
 	mphf_userdata *userdata = (mphf_userdata *)chain->userdata;
 	
+	mphf_build_end(userdata, BUILD_ONLOAD);
+	
 	backend_destroy (userdata->mphf.backend);
 	hash_free       (userdata->mphf.config);
 	free(userdata);
 	return 0;
 } // }}}
 static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
-	DT_INT64         count          = 0;
-	DT_STRING        mphf_type_str  = NULL;
-	DT_STRING        key_from_str   = "key";
-	DT_STRING        key_to_str     = "offset";
+	DT_INT64         count           = 0;
+	DT_STRING        mphf_type_str   = NULL;
+	DT_STRING        key_from_str    = "key";
+	DT_STRING        key_to_str      = "offset";
+	DT_STRING        build_start_str = NULL;
+	DT_STRING        build_end_str   = NULL;
 	data_t          *backend_name;
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_STRING, mphf_type_str, config, HK(type));
-	hash_copy_data(ret, TYPE_STRING, key_from_str,  config, HK(key_from));
-	hash_copy_data(ret, TYPE_STRING, key_to_str,    config, HK(key_to));
+	hash_copy_data(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
+	hash_copy_data(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
+	hash_copy_data(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
+	hash_copy_data(ret, TYPE_STRING, build_start_str, config, HK(build_start));
+	hash_copy_data(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
 	
 	if( (backend_name = hash_get_typed_data(config, TYPE_STRING, HK(backend))) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
@@ -114,8 +159,12 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'mphf_type' invalid or not supplied\n");
 	
-	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
+	if( (userdata->build_start = mphf_string_to_build_control(build_start_str)) == BUILD_INVALID)
+		return_error(-EINVAL, "chain 'mphf' parameter 'build_start' invalid\n");
+	if( (userdata->build_end   = mphf_string_to_build_control(build_end_str))   == BUILD_INVALID)
+		return_error(-EINVAL, "chain 'mphf' parameter 'build_end' invalid\n");
 	
+	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	if( (userdata->mphf.backend = backend_acquire(backend_name)) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' invalid\n");
 	
@@ -137,6 +186,9 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	if(count == 0 && userdata->mphf_proto->func_new(&userdata->mphf) < 0)
 		return -EFAULT;
 	
+	if(mphf_build_start(userdata, BUILD_ONLOAD) < 0)
+		return -EFAULT;
+	
 	return 0;
 } // }}}
 
@@ -150,7 +202,7 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 		return chain_next_query(chain, request);
 	
 	// start build
-	if(userdata->mphf_proto->func_build_start(&userdata->mphf) < 0)
+	if(mphf_build_start(userdata, BUILD_ONREQUEST) < 0)
 		return -EFAULT;
 	
 	// get new key_out
@@ -172,7 +224,7 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	ret = 0;
 error:
 	// stop build
-	if(userdata->mphf_proto->func_build_end(&userdata->mphf) < 0)
+	if(mphf_build_end(userdata, BUILD_ONREQUEST) < 0)
 		ret = -EFAULT;
 	
 	return ret;

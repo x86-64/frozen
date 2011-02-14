@@ -19,6 +19,8 @@ REGISTER_KEY(block_vid)
 REGISTER_KEY(blocks)
 REGISTER_KEY(buffer)
 REGISTER_KEY(buffer_size)
+REGISTER_KEY(build_start)
+REGISTER_KEY(build_end)
 REGISTER_KEY(chains)
 REGISTER_KEY(count)
 

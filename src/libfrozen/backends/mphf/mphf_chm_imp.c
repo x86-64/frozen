@@ -385,12 +385,22 @@ static ssize_t graph_add_edge(mphf_t *mphf, uint64_t *vertex, uint64_t value){ /
 		return -EFAULT;
 	
 	// update g
-	if(graph_getg(mphf, 2, vertex, (uint64_t *)&tmp) < 0)
-		return -EFAULT;
-	
-	      if(new_edge.next[0] == 0){ g_free = 0; g_new = value - tmp[1];
-	}else if(new_edge.next[1] == 0){ g_free = 1; g_new = value - tmp[0];
+	      if(new_edge.next[0] == 0){
+		if(graph_getg(mphf, 1, &vertex[1], (uint64_t *)&tmp[1]) < 0)
+			return -EFAULT;
+	      	
+		g_free = 0;
+		g_new  = value - tmp[1];
+	}else if(new_edge.next[1] == 0){
+		if(graph_getg(mphf, 1, &vertex[0], (uint64_t *)&tmp[0]) < 0)
+			return -EFAULT;
+		
+		g_free = 1;
+		g_new  = value - tmp[0];
 	}else{
+		if(graph_getg(mphf, 2, vertex, (uint64_t *)&tmp) < 0)
+			return -EFAULT;
+		
 		g_free = 1;
 		g_new  = value - tmp[0];
 		
