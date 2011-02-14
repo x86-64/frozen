@@ -33,6 +33,8 @@ struct mphf_t {
 	backend_t               *backend;
 	void                    *build_data;
 	uint64_t                 offset;
+	
+	char                     data[112];
 };
 
 struct mphf_proto_t {

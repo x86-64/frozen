@@ -114,6 +114,8 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'mphf_type' invalid or not supplied\n");
 	
+	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
+	
 	if( (userdata->mphf.backend = backend_acquire(backend_name)) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' invalid\n");
 	
@@ -165,8 +167,7 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 		data_value_ptr(key),
 		data_value_len(key),
 		key_out
-	) < 0){
-		ret = -EFAULT; goto error; }
+	) < 0){ ret = -EFAULT; goto error; }
 	
 	ret = 0;
 error:
