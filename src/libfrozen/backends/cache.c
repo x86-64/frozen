@@ -112,6 +112,26 @@ static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 }
 
 // TODO delete
+static ssize_t cache_backend_count(chain_t *chain, request_t *request){
+	data_t         *buffer;
+	data_ctx_t     *buffer_ctx;
+	size_t          size;
+	cache_userdata *userdata = (cache_userdata *)chain->userdata;
+	
+	if(memory_size(&userdata->memory, &size) < 0)
+		return -EFAULT;
+	
+	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
+		return -EINVAL;
+	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
+	
+	data_t count = DATA_PTR_SIZET(&size);
+	
+	return data_transfer(
+		buffer, buffer_ctx,
+		&count,  NULL
+	);
+}
 
 static chain_t chain_cache = {
 	"cache",
@@ -122,7 +142,8 @@ static chain_t chain_cache = {
 	{{
 		.func_create = &cache_backend_create,
 		.func_get    = &cache_backend_read,
-		.func_set    = &cache_backend_write
+		.func_set    = &cache_backend_write,
+		.func_count  = &cache_backend_count
 	}}
 };
 CHAIN_REGISTER(chain_cache)

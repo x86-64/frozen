@@ -22,6 +22,8 @@ typedef struct mphf_hash_proto_t  mphf_hash_proto_t;
 typedef ssize_t  (*mphf_func_new)         (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_build_start) (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_build_end)   (mphf_t *mphf);
+typedef ssize_t  (*mphf_func_clean)       (mphf_t *mphf);
+typedef ssize_t  (*mphf_func_destroy)     (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, char *key, size_t key_len, uint64_t  value);
 typedef ssize_t  (*mphf_func_query)       (mphf_t *mphf, char *key, size_t key_len, uint64_t *value);
 typedef ssize_t  (*mphf_func_delete)      (mphf_t *mphf, char *key, size_t key_len);
@@ -41,6 +43,8 @@ struct mphf_proto_t {
 	mphf_func_new            func_new;
 	mphf_func_build_start    func_build_start;
 	mphf_func_build_end      func_build_end;
+	mphf_func_clean          func_clean;
+	mphf_func_destroy        func_destory;
 	
 	mphf_func_insert         func_insert;
 	mphf_func_query          func_query;
@@ -51,10 +55,11 @@ struct mphf_hash_proto_t {
 	mphf_hash_hash32         func_hash32;
 };
 
-ssize_t         mphf_store_new   (backend_t *backend, uint64_t *offset, uint64_t size);
-ssize_t         mphf_store_read  (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size);
-ssize_t         mphf_store_write (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size);
-ssize_t         mphf_store_fill  (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size, size_t fill_size);
+ssize_t              mphf_store_new            (backend_t *backend, uint64_t *offset, uint64_t size);
+ssize_t              mphf_store_read           (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size);
+ssize_t              mphf_store_write          (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size);
+ssize_t              mphf_store_fill           (backend_t *backend, uint64_t  offset, void *buffer, size_t buffer_size, size_t fill_size);
+ssize_t              mphf_store_delete         (backend_t *backend, uint64_t  offset, uint64_t size);
 
 mphf_hash_proto_t *  mphf_string_to_hash_proto (char *string);
 uint32_t             mphf_hash32               (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes);
@@ -68,6 +73,8 @@ static mphf_proto_t mphf_protos[] = {
 		.func_new           = mphf_chm_imp_new,
 		.func_build_start   = mphf_chm_imp_build_start,
 		.func_build_end     = mphf_chm_imp_build_end,
+		.func_clean         = mphf_chm_imp_clean,
+		.func_destory       = mphf_chm_imp_destroy,
 		.func_insert        = mphf_chm_imp_insert,
 		.func_query         = mphf_chm_imp_query,
 		.func_delete        = mphf_chm_imp_delete

@@ -23,6 +23,10 @@ void     memory_free(memory_t *memory){ // {{{
 		free(memory->ptr);
 	memset(memory, 0, sizeof(memory_t));
 } // }}}
+ssize_t  memory_size(memory_t *memory, size_t *size){ // {{{
+	*size = memory->exact_size;
+	return 0;
+} // }}}
 ssize_t  memory_resize(memory_t *memory, size_t new_size){ // {{{
 	size_t t;
 	
@@ -90,9 +94,12 @@ ssize_t  memory_translate(memory_t *memory, off_t pointer, size_t size, void **p
 	switch(memory->alloc){
 		case ALLOC_MALLOC:
 			// TODO IMPORTANT SECURITY snap ptr+size to mem
-			size = MIN(size, memory->exact_size);
+			if(pointer >= memory->exact_size)
+				return -EINVAL;
 			
-			if(pointer >= memory->exact_size || pointer + size > memory->exact_size)
+			size = MIN(size, memory->exact_size - pointer);
+			
+			if(pointer + size > memory->exact_size)
 				return -EINVAL;
 			
 			if(pointer_out)
@@ -178,6 +185,7 @@ REGISTER_API(`API memory_t_type  memory_string_to_type(char *string);')
 REGISTER_API(`API memory_t_alloc memory_string_to_alloc(char *string);')
 REGISTER_API(`API void     memory_new(memory_t *memory, memory_t_type type, memory_t_alloc alloc, size_t page_size, int zero); ')
 REGISTER_API(`API void     memory_free(memory_t *memory); ')
+REGISTER_API(`API ssize_t  memory_size(memory_t *memory, size_t *size); ')
 REGISTER_API(`API ssize_t  memory_resize(memory_t *memory, size_t new_size); ')
 REGISTER_API(`API ssize_t  memory_grow(memory_t *memory, size_t size, off_t *pointer); ')
 REGISTER_API(`API ssize_t  memory_shrink(memory_t *memory, size_t size); ')

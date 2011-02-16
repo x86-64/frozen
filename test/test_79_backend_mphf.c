@@ -140,7 +140,7 @@ void bench_query(bench_t *bench){
 }
 /* }}} */
 
-#define NTESTS 10000
+#define NTESTS 100000
 
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
@@ -235,7 +235,6 @@ START_TEST (test_backend_mphf_speed){
 		for(j=0;j<sizeof(test)-1;j++){
 			if(++test[j] != 'z') break;
 			test[j] = 'a';
-			//test[j] = 'a' + random() % 26;
 		}
 		
 		if(backend_query(b_dat, r_write) < 0)

@@ -1,11 +1,13 @@
 #include <libfrozen.h>
 #include <backends/mphf/mphf.h>
+#include <backends/mphf/mphf_chm_imp.h>
 
 typedef struct chm_imp_params_t {
 	uint32_t            hash1;
+	//uint32_t            hash2;
 } chm_imp_params_t;
 
-typedef struct chm_imp_gparams_t {
+typedef struct chm_imp_gparams_t { // TODO move to params_t
 	uint64_t            last_edge;
 } chm_imp_gparams_t;
 
@@ -67,7 +69,7 @@ static uint64_t log_any(uint64_t x, uint64_t power){
 	return res + 1;
 }
 
-static ssize_t   fill_data       (mphf_t *mphf){ // {{{
+static ssize_t fill_data       (mphf_t *mphf){ // {{{
 	ssize_t    ret;
 	uint64_t   nvertex;
 	DT_INT32   persistent    = 0;
@@ -113,7 +115,7 @@ static ssize_t   fill_data       (mphf_t *mphf){ // {{{
 	data->filled |= 0x1;
 	return 0;
 } // }}}
-static ssize_t   fill_params     (mphf_t *mphf){ // {{{
+static ssize_t fill_params     (mphf_t *mphf){ // {{{
 	chm_imp_t *data          = (chm_imp_t *)&mphf->data;
 	
 	if((data->filled & 0x2) != 0)
@@ -122,62 +124,6 @@ static ssize_t   fill_params     (mphf_t *mphf){ // {{{
 	data->filled |= 0x2;
 	return mphf_store_read(mphf->backend, mphf->offset, &data->params, sizeof(data->params));
 } // }}}
-
-ssize_t mphf_chm_imp_new    (mphf_t *mphf){
-	chm_imp_t *data = (chm_imp_t *)&mphf->data;
-	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(mphf_store_new   (mphf->backend, &mphf->offset, data->store_size) < 0) return -EFAULT;
-	if(mphf_store_fill  (mphf->backend, mphf->offset, &clean, sizeof(clean), data->store_size)  < 0) return -EFAULT;
-	
-	srandom(time(NULL));
-	data->params.hash1 = random();
-	
-	if(mphf_store_write (mphf->backend, mphf->offset, &data->params, sizeof(data->params)) < 0) return -EFAULT;
-	//if(mphf_store_write(mphf->backend, mphf->offset + data.store_gp_offset, &data...., sizeof(chm_imp_gparams_t)) < 0) return -EFAULT;
-	
-	//printf("mphf new nelem: %lld hashelem: %lld g_size: %lld\n", nelements, data.r, g_size);
-	return 0;
-}
-
-ssize_t mphf_chm_imp_build_start (mphf_t *mphf){
-	chm_imp_build_data_t *build_data;
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
-	
-	//printf("mphf_build_start\n");
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(data->persistent != 0){
-		// store data in file
-		mphf->build_data = build_data = malloc(sizeof(chm_imp_build_data_t));
-		build_data->backend   = mphf->backend;
-		build_data->gp_offset = data->store_gp_offset;
-		build_data->gv_offset = data->store_gv_offset;
-		build_data->ge_offset = data->store_ge_offset;
-		return 0;
-	}
-	// TODO store data in memory
-	return -EINVAL;
-}
-
-ssize_t mphf_chm_imp_build_end   (mphf_t *mphf){
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
-	
-	//printf("mphf_build_stop\n");
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(data->persistent != 0){
-		free(mphf->build_data);
-		mphf->build_data = NULL;
-		return 0;
-	}
-	// TODO release memory
-	return -EINVAL;
-}
 
 static ssize_t graph_new_edge_id(mphf_t *mphf, uint64_t *new_id){ // {{{
 	chm_imp_build_data_t  *build_data;
@@ -310,6 +256,7 @@ static ssize_t graph_setg(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64
 	return 0;
 } // }}}
 static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old, uint64_t g_new, uint64_t skip_edge){ // {{{
+	ssize_t                ret;
 	size_t                 our_vertex, frn_vertex;
 	uint64_t               edge_id, frn_g_old, frn_g_new;
 	graph_egde_t           edge;
@@ -320,8 +267,9 @@ static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old,
 	//);
 	
 	for(curr = vertex->next; curr; curr = curr->next){
-		if(curr->vertex == vertex->vertex)
+		if(curr->vertex == vertex->vertex){
 			return -EBADF;
+		}
 	}
 	
 	if(graph_get_first(mphf, 1, &vertex->vertex, &edge_id) < 0)
@@ -351,8 +299,8 @@ static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old,
 		vertex_new.vertex = edge.vertex[frn_vertex];
 		vertex_new.next   = vertex;
 		
-		if(graph_recalc(mphf, &vertex_new, frn_g_old, frn_g_new, edge_id) < 0)
-			return -EFAULT;
+		if((ret = graph_recalc(mphf, &vertex_new, frn_g_old, frn_g_new, edge_id)) < 0)
+			return ret;
 	}
 	
 	if(graph_setg(mphf, 1, &vertex->vertex, &g_new) < 0)
@@ -419,7 +367,84 @@ static ssize_t graph_add_edge(mphf_t *mphf, uint64_t *vertex, uint64_t value){ /
 	return 0;
 } // }}}
 
-ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  value){
+ssize_t mphf_chm_imp_new         (mphf_t *mphf){ // {{{
+	chm_imp_t *data = (chm_imp_t *)&mphf->data;
+	
+	if(fill_data(mphf) < 0)
+		return -EINVAL;
+	
+	if(mphf_store_new   (mphf->backend, &mphf->offset, data->store_size) < 0) return -EFAULT;
+	
+	return mphf_chm_imp_clean(mphf);
+} // }}}
+ssize_t mphf_chm_imp_build_start (mphf_t *mphf){ // {{{
+	chm_imp_build_data_t *build_data;
+	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
+	
+	if(fill_data(mphf) < 0)
+		return -EINVAL;
+	
+	if(data->persistent != 0){
+		// store data in file
+		mphf->build_data = build_data = malloc(sizeof(chm_imp_build_data_t));
+		build_data->backend   = mphf->backend;
+		build_data->gp_offset = data->store_gp_offset;
+		build_data->gv_offset = data->store_gv_offset;
+		build_data->ge_offset = data->store_ge_offset;
+		return 0;
+	}
+	// TODO store data in memory
+	return -EINVAL;
+} // }}}
+ssize_t mphf_chm_imp_build_end   (mphf_t *mphf){ // {{{
+	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
+	
+	if(fill_data(mphf) < 0)
+		return -EINVAL;
+	
+	if(data->persistent != 0){
+		free(mphf->build_data);
+		mphf->build_data = NULL;
+		return 0;
+	}
+	// TODO release memory
+	return -EINVAL;
+} // }}}
+ssize_t mphf_chm_imp_clean       (mphf_t *mphf){ // {{{
+	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
+	
+	data->filled = 0;
+	
+	if(fill_data(mphf) < 0)
+		return -EINVAL;
+	
+	if(mphf_store_fill  (mphf->backend, mphf->offset, &clean, sizeof(clean), data->store_size)  < 0) return -EFAULT;
+	
+	srandom(time(NULL));
+	data->params.hash1 = random();
+	//data->params.hash2 = random();
+	
+	if(mphf_store_write (mphf->backend, mphf->offset, &data->params, sizeof(data->params)) < 0) return -EFAULT;
+	//if(mphf_store_write(mphf->backend, mphf->offset + data.store_gp_offset, &data...., sizeof(chm_imp_gparams_t)) < 0) return -EFAULT;
+	
+	if(fill_params(mphf) < 0)
+		return -EINVAL;
+	
+	return 0;
+} // }}}
+ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
+	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
+	
+	if(fill_data(mphf) < 0)
+		return -EINVAL;
+	
+	if(mphf_store_delete(mphf->backend, mphf->offset, data->store_size) < 0)
+		return -EFAULT;
+	
+	return 0;
+} // }}}
+
+ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  value){ // {{{
 	uint32_t               hash[2];
 	uint64_t               vertex[2];
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
@@ -432,24 +457,22 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  
 	
 	// TODO 64-bit
 	data->hash->func_hash32(data->params.hash1, key, key_len, (uint32_t *)&hash, 2);
+	//data->hash->func_hash32(data->params.hash2, key, key_len, (uint32_t *)&hash[1], 1);
 	
 	vertex[0] = (hash[0] % data->nvertex);
 	vertex[1] = (hash[1] % data->nvertex);
+	//vertex[1] = ((hash[1] ^ data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
-		return -EFAULT;
+		return -EBADF;
 	
 	//printf("mphf: insert: %.*s value: %.8llx v:{%llx,%llx:%x:%d}\n",
-	//	key_len, key, value, vertex[0], vertex[1], data.params.hash1, key_len
+	//	key_len, key, value, vertex[0], vertex[1], data->params.hash1, key_len
 	//);
 	
-	if(graph_add_edge(mphf, (uint64_t *)&vertex, value) < 0)
-		return -EFAULT;
-	
-	return 0;
-}
-
-ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *value){
+	return graph_add_edge(mphf, (uint64_t *)&vertex, value);
+} // }}}
+ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *value){ // {{{
 	uint32_t               hash[2];
 	uint64_t               vertex[2], g[2];
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
@@ -462,9 +485,11 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *
 	
 	// TODO 64-bit
 	data->hash->func_hash32(data->params.hash1, key, key_len, (uint32_t *)&hash, 2);
+	//data->hash->func_hash32(data->params.hash2, key, key_len, (uint32_t *)&hash[1], 1);
 	
 	vertex[0] = (hash[0] % data->nvertex);
 	vertex[1] = (hash[1] % data->nvertex);
+	//vertex[1] = ((hash[1] ^ data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
 		return MPHF_QUERY_NOTFOUND;
@@ -478,11 +503,10 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *
 	//	key_len, key, *value, vertex[0], vertex[1], data.params.hash1, key_len
 	//);
 	return MPHF_QUERY_FOUND;
-}
-
-ssize_t mphf_chm_imp_delete  (mphf_t *mphf, char *key, size_t key_len){
+} // }}}
+ssize_t mphf_chm_imp_delete (mphf_t *mphf, char *key, size_t key_len){ // {{{
 	return -EINVAL;
-}
+} // }}}
 
 /* Invalid code {{{
 typedef struct graph_egde_t {

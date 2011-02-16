@@ -3,7 +3,7 @@
 #include <libfrozen.h>
 #include <backends/mphf/mphf.h>
 
-#define MAX_STORES_PER_MPHF  10000
+#define BUFFER_SIZE_DEFAULT  1000
 
 typedef enum mphf_build_control {
 	BUILD_ONLOAD,
@@ -18,7 +18,9 @@ typedef struct mphf_userdata {
 	mphf_proto_t        *mphf_proto;
 	mphf_build_control   build_start;
 	mphf_build_control   build_end;
+	chain_t             *backend_data;
 	uint32_t             in_build;
+	size_t               buffer_size;
 	
 	hash_key_t           key_from;
 	hash_key_t           key_to;
@@ -43,25 +45,6 @@ mphf_build_control   mphf_string_to_build_control(char *string){ // {{{
 		   strcmp(string, "onrequestend") == 0) return BUILD_ONREQUEST;
 	}
 	return BUILD_INVALID;
-} // }}}
-
-static ssize_t mphf_build_start(mphf_userdata *userdata, mphf_build_control event){ // {{{
-	if(userdata->build_start == event){
-		if(userdata->mphf_proto->func_build_start(&userdata->mphf) < 0)
-			return -EFAULT;
-		
-		userdata->in_build = 1;
-	}
-	return 0;
-} // }}}
-static ssize_t mphf_build_end(mphf_userdata *userdata, mphf_build_control event){ // {{{
-	if(userdata->in_build == 1 && userdata->build_end == event){
-		if(userdata->mphf_proto->func_build_end(&userdata->mphf) < 0)
-			return -EFAULT;
-		
-		userdata->in_build = 0;
-	}
-	return 0;
 } // }}}
 
 /* store {{{ */
@@ -109,6 +92,16 @@ ssize_t         mphf_store_fill  (backend_t *backend, uint64_t  offset, void *bu
 	}while(fill_size > 0);
 	return 0;
 } // }}}
+ssize_t         mphf_store_delete (backend_t *backend, uint64_t  offset, uint64_t size){ // {{{
+	request_t  r_delete[] = {
+		{ HK(action),     DATA_INT32(ACTION_CRWD_DELETE)     },
+		{ HK(offset),     DATA_PTR_INT64(&offset)            },
+		{ HK(size),       DATA_PTR_INT64(&size)              },
+		hash_end
+	};
+	
+	return backend_query(backend, r_delete);
+} // }}}
 /* }}} */
 /* hashes {{{ */
 uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes){
@@ -118,6 +111,123 @@ uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key
 	return mphf_hash_protos[type].func_hash32(seed, key, key_size, hashes, nhashes);
 }
 /* }}} */
+
+static ssize_t mphf_build_start(mphf_userdata *userdata, mphf_build_control event){ // {{{
+	if(userdata->build_start == event){
+		if(userdata->mphf_proto->func_build_start(&userdata->mphf) < 0)
+			return -EFAULT;
+		
+		userdata->in_build = 1;
+	}
+	return 0;
+} // }}}
+static ssize_t mphf_build_end(mphf_userdata *userdata, mphf_build_control event){ // {{{
+	if(userdata->in_build == 1 && userdata->build_end == event){
+		if(userdata->mphf_proto->func_build_end(&userdata->mphf) < 0)
+			return -EFAULT;
+		
+		userdata->in_build = 0;
+	}
+	return 0;
+} // }}}
+static ssize_t mphf_insert(mphf_userdata *userdata, void *key_ptr, size_t key_size, off_t value){ // {{{
+	ssize_t   ret;
+	
+	// start build
+	if(mphf_build_start(userdata, BUILD_ONREQUEST) < 0)
+		return -EFAULT;
+	
+	// insert item
+	if( (ret = userdata->mphf_proto->func_insert(
+		&userdata->mphf, 
+		key_ptr,
+		key_size,
+		value
+	)) < 0)
+		goto error;
+	
+	ret = 0;
+error:
+	// stop build
+	if(mphf_build_end(userdata, BUILD_ONREQUEST) < 0)
+		ret = -EFAULT;
+	
+	return ret;
+} // }}}
+static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
+	ssize_t   ret;
+	DT_OFFT   i;
+	DT_OFFT   count = 0;
+	char     *buffer;
+	data_t   *key;
+	
+	// count elements
+	request_t r_count[] = {
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(buffer), DATA_PTR_OFFT(&count)         },
+		hash_end
+	};
+	if(chain_next_query(userdata->backend_data, r_count) < 0)
+		return 0;
+	
+	// prepare buffer
+	if( (buffer = malloc(userdata->buffer_size)) == NULL)
+		return -EFAULT;
+	
+redo:
+	mphf_build_end(userdata, BUILD_ONLOAD);
+	
+	if(userdata->mphf_proto->func_clean(&userdata->mphf) < 0)
+		return -EFAULT;
+	
+	if(mphf_build_start(userdata, BUILD_ONLOAD) < 0)
+		return -EFAULT;
+	
+	// process items
+	ret = 0;
+	for(i=0; i<count; i++){
+		request_t r_read[] = {
+			{ HK(action),          DATA_INT32(ACTION_CRWD_READ)            },
+			{ userdata->key_from,  DATA_VOID                               },
+			{ userdata->key_to,    DATA_OFFT(i)                            },
+			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
+			{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
+			hash_end
+		};
+		if( (ret = chain_next_query(userdata->backend_data, r_read)) < 0){
+			//printf("failed call\n");
+			break;
+		}
+		
+		if( (key = hash_get_data(r_read, userdata->key_from)) == NULL){
+			//printf("failed hash\n");
+			ret = -EFAULT;
+			break;
+		}
+		
+		//printf("key: %.*s value: %llx\n", data_value_len(key), (char *)data_value_ptr(key), i);
+		
+		if( (ret = mphf_insert(userdata,
+			data_value_ptr(key),
+			//data_len2raw(data_value_type(key), data_len(key, NULL)),
+			data_len(key, NULL),
+			i
+		)) < 0){
+			if(ret == -EBADF) goto redo; // bad mphf
+			//printf("failed insert %x\n", ret);
+			ret = -EFAULT;
+			break;
+		}
+		
+	}
+	free(buffer);
+	
+	// if error - exit
+	if(ret < 0)
+		return -EFAULT;
+	
+	return 0;
+} // }}}
 
 static int mphf_init(chain_t *chain){ // {{{
 	mphf_userdata *userdata = chain->userdata = calloc(1, sizeof(mphf_userdata));
@@ -137,6 +247,7 @@ static int mphf_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
+	DT_INT64         buffer_size     = BUFFER_SIZE_DEFAULT;
 	DT_INT64         count           = 0;
 	DT_STRING        mphf_type_str   = NULL;
 	DT_STRING        key_from_str    = "key";
@@ -152,6 +263,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_copy_data(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
 	hash_copy_data(ret, TYPE_STRING, build_start_str, config, HK(build_start));
 	hash_copy_data(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
+	hash_copy_data(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
 	
 	if( (backend_name = hash_get_typed_data(config, TYPE_STRING, HK(backend))) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
@@ -175,6 +287,8 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->mphf.build_data = NULL;
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
+	userdata->backend_data    = chain;
+	userdata->buffer_size     = buffer_size;
 	
 	request_t r_count[] = {
 		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
@@ -201,10 +315,6 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	if( (key = hash_get_data(request, userdata->key_from)) == NULL)
 		return chain_next_query(chain, request);
 	
-	// start build
-	if(mphf_build_start(userdata, BUILD_ONREQUEST) < 0)
-		return -EFAULT;
-	
 	// get new key_out
 	request_t r_next[] = {
 		{ HK(offset_out),      DATA_PTR_OFFT(&key_out) },
@@ -213,20 +323,11 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	if( (ret = chain_next_query(chain, r_next)) < 0)
 		goto error;
 	
-	// insert item
-	if(userdata->mphf_proto->func_insert(
-		&userdata->mphf, 
-		data_value_ptr(key),
-		data_value_len(key),
-		key_out
-	) < 0){ ret = -EFAULT; goto error; }
-	
-	ret = 0;
+	// insert key
+	if( (ret = mphf_insert(userdata, data_value_ptr(key), data_value_len(key), key_out)) == -EBADF)
+		ret = mphf_rebuild(userdata);
+
 error:
-	// stop build
-	if(mphf_build_end(userdata, BUILD_ONREQUEST) < 0)
-		ret = -EFAULT;
-	
 	return ret;
 } // }}}
 static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
