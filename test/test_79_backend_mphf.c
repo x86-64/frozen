@@ -140,7 +140,7 @@ void bench_query(bench_t *bench){
 }
 /* }}} */
 
-#define NTESTS 100000
+#define NTESTS 100
 
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {

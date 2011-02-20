@@ -37,6 +37,20 @@ START_TEST (test_hash){
 	fail_unless(strcmp(hash_get_value_ptr(key2_n), "value_next_2") == 0,             "assigned hash found wrong entry");
 	fail_unless( (key3 = hash_find(hash, 3))   != NULL,    "assigned hash not found existing entry");
 	fail_unless(strcmp(hash_get_value_ptr(key3), "value3") == 0,                   "assigned hash found wrong entry");
+	
+	hash_t   *hash_from;
+	buffer_t  buffer;
+	ssize_t   ret;
+	
+	ret = hash_to_buffer(hash, &buffer);
+		fail_unless(ret == 0, "hash_to_buffer failed");
+	
+	ret = hash_from_buffer(&hash_from, &buffer);
+		fail_unless(ret == 0, "hash_from_buffer failed");
+	
+	// TODO validate
+	
+	buffer_destroy(&buffer);
 }
 END_TEST
 REGISTER_TEST(core, test_hash)

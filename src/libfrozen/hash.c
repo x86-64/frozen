@@ -2,20 +2,31 @@
 #include <libfrozen.h>
 #include <alloca.h>
 
-static int hash_bsearch_string(const void *m1, const void *m2){
+static int hash_bsearch_string(const void *m1, const void *m2){ // {{{
 	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
 	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
 	return strcmp(mi1->key_str, mi2->key_str);
-}
-
-static int hash_bsearch_int(const void *m1, const void *m2){
+} // }}}
+static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
 	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
 	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
 	return (mi1->key_val - mi2->key_val);
-}
+} // }}}
+static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
+	void     *data_ptr;
+	size_t    data_size;
+	
+	data_ptr  = data_value_ptr(&hash->data);
+	data_size = data_value_len(&hash->data);
+	
+	if(data_ptr == NULL || data_size == 0)
+		return ITER_CONTINUE;
+	
+	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, data_size);
+	return ITER_CONTINUE;
+} // }}}
 
-
-hash_t *         hash_find              (hash_t *hash, hash_key_t key){ // {{{
+hash_t *           hash_find              (hash_t *hash, hash_key_t key){ // {{{
 	if(hash == NULL)
 		return NULL;
 	do{
@@ -33,11 +44,11 @@ end:
 	
 	return NULL;
 } // }}}
-hash_t *         hash_find_typed        (hash_t *hash, data_type type, hash_key_t key){ // {{{
+hash_t *           hash_find_typed        (hash_t *hash, data_type type, hash_key_t key){ // {{{
 	hash_t *hvalue = hash_find(hash, key);
 	return (hvalue != NULL) ? ((hvalue->data.type != type) ? NULL : hvalue) : NULL;
 } // }}}
-hash_t *         hash_set                     (hash_t *hash, hash_key_t key, data_type type, void *value, size_t value_size){ // {{{
+hash_t *           hash_set                     (hash_t *hash, hash_key_t key, data_type type, void *value, size_t value_size){ // {{{
 	hash_t      *hvalue;
 	
 	if( (hvalue = hash_find(hash, key)) == NULL){
@@ -154,11 +165,6 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 	
 	return new_hash;
 } // }}}
-
-/** @brief Free hash
- *  @param[in]  hash        Hash to free
- *  @param[in]  recursive   Also free recurive hashes
- */
 void               hash_free                    (hash_t *hash){ // {{{
 	hash_t       *el;
 	
@@ -212,7 +218,7 @@ data_ctx_t *       hash_get_data_ctx            (hash_t *hash, hash_key_t key){ 
 	return NULL;
 } // }}}
 
-hash_key_t         hash_string_to_key           (char *string){
+hash_key_t         hash_string_to_key           (char *string){ // {{{
 	hash_keypair_t  key, *ret;
 	key.key_str = string;
 	
@@ -235,9 +241,8 @@ hash_key_t         hash_string_to_key           (char *string){
 		return 0;
 	
 	return ret->key_val;
-}
-
-char *             hash_key_to_string           (hash_key_t key_val){
+} // }}}
+char *             hash_key_to_string           (hash_key_t key_val){ // {{{
 	hash_keypair_t  key, *ret;
 	key.key_val = key_val;
 	
@@ -252,28 +257,74 @@ char *             hash_key_to_string           (hash_key_t key_val){
 	return ret->key_str;
 ret_null:
 	return "(null)";
-}
+} // }}}
 
-/*
-ssize_t            hash_copy_data               (data_type type, void *dt, hash_t *hash, char *key){
-	ssize_t     ret;
-	data_t     *temp;
-	data_ctx_t *temp_ctx;
+ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer){ // {{{
+	size_t  nelements;
 	
-	if( (temp = hash_get_data(hash,key)) == NULL)
-		return -EINVAL;
+	buffer_init(buffer);
 	
-	if(data_value_type(temp) == type){
-		COPY
+	nelements = hash_get_nelements(hash);
+	buffer_add_tail_raw(buffer, hash, nelements * sizeof(hash_t));
+	
+	if(hash_iter(hash, &hash_to_buffer_one, buffer, NULL) == ITER_BREAK)
+		goto error;
+	
+	return 0;
+error:
+	buffer_free(buffer);
+	return -EFAULT;
+} // }}}
+ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer){ // {{{
+	hash_t    *curr;
+	void      *memory, *chunk, *ptr;
+	size_t     size, data_size;
+	off_t      data_off = 0;
+	
+	// TODO remake in streaming style (read)
+	// TODO SEC validate
+	
+	if(buffer_seek(buffer, 0, &chunk, &memory, &size) < 0)
+		goto error;
+	
+	for(curr = (hash_t *)memory; curr->key != hash_ptr_end; curr++){
+		if(size < sizeof(hash_t))
+			goto error;
+		
+		size        -= sizeof(hash_t);
+		data_off    += sizeof(hash_t);
 	}
-
-	temp_ctx = hash_get_data_ctx(hash,key);
+	data_off += sizeof(hash_t);
 	
-	data_to_dt(_ret,_type,_out,temp,NULL);
-}*/
+	for(curr = (hash_t *)memory; curr->key != hash_ptr_end; curr++){
+		if(curr->key == hash_ptr_null)
+			continue;
+		
+		if(buffer_seek(buffer, data_off, &chunk, &ptr, &size) < 0)
+			goto error;
+		
+		data_size = data_value_len(&curr->data);
+		
+		if(data_size > size)
+			goto error;
+		
+		data_assign_raw(
+			&curr->data,
+			data_value_type(&curr->data),
+			ptr,
+			data_size
+		);
+		data_off += data_size;
+	}	
+	
+	*hash = (hash_t *)memory;
+	return 0;
+error:
+	return -EFAULT;
+} // }}}
 
 #ifdef DEBUG
-void hash_dump(hash_t *hash){
+void hash_dump(hash_t *hash){ // {{{
 	unsigned int  k;
 	hash_t       *element = hash;
 	
@@ -301,6 +352,6 @@ start:
 		element = element->data.data_ptr;
 		goto start;
 	}
-}
+} // }}}
 #endif
 

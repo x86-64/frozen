@@ -5,6 +5,8 @@ backends_sources =                           \
 	backends/cache.c                     \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
+	backends/ipc/ipc.c                   \
+	backends/ipc/ipc_shmem.c             \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
 	backends/mphf/mphf_bdz_imp.c         \
@@ -14,11 +16,11 @@ backends_sources =                           \
 	backends/rewrite/rule_parser.lex.c   \
 	backends/insert-sort/insert-sort.c
 
-#	backends/rewrite/rule_parser.c       \
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
 
-data_sources= data/void.c     \
+data_sources =          \
+	data/void.c     \
 	data/raw.c      \
 	data/binary.c   \
 	data/uint8.c    \

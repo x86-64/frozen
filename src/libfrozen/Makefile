@@ -77,6 +77,8 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-cache.lo \
 	backends/libfrozen_la-structs.lo \
 	backends/libfrozen_la-incapsulate.lo \
+	backends/ipc/libfrozen_la-ipc.lo \
+	backends/ipc/libfrozen_la-ipc_shmem.lo \
 	backends/mphf/libfrozen_la-mphf.lo \
 	backends/mphf/libfrozen_la-mphf_chm_imp.lo \
 	backends/mphf/libfrozen_la-mphf_bdz_imp.lo \
@@ -240,6 +242,8 @@ backends_sources = \
 	backends/cache.c                     \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
+	backends/ipc/ipc.c                   \
+	backends/ipc/ipc_shmem.c             \
 	backends/mphf/mphf.c                 \
 	backends/mphf/mphf_chm_imp.c         \
 	backends/mphf/mphf_bdz_imp.c         \
@@ -250,10 +254,10 @@ backends_sources = \
 	backends/insert-sort/insert-sort.c
 
 
-#	backends/rewrite/rule_parser.c       \
 #	backends/blocks-adressing.c \
 #	backends/blocks.c
-data_sources = data/void.c     \
+data_sources = \
+	data/void.c     \
 	data/raw.c      \
 	data/binary.c   \
 	data/uint8.c    \
@@ -384,6 +388,16 @@ backends/libfrozen_la-structs.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-incapsulate.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
+backends/ipc/$(am__dirstamp):
+	@$(MKDIR_P) backends/ipc
+	@: > backends/ipc/$(am__dirstamp)
+backends/ipc/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) backends/ipc/$(DEPDIR)
+	@: > backends/ipc/$(DEPDIR)/$(am__dirstamp)
+backends/ipc/libfrozen_la-ipc.lo: backends/ipc/$(am__dirstamp) \
+	backends/ipc/$(DEPDIR)/$(am__dirstamp)
+backends/ipc/libfrozen_la-ipc_shmem.lo: backends/ipc/$(am__dirstamp) \
+	backends/ipc/$(DEPDIR)/$(am__dirstamp)
 backends/mphf/$(am__dirstamp):
 	@$(MKDIR_P) backends/mphf
 	@: > backends/mphf/$(am__dirstamp)
@@ -442,6 +456,10 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f backends/insert-sort/libfrozen_la-insert-sort.$(OBJEXT)
 	-rm -f backends/insert-sort/libfrozen_la-insert-sort.lo
+	-rm -f backends/ipc/libfrozen_la-ipc.$(OBJEXT)
+	-rm -f backends/ipc/libfrozen_la-ipc.lo
+	-rm -f backends/ipc/libfrozen_la-ipc_shmem.$(OBJEXT)
+	-rm -f backends/ipc/libfrozen_la-ipc_shmem.lo
 	-rm -f backends/libfrozen_la-cache.$(OBJEXT)
 	-rm -f backends/libfrozen_la-cache.lo
 	-rm -f backends/libfrozen_la-file.$(OBJEXT)
@@ -489,6 +507,8 @@ include backends/$(DEPDIR)/libfrozen_la-list.Plo
 include backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo
 include backends/$(DEPDIR)/libfrozen_la-structs.Plo
 include backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo
+include backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Plo
+include backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
 include backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Plo
@@ -600,6 +620,20 @@ backends/libfrozen_la-incapsulate.lo: backends/incapsulate.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-incapsulate.lo `test -f 'backends/incapsulate.c' || echo '$(srcdir)/'`backends/incapsulate.c
 
+backends/ipc/libfrozen_la-ipc.lo: backends/ipc/ipc.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/ipc/libfrozen_la-ipc.lo -MD -MP -MF backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Tpo -c -o backends/ipc/libfrozen_la-ipc.lo `test -f 'backends/ipc/ipc.c' || echo '$(srcdir)/'`backends/ipc/ipc.c
+	$(am__mv) backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Tpo backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Plo
+#	source='backends/ipc/ipc.c' object='backends/ipc/libfrozen_la-ipc.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/ipc/libfrozen_la-ipc.lo `test -f 'backends/ipc/ipc.c' || echo '$(srcdir)/'`backends/ipc/ipc.c
+
+backends/ipc/libfrozen_la-ipc_shmem.lo: backends/ipc/ipc_shmem.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/ipc/libfrozen_la-ipc_shmem.lo -MD -MP -MF backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Tpo -c -o backends/ipc/libfrozen_la-ipc_shmem.lo `test -f 'backends/ipc/ipc_shmem.c' || echo '$(srcdir)/'`backends/ipc/ipc_shmem.c
+	$(am__mv) backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Tpo backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Plo
+#	source='backends/ipc/ipc_shmem.c' object='backends/ipc/libfrozen_la-ipc_shmem.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/ipc/libfrozen_la-ipc_shmem.lo `test -f 'backends/ipc/ipc_shmem.c' || echo '$(srcdir)/'`backends/ipc/ipc_shmem.c
+
 backends/mphf/libfrozen_la-mphf.lo: backends/mphf/mphf.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c
 	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
@@ -684,6 +718,7 @@ clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf backends/.libs backends/_libs
 	-rm -rf backends/insert-sort/.libs backends/insert-sort/_libs
+	-rm -rf backends/ipc/.libs backends/ipc/_libs
 	-rm -rf backends/mphf/.libs backends/mphf/_libs
 	-rm -rf backends/rewrite/.libs backends/rewrite/_libs
 	-rm -rf configs/.libs configs/_libs
@@ -803,6 +838,8 @@ distclean-generic:
 	-rm -f backends/$(am__dirstamp)
 	-rm -f backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
 	-rm -f backends/insert-sort/$(am__dirstamp)
+	-rm -f backends/ipc/$(DEPDIR)/$(am__dirstamp)
+	-rm -f backends/ipc/$(am__dirstamp)
 	-rm -f backends/mphf/$(DEPDIR)/$(am__dirstamp)
 	-rm -f backends/mphf/$(am__dirstamp)
 	-rm -f backends/rewrite/$(DEPDIR)/$(am__dirstamp)
@@ -819,7 +856,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/ipc/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -865,7 +902,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/ipc/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
