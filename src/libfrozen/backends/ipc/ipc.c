@@ -13,6 +13,14 @@ static ipc_proto_t *   ipc_string_to_proto(char *string){ // {{{
 	}
 	return NULL;
 } // }}}
+ipc_role  ipc_string_to_role(char *string){ // {{{
+	if(string != NULL){
+		if( strcmp(string, "server") == 0) return ROLE_SERVER;
+		if( strcmp(string, "client") == 0) return ROLE_CLIENT;
+	}
+	return ROLE_INVALID;
+} // }}}
+
 
 static int ipc_init(chain_t *chain){ // {{{
 	if((chain->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
@@ -22,6 +30,8 @@ static int ipc_init(chain_t *chain){ // {{{
 } // }}}
 static int ipc_destroy(chain_t *chain){ // {{{
 	ipc_userdata *userdata = (ipc_userdata *)chain->userdata;
+	
+	userdata->ipc_proto->func_destroy(&userdata->ipc);
 	
 	free(userdata);
 	return 0;
@@ -39,6 +49,8 @@ static int ipc_configure(chain_t *chain, hash_t *config){ // {{{
 	if( userdata->ipc_proto->func_init(&userdata->ipc, config) < 0)
 		return -EFAULT;
 	
+	userdata->ipc.chain = chain;
+	
 	return 0;
 } // }}}
 
@@ -50,7 +62,9 @@ static ssize_t ipc_backend_query(chain_t *chain, request_t *request){ // {{{
 	if(hash_to_buffer(request, &buffer) < 0)
 		return -EFAULT;
 	
-	ret = userdata->ipc_proto->func_query(&buffer);
+	ret = userdata->ipc_proto->func_query(&userdata->ipc, &buffer);
+	
+	buffer_destroy(&buffer);
 	
 	return ret;
 } // }}}

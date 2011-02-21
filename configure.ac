@@ -13,6 +13,9 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h])
 AC_FUNC_MALLOC
 
+AC_CHECK_LIB(pthreads, pthread_create, [],
+[AC_CHECK_LIB(pthread, pthread_create)])
+
 PKG_CHECK_MODULES([CHECK], [check >= 0.8.2])
 PKG_CHECK_MODULES([FUSE], [fuse >= 2.6.0])
 
