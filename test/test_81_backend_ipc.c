@@ -37,7 +37,7 @@ START_TEST(test_backend_ipc){
 	usleep(1000);
 	
 	ssize_t  ret;
-	char     test[10], str[]="testtestm";
+	char     test[10] = {0}, str[]="testtestm";
 	
 	// create new
 	request_t  r_create[] = {
@@ -57,9 +57,10 @@ START_TEST(test_backend_ipc){
 		hash_end
 	};
 	ret = backend_query(backend, r_read);
-		fail_unless(ret > 0, "read failed");
+		fail_unless(ret > 0,                "read failed");
+		fail_unless(strcmp(test, str) == 0, "read data failed");
 	
-	
+	backend_destroy(backend);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_ipc)

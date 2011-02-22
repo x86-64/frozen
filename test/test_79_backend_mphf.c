@@ -1,5 +1,4 @@
 
-/*
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
@@ -7,7 +6,11 @@ START_TEST (test_backend_mphf){
 			{ HK(chains),  DATA_HASHT(
 				{ 0, DATA_HASHT(
 					{ HK(name),      DATA_STRING("file")                  },
-					{ HK(filename),  DATA_STRING("data_backend_mphi.dat") },
+					{ HK(filename),  DATA_STRING("data_backend_mphis.dat") },
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                 },
 					hash_end
 				)},
 				hash_end
@@ -15,18 +18,35 @@ START_TEST (test_backend_mphf){
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
-			{ HK(name),   DATA_STRING("backend_mphf")                             },
+			{ HK(name),   DATA_STRING("backend_mphf")                              },
 			{ HK(chains), DATA_HASHT(
 				{ 0, DATA_HASHT(
-					{ HK(name),      DATA_STRING("file")                  },
-					{ HK(filename),  DATA_STRING("data_backend_mphf.dat") },
+					{ HK(name),       DATA_STRING("file")                  },
+					{ HK(filename),   DATA_STRING("data_backend_mphfs.dat")},
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("mphf")                 },
-					{ HK(mphf_type),  DATA_STRING("chm_imp")              },
-					{ HK(backend),    DATA_STRING("backend_mphf_idx")     },
-					{ HK(value_bits), DATA_INT32(31)                      },
+					{ HK(name),       DATA_STRING("cache")                 },
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("structs")               },
+					{ HK(size),       DATA_STRING("size")                  },
+					{ HK(structure),  DATA_HASHT(
+						{ HK(key), DATA_STRING("")                     },
+						hash_end
+					)},
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),        DATA_STRING("mphf")                 },
+					{ HK(type),        DATA_STRING("chm_imp")              },
+					{ HK(backend),     DATA_STRING("backend_mphf_idx")     },
+					{ HK(nelements),   DATA_INT64(100)                     },
+					{ HK(value_bits),  DATA_INT32(32)                      },
+					{ HK(persistent),  DATA_INT32(1)                       },
+					{ HK(build_start), DATA_STRING("onload")               },
+					{ HK(build_end),   DATA_STRING("onunload")             },
 					hash_end
 				)},
 				hash_end
@@ -35,6 +55,7 @@ START_TEST (test_backend_mphf){
 		)},
 		hash_end
 	};
+	
 	
 	backend_bulk_new(config);
 	
@@ -50,16 +71,19 @@ START_TEST (test_backend_mphf){
 		"http://aport.ru/",
 		"http://hell.com/"
 	};
+	char buffer[20];
 	
 	// write array to file
 	int      i;
 	ssize_t  ret;
 	
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
+		memset(buffer, 0, sizeof(buffer));
+		
 		request_t r_write[] = {
-			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)                           },
+			{ HK(action),  DATA_INT32 (ACTION_CRWD_CREATE)                          },
 			{ HK(key),     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
-			{ HK(buffer),  DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
+			{ HK(buffer),  DATA_RAW (buffer, 20)                                    },
 			hash_end
 		};
 		ret = backend_query(b_dat, r_write);
@@ -86,10 +110,9 @@ START_TEST (test_backend_mphf){
 	backend_destroy(b_idx);
 }
 END_TEST
-REEEGISTER_TEST(core, test_backend_mphf)
-*/
+REGISTER_TEST(core, test_backend_mphf)
 
-/* benchmarks {{{ */
+/* benchmarks {{{
 typedef struct bench_t {
 	struct timeval  tv_start;
 	struct timeval  tv_end;
@@ -138,10 +161,8 @@ void bench_query(bench_t *bench){
 	if(bench->time_ms == 0) bench->time_ms = 1;
 	if(bench->time_us == 0) bench->time_us = 1;
 }
-/* }}} */
 
 #define NTESTS 100
-
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
@@ -294,5 +315,5 @@ START_TEST (test_backend_mphf_speed){
 	backend_destroy(b_idx);
 }
 END_TEST
-REGISTER_TEST(core, test_backend_mphf_speed)
-
+REEEEGISTER_TEST(core, test_backend_mphf_speed)
+*/
