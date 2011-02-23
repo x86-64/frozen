@@ -1,4 +1,22 @@
 
+void timersub (x, y, result)
+        struct timeval *result, *x, *y; 
+{
+    
+        if (x->tv_usec < y->tv_usec) {
+                int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+                y->tv_usec -= 1000000 * nsec;
+                y->tv_sec += nsec;
+        }   
+        if (x->tv_usec - y->tv_usec > 1000000) {
+                int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+                y->tv_usec += 1000000 * nsec;
+                y->tv_sec -= nsec;
+        }   
+        result->tv_sec = x->tv_sec - y->tv_sec;
+        result->tv_usec = x->tv_usec - y->tv_usec;
+}
+
 START_TEST(test_backend_ipc){
 	backend_t  *backend;
 	
@@ -30,7 +48,6 @@ START_TEST(test_backend_ipc){
 		hash_end
 	};
 	
-	/* create backend */
 	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
@@ -64,3 +81,73 @@ START_TEST(test_backend_ipc){
 }
 END_TEST
 REGISTER_TEST(core, test_backend_ipc)
+
+#define NTESTS 100000
+
+START_TEST(test_backend_ipc_speed){
+	backend_t  *backend;
+	
+	hash_t  settings[] = {
+		{ HK(chains), DATA_HASHT(
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("null-proxy")                  },
+				hash_end
+			)},
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("ipc")                         },
+				{ HK(type),        DATA_STRING("shmem")                       },
+				{ HK(role),        DATA_STRING("server")                      },
+				{ HK(key),         DATA_INT32(1001)                           },
+				{ HK(size),        DATA_SIZET(100)                            },
+				hash_end
+			)},
+			{ 0, DATA_HASHT(
+				{ HK(name),        DATA_STRING("ipc")                         },
+				{ HK(type),        DATA_STRING("shmem")                       },
+				{ HK(role),        DATA_STRING("client")                      },
+				{ HK(key),         DATA_INT32(1001)                           },
+				{ HK(size),        DATA_SIZET(100)                            },
+				hash_end
+			)},
+			hash_end
+		)},
+		hash_end
+	};
+	
+	/* create backend */
+	backend = backend_new(settings);
+		fail_unless(backend != NULL, "backend creation failed");
+	
+	usleep(1000);
+	
+	int             i, failed = 0;
+	struct timeval  start, end, res;
+	char            str[]="testtestm";
+	
+	// create new
+	request_t  r_create[] = {
+		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(size),       DATA_SIZET(0x0000BEEF)         },
+		{ HK(buffer),     DATA_RAW(str, sizeof(str))     },
+		hash_end
+	};
+	
+	gettimeofday(&start, NULL);
+	for(i=0; i<NTESTS; i++){
+		if(backend_query(backend, r_create) != 0x0000BEEF)
+			failed++;
+	}
+	gettimeofday(&end, NULL);
+	timersub(&end, &start, &res);
+	printf("ipc query: %u iters took %d.%.6d sec; speed: %7lu iters/s, failed: %d\n",
+		NTESTS,
+		(int)res.tv_sec,
+		(int)res.tv_usec,
+		( NTESTS / ((res.tv_sec * 1000 + res.tv_usec / 1000)+1) * 1000 ),
+		failed
+	);
+	
+	backend_destroy(backend);
+}
+END_TEST
+REGISTER_TEST(core, test_backend_ipc_speed)

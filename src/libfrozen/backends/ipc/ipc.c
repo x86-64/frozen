@@ -55,18 +55,9 @@ static int ipc_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 
 static ssize_t ipc_backend_query(chain_t *chain, request_t *request){ // {{{
-	ssize_t       ret;
-	buffer_t      buffer;
 	ipc_userdata *userdata = (ipc_userdata *)chain->userdata;
 	
-	if(hash_to_buffer(request, &buffer) < 0)
-		return -EFAULT;
-	
-	ret = userdata->ipc_proto->func_query(&userdata->ipc, &buffer);
-	
-	buffer_destroy(&buffer);
-	
-	return ret;
+	return userdata->ipc_proto->func_query(&userdata->ipc, request);
 } // }}}
 
 static chain_t chain_ipc = {

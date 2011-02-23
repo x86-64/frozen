@@ -41,6 +41,7 @@ START_TEST (test_hash){
 	hash_t   *hash_from;
 	buffer_t  buffer;
 	ssize_t   ret;
+	char      test[1024];
 	
 	ret = hash_to_buffer(hash, &buffer);
 		fail_unless(ret == 0, "hash_to_buffer failed");
@@ -49,6 +50,15 @@ START_TEST (test_hash){
 		fail_unless(ret == 0, "hash_from_buffer failed");
 	
 	// TODO validate
+	
+	ret = hash_to_memory(hash, &test, sizeof(test));
+		fail_unless(ret == 0, "hash_to_memory failed");
+	
+	ret = hash_from_memory(&hash_from, &test, sizeof(test));
+		fail_unless(ret == 0, "hash_from_memory failed");
+	
+	//ret = hash_reread_from_memory(hash, &test, sizeof(test));
+	//	fail_unless(ret == 0, "hash_reread_from_memory failed");
 	
 	buffer_destroy(&buffer);
 }

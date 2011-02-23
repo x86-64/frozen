@@ -66,6 +66,10 @@ API void               hash_dump                    (hash_t *hash);
 API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
 API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
+API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
+API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
+API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
+
 #define hash_copy_data(_ret,_type,_dt,_hash,_key){       \
 	data_t *temp;                                    \
 	if( (temp = hash_get_data(_hash,_key)) != NULL){ \

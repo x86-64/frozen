@@ -22,7 +22,7 @@ typedef struct ipc_proto_t       ipc_proto_t;
 
 typedef ssize_t (*ipc_func_init)   (ipc_t *ipc, config_t *config);
 typedef ssize_t (*ipc_func_destroy)(ipc_t *ipc);
-typedef ssize_t (*ipc_func_query)  (ipc_t *ipc, buffer_t *buffer);
+typedef ssize_t (*ipc_func_query)  (ipc_t *ipc, request_t *request);
 
 struct ipc_t {
 	chain_t                 *chain;

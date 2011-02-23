@@ -323,6 +323,96 @@ error:
 	return -EFAULT;
 } // }}}
 
+#define _hash_to_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(memory, _ptr, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+#define _hash_from_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(_ptr, memory, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+
+// TODO recursive hashes
+ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size){ // {{{
+	size_t  i, nelements, hash_size;
+	
+	nelements = hash_get_nelements(hash);
+	hash_size = nelements * sizeof(hash_t);
+	
+	_hash_to_memory_cpy(hash, hash_size);
+	for(i=0; i<nelements; i++, hash++){
+		if(hash->data.data_ptr == NULL || hash->data.data_size == 0)
+			continue;
+		
+		_hash_to_memory_cpy(hash->data.data_ptr, hash->data.data_size);
+	}
+	return 0;
+} // }}}
+ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size){ // {{{
+	size_t  i, nelements, hash_size;
+	
+	nelements = hash_get_nelements(hash);
+	hash_size = nelements * sizeof(hash_t);
+	
+	memory      += hash_size;
+	memory_size -= hash_size;
+	for(i=0; i<nelements; i++, hash++){
+		if(hash->data.data_ptr == NULL || hash->data.data_size == 0)
+			continue;
+		if(hash->key == hash_ptr_null)
+			continue;
+		
+		_hash_from_memory_cpy(hash->data.data_ptr, hash->data.data_size);
+	}
+	return 0;
+} // }}}
+ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size){ // {{{
+	hash_t    *curr;
+	size_t     data_size;
+	off_t      data_off = 0;
+	
+	for(curr = (hash_t *)memory; curr->key != hash_ptr_end; curr++){
+		if(memory_size < sizeof(hash_t))
+			goto error;
+		
+		memory_size -= sizeof(hash_t);
+		data_off    += sizeof(hash_t);
+	}
+	data_off += sizeof(hash_t);
+	
+	for(curr = (hash_t *)memory; curr->key != hash_ptr_end; curr++){
+		if(curr->key == hash_ptr_null)
+			continue;
+		
+		data_size = curr->data.data_size; //data_value_len(&curr->data);
+		
+		if(data_size > memory_size)
+			goto error;
+		
+		curr->data.data_ptr = memory + data_off;
+		/*
+		data_assign_raw(
+			&curr->data,
+			data_value_type(&curr->data),
+			memory + data_off,
+			data_size
+		);*/
+		memory_size -= data_size;
+		data_off    += data_size;
+	}	
+	
+	*hash = (hash_t *)memory;
+	return 0;
+error:
+	return -EFAULT;
+} // }}}
+
 #ifdef DEBUG
 void hash_dump(hash_t *hash){ // {{{
 	unsigned int  k;
