@@ -59,9 +59,8 @@ START_TEST (test_backend_mphf){
 	
 	backend_bulk_new(config);
 	
-	data_t     n_dat = DATA_STRING("backend_mphf"), n_idx = DATA_STRING("backend_mphf_idx");
-	backend_t *b_dat = backend_find(&n_dat);
-	backend_t *b_idx = backend_find(&n_idx);
+	backend_t *b_dat = backend_find("backend_mphf");
+	backend_t *b_idx = backend_find("backend_mphf_idx");
 	
 	char  *data_array[] = {
 		"http://google.ru/",

@@ -254,7 +254,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_STRING        key_to_str      = "offset";
 	DT_STRING        build_start_str = NULL;
 	DT_STRING        build_end_str   = NULL;
-	data_t          *backend_name;
+	DT_STRING        backend_name;
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
@@ -264,8 +264,8 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_copy_data(ret, TYPE_STRING, build_start_str, config, HK(build_start));
 	hash_copy_data(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
 	hash_copy_data(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
-	
-	if( (backend_name = hash_get_typed_data(config, TYPE_STRING, HK(backend))) == NULL)
+	hash_copy_data(ret, TYPE_STRING, backend_name,    config, HK(backend));
+	if(ret != 0)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)

@@ -354,8 +354,11 @@ ablock_continue:
 				
 				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
+				// TODO SEC insecure
+				if(data_value_type(from_data) != TYPE_STRING){ ret = -EINVAL; goto exit; }
+				
 				backend_t *backend;
-				if( (backend = backend_acquire(from_data)) == NULL){ // TODO ctx
+				if( (backend = backend_acquire(data_value_ptr(from_data))) == NULL){ // TODO ctx
 					ret = -EINVAL;
 					printf("backend acquire failed\n");
 					goto exit;

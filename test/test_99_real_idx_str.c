@@ -8,9 +8,8 @@ START_TEST (test_real_store_idx_strings){
 		fail_unless(ret == 0,      "chain 'real_store_idx_str' backends create failed");
 	hash_free(c_idx);
 	
-	data_t     n_idx = DATA_STRING("be_file"), n_dat = DATA_STRING("be_file_dat");
-	backend_t *b_idx = backend_find(&n_idx);
-	backend_t *b_dat = backend_find(&n_dat);
+	backend_t *b_idx = backend_find("be_file");
+	backend_t *b_dat = backend_find("be_file_dat");
 	
 	off_t  data_ptrs[6];
 	char  *data_array[] = {

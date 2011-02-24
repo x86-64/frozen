@@ -22,9 +22,8 @@ START_TEST (test_real_dns){
 		fail_unless(ret == 0,      "chain 'real_dns' backends create failed");
 	hash_free(c_idx);
 	
-	data_t     n_idx = DATA_STRING("real_dns"), n_dat = DATA_STRING("real_dns_domains");
-	backend_t *b_idx = backend_find(&n_idx);
-	backend_t *b_dat = backend_find(&n_dat);
+	backend_t *b_idx = backend_find("real_dns");
+	backend_t *b_dat = backend_find("real_dns_domains");
 	
 	off_t  data_ptr;
 	
