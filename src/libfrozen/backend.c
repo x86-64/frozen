@@ -39,7 +39,7 @@ chain_t * chain_new(char *name){
 	
 	memcpy(chain, chain_proto, sizeof(chain_t));
 	
-	chain->next = NULL;
+	chain->cnext = NULL;
 	
 	ret = chain->func_init(chain);
 	if(ret != 0){
@@ -82,13 +82,13 @@ ssize_t     chain_query        (chain_t *chain, request_t *request){
 	};	
 	
 	if(func == NULL)
-		return chain_query(chain->next, request);
+		return chain_query(chain->cnext, request);
 	
 	return func(chain, request);
 }
 
 ssize_t     chain_next_query   (chain_t *chain, request_t *request){
-	return chain_query(chain->next, request);
+	return chain_query(chain->cnext, request);
 }
 
 /* }}}1 */
@@ -111,7 +111,7 @@ static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chai
 	if(chain == NULL)
 		return ITER_BREAK;
 	
-	chain->next = *(chain_t **)p_chain;
+	chain->cnext = *(chain_t **)p_chain;
 	
 	ret = chain_configure(chain, chain_config);
 	if(ret != 0)
@@ -218,7 +218,7 @@ void         backend_destroy  (backend_t *backend){
 	chain_t *chain_next;
 	
 	while(chain_curr != NULL){
-		chain_next = chain_curr->next;
+		chain_next = chain_curr->cnext;
 		chain_destroy(chain_curr);
 		chain_curr = chain_next;
 	}

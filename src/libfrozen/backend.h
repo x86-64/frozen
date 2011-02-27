@@ -48,7 +48,7 @@ struct chain_t {
 		} chain_type_crwd;
 	};
 	
-	chain_t *   next;
+	chain_t *   cnext;
 	void *      userdata;
 }; 
 

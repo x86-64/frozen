@@ -14,13 +14,13 @@ void list_push(list *clist, void *item){
 	litem *new_litem = (litem *)malloc(sizeof(litem));
 	if(new_litem != NULL){
 		new_litem->item = item;
-		new_litem->next = NULL;
+		new_litem->lnext = NULL;
 
 		pthread_mutex_lock(&clist->lock);
 			if(clist->tail == NULL){
 				clist->head = new_litem;
 			}else{
-				clist->tail->next = new_litem;
+				clist->tail->lnext = new_litem;
 			}
 			clist->tail = new_litem;	
 		pthread_mutex_unlock(&clist->lock);
@@ -33,7 +33,7 @@ void * list_pop(list *clist){
 	pthread_mutex_lock(&clist->lock);
 		poped_item = clist->head;
 		if(poped_item != NULL){
-			clist->head = poped_item->next;
+			clist->head = poped_item->lnext;
 			if(clist->head == NULL)
 				clist->tail = NULL;
 		}
@@ -58,7 +58,7 @@ int list_iter(list *clist, iter_callback func, void *arg1, void *arg2){
 			break;
 		}
 		
-		curr = curr->next;
+		curr = curr->lnext;
 	}
 	
 	pthread_mutex_unlock(&clist->lock);
@@ -77,17 +77,17 @@ int list_unlink(list *clist, void *item){
 	while(curr != NULL){
 		if(curr->item == item){
 			if(last != NULL)
-				last->next = curr->next;
+				last->lnext = curr->lnext;
 			if(clist->tail == curr)
 				clist->tail = last;
 			if(clist->head == curr)
-				clist->head = curr->next;
+				clist->head = curr->lnext;
 			free(curr);
 			ret = 0;
 			break;
 		}
 		last = curr;
-		curr = curr->next;
+		curr = curr->lnext;
 	}
 	
 	pthread_mutex_unlock(&clist->lock);

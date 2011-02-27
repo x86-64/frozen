@@ -135,12 +135,14 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PERL = @PERL@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SWIG = @SWIG@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -196,7 +198,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 test_CFLAGS = @CHECK_CFLAGS@ -I$(top_builddir)/src/libfrozen/
 test_LDADD = @CHECK_LIBS@ $(top_builddir)/src/libfrozen/libfrozen.la
-EXTRA_DIST = test_valgrind test_gdb test_coverage test_*.c
+EXTRA_DIST = test_valgrind test_gdb test_coverage test_frozenfs test.c.m4 test_*.c test_*.conf
 CLEANFILES = tests.m4 test.c
 all: all-am
 

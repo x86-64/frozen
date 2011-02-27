@@ -7,7 +7,7 @@
 
 typedef struct litem_ litem;
 struct litem_ {
-	litem *next;
+	litem *lnext;
 	void  *item;
 };
 

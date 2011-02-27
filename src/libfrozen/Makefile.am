@@ -5,19 +5,24 @@ backends_sources =                           \
 	backends/cache.c                     \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
+	backends/ipc/ipc.h                   \
 	backends/ipc/ipc.c                   \
+	backends/ipc/ipc_shmem.h             \
 	backends/ipc/ipc_shmem.c             \
+	backends/mphf/mphf.h                 \
 	backends/mphf/mphf.c                 \
+	backends/mphf/mphf_chm_imp.h         \
 	backends/mphf/mphf_chm_imp.c         \
+	backends/mphf/mphf_bdz_imp.h         \
 	backends/mphf/mphf_bdz_imp.c         \
+	backends/mphf/hash_jenkins.h         \
 	backends/mphf/hash_jenkins.c         \
 	backends/rewrite/rewrite.c           \
+	backends/rewrite/rewrite.h           \
+	backends/rewrite/rule_parser.tab.h   \
 	backends/rewrite/rule_parser.tab.c   \
 	backends/rewrite/rule_parser.lex.c   \
 	backends/insert-sort/insert-sort.c
-
-#	backends/blocks-adressing.c \
-#	backends/blocks.c
 
 data_sources =          \
 	data/void.c     \
@@ -39,12 +44,20 @@ data_sources =          \
 
 AUTOMAKE_OPTIONS = subdir-objects
 
-EXTRA_DIST=backends/*.m4 data/*.c data/*.m4 backends/insert-sort/*.c
+EXTRA_DIST=                                     \
+	data/*.c                                \
+	data/*.m4                               \
+	configs/config_parser.l                 \
+	configs/config_parser.y                 \
+	backends/insert-sort/*.c                \
+	backends/insert-sort/insert-sort.c.m4   \
+	backends/rewrite/rule_parser.l          \
+	backends/rewrite/rule_parser.y
 
 lib_LTLIBRARIES=libfrozen.la
 libfrozen_la_LDFLAGS= -module -avoid-version
 libfrozen_la_CPPFLAGS= -fvisibility=hidden
-libfrozen_la_SOURCES=   data.h \
+libfrozen_la_SOURCES=   data.h                                  \
 			libfrozen.c         libfrozen.h         \
 			list.c              list.h              \
 			buffer.c            buffer.h            \
@@ -54,6 +67,8 @@ libfrozen_la_SOURCES=   data.h \
 			hashkeys.h                              \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
+			configs/config.h                        \
+			configs/config_parser.tab.h             \
 			configs/config_parser.tab.c             \
 			configs/config_parser.lex.c             \
 			public.h

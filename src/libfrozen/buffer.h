@@ -28,7 +28,7 @@ typedef enum chunk_type {
 typedef struct chunk_t {
 	chunk_type   type;       ///< Chunk type
 	size_t       size;       ///< Chunk size
-	void        *next;       ///< Next chunk ptr
+	void        *cnext;      ///< Next chunk ptr
 	
 	void        *bare_ptr;   ///< Ptr to raw memory (only CHUNK_TYPE_BARE)
 } chunk_t;

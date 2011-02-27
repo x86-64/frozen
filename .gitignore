@@ -1,0 +1,15 @@
+.deps
+.dirstamp
+*.sw[po]
+*.lo
+*.o
+*.dat
+Makefile
+.libs
+stamp-h1
+doc/*
+autom4te.cache/*
+config.*
+libtool
+callgrind.out
+*.c_

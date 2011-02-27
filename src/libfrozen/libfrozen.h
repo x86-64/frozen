@@ -1,11 +1,23 @@
+#ifndef LIBFROZEN_H
+#define LIBFROZEN_H
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #define _FILE_OFFSET_BITS 64
+
+#ifndef _LARGEFILE64_SOURCE
 #define _LARGEFILE64_SOURCE
+#endif
+
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
+
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500 
+#endif
 
 /* Standart libraries */
 #include <stdint.h>
@@ -19,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/param.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <alloca.h>
@@ -29,9 +42,6 @@
 #define error(...)            do{ fprintf(stdout,__VA_ARGS__);    }while(0);
 #define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
 #define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
-
-#define MIN(a,b)              ( (a > b) ? b : a )
-#define MAX(a,b)              ( (a > b) ? a : b )
 
 #define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))
 #define __MAX_SIGNED(type) (__HALF_MAX_SIGNED(type) - 1 + __HALF_MAX_SIGNED(type))
@@ -56,3 +66,4 @@ API extern hash_t *global_settings;
 API int frozen_init(void);
 API int frozen_destroy(void);
 
+#endif

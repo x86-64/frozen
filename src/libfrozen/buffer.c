@@ -18,7 +18,7 @@ void *      chunk_data_alloc (size_t size){ // {{{
 	chunk = malloc(size + sizeof(chunk_t));
 	chunk->type = CHUNK_TYPE_ALLOCATED;
 	chunk->size = size;
-	chunk->next = NULL;
+	chunk->cnext = NULL;
 
 	return (void *)(chunk + 1);
 } // }}}
@@ -29,7 +29,7 @@ void *      chunk_bare_alloc (void *ptr, size_t size){ // {{{
 	chunk->type     = CHUNK_TYPE_BARE;
 	chunk->bare_ptr = ptr;
 	chunk->size     = size;
-	chunk->next     = NULL;
+	chunk->cnext     = NULL;
 
 	return (void *)(chunk + 1);
 } // }}}
@@ -43,7 +43,7 @@ inline void * chunk_get_ptr  (void *chunk){
 	};
 	return NULL;
 }
-inline void * chunk_next     (void *chunk){ return ( ((chunk_t *)chunk) - 1)->next; }
+inline void * chunk_next     (void *chunk){ return ( ((chunk_t *)chunk) - 1)->cnext; }
 inline void   chunk_free     (void *chunk){ free( ((chunk_t *)chunk) - 1); }
 
 /* }}} */
@@ -208,7 +208,7 @@ static void     buffer_add_head_any        (buffer_t *buffer, void *chunk){ // {
 	if(buffer->head == NULL){
 		buffer->tail = chunk;
 	}else{
-		((chunk_t *)chunk - 1)->next = buffer->head;
+		((chunk_t *)chunk - 1)->cnext = buffer->head;
 	}
 	buffer->head = chunk;
 } // }}}
@@ -219,7 +219,7 @@ static void     buffer_add_tail_any        (buffer_t *buffer, void *chunk){ // {
 	if(buffer->tail == NULL){
 		buffer->head = chunk;
 	}else{
-		((chunk_t *)buffer->tail - 1)->next = chunk;
+		((chunk_t *)buffer->tail - 1)->cnext = chunk;
 	}
 	buffer->tail = chunk;
 } // }}}
@@ -488,16 +488,16 @@ int         buffer_delete_chunk   (buffer_t *buffer, void *chunk){
 	while(curr != NULL){
 		if(curr == chunk){
 			if(last != NULL)
-				( (chunk_t *)last - 1)->next = ( (chunk_t *)curr - 1)->next;
+				( (chunk_t *)last - 1)->cnext = ( (chunk_t *)curr - 1)->cnext;
 			if(buffer->tail == curr)
 				buffer->tail = last;
 			if(buffer->head == curr)
-				buffer->head = ( (chunk_t *)curr - 1)->next;
+				buffer->head = ( (chunk_t *)curr - 1)->cnext;
 			ret = 0;
 			break;
 		}
 		last = curr;
-		curr = ( (chunk_t *)curr - 1)->next;
+		curr = ( (chunk_t *)curr - 1)->cnext;
 	}
 	if(ret == 0){
 		size = chunk_get_size(chunk);

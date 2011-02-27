@@ -24,6 +24,8 @@ AC_PATH_PROGS(LS, [ls], no)
 AC_PATH_PROGS(AWK, [gawk awk], no)
 AC_PATH_PROGS(BISON, [bison], no)
 AC_PATH_PROGS(FLEX, [flex], no)
+AC_PATH_PROGS(SWIG, [swig], no)
+AC_PATH_PROGS(PERL, [perl perl5], no)
 
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))
 if test "x${enable_coverage}" = "xyes"; then
@@ -48,5 +50,6 @@ AC_CONFIG_FILES([Makefile
 		src/frozend/Makefile
 		src/frozenfs/Makefile
 		src/benchmark/Makefile
+		src/lang/Makefile
 		test/Makefile])
 AC_OUTPUT

@@ -1,1 +1,1 @@
-SUBDIRS = libfrozen frozend frozenfs benchmark
+SUBDIRS = libfrozen frozend frozenfs benchmark lang
