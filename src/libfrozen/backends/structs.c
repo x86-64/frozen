@@ -34,10 +34,10 @@ static int struct_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_HASHT          struct_hash   = NULL;
 	struct_userdata  *userdata      = (struct_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_HASHT,  struct_hash,   config, HK(structure));
-	hash_copy_data(ret, TYPE_STRING, key_str,       config, HK(key));
-	hash_copy_data(ret, TYPE_STRING, key_value_str, config, HK(values));
-	hash_copy_data(ret, TYPE_STRING, size_str,      config, HK(size));
+	hash_data_copy(ret, TYPE_HASHT,  struct_hash,   config, HK(structure));
+	hash_data_copy(ret, TYPE_STRING, key_str,       config, HK(key));
+	hash_data_copy(ret, TYPE_STRING, key_value_str, config, HK(values));
+	hash_data_copy(ret, TYPE_STRING, size_str,      config, HK(size));
 	
 	userdata->key        = hash_string_to_key(key_str);
 	userdata->key_values = hash_string_to_key(key_value_str);
@@ -54,18 +54,22 @@ static int struct_configure(chain_t *chain, hash_t *config){ // {{{
 } // }}}
 
 static ssize_t struct_backend_pack(chain_t *chain, request_t *request){
+	ssize_t          ret;
 	size_t           struct_size;
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)chain->userdata;
 	
-	if( (buffer = hash_get_data(request, userdata->key)) != NULL){
-		buffer_ctx = hash_get_data_ctx (request, userdata->key);
-		
+	hash_data_find(request, userdata->key, &buffer, &buffer_ctx);
+	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
-			case STRUCT_VALUES_ONE:   values = data_value_ptr(hash_get_data(request, userdata->key_values)); break;
+			case STRUCT_VALUES_ONE:
+				hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
+				if(ret != 0)
+					return -EINVAL;
+				break;
 		};
 		
 		if( (struct_size = struct_pack(userdata->structure, values, buffer, buffer_ctx)) == 0)
@@ -83,7 +87,7 @@ static ssize_t struct_backend_pack(chain_t *chain, request_t *request){
 }
 
 static ssize_t struct_backend_unpack(chain_t *chain, request_t *request){
-	ssize_t          ret;
+	ssize_t          ret, ret2;
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
 	request_t       *values;
@@ -91,12 +95,15 @@ static ssize_t struct_backend_unpack(chain_t *chain, request_t *request){
 	
 	ret = chain_next_query(chain, request);
 	
-	if( (buffer = hash_get_data(request, userdata->key)) != NULL){
-		buffer_ctx = hash_get_data_ctx (request, userdata->key);
-		
+	hash_data_find(request, userdata->key, &buffer, &buffer_ctx);
+	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
-			case STRUCT_VALUES_ONE:   values = data_value_ptr(hash_get_data(request, userdata->key_values)); break;
+			case STRUCT_VALUES_ONE:
+				hash_data_copy(ret2, TYPE_HASHT, values, request, userdata->key_values);
+				if(ret2 != 0)
+					return -EINVAL;
+				break;
 		};
 		
 		if(struct_unpack(userdata->structure, values, buffer, buffer_ctx) == 0)

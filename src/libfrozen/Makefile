@@ -125,7 +125,7 @@ AWK = /usr/bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -g3 -O0 -Wall -Werror -DDEBUG=1
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E

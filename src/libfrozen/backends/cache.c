@@ -60,8 +60,7 @@ static ssize_t cache_backend_read(chain_t *chain, request_t *request){
 	data_ctx_t     *buffer_ctx;
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	buffer     = hash_get_data     (request, HK(buffer));
-	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	
 	data_t     d_memory = DATA_MEMORYT(&userdata->memory);
 	
@@ -73,8 +72,7 @@ static ssize_t cache_backend_write(chain_t *chain, request_t *request){
 	data_ctx_t     *buffer_ctx;
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	buffer     = hash_get_data     (request, HK(buffer));
-	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	
 	data_t     d_memory = DATA_MEMORYT(&userdata->memory);
 	
@@ -90,14 +88,13 @@ static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 	data_ctx_t     *offset_out_ctx;
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
 	
 	if(memory_grow(&userdata->memory, size, &offset) != 0)
 		return -EFAULT;
 	
 	/* optional return of offset */
-	offset_out     = hash_get_data    (request, HK(offset_out));
-	offset_out_ctx = hash_get_data_ctx(request, HK(offset_out));
+	hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
 	data_transfer(offset_out, offset_out_ctx, &offset_data, NULL);
 	
 	/* optional write from buffer */
@@ -121,9 +118,7 @@ static ssize_t cache_backend_count(chain_t *chain, request_t *request){
 	if(memory_size(&userdata->memory, &size) < 0)
 		return -EFAULT;
 	
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
-		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	
 	data_t count = DATA_PTR_SIZET(&size);
 	

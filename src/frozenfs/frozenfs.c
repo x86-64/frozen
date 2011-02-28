@@ -230,12 +230,15 @@ static void         wfrozen_backend_destroy(backend_t *backend){
 };
 
 static void wfrozen_init(void){
+	//data_t *homedir;
+	
 	wfrozen_vfs_create("/", "backends", VIRTFS_DIRECTORY, BACKEND_HOLDER, NULL);
 	wfrozen_vfs_create("/", "config",   VIRTFS_FILE,      CONFIG_FILE,    NULL);
 	
 	frozen_init();
 	
-	hash_set(global_settings, HK(homedir), TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
+	//homedir = hash_find_typed(global_settings, TYPE_STRING, HK(homedir));
+	//data_assign_raw(homedir, TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
 	
 	hash_t c_data[] = {
 		{ HK(chains), DATA_HASHT(

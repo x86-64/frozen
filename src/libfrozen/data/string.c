@@ -1,18 +1,14 @@
 #include <libfrozen.h>
 
 ssize_t   data_string_read  (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){
-	off_t     d_offset;
-	size_t    d_size, str_l;
+	ssize_t   ret;
+	off_t     d_offset = 0;
+	size_t    d_size   = data->data_size, str_l;
 	char     *str;
-	hash_t   *temp;
 	
 	// read limits
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
+	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, d_size,   context, HK(size));
 	
 	// check consistency
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
@@ -42,16 +38,12 @@ ssize_t   data_string_read  (data_t *data, data_ctx_t *context, off_t offset, vo
 }
 
 ssize_t   data_string_write (data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){
-	off_t    d_offset;
-	size_t   d_size;
-	hash_t  *temp;
+	ssize_t  ret;
+	off_t    d_offset = 0;
+	size_t   d_size   = data->data_size;
 	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
-		HVALUE(temp, size_t) : data->data_size;
+	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, d_size,   context, HK(size));
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters

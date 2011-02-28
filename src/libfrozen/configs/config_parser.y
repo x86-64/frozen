@@ -46,7 +46,7 @@ hash_items :
 		hash_assign_hash_end (&$$[1]);
 	}
 	| hash_items ',' hash_item {
-		size_t nelements = hash_get_nelements($1);
+		size_t nelements = hash_nelements($1);
 		$1 = realloc($1, (nelements + 1) * sizeof(hash_t));
 		memmove(&$1[1], &$1[0], nelements * sizeof(hash_t));
 		hash_assign_hash_t(&$1[0], &$3);

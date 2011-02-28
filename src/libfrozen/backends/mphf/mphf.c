@@ -199,7 +199,8 @@ redo:
 			break;
 		}
 		
-		if( (key = hash_get_data(r_read, userdata->key_from)) == NULL){
+		hash_data_find(r_read, userdata->key_from, &key, NULL);
+		if(key == NULL){
 			//printf("failed hash\n");
 			ret = -EFAULT;
 			break;
@@ -258,13 +259,13 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
-	hash_copy_data(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
-	hash_copy_data(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
-	hash_copy_data(ret, TYPE_STRING, build_start_str, config, HK(build_start));
-	hash_copy_data(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
-	hash_copy_data(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
-	hash_copy_data(ret, TYPE_STRING, backend_name,    config, HK(backend));
+	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
+	hash_data_copy(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
+	hash_data_copy(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRING, build_start_str, config, HK(build_start));
+	hash_data_copy(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
+	hash_data_copy(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_STRING, backend_name,    config, HK(backend));
 	if(ret != 0)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
 	
@@ -312,7 +313,8 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	off_t            key_out;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	if( (key = hash_get_data(request, userdata->key_from)) == NULL)
+	hash_data_find(request, userdata->key_from, &key, NULL);
+	if(key == NULL)
 		return chain_next_query(chain, request);
 	
 	// get new key_out
@@ -335,7 +337,8 @@ static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
 	uint64_t         key_out;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	if( (key = hash_get_data(request, userdata->key_from)) == NULL)
+	hash_data_find(request, userdata->key_from, &key, NULL);
+	if(key == NULL)
 		return chain_next_query(chain, request);
 	
 	switch(userdata->mphf_proto->func_query(&userdata->mphf, data_value_ptr(key), data_value_len(key), &key_out)){

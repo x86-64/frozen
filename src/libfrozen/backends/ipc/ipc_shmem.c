@@ -150,10 +150,10 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	DT_STRING           role_str;
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
-	hash_copy_data(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
-	hash_copy_data(ret, TYPE_SIZET,  nitems,     config, HK(size));      if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_INT32,  shmkey,     config, HK(key));       if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_STRING, role_str,   config, HK(role));      if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
+	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));      if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32,  shmkey,     config, HK(key));       if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_STRING, role_str,   config, HK(role));      if(ret != 0) return -EINVAL;
 	
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	

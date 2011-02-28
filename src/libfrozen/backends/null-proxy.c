@@ -18,13 +18,12 @@ static int null_configure(chain_t *chain, hash_t *config){
 }
 
 static ssize_t null_create(chain_t *chain, request_t *request){
-	hash_t       *r_value_size;
+	ssize_t       ret;
+	size_t        value;
 	
-	if( (r_value_size = hash_find_typed(request, TYPE_SIZET, HK(size))) == NULL)
-		return -EINVAL;
-		
-	if(HVALUE(r_value_size, unsigned int) == 0x0000BEEF) // this check for backend tests
-		return HVALUE(r_value_size, unsigned int);
+	hash_data_copy(ret, TYPE_SIZET, value, request, HK(size));
+	if(ret == 0 && value == 0x0000BEEF)
+		return value;
 	
 	return chain_next_query(chain, request);
 }

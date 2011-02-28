@@ -282,15 +282,12 @@ static int blocks_destroy(chain_t *chain){
 }
 
 static int blocks_configure(chain_t *chain, hash_t *config){
-	void             *temp;
+	ssize_t           ret;
 	hash_t           *r_backend;
-	blocks_userdata *data         = (blocks_userdata *)chain->userdata;
+	blocks_userdata  *data         = (blocks_userdata *)chain->userdata;
 	
-	data->block_size =
-		(hash_get_typed(config, TYPE_INT32, HK(block_size), &temp, NULL) == 0) ?
-		*(unsigned int *)temp : 0;
-	
-	if( data->block_size == 0)
+	hash_data_copy(ret, TYPE_INT32, data->block_size, config, HK(block_size));
+	if(ret != 0)
 		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
 	
 	if( (r_backend = hash_find(config, HK(backend))) == NULL)
@@ -314,12 +311,11 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 	size_t            block_size;
 	off_t             block_vid;
 	ssize_t           ret;
-	hash_t           *r_size;
 	
-	if( (r_size = hash_find_typed (request, TYPE_SIZET, HK(size))) == NULL)
+	hash_data_copy(ret, TYPE_SIZET, element_size, request, HK(size));
+	if(ret != 0)
 		return -EINVAL;
-	element_size = HVALUE(r_size, unsigned int);
-	
+
 	if(element_size > data->block_size) // TODO make sticked blocks
 		return -EINVAL;
 	
@@ -371,51 +367,46 @@ static ssize_t blocks_create(chain_t *chain, request_t *request){ // {{{
 static ssize_t blocks_setget(chain_t *chain, request_t *request){ // {{{
 	unsigned int      block_vid;
 	hash_t           *r_key_virt;
-	data_t            key_real;
+	off_t             key_real, key_virt;
+	data_t            key_real_dt = DATA_PTR_OFFT(&key_real);
 	blocks_userdata *data = (blocks_userdata *)chain->userdata;
 	
 	// TODO r_size > block_size
 	// TODO remove TYPE_OFFT from code, support all
 	
-	if( (r_key_virt = hash_find_typed(request, TYPE_OFFT, HK(offset))) == NULL)
+	hash_data_copy(ret, TYPE_OFFT, key_virt, request, HK(offset));
+	if(ret != 0)
 		return -EINVAL;
 	
-	data_copy_local(&key_real, hash_get_data(r_key_virt));
-	
-	if(map_off(data, HVALUE(r_key_virt, off_t), &block_vid, data_value_ptr(&key_real)) != 0)
+	if(map_off(data, key_virt, &block_vid, &key_real) != 0)
 		return -EINVAL;
 	
 	hash_t  req_layer[] = {
-		{ HK(offset), key_real             },
+		{ HK(offset), key_real_dt           },
 		hash_next(request)
 	};
 	
 	return chain_next_query(chain, req_layer);
 } // }}}
 static ssize_t blocks_delete(chain_t *chain, request_t *request){ // {{{
-	hash_t *r_key, *r_size;
+	ssize_t ret;
+	off_t   r_key;
+	size_t  r_size;
 	
-	if( (r_key  = hash_find_typed(request, TYPE_OFFT,  HK(offset))) == NULL)
-		return -EINVAL;
-	if( (r_size = hash_find_typed(request, TYPE_SIZET, HK(size))) == NULL)
-		return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  r_key,  request, HK(offset)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size));   if(ret != 0) return -EINVAL;
 	
-	return itms_delete(chain, HVALUE(r_key, off_t), HVALUE(r_size, unsigned int));
+	return itms_delete(chain, r_key, r_size);
 } // }}}
 static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
+	ssize_t           ret;
 	off_t             from, to;
 	unsigned int      size;
-	hash_t           *r_from, *r_to, *r_size;
 	
 	ssize_t           move_delta;
 	
-	if( (r_from = hash_find_typed (request, TYPE_OFFT, HK(offset_from))) == NULL)
-		return -EINVAL;
-	if( (r_to   = hash_find_typed (request, TYPE_OFFT, HK(offset_to)))   == NULL)
-		return -EINVAL;
-	
-	from = HVALUE(r_from, off_t);
-	to   = HVALUE(r_to,   off_t);
+	hash_data_copy(ret, TYPE_OFFT,  from,  request, HK(offset_from)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  to,    request, HK(offset_to));   if(ret != 0) return -EINVAL;
 	
 	if(from == to)
 		return 0;
@@ -431,10 +422,8 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	}
 	
 	// manage bottom of move
-	if( (r_size = hash_find_typed (request, TYPE_SIZET, HK(size))) == NULL)
-		return 0;
-	size = HVALUE(r_size, unsigned int);
-	if(size == -1)
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size));
+	if(ret != 0 || size == -1)
 		return 0;
 		
 	from += size;

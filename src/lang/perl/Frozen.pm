@@ -59,7 +59,19 @@ package Frozen;
 *backend_destroy = *Frozenc::backend_destroy;
 *configs_string_parse = *Frozenc::configs_string_parse;
 *configs_file_parse = *Frozenc::configs_file_parse;
+*hash_new = *Frozenc::hash_new;
+*hash_copy = *Frozenc::hash_copy;
 *hash_free = *Frozenc::hash_free;
+*hash_find = *Frozenc::hash_find;
+*hash_chain = *Frozenc::hash_chain;
+*hash_nelements = *Frozenc::hash_nelements;
+*hash_string_to_key = *Frozenc::hash_string_to_key;
+*hash_key_to_string = *Frozenc::hash_key_to_string;
+*hash_key_to_ctx_key = *Frozenc::hash_key_to_ctx_key;
+*hash_item_key = *Frozenc::hash_item_key;
+*hash_item_data = *Frozenc::hash_item_data;
+*hash_item_next = *Frozenc::hash_item_next;
+*hash_data_find = *Frozenc::hash_data_find;
 
 # ------- VARIABLE STUBS --------
 

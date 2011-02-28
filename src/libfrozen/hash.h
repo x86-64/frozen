@@ -16,65 +16,79 @@ typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 #define hash_null       {hash_ptr_null, {0, NULL, 0}}
 #define hash_next(hash) {hash_ptr_end,  {0, (void *)hash,  0}}
 #define hash_end        hash_next(NULL)
+#define HASH_CTX_KEY_OFFSET 0x1000
 
-#define HVALUE(_hash_t,_type)  *(_type *)_hash_t->data.data_ptr
+// allocated hash functions
+API hash_t *           hash_new                     (size_t nelements);
+API hash_t *           hash_copy                    (hash_t *hash);
+API void               hash_free                    (hash_t *hash);
+
+// general functions
+API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
+API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
+API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
+API size_t             hash_nelements               (hash_t *hash);
+
+// hash <=> buffer
+API ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+
+// hash <=> raw memory
+API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
+API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
+API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
+
+// hash keys routines
+API hash_key_t         hash_string_to_key           (char *string);
+API char *             hash_key_to_string           (hash_key_t key);
+API hash_key_t         hash_key_to_ctx_key          (hash_key_t key);
+
+_inline
+API hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
+_inline
+API data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
+_inline
+API hash_t *           hash_item_next               (hash_t *hash){ return (hash->key == hash_ptr_end) ? NULL : hash + 1; }
+_inline
+API void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx){
+	hash_t *temp;
+	if(data){
+		*data     =
+			((temp = hash_find(hash, key                     )) == NULL) ?
+			NULL : hash_item_data(temp);
+	}
+	if(data_ctx){
+		*data_ctx =
+			((temp = hash_find(hash, hash_key_to_ctx_key(key))) == NULL) ?
+			NULL : (data_ctx_t *)hash_item_data(temp);
+	}
+}
+
+#define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
+	hash_t *__temp;                                             \
+	if( (__temp = hash_find(_hash,_key)) != NULL){              \
+		data_to_dt(_ret,_type,_dt,(&(__temp->data)),NULL);  \
+	}else{ _ret = -EINVAL; }                                    \
+}
 
 #define hash_assign_hash_t(_dst, _src) {        \
 	memcpy((_dst), (_src), sizeof(hash_t)); \
 }
-#define hash_assign_hash_null(_dst) { \
-	(_dst)->key = hash_ptr_null;  \
+#define hash_assign_hash_null(_dst) {  \
+	(_dst)->key = hash_ptr_null;   \
+	(_dst)->data.type = TYPE_VOID; \
+	(_dst)->data.data_ptr = NULL;  \
+	(_dst)->data.data_size = 0;    \
 }
 #define hash_assign_hash_end(_dst) {  \
 	(_dst)->key = hash_ptr_end;   \
 	(_dst)->data.data_ptr = NULL; \
 }
 
-// TODO deprecate this
-API int                hash_get                     (hash_t *hash, hash_key_t key, data_type *type, void **value, size_t *value_size);
-API int                hash_get_typed               (hash_t *hash, data_type type, hash_key_t key, void **value, size_t *value_size);
-API hash_t *           hash_set                     (hash_t *hash, hash_key_t key, data_type type, void *value, size_t value_size);
-API void               hash_delete                  (hash_t *hash, hash_key_t key);
-// END TODO
-
-API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
-API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
-API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
-API hash_t *           hash_find_typed              (hash_t *hash, data_type type, hash_key_t key);
-
-API data_t *           hash_get_data                (hash_t *hash, hash_key_t key);
-API data_t *           hash_get_typed_data          (hash_t *hash, data_type type, hash_key_t key);
-API data_ctx_t *       hash_get_data_ctx            (hash_t *hash, hash_key_t key);
-
-API data_type          hash_get_data_type           (hash_t *hash); // TODO deprecate
-API void *             hash_get_value_ptr           (hash_t *hash);
-API size_t             hash_get_value_size          (hash_t *hash);
-
-API hash_key_t         hash_string_to_key           (char *string);
-API char *             hash_key_to_string           (hash_key_t key);
-
-//API ssize_t            hash_copy_data               (data_type type, void *dt, hash_t *hash, hash_key_t key);
-
-API hash_t *           hash_copy                    (hash_t *hash);
-API void               hash_free                    (hash_t *hash);
-API size_t             hash_get_nelements           (hash_t *hash);
 
 #ifdef DEBUG
+
 API void               hash_dump                    (hash_t *hash);
+
 #endif
-
-API int                hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-API int                hash_from_buffer             (hash_t **hash, buffer_t *buffer);
-
-API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
-API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
-API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
-
-#define hash_copy_data(_ret,_type,_dt,_hash,_key){       \
-	data_t *temp;                                    \
-	if( (temp = hash_get_data(_hash,_key)) != NULL){ \
-		data_to_dt(_ret,_type,_dt,temp,NULL);    \
-	}                                                \
-}
-
 #endif // HASH_H

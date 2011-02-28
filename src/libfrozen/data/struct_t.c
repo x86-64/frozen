@@ -20,8 +20,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 	data_ctx_t      *curr_ctx;
 	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
 	
-	curr_data = hash_get_data     (iter_ctx->values, element->key);
-	curr_ctx  = hash_get_data_ctx (iter_ctx->values, element->key);
+	hash_data_find(iter_ctx->values, element->key, &curr_data, &curr_ctx);
 	
 	if(curr_data == NULL){
 		data_proto_t *proto = data_proto_from_type(element->data.type);
@@ -38,7 +37,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 		};
 	}else{
 		//DT_OFFT    new_offset = 0;
-		//hash_copy_data(ret, TYPE_OFFT, new_offset, iter_ctx->ctx, HK(offset));
+		//hash_data_copy(ret, TYPE_OFFT, new_offset, iter_ctx->ctx, HK(offset));
 		//new_offset += iter_ctx->curr_offset;
 		//data_ctx_t new_ctx[] = {
 		//	{ HK(offset), DATA_PTR_OFFT(&new_offset) },
@@ -76,7 +75,8 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
 	new_data.data_size = data_rawlen(&new_data, NULL);
 	iter_ctx->curr_offset += new_data.data_size;
 	
-	if( (curr_data = hash_get_data(iter_ctx->values, element->key)) != NULL){
+	hash_data_find(iter_ctx->values, element->key, &curr_data, NULL);
+	if(curr_data != NULL){
 		memcpy(curr_data, &new_data, sizeof(new_data));
 	}
 	
@@ -106,7 +106,7 @@ size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buff
 	iter_ctx.ctx         = ctx;
 	iter_ctx.curr_offset = 0;
 	
-	hash_copy_data(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset));
 	if(iter_ctx.curr_offset >= buffer->data_size)
 		return 0;
 	// TODO size

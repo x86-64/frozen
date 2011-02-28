@@ -1,7 +1,24 @@
 #define HASH_C
 #include <libfrozen.h>
-#include <alloca.h>
 
+// TODO recursive hashes in to\from_memory
+
+// macros {{{
+#define _hash_to_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(memory, _ptr, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+#define _hash_from_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(_ptr, memory, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+// }}}
 static int hash_bsearch_string(const void *m1, const void *m2){ // {{{
 	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
 	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
@@ -26,115 +43,67 @@ static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ /
 	return ITER_CONTINUE;
 } // }}}
 
-hash_t *           hash_find              (hash_t *hash, hash_key_t key){ // {{{
-	if(hash == NULL)
-		return NULL;
-	do{
-		if(hash->key == key){
-			return hash;
-		}else if(hash->key == hash_ptr_end){
-			goto end;
-		}else{
-			hash++;
-		}
-	}while(1);
-end:
-	if(hash->data.data_ptr != NULL)
-		return hash_find((hash_t *)hash->data.data_ptr, key);
+hash_key_t         hash_string_to_key           (char *string){ // {{{
+	hash_keypair_t  key, *ret;
+	key.key_str = string;
 	
-	return NULL;
-} // }}}
-hash_t *           hash_find_typed        (hash_t *hash, data_type type, hash_key_t key){ // {{{
-	hash_t *hvalue = hash_find(hash, key);
-	return (hvalue != NULL) ? ((hvalue->data.type != type) ? NULL : hvalue) : NULL;
-} // }}}
-hash_t *           hash_set                     (hash_t *hash, hash_key_t key, data_type type, void *value, size_t value_size){ // {{{
-	hash_t      *hvalue;
+	if(string == NULL)
+		return 0;
 	
-	if( (hvalue = hash_find(hash, key)) == NULL){
-		if( (hvalue = hash_find(hash, hash_ptr_null)) == NULL)
-			return NULL;
+	/*
+	// get valid ordering
+	qsort(hash_keys, hash_keys_nelements, hash_keys_size, &hash_bsearch_string);
+	int i;
+	for(i=0; i<hash_keys_nelements; i++){
+		printf("REGISTER_KEY(%s)\n", hash_keys[i].key_str);
 	}
+	exit(0);
+	*/
 	
-	hvalue->key            = key;
-	hvalue->data.type      = type;
-	hvalue->data.data_ptr  = value;
-	hvalue->data.data_size = value_size;
-	return hvalue;
+	if((ret = bsearch(&key, hash_keys,
+		hash_keys_nelements, hash_keys_size,
+		&hash_bsearch_string)) == NULL)
+		return 0;
+	
+	return ret->key_val;
 } // }}}
-void               hash_delete                (hash_t *hash, hash_key_t key){ // {{{
-	hash_t       *hvalue;
+char *             hash_key_to_string           (hash_key_t key_val){ // {{{
+	hash_keypair_t  key, *ret;
+	key.key_val = key_val;
 	
-	if( (hvalue = hash_find(hash, key)) == NULL)
-		return;
+	if(key_val == 0)
+		goto ret_null;
 	
-	hvalue->key = hash_ptr_null;
+	if((ret = bsearch(&key, hash_keys,
+		hash_keys_nelements, hash_keys_size,
+		&hash_bsearch_int)) == NULL)
+		goto ret_null;
+	
+	return ret->key_str;
+ret_null:
+	return "(null)";
 } // }}}
-void               hash_chain                   (hash_t *hash, hash_t *hash_next){ // {{{
-	hash_t *hend = hash_find(hash, hash_ptr_end);
-	hend->data.data_ptr = hash_next;
-} // }}}
-ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
-	hash_t      *value = hash;
-	ssize_t      ret;
-	
-	if(hash == NULL)
-		return ITER_BREAK;
-	
-	while(value->key != hash_ptr_end){
-		if( value->key == hash_ptr_null )
-			goto next;
-		
-		ret = func(value, arg1, arg2);
-		if(ret != ITER_CONTINUE)
-			return ret;
-	
-	next:	
-		value++;
-	}
-	if(value->data.data_ptr != NULL)
-		return hash_iter((hash_t *)value->data.data_ptr, func, arg1, arg2);
-	
-	return ITER_OK;
-} // }}}
-data_type          hash_get_data_type           (hash_t *hash){ // {{{
-	return hash->data.type;
-} // }}}
-void *             hash_get_value_ptr           (hash_t *hash){ // {{{
-	return hash->data.data_ptr;
-} // }}}
-size_t             hash_get_value_size          (hash_t *hash){ // {{{
-	return hash->data.data_size;
-} // }}}
-int                hash_get                     (hash_t *hash, hash_key_t key, data_type *type, void **value, size_t *value_size){ // {{{
-	hash_t *hvalue;
-	
-	if( (hvalue = hash_find(hash, key)) == NULL)
-		return -1;
-	
-	if(type != NULL)
-		*type = hvalue->data.type;
-	if(value != NULL)
-		*value = hvalue->data.data_ptr;
-	if(value_size != NULL)
-		*value_size = hvalue->data.data_size;
-	
-	return 0;
-} // }}}
-int                hash_get_typed               (hash_t *hash, data_type type, hash_key_t key, void **value, size_t *value_size){ // {{{
-	hash_t *hvalue;
-	
-	if( (hvalue = hash_find_typed(hash, type, key)) == NULL)
-		return -1;
-	
-	if(value != NULL)
-		*value = hvalue->data.data_ptr;
-	if(value_size != NULL)
-		*value_size = hvalue->data.data_size;
-	
-	return 0;
+hash_key_t         hash_key_to_ctx_key          (hash_key_t key){ // {{{
+	return key + HASH_CTX_KEY_OFFSET;
 } // }}}
 
+hash_t *           hash_new                     (size_t nelements){ // {{{
+	size_t  i;
+	hash_t *hash;
+	
+	if(__MAX(size_t) / sizeof(hash_t) <= nelements)
+		return NULL;
+	
+	if( (hash = malloc(nelements * sizeof(hash_t))) == NULL)
+		return NULL;
+	
+	for(i=0; i<nelements - 1; i++){
+		hash_assign_hash_null(&hash[i]);
+	}
+	hash_assign_hash_end(&hash[nelements-1]);
+	
+	return hash;
+} // }}}
 hash_t *           hash_copy                    (hash_t *hash){ // {{{
 	unsigned int  k;
 	hash_t       *el, *el_new, *new_hash;
@@ -182,7 +151,43 @@ void               hash_free                    (hash_t *hash){ // {{{
 	free(hash);
 } // }}}
 
-size_t             hash_get_nelements           (hash_t *hash){ // {{{
+hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ // {{{
+	for(; hash != NULL; hash = (hash_t *)hash->data.data_ptr){
+		for(; hash->key != hash_ptr_end; hash++){
+			if(hash->key == key)
+				return hash;
+		}
+	}
+	return NULL;
+} // }}}
+ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
+	hash_t      *value = hash;
+	ssize_t      ret;
+	
+	if(hash == NULL)
+		return ITER_BREAK;
+	
+	while(value->key != hash_ptr_end){
+		if( value->key == hash_ptr_null )
+			goto next;
+		
+		ret = func(value, arg1, arg2);
+		if(ret != ITER_CONTINUE)
+			return ret;
+	
+	next:	
+		value++;
+	}
+	if(value->data.data_ptr != NULL)
+		return hash_iter((hash_t *)value->data.data_ptr, func, arg1, arg2);
+	
+	return ITER_OK;
+} // }}}
+void               hash_chain                   (hash_t *hash, hash_t *hash_next){ // {{{
+	hash_t *hend = hash_find(hash, hash_ptr_end);
+	hend->data.data_ptr = hash_next;
+} // }}}
+size_t             hash_nelements               (hash_t *hash){ // {{{
 	hash_t       *el;
 	unsigned int  i;
 	
@@ -195,76 +200,12 @@ size_t             hash_get_nelements           (hash_t *hash){ // {{{
 	return i + 1;
 } // }}}
 
-data_t *           hash_get_data                (hash_t *hash, hash_key_t key){ // {{{
-	hash_t *htemp;
-	return ((htemp = hash_find(hash, key)) != NULL) ? &htemp->data : NULL;
-} // }}}
-data_t *           hash_get_typed_data          (hash_t *hash, data_type type, hash_key_t key){ // {{{
-	hash_t *htemp;
-	return ((htemp = hash_find_typed(hash, type, key)) != NULL) ? &htemp->data : NULL;
-} // }}}
-data_ctx_t *       hash_get_data_ctx            (hash_t *hash, hash_key_t key){ // {{{
-	/*
-	hash_t *htemp;
-	char *ctx_str = alloca(strlen(key) + 4 + 1); // TODO remove alloca
-	
-	strcpy(ctx_str, key);
-	strcat(ctx_str, "_ctx");
-	
-	if( (htemp = hash_find(hash, ctx_str)) != NULL)
-		return htemp->data.data_ptr;
-	*/
-	// TODO IMPORTANT
-	return NULL;
-} // }}}
-
-hash_key_t         hash_string_to_key           (char *string){ // {{{
-	hash_keypair_t  key, *ret;
-	key.key_str = string;
-	
-	if(string == NULL)
-		return 0;
-	
-	/*
-	// get valid ordering
-	qsort(hash_keys, hash_keys_nelements, hash_keys_size, &hash_bsearch_string);
-	int i;
-	for(i=0; i<hash_keys_nelements; i++){
-		printf("REGISTER_KEY(%s)\n", hash_keys[i].key_str);
-	}
-	exit(0);
-	*/
-	
-	if((ret = bsearch(&key, hash_keys,
-		hash_keys_nelements, hash_keys_size,
-		&hash_bsearch_string)) == NULL)
-		return 0;
-	
-	return ret->key_val;
-} // }}}
-char *             hash_key_to_string           (hash_key_t key_val){ // {{{
-	hash_keypair_t  key, *ret;
-	key.key_val = key_val;
-	
-	if(key_val == 0)
-		goto ret_null;
-	
-	if((ret = bsearch(&key, hash_keys,
-		hash_keys_nelements, hash_keys_size,
-		&hash_bsearch_int)) == NULL)
-		goto ret_null;
-	
-	return ret->key_str;
-ret_null:
-	return "(null)";
-} // }}}
-
 ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer){ // {{{
 	size_t  nelements;
 	
 	buffer_init(buffer);
 	
-	nelements = hash_get_nelements(hash);
+	nelements = hash_nelements(hash);
 	buffer_add_tail_raw(buffer, hash, nelements * sizeof(hash_t));
 	
 	if(hash_iter(hash, &hash_to_buffer_one, buffer, NULL) == ITER_BREAK)
@@ -323,26 +264,10 @@ error:
 	return -EFAULT;
 } // }}}
 
-#define _hash_to_memory_cpy(_ptr,_size) { \
-	if(_size > memory_size) \
-		return -ENOMEM; \
-	memcpy(memory, _ptr, _size); \
-	memory      += _size; \
-	memory_size -= _size; \
-}
-#define _hash_from_memory_cpy(_ptr,_size) { \
-	if(_size > memory_size) \
-		return -ENOMEM; \
-	memcpy(_ptr, memory, _size); \
-	memory      += _size; \
-	memory_size -= _size; \
-}
-
-// TODO recursive hashes
 ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size){ // {{{
 	size_t  i, nelements, hash_size;
 	
-	nelements = hash_get_nelements(hash);
+	nelements = hash_nelements(hash);
 	hash_size = nelements * sizeof(hash_t);
 	
 	_hash_to_memory_cpy(hash, hash_size);
@@ -357,7 +282,7 @@ ssize_t            hash_to_memory               (hash_t  *hash, void *memory, si
 ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size){ // {{{
 	size_t  i, nelements, hash_size;
 	
-	nelements = hash_get_nelements(hash);
+	nelements = hash_nelements(hash);
 	hash_size = nelements * sizeof(hash_t);
 	
 	memory      += hash_size;
@@ -412,6 +337,23 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 error:
 	return -EFAULT;
 } // }}}
+
+inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
+inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
+inline hash_t *           hash_item_next               (hash_t *hash){ return (hash->key == hash_ptr_end) ? NULL : hash + 1; }
+inline void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx){
+	hash_t *temp;
+	if(data){
+		*data     =
+			((temp = hash_find(hash, key                     )) == NULL) ?
+			NULL : hash_item_data(temp);
+	}
+	if(data_ctx){
+		*data_ctx =
+			((temp = hash_find(hash, hash_key_to_ctx_key(key))) == NULL) ?
+			NULL : (data_ctx_t *)hash_item_data(temp);
+	}
+}
 
 #ifdef DEBUG
 void hash_dump(hash_t *hash){ // {{{

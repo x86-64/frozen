@@ -31,9 +31,9 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	(void)data;
 	
-	hash_copy_data(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,  key,       context, HK(offset)); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_SIZET, size_min,  context, HK(size));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, size_min,  context, HK(size));
 	
 	// apply size limits
 	size_min = MIN(size, size_min);
@@ -65,9 +65,9 @@ static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	(void)data;
 	
-	hash_copy_data(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,  key,       context, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,      context, HK(size));
+	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, size,      context, HK(size));
 	
 	if(offset >= size)
 		return -1; // EOF
@@ -177,19 +177,24 @@ static int file_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int file_configure(chain_t *chain, hash_t *config){ // {{{
-	char   *filepath;
-	char   *filename;
-	char   *temp;
-	int     handle;
-	size_t  buffer_size;
+	ssize_t        ret;
+	int            handle;
+	char          *filepath;
+	char          *filename;
+	char          *temp;
+	size_t         buffer_size = DEF_BUFFER_SIZE;
+	file_userdata *userdata    = (file_userdata *)chain->userdata;
 	
-	if(hash_get_typed(config, TYPE_STRING, HK(filename), (void **)&filename, NULL) != 0)
+	hash_data_copy(ret, TYPE_SIZET,  buffer_size, config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_STRING, filename,    config, HK(filename));
+	if(ret != 0)
 		return -EINVAL;
 	
 	filepath  = malloc(256);
 	*filepath = '\0';
 	
-	if(hash_get_typed(global_settings, TYPE_STRING, HK(homedir), (void **)&temp, NULL) != 0)
+	hash_data_copy(ret, TYPE_STRING, temp, global_settings, HK(homedir));
+	if(ret != 0)
 		temp = ".";
 	
 	if(snprintf(filepath, 256, "%s/%s", temp, filename) >= 256){
@@ -206,23 +211,15 @@ static int file_configure(chain_t *chain, hash_t *config){ // {{{
 		S_IRUSR | S_IWUSR
 	);
 	
-	if(handle == -1){
+	if(handle == -1)
 		goto cleanup;
-	}
 	
-	buffer_size =
-		(hash_get_typed(config, TYPE_SIZET, HK(buffer_size), (void **)&temp, NULL) == 0) ?
-		*(size_t *)temp : DEF_BUFFER_SIZE;
+	userdata->path             = filepath;
+	userdata->handle           = handle;
+	userdata->buffer_size      = buffer_size;
+	userdata->file_stat_status = STAT_NEED_UPDATE;
 	
-	file_userdata *data = (file_userdata *)chain->userdata;
-	
-	data->path             = filepath;
-	data->handle           = handle;
-	data->buffer_size      = buffer_size;
-	data->file_stat_status = STAT_NEED_UPDATE;
-	
-	pthread_mutex_init(&(data->create_lock), NULL);
-	
+	pthread_mutex_init(&(userdata->create_lock), NULL);
 	return 0;
 
 cleanup:
@@ -238,9 +235,7 @@ static ssize_t file_write(chain_t *chain, request_t *request){ // {{{
 	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
-	buffer     = hash_get_data     (request, HK(buffer));
-	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
-	
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	data_ctx_t  file_ctx[] = {
 		{ HK(handle), DATA_INT32(data->handle) },
 		hash_next(request)
@@ -255,9 +250,7 @@ static ssize_t file_read(chain_t *chain, request_t *request){ // {{{
 	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
-	buffer     = hash_get_data     (request, HK(buffer));
-	buffer_ctx = hash_get_data_ctx (request, HK(buffer));
-	
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	data_ctx_t  file_ctx[] = {
 		{ HK(handle), DATA_INT32(data->handle) },
 		hash_next(request)
@@ -273,14 +266,13 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	data_t           *key_out;
 	data_ctx_t       *key_out_ctx;
 	
-	hash_copy_data(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
 	
 	if( file_new_offset(chain, &offset, size) != 0)
 		return -EFAULT;
 	
 	/* optional offset fill */
-	key_out     = hash_get_data     (request, HK(offset_out));
-	key_out_ctx = hash_get_data_ctx (request, HK(offset_out));
+	hash_data_find(request, HK(offset_out), &key_out, &key_out_ctx);
 	data_transfer(key_out, key_out_ctx, &offset_data, NULL);
 	
 	/* optional write from buffer */
@@ -301,9 +293,9 @@ static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 	DT_INT32          forced = 0;
 	file_userdata    *data        = ((file_userdata *)chain->userdata);
 	
-	hash_copy_data(ret, TYPE_INT32, forced, request, HK(forced));
-	hash_copy_data(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_SIZET, size,   request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, forced, request, HK(forced));
+	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size)); if(ret != 0) return -EINVAL;
 	
 	fd  = data->handle;
 	ret = 0;
@@ -342,9 +334,9 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	DT_OFFT          from, to;
 	DT_SIZET         move_size = -1;
 	
-	hash_copy_data(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return -EINVAL;
-	hash_copy_data(ret, TYPE_SIZET,  move_size, request, HK(size));
+	hash_data_copy(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET,  move_size, request, HK(size));
 	
 	if(move_size == -1){
 		if(file_update_count(data) == STAT_ERROR)
@@ -413,12 +405,11 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 static ssize_t file_count(chain_t *chain, request_t *request){ // {{{
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
-	file_userdata  *data = ((file_userdata *)chain->userdata);
+	file_userdata   *data = ((file_userdata *)chain->userdata);
 	
-	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
+	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
+	if(buffer == NULL)
 		return -EINVAL;
-	
-	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
 	
 	if(file_update_count(data) == STAT_ERROR)
 		return -EINVAL;

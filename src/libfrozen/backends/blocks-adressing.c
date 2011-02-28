@@ -453,58 +453,47 @@ static int addrs_destroy(chain_t *chain){
 }
 
 static int addrs_configure(chain_t *chain, hash_t *config){
-	void             *temp;
-	unsigned int      elements_per_level;
-	unsigned int      read_per_calc;
+	ssize_t           ret;
+	DT_INT32          elements_per_level = 0;
+	DT_INT32          read_per_calc      = READ_PER_CALC_DEFAULT;
+	addrs_userdata   *data = (addrs_userdata *)chain->userdata;
 	
-	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
+	hash_data_copy(ret, TYPE_INT32, elements_per_level, config, HK(perlevel));
+	hash_data_copy(ret, TYPE_INT32, read_per_calc,      config, HK(read_size));
 	
-	elements_per_level =
-		(hash_get_typed(config, TYPE_INT32, HK(perlevel), &temp, NULL) == 0) ?
-		*(unsigned int *)temp : 0;
-	
-	if( elements_per_level <= 1)
+	if(elements_per_level <= 1)
 		return_error(-EINVAL, "chain 'blocks-address' variable 'per-level' invalid");
 	
-	read_per_calc =
-		(hash_get_typed(config, TYPE_INT32, HK(read_size), &temp, NULL) == 0) ?
-		(*(unsigned int *)temp < 1) ? *(unsigned int *)temp : READ_PER_CALC_DEFAULT :
-		READ_PER_CALC_DEFAULT;
+	if(read_per_calc < 1)
+		read_per_calc = READ_PER_CALC_DEFAULT;
 	
 	if( (data->tree = tree_alloc(chain, elements_per_level, read_per_calc)) == NULL)
-		goto free1;
+		return_error(-ENOMEM, "chain 'blocks-address' no memory\n"); 
 	
-	if(tree_recalc(data->tree) != 0)
+	if(tree_recalc(data->tree) != 0){
+		tree_free(data->tree);
 		return_error(-EINVAL, "chain 'blocks-address' tree recalc failed\n");
+	}
 	
 	return 0;
-	
-free1:  
-	return_error(-ENOMEM, "chain 'blocks-address' no memory\n"); 
 }
 /* }}} */
 
 static ssize_t addrs_set(chain_t *chain, request_t *request){
-	unsigned int      block_vid;
-	unsigned int      insert       = 1;
-	hash_t           *r_block_size, *r_block_vid, *r_block_off;
-	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
+	ssize_t           ret;
+	uint32_t          r_block_vid, r_block_off, r_block_size, insert = 1;
+	addrs_userdata   *data = (addrs_userdata *)chain->userdata;
 	
-	if( (r_block_size = hash_find_typed(request, TYPE_INT32, HK(block_size))) == NULL) 
-		return -EINVAL;
-	
-	if( (r_block_vid  = hash_find_typed(request, TYPE_INT32, HK(block_vid)))  == NULL)
-		block_vid = tree_blocks_count(data->tree);
-	else
-		block_vid = HVALUE(r_block_vid, unsigned int);
-	
-	if( (r_block_off  = hash_find_typed(request, TYPE_INT32, HK(block_off)))  == NULL)
-		insert = 0;
+	hash_data_copy(ret, TYPE_INT32, r_block_size, request, HK(block_size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, r_block_off,  request, HK(block_off));  if(ret != 0) insert = 0;
+	hash_data_copy(ret, TYPE_INT32, r_block_vid,  request, HK(block_vid));
+	if(ret != 0)
+		r_block_vid = tree_blocks_count(data->tree);
 	
 	if(insert == 0){
-		return tree_resize_block(data->tree, block_vid, HVALUE(r_block_size, unsigned int));
+		return tree_resize_block(data->tree, r_block_vid, r_block_size);
 	}
-	return tree_insert(data->tree, block_vid, HVALUE(r_block_off, unsigned int), HVALUE(r_block_size, unsigned int));
+	return tree_insert(data->tree, r_block_vid, r_block_off, r_block_size);
 }
 
 // TODO custom functions to chain
@@ -512,6 +501,8 @@ static ssize_t addrs_set(chain_t *chain, request_t *request){
 // get block_size - get("blocks", "block_vid")
 
 static ssize_t addrs_get(chain_t *chain, request_t *request){
+	ssize_t           ret;
+	data_t           *temp;
 	off_t             def_real_offset;
 	unsigned int      def_block_vid;
 	unsigned int      def_block_size;
@@ -519,23 +510,27 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 	unsigned int     *o_block_vid   = &def_block_vid;
 	unsigned int     *o_block_size  = &def_block_size;
 	block_info        block;
+	off_t             r_virt_key;
+	uint32_t          r_block_vid;
 	hash_t           *r_virt_key, *r_block_vid;
-	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
+	addrs_userdata   *data = (addrs_userdata *)chain->userdata;
 	
-	hash_get_typed(request, TYPE_OFFT,  HK(real_offset), (void **)&o_real_offset, NULL);
-	hash_get_typed(request, TYPE_INT32, HK(block_vid),   (void **)&o_block_vid,   NULL);
-	hash_get_typed(request, TYPE_INT32, HK(block_size),  (void **)&o_block_size,  NULL);
+	temp = hash_find_typed(request, TYPE_OFFT,  HK(real_offset));
+	if(temp != NULL) o_real_offset = data_value_ptr(temp);
+	temp = hash_find_typed(request, TYPE_INT32, HK(block_vid));
+	if(temp != NULL) o_block_vid   = data_value_ptr(temp);
+	temp = hash_find_typed(request, TYPE_INT32, HK(block_size));
+	if(temp != NULL) o_block_size  = data_value_ptr(temp);
 	
 	if(hash_find(request, HK(blocks)) == NULL){
-		if( (r_virt_key = hash_find_typed(request, TYPE_OFFT, HK(offset))) == NULL)
-			return -EINVAL;
+		hash_data_copy(ret, TYPE_OFFT, r_virt_key, request, HK(offset)); if(ret != 0) return -EINVAL;
 		
-		if(tree_get(data->tree, HVALUE(r_virt_key, off_t), o_block_vid, o_real_offset) != 0)
+		if(tree_get(data->tree, r_virt_key, o_block_vid, o_real_offset) != 0)
 			return -EFAULT;
 	}else{
-		if( (r_block_vid = hash_find_typed(request, TYPE_INT32, HK(block_vid))) == NULL)
-			return -EINVAL;
-		if(tree_get_block(data->tree, HVALUE(r_block_vid, unsigned int), &block) != 0)
+		hash_data_copy(ret, TYPE_INT32, r_block_vid, request, HK(block_vid)); if(ret != 0) return -EINVAL;
+		
+		if(tree_get_block(data->tree, r_block_vid, &block) != 0)
 			return -EFAULT;
 		
 		*o_real_offset = (off_t)(block.real_block_off);
@@ -545,31 +540,41 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 }
 
 static ssize_t addrs_delete(chain_t *chain, request_t *request){
-	hash_t           *r_block_vid;
+	ssize_t          ret;
+	uint32_t         r_block_vid;
 	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
 	
-	if( (r_block_vid = hash_find_typed(request, TYPE_INT32, HK(block_vid))) == NULL)
+	hash_data_copy(ret, TYPE_INT32, r_block_vid, request, HK(block_vid));
+	if(ret != 0)
 		return -EINVAL;
 	
-	return tree_delete_block(data->tree, HVALUE(r_block_vid, unsigned int));
+	return tree_delete_block(data->tree, r_block_vid);
 }
 
 static ssize_t addrs_count(chain_t *chain, request_t *request){
-	size_t            units_count; 
-	buffer_t         *buffer;
-	addrs_userdata  *data = (addrs_userdata *)chain->userdata;
+	size_t           units; 
+	data_t          *buffer;
+	data_ctx_t      *buffer_ctx;
+	file_userdata   *data = ((file_userdata *)chain->userdata);
 	
-	if( hash_get_typed(request, TYPE_BUFFERT, HK(buffer), (void **)&buffer, NULL) != 0)
+	if( (buffer = hash_get_data(request, HK(buffer))) == NULL)
 		return -EINVAL;
 	
+	buffer_ctx = hash_get_data_ctx(request, HK(buffer));
+	
 	if(hash_find(request, HK(blocks)) == NULL){
-		if(tree_size(data->tree, &units_count) != 0)
+		if(tree_size(data->tree, &units) != 0)
 			return -EINVAL;
 	}else{
-		units_count = tree_blocks_count(data->tree);
+		units = tree_blocks_count(data->tree);
 	}
 	
-	return buffer_write(buffer, 0, &units_count, sizeof(units_count));
+	data_t dt_units = DATA_PTR_OFFT(&units);
+	
+	return data_transfer(
+		buffer,     buffer_ctx,
+		&dt_units,  NULL
+	);
 }
 
 static chain_t chain_addrs = {

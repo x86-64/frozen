@@ -122,9 +122,9 @@ ssize_t   data_memory_t_read(data_t *data, data_ctx_t *ctx, off_t coffset, void 
 	DT_INT64 offset = 0;
 	DT_SIZET size   = __MAX(DT_SIZET);
 	
-	//hash_copy_data(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	hash_copy_data(ret, TYPE_INT64, offset, ctx, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,   ctx, HK(size));
+	//hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_INT64, offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
 	
 	offset += coffset;
 	
@@ -142,9 +142,9 @@ ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void
 	void     *memory_ptr;
 	size_t    memory_size; 
 	
-	//hash_copy_data(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	hash_copy_data(ret, TYPE_INT64,  offset, ctx, HK(offset));
-	hash_copy_data(ret, TYPE_SIZET, size,   ctx, HK(size));
+	//hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_INT64,  offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
 	
 	offset      += coffset;
 	memory_size  = MIN(size, buffer_size);

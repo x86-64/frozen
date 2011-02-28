@@ -77,9 +77,9 @@ START_TEST(test_backend_structs){
 		ret = backend_query(backend, r_read);
 			fail_unless(ret > 0,                               "read array failed");
 		
-		hash_copy_data(ret, TYPE_INT32,  test1, r_read, HK(key1));
+		hash_data_copy(ret, TYPE_INT32,  test1, r_read, HK(key1));
 			fail_unless(ret == 0 && test1 == data_array[i].key1,           "data 1 failed\n");
-		hash_copy_data(ret, TYPE_STRING, test2, r_read, HK(key2));
+		hash_data_copy(ret, TYPE_STRING, test2, r_read, HK(key2));
 			fail_unless(ret == 0 && strcmp(test2,data_array[i].key2) == 0, "data 2 failed\n");
 	}
 	backend_destroy(backend);

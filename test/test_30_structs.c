@@ -41,11 +41,11 @@ START_TEST (test_structs){
 	ret = struct_unpack(structure, query, &test_data, NULL);
 		fail_unless(ret > 0,                                "struct_unpack failed");
 	
-	hash_copy_data(ret, TYPE_INT32,  test1, query, HK(key1));
+	hash_data_copy(ret, TYPE_INT32,  test1, query, HK(key1));
 		fail_unless(ret == 0 && test1 == 100,               "struct_unpack data 1 failed\n");
-	hash_copy_data(ret, TYPE_OFFT,   test2, query, HK(key2));
+	hash_data_copy(ret, TYPE_OFFT,   test2, query, HK(key2));
 		fail_unless(ret == 0 && test2 == 10,                "struct_unpack data 2 failed\n");
-	hash_copy_data(ret, TYPE_STRING, test3, query, HK(key4));
+	hash_data_copy(ret, TYPE_STRING, test3, query, HK(key4));
 		fail_unless(ret == 0 && strcmp(test3,"hello") == 0, "struct_unpack data 3 failed\n");
 	
 }

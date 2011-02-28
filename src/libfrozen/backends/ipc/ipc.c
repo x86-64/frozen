@@ -41,7 +41,7 @@ static int ipc_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_STRING        ipc_type_str  = NULL;
 	ipc_userdata    *userdata      = (ipc_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_STRING, ipc_type_str,  config, HK(type));
+	hash_data_copy(ret, TYPE_STRING, ipc_type_str,  config, HK(type));
 	
 	if( (userdata->ipc_proto = ipc_string_to_proto(ipc_type_str)) == NULL)
 		return_error(-EINVAL, "chain 'ipc' parameter 'type' invalid\n");

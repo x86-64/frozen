@@ -61,15 +61,17 @@ inline int  chain_configure    (chain_t *chain, hash_t *config){ return chain->f
 
 ssize_t     chain_query        (chain_t *chain, request_t *request){
 	f_crwd        func       = NULL;
-	hash_t       *r_action;
+	ssize_t       ret;
+	uint32_t      r_action;
 	
 	if(chain == NULL || request == NULL)
 		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
 	
-	if( (r_action = hash_find_typed(request, TYPE_INT32, HK(action))) == NULL)
+	hash_data_copy(ret, TYPE_INT32, r_action, request, HK(action));
+	if(ret != 0)
 		return_error(-EINVAL, "chain_query request 'action' not set\n");
 	
-	switch(HVALUE(r_action, unsigned int)){
+	switch(r_action){
 		case ACTION_CRWD_CREATE: func = chain->chain_type_crwd.func_create; break;
 		case ACTION_CRWD_READ:   func = chain->chain_type_crwd.func_get   ; break;
 		case ACTION_CRWD_WRITE:  func = chain->chain_type_crwd.func_set   ; break;
@@ -95,26 +97,25 @@ ssize_t     chain_next_query   (chain_t *chain, request_t *request){
 
 /* backends - private {{{1 */
 static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chain){
-	int        ret;
+	ssize_t    ret;
 	chain_t   *chain;
 	char      *chain_name;
 	hash_t    *chain_config;
 	
-	if(hash_get_data_type(config) != TYPE_HASHT)
-		return ITER_CONTINUE;
-	
-	chain_config = (hash_t *)hash_get_value_ptr(config);
-	if(hash_get_typed(chain_config, TYPE_STRING, HK(name), (void **)&chain_name, NULL) != 0)
+	if(data_value_type(hash_item_data(config)) != TYPE_HASHT)
 		return ITER_BREAK;
 	
-	chain = chain_new(chain_name);
-	if(chain == NULL)
+	chain_config = (hash_t *) data_value_ptr(hash_item_data(config));
+	
+	hash_data_copy(ret, TYPE_STRING, chain_name, chain_config, HK(name));
+	if(ret != 0) return ITER_BREAK;
+	
+	if( (chain = chain_new(chain_name)) == NULL)
 		return ITER_BREAK;
 	
 	chain->cnext = *(chain_t **)p_chain;
 	
-	ret = chain_configure(chain, chain_config);
-	if(ret != 0)
+	if(chain_configure(chain, chain_config) != 0)
 		goto cleanup;
 	
 	*(chain_t **)p_chain = chain;
@@ -137,7 +138,13 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 }
 
 static int backend_iter_backend_new(hash_t *config, void *null1, void *null2){
-	return (backend_new(hash_get_value_ptr(config)) == NULL) ? ITER_BREAK : ITER_CONTINUE;
+	if(data_value_type(hash_item_data(config)) != TYPE_HASHT)
+		return ITER_CONTINUE;
+	
+	if(backend_new( data_value_ptr(hash_item_data(config)) ) == NULL)
+		return ITER_BREAK;
+	
+	return ITER_CONTINUE;
 }
 
 /* }}}1 */
@@ -149,8 +156,8 @@ backend_t *  backend_new      (hash_t *config){
 	DT_HASHT    chains;
 	backend_t  *backend = NULL;
 	
-	hash_copy_data(ret, TYPE_HASHT,  chains, config, HK(chains)); if(ret != 0) return NULL;
-	hash_copy_data(ret, TYPE_STRING, name,   config, HK(name));
+	hash_data_copy(ret, TYPE_HASHT,  chains, config, HK(chains)); if(ret != 0) return NULL;
+	hash_data_copy(ret, TYPE_STRING, name,   config, HK(name));
 	
 	// register new one
 	if( (backend = malloc(sizeof(backend_t))) == NULL)

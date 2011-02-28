@@ -52,15 +52,18 @@ static int sorts_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
+	ssize_t          ret;
 	unsigned int     i;
 	char            *sort_engine_str;
-	char            *sort_field;
-	sorts_userdata *data = (sorts_userdata *)chain->userdata;
+	char            *sort_field_str = "buffer";
+	sorts_userdata  *data = (sorts_userdata *)chain->userdata;
 	
 	data->chain = chain;
 	
 	/* get engine info */
-	if(hash_get_typed(config, TYPE_STRING, HK(engine), (void **)&sort_engine_str, NULL) != 0)
+	hash_data_copy(ret, TYPE_STRING, sort_field_str,  config, HK(field));
+	hash_data_copy(ret, TYPE_STRING, sort_engine_str, config, HK(engine));
+	if(ret != 0)
 		return_error(-EINVAL, "chain 'insert-sort' parameter 'engine' not supplied\n");
 	
 	for(i=0, data->engine = NULL; i<sort_protos_size; i++){
@@ -72,10 +75,7 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	if(data->engine == NULL)
 		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
 	
-	if(hash_get_typed(config, TYPE_STRING, HK(field), (void **)&sort_field, NULL) != 0)
-		sort_field = "buffer";
-	
-	data->sort_field = hash_string_to_key(sort_field);
+	data->sort_field = hash_string_to_key(sort_field_str);
 	
 	return 0;
 } // }}}
@@ -83,17 +83,14 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 /* crwd handlers {{{ */
 static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	ssize_t          ret;
-	data_t          *buffer, *key_out;
+	data_t          *buffer,     *key_out;
 	data_ctx_t      *buffer_ctx, *key_out_ctx;
 	sorts_userdata  *data = (sorts_userdata *)chain->userdata;
 	
-	if( (buffer = hash_get_data(request, data->sort_field)) == NULL)
+	hash_data_find(request, data->sort_field, &buffer,  &buffer_ctx);
+	hash_data_find(request, HK(offset_out),   &key_out, &key_out_ctx);
+	if(buffer == NULL || key_out == NULL)
 		return -EINVAL;
-	buffer_ctx = hash_get_data_ctx(request, data->sort_field);
-	
-	if( (key_out = hash_get_data(request, HK(offset_out))) == NULL)
-		return -EINVAL;
-	key_out_ctx = hash_get_data_ctx(request, HK(offset_out));
 	
 	// TODO underlying locking and threading
 	// next("lock");

@@ -2,17 +2,14 @@
 
 ssize_t   data_chain_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void **buffer, size_t *size){
 	ssize_t         ret;
-	hash_t         *temp;
-	off_t           d_offset;
+	off_t           d_offset = 0;
 	
-	d_offset =
-		( (temp = hash_find_typed(ctx, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
+	hash_data_copy(ret, TYPE_OFFT, d_offset, ctx, HK(offset));
 	d_offset += offset;
 	
 	request_t  req_read[] = {
 		{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
-		{ HK(offset),    DATA_PTR_OFFT(&d_offset)      },
+		{ HK(offset), DATA_PTR_OFFT(&d_offset)      },
 		{ HK(size),   DATA_PTR_SIZET(size)          },
 		{ HK(buffer), DATA_RAW(*buffer, *size)      },
 		hash_end
@@ -32,12 +29,9 @@ ssize_t   data_chain_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void 
 
 ssize_t   data_chain_t_write (data_t *data, data_ctx_t *ctx, off_t offset, void *buffer, size_t size){
 	ssize_t         ret;
-	hash_t         *temp;
-	off_t           d_offset;
+	off_t           d_offset = 0;
 	
-	d_offset =
-		( (temp = hash_find_typed(ctx, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
+	hash_data_copy(ret, TYPE_OFFT, d_offset, ctx, HK(offset));
 	d_offset += offset;
 	
 	request_t  req_write[] = {

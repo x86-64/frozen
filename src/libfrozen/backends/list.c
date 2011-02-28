@@ -29,7 +29,8 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 		// on insert we move all items from 'key' to 'key'+1
 		// recommended use of 'blocks' chain as under-lying chain to improve perfomance
 		
-		if( (key_orig = hash_get_data(request, HK(offset))) == NULL)
+		hash_data_find(request, HK(offset), &key_orig, NULL);
+		if(key_orig == NULL)
 			return -EINVAL;
 		
 		data_copy_local(&key_from, key_orig);
@@ -56,25 +57,29 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 
 static ssize_t lists_delete(chain_t *chain, request_t *request){
 	ssize_t           ret;
-	data_t           *key_orig;
+	hash_t           *key_orig;
+	data_t           *key_data;
 	data_t            key_from, key_to;
-	hash_t           *r_size;
+	size_t            r_size;
 	
-	if( (key_orig = hash_get_data(request, HK(offset)))  == NULL) return -EINVAL;
-	if( (r_size   = hash_find    (request, HK(size))) == NULL) return -EINVAL;
+	if( (key_orig = hash_find(request, HK(offset))) == NULL)
+		return -EINVAL;
+
+	key_data = hash_item_data(key_orig);
+	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size)); if(ret != 0) return -EINVAL;
 	
-	data_copy_local(&key_from, key_orig);
-	data_copy_local(&key_to,   key_orig);
+	data_copy_local(&key_from, key_data);
+	data_copy_local(&key_to,   key_data);
 	
-	data_t  d_size = DATA_OFFT(HVALUE(r_size, unsigned int));     // TODO pass real data from hash
+	data_t  d_size = DATA_OFFT(r_size);                           // TODO pass real data from hash
 	if(data_arithmetic('+', &key_from, NULL, &d_size, NULL) != 0) // TODO contexts
 		return -EINVAL;
 	
 	hash_t  new_request[] = {
-		{ HK(action),   DATA_INT32(ACTION_CRWD_MOVE)               },
+		{ HK(action),      DATA_INT32(ACTION_CRWD_MOVE)               },
 		{ HK(offset_from), key_from                                   },
 		{ HK(offset_to),   key_to                                     },
-		{ HK(size),     DATA_VOID                                  },
+		{ HK(size),        DATA_VOID                                  },
 		hash_next(request)
 	};
 	

@@ -91,13 +91,15 @@ static int rewrite_destroy(chain_t *chain){ // {{{
 	return 0;
 } // }}}
 static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
-	data_t            *script;
-	rewrite_userdata *data = (rewrite_userdata *)chain->userdata;
+	ssize_t            ret;
+	char              *script;
+	rewrite_userdata  *data = (rewrite_userdata *)chain->userdata;
 	
-	if( (script = hash_get_typed_data(config, TYPE_STRING, HK(script))) == NULL)
+	hash_data_copy(ret, TYPE_STRING, script, config, HK(script));
+	if(ret != 0)
 		return_error(-EINVAL, "chain 'rewrite' parameter 'script' not supplied\n");
 	
-	if(rewrite_script_parse(&data->script, data_value_ptr(script)) != 0)
+	if(rewrite_script_parse(&data->script, script) != 0)
 		return -EINVAL;
 	
 	data->inited = 1;
@@ -110,8 +112,7 @@ static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_th
 		case THING_ARRAY_REQUEST_KEY:;
 			request_t *request = env->requests[thing->id];
 			
-			*data     = hash_get_data     (request, thing->array_key);
-			*data_ctx = hash_get_data_ctx (request, thing->array_key);
+			hash_data_find(request, thing->array_key, data, data_ctx);
 			break;
 		
 		case THING_CONST:;

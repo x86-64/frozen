@@ -32,12 +32,12 @@ static int incap_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_OFFT          multiply      = 1;
 	incap_userdata  *userdata      = (incap_userdata *)chain->userdata;
 	
-	hash_copy_data(ret, TYPE_STRING, key_str,       config, HK(key));
-	hash_copy_data(ret, TYPE_STRING, key_out_str,   config, HK(key_out));
-	hash_copy_data(ret, TYPE_STRING, key_to_str,    config, HK(key_to));
-	hash_copy_data(ret, TYPE_STRING, key_from_str,  config, HK(key_from));
-	hash_copy_data(ret, TYPE_STRING, count_str,     config, HK(count));
-	hash_copy_data(ret, TYPE_OFFT,   multiply,      config, HK(multiply));
+	hash_data_copy(ret, TYPE_STRING, key_str,       config, HK(key));
+	hash_data_copy(ret, TYPE_STRING, key_out_str,   config, HK(key_out));
+	hash_data_copy(ret, TYPE_STRING, key_to_str,    config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRING, key_from_str,  config, HK(key_from));
+	hash_data_copy(ret, TYPE_STRING, count_str,     config, HK(count));
+	hash_data_copy(ret, TYPE_OFFT,   multiply,      config, HK(multiply));
 	
 	data_t multiply_data = DATA_PTR_OFFT(&userdata->multiply);
 	memcpy(&userdata->multiply_data, &multiply_data, sizeof(multiply_data));
@@ -57,72 +57,63 @@ static int incap_configure(chain_t *chain, hash_t *config){ // {{{
 
 static ssize_t incap_backend_createwrite(chain_t *chain, request_t *request){
 	ssize_t          ret;
-	data_t          *offset_data;
+	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
 	
-	if( (offset_data = hash_get_data(request, userdata->key)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->key);
-		
-		data_arithmetic('*', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
+	hash_data_find(request, userdata->key, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_data, NULL);
 	
 	ret = chain_next_query(chain, request);
 	
-	if( (offset_data = hash_get_data(request, userdata->key_out)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->key_out);
-		
-		data_arithmetic('/', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
+	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_data, NULL);
+	
 	return ret;
 }
 
 static ssize_t incap_backend_read(chain_t *chain, request_t *request){
-	data_t          *offset_data;
+	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
 	
-	if( (offset_data = hash_get_data(request, userdata->key)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->key);
-		
-		data_arithmetic('*', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
+	hash_data_find(request, userdata->key, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_data, NULL);
 	
 	return chain_next_query(chain, request);
 }
 
 static ssize_t incap_backend_move(chain_t *chain, request_t *request){
-	data_t          *offset_data;
+	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
 	
-	if( (offset_data = hash_get_data(request, userdata->key_to)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->key_to);
-		
-		data_arithmetic('*', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
-	if( (offset_data = hash_get_data(request, userdata->key_from)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->key_from);
-		
-		data_arithmetic('*', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
+	hash_data_find(request, userdata->key_to, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_data, NULL);
+	
+	hash_data_find(request, userdata->key_from, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_data, NULL);
 	
 	return chain_next_query(chain, request);
 }
 
 static ssize_t incap_backend_count(chain_t *chain, request_t *request){
 	ssize_t          ret;
-	data_t          *offset_data;
+	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
 	
 	ret = chain_next_query(chain, request);
 	
-	if( (offset_data = hash_get_data(request, userdata->count)) != NULL){
-		offset_ctx  = hash_get_data_ctx(request, userdata->count);
-		
-		data_arithmetic('/', offset_data, offset_ctx, &userdata->multiply_data, NULL);
-	}
+	hash_data_find(request, userdata->count, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_data, NULL);
+	
 	return ret;
 }
 

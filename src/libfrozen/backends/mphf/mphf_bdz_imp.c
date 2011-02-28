@@ -35,8 +35,8 @@ ssize_t mphf_bdz_imp_new    (mphf_t *mphf, config_t *config){
 	DT_INT64   nelements      = N_INITIAL_DEFAULT;
 	DT_INT32   value_bits     = VALUE_BITS_DEFAULT;
 	
-	hash_copy_data(ret, TYPE_INT64,  nelements,     config, HK(n_initial));
-	hash_copy_data(ret, TYPE_INT32,  value_bits,    config, HK(value_bits));
+	hash_data_copy(ret, TYPE_INT64,  nelements,     config, HK(n_initial));
+	hash_data_copy(ret, TYPE_INT32,  value_bits,    config, HK(value_bits));
 	
 	srandom(time(NULL));
 	

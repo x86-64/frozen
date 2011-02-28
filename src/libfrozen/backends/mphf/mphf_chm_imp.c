@@ -81,10 +81,10 @@ static ssize_t fill_data       (mphf_t *mphf){ // {{{
 	if((data->filled & 0x1) != 0)
 		return 0;
 	
-	hash_copy_data(ret, TYPE_INT32,  persistent,    mphf->config, HK(persistent)); // if 1 - graph stored in file
-	hash_copy_data(ret, TYPE_INT64,  nelements,     mphf->config, HK(nelements));  // number of elements
-	hash_copy_data(ret, TYPE_INT32,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
-	hash_copy_data(ret, TYPE_STRING, hash_type_str, mphf->config, HK(hash));       // hash function
+	hash_data_copy(ret, TYPE_INT32,  persistent,    mphf->config, HK(persistent)); // if 1 - graph stored in file
+	hash_data_copy(ret, TYPE_INT64,  nelements,     mphf->config, HK(nelements));  // number of elements
+	hash_data_copy(ret, TYPE_INT32,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
+	hash_data_copy(ret, TYPE_STRING, hash_type_str, mphf->config, HK(hash));       // hash function
 	
 	if((data->hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
 		return -EINVAL;

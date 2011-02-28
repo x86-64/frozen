@@ -1,18 +1,14 @@
 #include <libfrozen.h>
 
 ssize_t   data_buffer_t_read  (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){
-	off_t     d_offset;
-	size_t    d_size;
-	hash_t   *temp;
+	ssize_t   ret;
+	off_t     d_offset = 0;
+	size_t    d_size   = 0;
 	void     *chunk;
 	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
-	d_size =
-		( (temp = hash_find_typed(context, TYPE_SIZET, HK(size))) != NULL) ?
-		HVALUE(temp, size_t) : 0;
-		
+	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
+	hash_data_copy(ret, TYPE_SIZET, d_size,   context, HK(size));
+	
 	if(d_size != 0 && offset >= d_size)
 		return -1; // EOF
 		
@@ -25,12 +21,10 @@ ssize_t   data_buffer_t_read  (data_t *data, data_ctx_t *context, off_t offset, 
 }
 
 ssize_t   data_buffer_t_write (data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){
-	off_t    d_offset;
-	hash_t  *temp;
+	ssize_t  ret;
+	off_t    d_offset = 0;
 	
-	d_offset =
-		( (temp = hash_find_typed(context, TYPE_OFFT, HK(offset))) != NULL) ?
-		HVALUE(temp, off_t) : 0;
+	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
 	
 	buffer_write((buffer_t *)data->data_ptr, d_offset + offset, buffer, size);
 	
