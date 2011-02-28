@@ -375,7 +375,7 @@ clean-local: $(PERLMAKEFILE)
 	rm -rf $(PERLOUTDIR)/data_*.dat
 
 check-local: $(PERLMAKEFILE)
-	cd $(PERLOUTDIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	cd $(PERLOUTDIR) && $(PERL) t/Frozen.t
 
 install-exec-local: $(PERLMAKEFILE)
 	cd $(PERLOUTDIR) && $(MAKE) $(AM_MAKEFLAGS) DESTDIR=$(DESTDIR) install

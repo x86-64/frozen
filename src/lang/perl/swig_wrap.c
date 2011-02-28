@@ -1493,12 +1493,13 @@ SWIG_Perl_SetModule(swig_module_info *module) {
 #define SWIGTYPE_p_data_t swig_types[2]
 #define SWIGTYPE_p_hash_key_t swig_types[3]
 #define SWIGTYPE_p_hash_t swig_types[4]
-#define SWIGTYPE_p_p_data_ctx_t swig_types[5]
-#define SWIGTYPE_p_p_data_t swig_types[6]
-#define SWIGTYPE_p_request_t swig_types[7]
-#define SWIGTYPE_p_ssize_t swig_types[8]
-static swig_type_info *swig_types[10];
-static swig_module_info swig_module = {swig_types, 9, 0, 0, 0, 0};
+#define SWIGTYPE_p_int swig_types[5]
+#define SWIGTYPE_p_p_char swig_types[6]
+#define SWIGTYPE_p_p_data_ctx_t swig_types[7]
+#define SWIGTYPE_p_p_data_t swig_types[8]
+#define SWIGTYPE_p_unsigned_int swig_types[9]
+static swig_type_info *swig_types[11];
+static swig_module_info swig_module = {swig_types, 10, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1761,6 +1762,36 @@ SWIG_FromCharPtr(const char *cptr)
   return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
+
+ssize_t            data_from_string             (data_t *data, char *type, char *string){
+        ssize_t   retval;
+        data_type d_type = data_type_from_string(type);
+        data_t    d_str  = DATA_PTR_STRING(string, strlen(string)+1);
+        
+        data_convert_to_alloc(retval, d_type, data, &d_str, NULL);
+        return retval;
+}
+
+ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string){
+        if( (hash = hash_find(hash, hash_ptr_null)) == NULL)
+                return -EINVAL;
+        
+        hash->key = hash_string_to_key(key);
+        return data_from_string(hash_item_data(hash), type, string);
+}
+
+void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len){
+        data_t     *data;
+        
+        hash_data_find(hash, hash_string_to_key(key), &data, NULL);
+        if(data == NULL)
+                return;
+        
+        *string = data_value_ptr(data);
+        *len    = data_value_len(data);
+}
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1871,8 +1902,8 @@ XS(_wrap_backend_bulk_new) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_bulk_new" "', argument " "1"" of type '" "hash_t *""'"); 
     }
     arg1 = (hash_t *)(argp1);
-    result = backend_bulk_new(arg1);
-    ST(argvi) = SWIG_NewPointerObj((ssize_t *)memcpy((ssize_t *)malloc(sizeof(ssize_t)),&result,sizeof(ssize_t)), SWIGTYPE_p_ssize_t, SWIG_POINTER_OWN | 0); argvi++ ;
+    result = (ssize_t)backend_bulk_new(arg1);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
     
     XSRETURN(argvi);
   fail:
@@ -1960,13 +1991,13 @@ XS(_wrap_backend_query) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_query" "', argument " "1"" of type '" "backend_t *""'"); 
     }
     arg1 = (backend_t *)(argp1);
-    res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_request_t, 0 |  0 );
+    res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_hash_t, 0 |  0 );
     if (!SWIG_IsOK(res2)) {
       SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "backend_query" "', argument " "2"" of type '" "request_t *""'"); 
     }
     arg2 = (request_t *)(argp2);
-    result = backend_query(arg1,arg2);
-    ST(argvi) = SWIG_NewPointerObj((ssize_t *)memcpy((ssize_t *)malloc(sizeof(ssize_t)),&result,sizeof(ssize_t)), SWIGTYPE_p_ssize_t, SWIG_POINTER_OWN | 0); argvi++ ;
+    result = (ssize_t)backend_query(arg1,arg2);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
     
     
     XSRETURN(argvi);
@@ -2242,8 +2273,35 @@ XS(_wrap_hash_nelements) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_nelements" "', argument " "1"" of type '" "hash_t *""'"); 
     }
     arg1 = (hash_t *)(argp1);
-    result = hash_nelements(arg1);
+    result = (size_t)hash_nelements(arg1);
     ST(argvi) = SWIG_From_size_t  SWIG_PERL_CALL_ARGS_1((size_t)(result)); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_hash_dump) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: hash_dump(hash);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_dump" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    hash_dump(arg1);
+    ST(argvi) = sv_newmortal();
     
     XSRETURN(argvi);
   fail:
@@ -2491,6 +2549,193 @@ XS(_wrap_hash_data_find) {
 }
 
 
+XS(_wrap_data_free) {
+  {
+    data_t *arg1 = (data_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: data_free(data);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_data_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_free" "', argument " "1"" of type '" "data_t *""'"); 
+    }
+    arg1 = (data_t *)(argp1);
+    data_free(arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_hash_get) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    char *arg2 = (char *) 0 ;
+    char **arg3 = (char **) 0 ;
+    size_t *arg4 = (size_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int res2 ;
+    char *buf2 = 0 ;
+    int alloc2 = 0 ;
+    char *temp3 = 0 ;
+    size_t tempn3 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    arg3 = &temp3; arg4 = &tempn3;
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: hash_get(hash,key,len);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_get" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    res2 = SWIG_AsCharPtrAndSize(ST(1), &buf2, NULL, &alloc2);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_get" "', argument " "2"" of type '" "char *""'");
+    }
+    arg2 = (char *)(buf2);
+    hash_get(arg1,arg2,arg3,arg4);
+    ST(argvi) = sv_newmortal();
+    if (*arg3) {
+      if (argvi >= items) EXTEND(sp,1);  ST(argvi) = SWIG_FromCharPtrAndSize(*arg3,*arg4); argvi++  ;
+      ;
+    }
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    
+    XSRETURN(argvi);
+  fail:
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_hash_set) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    char *arg2 = (char *) 0 ;
+    char *arg3 = (char *) 0 ;
+    char *arg4 = (char *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int res2 ;
+    char *buf2 = 0 ;
+    int alloc2 = 0 ;
+    int res3 ;
+    char *buf3 = 0 ;
+    int alloc3 = 0 ;
+    int res4 ;
+    char *buf4 = 0 ;
+    int alloc4 = 0 ;
+    int argvi = 0;
+    ssize_t result;
+    dXSARGS;
+    
+    if ((items < 4) || (items > 4)) {
+      SWIG_croak("Usage: hash_set(hash,key,type,string);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_set" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    res2 = SWIG_AsCharPtrAndSize(ST(1), &buf2, NULL, &alloc2);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_set" "', argument " "2"" of type '" "char *""'");
+    }
+    arg2 = (char *)(buf2);
+    res3 = SWIG_AsCharPtrAndSize(ST(2), &buf3, NULL, &alloc3);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "hash_set" "', argument " "3"" of type '" "char *""'");
+    }
+    arg3 = (char *)(buf3);
+    res4 = SWIG_AsCharPtrAndSize(ST(3), &buf4, NULL, &alloc4);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "hash_set" "', argument " "4"" of type '" "char *""'");
+    }
+    arg4 = (char *)(buf4);
+    result = (ssize_t)hash_set(arg1,arg2,arg3,arg4);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+    if (alloc4 == SWIG_NEWOBJ) free((char*)buf4);
+    XSRETURN(argvi);
+  fail:
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+    if (alloc4 == SWIG_NEWOBJ) free((char*)buf4);
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_data_from_string) {
+  {
+    data_t *arg1 = (data_t *) 0 ;
+    char *arg2 = (char *) 0 ;
+    char *arg3 = (char *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int res2 ;
+    char *buf2 = 0 ;
+    int alloc2 = 0 ;
+    int res3 ;
+    char *buf3 = 0 ;
+    int alloc3 = 0 ;
+    int argvi = 0;
+    ssize_t result;
+    dXSARGS;
+    
+    if ((items < 3) || (items > 3)) {
+      SWIG_croak("Usage: data_from_string(data,type,string);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_data_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "data_from_string" "', argument " "1"" of type '" "data_t *""'"); 
+    }
+    arg1 = (data_t *)(argp1);
+    res2 = SWIG_AsCharPtrAndSize(ST(1), &buf2, NULL, &alloc2);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "data_from_string" "', argument " "2"" of type '" "char *""'");
+    }
+    arg2 = (char *)(buf2);
+    res3 = SWIG_AsCharPtrAndSize(ST(2), &buf3, NULL, &alloc3);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "data_from_string" "', argument " "3"" of type '" "char *""'");
+    }
+    arg3 = (char *)(buf3);
+    result = (ssize_t)data_from_string(arg1,arg2,arg3);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+    XSRETURN(argvi);
+  fail:
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
+    SWIG_croak_null();
+  }
+}
+
+
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
@@ -2498,11 +2743,12 @@ static swig_type_info _swigt__p_backend_t = {"_p_backend_t", "backend_t *", 0, 0
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_t = {"_p_data_t", "data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_key_t = {"_p_hash_key_t", "hash_key_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_hash_t = {"_p_hash_t", "hash_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_hash_t = {"_p_hash_t", "request_t *|hash_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_ctx_t = {"_p_p_data_ctx_t", "data_ctx_t **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_t = {"_p_p_data_t", "data_t **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_request_t = {"_p_request_t", "request_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ssize_t = {"_p_ssize_t", "ssize_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "size_t *|unsigned int *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_backend_t,
@@ -2510,10 +2756,11 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_data_t,
   &_swigt__p_hash_key_t,
   &_swigt__p_hash_t,
+  &_swigt__p_int,
+  &_swigt__p_p_char,
   &_swigt__p_p_data_ctx_t,
   &_swigt__p_p_data_t,
-  &_swigt__p_request_t,
-  &_swigt__p_ssize_t,
+  &_swigt__p_unsigned_int,
 };
 
 static swig_cast_info _swigc__p_backend_t[] = {  {&_swigt__p_backend_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -2521,10 +2768,11 @@ static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0,
 static swig_cast_info _swigc__p_data_t[] = {  {&_swigt__p_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_hash_key_t[] = {  {&_swigt__p_hash_key_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_hash_t[] = {  {&_swigt__p_hash_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_data_ctx_t[] = {  {&_swigt__p_p_data_ctx_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_data_t[] = {  {&_swigt__p_p_data_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_request_t[] = {  {&_swigt__p_request_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ssize_t[] = {  {&_swigt__p_ssize_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_backend_t,
@@ -2532,10 +2780,11 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_data_t,
   _swigc__p_hash_key_t,
   _swigc__p_hash_t,
+  _swigc__p_int,
+  _swigc__p_p_char,
   _swigc__p_p_data_ctx_t,
   _swigc__p_p_data_t,
-  _swigc__p_request_t,
-  _swigc__p_ssize_t,
+  _swigc__p_unsigned_int,
 };
 
 
@@ -2567,6 +2816,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_find", _wrap_hash_find},
 {"Frozenc::hash_chain", _wrap_hash_chain},
 {"Frozenc::hash_nelements", _wrap_hash_nelements},
+{"Frozenc::hash_dump", _wrap_hash_dump},
 {"Frozenc::hash_string_to_key", _wrap_hash_string_to_key},
 {"Frozenc::hash_key_to_string", _wrap_hash_key_to_string},
 {"Frozenc::hash_key_to_ctx_key", _wrap_hash_key_to_ctx_key},
@@ -2574,6 +2824,10 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_item_data", _wrap_hash_item_data},
 {"Frozenc::hash_item_next", _wrap_hash_item_next},
 {"Frozenc::hash_data_find", _wrap_hash_data_find},
+{"Frozenc::data_free", _wrap_data_free},
+{"Frozenc::hash_get", _wrap_hash_get},
+{"Frozenc::hash_set", _wrap_hash_set},
+{"Frozenc::data_from_string", _wrap_data_from_string},
 {0,0}
 };
 /* -----------------------------------------------------------------------------

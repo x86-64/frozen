@@ -65,6 +65,7 @@ package Frozen;
 *hash_find = *Frozenc::hash_find;
 *hash_chain = *Frozenc::hash_chain;
 *hash_nelements = *Frozenc::hash_nelements;
+*hash_dump = *Frozenc::hash_dump;
 *hash_string_to_key = *Frozenc::hash_string_to_key;
 *hash_key_to_string = *Frozenc::hash_key_to_string;
 *hash_key_to_ctx_key = *Frozenc::hash_key_to_ctx_key;
@@ -72,6 +73,10 @@ package Frozen;
 *hash_item_data = *Frozenc::hash_item_data;
 *hash_item_next = *Frozenc::hash_item_next;
 *hash_data_find = *Frozenc::hash_data_find;
+*data_free = *Frozenc::data_free;
+*hash_get = *Frozenc::hash_get;
+*hash_set = *Frozenc::hash_set;
+*data_from_string = *Frozenc::data_from_string;
 
 # ------- VARIABLE STUBS --------
 
