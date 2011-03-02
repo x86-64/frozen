@@ -1,159 +1,133 @@
 #include <libfrozen.h>
 #include <backends/ipc/ipc.h>
 #include <backends/ipc/ipc_shmem.h>
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <pthread.h>
 #include <semaphore.h>
 
+#define NITEMS_DEFAULT    100
 #define ITEM_SIZE_DEFAULT 1000
 
-typedef enum window_type {
-	WND_WRITE  = 0,
-	WND_READ   = 1,
-	WND_RETURN = 2
-} window_type;
-
-typedef struct window_t {
-	volatile size_t      end;
-	volatile size_t      start;
-} window_t;
+typedef enum block_status {
+	STATUS_FREE      = 0,
+	STATUS_WRITING   = 1,
+	STATUS_WRITTEN   = 2,
+	STATUS_EXECUTING = 3,
+	STATUS_DONE      = 4
+} block_status;
 
 typedef struct ipc_shmem_header {
-	sem_t                  sem[2];
-	window_t               windows[3];
+	size_t                 item_size;
+	size_t                 nitems;
+	
+	sem_t                  sem_free;
+	sem_t                  sem_written;
 } ipc_shmem_header;
 
 typedef struct ipc_shmem_block {
+	volatile size_t        status;
 	volatile ssize_t       query_ret;
-	volatile size_t        done[3];
+	unsigned int           data;
+	
+	sem_t                  sem_done;
 } ipc_shmem_block;
 
 typedef struct ipc_shmem_userdata {
-	size_t            inited;
-	ipc_role          role;
+	size_t                 inited;
+	ipc_role               role;
 	
-	size_t            item_size;
-	size_t            nitems;
+	ipc_shmem_header      *shmaddr;
+	ipc_shmem_block       *shmblocks;
+	void                  *shmdata;
 	
-	pthread_t         server_thr;
-	
-	ipc_shmem_header *shmaddr;
-	ipc_shmem_block  *shmblocks;
-	void             *shmdata;
+	pthread_t              server_thr;
 } ipc_shmem_userdata;
 
-typedef ssize_t (*func_callb) (ipc_t *ipc, ipc_shmem_block *block, void *data, size_t data_size, void *arg);
-	
-#define shmem_next(curr) ( (curr + 1 >= userdata->nitems) ? 0 : curr + 1)
-
 static ssize_t shmem_init(ipc_shmem_userdata *userdata){ // {{{
-	sem_init(&userdata->shmaddr->sem[WND_WRITE],  1, userdata->item_size);
-	sem_init(&userdata->shmaddr->sem[WND_READ],   1, 0);
+	size_t i;
+	
+	sem_init(&userdata->shmaddr->sem_written, 1, 0);
+	sem_init(&userdata->shmaddr->sem_free,    1, userdata->shmaddr->nitems);
+	for(i=0; i<userdata->shmaddr->nitems; i++){
+		sem_init(&userdata->shmblocks[i].sem_done, 1, 0);
+		userdata->shmblocks[i].data = i * userdata->shmaddr->item_size;
+	}
 	return 0;
 } // }}}
-static ssize_t shmem_do(ipc_t *ipc, window_type windowt, func_callb callb, void *arg, uint32_t *p_blockid){ // {{{
-	ssize_t             ret;
-	uint32_t            blockid, blockid_next;
-	window_type         windowt_dep;
-	window_t           *window_curr, *window_deps;
-	void               *block_data;
-	ipc_shmem_block    *block;
-	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
+static ssize_t shmem_destroy(ipc_shmem_userdata *userdata){ // {{{
+	size_t i;
 	
-	windowt_dep = (windowt == WND_RETURN) ? WND_READ : WND_WRITE;
-	window_curr = &userdata->shmaddr->windows[windowt];
-	window_deps = &userdata->shmaddr->windows[windowt_dep];
-	
-	// reserve block
-	while(1){
-		blockid      = window_curr->start;
-		
-		if(windowt == WND_WRITE){
-			blockid_next = shmem_next(blockid);
-			if(blockid_next == window_deps->end) goto sleep;
-		}else{
-			if(blockid      == window_deps->end) goto sleep;
-			blockid_next = shmem_next(blockid);
+	sem_destroy(&userdata->shmaddr->sem_free);
+	sem_destroy(&userdata->shmaddr->sem_written);
+	for(i=0; i<userdata->shmaddr->nitems; i++){
+		sem_destroy(&userdata->shmblocks[i].sem_done);
+	}
+	return 0;
+} // }}}
+static ssize_t           shmem_block_status(ipc_shmem_userdata *userdata, ipc_shmem_block *block, size_t old_status, size_t new_status){ // {{{
+	if(__sync_bool_compare_and_swap(&block->status, old_status, new_status)){
+		switch(new_status){
+			case STATUS_FREE:    sem_post(&userdata->shmaddr->sem_free);    break;
+			case STATUS_WRITTEN: sem_post(&userdata->shmaddr->sem_written); break;
+			case STATUS_DONE:    sem_post(&block->sem_done);                break;
+			default: break;
 		}
-		
-		if(__sync_bool_compare_and_swap(&window_curr->start, blockid, blockid_next))
-			break;
-		
-		continue;
-sleep:
-		sem_wait(&userdata->shmaddr->sem[windowt_dep]);
+		return 0;
+	}
+	return -EFAULT;
+} // }}}
+static ipc_shmem_block * shmem_get_block(ipc_shmem_userdata *userdata, size_t old_status, size_t new_status){ // {{{
+	size_t           i;
+	ipc_shmem_block *block;
+	
+	switch(old_status){
+		case STATUS_FREE:    sem_wait(&userdata->shmaddr->sem_free);    break;
+		case STATUS_WRITTEN: sem_wait(&userdata->shmaddr->sem_written); break;
+		default: return NULL;
 	}
 	
-	*p_blockid = blockid;
-	block      = &userdata->shmblocks[blockid];
-	block_data =  userdata->shmdata + (blockid * userdata->item_size);
-	
-	// call callback
-	ret = callb(ipc, block, block_data, userdata->item_size, arg);
-	
-	block->done[WND_WRITE]  = (WND_WRITE  == windowt) ? 1 : 0;
-	block->done[WND_READ]   = (WND_READ   == windowt) ? 1 : 0;
-	block->done[WND_RETURN] = (WND_RETURN == windowt) ? 1 : 0;
-	
-	while(1){
-		blockid      = window_curr->end;
-		block        = &userdata->shmblocks[blockid];
-		
-		if(!__sync_bool_compare_and_swap(&block->done[windowt], 1, 0))
-			break;
-		
-		blockid_next = shmem_next(blockid);
-		
-		__sync_bool_compare_and_swap(&window_curr->end, blockid, blockid_next);
-		
-		if(windowt != WND_RETURN)
-			sem_post(&userdata->shmaddr->sem[windowt]);
+	for(i=0; i<userdata->shmaddr->nitems; i++){
+		block = &userdata->shmblocks[i];
+		if(shmem_block_status(userdata, block, old_status, new_status) == 0)
+			return block;
 	}
-	return ret;
-} // }}}
-
-ssize_t callb_write(ipc_t *ipc, ipc_shmem_block *block, void *data, size_t data_size, void *p_request){ // {{{
-	hash_to_memory((request_t *)p_request, data, data_size);
-	return 0;
-} // }}}
-ssize_t callb_read(ipc_t *ipc, ipc_shmem_block *block, void *data, size_t data_size, void *null){ // {{{
-	ssize_t             ret;
-	request_t          *request;
-	
-	hash_from_memory(&request, data, data_size);
-	//request_t request[] = { { HK(action), DATA_INT32(ACTION_CRWD_CREATE) }, hash_end };
-	ret = chain_next_query(ipc->chain, request);
-	
-	block->query_ret = ret;
-	return ret;
-} // }}}
-ssize_t callb_return(ipc_t *ipc, ipc_shmem_block *block, void *data, size_t data_size, void *p_request){ // {{{
-	hash_reread_from_memory((request_t *)p_request, data, data_size);
-	return block->query_ret;
+	return NULL;
 } // }}}
 
 void *  ipc_shmem_listen  (void *ipc){ // {{{
-	uint32_t blockid;
-	while(1)
-		shmem_do((ipc_t *)ipc, WND_READ, &callb_read, NULL, &blockid);
+	request_t          *request;
+	ipc_shmem_block    *block;
+	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)((ipc_t *)ipc)->userdata;
+	
+	while(1){
+		if( (block = shmem_get_block(userdata, STATUS_WRITTEN, STATUS_EXECUTING)) == NULL)
+			return_error(NULL, "reader strange error 1\n");
+		
+		// run request
+		hash_from_memory(&request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
+		block->query_ret = chain_next_query(((ipc_t *)ipc)->chain, request);
+		
+		// update status
+		if(shmem_block_status(userdata, block, STATUS_EXECUTING, STATUS_DONE) < 0)
+			return_error(NULL, "reader strange error 2\n");
+	}
 } // }}}
 ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	ssize_t             ret;
 	int                 shmid;
 	DT_INT32            shmkey;
-	DT_SIZET            nitems;
+	DT_SIZET            nitems    = NITEMS_DEFAULT;
 	DT_SIZET            item_size = ITEM_SIZE_DEFAULT;
 	DT_SIZET            shmsize;
 	DT_STRING           role_str;
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
-	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
-	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));      if(ret != 0) return -EINVAL;
 	hash_data_copy(ret, TYPE_INT32,  shmkey,     config, HK(key));       if(ret != 0) return -EINVAL;
 	hash_data_copy(ret, TYPE_STRING, role_str,   config, HK(role));      if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
+	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));
 	
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -168,11 +142,12 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	
 	userdata->shmblocks = (ipc_shmem_block *)((void *)userdata->shmaddr   + sizeof(ipc_shmem_header));
 	userdata->shmdata   = (void *)           ((void *)userdata->shmblocks + nitems * sizeof(ipc_shmem_block));
-	userdata->item_size = item_size;
-	userdata->nitems    = nitems;
 	userdata->inited    = 1;
 	
 	if(userdata->role == ROLE_SERVER){
+		userdata->shmaddr->item_size = item_size;
+		userdata->shmaddr->nitems    = nitems;
+		
 		shmem_init(userdata);
 		
 		// start threads
@@ -195,8 +170,7 @@ ssize_t ipc_shmem_destroy (ipc_t *ipc){ // {{{
 		if(pthread_join(userdata->server_thr, &res) != 0)
 			goto error;
 		
-		sem_destroy(&userdata->shmaddr->sem[WND_WRITE]);
-		sem_destroy(&userdata->shmaddr->sem[WND_READ]);
+		shmem_destroy(userdata);
 	}
 	
 error:
@@ -206,11 +180,28 @@ error:
 } // }}}
 ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	ssize_t             ret;
-	uint32_t            blockid;
+	ipc_shmem_block    *block;
+	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
-	ret = shmem_do(ipc, WND_WRITE,  &callb_write,  request, &blockid);
-	//ret = 0x0000BEEF;
-	ret = shmem_do(ipc, WND_RETURN, &callb_return, request, &blockid);
+	if( (block = shmem_get_block(userdata, STATUS_FREE, STATUS_WRITING)) == NULL)
+		return_error(-EFAULT, "strange error\n");
+	
+	// write request
+	hash_to_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
+	
+	if(shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN) < 0)
+		return_error(-EFAULT, "strange error 2\n");
+	
+	// wait for answer
+	sem_wait(&block->sem_done);
+	
+	// read request back
+	hash_reread_from_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
+	ret = block->query_ret;
+	
+	if(shmem_block_status(userdata, block, STATUS_DONE, STATUS_FREE) < 0)
+		return_error(-EFAULT, "strange error 3\n");
+	
 	return ret;
 } // }}}
 

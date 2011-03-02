@@ -32,7 +32,6 @@ START_TEST(test_backend_ipc){
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("server")                      },
 				{ HK(key),         DATA_INT32(1000)                           },
-				{ HK(size),        DATA_SIZET(10)                             },
 				hash_end
 			)},
 			{ 0, DATA_HASHT(
@@ -40,7 +39,6 @@ START_TEST(test_backend_ipc){
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("client")                      },
 				{ HK(key),         DATA_INT32(1000)                           },
-				{ HK(size),        DATA_SIZET(10)                             },
 				hash_end
 			)},
 			hash_end
@@ -98,7 +96,6 @@ START_TEST(test_backend_ipc_speed){
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("server")                      },
 				{ HK(key),         DATA_INT32(1001)                           },
-				{ HK(size),        DATA_SIZET(100)                            },
 				hash_end
 			)},
 			{ 0, DATA_HASHT(
@@ -106,7 +103,6 @@ START_TEST(test_backend_ipc_speed){
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("client")                      },
 				{ HK(key),         DATA_INT32(1001)                           },
-				{ HK(size),        DATA_SIZET(100)                            },
 				hash_end
 			)},
 			hash_end
