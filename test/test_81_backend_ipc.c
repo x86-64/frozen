@@ -1,22 +1,4 @@
 
-void timersub (x, y, result)
-        struct timeval *result, *x, *y; 
-{
-    
-        if (x->tv_usec < y->tv_usec) {
-                int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-                y->tv_usec -= 1000000 * nsec;
-                y->tv_sec += nsec;
-        }   
-        if (x->tv_usec - y->tv_usec > 1000000) {
-                int nsec = (x->tv_usec - y->tv_usec) / 1000000;
-                y->tv_usec += 1000000 * nsec;
-                y->tv_sec -= nsec;
-        }   
-        result->tv_sec = x->tv_sec - y->tv_sec;
-        result->tv_usec = x->tv_usec - y->tv_usec;
-}
-
 START_TEST(test_backend_ipc){
 	backend_t  *backend;
 	
@@ -80,7 +62,26 @@ START_TEST(test_backend_ipc){
 END_TEST
 REGISTER_TEST(core, test_backend_ipc)
 
+/*
 #define NTESTS 100000
+
+void timersub (x, y, result)
+        struct timeval *result, *x, *y; 
+{
+    
+        if (x->tv_usec < y->tv_usec) {
+                int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+                y->tv_usec -= 1000000 * nsec;
+                y->tv_sec += nsec;
+        }   
+        if (x->tv_usec - y->tv_usec > 1000000) {
+                int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+                y->tv_usec += 1000000 * nsec;
+                y->tv_sec -= nsec;
+        }   
+        result->tv_sec = x->tv_sec - y->tv_sec;
+        result->tv_usec = x->tv_usec - y->tv_usec;
+}
 
 START_TEST(test_backend_ipc_speed){
 	backend_t  *backend;
@@ -110,7 +111,6 @@ START_TEST(test_backend_ipc_speed){
 		hash_end
 	};
 	
-	/* create backend */
 	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
@@ -146,4 +146,5 @@ START_TEST(test_backend_ipc_speed){
 	backend_destroy(backend);
 }
 END_TEST
-REGISTER_TEST(core, test_backend_ipc_speed)
+REEEGISTER_TEST(core, test_backend_ipc_speed)
+*/

@@ -96,7 +96,7 @@ ssize_t     chain_next_query   (chain_t *chain, request_t *request){
 /* }}}1 */
 
 /* backends - private {{{1 */
-static int backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chain){
+static ssize_t backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chain){
 	ssize_t    ret;
 	chain_t   *chain;
 	char      *chain_name;
@@ -127,7 +127,7 @@ cleanup:
 	return ITER_BREAK;
 }
 
-static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
+static ssize_t backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	backend_t *backend = (backend_t *)p_backend;
 	
 	if(strcmp(backend->name, p_name) == 0){
@@ -137,7 +137,7 @@ static int backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
 	return ITER_CONTINUE;
 }
 
-static int backend_iter_backend_new(hash_t *config, void *null1, void *null2){
+static ssize_t backend_iter_backend_new(hash_t *config, void *null1, void *null2){
 	if(data_value_type(hash_item_data(config)) != TYPE_HASHT)
 		return ITER_CONTINUE;
 	

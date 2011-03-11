@@ -58,13 +58,13 @@ lib_LTLIBRARIES=libfrozen.la
 libfrozen_la_LDFLAGS= -module -avoid-version
 libfrozen_la_CPPFLAGS= -fvisibility=hidden
 libfrozen_la_SOURCES=   data.h                                  \
-			libfrozen.c         libfrozen.h         \
 			list.c              list.h              \
 			buffer.c            buffer.h            \
 			data_protos.m4                          \
-			data.c                                  \
-			hash.c              hash.h              \
 			hashkeys.h                              \
+			hash.c              hash.h              \
+			data.c                                  \
+			libfrozen.c         libfrozen.h         \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			configs/config.h                        \
@@ -72,9 +72,6 @@ libfrozen_la_SOURCES=   data.h                                  \
 			configs/config_parser.tab.c             \
 			configs/config_parser.lex.c             \
 			public.h
-
-libfrozen.c: data.h data.c
-hash.h: hashkeys.h
 
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@

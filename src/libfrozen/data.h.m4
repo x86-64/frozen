@@ -114,7 +114,7 @@ API int                  data_cmp               (data_t *data1, data_ctx_t *data
 API int                  data_arithmetic        (char operator, data_t *operand1, data_ctx_t *operand1_ctx, data_t *operand2, data_ctx_t *operand2_ctx);
 
 API ssize_t              data_convert           (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
-API int                  data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
+API ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx);
 
 API ssize_t              data_alloc             (data_t *dst, data_type type, size_t size);
 API ssize_t              data_copy              (data_t *dst, data_t *src);

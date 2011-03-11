@@ -32,8 +32,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = i686-pc-linux-gnu
-host_triplet = i686-pc-linux-gnu
+build_triplet = x86_64-unknown-linux-gnu
+host_triplet = x86_64-unknown-linux-gnu
 subdir = src/libfrozen
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -87,9 +87,9 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/rewrite/libfrozen_la-rule_parser.tab.lo \
 	backends/rewrite/libfrozen_la-rule_parser.lex.lo \
 	backends/insert-sort/libfrozen_la-insert-sort.lo
-am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
-	libfrozen_la-list.lo libfrozen_la-buffer.lo \
-	libfrozen_la-data.lo libfrozen_la-hash.lo $(am__objects_1) \
+am_libfrozen_la_OBJECTS = libfrozen_la-list.lo libfrozen_la-buffer.lo \
+	libfrozen_la-hash.lo libfrozen_la-data.lo \
+	libfrozen_la-libfrozen.lo $(am__objects_1) \
 	libfrozen_la-backend.lo \
 	configs/libfrozen_la-config_parser.tab.lo \
 	configs/libfrozen_la-config_parser.lex.lo
@@ -115,13 +115,13 @@ DIST_SOURCES = $(libfrozen_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run tar
+ACLOCAL = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run aclocal-1.11
+AMTAR = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run automake-1.11
-AWK = /usr/bin/gawk
+AUTOCONF = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run automake-1.11
+AWK = /bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -150,18 +150,18 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/i686-pc-linux-gnu/bin/ld
+LD = /usr/x86_64-pc-linux-gnu/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = -lpthread 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
-LS = /usr/bin/ls
+LS = /bin/ls
 LTLIBOBJS = 
 M4 = /usr/bin/m4
-MAKEINFO = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/missing --run makeinfo
-MKDIR_P = /usr/bin/mkdir -p
+MAKEINFO = ${SHELL} /home/projects/dev-db/frozen/build-aux/missing --run makeinfo
+MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -178,6 +178,8 @@ PACKAGE_VERSION = 0.1.0
 PATH_SEPARATOR = :
 PERL = /usr/bin/perl
 PKG_CONFIG = /usr/bin/pkg-config
+PKG_CONFIG_LIBDIR = 
+PKG_CONFIG_PATH = 
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
@@ -185,10 +187,10 @@ SHELL = /bin/sh
 STRIP = strip
 SWIG = /usr/bin/swig
 VERSION = 0.1.0
-abs_builddir = /home/user/crypted/projects/dev-db/frozen/src/libfrozen
-abs_srcdir = /home/user/crypted/projects/dev-db/frozen/src/libfrozen
-abs_top_builddir = /home/user/crypted/projects/dev-db/frozen
-abs_top_srcdir = /home/user/crypted/projects/dev-db/frozen
+abs_builddir = /home/projects/dev-db/frozen/src/libfrozen
+abs_srcdir = /home/projects/dev-db/frozen/src/libfrozen
+abs_top_builddir = /home/projects/dev-db/frozen
+abs_top_srcdir = /home/projects/dev-db/frozen
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 am__include = include
@@ -197,33 +199,32 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = i686-pc-linux-gnu
+build = x86_64-unknown-linux-gnu
 build_alias = 
-build_cpu = i686
+build_cpu = x86_64
 build_os = linux-gnu
-build_vendor = pc
+build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = i686-pc-linux-gnu
+host = x86_64-unknown-linux-gnu
 host_alias = 
-host_cpu = i686
+host_cpu = x86_64
 host_os = linux-gnu
-host_vendor = pc
+host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/user/crypted/projects/dev-db/frozen/build-aux/install-sh
+install_sh = ${SHELL} /home/projects/dev-db/frozen/build-aux/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
-lt_ECHO = echo
 mandir = ${datarootdir}/man
-mkdir_p = /usr/bin/mkdir -p
+mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local
@@ -296,13 +297,13 @@ lib_LTLIBRARIES = libfrozen.la
 libfrozen_la_LDFLAGS = -module -avoid-version
 libfrozen_la_CPPFLAGS = -fvisibility=hidden
 libfrozen_la_SOURCES = data.h                                  \
-			libfrozen.c         libfrozen.h         \
 			list.c              list.h              \
 			buffer.c            buffer.h            \
 			data_protos.m4                          \
-			data.c                                  \
-			hash.c              hash.h              \
 			hashkeys.h                              \
+			hash.c              hash.h              \
+			data.c                                  \
+			libfrozen.c         libfrozen.h         \
 			$(backends_sources)                     \
 			backend.c           backend.h           \
 			configs/config.h                        \
@@ -561,13 +562,6 @@ include configs/$(DEPDIR)/libfrozen_la-config_parser.tab.Plo
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LTCOMPILE) -c -o $@ $<
 
-libfrozen_la-libfrozen.lo: libfrozen.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-libfrozen.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-libfrozen.Tpo -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-	$(am__mv) $(DEPDIR)/libfrozen_la-libfrozen.Tpo $(DEPDIR)/libfrozen_la-libfrozen.Plo
-#	source='libfrozen.c' object='libfrozen_la-libfrozen.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-
 libfrozen_la-list.lo: list.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-list.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-list.Tpo -c -o libfrozen_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
 	$(am__mv) $(DEPDIR)/libfrozen_la-list.Tpo $(DEPDIR)/libfrozen_la-list.Plo
@@ -582,6 +576,13 @@ libfrozen_la-buffer.lo: buffer.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
 
+libfrozen_la-hash.lo: hash.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-hash.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-hash.Tpo -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+	$(am__mv) $(DEPDIR)/libfrozen_la-hash.Tpo $(DEPDIR)/libfrozen_la-hash.Plo
+#	source='hash.c' object='libfrozen_la-hash.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+
 libfrozen_la-data.lo: data.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-data.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-data.Tpo -c -o libfrozen_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
 	$(am__mv) $(DEPDIR)/libfrozen_la-data.Tpo $(DEPDIR)/libfrozen_la-data.Plo
@@ -589,12 +590,12 @@ libfrozen_la-data.lo: data.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
 
-libfrozen_la-hash.lo: hash.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-hash.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-hash.Tpo -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-	$(am__mv) $(DEPDIR)/libfrozen_la-hash.Tpo $(DEPDIR)/libfrozen_la-hash.Plo
-#	source='hash.c' object='libfrozen_la-hash.lo' libtool=yes \
+libfrozen_la-libfrozen.lo: libfrozen.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-libfrozen.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-libfrozen.Tpo -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
+	$(am__mv) $(DEPDIR)/libfrozen_la-libfrozen.Tpo $(DEPDIR)/libfrozen_la-libfrozen.Plo
+#	source='libfrozen.c' object='libfrozen_la-libfrozen.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
 
 backends/libfrozen_la-null-proxy.lo: backends/null-proxy.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-null-proxy.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-null-proxy.Tpo -c -o backends/libfrozen_la-null-proxy.lo `test -f 'backends/null-proxy.c' || echo '$(srcdir)/'`backends/null-proxy.c
@@ -955,9 +956,6 @@ uninstall-am: uninstall-libLTLIBRARIES
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-libLTLIBRARIES
 
-
-libfrozen.c: data.h data.c
-hash.h: hashkeys.h
 
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@

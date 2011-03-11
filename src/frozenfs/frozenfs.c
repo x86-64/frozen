@@ -453,7 +453,7 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 	};
 	ret = backend_query(fh->ud->backend, r_read);
 	
-	printf("read: %x bytes from %llx. ret: %x, data: %s\n", (int)size, off, (int)ret, buf);
+	printf("read: %x bytes from %x. ret: %x, data: %s\n", (int)size, (int)off, (int)ret, buf);
 	
 	return (ret < 0) ? 0 : (int)ret; //(int)size;
 }
@@ -476,7 +476,7 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	};
 	ret = backend_query(fh->ud->backend, r_write);
 	
-	printf("write: %x bytes from %llx. ret: %x\n", (int)size, off, (int)ret);
+	printf("write: %x bytes from %x. ret: %x\n", (int)size, (int)off, (int)ret);
 	
 	return (ret < 0) ?
 		0 :

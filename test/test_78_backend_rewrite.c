@@ -79,14 +79,14 @@ START_TEST (test_backend_rewrite){
 		"request['size'] = length((size_t)'30');"
 		"ret = pass(request);";
 	ret = test_diff_rewrite(rules_length_key, req_create);
-		fail_unless(ret == 4, "backend rewrite rules rules_length_key failed\n");
+		fail_unless(ret == 4 || ret == 8, "backend rewrite rules rules_length_key failed\n");
 	// }}}
 	// calc data length of key {{{
 	char rules_data_length_key[] =
 		"request['size'] = data_length((size_t)'30');"
 		"ret = pass(request);";
 	ret = test_diff_rewrite(rules_data_length_key, req_create);
-		fail_unless(ret == 4, "backend rewrite rules rules_data_length_key failed\n");
+		fail_unless(ret == 4 || ret == 8, "backend rewrite rules rules_data_length_key failed\n");
 	// }}}
 	// do arith of key {{{
 	char rules_arith_key[] =
