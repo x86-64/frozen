@@ -24,6 +24,7 @@ typedef struct mphf_userdata {
 	
 	hash_key_t           key_from;
 	hash_key_t           key_to;
+	hash_key_t           keyid;
 } mphf_userdata;
 
 mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
@@ -112,6 +113,13 @@ uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key
 }
 /* }}} */
 
+static uint64_t mphf_key_str_to_key(mphf_t *mphf, char *key, size_t key_len){ // {{{
+	uint64_t value = 0;
+	
+	// TODO 64-bit
+	mphf->hash->func_hash32(0, key, key_len, (uint32_t *)&value, 1);
+	return value;
+} // }}}
 static ssize_t mphf_build_start(mphf_userdata *userdata, mphf_build_control event){ // {{{
 	if(userdata->build_start == event){
 		if(userdata->mphf_proto->func_build_start(&userdata->mphf) < 0)
@@ -130,7 +138,7 @@ static ssize_t mphf_build_end(mphf_userdata *userdata, mphf_build_control event)
 	}
 	return 0;
 } // }}}
-static ssize_t mphf_insert(mphf_userdata *userdata, void *key_ptr, size_t key_size, off_t value){ // {{{
+static ssize_t mphf_insert(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
 	ssize_t   ret;
 	
 	// start build
@@ -140,8 +148,7 @@ static ssize_t mphf_insert(mphf_userdata *userdata, void *key_ptr, size_t key_si
 	// insert item
 	if( (ret = userdata->mphf_proto->func_insert(
 		&userdata->mphf, 
-		key_ptr,
-		key_size,
+		keyid,
 		value
 	)) < 0)
 		goto error;
@@ -160,6 +167,7 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	DT_OFFT   count = 0;
 	char     *buffer;
 	data_t   *key;
+	uint64_t  keyid;
 	
 	// count elements
 	request_t r_count[] = {
@@ -188,6 +196,7 @@ redo:
 	for(i=0; i<count; i++){
 		request_t r_read[] = {
 			{ HK(action),          DATA_INT32(ACTION_CRWD_READ)            },
+			{ userdata->keyid,     DATA_VOID                               },
 			{ userdata->key_from,  DATA_VOID                               },
 			{ userdata->key_to,    DATA_OFFT(i)                            },
 			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
@@ -199,19 +208,24 @@ redo:
 			break;
 		}
 		
-		hash_data_find(r_read, userdata->key_from, &key, NULL);
+		hash_data_find(r_read, userdata->keyid,    &key, NULL);
 		if(key == NULL){
-			//printf("failed hash\n");
-			ret = -EFAULT;
-			break;
+			hash_data_find(r_read, userdata->key_from, &key, NULL);
+			if(key == NULL){
+				//printf("failed hash\n");
+				ret = -EFAULT;
+				break;
+			}
+			
+			keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_len(key, NULL));
+		}else{
+			keyid = 0;
+			data_to_dt(ret, TYPE_INT64, keyid, key, NULL); 
 		}
-		
-		//printf("key: %.*s value: %llx\n", data_value_len(key), (char *)data_value_ptr(key), i);
+		//printf("key: %lx value: %x\n", keyid, (int)i);
 		
 		if( (ret = mphf_insert(userdata,
-			data_value_ptr(key),
-			//data_len2raw(data_value_type(key), data_len(key, NULL)),
-			data_len(key, NULL),
+			keyid,
 			i
 		)) < 0){
 			if(ret == -EBADF) goto redo; // bad mphf
@@ -253,8 +267,10 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_STRING        mphf_type_str   = NULL;
 	DT_STRING        key_from_str    = "key";
 	DT_STRING        key_to_str      = "offset";
+	DT_STRING        keyid_str       = NULL;
 	DT_STRING        build_start_str = NULL;
 	DT_STRING        build_end_str   = NULL;
+	DT_STRING        hash_type_str   = "jenkins";
 	DT_STRING        backend_name;
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
@@ -262,9 +278,11 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
 	hash_data_copy(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRING, keyid_str,       config, HK(keyid));
 	hash_data_copy(ret, TYPE_STRING, build_start_str, config, HK(build_start));
 	hash_data_copy(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
 	hash_data_copy(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_STRING, hash_type_str,   config, HK(hash));
 	hash_data_copy(ret, TYPE_STRING, backend_name,    config, HK(backend));
 	if(ret != 0)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' not supplied\n");
@@ -278,16 +296,18 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 		return_error(-EINVAL, "chain 'mphf' parameter 'build_end' invalid\n");
 	
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
+	if((userdata->mphf.hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
+		return_error(-EINVAL, "chain 'mphf' parameter 'hash' invalid\n");
 	if( (userdata->mphf.backend = backend_acquire(backend_name)) == NULL)
 		return_error(-EINVAL, "chain 'mphf' parameter 'backend' invalid\n");
-	
 	if( (userdata->mphf.config  = hash_copy(config)) == NULL)
-		return -ENOMEM;
+		return_error(-ENOMEM, "chain 'mphf' insufficent memory\n");
 	
 	userdata->mphf.offset     = 0;
 	userdata->mphf.build_data = NULL;
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
+	userdata->keyid           = hash_string_to_key(keyid_str);
 	userdata->backend_data    = chain;
 	userdata->buffer_size     = buffer_size;
 	
@@ -311,14 +331,18 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	ssize_t          ret;
 	data_t          *key;
 	off_t            key_out;
+	uint64_t         keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)
 		return chain_next_query(chain, request);
 	
+	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
+	
 	// get new key_out
 	request_t r_next[] = {
+		{ userdata->keyid,     DATA_PTR_INT64(&keyid)  },
 		{ HK(offset_out),      DATA_PTR_OFFT(&key_out) },
 		hash_next(request)
 	};
@@ -326,7 +350,7 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 		goto error;
 	
 	// insert key
-	if( (ret = mphf_insert(userdata, data_value_ptr(key), data_value_len(key), key_out)) == -EBADF)
+	if( (ret = mphf_insert(userdata, keyid, key_out)) == -EBADF)
 		ret = mphf_rebuild(userdata);
 
 error:
@@ -334,14 +358,15 @@ error:
 } // }}}
 static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
 	data_t          *key;
-	uint64_t         key_out;
+	uint64_t         key_out, keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)
 		return chain_next_query(chain, request);
 	
-	switch(userdata->mphf_proto->func_query(&userdata->mphf, data_value_ptr(key), data_value_len(key), &key_out)){
+	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
+	switch(userdata->mphf_proto->func_query(&userdata->mphf, keyid, &key_out)){
 		case MPHF_QUERY_NOTFOUND: return -EBADF;
 		case MPHF_QUERY_FOUND:;
 			request_t r_next[] = {

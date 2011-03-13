@@ -57,21 +57,21 @@ EXTRA_DIST=                                     \
 lib_LTLIBRARIES=libfrozen.la
 libfrozen_la_LDFLAGS= -module -avoid-version
 libfrozen_la_CPPFLAGS= -fvisibility=hidden
-libfrozen_la_SOURCES=   data.h                                  \
-			list.c              list.h              \
-			buffer.c            buffer.h            \
-			data_protos.m4                          \
-			hashkeys.h                              \
-			hash.c              hash.h              \
-			data.c                                  \
-			libfrozen.c         libfrozen.h         \
-			$(backends_sources)                     \
-			backend.c           backend.h           \
-			configs/config.h                        \
-			configs/config_parser.tab.h             \
-			configs/config_parser.tab.c             \
-			configs/config_parser.lex.c             \
-			public.h
+libfrozen_la_SOURCES=  \
+                        libfrozen.h     libfrozen.c                          \   
+                        data_protos.m4  data.c                               \   
+                        hash.h          hash.c                               \   
+                        list.h          list.c                               \   
+                        buffer.h        buffer.c                             \   
+                        $(backends_sources)                     \   
+                        backend.c           backend.h           \   
+                        configs/config.h                        \   
+                        configs/config_parser.tab.h             \   
+                        configs/config_parser.tab.c             \   
+                        configs/config_parser.lex.c             \   
+                        public.h
+
+libfrozen.c: data.h hashkeys.h
 
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@

@@ -18,6 +18,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 	ssize_t          ret;
 	data_t          *curr_data;
 	data_ctx_t      *curr_ctx;
+	data_t           need_data;
 	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
 	
 	hash_data_find(iter_ctx->values, element->key, &curr_data, &curr_ctx);
@@ -48,11 +49,15 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 		
 		// TODO IMPORTANT bad packing, TYPE_BINARY in troubles
 		
-		size_t rawlen = data_rawlen(curr_data, curr_ctx);
+		data_convert_to_local(ret, data_value_type(hash_item_data(element)), &need_data, curr_data, curr_ctx);
+		if(ret < 0)
+			return ITER_BREAK;
+		
+		size_t rawlen = data_rawlen(&need_data, NULL);
 		
 		ret = data_write(
 			iter_ctx->buffer, iter_ctx->ctx, iter_ctx->curr_offset,
-			data_value_ptr(curr_data), rawlen
+			data_value_ptr(&need_data), rawlen
 		);
 		
 		iter_ctx->curr_offset += ret;

@@ -24,9 +24,9 @@ typedef ssize_t  (*mphf_func_build_start) (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_build_end)   (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_clean)       (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_destroy)     (mphf_t *mphf);
-typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, char *key, size_t key_len, uint64_t  value);
-typedef ssize_t  (*mphf_func_query)       (mphf_t *mphf, char *key, size_t key_len, uint64_t *value);
-typedef ssize_t  (*mphf_func_delete)      (mphf_t *mphf, char *key, size_t key_len);
+typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, uint64_t key, uint64_t  value);
+typedef ssize_t  (*mphf_func_query)       (mphf_t *mphf, uint64_t key, uint64_t *value);
+typedef ssize_t  (*mphf_func_delete)      (mphf_t *mphf, uint64_t key);
 
 typedef uint32_t (*mphf_hash_hash32)      (uint32_t seed, char *k, size_t keylen, uint32_t hashes[], size_t nhashes);
 
@@ -35,6 +35,7 @@ struct mphf_t {
 	backend_t               *backend;
 	void                    *build_data;
 	uint64_t                 offset;
+	mphf_hash_proto_t       *hash;
 	
 	char                     data[112];
 };

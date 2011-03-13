@@ -123,8 +123,11 @@ API ssize_t              data_write             (data_t *dst, data_ctx_t *dst_ct
 API ssize_t              data_validate          (data_t *data);
 API void                 data_free              (data_t *data);
 
+_inline
 API data_type            data_value_type        (data_t *data); // TODO deprecate this
+_inline
 API void *               data_value_ptr         (data_t *data); // TODO deprecate this
+_inline
 API size_t               data_value_len         (data_t *data); // TODO deprecate this
 
 #define data_alloc_local(_dst,_type,_size) {                       \

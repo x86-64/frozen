@@ -3,8 +3,8 @@
 #include <backends/mphf/mphf_chm_imp.h>
 
 typedef struct chm_imp_params_t {
-	uint32_t            hash1;
-	//uint32_t            hash2;
+	uint64_t            hash1;
+	uint64_t            hash2;
 } chm_imp_params_t;
 
 typedef struct chm_imp_gparams_t { // TODO move to params_t
@@ -22,7 +22,6 @@ typedef struct chm_imp_t {
 	uint32_t            filled;
 	
 	chm_imp_params_t    params;
-	mphf_hash_proto_t  *hash;
 	uint64_t            nvertex;
 	uint32_t            bt_value;
 	uint32_t            bt_vertex;
@@ -47,8 +46,8 @@ typedef struct vertex_list_t {
 
 #define CHM_CONST 209
 #define N_INITIAL_DEFAULT    256
+#define KEY_BITS_DEFAULT     32
 #define VALUE_BITS_DEFAULT   32
-#define HASH_TYPE_DEFAULT    "jenkins"
 #define BITS_TO_BYTES(x) ( ((x - 1) >> 3) + 1)
 
 static char clean[100] = {0};
@@ -74,8 +73,8 @@ static ssize_t fill_data       (mphf_t *mphf){ // {{{
 	uint64_t   nvertex;
 	DT_INT32   persistent    = 0;
 	DT_INT64   nelements     = N_INITIAL_DEFAULT;
+	//uint32_t   bkey          = KEY_BITS_DEFAULT;
 	DT_INT32   bvalue        = VALUE_BITS_DEFAULT;
-	DT_STRING  hash_type_str = HASH_TYPE_DEFAULT;
 	chm_imp_t *data          = (chm_imp_t *)&mphf->data;
 	
 	if((data->filled & 0x1) != 0)
@@ -84,10 +83,7 @@ static ssize_t fill_data       (mphf_t *mphf){ // {{{
 	hash_data_copy(ret, TYPE_INT32,  persistent,    mphf->config, HK(persistent)); // if 1 - graph stored in file
 	hash_data_copy(ret, TYPE_INT64,  nelements,     mphf->config, HK(nelements));  // number of elements
 	hash_data_copy(ret, TYPE_INT32,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
-	hash_data_copy(ret, TYPE_STRING, hash_type_str, mphf->config, HK(hash));       // hash function
-	
-	if((data->hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
-		return -EINVAL;
+	//hash_data_copy(ret, TYPE_INT32,  bkey,          mphf->config, HK(key_bits));   // number of bits per key to store
 	
 	// nvertex = (2.09 * nelements)
 	nvertex = nelements;
@@ -422,7 +418,7 @@ ssize_t mphf_chm_imp_clean       (mphf_t *mphf){ // {{{
 	
 	srandom(time(NULL));
 	data->params.hash1 = random();
-	//data->params.hash2 = random();
+	data->params.hash2 = random();
 	
 	if(mphf_store_write (mphf->backend, mphf->offset, &data->params, sizeof(data->params)) < 0) return -EFAULT;
 	//if(mphf_store_write(mphf->backend, mphf->offset + data.store_gp_offset, &data...., sizeof(chm_imp_gparams_t)) < 0) return -EFAULT;
@@ -444,8 +440,7 @@ ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
 	return 0;
 } // }}}
 
-ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  value){ // {{{
-	uint32_t               hash[2];
+ssize_t mphf_chm_imp_insert (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
 	uint64_t               vertex[2];
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
@@ -455,25 +450,18 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  
 	if(fill_params(mphf) < 0)
 		return -EINVAL;
 	
-	// TODO 64-bit
-	data->hash->func_hash32(data->params.hash1, key, key_len, (uint32_t *)&hash, 2);
-	//data->hash->func_hash32(data->params.hash2, key, key_len, (uint32_t *)&hash[1], 1);
-	
-	vertex[0] = (hash[0] % data->nvertex);
-	vertex[1] = (hash[1] % data->nvertex);
-	//vertex[1] = ((hash[1] ^ data->params.hash2) % data->nvertex);
+	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
+	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
 		return -EBADF;
 	
-	//printf("mphf: insert: %.*s value: %.8llx v:{%llx,%llx:%x:%d}\n",
-	//	key_len, key, value, vertex[0], vertex[1], data->params.hash1, key_len
+	//printf("mphf: insert: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
+	//	key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
 	//);
-	
 	return graph_add_edge(mphf, (uint64_t *)&vertex, value);
 } // }}}
-ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *value){ // {{{
-	uint32_t               hash[2];
+ssize_t mphf_chm_imp_query  (mphf_t *mphf, uint64_t key, uint64_t *value){ // {{{
 	uint64_t               vertex[2], g[2];
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
@@ -483,13 +471,8 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *
 	if(fill_params(mphf) < 0)
 		return -EINVAL;
 	
-	// TODO 64-bit
-	data->hash->func_hash32(data->params.hash1, key, key_len, (uint32_t *)&hash, 2);
-	//data->hash->func_hash32(data->params.hash2, key, key_len, (uint32_t *)&hash[1], 1);
-	
-	vertex[0] = (hash[0] % data->nvertex);
-	vertex[1] = (hash[1] % data->nvertex);
-	//vertex[1] = ((hash[1] ^ data->params.hash2) % data->nvertex);
+	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
+	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
 		return MPHF_QUERY_NOTFOUND;
@@ -499,12 +482,12 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, char *key, size_t key_len, uint64_t *
 	
 	*value = (g[0] + g[1]) & ( ( 1 << (data->bt_vertex << 3) ) - 1);
 	
-	//printf("mphf: query %.*s value: %.8llx v:{%llx,%llx:%x:%d}\n",
-	//	key_len, key, *value, vertex[0], vertex[1], data.params.hash1, key_len
+	//printf("mphf: query %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
+	//	key, *value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
 	//);
 	return MPHF_QUERY_FOUND;
 } // }}}
-ssize_t mphf_chm_imp_delete (mphf_t *mphf, char *key, size_t key_len){ // {{{
+ssize_t mphf_chm_imp_delete (mphf_t *mphf, uint64_t key){ // {{{
 	return -EINVAL;
 } // }}}
 
