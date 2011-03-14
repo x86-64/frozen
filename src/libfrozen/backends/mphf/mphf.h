@@ -25,6 +25,7 @@ typedef ssize_t  (*mphf_func_build_end)   (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_clean)       (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_destroy)     (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, uint64_t key, uint64_t  value);
+typedef ssize_t  (*mphf_func_update)      (mphf_t *mphf, uint64_t key, uint64_t  value);
 typedef ssize_t  (*mphf_func_query)       (mphf_t *mphf, uint64_t key, uint64_t *value);
 typedef ssize_t  (*mphf_func_delete)      (mphf_t *mphf, uint64_t key);
 
@@ -48,6 +49,7 @@ struct mphf_proto_t {
 	mphf_func_destroy        func_destory;
 	
 	mphf_func_insert         func_insert;
+	mphf_func_update         func_update;
 	mphf_func_query          func_query;
 	mphf_func_delete         func_delete;
 };
@@ -77,6 +79,7 @@ static mphf_proto_t mphf_protos[] = {
 		.func_clean         = mphf_chm_imp_clean,
 		.func_destory       = mphf_chm_imp_destroy,
 		.func_insert        = mphf_chm_imp_insert,
+		.func_update        = mphf_chm_imp_update,
 		.func_query         = mphf_chm_imp_query,
 		.func_delete        = mphf_chm_imp_delete
 	}

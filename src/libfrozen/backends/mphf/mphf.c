@@ -24,6 +24,7 @@ typedef struct mphf_userdata {
 	
 	hash_key_t           key_from;
 	hash_key_t           key_to;
+	hash_key_t           offset_out;
 	hash_key_t           keyid;
 } mphf_userdata;
 
@@ -161,6 +162,29 @@ error:
 	
 	return ret;
 } // }}}
+static ssize_t mphf_update(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
+	ssize_t   ret;
+	
+	// start build
+	if(mphf_build_start(userdata, BUILD_ONREQUEST) < 0)
+		return -EFAULT;
+	
+	// insert item
+	if( (ret = userdata->mphf_proto->func_update(
+		&userdata->mphf, 
+		keyid,
+		value
+	)) < 0)
+		goto error;
+	
+	ret = 0;
+error:
+	// stop build
+	if(mphf_build_end(userdata, BUILD_ONREQUEST) < 0)
+		ret = -EFAULT;
+	
+	return ret;
+} // }}}
 static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	ssize_t   ret;
 	DT_OFFT   i;
@@ -264,10 +288,11 @@ static int mphf_destroy(chain_t *chain){ // {{{
 static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_INT64         buffer_size     = BUFFER_SIZE_DEFAULT;
 	DT_INT64         count           = 0;
-	DT_STRING        mphf_type_str   = NULL;
 	DT_STRING        key_from_str    = "key";
 	DT_STRING        key_to_str      = "offset";
+	DT_STRING        offset_out_str  = "offset_out";
 	DT_STRING        keyid_str       = NULL;
+	DT_STRING        mphf_type_str   = NULL;
 	DT_STRING        build_start_str = NULL;
 	DT_STRING        build_end_str   = NULL;
 	DT_STRING        hash_type_str   = "jenkins";
@@ -275,10 +300,12 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
-	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
 	hash_data_copy(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRING, offset_out_str,  config, HK(offset_out));
 	hash_data_copy(ret, TYPE_STRING, keyid_str,       config, HK(keyid));
+	
+	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_STRING, build_start_str, config, HK(build_start));
 	hash_data_copy(ret, TYPE_STRING, build_end_str,   config, HK(build_end));
 	hash_data_copy(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
@@ -307,6 +334,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->mphf.build_data = NULL;
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
+	userdata->offset_out      = hash_string_to_key(offset_out_str);
 	userdata->keyid           = hash_string_to_key(keyid_str);
 	userdata->backend_data    = chain;
 	userdata->buffer_size     = buffer_size;
@@ -342,8 +370,8 @@ static ssize_t mphf_backend_insert(chain_t *chain, request_t *request){ // {{{
 	
 	// get new key_out
 	request_t r_next[] = {
-		{ userdata->keyid,     DATA_PTR_INT64(&keyid)  },
-		{ HK(offset_out),      DATA_PTR_OFFT(&key_out) },
+		{ userdata->keyid,      DATA_PTR_INT64(&keyid)  },
+		{ userdata->offset_out, DATA_PTR_OFFT(&key_out) },
 		hash_next(request)
 	};
 	if( (ret = chain_next_query(chain, r_next)) < 0)
@@ -357,8 +385,9 @@ error:
 	return ret;
 } // }}}
 static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
+	ssize_t          ret;
 	data_t          *key;
-	uint64_t         key_out, keyid;
+	uint64_t         key_out, key_new_out, keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
@@ -368,12 +397,25 @@ static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
 	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
 	switch(userdata->mphf_proto->func_query(&userdata->mphf, keyid, &key_out)){
 		case MPHF_QUERY_NOTFOUND: return -EBADF;
-		case MPHF_QUERY_FOUND:;
+		case MPHF_QUERY_FOUND:
+			key_new_out = key_out;
+			
 			request_t r_next[] = {
-				{ userdata->key_to, DATA_PTR_OFFT(&key_out) },
+				{ userdata->key_to,     DATA_PTR_OFFT(&key_out)     },
+				{ userdata->offset_out, DATA_PTR_OFFT(&key_new_out) },
 				hash_next(request)
 			};
-			return chain_next_query(chain, r_next);
+			ret = chain_next_query(chain, r_next);
+			
+			if(key_out != key_new_out){
+				// TODO ret & rebuild?
+				if(mphf_update(userdata, keyid, key_new_out) < 0)
+					return -EFAULT;
+			}
+			
+			// TODO pass captured offset_out 
+			
+			return ret;
 	}
 	return 0;
 } // }}}
