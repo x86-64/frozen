@@ -59,7 +59,7 @@ hash_key_t         hash_string_to_key           (char *string){ // {{{
 	}
 	exit(0);
 	*/
-	
+
 	if((ret = bsearch(&key, hash_keys,
 		hash_keys_nelements, hash_keys_size,
 		&hash_bsearch_string)) == NULL)

@@ -19,17 +19,14 @@ REGISTER_KEY(block_vid)
 REGISTER_KEY(blocks)
 REGISTER_KEY(buffer)
 REGISTER_KEY(buffer_size)
-REGISTER_KEY(build_start)
 REGISTER_KEY(build_end)
+REGISTER_KEY(build_start)
 REGISTER_KEY(chains)
 REGISTER_KEY(count)
 REGISTER_KEY(direction)
-
-// TODO IMPORTANT remove it
 REGISTER_KEY(dns_domain)
 REGISTER_KEY(dns_ip)
 REGISTER_KEY(dns_tstamp)
-
 REGISTER_KEY(engine)
 REGISTER_KEY(field)
 REGISTER_KEY(file)
