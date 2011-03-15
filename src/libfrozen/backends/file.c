@@ -38,14 +38,6 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	// apply size limits
 	size_min = MIN(size, size_min);
 	
-	#ifdef DEBUG
-		if(size_min > 10000000 || offset > 10000000 || key > 10000000){
-			printf("TOOMANY WRITE!\n");
-			
-			return -EFAULT + *((char *)0);
-		}
-	#endif
-
 redo:   ret = pwrite(
 		handle,
 		buffer,
@@ -108,13 +100,6 @@ static int               file_new_offset(chain_t *chain, off_t *new_key, unsigne
 	mutex = &data->create_lock;
 	
 	pthread_mutex_lock(mutex);
-		
-	#ifdef DEBUG
-		if(size > 10000000){
-			printf("TOOMANY!\n");
-			return -EFAULT;
-		}
-	#endif
 		
 		key = lseek(fd, 0, SEEK_END);
 		ret = ftruncate(fd, key + size);
