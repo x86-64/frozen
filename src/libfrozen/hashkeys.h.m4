@@ -75,8 +75,8 @@ REGISTER_KEY(size)
 REGISTER_KEY(size_old)
 REGISTER_KEY(structure)
 REGISTER_KEY(type)
-REGISTER_KEY(values)
 REGISTER_KEY(value_bits)
+REGISTER_KEY(values)
 
 #ifdef HASH_C
 typedef struct hash_keypair_t {
