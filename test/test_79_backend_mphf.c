@@ -2,11 +2,11 @@
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_idx")                        },
+			{ HK(name),    DATA_STRING("backend_mphf_idx")                         },
 			{ HK(chains),  DATA_HASHT(
 				{ 0, DATA_HASHT(
-					{ HK(name),      DATA_STRING("file")                  },
-					{ HK(filename),  DATA_STRING("data_backend_mphis.dat") },
+					{ HK(name),       DATA_STRING("file")                  },
+					{ HK(filename),   DATA_STRING("data_backend_mphis.dat")},
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
@@ -29,11 +29,17 @@ START_TEST (test_backend_mphf){
 					{ HK(name),       DATA_STRING("cache")                 },
 					hash_end
 				)},
-				{ 0, DATA_HASHT(
+				/*
+                                { 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("incapsulate")           },
 					{ HK(multiply),   DATA_OFFT(30)                        },
 					hash_end
 				)},
+                                */
+                                { 0, DATA_HASHT(
+                                        { HK(name),       DATA_STRING("allocator")             },
+                                        hash_end
+                                )},
 				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("structs")               },
 					{ HK(size),       DATA_STRING("size")                  },

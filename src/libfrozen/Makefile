@@ -77,6 +77,7 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/libfrozen_la-cache.lo \
 	backends/libfrozen_la-structs.lo \
 	backends/libfrozen_la-incapsulate.lo \
+	backends/libfrozen_la-allocator.lo \
 	backends/ipc/libfrozen_la-ipc.lo \
 	backends/ipc/libfrozen_la-ipc_shmem.lo \
 	backends/mphf/libfrozen_la-mphf.lo \
@@ -245,6 +246,7 @@ backends_sources = \
 	backends/cache.c                     \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
+	backends/allocator.c                 \
 	backends/ipc/ipc.h                   \
 	backends/ipc/ipc.c                   \
 	backends/ipc/ipc_shmem.h             \
@@ -405,6 +407,8 @@ backends/libfrozen_la-structs.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
 backends/libfrozen_la-incapsulate.lo: backends/$(am__dirstamp) \
 	backends/$(DEPDIR)/$(am__dirstamp)
+backends/libfrozen_la-allocator.lo: backends/$(am__dirstamp) \
+	backends/$(DEPDIR)/$(am__dirstamp)
 backends/ipc/$(am__dirstamp):
 	@$(MKDIR_P) backends/ipc
 	@: > backends/ipc/$(am__dirstamp)
@@ -477,6 +481,8 @@ mostlyclean-compile:
 	-rm -f backends/ipc/libfrozen_la-ipc.lo
 	-rm -f backends/ipc/libfrozen_la-ipc_shmem.$(OBJEXT)
 	-rm -f backends/ipc/libfrozen_la-ipc_shmem.lo
+	-rm -f backends/libfrozen_la-allocator.$(OBJEXT)
+	-rm -f backends/libfrozen_la-allocator.lo
 	-rm -f backends/libfrozen_la-cache.$(OBJEXT)
 	-rm -f backends/libfrozen_la-cache.lo
 	-rm -f backends/libfrozen_la-file.$(OBJEXT)
@@ -517,6 +523,7 @@ include ./$(DEPDIR)/libfrozen_la-data.Plo
 include ./$(DEPDIR)/libfrozen_la-hash.Plo
 include ./$(DEPDIR)/libfrozen_la-libfrozen.Plo
 include ./$(DEPDIR)/libfrozen_la-list.Plo
+include backends/$(DEPDIR)/libfrozen_la-allocator.Plo
 include backends/$(DEPDIR)/libfrozen_la-cache.Plo
 include backends/$(DEPDIR)/libfrozen_la-file.Plo
 include backends/$(DEPDIR)/libfrozen_la-incapsulate.Plo
@@ -636,6 +643,13 @@ backends/libfrozen_la-incapsulate.lo: backends/incapsulate.c
 #	source='backends/incapsulate.c' object='backends/libfrozen_la-incapsulate.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-incapsulate.lo `test -f 'backends/incapsulate.c' || echo '$(srcdir)/'`backends/incapsulate.c
+
+backends/libfrozen_la-allocator.lo: backends/allocator.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-allocator.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-allocator.Tpo -c -o backends/libfrozen_la-allocator.lo `test -f 'backends/allocator.c' || echo '$(srcdir)/'`backends/allocator.c
+	$(am__mv) backends/$(DEPDIR)/libfrozen_la-allocator.Tpo backends/$(DEPDIR)/libfrozen_la-allocator.Plo
+#	source='backends/allocator.c' object='backends/libfrozen_la-allocator.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-allocator.lo `test -f 'backends/allocator.c' || echo '$(srcdir)/'`backends/allocator.c
 
 backends/ipc/libfrozen_la-ipc.lo: backends/ipc/ipc.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/ipc/libfrozen_la-ipc.lo -MD -MP -MF backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Tpo -c -o backends/ipc/libfrozen_la-ipc.lo `test -f 'backends/ipc/ipc.c' || echo '$(srcdir)/'`backends/ipc/ipc.c

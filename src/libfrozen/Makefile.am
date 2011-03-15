@@ -5,6 +5,7 @@ backends_sources =                           \
 	backends/cache.c                     \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
+	backends/allocator.c                 \
 	backends/ipc/ipc.h                   \
 	backends/ipc/ipc.c                   \
 	backends/ipc/ipc_shmem.h             \
