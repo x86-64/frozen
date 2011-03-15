@@ -66,7 +66,7 @@ static int incap_configure(chain_t *chain, hash_t *config){ // {{{
 
 static ssize_t incap_backend_createwrite(chain_t *chain, request_t *request){
 	ssize_t          ret;
-	data_t           int_one = DATA_SIZET(1);
+	size_t           size, new_size;
 	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
@@ -74,9 +74,13 @@ static ssize_t incap_backend_createwrite(chain_t *chain, request_t *request){
 	hash_data_find(request, userdata->size, &offset, &offset_ctx);
 	if(offset != NULL){
 		// round size
-		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_as_sizet_data, NULL);
-		data_arithmetic('+', offset, offset_ctx, &int_one,                 NULL);
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_sizet_data, NULL);
+		size     = GET_TYPE_SIZET(offset);
+		new_size =     size / userdata->multiply_as_sizet;
+		new_size = new_size * userdata->multiply_as_sizet;
+		if( (size % userdata->multiply_as_sizet) != 0)
+			new_size += userdata->multiply_as_sizet;
+		
+		data_write(offset, offset_ctx, 0, &size, sizeof(size));
 	}
 	
 	hash_data_find(request, userdata->key, &offset, &offset_ctx);
@@ -135,6 +139,26 @@ static ssize_t incap_backend_count(chain_t *chain, request_t *request){
 	return ret;
 }
 
+static ssize_t incap_backend_custom(chain_t *chain, request_t *request){
+	ssize_t          ret;
+	data_t          *offset;
+	data_ctx_t      *offset_ctx;
+	incap_userdata  *userdata = (incap_userdata *)chain->userdata;
+	
+	hash_data_find(request, userdata->key, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
+	
+	ret = chain_next_query(chain, request);
+	
+	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
+	if(offset != NULL)
+		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
+	
+	return ret;
+	
+}
+
 static chain_t chain_incap = {
 	"incapsulate",
 	CHAIN_TYPE_CRWD,
@@ -147,7 +171,8 @@ static chain_t chain_incap = {
 		.func_get    = &incap_backend_read,
 		.func_delete = &incap_backend_read,
 		.func_move   = &incap_backend_move,
-		.func_count  = &incap_backend_count
+		.func_count  = &incap_backend_count,
+		.func_custom = &incap_backend_custom
 	}}
 };
 CHAIN_REGISTER(chain_incap)
