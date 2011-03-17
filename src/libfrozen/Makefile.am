@@ -3,6 +3,7 @@ backends_sources =                           \
 	backends/file.c                      \
 	backends/list.c                      \
 	backends/cache.c                     \
+	backends/cache_append.c              \
 	backends/structs.c                   \
 	backends/incapsulate.c               \
 	backends/allocator.c                 \
