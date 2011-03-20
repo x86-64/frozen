@@ -34,6 +34,8 @@ data_sources =          \
 	data/uint16.c   \
 	data/uint32.c   \
 	data/uint64.c   \
+	data/int_t.c    \
+	data/uint_t.c   \
 	data/size_t.c   \
 	data/off_t.c    \
 	data/string.c   \
@@ -99,17 +101,21 @@ backends/rewrite/rewrite.c: backends/rewrite/rule_parser.tab.c backends/rewrite/
 backends/rewrite/rule_parser.lex.c: backends/rewrite/rule_parser.tab.c
 
 data/uint8.c:
-	${M4} -sP -DBITS=8  -DNAME=int8  -DDEF=INT8  data/uint.c.m4 > $@
+	${M4} -sP -DNAME=int8  -DDEF=INT8  data/uint.c.m4 > $@
 data/uint16.c:
-	${M4} -sP -DBITS=16 -DNAME=int16 -DDEF=INT16 data/uint.c.m4 > $@
+	${M4} -sP -DNAME=int16 -DDEF=INT16 data/uint.c.m4 > $@
 data/uint32.c:
-	${M4} -sP -DBITS=32 -DNAME=int32 -DDEF=INT32 data/uint.c.m4 > $@
+	${M4} -sP -DNAME=int32 -DDEF=INT32 data/uint.c.m4 > $@
 data/uint64.c:
-	${M4} -sP -DBITS=64 -DNAME=int64 -DDEF=INT64 data/uint.c.m4 > $@
+	${M4} -sP -DNAME=int64 -DDEF=INT64 data/uint.c.m4 > $@
 data/size_t.c:
-	${M4} -sP -DBITS=64 -DNAME=size_t -DDEF=SIZET data/uint.c.m4 > $@
+	${M4} -sP -DNAME=size_t -DDEF=SIZET data/uint.c.m4 > $@
 data/off_t.c:
-	${M4} -sP -DBITS=64 -DNAME=off_t -DDEF=OFFT data/uint.c.m4 > $@
+	${M4} -sP -DNAME=off_t -DDEF=OFFT data/uint.c.m4 > $@
+data/int_t.c:
+	${M4} -sP -DNAME=int_t -DDEF=INTT data/uint.c.m4 > $@
+data/uint_t.c:
+	${M4} -sP -DNAME=uint_t -DDEF=UINTT data/uint.c.m4 > $@
 
 CLEANFILES =	backends/locate.c backends/insert-sort/insert-sort.c   \
                 backends/rewrite/rule_parser.tab.c                     \
@@ -121,5 +127,5 @@ CLEANFILES =	backends/locate.c backends/insert-sort/insert-sort.c   \
 		data.c data.h                                          \
 		hashkeys.h                                             \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
-		data/off_t.c data/size_t.c
+		data/off_t.c data/size_t.c data/int_t.c  data/uint_t.c
 

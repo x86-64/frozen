@@ -2,15 +2,47 @@
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_idx")                         },
+			{ HK(name),    DATA_STRING("backend_mphf_g")                            },
 			{ HK(chains),  DATA_HASHT(
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                  },
-					{ HK(filename),   DATA_STRING("data_backend_mphis.dat")},
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphf_g.dat")},
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                 },
+					{ HK(name),       DATA_STRING("cache")                  },
+					hash_end
+				)},
+				hash_end
+			)},
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(name),    DATA_STRING("backend_mphf_v")                            },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphf_v.dat")},
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                  },
+					hash_end
+				)},
+				hash_end
+			)},
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(name),    DATA_STRING("backend_mphf_e")                            },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphf_e.dat")},
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                  },
 					hash_end
 				)},
 				hash_end
@@ -22,7 +54,7 @@ START_TEST (test_backend_mphf){
 			{ HK(chains), DATA_HASHT(
 				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("file")                  },
-					{ HK(filename),   DATA_STRING("data_backend_mphfs.dat")},
+					{ HK(filename),   DATA_STRING("data_backend_mphf.dat") },
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
@@ -53,12 +85,11 @@ START_TEST (test_backend_mphf){
 				{ 0, DATA_HASHT(
 					{ HK(name),        DATA_STRING("mphf")                 },
 					{ HK(type),        DATA_STRING("chm_imp")              },
-					{ HK(backend),     DATA_STRING("backend_mphf_idx")     },
+					{ HK(backend_g),   DATA_STRING("backend_mphf_g")       },
+					{ HK(backend_e),   DATA_STRING("backend_mphf_e")       },
+					{ HK(backend_v),   DATA_STRING("backend_mphf_v")       },
 					{ HK(nelements),   DATA_INT64(100)                     },
 					{ HK(value_bits),  DATA_INT32(32)                      },
-					{ HK(persistent),  DATA_INT32(1)                       },
-					{ HK(build_start), DATA_STRING("onload")               },
-					{ HK(build_end),   DATA_STRING("onunload")             },
                                         { HK(keyid),       DATA_STRING("keyid")                },
 					hash_end
 				)},
@@ -73,7 +104,9 @@ START_TEST (test_backend_mphf){
 	backend_bulk_new(config);
 	
 	backend_t *b_dat = backend_find("backend_mphf");
-	backend_t *b_idx = backend_find("backend_mphf_idx");
+	backend_t *b_g = backend_find("backend_mphf_g");
+	backend_t *b_v = backend_find("backend_mphf_v");
+	backend_t *b_e = backend_find("backend_mphf_e");
 	
 	char  *data_array[] = {
 		"http://google.ru/",
@@ -120,7 +153,9 @@ START_TEST (test_backend_mphf){
 	}
 	
 	backend_destroy(b_dat);
-	backend_destroy(b_idx);
+	backend_destroy(b_g);
+	backend_destroy(b_v);
+	backend_destroy(b_e);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_mphf)

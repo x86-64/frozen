@@ -87,6 +87,13 @@ API char *          backend_get_name        (backend_t *backend);
 API void            backend_buffer_io_init  (buffer_t *buffer, chain_t *chain, int cached);
 API buffer_t *      backend_buffer_io_alloc (chain_t *chain, int cached);
 
+API ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size);
+API ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+API ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+API ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size);
+API ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size);
+API ssize_t         backend_stdcall_count (backend_t *backend, size_t *count);
+
 /* }}} */
 
 request_actions     request_str_to_action   (char *string);

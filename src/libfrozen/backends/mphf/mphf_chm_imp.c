@@ -2,45 +2,37 @@
 #include <backends/mphf/mphf.h>
 #include <backends/mphf/mphf_chm_imp.h>
 
+typedef enum chm_imp_fill_flags {
+	FILLED                 = 1,
+	WRITEABLE               = 2
+} chm_imp_fill_flags;
+
 typedef struct chm_imp_params_t {
-	uint64_t            hash1;
-	uint64_t            hash2;
+	uint64_t               hash1;
+	uint64_t               hash2;
 } chm_imp_params_t;
 
-typedef struct chm_imp_gparams_t { // TODO move to params_t
-	uint64_t            last_edge;
-} chm_imp_gparams_t;
-
-typedef struct chm_imp_build_data_t {
-	backend_t          *backend;
-	uint64_t            gp_offset;
-	uint64_t            gv_offset;
-	uint64_t            ge_offset;
-} chm_imp_build_data_t;
-
 typedef struct chm_imp_t {
-	uint32_t            filled;
+	uintmax_t              status;
 	
-	chm_imp_params_t    params;
-	uint64_t            nvertex;
-	uint32_t            bt_value;
-	uint32_t            bt_vertex;
-	uint32_t            bi_vertex;
-	uint32_t            persistent;
+	backend_t             *be_g;
+	backend_t             *be_v;
+	backend_t             *be_e;
 	
-	uint64_t            store_size;
-	uint64_t            store_gp_offset; // graph params
-	uint64_t            store_gv_offset; // graph vertexes
-	uint64_t            store_ge_offset; // graph edges
+	chm_imp_params_t       params;
+	uintmax_t              nvertex;
+	uintmax_t              bt_value;
+	uintmax_t              bt_vertex;
+	uintmax_t              bi_vertex;
 } chm_imp_t;
 
 typedef struct graph_edge_t {
-	uint64_t  vertex [2];
-	uint64_t  next   [2];
+	uintmax_t              vertex [2];
+	uintmax_t              next   [2];
 } graph_edge_t;
 
 typedef struct vertex_list_t {
-	uint64_t               vertex;
+	uintmax_t              vertex;
 	struct vertex_list_t  *next;
 } vertex_list_t;
 
@@ -57,97 +49,94 @@ static char clean[100] = {0};
 //     second vertex for stored edge. However this method have complex background - adding edge
 //     invalid in commented code
 
-static uint64_t log_any(uint64_t x, uint64_t power){
-	uint64_t res   = 0;
-	uint64_t t     = power;
+// BUG no destory of backend_[gve]
+
+static uintmax_t log_any(uintmax_t x, uintmax_t power){ // {{{
+	uintmax_t res   = 0;
+	uintmax_t t     = power;
 	
 	while (t <= x){
 		++res;
 		t *= power;
 	}
 	return res + 1;
-}
+} // }}}
 
-static ssize_t fill_data       (mphf_t *mphf){ // {{{
+static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
 	ssize_t    ret;
-	uint64_t   nvertex;
-	DT_INT32   persistent    = 0;
-	DT_INT64   nelements     = N_INITIAL_DEFAULT;
-	//uint32_t   bkey          = KEY_BITS_DEFAULT;
-	DT_INT32   bvalue        = VALUE_BITS_DEFAULT;
+	char      *backend;
+	uintmax_t  nvertex;
+	uintmax_t  nelements     = N_INITIAL_DEFAULT;
+	uintmax_t  bvalue        = VALUE_BITS_DEFAULT;
 	chm_imp_t *data          = (chm_imp_t *)&mphf->data;
-	
-	if((data->filled & 0x1) != 0)
-		return 0;
-	
-	hash_data_copy(ret, TYPE_INT32,  persistent,    mphf->config, HK(persistent)); // if 1 - graph stored in file
-	hash_data_copy(ret, TYPE_INT64,  nelements,     mphf->config, HK(nelements));  // number of elements
-	hash_data_copy(ret, TYPE_INT32,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
-	//hash_data_copy(ret, TYPE_INT32,  bkey,          mphf->config, HK(key_bits));   // number of bits per key to store
-	
-	// nvertex = (2.09 * nelements)
-	nvertex = nelements;
-	nvertex = (__MAX(uint64_t) / CHM_CONST > nvertex) ? (nvertex * CHM_CONST) / 100 : (nvertex / 100) * CHM_CONST;
-	
-	data->nvertex     = nvertex;
-	data->bi_vertex   = log_any(nvertex, 2);
-	data->bt_vertex   = BITS_TO_BYTES(data->bi_vertex);
-	data->bt_value    = BITS_TO_BYTES(bvalue);
-	data->persistent  = persistent;
-	
-	if(__MAX(uint64_t) / data->bt_value <= nvertex)
-		return -EINVAL;
-	
-	data->store_size  = sizeof(*data) + nvertex * data->bt_value;
-	
-	if(persistent != 0){
-		// TODO validate 
-		data->store_gp_offset = data->store_size;
-		data->store_gv_offset = data->store_gp_offset + sizeof(chm_imp_gparams_t);
-		data->store_ge_offset = data->store_gv_offset + nvertex   * data->bt_vertex;
-		data->store_size      = data->store_ge_offset + nelements * data->bt_vertex * 4; 
+
+	if((data->status & FILLED) == 0){
+		hash_data_copy(ret, TYPE_UINTT,  nelements,     mphf->config, HK(nelements));  // number of elements
+		hash_data_copy(ret, TYPE_UINTT,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
+		// TODO param 'writable' and 'readonly'
+		
+		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_g));
+		if(ret != 0 || (data->be_g = backend_acquire(backend)) == NULL)
+			return_error(-EINVAL, "chain 'chm_imp' parameter 'backend_g' invalid\n");
+		
+		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_v));
+		if(ret == 0)
+			data->be_v = backend_acquire(backend);
+		
+		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_e));
+		if(ret == 0)
+			data->be_e = backend_acquire(backend);
+		
+		if(data->be_v == NULL || data->be_e == NULL){
+			data->status &= ~WRITEABLE;
+		}else{
+			data->status |= WRITEABLE;
+		}
+		
+		// nvertex = (2.09 * nelements)
+		nvertex = nelements;
+		nvertex = (__MAX(uintmax_t) / CHM_CONST > nvertex) ? (nvertex * CHM_CONST) / 100 : (nvertex / 100) * CHM_CONST;
+		// TODO SEC check max elements
+		
+		data->nvertex     = nvertex;
+		data->bi_vertex   = log_any(nvertex, 2);
+		data->bt_vertex   = BITS_TO_BYTES(data->bi_vertex);
+		data->bt_value    = BITS_TO_BYTES(bvalue);
+		
+		//if(__MAX(uintmax_t) / data->bt_value <= nvertex)
+		//	return -EINVAL;
+		//data->store_size  = sizeof(*data) + nvertex * data->bt_value;
+		//return backend_stdcall_read(mphf->backend, mphf->offset, &data->params, sizeof(data->params));
+		
+		data->status     |= FILLED;
 	}
 	
-	data->filled |= 0x1;
-	return 0;
-} // }}}
-static ssize_t fill_params     (mphf_t *mphf){ // {{{
-	chm_imp_t *data          = (chm_imp_t *)&mphf->data;
-	
-	if((data->filled & 0x2) != 0)
-		return 0;
-	
-	data->filled |= 0x2;
-	return mphf_store_read(mphf->backend, mphf->offset, &data->params, sizeof(data->params));
-} // }}}
-
-static ssize_t graph_new_edge_id(mphf_t *mphf, uint64_t *new_id){ // {{{
-	chm_imp_build_data_t  *build_data;
-	chm_imp_gparams_t      gparams;
-	
-	build_data = mphf->build_data;
-	
-	if(mphf_store_read  (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
-		return -EFAULT;
-	
-	*new_id = ++gparams.last_edge; // first edge will be 1, 0-edge reserved
-	
-	if(mphf_store_write (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
-		return -EFAULT;
+	if( (flags & WRITEABLE) && ((data->status & WRITEABLE) == 0) )
+		return -EINVAL;
 	
 	return 0;
 } // }}}
-static ssize_t graph_get_first(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64_t *edge_id){ // {{{
+static ssize_t graph_new_edge_id(chm_imp_t *data, uintmax_t *id){ // {{{
+	off_t                  offset;
+	uintmax_t              sizeof_edge;
+	
+	sizeof_edge = 4 * data->bt_vertex;
+	
+	if(backend_stdcall_create(data->be_e, &offset, sizeof_edge) < 0)
+		return -EFAULT;
+	
+	*id = (offset / sizeof_edge) + 1;
+	return 0;
+} // }}}
+static ssize_t graph_get_first(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *edge_id){ // {{{
 	size_t                 i;
-	chm_imp_build_data_t  *build_data = mphf->build_data;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
 	for(i=0; i<nvertex; i++){
 		edge_id[i] = 0;
 		
-		if(mphf_store_read(
-			build_data->backend,
-			build_data->gv_offset + vertex[i] * data->bt_vertex,
+		if(backend_stdcall_read(
+			data->be_v,
+			vertex[i] * data->bt_vertex,
 			&edge_id[i],
 			data->bt_vertex
 		) < 0)
@@ -155,15 +144,13 @@ static ssize_t graph_get_first(mphf_t *mphf, size_t nvertex, uint64_t *vertex, u
 	}
 	return 0;
 } // }}}
-static ssize_t graph_set_first(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64_t *edge_id){ // {{{
+static ssize_t graph_set_first(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *edge_id){ // {{{
 	size_t                 i;
-	chm_imp_build_data_t  *build_data = mphf->build_data;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
 	for(i=0; i<nvertex; i++){
-		if(mphf_store_write(
-			build_data->backend,
-			build_data->gv_offset + vertex[i] * data->bt_vertex,
+		if(backend_stdcall_write(
+			data->be_v,
+			vertex[i] * data->bt_vertex,
 			&edge_id[i],
 			data->bt_vertex
 		) < 0)
@@ -171,46 +158,42 @@ static ssize_t graph_set_first(mphf_t *mphf, size_t nvertex, uint64_t *vertex, u
 	}
 	return 0;
 } // }}}
-static ssize_t graph_get_edge(mphf_t *mphf, uint64_t id, graph_edge_t *edge){ // {{{
-	uint64_t               sizeof_edge, vertex_mask;
-	char                   buffer[4 * sizeof(uint64_t)];
-	chm_imp_build_data_t  *build_data = mphf->build_data;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
+static ssize_t graph_get_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge){ // {{{
+	uintmax_t              sizeof_edge, vertex_mask;
+	char                   buffer[4 * sizeof(uintmax_t)];
 	
 	sizeof_edge  = 4 * data->bt_vertex;
 	vertex_mask  = ( 1 << (data->bt_vertex << 3) ) - 1;
 	
-	if(mphf_store_read(
-		build_data->backend,
-		build_data->ge_offset + (id - 1) * sizeof_edge,
+	if(backend_stdcall_read(
+		data->be_e,
+		(id - 1) * sizeof_edge,
 		&buffer,
 		sizeof_edge
 	) < 0)
 		return -EFAULT;
 	
-	edge->vertex[0] = (*(uint64_t *)(buffer                                           )) & vertex_mask;
-	edge->vertex[1] = (*(uint64_t *)(buffer +  data->bt_vertex                        )) & vertex_mask;
-	edge->next[0]   = (*(uint64_t *)(buffer + (data->bt_vertex << 1)                  )) & vertex_mask;
-	edge->next[1]   = (*(uint64_t *)(buffer + (data->bt_vertex << 1) + data->bt_vertex)) & vertex_mask;
+	edge->vertex[0] = (*(uintmax_t *)(buffer                                           )) & vertex_mask;
+	edge->vertex[1] = (*(uintmax_t *)(buffer +  data->bt_vertex                        )) & vertex_mask;
+	edge->next[0]   = (*(uintmax_t *)(buffer + (data->bt_vertex << 1)                  )) & vertex_mask;
+	edge->next[1]   = (*(uintmax_t *)(buffer + (data->bt_vertex << 1) + data->bt_vertex)) & vertex_mask;
 	
 	return 0;
 } // }}}
-static ssize_t graph_set_edge(mphf_t *mphf, uint64_t id, graph_edge_t *edge){ // {{{
-	uint64_t               edge_size;
-	char                   buffer[4 * sizeof(uint64_t)];
-	chm_imp_build_data_t  *build_data = mphf->build_data;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
+static ssize_t graph_set_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge){ // {{{
+	uintmax_t              edge_size;
+	char                   buffer[4 * sizeof(uintmax_t)];
 	
 	edge_size    = 4 * data->bt_vertex;
 	
-	*(uint64_t *)(buffer                                           ) = edge->vertex[0];
-	*(uint64_t *)(buffer +  data->bt_vertex                        ) = edge->vertex[1];
-	*(uint64_t *)(buffer + (data->bt_vertex << 1)                  ) = edge->next[0];
-	*(uint64_t *)(buffer + (data->bt_vertex << 1) + data->bt_vertex) = edge->next[1];
+	*(uintmax_t *)(buffer                                           ) = edge->vertex[0];
+	*(uintmax_t *)(buffer +  data->bt_vertex                        ) = edge->vertex[1];
+	*(uintmax_t *)(buffer + (data->bt_vertex << 1)                  ) = edge->next[0];
+	*(uintmax_t *)(buffer + (data->bt_vertex << 1) + data->bt_vertex) = edge->next[1];
 	
-	if(mphf_store_write(
-		build_data->backend,
-		build_data->ge_offset + (id - 1) * edge_size,
+	if(backend_stdcall_write(
+		data->be_e,
+		(id - 1) * edge_size,
 		&buffer,
 		edge_size
 	) < 0)
@@ -218,19 +201,19 @@ static ssize_t graph_set_edge(mphf_t *mphf, uint64_t id, graph_edge_t *edge){ //
 	
 	return 0;
 } // }}}
-static ssize_t graph_find_edge(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64_t *edge_id){ // {{{
-	uint64_t      curr_edge_id;
+static ssize_t graph_find_edge(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *edge_id){ // {{{
+	uintmax_t      curr_edge_id;
 	graph_edge_t  curr_edge;
 	
 	if(nvertex != 2)
 		return -EINVAL;
 	
 	curr_edge_id = 0;
-	if(graph_get_first(mphf, 1, (uint64_t *)&vertex[0], &curr_edge_id) < 0)
+	if(graph_get_first(data, 1, (uintmax_t *)&vertex[0], &curr_edge_id) < 0)
 		return -EFAULT;
 	
 	do{
-		if(graph_get_edge(mphf, curr_edge_id, &curr_edge) < 0)
+		if(graph_get_edge(data, curr_edge_id, &curr_edge) < 0)
 			return -EFAULT;
 		
 		if(memcmp(vertex, curr_edge.vertex, MIN(nvertex * sizeof(vertex[0]), sizeof(curr_edge.vertex))) == 0){
@@ -245,15 +228,14 @@ static ssize_t graph_find_edge(mphf_t *mphf, size_t nvertex, uint64_t *vertex, u
 	
 	return -EINVAL;
 } // }}}
-static ssize_t graph_getg(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64_t *g){ // {{{
+static ssize_t graph_getg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *g){ // {{{
 	size_t                 i;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
 	for(i=0; i<nvertex; i++){
 		g[i] = 0;
 		
-		if(mphf_store_read(
-			mphf->backend,
+		if(backend_stdcall_read(
+			data->be_g,
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&g[i],
 			data->bt_value
@@ -263,13 +245,12 @@ static ssize_t graph_getg(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64
 	return 0;
 
 } // }}}
-static ssize_t graph_setg(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64_t *new_g){ // {{{
+static ssize_t graph_setg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *new_g){ // {{{
 	size_t                 i;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
-
+	
 	for(i=0; i<nvertex; i++){
-		if(mphf_store_write(
-			mphf->backend,
+		if(backend_stdcall_write(
+			data->be_g,
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&new_g[i],
 			data->bt_value
@@ -278,10 +259,10 @@ static ssize_t graph_setg(mphf_t *mphf, size_t nvertex, uint64_t *vertex, uint64
 	}
 	return 0;
 } // }}}
-static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old, uint64_t g_new, uint64_t skip_edge){ // {{{
+static ssize_t graph_recalc(chm_imp_t *data, vertex_list_t *vertex, uintmax_t g_old, uintmax_t g_new, uintmax_t skip_edge){ // {{{
 	ssize_t                ret;
 	size_t                 our_vertex, frn_vertex;
-	uint64_t               edge_id, frn_g_old, frn_g_new;
+	uintmax_t              edge_id, frn_g_old, frn_g_new;
 	graph_edge_t           edge;
 	vertex_list_t          vertex_new, *curr;
 	
@@ -295,11 +276,11 @@ static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old,
 		}
 	}
 	
-	if(graph_get_first(mphf, 1, &vertex->vertex, &edge_id) < 0)
+	if(graph_get_first(data, 1, &vertex->vertex, &edge_id) < 0)
 		return -EFAULT;
 	
 	for(; edge_id != 0; edge_id = edge.next[our_vertex]){
-		if(graph_get_edge(mphf, edge_id, &edge) < 0)
+		if(graph_get_edge(data, edge_id, &edge) < 0)
 			return -EFAULT;
 		
 		      if(edge.vertex[0] == vertex->vertex){ our_vertex = 0; frn_vertex = 1;
@@ -314,7 +295,7 @@ static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old,
 		if(skip_edge == edge_id)
 			continue;
 		
-		if(graph_getg(mphf, 1, &edge.vertex[frn_vertex], &frn_g_old) < 0)
+		if(graph_getg(data, 1, &edge.vertex[frn_vertex], &frn_g_old) < 0)
 			return -EFAULT;
 		
 		frn_g_new = g_old + frn_g_old - g_new;
@@ -322,54 +303,54 @@ static ssize_t graph_recalc(mphf_t *mphf, vertex_list_t *vertex, uint64_t g_old,
 		vertex_new.vertex = edge.vertex[frn_vertex];
 		vertex_new.next   = vertex;
 		
-		if((ret = graph_recalc(mphf, &vertex_new, frn_g_old, frn_g_new, edge_id)) < 0)
+		if((ret = graph_recalc(data, &vertex_new, frn_g_old, frn_g_new, edge_id)) < 0)
 			return ret;
 	}
 	
-	if(graph_setg(mphf, 1, &vertex->vertex, &g_new) < 0)
+	if(graph_setg(data, 1, &vertex->vertex, &g_new) < 0)
 		return -EFAULT;
 	
 	return 0;
 } // }}}
-static ssize_t graph_add_edge(mphf_t *mphf, uint64_t *vertex, uint64_t value){ // {{{
+static ssize_t graph_add_edge(chm_imp_t *data, uintmax_t *vertex, uintmax_t value){ // {{{
 	ssize_t                ret;
-	uint64_t               new_edge_id, g_new, g_free = __MAX(uint64_t);
-	uint64_t               tmp[2];
+	uintmax_t              new_edge_id, g_new, g_free = __MAX(uintmax_t);
+	uintmax_t              tmp[2];
 	graph_edge_t           new_edge;
 	vertex_list_t          vertex_new;
 	
-	if(graph_new_edge_id(mphf, &new_edge_id) < 0)
+	if(graph_new_edge_id(data, &new_edge_id) < 0)
 		return -EFAULT;
 	
 	new_edge.vertex[0] = vertex[0];
 	new_edge.vertex[1] = vertex[1];
 	
-	if(graph_get_first(mphf, 2, vertex, (uint64_t *)&new_edge.next) < 0)
+	if(graph_get_first(data, 2, vertex, (uintmax_t *)&new_edge.next) < 0)
 		return -EFAULT;
 	
 	// save edge
-	if(graph_set_edge(mphf, new_edge_id, &new_edge) < 0)
+	if(graph_set_edge(data, new_edge_id, &new_edge) < 0)
 		return -EFAULT;
 	
 	tmp[0] = tmp[1] = new_edge_id;
-	if(graph_set_first(mphf, 2, vertex, (uint64_t *)&tmp) < 0)
+	if(graph_set_first(data, 2, vertex, (uintmax_t *)&tmp) < 0)
 		return -EFAULT;
 	
 	// update g
 	      if(new_edge.next[0] == 0){
-		if(graph_getg(mphf, 1, &vertex[1], (uint64_t *)&tmp[1]) < 0)
+		if(graph_getg(data, 1, &vertex[1], (uintmax_t *)&tmp[1]) < 0)
 			return -EFAULT;
 	      	
 		g_free = 0;
 		g_new  = value - tmp[1];
 	}else if(new_edge.next[1] == 0){
-		if(graph_getg(mphf, 1, &vertex[0], (uint64_t *)&tmp[0]) < 0)
+		if(graph_getg(data, 1, &vertex[0], (uintmax_t *)&tmp[0]) < 0)
 			return -EFAULT;
 		
 		g_free = 1;
 		g_new  = value - tmp[0];
 	}else{
-		if(graph_getg(mphf, 2, vertex, (uint64_t *)&tmp) < 0)
+		if(graph_getg(data, 2, vertex, (uintmax_t *)&tmp) < 0)
 			return -EFAULT;
 		
 		g_free = 1;
@@ -378,103 +359,104 @@ static ssize_t graph_add_edge(mphf_t *mphf, uint64_t *vertex, uint64_t value){ /
 		vertex_new.vertex = new_edge.vertex[g_free];
 		vertex_new.next   = NULL;
 		
-		if( (ret = graph_recalc(mphf, &vertex_new, tmp[1], g_new, new_edge_id)) < 0)
+		if( (ret = graph_recalc(data, &vertex_new, tmp[1], g_new, new_edge_id)) < 0)
 			return ret;
 		
 		return 0;
 	}
 	
-	if(graph_setg(mphf, 1, &vertex[g_free], &g_new) < 0)
+	if(graph_setg(data, 1, &vertex[g_free], &g_new) < 0)
 		return -EFAULT;
 	
 	return 0;
 } // }}}
 
-ssize_t mphf_chm_imp_new         (mphf_t *mphf){ // {{{
-	chm_imp_t *data = (chm_imp_t *)&mphf->data;
+ssize_t mphf_chm_imp_load        (mphf_t *mphf){ // {{{
+	size_t                 count = 0;
+	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
 	
-	if(fill_data(mphf) < 0)
+	if(chm_imp_init(mphf, 0) < 0)
 		return -EINVAL;
 	
-	if(mphf_store_new   (mphf->backend, &mphf->offset, data->store_size) < 0) return -EFAULT;
+	if(backend_stdcall_count(data->be_g, &count) < 0 || count == 0)
+		return mphf_chm_imp_clean(mphf);
 	
-	return mphf_chm_imp_clean(mphf);
-} // }}}
-ssize_t mphf_chm_imp_build_start (mphf_t *mphf){ // {{{
-	chm_imp_build_data_t *build_data;
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
-	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(data->persistent != 0){
-		// store data in file
-		mphf->build_data = build_data = malloc(sizeof(chm_imp_build_data_t));
-		build_data->backend   = mphf->backend;
-		build_data->gp_offset = data->store_gp_offset;
-		build_data->gv_offset = data->store_gv_offset;
-		build_data->ge_offset = data->store_ge_offset;
-		return 0;
-	}
-	// TODO store data in memory
-	return -EINVAL;
-} // }}}
-ssize_t mphf_chm_imp_build_end   (mphf_t *mphf){ // {{{
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
-	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(data->persistent != 0){
-		free(mphf->build_data);
-		mphf->build_data = NULL;
-		return 0;
-	}
-	// TODO release memory
-	return -EINVAL;
+	return 0;
 } // }}}
 ssize_t mphf_chm_imp_clean       (mphf_t *mphf){ // {{{
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
+	off_t                  t;
+	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	data->filled = 0;
+	if(mphf_chm_imp_destroy(mphf) < 0)
+		return -EFAULT;
 	
-	if(fill_data(mphf) < 0)
+	if(chm_imp_init(mphf, WRITEABLE) < 0)
 		return -EINVAL;
-	
-	if(mphf_store_fill  (mphf->backend, mphf->offset, &clean, sizeof(clean), data->store_size)  < 0) return -EFAULT;
 	
 	srandom(time(NULL));
 	data->params.hash1 = random();
 	data->params.hash2 = random();
 	
-	if(mphf_store_write (mphf->backend, mphf->offset, &data->params, sizeof(data->params)) < 0) return -EFAULT;
-	//if(mphf_store_write(mphf->backend, mphf->offset + data.store_gp_offset, &data...., sizeof(chm_imp_gparams_t)) < 0) return -EFAULT;
+	// TODO STRANGE create offset written to t, but we write in 0
 	
-	if(fill_params(mphf) < 0)
-		return -EINVAL;
+	// fill g
+	if(backend_stdcall_create(data->be_g, &t, sizeof(data->params) + data->nvertex * data->bt_value) < 0)
+		return -EFAULT;
+	if(backend_stdcall_write (data->be_g, 0, &data->params, sizeof(data->params)) < 0)
+		return -EFAULT;
+	if(backend_stdcall_fill  (data->be_g, sizeof(data->params), &clean, sizeof(clean), data->nvertex * data->bt_value) < 0)
+		return -EFAULT;
 	
-	return 0;
-} // }}}
-ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
-	chm_imp_t            *data = (chm_imp_t *)&mphf->data;
-	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(mphf_store_delete(mphf->backend, mphf->offset, data->store_size) < 0)
+	// fill v
+	if(backend_stdcall_create(data->be_v, &t, data->nvertex * data->bt_vertex) < 0)
+		return -EFAULT;
+	if(backend_stdcall_fill  (data->be_v, 0, &clean, sizeof(clean), data->nvertex * data->bt_vertex) < 0)
 		return -EFAULT;
 	
 	return 0;
 } // }}}
-
-ssize_t mphf_chm_imp_insert (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
-	uint64_t               vertex[2];
+ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
+	size_t                 count;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if(fill_data(mphf) < 0)
+	if(chm_imp_init(mphf, WRITEABLE) < 0)
 		return -EINVAL;
 	
-	if(fill_params(mphf) < 0)
+	// TODO normal _destroy
+	// TODO remove inits
+	
+	// kill g
+	count = 0;
+	backend_stdcall_count(data->be_g, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_g, 0, count) < 0)
+			return -EFAULT;
+	}
+	
+	// kill e
+	count = 0;
+	backend_stdcall_count(data->be_e, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_e, 0, count) < 0)
+			return -EFAULT;
+	}
+	
+	// kill v
+	count = 0;
+	backend_stdcall_count(data->be_v, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_v, 0, count) < 0)
+			return -EFAULT;
+	}
+	
+	return 0;
+} // }}}
+
+ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {{{
+	uintmax_t              vertex[2];
+	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
+	
+	if(chm_imp_init(mphf, WRITEABLE) < 0)
 		return -EINVAL;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
@@ -486,18 +468,15 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
 	//printf("mphf: insert: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
 	//	key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
 	//);
-	return graph_add_edge(mphf, (uint64_t *)&vertex, value);
+	return graph_add_edge(data, (uintmax_t *)&vertex, value);
 } // }}}
-ssize_t mphf_chm_imp_update (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
+ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {{{
 	ssize_t                ret;
-	uint64_t               vertex[2], g_old, g_new, edge_id;
+	uintmax_t              vertex[2], g_old, g_new, edge_id;
 	vertex_list_t          vertex_new;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(fill_params(mphf) < 0)
+	if(chm_imp_init(mphf, WRITEABLE) < 0)
 		return -EINVAL;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
@@ -510,10 +489,10 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
 	if(vertex[0] == vertex[1])
 		return MPHF_QUERY_NOTFOUND;
 	
-	if(graph_find_edge(mphf, 2, (uint64_t *)&vertex, &edge_id) < 0)
+	if(graph_find_edge(data, 2, (uintmax_t *)&vertex, &edge_id) < 0)
 		return MPHF_QUERY_NOTFOUND;
 	
-	if(graph_getg(mphf, 1, (uint64_t *)&vertex[1], &g_old) < 0)
+	if(graph_getg(data, 1, (uintmax_t *)&vertex[1], &g_old) < 0)
 		return MPHF_QUERY_NOTFOUND;
 	
 	g_new = value - g_old;
@@ -521,22 +500,19 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uint64_t key, uint64_t value){ // {{{
 	vertex_new.vertex = vertex[1];
 	vertex_new.next   = NULL;
 	
-	if( (ret = graph_recalc(mphf, &vertex_new, g_old, g_new, edge_id)) < 0)
+	if( (ret = graph_recalc(data, &vertex_new, g_old, g_new, edge_id)) < 0)
 		return ret;
 		
-	if(graph_setg(mphf, 1, &vertex[1], &g_new) < 0)
+	if(graph_setg(data, 1, &vertex[1], &g_new) < 0)
 		return -EFAULT;
 	
 	return 0;
 } // }}}
-ssize_t mphf_chm_imp_query  (mphf_t *mphf, uint64_t key, uint64_t *value){ // {{{
-	uint64_t               vertex[2], g[2];
+ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // {{{
+	uintmax_t               vertex[2], g[2];
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if(fill_data(mphf) < 0)
-		return -EINVAL;
-	
-	if(fill_params(mphf) < 0)
+	if(chm_imp_init(mphf, 0) < 0)
 		return -EINVAL;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
@@ -545,7 +521,7 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, uint64_t key, uint64_t *value){ // {{
 	if(vertex[0] == vertex[1])
 		return MPHF_QUERY_NOTFOUND;
 	
-	if(graph_getg(mphf, 2, (uint64_t *)&vertex, (uint64_t *)&g) < 0)
+	if(graph_getg(data, 2, (uintmax_t *)&vertex, (uintmax_t *)&g) < 0)
 		return MPHF_QUERY_NOTFOUND;
 	
 	*value = (g[0] + g[1]) & ( ( 1 << (data->bt_vertex << 3) ) - 1);
@@ -555,42 +531,42 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, uint64_t key, uint64_t *value){ // {{
 	//);
 	return MPHF_QUERY_FOUND;
 } // }}}
-ssize_t mphf_chm_imp_delete (mphf_t *mphf, uint64_t key){ // {{{
+ssize_t mphf_chm_imp_delete (mphf_t *mphf, uintmax_t key){ // {{{
 	return -EINVAL;
 } // }}}
 
 /* Invalid code {{{
 typedef struct graph_edge_t {
 	// public
-	uint64_t  second_vertex;
-	uint64_t  own_vertex_list;
-	uint64_t  frn_vertex_list;
+	uintmax_t  second_vertex;
+	uintmax_t  own_vertex_list;
+	uintmax_t  frn_vertex_list;
 	// private
-	uint64_t  edge_id;
+	uintmax_t  edge_id;
 } graph_edge_t;
 
 // gv list: [1 bit; {bit=0 -> second vertex; bit=1 -> edge_id }]
 // ge list: [second vertex; own vertex's edge list; foreign vertex's edge list]
 
-static ssize_t graph_new_edge_id(mphf_t *mphf, uint64_t *new_id){ // {{{
+static ssize_t graph_new_edge_id(mphf_t *mphf, uintmax_t *new_id){ // {{{
 	chm_imp_build_data_t  *build_data;
 	chm_imp_gparams_t      gparams;
 	
 	build_data = mphf->build_data;
 	
-	if(mphf_store_read  (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
+	if(backend_stdcall_read  (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
 		return -EFAULT;
 	
 	*new_id = gparams.last_edge++;
 	
-	if(mphf_store_write (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
+	if(backend_stdcall_write (build_data->backend, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
 		return -EFAULT;
 	
 	return 0;
 } // }}}
-static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_t *id, graph_edge_t *edge){ // {{{
-	uint64_t               i, t, k, sizeof_edge, vertex_mask, edgebit_mask;
-	char                   buffer[3 * sizeof(uint64_t)];
+static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax_t *id, graph_edge_t *edge){ // {{{
+	uintmax_t               i, t, k, sizeof_edge, vertex_mask, edgebit_mask;
+	char                   buffer[3 * sizeof(uintmax_t)];
 	chm_imp_build_data_t  *build_data = mphf->build_data;
 	
 	sizeof_edge  = 3 * data->bt_vertex;
@@ -599,7 +575,7 @@ static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 	
 	for(i=0; i < nid; i++){
 		// read from vertex array
-		if(mphf_store_read(
+		if(backend_stdcall_read(
 			build_data->backend,
 			build_data->gv_offset + id[i] * data->bt_gv,
 			&buffer,
@@ -607,18 +583,18 @@ static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 		) < 0)
 			return -EFAULT;
 		
-		t = *(uint64_t *)(buffer);
+		t = *(uintmax_t *)(buffer);
 		k = (t & (edgebit_mask - 1));
 		
 		if( (t & edgebit_mask) == 0){
 			edge[i].second_vertex   = k;
-			edge[i].edge_id         = __MAX(uint64_t);
+			edge[i].edge_id         = __MAX(uintmax_t);
 			edge[i].own_vertex_list = 0;
 			edge[i].frn_vertex_list = 0;
 		}else{
 			edge[i].edge_id         = k;
 			
-			if(mphf_store_read(
+			if(backend_stdcall_read(
 				build_data->backend,
 				build_data->ge_offset + k * sizeof_edge,
 				&buffer,
@@ -626,16 +602,16 @@ static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 			) < 0)
 				return -EFAULT;
 			
-			edge[i].second_vertex   = (*(uint64_t *)(buffer                         )) & vertex_mask;
-			edge[i].own_vertex_list = (*(uint64_t *)(buffer +  data->bt_vertex      )) & vertex_mask;
-			edge[i].frn_vertex_list = (*(uint64_t *)(buffer + (data->bt_vertex << 1))) & vertex_mask;
+			edge[i].second_vertex   = (*(uintmax_t *)(buffer                         )) & vertex_mask;
+			edge[i].own_vertex_list = (*(uintmax_t *)(buffer +  data->bt_vertex      )) & vertex_mask;
+			edge[i].frn_vertex_list = (*(uintmax_t *)(buffer + (data->bt_vertex << 1))) & vertex_mask;
 		}
 	}
 	return 0;
 } // }}}
-static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_t *id, graph_edge_t *edge){ // {{{
-	uint64_t               i, edge_size;
-	char                   buffer[3 * sizeof(uint64_t)];
+static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax_t *id, graph_edge_t *edge){ // {{{
+	uintmax_t               i, edge_size;
+	char                   buffer[3 * sizeof(uintmax_t)];
 	chm_imp_build_data_t  *build_data = mphf->build_data;
 	
 	edge_size    = 3 * data->bt_vertex;
@@ -644,16 +620,16 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 		if(edge[i].own_vertex_list != 0 || edge[i].frn_vertex_list != 0){
 
 			// create new edge if not exist
-			if(edge[i].edge_id == __MAX(uint64_t)){
-				if(graph_new_edge_id(mphf, &edge[i].edge_id) < 0)
+			if(edge[i].edge_id == __MAX(uintmax_t)){
+				if(graph_new_edge_id(data, &edge[i].edge_id) < 0)
 					return -EFAULT;
 			}
 			
-			*(uint64_t *)(buffer                         ) = edge[i].second_vertex;
-			*(uint64_t *)(buffer +  data->bt_vertex      ) = edge[i].own_vertex_list;
-			*(uint64_t *)(buffer + (data->bt_vertex << 1)) = edge[i].frn_vertex_list;
+			*(uintmax_t *)(buffer                         ) = edge[i].second_vertex;
+			*(uintmax_t *)(buffer +  data->bt_vertex      ) = edge[i].own_vertex_list;
+			*(uintmax_t *)(buffer + (data->bt_vertex << 1)) = edge[i].frn_vertex_list;
 			
-			if(mphf_store_write(
+			if(backend_stdcall_write(
 				build_data->backend,
 				build_data->ge_offset + edge[i].edge_id * edge_size,
 				&buffer,
@@ -661,14 +637,14 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 			) < 0)
 				return -EFAULT;
 			
-			*(uint64_t *)(buffer)  = edge[i].edge_id;
-			*(uint64_t *)(buffer) |= ( 1 << data->bi_vertex );
+			*(uintmax_t *)(buffer)  = edge[i].edge_id;
+			*(uintmax_t *)(buffer) |= ( 1 << data->bi_vertex );
 		}else{
-			*(uint64_t *)(buffer)  = edge[i].second_vertex;
+			*(uintmax_t *)(buffer)  = edge[i].second_vertex;
 		}
 		
 		// write to vertex array
-		if(mphf_store_write(
+		if(backend_stdcall_write(
 			build_data->backend,
 			build_data->gv_offset + id[i] * data->bt_gv,
 			&buffer,
@@ -678,13 +654,13 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uint64_
 	}
 	return 0;
 } // }}}
-static ssize_t graph_getg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uint64_t *vertex, uint64_t *g){ // {{{
+static ssize_t graph_getg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *g){ // {{{
 	size_t i;
 	
 	for(i=0; i<nvertex; i++){
 		g[i] = 0;
 		
-		if(mphf_store_read(
+		if(backend_stdcall_read(
 			mphf->backend,
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&g[i],
@@ -694,11 +670,11 @@ static ssize_t graph_getg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uint64_
 	}
 	return 0;
 } // }}}
-static ssize_t graph_setg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uint64_t *vertex, uint64_t *new_g){ // {{{
+static ssize_t graph_setg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *new_g){ // {{{
 	size_t i;
 
 	for(i=0; i<nvertex; i++){
-		if(mphf_store_write(
+		if(backend_stdcall_write(
 			mphf->backend,
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&new_g[i],
@@ -708,8 +684,8 @@ static ssize_t graph_setg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uint64_
 	}
 	return 0;
 } // }}}
-static ssize_t graph_recalc(mphf_t *mphf, chm_imp_t *data, uint64_t initial_vertex, uint64_t from_vertex, graph_edge_t *parent, uint64_t g_old, uint64_t g_new){ // {{{
-	uint64_t       child_vertex, child_g_old, child_g_new;
+static ssize_t graph_recalc(mphf_t *mphf, chm_imp_t *data, uintmax_t initial_vertex, uintmax_t from_vertex, graph_edge_t *parent, uintmax_t g_old, uintmax_t g_new){ // {{{
+	uintmax_t       child_vertex, child_g_old, child_g_new;
 	graph_edge_t   child;
 
 	child_vertex = parent->own_vertex_list;
@@ -722,20 +698,20 @@ static ssize_t graph_recalc(mphf_t *mphf, chm_imp_t *data, uint64_t initial_vert
 		//if(child_vertex == initial_vertex)
 		//	return -EBADF;
 		
-		if(graph_get_edge(mphf, data, 1, &child_vertex, &child) < 0)
+		if(graph_get_edge(data, data, 1, &child_vertex, &child) < 0)
 			return -EFAULT;
 		
 		printf("child:  %llx -> { %llx, %llx, %llx }\n", child_vertex, child.second_vertex, child.own_vertex_list, child.frn_vertex_list);
 		
-		if(graph_getg(mphf, data, 1, &child.second_vertex, &child_g_old) < 0)
+		if(graph_getg(data, data, 1, &child.second_vertex, &child_g_old) < 0)
 			return -EFAULT;
 		
 		child_g_new = g_old + child_g_old - g_new;
 		
-		if(graph_recalc(mphf, data, initial_vertex, child.own_vertex_list, (graph_edge_t *)&child, child_g_old, child_g_new) < 0)
+		if(graph_recalc(data, data, initial_vertex, child.own_vertex_list, (graph_edge_t *)&child, child_g_old, child_g_new) < 0)
 			return -EFAULT;
 		
-		if(graph_setg(mphf, data, 1, &child.second_vertex, &child_g_new) < 0)
+		if(graph_setg(data, data, 1, &child.second_vertex, &child_g_new) < 0)
 			return -EFAULT;
 		
 		child_vertex = child.frn_vertex_list;
@@ -743,11 +719,11 @@ static ssize_t graph_recalc(mphf_t *mphf, chm_imp_t *data, uint64_t initial_vert
 	}
 	return 0;
 } // }}}
-static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uint64_t *vertex, uint64_t value){ // {{{
+static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, uintmax_t value){ // {{{
 	ssize_t        ret;
 	graph_edge_t   edges[2];
 	
-	if(graph_get_edge(mphf, data, 2, vertex, (graph_edge_t *)&edges) < 0){
+	if(graph_get_edge(data, data, 2, vertex, (graph_edge_t *)&edges) < 0){
 		printf("get_edge failed\n");
 		return -EFAULT;
 	}
@@ -757,18 +733,18 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uint64_t *vertex, u
 	edges[0].second_vertex   = vertex[1];
 	edges[1].second_vertex   = vertex[0];
 	
-	if(graph_set_edge(mphf, data, 2, vertex, (graph_edge_t *)&edges) < 0){
+	if(graph_set_edge(data, data, 2, vertex, (graph_edge_t *)&edges) < 0){
 		printf("set_edge failed\n");
 		return -EFAULT;
 	}
 	
-	uint64_t g[2], g_new, g_free = __MAX(uint64_t);
+	uintmax_t g[2], g_new, g_free = __MAX(uintmax_t);
 	
 	if(edges[0].own_vertex_list == 0){
 		g_free = 0;
 		g[0]   = 0;
 	}else{
-		if(graph_getg(mphf, data, 1, &vertex[0], &g[0]) < 0)
+		if(graph_getg(data, data, 1, &vertex[0], &g[0]) < 0)
 			return -EFAULT;
 	}
 	
@@ -776,21 +752,21 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uint64_t *vertex, u
 		g_free = 1;
 		g[1]   = 0;
 	}else{
-		if(graph_getg(mphf, data, 1, &vertex[1], &g[1]) < 0)
+		if(graph_getg(data, data, 1, &vertex[1], &g[1]) < 0)
 			return -EFAULT;
 	}
 	
-	if(g_free == __MAX(uint64_t)){
+	if(g_free == __MAX(uintmax_t)){
 		g_free = 1;
 		g_new  = value - g[0]; // g_new
 		
-		if( (ret = graph_recalc(mphf, data, vertex[1], vertex[1], &edges[1], g[1], g_new)) < 0)
+		if( (ret = graph_recalc(data, data, vertex[1], vertex[1], &edges[1], g[1], g_new)) < 0)
 			return ret;
 	}else{
 		g_new = value - (g[0] + g[1]);
 	}
 	
-	if(graph_setg(mphf, data, 1, &vertex[g_free], &g_new) < 0)
+	if(graph_setg(data, data, 1, &vertex[g_free], &g_new) < 0)
 		return -EFAULT;
 	
 	return 0;

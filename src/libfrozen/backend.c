@@ -234,6 +234,70 @@ void         backend_destroy  (backend_t *backend){
 		free(backend->name);
 	free(backend);
 }
+
+ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
+	request_t  r_create[] = {
+		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE)     },
+		{ HK(size),       DATA_PTR_SIZET(&size)              },
+		{ HK(offset_out), DATA_PTR_OFFT(offset)              },
+		hash_end
+	};
+	
+	return backend_query(backend, r_create);
+} // }}}
+ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+	request_t  r_read[] = {
+		{ HK(action),  DATA_INT32(ACTION_CRWD_READ)   },
+		{ HK(offset),  DATA_PTR_OFFT(&offset)         },
+		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
+		{ HK(buffer),  DATA_RAW(buffer, buffer_size)  },
+		hash_end
+	};
+	
+	return backend_query(backend, r_read);
+} // }}}
+ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+	request_t  r_write[] = {
+		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(offset),  DATA_PTR_OFFT(&offset)         },
+		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
+		{ HK(buffer),  DATA_RAW(buffer, buffer_size)  },
+		hash_end
+	};
+	
+	return backend_query(backend, r_write);
+} // }}}
+ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size){ // {{{
+	size_t size;
+	
+	do{
+		size = MIN(fill_size, buffer_size);
+		backend_stdcall_write(backend, offset, buffer, size);
+		
+		offset    += size;
+		fill_size -= size;
+	}while(fill_size > 0);
+	return 0;
+} // }}}
+ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size){ // {{{
+	request_t  r_delete[] = {
+		{ HK(action),     DATA_INT32(ACTION_CRWD_DELETE)     },
+		{ HK(offset),     DATA_PTR_OFFT(&offset)             },
+		{ HK(size),       DATA_PTR_SIZET(&size)              },
+		hash_end
+	};
+	
+	return backend_query(backend, r_delete);
+} // }}}
+ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{{
+	request_t r_count[] = {
+		{ HK(action),     DATA_INT32(ACTION_CRWD_COUNT)      },
+		{ HK(buffer),     DATA_PTR_SIZET(count)              },
+		hash_end
+	};
+	
+	return backend_query(backend, r_count);
+} // }}}
 /* }}}1 */
 
 request_actions request_str_to_action(char *string){

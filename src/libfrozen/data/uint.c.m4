@@ -1,17 +1,14 @@
 #include <libfrozen.h>
 
 /*
-m4_define(`BYTES', m4_eval(BITS() `/ 8'))
-m4_ifelse(BYTES(), `1', `m4_define(`TYPE', `unsigned char')')
-m4_ifelse(BYTES(), `2', `m4_define(`TYPE', `unsigned short')')
-m4_ifelse(BYTES(), `4', `m4_define(`TYPE', `unsigned int')')
-m4_ifelse(BYTES(), `8', `m4_define(`TYPE', `unsigned long long')')
-
+m4_ifelse(NAME(), `int8',   `m4_define(`TYPE', `uint8_t')')
+m4_ifelse(NAME(), `int16',  `m4_define(`TYPE', `uint16_t')')
+m4_ifelse(NAME(), `int32',  `m4_define(`TYPE', `uint32_t')')
+m4_ifelse(NAME(), `int64',  `m4_define(`TYPE', `uint64_t')')
 m4_ifelse(NAME(), `size_t', `m4_define(`TYPE', `size_t')') 
-m4_ifelse(NAME(), `size_t', `m4_define(`BYTES', `sizeof(size_t)')')
-
 m4_ifelse(NAME(), `off_t',  `m4_define(`TYPE', `off_t')') 
-m4_ifelse(NAME(), `off_t',  `m4_define(`BYTES', `sizeof(off_t)')') 
+m4_ifelse(NAME(), `int_t',  `m4_define(`TYPE', `intmax_t')') 
+m4_ifelse(NAME(), `uint_t', `m4_define(`TYPE', `uintmax_t')') 
 m4_changequote([,])
 */
 
@@ -21,7 +18,7 @@ int data_[]NAME()_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t
 	
 	(void)ctx1; (void)ctx2; // TODO use ctx
 	
-	if(data1->data_size < BYTES() || data2->data_size < BYTES())
+	if(data1->data_size < sizeof(data1_val) || data2->data_size < sizeof(data2_val))
 		return -EINVAL;
 	
 	data1_val = *(TYPE *)(data1->data_ptr);
@@ -38,7 +35,7 @@ int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1, data_
 	
 	(void)ctx1; (void)ctx2; // TODO use ctx
 	
-	if(operand1->data_size < BYTES() || operand2->data_size < BYTES())
+	if(operand1->data_size < sizeof(operand1_val) || operand2->data_size < sizeof(operand2_val))
 		return -EINVAL;
 	
 	operand1_val = *(TYPE *)(operand1->data_ptr);
@@ -133,7 +130,7 @@ REGISTER_PROTO([
 		.func_cmp               = &data_]NAME()[_cmp,
 		.func_arithmetic        = &data_]NAME()[_arith,
 		.func_convert           = &data_]NAME()[_convert,
-		.fixed_size             = ]BYTES()[
+		.fixed_size             = sizeof(]TYPE()[)
 	}'
 ])
 */
