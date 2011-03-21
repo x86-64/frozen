@@ -235,6 +235,14 @@ void         backend_destroy  (backend_t *backend){
 	free(backend);
 }
 
+void        backend_destroy_all (void){
+	backend_t *backend;
+
+	while((backend = list_pop(&backends))){
+		backend_destroy(backend);
+	}
+}
+
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
 	request_t  r_create[] = {
 		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE)     },

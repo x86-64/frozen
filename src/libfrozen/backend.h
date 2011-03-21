@@ -67,8 +67,6 @@ _inline int chain_configure    (chain_t *chain, hash_t *config);
 
 /* }}}1 */
 
-/* backends {{{ */
-
 typedef struct backend_t {
 	chain_t        *chain;
 	char           *name;
@@ -81,6 +79,7 @@ API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
+    void            backend_destroy_all     (void);
 
 API char *          backend_get_name        (backend_t *backend);
 
@@ -93,8 +92,6 @@ API ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, vo
 API ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size);
 API ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size);
 API ssize_t         backend_stdcall_count (backend_t *backend, size_t *count);
-
-/* }}} */
 
 request_actions     request_str_to_action   (char *string);
 

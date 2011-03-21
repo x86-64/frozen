@@ -27,6 +27,7 @@ int frozen_init(void){
  * @return -1 on error
  */
 int frozen_destroy(void){
+	backend_destroy_all();
 	free(global_settings);
 	return 0;
 }
