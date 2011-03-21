@@ -13,9 +13,9 @@ m4_define(`REGISTER_KEY', `
 
 REGISTER_KEY(action)
 REGISTER_KEY(backend)
+REGISTER_KEY(backend_e)
 REGISTER_KEY(backend_g)
 REGISTER_KEY(backend_v)
-REGISTER_KEY(backend_e)
 REGISTER_KEY(block_off)
 REGISTER_KEY(block_size)
 REGISTER_KEY(block_vid)
