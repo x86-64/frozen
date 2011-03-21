@@ -116,6 +116,18 @@ static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
 	
 	return 0;
 } // }}}
+static ssize_t chm_imp_destroy    (mphf_t *mphf){ // {{{
+	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
+	
+	if( (data->status & FILLED)){
+		backend_destroy(data->be_g);
+		if( (data->status & WRITEABLE) ){
+			backend_destroy(data->be_e);
+			backend_destroy(data->be_v);
+		}
+	}
+	return 0;
+} // }}}
 static ssize_t graph_new_edge_id(chm_imp_t *data, uintmax_t *id){ // {{{
 	off_t                  offset;
 	uintmax_t              sizeof_edge;
@@ -380,6 +392,12 @@ ssize_t mphf_chm_imp_load        (mphf_t *mphf){ // {{{
 	
 	if(backend_stdcall_count(data->be_g, &count) < 0 || count == 0)
 		return mphf_chm_imp_clean(mphf);
+	
+	return 0;
+} // }}}
+ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
+	if(chm_imp_destroy(mphf) < 0)
+		return -EFAULT;
 	
 	return 0;
 } // }}}

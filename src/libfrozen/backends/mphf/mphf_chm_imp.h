@@ -2,8 +2,11 @@
 #define MPHF_CHM_IMP_H
 
 ssize_t  mphf_chm_imp_load        (mphf_t *mphf);
+ssize_t  mphf_chm_imp_unload      (mphf_t *mphf);
+
 ssize_t  mphf_chm_imp_clean       (mphf_t *mphf);
 ssize_t  mphf_chm_imp_destroy     (mphf_t *mphf);
+
 ssize_t  mphf_chm_imp_insert      (mphf_t *mphf, uint64_t key, uint64_t  value);
 ssize_t  mphf_chm_imp_update      (mphf_t *mphf, uint64_t key, uint64_t  value);
 ssize_t  mphf_chm_imp_query       (mphf_t *mphf, uint64_t key, uint64_t *value);

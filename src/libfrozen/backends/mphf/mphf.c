@@ -164,6 +164,9 @@ static int mphf_init(chain_t *chain){ // {{{
 static int mphf_destroy(chain_t *chain){ // {{{
 	mphf_userdata *userdata = (mphf_userdata *)chain->userdata;
 	
+	if(userdata->mphf_proto->func_unload(&userdata->mphf) < 0)
+		return -EFAULT;
+	
 	hash_free       (userdata->mphf.config);
 	free(userdata);
 	return 0;
