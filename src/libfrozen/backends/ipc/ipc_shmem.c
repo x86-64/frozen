@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+#define EMODULE           9
 #define NITEMS_DEFAULT    100
 #define ITEM_SIZE_DEFAULT 1000
 
@@ -76,7 +77,7 @@ static ssize_t           shmem_block_status(ipc_shmem_userdata *userdata, ipc_sh
 		}
 		return 0;
 	}
-	return -EFAULT;
+	return error("shmem_block_status failed");
 } // }}}
 static ipc_shmem_block * shmem_get_block(ipc_shmem_userdata *userdata, size_t old_status, size_t new_status){ // {{{
 	size_t           i;
@@ -103,7 +104,7 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 	
 	while(1){
 		if( (block = shmem_get_block(userdata, STATUS_WRITTEN, STATUS_EXECUTING)) == NULL)
-			return_error(NULL, "reader strange error 1\n");
+			break;
 		
 		// run request
 		hash_from_memory(&request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
@@ -111,8 +112,10 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 		
 		// update status
 		if(shmem_block_status(userdata, block, STATUS_EXECUTING, STATUS_DONE) < 0)
-			return_error(NULL, "reader strange error 2\n");
+			break;
 	}
+	error("ipc_shmem_listen dead\n");
+	return NULL;
 } // }}}
 ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	ssize_t             ret;
@@ -124,21 +127,21 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	DT_STRING           role_str;
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
-	hash_data_copy(ret, TYPE_INT32,  shmkey,     config, HK(key));       if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_STRING, role_str,   config, HK(role));      if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32,  shmkey,     config, HK(key)); if(ret != 0) return warning("no key supplied");
+	hash_data_copy(ret, TYPE_STRING, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
 	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
 	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));
 	
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
 	if( (shmid = shmget(shmkey, shmsize, IPC_CREAT | 0666)) < 0)
-		return -EFAULT;
+		return error("shmget failed");
 	
 	if( (userdata->shmaddr = shmat(shmid, NULL, 0)) == (void *)-1)
-		return -EFAULT;
+		return error("shmat failed");
 	
 	if( (userdata->role = ipc_string_to_role(role_str)) == ROLE_INVALID)
-		return -EFAULT;
+		return error("invalid role supplied");
 	
 	userdata->shmblocks = (ipc_shmem_block *)((void *)userdata->shmaddr   + sizeof(ipc_shmem_header));
 	userdata->shmdata   = (void *)           ((void *)userdata->shmblocks + nitems * sizeof(ipc_shmem_block));
@@ -152,7 +155,7 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 		
 		// start threads
 		if(pthread_create(&userdata->server_thr, NULL, &ipc_shmem_listen, ipc) != 0)
-			return -EFAULT;
+			return error("pthread_create failed");
 	}
 	return 0;
 } // }}}
@@ -184,13 +187,13 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
 	if( (block = shmem_get_block(userdata, STATUS_FREE, STATUS_WRITING)) == NULL)
-		return_error(-EFAULT, "strange error\n");
+		return error("strange error");
 	
 	// write request
 	hash_to_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
 	
-	if(shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN) < 0)
-		return_error(-EFAULT, "strange error 2\n");
+	if( (ret = shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN)) < 0)
+		return ret;
 	
 	// wait for answer
 	sem_wait(&block->sem_done);
@@ -200,7 +203,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	ret = block->query_ret;
 	
 	if(shmem_block_status(userdata, block, STATUS_DONE, STATUS_FREE) < 0)
-		return_error(-EFAULT, "strange error 3\n");
+		return error("strange error 3");
 	
 	return ret;
 } // }}}

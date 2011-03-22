@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#define EMODULE 5
 
 typedef enum struct_values {
 	STRUCT_VALUES_WHOLE,
@@ -15,7 +16,7 @@ typedef struct struct_userdata {
 
 static int struct_init(chain_t *chain){ // {{{
 	if((chain->userdata = calloc(1, sizeof(struct_userdata))) == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -46,9 +47,9 @@ static int struct_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	
 	if(userdata->key == 0)
-		return_error(-EINVAL, "chain 'struct' parameter 'key' invalid\n");
+		return error("chain struct parameter key invalid");
 	if(userdata->structure == NULL)
-		return_error(-EINVAL, "chain 'struct' parameter 'structure' invalid\n");
+		return error("chain struct parameter structure invalid");
 	
 	return 0;
 } // }}}
@@ -68,12 +69,12 @@ static ssize_t struct_backend_pack(chain_t *chain, request_t *request){
 			case STRUCT_VALUES_ONE:
 				hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
 				if(ret != 0)
-					return -EINVAL;
+					return warning("hash with keys not supplied");
 				break;
 		};
 		
 		if( (struct_size = struct_pack(userdata->structure, values, buffer, buffer_ctx)) == 0)
-			return -EFAULT;
+			return error("struct_pack failed");
 		
 		request_t new_request[] = {
 			{ userdata->size, DATA_PTR_SIZET(&struct_size) },
@@ -102,12 +103,12 @@ static ssize_t struct_backend_unpack(chain_t *chain, request_t *request){
 			case STRUCT_VALUES_ONE:
 				hash_data_copy(ret2, TYPE_HASHT, values, request, userdata->key_values);
 				if(ret2 != 0)
-					return -EINVAL;
+					return warning("hash with keys not supplied");
 				break;
 		};
 		
 		if(struct_unpack(userdata->structure, values, buffer, buffer_ctx) == 0)
-			return -EFAULT;
+			return error("struct_unpack failed");
 	}
 	
 	return ret;

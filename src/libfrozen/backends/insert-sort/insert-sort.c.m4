@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <backend.h>
 
+#define EMODULE 13
 #define KEY_FOUND     0
 #define KEY_NOT_FOUND 1
 
@@ -37,7 +38,7 @@ sort_proto_t  sort_protos[] = { VAR_ARRAY() };
 static int sorts_init(chain_t *chain){ // {{{
 	sorts_userdata *userdata = calloc(1, sizeof(sorts_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	chain->userdata = userdata;
 	
@@ -64,7 +65,7 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRING, sort_field_str,  config, HK(field));
 	hash_data_copy(ret, TYPE_STRING, sort_engine_str, config, HK(engine));
 	if(ret != 0)
-		return_error(-EINVAL, "chain 'insert-sort' parameter 'engine' not supplied\n");
+		return error("chain insert-sort parameter engine not supplied");
 	
 	for(i=0, data->engine = NULL; i<sort_protos_size; i++){
 		if(strcasecmp(sort_protos[i].name, sort_engine_str) == 0){
@@ -73,7 +74,7 @@ static int sorts_configure(chain_t *chain, hash_t *config){ // {{{
 		}
 	}
 	if(data->engine == NULL)
-		return_error(-EINVAL, "chain 'insert-sort' engine not found\n");
+		return error("chain insert-sort engine not found");
 	
 	data->sort_field = hash_string_to_key(sort_field_str);
 	
@@ -87,10 +88,8 @@ static ssize_t sorts_set   (chain_t *chain, request_t *request){
 	data_ctx_t      *buffer_ctx, *key_out_ctx;
 	sorts_userdata  *data = (sorts_userdata *)chain->userdata;
 	
-	hash_data_find(request, data->sort_field, &buffer,  &buffer_ctx);
-	hash_data_find(request, HK(offset_out),   &key_out, &key_out_ctx);
-	if(buffer == NULL || key_out == NULL)
-		return -EINVAL;
+	hash_data_find(request, data->sort_field, &buffer,  &buffer_ctx);  if(buffer == NULL)  return warning("no buffer supplied");
+	hash_data_find(request, HK(offset_out),   &key_out, &key_out_ctx); if(key_out == NULL) return warning("no key_out supplied");
 	
 	// TODO underlying locking and threading
 	// next("lock");
@@ -135,7 +134,7 @@ static ssize_t sorts_custom(chain_t *chain, request_t *request){
 	}
 	*/
 	(void)chain; (void)request;
-	return -EINVAL;
+	return -ENOSYS;
 }
 /* }}} */
 

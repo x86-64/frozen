@@ -30,7 +30,7 @@ START_TEST (test_real_store_nums){
 			hash_end
 		};
 		ret = backend_query(backend, r_write);
-			fail_unless(ret == 4, "chain 'real_store_nums': write array failed");
+			fail_unless(ret == 4, "chain real_store_nums: write array failed");
 	}
 	
 	// check
@@ -43,8 +43,8 @@ START_TEST (test_real_store_nums){
 			hash_end
 		};
 		ret = backend_query(backend, r_read);
-			fail_unless(ret == 4,                   "chain 'real_store_nums': read array failed");
-			fail_unless(data_read == data_array[i], "chain 'real_store_nums': read array data failed");
+			fail_unless(ret == 4,                   "chain real_store_nums: read array failed");
+			fail_unless(data_read == data_array[i], "chain real_store_nums: read array data failed");
 	}
 	
 	backend_destroy(backend);

@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 #include <alloca.h>
+#define EMODULE 2
 
 // 'list' chain provide insert capability using underlying chains.
 // This is useful for upper-level chains like 'insert-sort'
@@ -31,13 +32,13 @@ static ssize_t lists_set(chain_t *chain, request_t *request){
 		
 		hash_data_find(request, HK(offset), &key_orig, NULL);
 		if(key_orig == NULL)
-			return -EINVAL;
+			return warning("no offset supplied");
 		
 		data_copy_local(&key_from, key_orig);
 		data_copy_local(&key_to,   key_orig);
 			
 		if(data_arithmetic('+', &key_to, NULL, &d_one, NULL) != 0) // TODO contexts
-			return -EINVAL;
+			return error("data_arithmetic failed");
 		
 		hash_t  new_request[] = {
 			{ HK(action),   DATA_INT32(ACTION_CRWD_MOVE)               },
@@ -63,17 +64,17 @@ static ssize_t lists_delete(chain_t *chain, request_t *request){
 	size_t            r_size;
 	
 	if( (key_orig = hash_find(request, HK(offset))) == NULL)
-		return -EINVAL;
+		return warning("no offset supplied");
 
 	key_data = hash_item_data(key_orig);
-	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
 	data_copy_local(&key_from, key_data);
 	data_copy_local(&key_to,   key_data);
 	
 	data_t  d_size = DATA_OFFT(r_size);                           // TODO pass real data from hash
 	if(data_arithmetic('+', &key_from, NULL, &d_size, NULL) != 0) // TODO contexts
-		return -EINVAL;
+		return error("data_arithmetic failed");
 	
 	hash_t  new_request[] = {
 		{ HK(action),      DATA_INT32(ACTION_CRWD_MOVE)               },

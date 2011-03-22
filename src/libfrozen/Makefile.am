@@ -62,20 +62,28 @@ lib_LTLIBRARIES=libfrozen.la
 libfrozen_la_LDFLAGS= -module -avoid-version
 libfrozen_la_CPPFLAGS= -fvisibility=hidden
 libfrozen_la_SOURCES=  \
-                        libfrozen.h     libfrozen.c                          \   
-                        data_protos.m4  data.c                               \   
-                        hash.h          hash.c                               \   
-                        list.h          list.c                               \   
-                        buffer.h        buffer.c                             \   
-                        $(backends_sources)                     \   
-                        backend.c           backend.h           \   
-                        configs/config.h                        \   
-                        configs/config_parser.tab.h             \   
-                        configs/config_parser.tab.c             \   
-                        configs/config_parser.lex.c             \   
+                        libfrozen.h     libfrozen.c                          \
+                        errors.h        errors.c                             \
+			data_protos.m4  data.c                               \
+                        hash.h          hash.c                               \
+                        list.h          list.c                               \
+                        buffer.h        buffer.c                             \
+                        $(backends_sources)                     \
+                        backend.c           backend.h           \
+                        configs/config.h                        \
+                        configs/config_parser.tab.h             \
+                        configs/config_parser.tab.c             \
+                        configs/config_parser.lex.c             \
                         public.h
 
 libfrozen.c: data.h hashkeys.h
+
+
+errors.c: errors.c.m4
+	${M4} -sP errors.c.m4 > $@
+errors.c.m4: errors_list.m4
+errors_list.m4:
+	${PERL} generrors.pl $(backends_sources) > $@
 
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@
@@ -125,6 +133,7 @@ CLEANFILES =	backends/locate.c backends/insert-sort/insert-sort.c   \
 		configs/config_parser.tab.h                            \
 		configs/config_parser.lex.c                            \
 		data.c data.h                                          \
+		errors.c errors_list.m4                                \
 		hashkeys.h                                             \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c data/int_t.c  data/uint_t.c

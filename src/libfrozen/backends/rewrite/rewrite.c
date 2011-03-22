@@ -68,6 +68,7 @@
 #include <alloca.h>
 #include <backends/rewrite/rewrite.h>
 
+#define EMODULE 12
 typedef struct rewrite_userdata {
 	unsigned int      inited;
 	rewrite_script_t  script;
@@ -77,7 +78,7 @@ typedef struct rewrite_userdata {
 /* init {{{ */
 static int rewrite_init(chain_t *chain){ // {{{
 	if( (chain->userdata = malloc(sizeof(rewrite_userdata))) == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -97,10 +98,10 @@ static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
 	
 	hash_data_copy(ret, TYPE_STRING, script, config, HK(script));
 	if(ret != 0)
-		return_error(-EINVAL, "chain 'rewrite' parameter 'script' not supplied\n");
+		return error("script not supplied");
 	
 	if(rewrite_script_parse(&data->script, script) != 0)
-		return -EINVAL;
+		return error("script parse failed");
 	
 	data->inited = 1;
 	return 0;
@@ -205,8 +206,7 @@ ablock_continue:
 						cmp_res = (m_i32 == 0) ? 0 : 1;
 						break;
 					default:
-						printf("no cmp!\n");
-						ret = -EINVAL;
+						ret = error("no cmp");
 						goto exit;
 				};
 				
@@ -229,8 +229,7 @@ ablock_continue:
 						cmp_res2 = (m_i32 == 0) ? 0 : 1;
 						break;
 					default:
-						printf("no cmp!\n");
-						ret = -EINVAL;
+						ret = error("no cmp");
 						goto exit;
 				};
 				
@@ -243,8 +242,7 @@ ablock_continue:
 				param1 = action->params->list;
 				
 				if(param1 == NULL || param1->type != THING_ARRAY_REQUEST){
-					ret = -EINVAL;
-					printf("pass failed\n");
+					ret = error("pass failed");
 					goto exit;
 				}
 				
@@ -289,8 +287,7 @@ ablock_continue:
 				rewrite_thing_get_data(env, param3, &src_data,  &src_data_ctx);
 				
 				if(data_value_type(from_data) != TYPE_STRING){
-					ret = -EINVAL;
-					printf("arith failed\n");
+					ret = error("arithmetic failed");
 					goto exit;
 				}
 				
@@ -332,8 +329,7 @@ ablock_continue:
 				
 				data_type  new_type;
 				if((new_type = data_type_from_string(data_value_ptr(type_data))) == TYPE_INVALID){
-					ret = -EINVAL;
-					printf("alloca data invalid: %s\n", (char *)data_value_ptr(type_data));
+					ret = error("alloca data invalid");
 					goto exit;
 				}
 				
@@ -360,8 +356,7 @@ ablock_continue:
 				
 				backend_t *backend;
 				if( (backend = backend_acquire(data_value_ptr(from_data))) == NULL){ // TODO ctx
-					ret = -EINVAL;
-					printf("backend acquire failed\n");
+					ret = error("backend_acquire failed");
 					goto exit;
 				}
 				

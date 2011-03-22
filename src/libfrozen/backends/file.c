@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <alloca.h>
 
+#define EMODULE         1
 #define DEF_BUFFER_SIZE 1024
 
 typedef enum file_stat_status {
@@ -31,7 +32,7 @@ static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	(void)data;
 	
-	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return error("handle not supplied");
 	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
 	hash_data_copy(ret, TYPE_SIZET, size_min,  context, HK(size));
 	
@@ -57,7 +58,7 @@ static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, vo
 	
 	(void)data;
 	
-	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, handle,    context, HK(handle)); if(ret != 0) return error("handle not supplied");
 	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
 	hash_data_copy(ret, TYPE_SIZET, size,      context, HK(size));
 	
@@ -137,7 +138,7 @@ static file_stat_status  file_update_count(file_userdata *data){ // {{{
 static int file_init(chain_t *chain){ // {{{
 	file_userdata *userdata = calloc(1, sizeof(file_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return error("calloc returns null");
 	
 	chain->userdata = userdata;
 	
@@ -164,27 +165,31 @@ static int file_destroy(chain_t *chain){ // {{{
 static int file_configure(chain_t *chain, hash_t *config){ // {{{
 	ssize_t        ret;
 	int            handle;
+	size_t         s;
 	char          *filepath;
 	char          *filename;
-	char          *temp;
+	char          *homedir;
 	size_t         buffer_size = DEF_BUFFER_SIZE;
 	file_userdata *userdata    = (file_userdata *)chain->userdata;
 	
 	hash_data_copy(ret, TYPE_SIZET,  buffer_size, config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_STRING, filename,    config, HK(filename));
 	if(ret != 0)
-		return -EINVAL;
+		return error("filename not defined");
 	
-	filepath  = malloc(256);
-	*filepath = '\0';
-	
-	hash_data_copy(ret, TYPE_STRING, temp, global_settings, HK(homedir));
+	hash_data_copy(ret, TYPE_STRING, homedir,     global_settings, HK(homedir));
 	if(ret != 0)
-		temp = ".";
+		homedir = ".";
 	
-	if(snprintf(filepath, 256, "%s/%s", temp, filename) >= 256){
-		/* snprintf can truncate strings, so malicious user can use it to access another file.
-		 * we check string len such way to ensure none of strings was truncated */
+	s = strlen(homedir) + 1 + strlen(filename) + 1;
+	
+	if((filepath = malloc(s)) == NULL)
+		return error("filename too long");
+	
+	/* snprintf can truncate strings, so malicious user can use it to access another file.
+	 * we check string len such way to ensure none of strings was truncated */
+	if(snprintf(filepath, s, "%s/%s", homedir, filename) >= s){
+		ret = error("filename too long");
 		goto cleanup;
 	}
 	
@@ -196,8 +201,10 @@ static int file_configure(chain_t *chain, hash_t *config){ // {{{
 		S_IRUSR | S_IWUSR
 	);
 	
-	if(handle == -1)
+	if(handle == -1){
+		ret = error("file open() error");
 		goto cleanup;
+	}
 	
 	userdata->path             = filepath;
 	userdata->handle           = handle;
@@ -209,7 +216,7 @@ static int file_configure(chain_t *chain, hash_t *config){ // {{{
 
 cleanup:
 	free(filepath);
-	return -EINVAL;
+	return ret;
 } // }}}
 
 // Requests
@@ -251,10 +258,10 @@ static ssize_t file_create(chain_t *chain, request_t *request){ // {{{
 	data_t           *key_out;
 	data_ctx_t       *key_out_ctx;
 	
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("size not supplied");
 	
 	if( file_new_offset(chain, &offset, size) != 0)
-		return -EFAULT;
+		return error("file expand error");
 	
 	/* optional offset fill */
 	hash_data_find(request, HK(offset_out), &key_out, &key_out_ctx);
@@ -279,15 +286,15 @@ static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 	file_userdata    *data        = ((file_userdata *)chain->userdata);
 	
 	hash_data_copy(ret, TYPE_INT32, forced, request, HK(forced));
-	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return warning("offset not supplied");
+	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
 	
 	fd  = data->handle;
 	ret = 0;
 	pthread_mutex_lock(&data->create_lock);
 		
 		if(file_update_count(data) == STAT_ERROR){
-			ret = -EFAULT;
+			ret = error("file_update_count failed");
 			goto exit;
 		}
 		
@@ -295,7 +302,7 @@ static ssize_t file_delete(chain_t *chain, request_t *request){ // {{{
 			key + size != data->file_stat.st_size
 			&& forced == 0
 		){ // truncating only last elements
-			ret = -EFAULT;
+			ret = warning("cant delete not last elements");
 			goto exit;
 		}
 		
@@ -319,13 +326,13 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	DT_OFFT          from, to;
 	DT_SIZET         move_size = -1;
 	
-	hash_data_copy(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return warning("offset_from not supplied");
+	hash_data_copy(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return warning("offset_to not supplied");
 	hash_data_copy(ret, TYPE_SIZET,  move_size, request, HK(size));
 	
 	if(move_size == -1){
 		if(file_update_count(data) == STAT_ERROR)
-			return -EINVAL;
+			return error("file_update_count failed");
 		
 		move_size = (data->file_stat.st_size - from);
 	}
@@ -348,10 +355,10 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 	}
 	
 	if(size == 0)
-		return -EINVAL;
+		return warning("size is null");
 	
 	if( (buff = malloc(max_size)) == NULL)
-		return -ENOMEM;
+		return error("malloc error");
 	
 	ret = 0;
 	while(move_size > 0){
@@ -361,7 +368,7 @@ static ssize_t file_move(chain_t *chain, request_t *request){ // {{{
 			break;
 		}
 		if(ssize == 0){
-			ret = -EFAULT;
+			ret = error("io error");
 			break;
 		}
 		
@@ -394,10 +401,10 @@ static ssize_t file_count(chain_t *chain, request_t *request){ // {{{
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	if(buffer == NULL)
-		return -EINVAL;
+		return warning("no buffer supplied");
 	
 	if(file_update_count(data) == STAT_ERROR)
-		return -EINVAL;
+		return error("file_update_count failed");
 	
 	data_t count = DATA_PTR_OFFT(&(data->file_stat.st_size));
 	

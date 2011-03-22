@@ -1,6 +1,7 @@
 #define IPC_C
 #include <libfrozen.h>
 #include <backends/ipc/ipc.h>
+#define EMODULE 8
 
 typedef struct ipc_userdata {
 	ipc_t            ipc;
@@ -24,7 +25,7 @@ ipc_role  ipc_string_to_role(char *string){ // {{{
 
 static int ipc_init(chain_t *chain){ // {{{
 	if((chain->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -38,16 +39,16 @@ static int ipc_destroy(chain_t *chain){ // {{{
 } // }}}
 static int ipc_configure(chain_t *chain, hash_t *config){ // {{{
 	ssize_t          ret;
-	DT_STRING        ipc_type_str  = NULL;
+	char            *ipc_type_str  = NULL;
 	ipc_userdata    *userdata      = (ipc_userdata *)chain->userdata;
 	
 	hash_data_copy(ret, TYPE_STRING, ipc_type_str,  config, HK(type));
 	
 	if( (userdata->ipc_proto = ipc_string_to_proto(ipc_type_str)) == NULL)
-		return_error(-EINVAL, "chain 'ipc' parameter 'type' invalid\n");
+		return error("chain ipc parameter type invalid");
 	
-	if( userdata->ipc_proto->func_init(&userdata->ipc, config) < 0)
-		return -EFAULT;
+	if( (ret = userdata->ipc_proto->func_init(&userdata->ipc, config)) < 0)
+		return ret;
 	
 	userdata->ipc.chain = chain;
 	

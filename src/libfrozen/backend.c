@@ -65,11 +65,11 @@ ssize_t     chain_query        (chain_t *chain, request_t *request){
 	uint32_t      r_action;
 	
 	if(chain == NULL || request == NULL)
-		return_error(-EINVAL, "chain_query 'chain' or 'request' is null\n");
+		return -ENOSYS;
 	
 	hash_data_copy(ret, TYPE_INT32, r_action, request, HK(action));
 	if(ret != 0)
-		return_error(-EINVAL, "chain_query request 'action' not set\n");
+		return -ENOSYS;
 	
 	switch(r_action){
 		case ACTION_CRWD_CREATE: func = chain->chain_type_crwd.func_create; break;

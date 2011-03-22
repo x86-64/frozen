@@ -1,5 +1,5 @@
 #include <libfrozen.h>
-
+#define EMODULE 7
 	/*
 typedef struct allocator_userdata {
 	hash_key_t     key;
@@ -17,7 +17,7 @@ typedef struct allocator_userdata {
 
 static int allocator_init(chain_t *chain){ // {{{
 	//if((chain->userdata = calloc(1, sizeof(allocator_userdata))) == NULL)
-	//	return -ENOMEM;
+	//	return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -37,8 +37,8 @@ static ssize_t allocator_backend_delete(chain_t *chain, request_t *request){
 	size_t    size, curr_size;
 	char      fill_buffer[255];
 	
-	hash_data_copy(ret, TYPE_OFFT,  offset,  request, HK(offset)); if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_SIZET, size,    request, HK(size));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  offset,  request, HK(offset)); if(ret != 0) return warning("no offset supplied");
+	hash_data_copy(ret, TYPE_SIZET, size,    request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
 	while(size > 0){
 		curr_size = MIN(size, 255);
@@ -66,7 +66,7 @@ static ssize_t allocator_backend_custom(chain_t *chain, request_t *request){
 	
 	hash_data_copy(ret, TYPE_STRING, function, request, HK(function));
 	if(ret != 0)
-		return -EINVAL;
+		return warning("no function supplied");
 	
 	if(strcmp(function, "resize") == 0){
 		off_t       rec_old_offset, rec_new_offset;
@@ -75,9 +75,9 @@ static ssize_t allocator_backend_custom(chain_t *chain, request_t *request){
 		data_t     *offset_out;
 		data_ctx_t *offset_out_ctx;
 		
-		hash_data_copy(ret, TYPE_OFFT,  rec_old_offset, request, HK(offset));   if(ret != 0) return -EINVAL;
-		hash_data_copy(ret, TYPE_SIZET, rec_new_size,   request, HK(size));     if(ret != 0) return -EINVAL;
-		hash_data_copy(ret, TYPE_SIZET, rec_old_size,   request, HK(size_old)); if(ret != 0) return -EINVAL;
+		hash_data_copy(ret, TYPE_OFFT,  rec_old_offset, request, HK(offset)); if(ret != 0) return warning("no offset supplied");
+		hash_data_copy(ret, TYPE_SIZET, rec_new_size,   request, HK(size)); if(ret != 0) return warning("no size supplied");
+		hash_data_copy(ret, TYPE_SIZET, rec_old_size,   request, HK(size_old)); if(ret != 0) return warning("no size_old supplied");
 		
 		// create new chunk
 		rec_new_offset = 0; // TODO remove all inits
@@ -122,7 +122,7 @@ static ssize_t allocator_backend_custom(chain_t *chain, request_t *request){
 		data_transfer(offset_out, offset_out_ctx, &rec_new_offset_data, NULL);
 		return 0;
 	}
-	return -EINVAL;
+	return warning("no such function");
 }
 
 static chain_t chain_allocator = {
@@ -133,7 +133,7 @@ static chain_t chain_allocator = {
 	.func_destroy   = &allocator_destroy,
 	{{
 		.func_delete  = &allocator_backend_delete,
-		.func_count   = &allocator_backend_custom
+		.func_custom  = &allocator_backend_custom
 	}}
 };
 CHAIN_REGISTER(chain_allocator)

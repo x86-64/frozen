@@ -123,7 +123,7 @@ ssize_t mphf_bdz_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  
 	}else if(array[2].occupied == 0){ g_free = &array[2].value;
 	}else{
 		// call rebuild
-		//return_error(-EFAULT, "mphf g_free\n");
+		//return error("mphf g_free");
 		return -EFAULT;
 	}
 	

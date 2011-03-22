@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#define EMODULE 6
 
 typedef struct incap_userdata {
 	hash_key_t     key;
@@ -15,7 +16,7 @@ typedef struct incap_userdata {
 
 static int incap_init(chain_t *chain){ // {{{
 	if((chain->userdata = calloc(1, sizeof(incap_userdata))) == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -59,7 +60,7 @@ static int incap_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->multiply_as_offt  = multiply;
 	
 	if(multiply == 0)
-		return_error(-EINVAL, "chain 'incapsulate' parameter 'multiply' invalid\n");
+		return error("chain incapsulate parameter multiply invalid");
 	
 	return 0;
 } // }}}
@@ -80,7 +81,7 @@ static ssize_t incap_backend_createwrite(chain_t *chain, request_t *request){
 		if( (size % userdata->multiply_as_sizet) != 0)
 			new_size += userdata->multiply_as_sizet;
 		
-		data_write(offset, offset_ctx, 0, &size, sizeof(size));
+		data_write(offset, offset_ctx, 0, &new_size, sizeof(new_size));
 	}
 	
 	hash_data_find(request, userdata->key, &offset, &offset_ctx);

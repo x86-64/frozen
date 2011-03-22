@@ -19,6 +19,8 @@ enum request_actions {
 typedef hash_t       request_t;
 typedef signed int   ssize_t;
 typedef unsigned int size_t;
+typedef signed int   intmax_t;
+typedef unsigned int uintmax_t;
 
 int                frozen_init(void);
 int                frozen_destroy(void);
@@ -60,6 +62,7 @@ void               hash_get                     (hash_t *hash, char *key, char *
 ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
 ssize_t            data_from_string             (data_t *data, char *type, char *string);
 
+const char *       describe_error               (intmax_t errnum);
 
 %inline %{
 ssize_t            data_from_string             (data_t *data, char *type, char *string){

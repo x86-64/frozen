@@ -288,13 +288,13 @@ static int blocks_configure(chain_t *chain, hash_t *config){
 	
 	hash_data_copy(ret, TYPE_INT32, data->block_size, config, HK(block_size));
 	if(ret != 0)
-		return_error(-EINVAL, "chain 'blocks' variable 'block_size' invalid\n");
+		return error("chain blocks variable 'block_size' invalid");
 	
 	if( (r_backend = hash_find(config, HK(backend))) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'backend' not set\n");
+		return error("chain blocks variable 'backend' not set");
 	
 	if( (data->bk_map = backend_new(r_backend)) == NULL)
-		return_error(-EINVAL, "chain 'blocks' variable 'backend' invalid\n");
+		return error("chain blocks variable 'backend' invalid");
 	
 	data->ch_real = chain;
 	
@@ -393,8 +393,8 @@ static ssize_t blocks_delete(chain_t *chain, request_t *request){ // {{{
 	off_t   r_key;
 	size_t  r_size;
 	
-	hash_data_copy(ret, TYPE_OFFT,  r_key,  request, HK(offset)); if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  r_key,  request, HK(offset)); if(ret != 0) return warning("no offset supplied");
+	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
 	return itms_delete(chain, r_key, r_size);
 } // }}}
@@ -405,8 +405,8 @@ static ssize_t blocks_move(chain_t *chain, request_t *request){ // {{{
 	
 	ssize_t           move_delta;
 	
-	hash_data_copy(ret, TYPE_OFFT,  from,  request, HK(offset_from)); if(ret != 0) return -EINVAL;
-	hash_data_copy(ret, TYPE_OFFT,  to,    request, HK(offset_to));   if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_OFFT,  from,  request, HK(offset_from)); if(ret != 0) return warning("no offset_from supplied");
+	hash_data_copy(ret, TYPE_OFFT,  to,    request, HK(offset_to)); if(ret != 0) return warning("no offset_to supplied");
 	
 	if(from == to)
 		return 0;

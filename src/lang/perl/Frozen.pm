@@ -76,6 +76,7 @@ package Frozen;
 *hash_get = *Frozenc::hash_get;
 *hash_set = *Frozenc::hash_set;
 *data_from_string = *Frozenc::data_from_string;
+*describe_error = *Frozenc::describe_error;
 
 # ------- VARIABLE STUBS --------
 

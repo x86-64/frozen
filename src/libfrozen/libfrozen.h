@@ -39,10 +39,6 @@
 #define _inline   extern inline
 #define API       __attribute__((visibility("default")))
 
-#define error(...)            do{ fprintf(stdout,__VA_ARGS__);    }while(0);
-#define return_error(err,...) do{ error(__VA_ARGS__); return err; }while(0);
-#define label_error(err,...)  do{ error(__VA_ARGS__); goto err;   }while(0);
-
 #define __HALF_MAX_SIGNED(type) ((type)1 << (sizeof(type)*8-2))
 #define __MAX_SIGNED(type) (__HALF_MAX_SIGNED(type) - 1 + __HALF_MAX_SIGNED(type))
 #define __MIN_SIGNED(type) (-1 - __MAX_SIGNED(type))
@@ -50,6 +46,7 @@
 #define __MAX(type) ((type)~__MIN(type))
 
 /* Own headers */
+#include <errors.h>
 #include <public.h>
 
 #include <list.h>            // internal data storage

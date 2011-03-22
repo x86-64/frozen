@@ -90,7 +90,8 @@ am__objects_1 = backends/libfrozen_la-null-proxy.lo \
 	backends/rewrite/libfrozen_la-rule_parser.lex.lo \
 	backends/insert-sort/libfrozen_la-insert-sort.lo
 am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
-	libfrozen_la-data.lo libfrozen_la-hash.lo libfrozen_la-list.lo \
+	libfrozen_la-errors.lo libfrozen_la-data.lo \
+	libfrozen_la-hash.lo libfrozen_la-list.lo \
 	libfrozen_la-buffer.lo $(am__objects_1) \
 	libfrozen_la-backend.lo \
 	configs/libfrozen_la-config_parser.tab.lo \
@@ -127,7 +128,7 @@ AWK = /bin/gawk
 BISON = /usr/bin/bison
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -g3 -O0 -Wall -Werror -DDEBUG=1
+CFLAGS =  -g3 -O0 -Wall -Werror -DDEBUG=1
 CHECK_CFLAGS =  
 CHECK_LIBS = -lcheck  
 CPP = gcc -E
@@ -304,7 +305,8 @@ libfrozen_la_LDFLAGS = -module -avoid-version
 libfrozen_la_CPPFLAGS = -fvisibility=hidden
 libfrozen_la_SOURCES = \
                         libfrozen.h     libfrozen.c                          \
-                        data_protos.m4  data.c                               \
+                        errors.h        errors.c                             \
+			data_protos.m4  data.c                               \
                         hash.h          hash.c                               \
                         list.h          list.c                               \
                         buffer.h        buffer.c                             \
@@ -324,6 +326,7 @@ CLEANFILES = backends/locate.c backends/insert-sort/insert-sort.c   \
 		configs/config_parser.tab.h                            \
 		configs/config_parser.lex.c                            \
 		data.c data.h                                          \
+		errors.c errors_list.m4                                \
 		hashkeys.h                                             \
 		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
 		data/off_t.c data/size_t.c data/int_t.c  data/uint_t.c
@@ -528,6 +531,7 @@ distclean-compile:
 include ./$(DEPDIR)/libfrozen_la-backend.Plo
 include ./$(DEPDIR)/libfrozen_la-buffer.Plo
 include ./$(DEPDIR)/libfrozen_la-data.Plo
+include ./$(DEPDIR)/libfrozen_la-errors.Plo
 include ./$(DEPDIR)/libfrozen_la-hash.Plo
 include ./$(DEPDIR)/libfrozen_la-libfrozen.Plo
 include ./$(DEPDIR)/libfrozen_la-list.Plo
@@ -582,6 +586,13 @@ libfrozen_la-libfrozen.lo: libfrozen.c
 #	source='libfrozen.c' object='libfrozen_la-libfrozen.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
+
+libfrozen_la-errors.lo: errors.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-errors.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-errors.Tpo -c -o libfrozen_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
+	$(am__mv) $(DEPDIR)/libfrozen_la-errors.Tpo $(DEPDIR)/libfrozen_la-errors.Plo
+#	source='errors.c' object='libfrozen_la-errors.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
 
 libfrozen_la-data.lo: data.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-data.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-data.Tpo -c -o libfrozen_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
@@ -986,6 +997,12 @@ uninstall-am: uninstall-libLTLIBRARIES
 
 
 libfrozen.c: data.h hashkeys.h
+
+errors.c: errors.c.m4
+	${M4} -sP errors.c.m4 > $@
+errors.c.m4: errors_list.m4
+errors_list.m4:
+	${PERL} generrors.pl $(backends_sources) > $@
 
 data.c: ${data_sources}
 	${M4} -sP data.c.m4 > $@

@@ -90,7 +90,7 @@ hash_value :
 
 void yyerror(hash_t **hash, const char *msg){
 	(void)hash;
-	error("config error: %s\n", msg);
+	fprintf(stderr, "config error: %s\n", msg);
 }
 
 hash_t *   configs_string_parse(char *string){ // {{{

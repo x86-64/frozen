@@ -57,7 +57,7 @@ START_TEST (test_backend_rewrite){
 		"request['size'] = (void)''; "
 		"ret = pass(request);";
 	
-	ret = test_rewrite(rules_unset_key, req_create);
+        ret = test_rewrite(rules_unset_key, req_create);
 		fail_unless(ret < 0, "backend rewrite rules unset_key failed\n");
 	// }}}
 	// set key from key {{{

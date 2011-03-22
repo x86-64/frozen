@@ -435,7 +435,7 @@ static void                 rewrite_free_thing(rewrite_thing_t *thing){ // {{{
 } // }}}
 
 void yyerror(rewrite_script_t *script, const char *msg){
-	error("rewrite rule error: '%s': %s\n",
+	fprintf(stderr, "rewrite rule error: '%s': %s\n",
 		script->script,
 		msg
 	);

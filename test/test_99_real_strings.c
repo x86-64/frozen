@@ -37,7 +37,7 @@ START_TEST (test_real_store_strings){
 			hash_end
 		};
 		ret = backend_query(backend, r_write);
-			fail_unless(ret > 0, "chain 'real_store_strings': write array failed");
+			fail_unless(ret > 0, "chain real_store_strings: write array failed");
 	}
 	
 	// check
@@ -50,8 +50,8 @@ START_TEST (test_real_store_strings){
 			hash_end
 		};
 		ret = backend_query(backend, r_read);
-			fail_unless(ret > 0,                               "chain 'real_store_strings': read array failed");
-			fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'real_store_strings': read array data failed");
+			fail_unless(ret > 0,                               "chain real_store_strings: read array failed");
+			fail_unless(strcmp(data_read, data_array[i]) == 0, "chain real_store_strings: read array data failed");
 	}
 	
 	backend_destroy(backend);

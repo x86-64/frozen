@@ -3,6 +3,7 @@
 #include <libfrozen.h>
 #include <backends/mphf/mphf.h>
 
+#define EMODULE              10
 #define BUFFER_SIZE_DEFAULT  1000
 
 typedef struct mphf_userdata {
@@ -95,14 +96,13 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	
 	// prepare buffer
 	if( (buffer = malloc(userdata->buffer_size)) == NULL)
-		return -EFAULT;
+		return error("malloc failed");
 	
 redo:
-	if(userdata->mphf_proto->func_clean(&userdata->mphf) < 0)
-		return -EFAULT;
+	if( (ret = userdata->mphf_proto->func_clean(&userdata->mphf)) < 0)
+		return ret;
 	
 	// process items
-	ret = 0;
 	for(i=0; i<count; i++){
 		request_t r_read[] = {
 			{ HK(action),          DATA_INT32(ACTION_CRWD_READ)            },
@@ -114,25 +114,31 @@ redo:
 			hash_end
 		};
 		if( (ret = chain_next_query(userdata->backend_data, r_read)) < 0){
-			//printf("failed call\n");
+			ret = error("failed call\n");
 			break;
 		}
 		
-		hash_data_find(r_read, userdata->keyid,    &key, NULL);
-		if(key == NULL){
-			hash_data_find(r_read, userdata->key_from, &key, NULL);
-			if(key == NULL){
-				//printf("failed hash\n");
-				ret = -EFAULT;
-				break;
+		do {
+			if(userdata->keyid != 0){
+				hash_data_find(r_read, userdata->keyid,    &key, NULL);
+				if(key != NULL){
+					keyid = 0;
+					data_to_dt(ret, TYPE_INT64, keyid, key, NULL); 
+					break;
+				}
 			}
 			
-			keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_len(key, NULL));
-		}else{
-			keyid = 0;
-			data_to_dt(ret, TYPE_INT64, keyid, key, NULL); 
-		}
-		//printf("key: %lx value: %x\n", keyid, (int)i);
+			if(userdata->key_from != 0){
+				hash_data_find(r_read, userdata->key_from, &key, NULL);
+				if(key != NULL){
+					keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_len(key, NULL));
+					break;
+				}
+			}
+			ret = error("no keyid or key found in item");
+			goto exit;
+		}while(0);
+		//printf("mphf: rebuild: key: %lx value: %x\n", keyid, (int)i);
 		
 		if( (ret = mphf_insert(userdata,
 			keyid,
@@ -140,34 +146,38 @@ redo:
 		)) < 0){
 			if(ret == -EBADF) goto redo; // bad mphf
 			//printf("failed insert %x\n", ret);
-			ret = -EFAULT;
+			printf("fuck2 %d\n", (int)ret);
+			ret = error("insert failed");
 			break;
 		}
 		
 	}
+exit:
 	free(buffer);
 	
 	// if error - exit
-	if(ret < 0)
-		return -EFAULT;
-	
+	if(ret < 0){
+		printf("rebuild failed\n");
+		return ret;
+	}
 	return 0;
 } // }}}
 
 static int mphf_init(chain_t *chain){ // {{{
 	mphf_userdata *userdata = chain->userdata = calloc(1, sizeof(mphf_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
 static int mphf_destroy(chain_t *chain){ // {{{
+	intmax_t       ret;
 	mphf_userdata *userdata = (mphf_userdata *)chain->userdata;
 	
-	if(userdata->mphf_proto->func_unload(&userdata->mphf) < 0)
-		return -EFAULT;
+	if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
+		return ret;
 	
-	hash_free       (userdata->mphf.config);
+	hash_free(userdata->mphf.config);
 	free(userdata);
 	return 0;
 } // }}}
@@ -192,13 +202,13 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRING, hash_type_str,   config, HK(hash));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
-		return_error(-EINVAL, "chain 'mphf' parameter 'mphf_type' invalid or not supplied\n");
+		return error("chain mphf parameter mphf_type invalid or not supplied");
 	
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	if((userdata->mphf.hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
-		return_error(-EINVAL, "chain 'mphf' parameter 'hash' invalid\n");
+		return error("chain mphf parameter hash invalid");
 	if( (userdata->mphf.config  = hash_copy(config)) == NULL)
-		return_error(-ENOMEM, "chain 'mphf' insufficent memory\n");
+		return error("chain mphf insufficent memory");
 	
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
@@ -207,8 +217,8 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->backend_data    = chain;
 	userdata->buffer_size     = buffer_size;
 	
-	if(userdata->mphf_proto->func_load(&userdata->mphf) < 0)
-		return -EFAULT;
+	if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)
+		return ret;
 	
 	return 0;
 } // }}}
@@ -266,9 +276,11 @@ static ssize_t mphf_backend_query(chain_t *chain, request_t *request){ // {{{
 			ret = chain_next_query(chain, r_next);
 			
 			if(key_out != key_new_out){
+				ssize_t ret;
+				
 				// TODO ret & rebuild?
-				if(mphf_update(userdata, keyid, key_new_out) < 0)
-					return -EFAULT;
+				if( (ret = mphf_update(userdata, keyid, key_new_out)) < 0)
+					return ret;
 			}
 			
 			// TODO pass captured offset_out 

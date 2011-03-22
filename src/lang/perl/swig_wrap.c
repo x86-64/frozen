@@ -1763,6 +1763,69 @@ SWIG_FromCharPtr(const char *cptr)
 }
 
 
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
+
+SWIGINTERN int
+SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
+{
+  if (SvIOK(obj)) {
+    if (val) *val = SvIV(obj);
+    return SWIG_OK;
+  } else {
+    int dispatch = 0;
+    const char *nptr = SvPV_nolen(obj);
+    if (nptr) {
+      char *endptr;
+      long v;
+      errno = 0;
+      v = strtol(nptr, &endptr,0);
+      if (errno == ERANGE) {
+	errno = 0;
+	return SWIG_OverflowError;
+      } else {
+	if (*endptr == '\0') {
+	  if (val) *val = v;
+	  return SWIG_Str2NumCast(SWIG_OK);
+	}
+      }
+    }
+    if (!dispatch) {
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
+	if (val) *val = (long)(d);
+	return res;
+      }
+    }
+  }
+  return SWIG_TypeError;
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_int SWIG_PERL_DECL_ARGS_2(SV * obj, int *val)
+{
+  long v;
+  int res = SWIG_AsVal_long SWIG_PERL_CALL_ARGS_2(obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v < INT_MIN || v > INT_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = (int)(v);
+    }
+  }  
+  return res;
+}
+
+
 ssize_t            data_from_string             (data_t *data, char *type, char *string){
         ssize_t   retval;
         data_type d_type = data_type_from_string(type);
@@ -2709,6 +2772,34 @@ XS(_wrap_data_from_string) {
 }
 
 
+XS(_wrap_describe_error) {
+  {
+    intmax_t arg1 ;
+    int val1 ;
+    int ecode1 = 0 ;
+    int argvi = 0;
+    char *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: describe_error(errnum);");
+    }
+    ecode1 = SWIG_AsVal_int SWIG_PERL_CALL_ARGS_2(ST(0), &val1);
+    if (!SWIG_IsOK(ecode1)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "describe_error" "', argument " "1"" of type '" "intmax_t""'");
+    } 
+    arg1 = (intmax_t)(val1);
+    result = (char *)describe_error(arg1);
+    ST(argvi) = SWIG_FromCharPtr((const char *)result); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
@@ -2717,11 +2808,11 @@ static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_t = {"_p_data_t", "data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_key_t = {"_p_hash_key_t", "hash_key_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_t = {"_p_hash_t", "request_t *|hash_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *|intmax_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_ctx_t = {"_p_p_data_ctx_t", "data_ctx_t **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_t = {"_p_p_data_t", "data_t **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "size_t *|unsigned int *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "size_t *|unsigned int *|uintmax_t *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_backend_t,
@@ -2800,6 +2891,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_get", _wrap_hash_get},
 {"Frozenc::hash_set", _wrap_hash_set},
 {"Frozenc::data_from_string", _wrap_data_from_string},
+{"Frozenc::describe_error", _wrap_describe_error},
 {0,0}
 };
 /* -----------------------------------------------------------------------------

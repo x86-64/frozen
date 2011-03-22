@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 #include <backend.h>
+#define EMODULE 4
 
 typedef struct cacheapp_userdata {
 	memory_t    memory;
@@ -33,7 +34,7 @@ static ssize_t  cacheapp_flush(cacheapp_userdata *userdata){ // {{{
 static int cacheapp_init(chain_t *chain){ // {{{
 	cacheapp_userdata *userdata = chain->userdata = calloc(1, sizeof(cacheapp_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -54,7 +55,7 @@ static int cacheapp_configure(chain_t *chain, hash_t *config){ // {{{
 	
 	hash_data_copy(ret, TYPE_SIZET, cache_max_size, config, HK(size));
 	if(cache_max_size == 0)
-		return_error(-EINVAL, "backend 'cache-append' parameter 'size' too small\n");
+		return error("size too small");
 	
 	/* get file size */
 	request_t r_count[] = {
@@ -63,7 +64,7 @@ static int cacheapp_configure(chain_t *chain, hash_t *config){ // {{{
 		hash_end
 	};
 	if(chain_next_query(chain, r_count) < 0)
-		return -EFAULT;
+		return error("count failed");
 	
 	if(__MAX(size_t) < file_size) // TODO add support and remove it
 		return 0;
@@ -133,15 +134,15 @@ static ssize_t cacheapp_backend_create(chain_t *chain, request_t *request){ // {
 	
 	// check cache size
 	if(memory_size(&userdata->memory, &size) < 0)
-		return -EFAULT;
+		return error("memory_size failed");
 	if(size >= userdata->cache_max_size)
 		cacheapp_flush(userdata);
 	
 	// do create
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return error("no size supplied");
 	
 	if(memory_grow(&userdata->memory, size, &offset) != 0)
-		return -EFAULT;
+		return error("memory_grow failed");
 	
 	/* optional return of offset */
 	offset += userdata->cache_start_offset;
@@ -159,10 +160,27 @@ static ssize_t cacheapp_backend_create(chain_t *chain, request_t *request){ // {
 	return 0;
 } // }}}
 static ssize_t cacheapp_backend_rest(chain_t *chain, request_t *request){ // {{{
+	ssize_t            ret;
+	off_t              file_size;
 	cacheapp_userdata *userdata = (cacheapp_userdata *)chain->userdata;
 	cacheapp_flush(userdata);
 	
-	return chain_next_query(chain, request);
+	ret = chain_next_query(chain, request);
+	
+	/* get file size */
+	request_t r_count[] = {
+		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT)   },
+		{ HK(buffer), DATA_PTR_INT64(&file_size)      },
+		hash_end
+	};
+	if(chain_next_query(chain, r_count) < 0)
+		return error("count failed");
+	
+	if(__MAX(size_t) < file_size) // TODO add support and remove it
+		return 0;
+	
+	userdata->cache_start_offset = file_size;
+	return ret;
 } // }}}
 static ssize_t cacheapp_backend_count(chain_t *chain, request_t *request){ // {{{
 	data_t         *buffer;
@@ -172,7 +190,7 @@ static ssize_t cacheapp_backend_count(chain_t *chain, request_t *request){ // {{
 	cacheapp_userdata *userdata = (cacheapp_userdata *)chain->userdata;
 	
 	if(memory_size(&userdata->memory, &size) < 0)
-		return -EFAULT;
+		return error("memory_size failed");
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	

@@ -1,4 +1,3 @@
-
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
@@ -42,7 +41,7 @@ START_TEST (test_backend_mphf){
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                  },
+					{ HK(name),       DATA_STRING("cache-append")           },
 					hash_end
 				)},
 				hash_end
@@ -61,17 +60,15 @@ START_TEST (test_backend_mphf){
 					{ HK(name),       DATA_STRING("cache")                 },
 					hash_end
 				)},
-				/*
+                                { 0, DATA_HASHT(
+                                        { HK(name),       DATA_STRING("allocator")             },
+                                        hash_end
+                                )},
                                 { 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("incapsulate")           },
 					{ HK(multiply),   DATA_OFFT(30)                        },
 					hash_end
 				)},
-                                */
-                                { 0, DATA_HASHT(
-                                        { HK(name),       DATA_STRING("allocator")             },
-                                        hash_end
-                                )},
 				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("structs")               },
 					{ HK(size),       DATA_STRING("size")                  },
@@ -132,7 +129,7 @@ START_TEST (test_backend_mphf){
                         hash_end
 		};
 		ret = backend_query(b_dat, r_write);
-			fail_unless(ret >= 0, "chain 'backend_mphf': write array failed");
+			fail_unless(ret >= 0, "chain backend_mphf: write array failed");
 	}
 	
 	// check
@@ -147,8 +144,8 @@ START_TEST (test_backend_mphf){
 			hash_end
 		};
 		ret = backend_query(b_dat, r_read);
-			fail_unless(ret >= 0,                              "chain 'backend_mphf': read array failed");
-                //        fail_unless(strcmp(data_read, data_array[i]) == 0, "chain 'backend_mphf': read array data failed");
+			fail_unless(ret >= 0,                              "chain backend_mphf: read array failed");
+                //        fail_unless(strcmp(data_read, data_array[i]) == 0, "chain backend_mphf: read array data failed");
                 //printf("mphf_read: %s %s\n", data_read, data_array[i]);
 	}
 	
@@ -210,19 +207,19 @@ void bench_query(bench_t *bench){
 	if(bench->time_us == 0) bench->time_us = 1;
 }
 
-#define NTESTS 100
+#define NTESTS 10000
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
 		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_idx")                        },
+			{ HK(name),    DATA_STRING("backend_mphfs_g")                            },
 			{ HK(chains),  DATA_HASHT(
 				{ 0, DATA_HASHT(
-					{ HK(name),      DATA_STRING("file")                  },
-					{ HK(filename),  DATA_STRING("data_backend_mphis.dat") },
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphfs_g.dat")},
 					hash_end
 				)},
 				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                 },
+					{ HK(name),       DATA_STRING("cache")                  },
 					hash_end
 				)},
 				hash_end
@@ -230,7 +227,39 @@ START_TEST (test_backend_mphf_speed){
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
-			{ HK(name),   DATA_STRING("backend_mphf")                              },
+			{ HK(name),    DATA_STRING("backend_mphfs_v")                            },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphfs_v.dat")},
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache")                  },
+					hash_end
+				)},
+	        		hash_end
+			)},
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(name),    DATA_STRING("backend_mphfs_e")                            },
+			{ HK(chains),  DATA_HASHT(
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("file")                   },
+					{ HK(filename),   DATA_STRING("data_backend_mphfs_e.dat")},
+					hash_end
+				)},
+				{ 0, DATA_HASHT(
+					{ HK(name),       DATA_STRING("cache-append")            },
+					hash_end
+				)},
+				hash_end
+			)},
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(name),   DATA_STRING("backend_mphf_speed")                        },
 			{ HK(chains), DATA_HASHT(
 				{ 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("file")                  },
@@ -241,12 +270,16 @@ START_TEST (test_backend_mphf_speed){
 					{ HK(name),       DATA_STRING("cache")                 },
 					hash_end
 				)},
-				{ 0, DATA_HASHT(
+                                { 0, DATA_HASHT(
+                                        { HK(name),       DATA_STRING("allocator")             },
+                                        hash_end
+                                )},
+                                { 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("incapsulate")           },
-					{ HK(multiply),   DATA_OFFT(8)                         },
-					hash_end
+					{ HK(multiply),   DATA_OFFT(30)                        },
+                                        hash_end
 				)},
-				{ 0, DATA_HASHT(
+                                { 0, DATA_HASHT(
 					{ HK(name),       DATA_STRING("structs")               },
 					{ HK(size),       DATA_STRING("size")                  },
 					{ HK(structure),  DATA_HASHT(
@@ -258,12 +291,11 @@ START_TEST (test_backend_mphf_speed){
 				{ 0, DATA_HASHT(
 					{ HK(name),        DATA_STRING("mphf")                 },
 					{ HK(type),        DATA_STRING("chm_imp")              },
-					{ HK(backend),     DATA_STRING("backend_mphf_idx")     },
+					{ HK(backend_g),   DATA_STRING("backend_mphfs_g")      },
+					{ HK(backend_e),   DATA_STRING("backend_mphfs_e")      },
+					{ HK(backend_v),   DATA_STRING("backend_mphfs_v")      },
 					{ HK(nelements),   DATA_INT64(NTESTS)                  },
-					{ HK(value_bits),  DATA_INT32(31)                      },
-					{ HK(persistent),  DATA_INT32(1)                       },
-					{ HK(build_start), DATA_STRING("onload")               },
-					{ HK(build_end),   DATA_STRING("onunload")             },
+					{ HK(value_bits),  DATA_INT32(32)                      },
 					hash_end
 				)},
 				hash_end
@@ -275,10 +307,8 @@ START_TEST (test_backend_mphf_speed){
 	
 	backend_bulk_new(config);
 	
-	data_t     n_dat = DATA_STRING("backend_mphf"), n_idx = DATA_STRING("backend_mphf_idx");
-	backend_t *b_dat = backend_find(&n_dat);
-	backend_t *b_idx = backend_find(&n_idx);
-		fail_unless(b_dat != NULL && b_idx != NULL, "chain 'backend_mphf' backend creating failed");
+	backend_t *b_dat = backend_find("backend_mphf_speed");
+		fail_unless(b_dat != NULL, "chain backend_mphf backend creating failed");
 
 	// write array to file
 	int      i,j;
@@ -311,7 +341,7 @@ START_TEST (test_backend_mphf_speed){
 	}
 	bench_query(be);
 	printf("mphf write: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
-		ntests,
+		(unsigned int)ntests,
 		be->string,
 		( ntests * 1000 / be->time_ms), 
 		( be->time_us * 1000 / ntests ),
@@ -319,7 +349,7 @@ START_TEST (test_backend_mphf_speed){
 	);
 	
 	bench_free(be);
-	fail_unless(failed == 0, "chain 'backend_mphf': write array failed");
+	fail_unless(failed == 0, "chain backend_mphf: write array failed");
 	
 	// read test
 	memset(test, 'a', sizeof(test));
@@ -344,12 +374,12 @@ START_TEST (test_backend_mphf_speed){
 		
 		if(backend_query(b_dat, r_read) < 0 || memcmp(test, test2, sizeof(test)) != 0){
 			failed++;
-			//printf("failed: %.*s %.*s\n", sizeof(test), test, sizeof(test2), test2);
+			printf("failed: %.*s %.*s\n", (int)sizeof(test), test, (int)sizeof(test2), test2);
 		}
 	}
 	bench_query(be);
 	printf("mphf  read: %u iters took %s sec; speed: %7lu iters/s (one: %10lu ns) failed: %d\n",
-		ntests,
+		(unsigned int)ntests,
 		be->string,
 		( ntests * 1000 / be->time_ms), 
 		( be->time_us / ntests * 1000 ),
@@ -357,10 +387,9 @@ START_TEST (test_backend_mphf_speed){
 	);
 	
 	bench_free(be);
-	fail_unless(failed == 0, "chain 'backend_mphf': read array failed");
+	fail_unless(failed == 0, "chain backend_mphf: read array failed");
 	
 	backend_destroy(b_dat);
-	backend_destroy(b_idx);
 }
 END_TEST
 REEEEGISTER_TEST(core, test_backend_mphf_speed)

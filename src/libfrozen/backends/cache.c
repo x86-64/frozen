@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 #include <backend.h>
+#define EMODULE 3
 
 typedef struct cache_userdata {
 	memory_t    memory;
@@ -8,7 +9,7 @@ typedef struct cache_userdata {
 static int cache_init(chain_t *chain){ // {{{
 	cache_userdata *userdata = chain->userdata = calloc(1, sizeof(cache_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return error("calloc failed");
 	
 	return 0;
 } // }}}
@@ -34,7 +35,7 @@ static int cache_configure(chain_t *chain, hash_t *config){ // {{{
 		hash_end
 	};
 	if(chain_next_query(chain, r_count) < 0)
-		return -EFAULT;
+		return error("count failed");
 	
 	if(__MAX(size_t) < file_size)
 		return 0;
@@ -88,10 +89,10 @@ static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 	data_ctx_t     *offset_out_ctx;
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
 	if(memory_grow(&userdata->memory, size, &offset) != 0)
-		return -EFAULT;
+		return error("memory_grow failed");
 	
 	/* optional return of offset */
 	hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
@@ -108,7 +109,12 @@ static ssize_t cache_backend_create(chain_t *chain, request_t *request){
 	return 0;
 }
 
-// TODO delete
+static ssize_t cache_backend_delete(chain_t *chain, request_t *request){
+	// TIP cache, as like as file, can only truncate
+	
+	return 0; //-EFAULT;
+}
+
 static ssize_t cache_backend_count(chain_t *chain, request_t *request){
 	data_t         *buffer;
 	data_ctx_t     *buffer_ctx;
@@ -116,7 +122,7 @@ static ssize_t cache_backend_count(chain_t *chain, request_t *request){
 	cache_userdata *userdata = (cache_userdata *)chain->userdata;
 	
 	if(memory_size(&userdata->memory, &size) < 0)
-		return -EFAULT;
+		return error("memory_size failed");
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	
@@ -138,6 +144,7 @@ static chain_t chain_cache = {
 		.func_create = &cache_backend_create,
 		.func_get    = &cache_backend_read,
 		.func_set    = &cache_backend_write,
+		.func_delete = &cache_backend_delete,
 		.func_count  = &cache_backend_count
 	}}
 };

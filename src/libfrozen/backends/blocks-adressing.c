@@ -462,17 +462,17 @@ static int addrs_configure(chain_t *chain, hash_t *config){
 	hash_data_copy(ret, TYPE_INT32, read_per_calc,      config, HK(read_size));
 	
 	if(elements_per_level <= 1)
-		return_error(-EINVAL, "chain 'blocks-address' variable 'per-level' invalid");
+		return -EINVAL; // "chain blocks-address variable 'per-level' invalid");
 	
 	if(read_per_calc < 1)
 		read_per_calc = READ_PER_CALC_DEFAULT;
 	
 	if( (data->tree = tree_alloc(chain, elements_per_level, read_per_calc)) == NULL)
-		return_error(-ENOMEM, "chain 'blocks-address' no memory\n"); 
+		return error("chain blocks-address no memory"); 
 	
 	if(tree_recalc(data->tree) != 0){
 		tree_free(data->tree);
-		return_error(-EINVAL, "chain 'blocks-address' tree recalc failed\n");
+		return error("chain blocks-address tree recalc failed");
 	}
 	
 	return 0;
@@ -484,7 +484,7 @@ static ssize_t addrs_set(chain_t *chain, request_t *request){
 	uint32_t          r_block_vid, r_block_off, r_block_size, insert = 1;
 	addrs_userdata   *data = (addrs_userdata *)chain->userdata;
 	
-	hash_data_copy(ret, TYPE_INT32, r_block_size, request, HK(block_size)); if(ret != 0) return -EINVAL;
+	hash_data_copy(ret, TYPE_INT32, r_block_size, request, HK(block_size)); if(ret != 0) return error("no block_size supplied");
 	hash_data_copy(ret, TYPE_INT32, r_block_off,  request, HK(block_off));  if(ret != 0) insert = 0;
 	hash_data_copy(ret, TYPE_INT32, r_block_vid,  request, HK(block_vid));
 	if(ret != 0)
@@ -523,12 +523,12 @@ static ssize_t addrs_get(chain_t *chain, request_t *request){
 	if(temp != NULL) o_block_size  = data_value_ptr(temp);
 	
 	if(hash_find(request, HK(blocks)) == NULL){
-		hash_data_copy(ret, TYPE_OFFT, r_virt_key, request, HK(offset)); if(ret != 0) return -EINVAL;
+		hash_data_copy(ret, TYPE_OFFT, r_virt_key, request, HK(offset)); if(ret != 0) return warning("no offset supplied");
 		
 		if(tree_get(data->tree, r_virt_key, o_block_vid, o_real_offset) != 0)
 			return -EFAULT;
 	}else{
-		hash_data_copy(ret, TYPE_INT32, r_block_vid, request, HK(block_vid)); if(ret != 0) return -EINVAL;
+		hash_data_copy(ret, TYPE_INT32, r_block_vid, request, HK(block_vid)); if(ret != 0) return warning("no block_vid supplied");
 		
 		if(tree_get_block(data->tree, r_block_vid, &block) != 0)
 			return -EFAULT;
