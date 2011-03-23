@@ -19,8 +19,8 @@ enum request_actions {
 typedef hash_t       request_t;
 typedef signed int   ssize_t;
 typedef unsigned int size_t;
-typedef signed int   intmax_t;
-typedef unsigned int uintmax_t;
+typedef signed long long int   intmax_t;
+typedef unsigned long long int uintmax_t;
 
 int                frozen_init(void);
 int                frozen_destroy(void);

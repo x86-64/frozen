@@ -1494,12 +1494,14 @@ SWIG_Perl_SetModule(swig_module_info *module) {
 #define SWIGTYPE_p_hash_key_t swig_types[3]
 #define SWIGTYPE_p_hash_t swig_types[4]
 #define SWIGTYPE_p_int swig_types[5]
-#define SWIGTYPE_p_p_char swig_types[6]
-#define SWIGTYPE_p_p_data_ctx_t swig_types[7]
-#define SWIGTYPE_p_p_data_t swig_types[8]
-#define SWIGTYPE_p_unsigned_int swig_types[9]
-static swig_type_info *swig_types[11];
-static swig_module_info swig_module = {swig_types, 10, 0, 0, 0, 0};
+#define SWIGTYPE_p_long_long swig_types[6]
+#define SWIGTYPE_p_p_char swig_types[7]
+#define SWIGTYPE_p_p_data_ctx_t swig_types[8]
+#define SWIGTYPE_p_p_data_t swig_types[9]
+#define SWIGTYPE_p_unsigned_int swig_types[10]
+#define SWIGTYPE_p_unsigned_long_long swig_types[11]
+static swig_type_info *swig_types[13];
+static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1773,8 +1775,20 @@ SWIG_FromCharPtr(const char *cptr)
 #endif
 
 
+#include <stdlib.h>
+#ifdef _MSC_VER
+# ifndef strtoull
+#  define strtoull _strtoui64
+# endif
+# ifndef strtoll
+#  define strtoll _strtoi64
+# endif
+#endif
+
+
+
 SWIGINTERN int
-SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
+SWIG_AsVal_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, long long *val)
 {
   if (SvIOK(obj)) {
     if (val) *val = SvIV(obj);
@@ -1784,9 +1798,9 @@ SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
     const char *nptr = SvPV_nolen(obj);
     if (nptr) {
       char *endptr;
-      long v;
+      long long v;
       errno = 0;
-      v = strtol(nptr, &endptr,0);
+      v = strtoll(nptr, &endptr,0);
       if (errno == ERANGE) {
 	errno = 0;
 	return SWIG_OverflowError;
@@ -1798,31 +1812,17 @@ SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
       }
     }
     if (!dispatch) {
+      const double mant_max = 1LL << DBL_MANT_DIG;
+      const double mant_min = -mant_max;
       double d;
       int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
-	if (val) *val = (long)(d);
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, mant_min, mant_max)) {
+	if (val) *val = (long long)(d);
 	return res;
       }
     }
   }
-  return SWIG_TypeError;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_int SWIG_PERL_DECL_ARGS_2(SV * obj, int *val)
-{
-  long v;
-  int res = SWIG_AsVal_long SWIG_PERL_CALL_ARGS_2(obj, &v);
-  if (SWIG_IsOK(res)) {
-    if ((v < INT_MIN || v > INT_MAX)) {
-      return SWIG_OverflowError;
-    } else {
-      if (val) *val = (int)(v);
-    }
-  }  
-  return res;
+  return SWIG_TypeError; 
 }
 
 
@@ -2775,7 +2775,7 @@ XS(_wrap_data_from_string) {
 XS(_wrap_describe_error) {
   {
     intmax_t arg1 ;
-    int val1 ;
+    long long val1 ;
     int ecode1 = 0 ;
     int argvi = 0;
     char *result = 0 ;
@@ -2784,7 +2784,7 @@ XS(_wrap_describe_error) {
     if ((items < 1) || (items > 1)) {
       SWIG_croak("Usage: describe_error(errnum);");
     }
-    ecode1 = SWIG_AsVal_int SWIG_PERL_CALL_ARGS_2(ST(0), &val1);
+    ecode1 = SWIG_AsVal_long_SS_long SWIG_PERL_CALL_ARGS_2(ST(0), &val1);
     if (!SWIG_IsOK(ecode1)) {
       SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "describe_error" "', argument " "1"" of type '" "intmax_t""'");
     } 
@@ -2808,11 +2808,13 @@ static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_t = {"_p_data_t", "data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_key_t = {"_p_hash_key_t", "hash_key_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_t = {"_p_hash_t", "request_t *|hash_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *|intmax_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_long_long = {"_p_long_long", "long long *|intmax_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_ctx_t = {"_p_p_data_ctx_t", "data_ctx_t **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_data_t = {"_p_p_data_t", "data_t **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "size_t *|unsigned int *|uintmax_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "size_t *|unsigned int *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_long_long = {"_p_unsigned_long_long", "unsigned long long *|uintmax_t *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_backend_t,
@@ -2821,10 +2823,12 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_hash_key_t,
   &_swigt__p_hash_t,
   &_swigt__p_int,
+  &_swigt__p_long_long,
   &_swigt__p_p_char,
   &_swigt__p_p_data_ctx_t,
   &_swigt__p_p_data_t,
   &_swigt__p_unsigned_int,
+  &_swigt__p_unsigned_long_long,
 };
 
 static swig_cast_info _swigc__p_backend_t[] = {  {&_swigt__p_backend_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -2833,10 +2837,12 @@ static swig_cast_info _swigc__p_data_t[] = {  {&_swigt__p_data_t, 0, 0, 0},{0, 0
 static swig_cast_info _swigc__p_hash_key_t[] = {  {&_swigt__p_hash_key_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_hash_t[] = {  {&_swigt__p_hash_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_long_long[] = {  {&_swigt__p_long_long, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_data_ctx_t[] = {  {&_swigt__p_p_data_ctx_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_data_t[] = {  {&_swigt__p_p_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_long_long, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_backend_t,
@@ -2845,10 +2851,12 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_hash_key_t,
   _swigc__p_hash_t,
   _swigc__p_int,
+  _swigc__p_long_long,
   _swigc__p_p_char,
   _swigc__p_p_data_ctx_t,
   _swigc__p_p_data_t,
   _swigc__p_unsigned_int,
+  _swigc__p_unsigned_long_long,
 };
 
 

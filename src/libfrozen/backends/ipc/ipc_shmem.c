@@ -77,7 +77,7 @@ static ssize_t           shmem_block_status(ipc_shmem_userdata *userdata, ipc_sh
 		}
 		return 0;
 	}
-	return error("shmem_block_status failed");
+	return -EFAULT;
 } // }}}
 static ipc_shmem_block * shmem_get_block(ipc_shmem_userdata *userdata, size_t old_status, size_t new_status){ // {{{
 	size_t           i;

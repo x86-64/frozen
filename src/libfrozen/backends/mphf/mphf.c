@@ -5,12 +5,14 @@
 
 #define EMODULE              10
 #define BUFFER_SIZE_DEFAULT  1000
+#define MAX_REBUILDS_DEFAULT 1000
 
 typedef struct mphf_userdata {
 	mphf_t               mphf;
 	mphf_proto_t        *mphf_proto;
 	chain_t             *backend_data;
 	size_t               buffer_size;
+	uintmax_t            max_rebuilds;
 	
 	hash_key_t           key_from;
 	hash_key_t           key_to;
@@ -84,6 +86,7 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	char     *buffer;
 	data_t   *key;
 	uint64_t  keyid;
+	uintmax_t rebuild_num = 0;
 	
 	// count elements
 	request_t r_count[] = {
@@ -99,6 +102,9 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 		return error("malloc failed");
 	
 redo:
+	if(rebuild_num++ >= userdata->max_rebuilds)
+		return error("mphf full");
+
 	if( (ret = userdata->mphf_proto->func_clean(&userdata->mphf)) < 0)
 		return ret;
 	
@@ -146,8 +152,6 @@ redo:
 		)) < 0){
 			if(ret == -EBADF) goto redo; // bad mphf
 			//printf("failed insert %x\n", ret);
-			printf("fuck2 %d\n", (int)ret);
-			ret = error("insert failed");
 			break;
 		}
 		
@@ -156,10 +160,9 @@ exit:
 	free(buffer);
 	
 	// if error - exit
-	if(ret < 0){
-		printf("rebuild failed\n");
+	if(ret < 0)
 		return ret;
-	}
+	
 	return 0;
 } // }}}
 
@@ -189,6 +192,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	DT_STRING        keyid_str       = NULL;
 	DT_STRING        mphf_type_str   = NULL;
 	DT_STRING        hash_type_str   = "jenkins";
+	uintmax_t        max_rebuilds    = MAX_REBUILDS_DEFAULT;
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)chain->userdata;
 	
@@ -200,6 +204,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_INT64,  buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_STRING, hash_type_str,   config, HK(hash));
+	hash_data_copy(ret, TYPE_UINTT,  max_rebuilds,    config, HK(max_rebuilds));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("chain mphf parameter mphf_type invalid or not supplied");
@@ -215,6 +220,7 @@ static int mphf_configure(chain_t *chain, hash_t *config){ // {{{
 	userdata->offset_out      = hash_string_to_key(offset_out_str);
 	userdata->keyid           = hash_string_to_key(keyid_str);
 	userdata->backend_data    = chain;
+	userdata->max_rebuilds    = max_rebuilds;
 	userdata->buffer_size     = buffer_size;
 	
 	if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)

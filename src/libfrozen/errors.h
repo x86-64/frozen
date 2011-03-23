@@ -18,6 +18,6 @@
 #define warning(...) handle_error(EFLAG_WARNING, -(EBASE + EMODULE * ESTEP + ECOUNTER))
 #define error(...)   handle_error(EFLAG_ERROR,   -(EBASE + EMODULE * ESTEP + ECOUNTER))
 
-intmax_t           handle_error             (uintmax_t eflag, intmax_t errnum);
-const char *       describe_error           (intmax_t errnum);
+    intmax_t           handle_error             (uintmax_t eflag, intmax_t errnum);
+API const char *       describe_error           (intmax_t errnum);
 
