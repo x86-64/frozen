@@ -40,6 +40,31 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/./build/libfrozen_backends.m4 \
+	$(top_srcdir)/./build/libfrozen_data.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/string/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -70,40 +95,12 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfrozen_la_LIBADD =
-am__dirstamp = $(am__leading_dot)dirstamp
-am__objects_1 = backends/libfrozen_la-null-proxy.lo \
-	backends/libfrozen_la-file.lo backends/libfrozen_la-list.lo \
-	backends/libfrozen_la-cache.lo \
-	backends/libfrozen_la-cache_append.lo \
-	backends/libfrozen_la-structs.lo \
-	backends/libfrozen_la-incapsulate.lo \
-	backends/libfrozen_la-allocator.lo \
-	backends/ipc/libfrozen_la-ipc.lo \
-	backends/ipc/libfrozen_la-ipc_shmem.lo \
-	backends/mphf/libfrozen_la-mphf.lo \
-	backends/mphf/libfrozen_la-mphf_chm_imp.lo \
-	backends/mphf/libfrozen_la-mphf_bdz_imp.lo \
-	backends/mphf/libfrozen_la-hash_jenkins.lo \
-	backends/rewrite/libfrozen_la-rewrite.lo \
-	backends/rewrite/libfrozen_la-rule_parser.tab.lo \
-	backends/rewrite/libfrozen_la-rule_parser.lex.lo \
-	backends/insert-sort/libfrozen_la-insert-sort.lo
-am_libfrozen_la_OBJECTS = libfrozen_la-libfrozen.lo \
-	libfrozen_la-errors.lo libfrozen_la-data.lo \
-	libfrozen_la-hash.lo libfrozen_la-list.lo \
-	libfrozen_la-buffer.lo $(am__objects_1) \
-	libfrozen_la-backend.lo \
-	configs/libfrozen_la-config_parser.tab.lo \
-	configs/libfrozen_la-config_parser.lex.lo
+am_libfrozen_la_OBJECTS =
 libfrozen_la_OBJECTS = $(am_libfrozen_la_OBJECTS)
 libfrozen_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libfrozen_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
-am__depfiles_maybe = depfiles
-am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -115,16 +112,70 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libfrozen_la_SOURCES)
 DIST_SOURCES = $(libfrozen_la_SOURCES)
+RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
+	html-recursive info-recursive install-data-recursive \
+	install-dvi-recursive install-exec-recursive \
+	install-html-recursive install-info-recursive \
+	install-pdf-recursive install-ps-recursive install-recursive \
+	installcheck-recursive installdirs-recursive pdf-recursive \
+	ps-recursive uninstall-recursive
+RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+  distclean-recursive maintainer-clean-recursive
+AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
+	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
+	distdir
 ETAGS = etags
 CTAGS = ctags
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+am__relativize = \
+  dir0=`pwd`; \
+  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
+  sed_rest='s,^[^/]*/*,,'; \
+  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
+  sed_butlast='s,/*[^/]*$$,,'; \
+  while test -n "$$dir1"; do \
+    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
+    if test "$$first" != "."; then \
+      if test "$$first" = ".."; then \
+        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
+        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
+      else \
+        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
+        if test "$$first2" = "$$first"; then \
+          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
+        else \
+          dir2="../$$dir2"; \
+        fi; \
+        dir0="$$dir0"/"$$first"; \
+      fi; \
+    fi; \
+    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
+  done; \
+  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
+ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BACKEND_DIRS = @BACKEND_DIRS@
+BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
+BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
+BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
+BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
+BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
+BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
+BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
+BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
+BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
+BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
+BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
+BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
+BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
+BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -133,9 +184,28 @@ CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+DATA_DIRS = @DATA_DIRS@
+DATA_DIST_DIRS = @DATA_DIST_DIRS@
+DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
+DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
+DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
+DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
+DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
+DATA_OBJECTS_io = @DATA_OBJECTS_io@
+DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
+DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
+DATA_OBJECTS_string = @DATA_OBJECTS_string@
+DATA_OBJECTS_struct = @DATA_OBJECTS_struct@
+DATA_OBJECTS_uint = @DATA_OBJECTS_uint@
+DATA_OBJECTS_void = @DATA_OBJECTS_void@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -164,6 +234,7 @@ LS = @LS@
 LTLIBOBJS = @LTLIBOBJS@
 M4 = @M4@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -183,18 +254,23 @@ PERL = @PERL@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
+TAC = @TAC@
+TSORT = @TSORT@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -241,100 +317,18 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-backends_sources = \
-	backends/null-proxy.c                \
-	backends/file.c                      \
-	backends/list.c                      \
-	backends/cache.c                     \
-	backends/cache_append.c              \
-	backends/structs.c                   \
-	backends/incapsulate.c               \
-	backends/allocator.c                 \
-	backends/ipc/ipc.h                   \
-	backends/ipc/ipc.c                   \
-	backends/ipc/ipc_shmem.h             \
-	backends/ipc/ipc_shmem.c             \
-	backends/mphf/mphf.h                 \
-	backends/mphf/mphf.c                 \
-	backends/mphf/mphf_chm_imp.h         \
-	backends/mphf/mphf_chm_imp.c         \
-	backends/mphf/mphf_bdz_imp.h         \
-	backends/mphf/mphf_bdz_imp.c         \
-	backends/mphf/hash_jenkins.h         \
-	backends/mphf/hash_jenkins.c         \
-	backends/rewrite/rewrite.c           \
-	backends/rewrite/rewrite.h           \
-	backends/rewrite/rule_parser.tab.h   \
-	backends/rewrite/rule_parser.tab.c   \
-	backends/rewrite/rule_parser.lex.c   \
-	backends/insert-sort/insert-sort.c
-
-data_sources = \
-	data/void.c     \
-	data/raw.c      \
-	data/binary.c   \
-	data/uint8.c    \
-	data/uint16.c   \
-	data/uint32.c   \
-	data/uint64.c   \
-	data/int_t.c    \
-	data/uint_t.c   \
-	data/size_t.c   \
-	data/off_t.c    \
-	data/string.c   \
-	data/hash_t.c   \
-	data/buffer_t.c \
-	data/memory_t.c \
-	data/io_t.c     \
-	data/chain_t.c  \
-	data/struct_t.c
-
-AUTOMAKE_OPTIONS = subdir-objects
-EXTRA_DIST = \
-	data/*.c                                \
-	data/*.m4                               \
-	configs/config_parser.l                 \
-	configs/config_parser.y                 \
-	backends/insert-sort/*.c                \
-	backends/insert-sort/insert-sort.c.m4   \
-	backends/rewrite/rule_parser.l          \
-	backends/rewrite/rule_parser.y
-
+SUBDIRS = data core backends
+libfrozen_libs = core/libfrozen_core.la backends/libfrozen_backends.la \
+	data/libfrozen_data.la
 lib_LTLIBRARIES = libfrozen.la
+libfrozen_la_SOURCES = 
 libfrozen_la_LDFLAGS = -module -avoid-version
 libfrozen_la_CPPFLAGS = -fvisibility=hidden
-libfrozen_la_SOURCES = \
-                        libfrozen.h     libfrozen.c                          \
-                        errors.h        errors.c                             \
-			data_protos.m4  data.c                               \
-                        hash.h          hash.c                               \
-                        list.h          list.c                               \
-                        buffer.h        buffer.c                             \
-                        $(backends_sources)                     \
-                        backend.c           backend.h           \
-                        configs/config.h                        \
-                        configs/config_parser.tab.h             \
-                        configs/config_parser.tab.c             \
-                        configs/config_parser.lex.c             \
-                        public.h
-
-CLEANFILES = backends/locate.c backends/insert-sort/insert-sort.c   \
-                backends/rewrite/rule_parser.tab.c                     \
-                backends/rewrite/rule_parser.tab.h                     \
-                backends/rewrite/rule_parser.lex.c                     \
-		configs/config_parser.tab.c                            \
-		configs/config_parser.tab.h                            \
-		configs/config_parser.lex.c                            \
-		data.c data.h                                          \
-		errors.c errors_list.m4                                \
-		hashkeys.h                                             \
-		data/uint8.c data/uint16.c data/uint32.c data/uint64.c \
-		data/off_t.c data/size_t.c data/int_t.c  data/uint_t.c
-
-all: all-am
+libfrozen_la_LIBADD = $(libfrozen_libs)
+libfrozen_la_DEPENDENCIES = $(libfrozen_libs)
+all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -396,390 +390,90 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-backends/$(am__dirstamp):
-	@$(MKDIR_P) backends
-	@: > backends/$(am__dirstamp)
-backends/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) backends/$(DEPDIR)
-	@: > backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-null-proxy.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-file.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-list.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-cache.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-cache_append.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-structs.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-incapsulate.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/libfrozen_la-allocator.lo: backends/$(am__dirstamp) \
-	backends/$(DEPDIR)/$(am__dirstamp)
-backends/ipc/$(am__dirstamp):
-	@$(MKDIR_P) backends/ipc
-	@: > backends/ipc/$(am__dirstamp)
-backends/ipc/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) backends/ipc/$(DEPDIR)
-	@: > backends/ipc/$(DEPDIR)/$(am__dirstamp)
-backends/ipc/libfrozen_la-ipc.lo: backends/ipc/$(am__dirstamp) \
-	backends/ipc/$(DEPDIR)/$(am__dirstamp)
-backends/ipc/libfrozen_la-ipc_shmem.lo: backends/ipc/$(am__dirstamp) \
-	backends/ipc/$(DEPDIR)/$(am__dirstamp)
-backends/mphf/$(am__dirstamp):
-	@$(MKDIR_P) backends/mphf
-	@: > backends/mphf/$(am__dirstamp)
-backends/mphf/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) backends/mphf/$(DEPDIR)
-	@: > backends/mphf/$(DEPDIR)/$(am__dirstamp)
-backends/mphf/libfrozen_la-mphf.lo: backends/mphf/$(am__dirstamp) \
-	backends/mphf/$(DEPDIR)/$(am__dirstamp)
-backends/mphf/libfrozen_la-mphf_chm_imp.lo:  \
-	backends/mphf/$(am__dirstamp) \
-	backends/mphf/$(DEPDIR)/$(am__dirstamp)
-backends/mphf/libfrozen_la-mphf_bdz_imp.lo:  \
-	backends/mphf/$(am__dirstamp) \
-	backends/mphf/$(DEPDIR)/$(am__dirstamp)
-backends/mphf/libfrozen_la-hash_jenkins.lo:  \
-	backends/mphf/$(am__dirstamp) \
-	backends/mphf/$(DEPDIR)/$(am__dirstamp)
-backends/rewrite/$(am__dirstamp):
-	@$(MKDIR_P) backends/rewrite
-	@: > backends/rewrite/$(am__dirstamp)
-backends/rewrite/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) backends/rewrite/$(DEPDIR)
-	@: > backends/rewrite/$(DEPDIR)/$(am__dirstamp)
-backends/rewrite/libfrozen_la-rewrite.lo:  \
-	backends/rewrite/$(am__dirstamp) \
-	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
-backends/rewrite/libfrozen_la-rule_parser.tab.lo:  \
-	backends/rewrite/$(am__dirstamp) \
-	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
-backends/rewrite/libfrozen_la-rule_parser.lex.lo:  \
-	backends/rewrite/$(am__dirstamp) \
-	backends/rewrite/$(DEPDIR)/$(am__dirstamp)
-backends/insert-sort/$(am__dirstamp):
-	@$(MKDIR_P) backends/insert-sort
-	@: > backends/insert-sort/$(am__dirstamp)
-backends/insert-sort/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) backends/insert-sort/$(DEPDIR)
-	@: > backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
-backends/insert-sort/libfrozen_la-insert-sort.lo:  \
-	backends/insert-sort/$(am__dirstamp) \
-	backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
-configs/$(am__dirstamp):
-	@$(MKDIR_P) configs
-	@: > configs/$(am__dirstamp)
-configs/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) configs/$(DEPDIR)
-	@: > configs/$(DEPDIR)/$(am__dirstamp)
-configs/libfrozen_la-config_parser.tab.lo: configs/$(am__dirstamp) \
-	configs/$(DEPDIR)/$(am__dirstamp)
-configs/libfrozen_la-config_parser.lex.lo: configs/$(am__dirstamp) \
-	configs/$(DEPDIR)/$(am__dirstamp)
 libfrozen.la: $(libfrozen_la_OBJECTS) $(libfrozen_la_DEPENDENCIES) 
 	$(libfrozen_la_LINK) -rpath $(libdir) $(libfrozen_la_OBJECTS) $(libfrozen_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f backends/insert-sort/libfrozen_la-insert-sort.$(OBJEXT)
-	-rm -f backends/insert-sort/libfrozen_la-insert-sort.lo
-	-rm -f backends/ipc/libfrozen_la-ipc.$(OBJEXT)
-	-rm -f backends/ipc/libfrozen_la-ipc.lo
-	-rm -f backends/ipc/libfrozen_la-ipc_shmem.$(OBJEXT)
-	-rm -f backends/ipc/libfrozen_la-ipc_shmem.lo
-	-rm -f backends/libfrozen_la-allocator.$(OBJEXT)
-	-rm -f backends/libfrozen_la-allocator.lo
-	-rm -f backends/libfrozen_la-cache.$(OBJEXT)
-	-rm -f backends/libfrozen_la-cache.lo
-	-rm -f backends/libfrozen_la-cache_append.$(OBJEXT)
-	-rm -f backends/libfrozen_la-cache_append.lo
-	-rm -f backends/libfrozen_la-file.$(OBJEXT)
-	-rm -f backends/libfrozen_la-file.lo
-	-rm -f backends/libfrozen_la-incapsulate.$(OBJEXT)
-	-rm -f backends/libfrozen_la-incapsulate.lo
-	-rm -f backends/libfrozen_la-list.$(OBJEXT)
-	-rm -f backends/libfrozen_la-list.lo
-	-rm -f backends/libfrozen_la-null-proxy.$(OBJEXT)
-	-rm -f backends/libfrozen_la-null-proxy.lo
-	-rm -f backends/libfrozen_la-structs.$(OBJEXT)
-	-rm -f backends/libfrozen_la-structs.lo
-	-rm -f backends/mphf/libfrozen_la-hash_jenkins.$(OBJEXT)
-	-rm -f backends/mphf/libfrozen_la-hash_jenkins.lo
-	-rm -f backends/mphf/libfrozen_la-mphf.$(OBJEXT)
-	-rm -f backends/mphf/libfrozen_la-mphf.lo
-	-rm -f backends/mphf/libfrozen_la-mphf_bdz_imp.$(OBJEXT)
-	-rm -f backends/mphf/libfrozen_la-mphf_bdz_imp.lo
-	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.$(OBJEXT)
-	-rm -f backends/mphf/libfrozen_la-mphf_chm_imp.lo
-	-rm -f backends/rewrite/libfrozen_la-rewrite.$(OBJEXT)
-	-rm -f backends/rewrite/libfrozen_la-rewrite.lo
-	-rm -f backends/rewrite/libfrozen_la-rule_parser.lex.$(OBJEXT)
-	-rm -f backends/rewrite/libfrozen_la-rule_parser.lex.lo
-	-rm -f backends/rewrite/libfrozen_la-rule_parser.tab.$(OBJEXT)
-	-rm -f backends/rewrite/libfrozen_la-rule_parser.tab.lo
-	-rm -f configs/libfrozen_la-config_parser.lex.$(OBJEXT)
-	-rm -f configs/libfrozen_la-config_parser.lex.lo
-	-rm -f configs/libfrozen_la-config_parser.tab.$(OBJEXT)
-	-rm -f configs/libfrozen_la-config_parser.tab.lo
 
 distclean-compile:
 	-rm -f *.tab.c
-
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-backend.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-buffer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-data.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-errors.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-hash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-libfrozen.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_la-list.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-allocator.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-cache.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-cache_append.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-file.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-incapsulate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-list.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/$(DEPDIR)/libfrozen_la-structs.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_la-config_parser.lex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_la-config_parser.tab.Plo@am__quote@
-
-.c.o:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ $<
-
-.c.obj:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.c.lo:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-libfrozen_la-libfrozen.lo: libfrozen.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-libfrozen.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-libfrozen.Tpo -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-libfrozen.Tpo $(DEPDIR)/libfrozen_la-libfrozen.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='libfrozen.c' object='libfrozen_la-libfrozen.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-
-libfrozen_la-errors.lo: errors.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-errors.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-errors.Tpo -c -o libfrozen_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-errors.Tpo $(DEPDIR)/libfrozen_la-errors.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='errors.c' object='libfrozen_la-errors.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
-
-libfrozen_la-data.lo: data.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-data.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-data.Tpo -c -o libfrozen_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-data.Tpo $(DEPDIR)/libfrozen_la-data.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='data.c' object='libfrozen_la-data.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
-
-libfrozen_la-hash.lo: hash.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-hash.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-hash.Tpo -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-hash.Tpo $(DEPDIR)/libfrozen_la-hash.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash.c' object='libfrozen_la-hash.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-
-libfrozen_la-list.lo: list.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-list.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-list.Tpo -c -o libfrozen_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-list.Tpo $(DEPDIR)/libfrozen_la-list.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='list.c' object='libfrozen_la-list.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-
-libfrozen_la-buffer.lo: buffer.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-buffer.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-buffer.Tpo -c -o libfrozen_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-buffer.Tpo $(DEPDIR)/libfrozen_la-buffer.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='buffer.c' object='libfrozen_la-buffer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
-
-backends/libfrozen_la-null-proxy.lo: backends/null-proxy.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-null-proxy.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-null-proxy.Tpo -c -o backends/libfrozen_la-null-proxy.lo `test -f 'backends/null-proxy.c' || echo '$(srcdir)/'`backends/null-proxy.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-null-proxy.Tpo backends/$(DEPDIR)/libfrozen_la-null-proxy.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/null-proxy.c' object='backends/libfrozen_la-null-proxy.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-null-proxy.lo `test -f 'backends/null-proxy.c' || echo '$(srcdir)/'`backends/null-proxy.c
-
-backends/libfrozen_la-file.lo: backends/file.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-file.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-file.Tpo -c -o backends/libfrozen_la-file.lo `test -f 'backends/file.c' || echo '$(srcdir)/'`backends/file.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-file.Tpo backends/$(DEPDIR)/libfrozen_la-file.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/file.c' object='backends/libfrozen_la-file.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-file.lo `test -f 'backends/file.c' || echo '$(srcdir)/'`backends/file.c
-
-backends/libfrozen_la-list.lo: backends/list.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-list.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-list.Tpo -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-list.Tpo backends/$(DEPDIR)/libfrozen_la-list.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/list.c' object='backends/libfrozen_la-list.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-list.lo `test -f 'backends/list.c' || echo '$(srcdir)/'`backends/list.c
-
-backends/libfrozen_la-cache.lo: backends/cache.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-cache.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-cache.Tpo -c -o backends/libfrozen_la-cache.lo `test -f 'backends/cache.c' || echo '$(srcdir)/'`backends/cache.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-cache.Tpo backends/$(DEPDIR)/libfrozen_la-cache.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/cache.c' object='backends/libfrozen_la-cache.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-cache.lo `test -f 'backends/cache.c' || echo '$(srcdir)/'`backends/cache.c
-
-backends/libfrozen_la-cache_append.lo: backends/cache_append.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-cache_append.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-cache_append.Tpo -c -o backends/libfrozen_la-cache_append.lo `test -f 'backends/cache_append.c' || echo '$(srcdir)/'`backends/cache_append.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-cache_append.Tpo backends/$(DEPDIR)/libfrozen_la-cache_append.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/cache_append.c' object='backends/libfrozen_la-cache_append.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-cache_append.lo `test -f 'backends/cache_append.c' || echo '$(srcdir)/'`backends/cache_append.c
-
-backends/libfrozen_la-structs.lo: backends/structs.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-structs.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-structs.Tpo -c -o backends/libfrozen_la-structs.lo `test -f 'backends/structs.c' || echo '$(srcdir)/'`backends/structs.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-structs.Tpo backends/$(DEPDIR)/libfrozen_la-structs.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/structs.c' object='backends/libfrozen_la-structs.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-structs.lo `test -f 'backends/structs.c' || echo '$(srcdir)/'`backends/structs.c
-
-backends/libfrozen_la-incapsulate.lo: backends/incapsulate.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-incapsulate.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-incapsulate.Tpo -c -o backends/libfrozen_la-incapsulate.lo `test -f 'backends/incapsulate.c' || echo '$(srcdir)/'`backends/incapsulate.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-incapsulate.Tpo backends/$(DEPDIR)/libfrozen_la-incapsulate.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/incapsulate.c' object='backends/libfrozen_la-incapsulate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-incapsulate.lo `test -f 'backends/incapsulate.c' || echo '$(srcdir)/'`backends/incapsulate.c
-
-backends/libfrozen_la-allocator.lo: backends/allocator.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/libfrozen_la-allocator.lo -MD -MP -MF backends/$(DEPDIR)/libfrozen_la-allocator.Tpo -c -o backends/libfrozen_la-allocator.lo `test -f 'backends/allocator.c' || echo '$(srcdir)/'`backends/allocator.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/$(DEPDIR)/libfrozen_la-allocator.Tpo backends/$(DEPDIR)/libfrozen_la-allocator.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/allocator.c' object='backends/libfrozen_la-allocator.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/libfrozen_la-allocator.lo `test -f 'backends/allocator.c' || echo '$(srcdir)/'`backends/allocator.c
-
-backends/ipc/libfrozen_la-ipc.lo: backends/ipc/ipc.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/ipc/libfrozen_la-ipc.lo -MD -MP -MF backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Tpo -c -o backends/ipc/libfrozen_la-ipc.lo `test -f 'backends/ipc/ipc.c' || echo '$(srcdir)/'`backends/ipc/ipc.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Tpo backends/ipc/$(DEPDIR)/libfrozen_la-ipc.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/ipc/ipc.c' object='backends/ipc/libfrozen_la-ipc.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/ipc/libfrozen_la-ipc.lo `test -f 'backends/ipc/ipc.c' || echo '$(srcdir)/'`backends/ipc/ipc.c
-
-backends/ipc/libfrozen_la-ipc_shmem.lo: backends/ipc/ipc_shmem.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/ipc/libfrozen_la-ipc_shmem.lo -MD -MP -MF backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Tpo -c -o backends/ipc/libfrozen_la-ipc_shmem.lo `test -f 'backends/ipc/ipc_shmem.c' || echo '$(srcdir)/'`backends/ipc/ipc_shmem.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Tpo backends/ipc/$(DEPDIR)/libfrozen_la-ipc_shmem.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/ipc/ipc_shmem.c' object='backends/ipc/libfrozen_la-ipc_shmem.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/ipc/libfrozen_la-ipc_shmem.lo `test -f 'backends/ipc/ipc_shmem.c' || echo '$(srcdir)/'`backends/ipc/ipc_shmem.c
-
-backends/mphf/libfrozen_la-mphf.lo: backends/mphf/mphf.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/mphf/mphf.c' object='backends/mphf/libfrozen_la-mphf.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf.lo `test -f 'backends/mphf/mphf.c' || echo '$(srcdir)/'`backends/mphf/mphf.c
-
-backends/mphf/libfrozen_la-mphf_chm_imp.lo: backends/mphf/mphf_chm_imp.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf_chm_imp.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Tpo -c -o backends/mphf/libfrozen_la-mphf_chm_imp.lo `test -f 'backends/mphf/mphf_chm_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_chm_imp.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf_chm_imp.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/mphf/mphf_chm_imp.c' object='backends/mphf/libfrozen_la-mphf_chm_imp.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf_chm_imp.lo `test -f 'backends/mphf/mphf_chm_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_chm_imp.c
-
-backends/mphf/libfrozen_la-mphf_bdz_imp.lo: backends/mphf/mphf_bdz_imp.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-mphf_bdz_imp.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Tpo -c -o backends/mphf/libfrozen_la-mphf_bdz_imp.lo `test -f 'backends/mphf/mphf_bdz_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_bdz_imp.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-mphf_bdz_imp.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/mphf/mphf_bdz_imp.c' object='backends/mphf/libfrozen_la-mphf_bdz_imp.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-mphf_bdz_imp.lo `test -f 'backends/mphf/mphf_bdz_imp.c' || echo '$(srcdir)/'`backends/mphf/mphf_bdz_imp.c
-
-backends/mphf/libfrozen_la-hash_jenkins.lo: backends/mphf/hash_jenkins.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/mphf/libfrozen_la-hash_jenkins.lo -MD -MP -MF backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Tpo -c -o backends/mphf/libfrozen_la-hash_jenkins.lo `test -f 'backends/mphf/hash_jenkins.c' || echo '$(srcdir)/'`backends/mphf/hash_jenkins.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Tpo backends/mphf/$(DEPDIR)/libfrozen_la-hash_jenkins.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/mphf/hash_jenkins.c' object='backends/mphf/libfrozen_la-hash_jenkins.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/mphf/libfrozen_la-hash_jenkins.lo `test -f 'backends/mphf/hash_jenkins.c' || echo '$(srcdir)/'`backends/mphf/hash_jenkins.c
-
-backends/rewrite/libfrozen_la-rewrite.lo: backends/rewrite/rewrite.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rewrite.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo -c -o backends/rewrite/libfrozen_la-rewrite.lo `test -f 'backends/rewrite/rewrite.c' || echo '$(srcdir)/'`backends/rewrite/rewrite.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rewrite.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rewrite.c' object='backends/rewrite/libfrozen_la-rewrite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rewrite.lo `test -f 'backends/rewrite/rewrite.c' || echo '$(srcdir)/'`backends/rewrite/rewrite.c
-
-backends/rewrite/libfrozen_la-rule_parser.tab.lo: backends/rewrite/rule_parser.tab.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rule_parser.tab.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Tpo -c -o backends/rewrite/libfrozen_la-rule_parser.tab.lo `test -f 'backends/rewrite/rule_parser.tab.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.tab.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.tab.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rule_parser.tab.c' object='backends/rewrite/libfrozen_la-rule_parser.tab.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rule_parser.tab.lo `test -f 'backends/rewrite/rule_parser.tab.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.tab.c
-
-backends/rewrite/libfrozen_la-rule_parser.lex.lo: backends/rewrite/rule_parser.lex.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/rewrite/libfrozen_la-rule_parser.lex.lo -MD -MP -MF backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Tpo -c -o backends/rewrite/libfrozen_la-rule_parser.lex.lo `test -f 'backends/rewrite/rule_parser.lex.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.lex.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Tpo backends/rewrite/$(DEPDIR)/libfrozen_la-rule_parser.lex.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/rewrite/rule_parser.lex.c' object='backends/rewrite/libfrozen_la-rule_parser.lex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/rewrite/libfrozen_la-rule_parser.lex.lo `test -f 'backends/rewrite/rule_parser.lex.c' || echo '$(srcdir)/'`backends/rewrite/rule_parser.lex.c
-
-backends/insert-sort/libfrozen_la-insert-sort.lo: backends/insert-sort/insert-sort.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT backends/insert-sort/libfrozen_la-insert-sort.lo -MD -MP -MF backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Tpo -c -o backends/insert-sort/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort/insert-sort.c
-@am__fastdepCC_TRUE@	$(am__mv) backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Tpo backends/insert-sort/$(DEPDIR)/libfrozen_la-insert-sort.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backends/insert-sort/insert-sort.c' object='backends/insert-sort/libfrozen_la-insert-sort.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o backends/insert-sort/libfrozen_la-insert-sort.lo `test -f 'backends/insert-sort/insert-sort.c' || echo '$(srcdir)/'`backends/insert-sort/insert-sort.c
-
-libfrozen_la-backend.lo: backend.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfrozen_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_la-backend.Tpo -c -o libfrozen_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_la-backend.Tpo $(DEPDIR)/libfrozen_la-backend.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backend.c' object='libfrozen_la-backend.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfrozen_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
-
-configs/libfrozen_la-config_parser.tab.lo: configs/config_parser.tab.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT configs/libfrozen_la-config_parser.tab.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_la-config_parser.tab.Tpo -c -o configs/libfrozen_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c
-@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_la-config_parser.tab.Tpo configs/$(DEPDIR)/libfrozen_la-config_parser.tab.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config_parser.tab.c' object='configs/libfrozen_la-config_parser.tab.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c
-
-configs/libfrozen_la-config_parser.lex.lo: configs/config_parser.lex.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT configs/libfrozen_la-config_parser.lex.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_la-config_parser.lex.Tpo -c -o configs/libfrozen_la-config_parser.lex.lo `test -f 'configs/config_parser.lex.c' || echo '$(srcdir)/'`configs/config_parser.lex.c
-@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_la-config_parser.lex.Tpo configs/$(DEPDIR)/libfrozen_la-config_parser.lex.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config_parser.lex.c' object='configs/libfrozen_la-config_parser.lex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfrozen_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_la-config_parser.lex.lo `test -f 'configs/config_parser.lex.c' || echo '$(srcdir)/'`configs/config_parser.lex.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf backends/.libs backends/_libs
-	-rm -rf backends/insert-sort/.libs backends/insert-sort/_libs
-	-rm -rf backends/ipc/.libs backends/ipc/_libs
-	-rm -rf backends/mphf/.libs backends/mphf/_libs
-	-rm -rf backends/rewrite/.libs backends/rewrite/_libs
-	-rm -rf configs/.libs configs/_libs
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@fail= failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+$(RECURSIVE_CLEAN_TARGETS):
+	@fail= failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+ctags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -791,10 +485,23 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -813,7 +520,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -863,22 +570,51 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d "$(distdir)/$$subdir" \
+	    || $(MKDIR_P) "$(distdir)/$$subdir" \
+	    || exit 1; \
+	  fi; \
+	done
+	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
+	    $(am__relativize); \
+	    new_distdir=$$reldir; \
+	    dir1=$$subdir; dir2="$(top_distdir)"; \
+	    $(am__relativize); \
+	    new_top_distdir=$$reldir; \
+	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
+	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
+	    ($(am__cd) $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$new_top_distdir" \
+	        distdir="$$new_distdir" \
+		am__remove_distdir=: \
+		am__skip_length_check=: \
+		am__skip_mode_fix=: \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
 check-am: all-am
-check: check-am
+check: check-recursive
 all-am: Makefile $(LTLIBRARIES)
-installdirs:
+installdirs: installdirs-recursive
+installdirs-am:
 	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -887,162 +623,102 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f backends/$(DEPDIR)/$(am__dirstamp)
-	-rm -f backends/$(am__dirstamp)
-	-rm -f backends/insert-sort/$(DEPDIR)/$(am__dirstamp)
-	-rm -f backends/insert-sort/$(am__dirstamp)
-	-rm -f backends/ipc/$(DEPDIR)/$(am__dirstamp)
-	-rm -f backends/ipc/$(am__dirstamp)
-	-rm -f backends/mphf/$(DEPDIR)/$(am__dirstamp)
-	-rm -f backends/mphf/$(am__dirstamp)
-	-rm -f backends/rewrite/$(DEPDIR)/$(am__dirstamp)
-	-rm -f backends/rewrite/$(am__dirstamp)
-	-rm -f configs/$(DEPDIR)/$(am__dirstamp)
-	-rm -f configs/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
+clean: clean-recursive
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
-distclean: distclean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/ipc/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+distclean: distclean-recursive
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
 html-am:
 
-info: info-am
+info: info-recursive
 
 info-am:
 
 install-data-am:
 
-install-dvi: install-dvi-am
+install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
 install-exec-am: install-libLTLIBRARIES
 
-install-html: install-html-am
+install-html: install-html-recursive
 
 install-html-am:
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-am
+install-pdf: install-pdf-recursive
 
 install-pdf-am:
 
-install-ps: install-ps-am
+install-ps: install-ps-recursive
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) backends/$(DEPDIR) backends/insert-sort/$(DEPDIR) backends/ipc/$(DEPDIR) backends/mphf/$(DEPDIR) backends/rewrite/$(DEPDIR) configs/$(DEPDIR)
+maintainer-clean: maintainer-clean-recursive
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
+	install-am install-strip tags-recursive
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLTLIBRARIES
+.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
+	all all-am check check-am clean clean-generic \
+	clean-libLTLIBRARIES clean-libtool ctags ctags-recursive \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-libLTLIBRARIES
 
-
-libfrozen.c: data.h hashkeys.h
-
-errors.c: errors.c.m4
-	${M4} -sP errors.c.m4 > $@
-errors.c.m4: errors_list.m4
-errors_list.m4:
-	${PERL} generrors.pl $(backends_sources) > $@
-
-data.c: ${data_sources}
-	${M4} -sP data.c.m4 > $@
-data.h: ${data_sources}
-	${M4} -sP data.h.m4 > $@
-hashkeys.h:
-	${M4} -sP hashkeys.h.m4 > $@
-
-configs/config_parser.tab.c:
-	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
-configs/config_parser.lex.c:
-	${FLEX}  -P config_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
-
-backends/insert-sort/insert-sort.c:
-	${M4} -sP backends/insert-sort/insert-sort.c.m4 > $@
-
-backends/rewrite/rule_parser.tab.c:
-	${BISON} -p rewrite_ -d -b backends/rewrite/rule_parser backends/rewrite/rule_parser.y
-backends/rewrite/rule_parser.lex.c:
-	${FLEX}  -P rewrite_ --bison-bridge -o backends/rewrite/rule_parser.lex.c backends/rewrite/rule_parser.l
-
-backends/rewrite/rewrite.c: backends/rewrite/rule_parser.tab.c backends/rewrite/rule_parser.lex.c
-backends/rewrite/rule_parser.lex.c: backends/rewrite/rule_parser.tab.c
-
-data/uint8.c:
-	${M4} -sP -DNAME=int8  -DDEF=INT8  data/uint.c.m4 > $@
-data/uint16.c:
-	${M4} -sP -DNAME=int16 -DDEF=INT16 data/uint.c.m4 > $@
-data/uint32.c:
-	${M4} -sP -DNAME=int32 -DDEF=INT32 data/uint.c.m4 > $@
-data/uint64.c:
-	${M4} -sP -DNAME=int64 -DDEF=INT64 data/uint.c.m4 > $@
-data/size_t.c:
-	${M4} -sP -DNAME=size_t -DDEF=SIZET data/uint.c.m4 > $@
-data/off_t.c:
-	${M4} -sP -DNAME=off_t -DDEF=OFFT data/uint.c.m4 > $@
-data/int_t.c:
-	${M4} -sP -DNAME=int_t -DDEF=INTT data/uint.c.m4 > $@
-data/uint_t.c:
-	${M4} -sP -DNAME=uint_t -DDEF=UINTT data/uint.c.m4 > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

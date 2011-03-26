@@ -1,7 +1,7 @@
 
 START_TEST (test_real_store_nums){
 	hash_t config[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),      DATA_STRING("file")                        },
 				{ HK(filename),  DATA_STRING("data_real_store_nums.dat")    },
@@ -30,7 +30,7 @@ START_TEST (test_real_store_nums){
 			hash_end
 		};
 		ret = backend_query(backend, r_write);
-			fail_unless(ret == 4, "chain real_store_nums: write array failed");
+			fail_unless(ret == 4, "backend real_store_nums: write array failed");
 	}
 	
 	// check
@@ -43,8 +43,8 @@ START_TEST (test_real_store_nums){
 			hash_end
 		};
 		ret = backend_query(backend, r_read);
-			fail_unless(ret == 4,                   "chain real_store_nums: read array failed");
-			fail_unless(data_read == data_array[i], "chain real_store_nums: read array data failed");
+			fail_unless(ret == 4,                   "backend real_store_nums: read array failed");
+			fail_unless(data_read == data_array[i], "backend real_store_nums: read array data failed");
 	}
 	
 	backend_destroy(backend);

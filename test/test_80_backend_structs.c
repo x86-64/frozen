@@ -7,7 +7,7 @@ START_TEST(test_backend_structs){
 	backend_t  *backend;
 	
 	hash_t  settings[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("file")                        },
 				{ HK(filename),    DATA_STRING("data_backend_structs.dat")    },

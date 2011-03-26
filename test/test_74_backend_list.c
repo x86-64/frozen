@@ -3,7 +3,7 @@ START_TEST (test_backend_list){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("file")                     },
 				{ HK(filename),    DATA_STRING("data_backend_list.dat")    },
@@ -38,7 +38,7 @@ START_TEST (test_backend_list){
 		hash_end
 	};
 	if( (ssize = backend_query(backend, hash_create)) < 0 )
-		fail("chain in_list create failed");	
+		fail("backend in_list create failed");	
 	
 	// write keys
 	hash_t  hash_write[] = {

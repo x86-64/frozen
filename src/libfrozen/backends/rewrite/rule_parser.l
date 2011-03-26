@@ -1,7 +1,7 @@
 %{
 #include "libfrozen.h"
-#include "backends/rewrite/rewrite.h"
-#include "backends/rewrite/rule_parser.tab.h"
+#include "rewrite.h"
+#include "rule_parser.tab.h"
 %}
 
 %option noyywrap

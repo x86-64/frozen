@@ -41,6 +41,31 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/./build/libfrozen_backends.m4 \
+	$(top_srcdir)/./build/libfrozen_data.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/string/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -52,12 +77,12 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_frozend_OBJECTS = frozend-frozend.$(OBJEXT)
 frozend_OBJECTS = $(am_frozend_OBJECTS)
-frozend_DEPENDENCIES = $(top_builddir)/src/libfrozen/libfrozen.la
+frozend_DEPENDENCIES = $(top_srcdir)/src/libfrozen/libfrozen.la
 frozend_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(frozend_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
+depcomp = $(SHELL) $(top_srcdir)/build/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -75,12 +100,28 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BACKEND_DIRS = @BACKEND_DIRS@
+BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
+BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
+BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
+BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
+BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
+BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
+BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
+BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
+BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
+BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
+BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
+BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
+BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
+BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -89,9 +130,28 @@ CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+DATA_DIRS = @DATA_DIRS@
+DATA_DIST_DIRS = @DATA_DIST_DIRS@
+DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
+DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
+DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
+DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
+DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
+DATA_OBJECTS_io = @DATA_OBJECTS_io@
+DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
+DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
+DATA_OBJECTS_string = @DATA_OBJECTS_string@
+DATA_OBJECTS_struct = @DATA_OBJECTS_struct@
+DATA_OBJECTS_uint = @DATA_OBJECTS_uint@
+DATA_OBJECTS_void = @DATA_OBJECTS_void@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -120,6 +180,7 @@ LS = @LS@
 LTLIBOBJS = @LTLIBOBJS@
 M4 = @M4@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -139,18 +200,23 @@ PERL = @PERL@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
+TAC = @TAC@
+TSORT = @TSORT@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -198,8 +264,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 frozend_SOURCES = frozend.c
-frozend_CFLAGS = -I$(top_builddir)/src/libfrozen/ 
-frozend_LDADD = $(top_builddir)/src/libfrozen/libfrozen.la
+frozend_CFLAGS = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
+frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la
 all: all-am
 
 .SUFFIXES:

@@ -1,7 +1,7 @@
 %{
 #include <libfrozen.h>
-#include <backends/rewrite/rewrite.h>	
-#include <backends/rewrite/rule_parser.tab.h>	
+#include <rewrite.h>	
+#include <rule_parser.tab.h>	
 
 void yyerror (rewrite_script_t *, const char *);
 
@@ -197,7 +197,7 @@ label : NAME {
 	request_actions action;
 	if((action = request_str_to_action($1)) != REQUEST_INVALID){
 		rewrite_variable_t *constant = rewrite_new_constant(script);
-		data_t              d_act    = DATA_INT32(action);
+		data_t              d_act    = DATA_UINT32T(action);
 		
 		data_copy(&constant->data, &d_act);
 		

@@ -44,7 +44,7 @@
  * 		@param[in]  backend_name    Backend to call
  * 		@param[in]  request         Any request
  *      
- *      - "pass(request)" - pass request to underlying chain
+ *      - "pass(request)" - pass request to underlying backend
  *      	@param[in]  request         Any request
  *
  * 	- "length(target)" - get length (data->data_size)
@@ -66,7 +66,7 @@
 
 #include <libfrozen.h>
 #include <alloca.h>
-#include <backends/rewrite/rewrite.h>
+#include <rewrite.h>
 
 #define EMODULE 12
 typedef struct rewrite_userdata {
@@ -76,14 +76,14 @@ typedef struct rewrite_userdata {
 /* }}} */
 
 /* init {{{ */
-static int rewrite_init(chain_t *chain){ // {{{
-	if( (chain->userdata = malloc(sizeof(rewrite_userdata))) == NULL)
+static int rewrite_init(backend_t *backend){ // {{{
+	if( (backend->userdata = malloc(sizeof(rewrite_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int rewrite_destroy(chain_t *chain){ // {{{
-	rewrite_userdata *data = (rewrite_userdata *)chain->userdata;
+static int rewrite_destroy(backend_t *backend){ // {{{
+	rewrite_userdata *data = (rewrite_userdata *)backend->userdata;
 	
 	if(data->inited == 1){
 		rewrite_script_free(&data->script);
@@ -91,10 +91,10 @@ static int rewrite_destroy(chain_t *chain){ // {{{
 	free(data);
 	return 0;
 } // }}}
-static int rewrite_configure(chain_t *chain, hash_t *config){ // {{{
+static int rewrite_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t            ret;
 	char              *script;
-	rewrite_userdata  *data = (rewrite_userdata *)chain->userdata;
+	rewrite_userdata  *data = (rewrite_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRING, script, config, HK(script));
 	if(ret != 0)
@@ -201,7 +201,7 @@ ablock_continue:
 				unsigned int cmp_res = 0;
 				switch(from_data->type){
 					case TYPE_SIZET:;
-					case TYPE_INT32:;
+					case TYPE_UINT32T:;
 						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
 						cmp_res = (m_i32 == 0) ? 0 : 1;
 						break;
@@ -224,7 +224,7 @@ ablock_continue:
 				unsigned int cmp_res2 = 0;
 				switch(from_data->type){
 					case TYPE_SIZET:;
-					case TYPE_INT32:;
+					case TYPE_UINT32T:;
 						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
 						cmp_res2 = (m_i32 == 0) ? 0 : 1;
 						break;
@@ -246,7 +246,7 @@ ablock_continue:
 					goto exit;
 				}
 				
-				temp_ret = chain_next_query(env->chain, env->requests[param1->id]);
+				temp_ret = backend_pass(env->backend, env->requests[param1->id]);
 				
 				from_data     = &temp_ret_data;
 				from_data_ctx = NULL;
@@ -418,17 +418,17 @@ exit:
 	free(stack);
 	return ret;
 } // }}}
-static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
+static ssize_t rewrite_func(backend_t *backend, request_t *request){ // {{{
 	size_t                temp_size;
 	rewrite_script_env_t  env;
-	rewrite_userdata    *data = (rewrite_userdata *)chain->userdata;
+	rewrite_userdata    *data = (rewrite_userdata *)backend->userdata;
 	
-	/* if no actions - pass to next chain */
+	/* if no actions - pass to next backend */
 	if(data->script.main->actions_count == 0)
-		return chain_next_query(chain, request);
+		return backend_pass(backend, request);
 	
 	env.script   = &data->script;
-	env.chain    = chain;
+	env.backend    = backend;
 	
 	/* alloc requests */
 	temp_size = (data->script.requests_count + 1) * sizeof(request_t *);
@@ -445,9 +445,9 @@ static ssize_t rewrite_func(chain_t *chain, request_t *request){ // {{{
 	return rewrite_func_ablock(&env, data->script.main);
 } // }}}
 
-static chain_t chain_rewrite = {
+backend_t backend_rewrite = {
 	"rewrite",
-	CHAIN_TYPE_CRWD,
+	.supported_api = API_CRWD,
 	.func_init      = &rewrite_init,
 	.func_configure = &rewrite_configure,
 	.func_destroy   = &rewrite_destroy,
@@ -461,5 +461,5 @@ static chain_t chain_rewrite = {
 		.func_custom = &rewrite_func
 	}}
 };
-CHAIN_REGISTER(chain_rewrite)
+
 

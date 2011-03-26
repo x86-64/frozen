@@ -212,7 +212,7 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 	
 	frozen_init();
 		hash_t  b_config[] = {
-			{ HK(chains), DATA_HASHT(
+			{ HK(backends), DATA_HASHT(
 				{ HK(name),     DATA_STRING("file")                                           },
 				{ HK(filename), DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
 				hash_end
@@ -231,7 +231,7 @@ int test_frozen_seqwrite(unsigned int iters){ // {{{
 		off = 0;
 		while(iters > 0){
 			hash_t  request[] = {
-				{ HK(action), DATA_INT32(ACTION_CRWD_WRITE) },
+				{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE) },
 				{ HK(offset),    DATA_OFFT(off)                },
 				{ HK(size),   DATA_SIZET(opt_item_size)     },
 				{ HK(buffer), DATA_BUFFERT(&buffer)         },
@@ -263,7 +263,7 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 	
 	frozen_init();
 		hash_t  b_config[] = {
-			{ HK(chains), DATA_HASHT(
+			{ HK(backends), DATA_HASHT(
 				{ HK(name),     DATA_STRING("file")                                           },
 				{ HK(filename), DATA_PTR_STRING(opt_frozen_file, strlen(opt_frozen_file) + 1) },
 				hash_end
@@ -282,7 +282,7 @@ int test_frozen_seqread(unsigned int iters){ // {{{
 		off = 0;
 		while(iters > 0){
 			hash_t  request[] = {
-				{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
+				{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)  },
 				{ HK(offset),    DATA_OFFT(off)                },
 				{ HK(size),   DATA_SIZET(opt_item_size)     },
 				{ HK(buffer), DATA_BUFFERT(&buffer)         },

@@ -1,0 +1,33 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
+EXTRA_DIST=                                     \
+	configs/config_parser.l                 \
+	configs/config_parser.y                 
+
+noinst_LTLIBRARIES=libfrozen_core.la
+libfrozen_core_la_SOURCES=  \
+                        libfrozen.h     libfrozen.c                          \
+                        errors.h        errors.c                             \
+			data.h          data.c                               \
+                        hash.h          hash.c                               \
+                        hashkeys.c      hashkeys.h                           \
+			list.h          list.c                               \
+                        buffer.h        buffer.c                             \
+                        backend.c           backend.h           \
+                        configs/config.h                        \
+                        configs/config_parser.tab.h             \
+                        configs/config_parser.tab.c             \
+                        configs/config_parser.lex.c             \
+                        public.h
+libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
+
+configs/config_parser.tab.c:
+	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
+configs/config_parser.lex.c:
+	${FLEX}  -P config_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
+
+CLEANFILES =	\
+		configs/config_parser.tab.c                            \
+		configs/config_parser.tab.h                            \
+		configs/config_parser.lex.c                            
+

@@ -98,7 +98,7 @@ typedef struct rewrite_script_env_t {
 	rewrite_variable_t      *variables;
 	request_t              **requests;
 	data_t                  *ret_data;
-	chain_t                 *chain;
+	backend_t                 *backend;
 
 } rewrite_script_env_t;
 

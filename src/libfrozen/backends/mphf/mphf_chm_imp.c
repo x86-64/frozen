@@ -1,6 +1,6 @@
 #include <libfrozen.h>
-#include <backends/mphf/mphf.h>
-#include <backends/mphf/mphf_chm_imp.h>
+#include <mphf.h>
+#include <mphf_chm_imp.h>
 
 typedef enum chm_imp_fill_flags {
 	FILLED                 = 1,
@@ -77,7 +77,7 @@ static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
 		
 		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_g));
 		if(ret != 0 || (data->be_g = backend_acquire(backend)) == NULL)
-			return error("chain chm_imp parameter backend_g invalid");
+			return error("backend chm_imp parameter backend_g invalid");
 		
 		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_v));
 		if(ret == 0)

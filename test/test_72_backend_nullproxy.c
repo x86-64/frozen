@@ -1,9 +1,9 @@
 
-START_TEST (test_backends_two_chains){
+START_TEST (test_backends_two_backends){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("file")                     },
 				{ HK(filename),    DATA_STRING("data_backend_file.dat")    },
@@ -33,7 +33,7 @@ START_TEST (test_backends_two_chains){
 	};
 	
 	ssize = backend_query(backend, request);
-		fail_unless(ssize == 0x0000BEEF, "backend chain incorrectly set");
+		fail_unless(ssize == 0x0000BEEF, "backend backend incorrectly set");
 		
 	buffer_free(buffer);
 	
@@ -42,5 +42,5 @@ START_TEST (test_backends_two_chains){
 	backend_destroy(backend);
 }
 END_TEST
-REGISTER_TEST(core, test_backends_two_chains)
+REGISTER_TEST(core, test_backends_two_backends)
 

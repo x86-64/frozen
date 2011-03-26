@@ -2282,7 +2282,7 @@ XS(_wrap_hash_find) {
 }
 
 
-XS(_wrap_hash_chain) {
+XS(_wrap_hash_backend) {
   {
     hash_t *arg1 = (hash_t *) 0 ;
     hash_t *arg2 = (hash_t *) 0 ;
@@ -2294,19 +2294,19 @@ XS(_wrap_hash_chain) {
     dXSARGS;
     
     if ((items < 2) || (items > 2)) {
-      SWIG_croak("Usage: hash_chain(hash,hash_next);");
+      SWIG_croak("Usage: hash_backend(hash,hash_next);");
     }
     res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_chain" "', argument " "1"" of type '" "hash_t *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_backend" "', argument " "1"" of type '" "hash_t *""'"); 
     }
     arg1 = (hash_t *)(argp1);
     res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_hash_t, 0 |  0 );
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_chain" "', argument " "2"" of type '" "hash_t *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_backend" "', argument " "2"" of type '" "hash_t *""'"); 
     }
     arg2 = (hash_t *)(argp2);
-    hash_chain(arg1,arg2);
+    hash_backend(arg1,arg2);
     ST(argvi) = sv_newmortal();
     
     
@@ -2886,7 +2886,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_copy", _wrap_hash_copy},
 {"Frozenc::hash_free", _wrap_hash_free},
 {"Frozenc::hash_find", _wrap_hash_find},
-{"Frozenc::hash_chain", _wrap_hash_chain},
+{"Frozenc::hash_backend", _wrap_hash_backend},
 {"Frozenc::hash_nelements", _wrap_hash_nelements},
 {"Frozenc::hash_string_to_key", _wrap_hash_string_to_key},
 {"Frozenc::hash_key_to_string", _wrap_hash_key_to_string},

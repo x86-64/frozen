@@ -1,6 +1,6 @@
 #include <libfrozen.h>
-#include <backends/ipc/ipc.h>
-#include <backends/ipc/ipc_shmem.h>
+#include <ipc.h>
+#include <ipc_shmem.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -108,7 +108,7 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 		
 		// run request
 		hash_from_memory(&request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
-		block->query_ret = chain_next_query(((ipc_t *)ipc)->chain, request);
+		block->query_ret = backend_pass(((ipc_t *)ipc)->backend, request);
 		
 		// update status
 		if(shmem_block_status(userdata, block, STATUS_EXECUTING, STATUS_DONE) < 0)
@@ -120,14 +120,14 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	ssize_t             ret;
 	int                 shmid;
-	DT_INT32            shmkey;
+	DT_UINT32T            shmkey;
 	DT_SIZET            nitems    = NITEMS_DEFAULT;
 	DT_SIZET            item_size = ITEM_SIZE_DEFAULT;
 	DT_SIZET            shmsize;
 	DT_STRING           role_str;
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
 	
-	hash_data_copy(ret, TYPE_INT32,  shmkey,     config, HK(key)); if(ret != 0) return warning("no key supplied");
+	hash_data_copy(ret, TYPE_UINT32T,  shmkey,     config, HK(key)); if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRING, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
 	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
 	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));

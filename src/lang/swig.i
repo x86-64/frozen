@@ -40,7 +40,7 @@ hash_t *           hash_copy                    (hash_t *hash);
 void               hash_free                    (hash_t *hash);
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
-void               hash_chain                   (hash_t *hash, hash_t *hash_next);
+void               hash_backend                   (hash_t *hash, hash_t *hash_next);
 size_t             hash_nelements               (hash_t *hash);
 #ifdef DEBUG
 void               hash_dump                    (hash_t *hash);

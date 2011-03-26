@@ -4,7 +4,7 @@ off_t     buffer;
 static ssize_t test_rewrite(char *rules, request_t *request){
 	ssize_t ret;
 	hash_t  config[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),         DATA_STRING("file")                       },
 				{ HK(filename),     DATA_STRING("data_backend_rewrite.dat")   },
@@ -98,7 +98,7 @@ START_TEST (test_backend_rewrite){
 	// do backend call {{{
 	hash_t  rewrite_be_test_conf[] = {
 		{ HK(name),   DATA_STRING("rewrite_be_test") },
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),         DATA_STRING("file")                               },
 				{ HK(filename),     DATA_STRING("data_backend_rewrite_backend.dat")   },

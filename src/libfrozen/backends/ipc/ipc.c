@@ -1,6 +1,6 @@
 #define IPC_C
 #include <libfrozen.h>
-#include <backends/ipc/ipc.h>
+#include <ipc.h>
 #define EMODULE 8
 
 typedef struct ipc_userdata {
@@ -23,47 +23,47 @@ ipc_role  ipc_string_to_role(char *string){ // {{{
 } // }}}
 
 
-static int ipc_init(chain_t *chain){ // {{{
-	if((chain->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
+static int ipc_init(backend_t *backend){ // {{{
+	if((backend->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int ipc_destroy(chain_t *chain){ // {{{
-	ipc_userdata *userdata = (ipc_userdata *)chain->userdata;
+static int ipc_destroy(backend_t *backend){ // {{{
+	ipc_userdata *userdata = (ipc_userdata *)backend->userdata;
 	
 	userdata->ipc_proto->func_destroy(&userdata->ipc);
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int ipc_configure(chain_t *chain, hash_t *config){ // {{{
+static int ipc_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t          ret;
 	char            *ipc_type_str  = NULL;
-	ipc_userdata    *userdata      = (ipc_userdata *)chain->userdata;
+	ipc_userdata    *userdata      = (ipc_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRING, ipc_type_str,  config, HK(type));
 	
 	if( (userdata->ipc_proto = ipc_string_to_proto(ipc_type_str)) == NULL)
-		return error("chain ipc parameter type invalid");
+		return error("backend ipc parameter type invalid");
 	
 	if( (ret = userdata->ipc_proto->func_init(&userdata->ipc, config)) < 0)
 		return ret;
 	
-	userdata->ipc.chain = chain;
+	userdata->ipc.backend = backend;
 	
 	return 0;
 } // }}}
 
-static ssize_t ipc_backend_query(chain_t *chain, request_t *request){ // {{{
-	ipc_userdata *userdata = (ipc_userdata *)chain->userdata;
+static ssize_t ipc_backend_query(backend_t *backend, request_t *request){ // {{{
+	ipc_userdata *userdata = (ipc_userdata *)backend->userdata;
 	
 	return userdata->ipc_proto->func_query(&userdata->ipc, request);
 } // }}}
 
-static chain_t chain_ipc = {
+backend_t backend_ipc = {
 	"ipc",
-	CHAIN_TYPE_CRWD,
+	.supported_api = API_CRWD,
 	.func_init      = &ipc_init,
 	.func_configure = &ipc_configure,
 	.func_destroy   = &ipc_destroy,
@@ -77,5 +77,5 @@ static chain_t chain_ipc = {
 		.func_custom = &ipc_backend_query
 	}}
 };
-CHAIN_REGISTER(chain_ipc)
+
 

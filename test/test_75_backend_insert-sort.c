@@ -4,7 +4,7 @@ START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
 	hash_t  settings[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("file")                         },
 				{ HK(filename),    DATA_STRING("data_backend_insert_sort.dat") },
@@ -47,7 +47,7 @@ START_TEST (test_backend_insert_sort){
 			hash_end
 		};
 		ret = backend_query(backend, req_write);
-			fail_unless(ret > 0,  "chain in_sort write failed");
+			fail_unless(ret > 0,  "backend in_sort write failed");
 	}
 	
 	hash_t  req_read[] = {
@@ -58,11 +58,11 @@ START_TEST (test_backend_insert_sort){
 		hash_end
 	};
 	ret = backend_query(backend, req_read);
-		fail_unless(ret == iters, "chain in_sort read failed");
+		fail_unless(ret == iters, "backend in_sort read failed");
 	
 	for(i=0; i<iters-1; i++){
 		if(temp[i] > temp[i+1])
-			fail("chain in_sort wrong inserts");
+			fail("backend in_sort wrong inserts");
 	}
 	
 	backend_destroy(backend);

@@ -6,5 +6,5 @@ WriteMakefile(
     LIBS              => ['-L../../libfrozen/.libs/ -lfrozen'],
     OBJECT            => 'swig_wrap.o',
     DEFINE            => '',
-    INC               => '-I../../libfrozen/',
+    INC               => '-I../../libfrozen/core/ -I../../libfrozen/data/',
 );

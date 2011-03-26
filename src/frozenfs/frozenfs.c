@@ -241,7 +241,7 @@ static void wfrozen_init(void){
 	//data_assign_raw(homedir, TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
 	
 	hash_t c_data[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),      DATA_STRING("file")                           },
 				{ HK(filename),  DATA_STRING("data_ffs_data.dat")              },
@@ -255,7 +255,7 @@ static void wfrozen_init(void){
 	backend2 = wfrozen_backend_new(c_data);
 	
 	hash_t c_idx[] = {
-		{ HK(chains), DATA_HASHT(
+		{ HK(backends), DATA_HASHT(
 			{ 0, DATA_HASHT(
 				{ HK(name),         DATA_STRING("file")                               },
 				{ HK(filename),     DATA_STRING("data_ffs_idx.dat")                   },
@@ -391,7 +391,7 @@ static int fusef_getattr(const char *path, struct stat *buf){
 	if(ud && ud->type == BACKEND_IO){
 		// updating size
 		request_t r_count[] = {
-			{ HK(action),  DATA_INT32(ACTION_CRWD_COUNT)       },
+			{ HK(action),  DATA_UINT32T(ACTION_CRWD_COUNT)       },
 			{ HK(buffer),  DATA_PTR_OFFT(&size)                },
 			hash_end
 		};
@@ -443,7 +443,7 @@ static int fusef_read(const char *path, char *buf, size_t size, off_t off, struc
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
 	request_t r_read[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_READ)                    },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                    },
 		{ HK(offset),    DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer), DATA_RAW(buf, size)                             },
 		
@@ -465,7 +465,7 @@ static int fusef_write(const char *path, const char *buf, size_t size, off_t off
 	fh = (frozen_fh *)(uintptr_t)fi->fh;
 	
 	request_t r_write[] = {
-		{ HK(action),  DATA_INT32(ACTION_CRWD_WRITE)                   },
+		{ HK(action),  DATA_UINT32T(ACTION_CRWD_WRITE)                   },
 		//{ HK(offset),     DATA_PTR_OFFT(&off)                             },
 		{ HK(offset_out), DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },

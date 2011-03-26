@@ -25,7 +25,7 @@ typedef ssize_t (*ipc_func_destroy)(ipc_t *ipc);
 typedef ssize_t (*ipc_func_query)  (ipc_t *ipc, request_t *request);
 
 struct ipc_t {
-	chain_t                 *chain;
+	backend_t                 *backend;
 	char                     userdata[MAX_USERDATA_SIZE];
 };
 
@@ -38,7 +38,7 @@ struct ipc_proto_t {
 ipc_role  ipc_string_to_role(char *string);
 
 #ifdef IPC_C
-#include <backends/ipc/ipc_shmem.h>
+#include <ipc_shmem.h>
 
 static ipc_proto_t ipc_protos[] = {
 	[IPC_TYPE_SHMEM] = {
