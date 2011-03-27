@@ -68,43 +68,39 @@ static int data_[]NAME()_arith(char operator, data_t *operand1, data_ctx_t *ctx1
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
-	char                  buffer[[DEF_BUFFER_SIZE]];
 	TYPE                  value = 0;
+	data_proto_t         *proto;
 	
-	switch(src->type){
-	#ifdef TYPE_STRING
-		case TYPE_STRING:
-			if(data_read(src, src_ctx, 0, &buffer, DEF_BUFFER_SIZE) < 0)
-				return -EINVAL;
-			
-			value = (TYPE )strtoul(buffer, NULL, 10);
-			
-			data_write(dst, dst_ctx, 0, &value, sizeof(value));
-			return 0;
-	#endif
-	#ifdef TYPE_UINT8T
-		case TYPE_UINT8T:
-	#endif
-	#ifdef TYPE_UINT16T
-		case TYPE_UINT16T:
-	#endif
-	#ifdef TYPE_UINT32T
-		case TYPE_UINT32T:
-	#endif
-	#ifdef TYPE_UINT64T
-		case TYPE_UINT64T:
-	#endif
-	#ifdef TYPE_OFFT
-		case TYPE_OFFT:
-	#endif
-	#ifdef TYPE_SIZET
-		case TYPE_SIZET:
-	#endif
-			data_write(dst, dst_ctx, 0, &value, sizeof(value));
-			return (data_transfer(dst, dst_ctx, src, src_ctx) > 0) ? 0 : -EFAULT;
-		default:
-			break;
-	};
+	proto = data_proto_from_type(src->type);
+	
+	if(strcasecmp(proto->type_str, "string_t") == 0){
+		char  buffer[[DEF_BUFFER_SIZE]];
+		
+		if(data_read(src, src_ctx, 0, &buffer, DEF_BUFFER_SIZE) < 0)
+			return -EINVAL;
+		
+		value = (TYPE )strtoul(buffer, NULL, 10);
+		
+		data_write(dst, dst_ctx, 0, &value, sizeof(value));
+		return 0;
+	}
+	if(
+		strcasecmp(proto->type_str, "uint8_t") == 0 ||
+		strcasecmp(proto->type_str, "uint16_t") == 0 ||
+		strcasecmp(proto->type_str, "uint32_t") == 0 ||
+		strcasecmp(proto->type_str, "uint64_t") == 0 ||
+		strcasecmp(proto->type_str, "int8_t") == 0 ||
+		strcasecmp(proto->type_str, "int16_t") == 0 ||
+		strcasecmp(proto->type_str, "int32_t") == 0 ||
+		strcasecmp(proto->type_str, "int64_t") == 0 ||
+		strcasecmp(proto->type_str, "size_t") == 0 ||
+		strcasecmp(proto->type_str, "off_t") == 0 ||
+		strcasecmp(proto->type_str, "int_t") == 0 ||
+		strcasecmp(proto->type_str, "uint_t") == 0
+	){
+		data_write(dst, dst_ctx, 0, &value, sizeof(value));
+		return (data_transfer(dst, dst_ctx, src, src_ctx) > 0) ? 0 : -EFAULT;
+	}
 	return -ENOSYS;
 } // }}}
 

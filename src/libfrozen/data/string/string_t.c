@@ -94,7 +94,7 @@ ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_
 	char    nullchar = '\0';
 	
 	switch(src->type){
-		case TYPE_STRING:
+		case TYPE_STRINGT:
 			if( (size = data_transfer(dst, dst_ctx, src, src_ctx)) < 0)
 				return -EFAULT;
 			
@@ -107,8 +107,8 @@ ssize_t data_string_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_
 	return -ENOSYS;
 } // }}}
 
-data_proto_t string_proto = {
-		.type          = TYPE_STRING,
+data_proto_t string_t_proto = {
+		.type          = TYPE_STRINGT,
 		.type_str      = "string_t",
 		.size_type     = SIZE_VARIABLE,
 		.func_cmp      = &data_string_cmp,

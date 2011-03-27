@@ -4,7 +4,7 @@ void  db_read(backend_t *backend, off_t key, size_t size, char *buf, ssize_t *ss
 	ssize_t         ret;
 	
 	hash_t hash[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_READ) },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ) },
 		{ HK(offset),    DATA_PTR_OFFT(&key)          },
 		{ HK(size),   DATA_PTR_SIZET(&size)        },
 		{ HK(buffer), DATA_BUFFERT(buffer)         },
@@ -27,7 +27,7 @@ void  db_write(backend_t *backend, off_t key, char *buf, unsigned int buf_size, 
 	buffer_add_head_raw(&buffer, buf, buf_size);
 	
 	hash_t hash[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE) },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE) },
 		{ HK(offset),    DATA_PTR_OFFT(&key)           },
 		{ HK(size),   DATA_PTR_SIZET(&buf_size)     },
 		{ HK(buffer), DATA_BUFFERT(&buffer)         },
@@ -45,7 +45,7 @@ void  db_move(backend_t *backend, off_t key_from, off_t key_to, size_t key_size,
 	buffer_init(&buffer);
 	
 	hash_t hash[] = {
-		{ HK(action),   DATA_INT32(ACTION_CRWD_MOVE) },
+		{ HK(action),   DATA_UINT32T(ACTION_CRWD_MOVE) },
 		{ HK(offset_from), DATA_PTR_OFFT(&key_from)     },
 		{ HK(offset_to),   DATA_PTR_OFFT(&key_to)       },
 		{ HK(size),     DATA_PTR_SIZET(&key_size)    },
@@ -81,7 +81,7 @@ START_TEST (test_backend_file){
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	hash_t hash_create[] = {
-		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(size),       DATA_SIZET(10)                 },
 		{ HK(offset_out), DATA_PTR_OFFT(&temp)           },
 		hash_end
@@ -128,7 +128,7 @@ START_TEST (test_backend_file){
 	size_t  count;
 	
 	hash_t hash_count[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_COUNT) },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
 		{ HK(buffer), DATA_BUFFERT(buffer)          },
 		hash_end
 	};
@@ -171,7 +171,7 @@ START_TEST (test_backend_file){
 	ssize = 10 + 10;
 	
 	hash_t hash_delete[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_DELETE) },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_DELETE) },
 		{ HK(offset),    DATA_PTR_OFFT(&new_key1)       },
 		{ HK(size),   DATA_PTR_SIZET(&ssize)         },
 		{ HK(buffer), DATA_BUFFERT(buffer)           },

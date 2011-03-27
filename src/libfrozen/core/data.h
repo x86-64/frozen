@@ -2,7 +2,7 @@
 #define DATA_H
 
 enum data_type {
-	TYPE_INVALID = -1
+	TYPE_INVALID = 0
 };
 
 enum size_type {
@@ -53,9 +53,6 @@ struct data_proto_t {
 	f_data_write    func_write;
 	f_data_convert  func_convert;
 };
-
-extern data_proto_t  data_protos[];
-extern size_t        data_protos_size;
 
 /* api's */
 

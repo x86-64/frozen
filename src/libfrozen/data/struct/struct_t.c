@@ -49,7 +49,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 		//if( (ret = data_transfer(iter_ctx->buffer, new_ctx, curr_data, curr_ctx)) < 0)
 		//	return ITER_BREAK;
 		
-		// TODO IMPORTANT bad packing, TYPE_BINARY in troubles
+		// TODO IMPORTANT bad packing, TYPE_BINARYT in troubles
 		
 		data_convert_to_local(ret, data_value_type(hash_item_data(element)), &need_data, curr_data, curr_ctx);
 		if(ret < 0)
@@ -124,7 +124,7 @@ size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buff
 	return (size_t)iter_ctx.curr_offset;
 }
 
-data_proto_t struct_proto = {
+data_proto_t struct_t_proto = {
 		.type                   = TYPE_STRUCTT,
 		.type_str               = "struct_t",
 		.size_type              = SIZE_VARIABLE,

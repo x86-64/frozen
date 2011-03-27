@@ -62,8 +62,8 @@ static int sorts_configure(backend_t *backend, hash_t *config){ // {{{
 	data->backend = backend;
 	
 	/* get engine info */
-	hash_data_copy(ret, TYPE_STRING, sort_field_str,  config, HK(field));
-	hash_data_copy(ret, TYPE_STRING, sort_engine_str, config, HK(engine));
+	hash_data_copy(ret, TYPE_STRINGT, sort_field_str,  config, HK(field));
+	hash_data_copy(ret, TYPE_STRINGT, sort_engine_str, config, HK(engine));
 	if(ret != 0)
 		return error("backend insert-sort parameter engine not supplied");
 	
@@ -126,7 +126,7 @@ static ssize_t sorts_custom(backend_t *backend, request_t *request){
 	hash_t *r_funcname;
 	sorts_userdata *data = (sorts_userdata *)backend->userdata;
 	
-	if( (r_funcname = hash_find_typed(request, TYPE_STRING, HK(function))) == NULL)
+	if( (r_funcname = hash_find_typed(request, TYPE_STRINGT, HK(function))) == NULL)
 		return -EINVAL;
 	
 	if(strcmp((char *)r_funcname->value, "search") == 0){
@@ -138,9 +138,9 @@ static ssize_t sorts_custom(backend_t *backend, request_t *request){
 }
 /* }}} */
 
-backend_t backend_insert_sort = {
-	"insert-sort",
-	.supported_api = API_CRWD,
+backend_t insert_sort_proto = {
+	.class          = "insert-sort",
+	.supported_api  = API_CRWD,
 	.func_init      = &sorts_init,
 	.func_configure = &sorts_configure,
 	.func_destroy   = &sorts_destroy,

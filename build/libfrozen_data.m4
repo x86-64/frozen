@@ -56,5 +56,15 @@ AC_DEFUN([FROZEN_DATA_END],[
 	for h in $DATA_HEADERS; do
 		echo "#include <$h>" >> $data_hdr_file
 	done;
+	echo "#ifdef DATA_C" >> $data_hdr_file
+	echo "data_proto_t * data_protos[[]] = {" >> $data_hdr_file
+	for h in $DATA_SELECTED; do
+		h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")
+		echo "   [[TYPE_$h_upper]] = &${h}_proto," >> $data_hdr_file
+	done;
+	echo "};" >> $data_hdr_file
+	echo "size_t data_protos_size = (sizeof(data_protos)/sizeof(data_protos[[0]]));" >> $data_hdr_file
+	echo "#endif" >> $data_hdr_file
+	
 	echo "#endif" >> $data_hdr_file
 ])

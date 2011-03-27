@@ -62,7 +62,7 @@ int     data_binary_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx
 }
 
 data_proto_t binary_t_proto = {
-	.type            = TYPE_BINARY,
+	.type            = TYPE_BINARYT,
 	.type_str        = "binary_t",
 	.size_type       = SIZE_VARIABLE,
 	.func_cmp        = &data_binary_cmp,

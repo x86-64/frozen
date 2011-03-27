@@ -1,6 +1,6 @@
 #!/bin/sh
 
-keys=`grep "HK([a-z_]*)" -roha ./ | awk '
+keys=`grep "HK([a-z0-9_]*)" -roha ./ | awk '
 	{ gsub("[()]"," ") }
 	{ arr[$2] = $2 }
 	END {

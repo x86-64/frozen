@@ -50,7 +50,7 @@ static ssize_t   data_backend_t_write (data_t *data, data_ctx_t *ctx, off_t offs
 	return ret;
 }
 
-data_proto_t backend_proto = {
+data_proto_t backend_t_proto = {
 	.type                   = TYPE_BACKENDT,
 	.type_str               = "backend_t",
 	.size_type              = SIZE_VARIABLE,

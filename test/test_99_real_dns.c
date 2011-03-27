@@ -32,12 +32,12 @@ START_TEST (test_real_dns){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(struct dns_entry); i++){
 		request_t r_write[] = {
-			{ HK(action),  DATA_INT32 (ACTION_CRWD_WRITE)                           },
+			{ HK(action),  DATA_UINT32T (ACTION_CRWD_WRITE)                           },
 			{ HK(offset_out), DATA_PTR_OFFT   (&data_ptr)                           },
 			
 			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)            },
-			{ HK(dns_ip),     DATA_INT32  (data_array[i].ip)                        },
-			{ HK(dns_tstamp), DATA_INT32  (data_array[i].timestamp)                 },
+			{ HK(dns_ip),     DATA_UINT32T  (data_array[i].ip)                        },
+			{ HK(dns_tstamp), DATA_UINT32T  (data_array[i].timestamp)                 },
 			hash_end
 		};
 		ret = backend_query(b_idx, r_write);
@@ -55,7 +55,7 @@ START_TEST (test_real_dns){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ HK(action), DATA_INT32(ACTION_CRWD_READ)      },
+			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)      },
 			{ HK(offset),    DATA_OFFT(i)                      },
 			{ HK(buffer), DATA_PTR_STRING(&data_read, 1024) },
 			hash_end

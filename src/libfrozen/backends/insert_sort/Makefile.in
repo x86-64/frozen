@@ -208,8 +208,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
-TAC = @TAC@
-TSORT = @TSORT@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -267,6 +265,7 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libfrozen_backend_insert_sort.la
 libfrozen_backend_insert_sort_la_SOURCES = insert_sort.c
 libfrozen_backend_insert_sort_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+CLEANFILES = insert_sort.c
 all: all-am
 
 .SUFFIXES:
@@ -458,6 +457,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -552,6 +552,9 @@ uninstall-am:
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am
 
+
+insert_sort.c: insert_sort.m4
+	${M4} -sP $< > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

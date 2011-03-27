@@ -37,12 +37,12 @@ static int incap_configure(backend_t *backend, hash_t *config){ // {{{
 	DT_OFFT          multiply      = 1;
 	incap_userdata  *userdata      = (incap_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRING, key_str,       config, HK(key));
-	hash_data_copy(ret, TYPE_STRING, key_out_str,   config, HK(key_out));
-	hash_data_copy(ret, TYPE_STRING, key_to_str,    config, HK(key_to));
-	hash_data_copy(ret, TYPE_STRING, key_from_str,  config, HK(key_from));
-	hash_data_copy(ret, TYPE_STRING, count_str,     config, HK(count));
-	hash_data_copy(ret, TYPE_STRING, size_str,      config, HK(size));
+	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
+	hash_data_copy(ret, TYPE_STRINGT, key_out_str,   config, HK(key_out));
+	hash_data_copy(ret, TYPE_STRINGT, key_to_str,    config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRINGT, key_from_str,  config, HK(key_from));
+	hash_data_copy(ret, TYPE_STRINGT, count_str,     config, HK(count));
+	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
 	hash_data_copy(ret, TYPE_OFFT,   multiply,      config, HK(multiply));
 	
 	data_t multiply_as_offt_data = DATA_PTR_OFFT(&userdata->multiply_as_offt);
@@ -160,9 +160,9 @@ static ssize_t incap_backend_custom(backend_t *backend, request_t *request){
 	
 }
 
-backend_t backend_incap = {
-	"incapsulate",
-	.supported_api = API_CRWD,
+backend_t incapsulate_proto = {
+	.class          = "incapsulate",
+	.supported_api  = API_CRWD,
 	.func_init      = &incap_init,
 	.func_configure = &incap_configure,
 	.func_destroy   = &incap_destroy,

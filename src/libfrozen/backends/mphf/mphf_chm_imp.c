@@ -75,15 +75,15 @@ static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
 		hash_data_copy(ret, TYPE_UINTT,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
 		// TODO param 'writable' and 'readonly'
 		
-		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_g));
+		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_g));
 		if(ret != 0 || (data->be_g = backend_acquire(backend)) == NULL)
 			return error("backend chm_imp parameter backend_g invalid");
 		
-		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_v));
+		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_v));
 		if(ret == 0)
 			data->be_v = backend_acquire(backend);
 		
-		hash_data_copy(ret, TYPE_STRING, backend,       mphf->config, HK(backend_e));
+		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_e));
 		if(ret == 0)
 			data->be_e = backend_acquire(backend);
 		

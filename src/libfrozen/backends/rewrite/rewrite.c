@@ -54,7 +54,7 @@
  * 		@param[in]  target   Target to measure
  *
  * 	- "data_arith((string)'+', dst, src)" - do arithmetic with targets. [ Dst = Dst (operation) Src ]
- * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRING]
+ * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRINGT]
  * 		@param      dst_*      Destination target
  * 		@param[in]  src_*      Source target
  *
@@ -96,7 +96,7 @@ static int rewrite_configure(backend_t *backend, hash_t *config){ // {{{
 	char              *script;
 	rewrite_userdata  *data = (rewrite_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRING, script, config, HK(script));
+	hash_data_copy(ret, TYPE_STRINGT, script, config, HK(script));
 	if(ret != 0)
 		return error("script not supplied");
 	
@@ -286,7 +286,7 @@ ablock_continue:
 				rewrite_thing_get_data(env, param2, &dst_data,  &dst_data_ctx);
 				rewrite_thing_get_data(env, param3, &src_data,  &src_data_ctx);
 				
-				if(data_value_type(from_data) != TYPE_STRING){
+				if(data_value_type(from_data) != TYPE_STRINGT){
 					ret = error("arithmetic failed");
 					goto exit;
 				}
@@ -352,7 +352,7 @@ ablock_continue:
 				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
 				
 				// TODO SEC insecure
-				if(data_value_type(from_data) != TYPE_STRING){ ret = -EINVAL; goto exit; }
+				if(data_value_type(from_data) != TYPE_STRINGT){ ret = -EINVAL; goto exit; }
 				
 				backend_t *backend;
 				if( (backend = backend_acquire(data_value_ptr(from_data))) == NULL){ // TODO ctx
@@ -375,7 +375,7 @@ ablock_continue:
 		switch(to->type){
 			case THING_ARRAY_REQUEST_KEY:;
 				if(from_data == NULL){
-					data_alloc_local(&temp_any, TYPE_VOID, 0);
+					data_alloc_local(&temp_any, TYPE_VOIDT, 0);
 					from_data = &temp_any;
 				}
 				request_t **request = &env->requests[to->id];
@@ -445,9 +445,9 @@ static ssize_t rewrite_func(backend_t *backend, request_t *request){ // {{{
 	return rewrite_func_ablock(&env, data->script.main);
 } // }}}
 
-backend_t backend_rewrite = {
-	"rewrite",
-	.supported_api = API_CRWD,
+backend_t rewrite_proto = {
+	.class          = "rewrite",
+	.supported_api  = API_CRWD,
 	.func_init      = &rewrite_init,
 	.func_configure = &rewrite_configure,
 	.func_destroy   = &rewrite_destroy,

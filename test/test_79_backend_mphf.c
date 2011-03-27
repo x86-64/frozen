@@ -73,7 +73,7 @@ START_TEST (test_backend_mphf){
 					{ HK(name),       DATA_STRING("structs")               },
 					{ HK(size),       DATA_STRING("size")                  },
 					{ HK(structure),  DATA_HASHT(
-						{ HK(keyid), DATA_INT32(0)                     },
+						{ HK(keyid), DATA_UINT32T(0)                     },
 						{ HK(key),   DATA_STRING("")                   },
                                                 hash_end
 					)},
@@ -85,8 +85,8 @@ START_TEST (test_backend_mphf){
 					{ HK(backend_g),   DATA_STRING("backend_mphf_g")       },
 					{ HK(backend_e),   DATA_STRING("backend_mphf_e")       },
 					{ HK(backend_v),   DATA_STRING("backend_mphf_v")       },
-					{ HK(nelements),   DATA_INT64(100)                     },
-					{ HK(value_bits),  DATA_INT32(32)                      },
+					{ HK(nelements),   DATA_UINT64T(100)                     },
+					{ HK(value_bits),  DATA_UINT32T(32)                      },
                                         { HK(keyid),       DATA_STRING("keyid")                },
 					hash_end
 				)},
@@ -123,7 +123,7 @@ START_TEST (test_backend_mphf){
 		memset(buffer, 0, sizeof(buffer));
 		
 		request_t r_write[] = {
-			{ HK(action),  DATA_INT32 (ACTION_CRWD_CREATE)                          },
+			{ HK(action),  DATA_UINT32T (ACTION_CRWD_CREATE)                          },
 			{ HK(key),     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
 			{ HK(buffer),  DATA_RAW (buffer, 30)                                    },
                         hash_end
@@ -138,7 +138,7 @@ START_TEST (test_backend_mphf){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ HK(action), DATA_INT32(ACTION_CRWD_READ)                              },
+			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                              },
 			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
 			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
 			hash_end
@@ -294,8 +294,8 @@ START_TEST (test_backend_mphf_speed){
 					{ HK(backend_g),   DATA_STRING("backend_mphfs_g")      },
 					{ HK(backend_e),   DATA_STRING("backend_mphfs_e")      },
 					{ HK(backend_v),   DATA_STRING("backend_mphfs_v")      },
-					{ HK(nelements),   DATA_INT64(NTESTS)                  },
-					{ HK(value_bits),  DATA_INT32(32)                      },
+					{ HK(nelements),   DATA_UINT64T(NTESTS)                  },
+					{ HK(value_bits),  DATA_UINT32T(32)                      },
 					hash_end
 				)},
 				hash_end
@@ -317,7 +317,7 @@ START_TEST (test_backend_mphf_speed){
 	char     test[8], test2[8];
 	
 	request_t r_write[] = {
-		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(buffer),  DATA_RAW(test2, sizeof(test2)) },
 		
 		{ HK(key),     DATA_PTR_STRING(test, 8)       },
@@ -365,7 +365,7 @@ START_TEST (test_backend_mphf_speed){
 		}
 		
 		request_t r_read[] = {
-			{ HK(action),  DATA_INT32(ACTION_CRWD_READ)   },
+			{ HK(action),  DATA_UINT32T(ACTION_CRWD_READ)   },
 			{ HK(key),     DATA_RAW(test,  sizeof(test))  },
 			{ HK(buffer),  DATA_RAW(test2, sizeof(test2)) },
 			{ HK(size),    DATA_SIZET(sizeof(test2))      },

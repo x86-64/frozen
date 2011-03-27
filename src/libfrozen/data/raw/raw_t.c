@@ -7,7 +7,7 @@ size_t  data_raw_len(data_t *data, data_ctx_t *ctx){
 }
 
 data_proto_t raw_t_proto = {
-		.type          = TYPE_RAW,
+		.type          = TYPE_RAWT,
 		.type_str      = "raw_t",
 		.size_type     = SIZE_VARIABLE,
 		.func_len      = &data_raw_len,

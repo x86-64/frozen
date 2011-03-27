@@ -2,16 +2,17 @@
  * @file data.c
  * @brief Data manipulations
  */
+#define DATA_C
 #include <libfrozen.h>
 
-#define DATA_FUNC(_type,_name) ( data_protos[_type].func_##_name ? data_protos[_type].func_##_name : data_def_##_name )
+#define DATA_FUNC(_type,_name) ( data_protos[_type]->func_##_name ? data_protos[_type]->func_##_name : data_def_##_name )
 #define DATA_FUNC_CALL(_type,_name,...) {             \
 	f_data_##_name func = DATA_FUNC(_type,_name); \
 	return func(__VA_ARGS__);                     \
 }
 
-extern data_proto_t data_protos[];
-extern size_t       data_protos_size;
+extern data_proto_t * data_protos[];
+extern size_t         data_protos_size;
 
 static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){ // {{{
 	ssize_t      ret;
@@ -72,8 +73,8 @@ static size_t        data_def_len2raw       (size_t unitsize){ // {{{
 	return unitsize;
 } // }}}
 static size_t        data_def_rawlen        (data_t *data, data_ctx_t *context){ // {{{
-	if(data_protos[data->type].size_type == SIZE_FIXED)
-		return data_protos[data->type].fixed_size;
+	if(data_protos[data->type]->size_type == SIZE_FIXED)
+		return data_protos[data->type]->fixed_size;
 	
 	return data->data_size;
 } // }}}
@@ -191,11 +192,15 @@ ssize_t              data_validate(data_t *data){ // {{{
 	return 1;
 } // }}}
 data_type            data_type_from_string  (char *string){ // {{{
-	unsigned int i;
+	uintmax_t     i;
+	data_proto_t *proto;
 	
 	for(i=0; i<data_protos_size; i++){
-		if(strcasecmp(data_protos[i].type_str, string) == 0)
-			return data_protos[i].type;
+		if( (proto = data_protos[i]) == NULL)
+			continue;
+		
+		if(strcasecmp(proto->type_str, string) == 0)
+			return proto->type;
 	}
 	
 	return TYPE_INVALID;
@@ -204,13 +209,13 @@ char *               data_string_from_type  (data_type type){ // {{{
 	if(!data_type_validate(type))
 		return "INVALID";
 	
-	return data_protos[type].type_str;
+	return data_protos[type]->type_str;
 } // }}}
 data_proto_t *       data_proto_from_type   (data_type type){ // {{{
 	if(type == TYPE_INVALID || (unsigned)type >= data_protos_size)
 		return NULL;
 	
-	return &data_protos[type];
+	return data_protos[type];
 } // }}}
 
 /** @brief Calculate length of data
@@ -239,8 +244,8 @@ size_t               data_len2raw           (data_type type, size_t unitsize){ /
 	if(!data_type_validate(type))
 		return 0;
 	
-	if(data_protos[type].size_type == SIZE_FIXED)
-		return data_protos[type].fixed_size;
+	if(data_protos[type]->size_type == SIZE_FIXED)
+		return data_protos[type]->fixed_size;
 	
 	DATA_FUNC_CALL(type, len2raw,
 		unitsize
@@ -314,7 +319,7 @@ int                  data_cmp               (data_t *data1, data_ctx_t *data1_ct
 		}while(1);
 	}
 	
-	if( (func_cmp = data_protos[data1->type].func_cmp) == NULL)
+	if( (func_cmp = data_protos[data1->type]->func_cmp) == NULL)
 		return -ENOSYS;
 	
 	return func_cmp(data1, data1_ctx, data2, data2_ctx);
@@ -341,7 +346,7 @@ int                  data_arithmetic        (char operator, data_t *operand1, da
 		return -EFAULT;
 	}
 	
-	if( (func_arith = data_protos[operand1->type].func_arithmetic) == NULL)
+	if( (func_arith = data_protos[operand1->type]->func_arithmetic) == NULL)
 		return -EFAULT;
 	
 	return func_arith(operator, operand1, operand1_ctx, operand2, operand2_ctx);
@@ -472,7 +477,7 @@ void                data_free                (data_t *data){ // {{{
 	if(data == NULL || data->data_ptr == NULL)
 		return;
 	
-	if( (func_free = data_protos[data->type].func_free) != NULL){
+	if( (func_free = data_protos[data->type]->func_free) != NULL){
 		func_free(data);
 		return;
 	}

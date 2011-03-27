@@ -77,7 +77,7 @@ API void               hash_data_find               (hash_t *hash, hash_key_t ke
 }
 #define hash_assign_hash_null(_dst) {  \
 	(_dst)->key = hash_ptr_null;   \
-	(_dst)->data.type = TYPE_VOID; \
+	(_dst)->data.type = TYPE_VOIDT; \
 	(_dst)->data.data_ptr = NULL;  \
 	(_dst)->data.data_size = 0;    \
 }

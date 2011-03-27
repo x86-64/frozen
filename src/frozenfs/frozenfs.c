@@ -237,8 +237,8 @@ static void wfrozen_init(void){
 	
 	frozen_init();
 	
-	//homedir = hash_find_typed(global_settings, TYPE_STRING, HK(homedir));
-	//data_assign_raw(homedir, TYPE_STRING, opts.datadir, strlen(opts.datadir) + 1);
+	//homedir = hash_find_typed(global_settings, TYPE_STRINGT, HK(homedir));
+	//data_assign_raw(homedir, TYPE_STRINGT, opts.datadir, strlen(opts.datadir) + 1);
 	
 	hash_t c_data[] = {
 		{ HK(backends), DATA_HASHT(
@@ -425,7 +425,7 @@ static int fusef_open(const char *path, struct fuse_file_info *fi){
 		if(data_copy(&fh->param, &d_param) < 0)
 			return -ENOMEM;
 	}else{
-		data_alloc(&fh->param, TYPE_VOID, 0);
+		data_alloc(&fh->param, TYPE_VOIDT, 0);
 	}
 	
 	// TODO check access

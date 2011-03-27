@@ -42,7 +42,7 @@ static int ipc_configure(backend_t *backend, hash_t *config){ // {{{
 	char            *ipc_type_str  = NULL;
 	ipc_userdata    *userdata      = (ipc_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRING, ipc_type_str,  config, HK(type));
+	hash_data_copy(ret, TYPE_STRINGT, ipc_type_str,  config, HK(type));
 	
 	if( (userdata->ipc_proto = ipc_string_to_proto(ipc_type_str)) == NULL)
 		return error("backend ipc parameter type invalid");
@@ -61,9 +61,9 @@ static ssize_t ipc_backend_query(backend_t *backend, request_t *request){ // {{{
 	return userdata->ipc_proto->func_query(&userdata->ipc, request);
 } // }}}
 
-backend_t backend_ipc = {
-	"ipc",
-	.supported_api = API_CRWD,
+backend_t ipc_proto = {
+	.class          = "ipc",
+	.supported_api  = API_CRWD,
 	.func_init      = &ipc_init,
 	.func_configure = &ipc_configure,
 	.func_destroy   = &ipc_destroy,

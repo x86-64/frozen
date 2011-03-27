@@ -31,7 +31,7 @@ START_TEST (test_backend_cache_app){
 
         for(i=0; i<=10; i++){
                 request_t       request[] = {
-                        { HK(action),  DATA_INT32(ACTION_CRWD_CREATE)  },
+                        { HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE)  },
                         { HK(buffer),  DATA_RAW(buf, 30)               },
                         { HK(size),    DATA_SIZET(30)                  },
                         hash_end

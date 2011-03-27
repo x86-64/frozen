@@ -203,9 +203,9 @@ static ssize_t cacheapp_backend_count(backend_t *backend, request_t *request){ /
 	);
 } // }}}
 
-backend_t backend_cacheapp = {
-	"cache-append",
-	.supported_api = API_CRWD,
+backend_t cache_append_proto = {
+	.class          = "cache-append",
+	.supported_api  = API_CRWD,
 	.func_init      = &cacheapp_init,
 	.func_configure = &cacheapp_configure,
 	.func_destroy   = &cacheapp_destroy,

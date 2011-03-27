@@ -1,8 +1,8 @@
 TESTS          = test test_frozenfs
 check_PROGRAMS = test
 
-test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_builddir)/src/libfrozen/
-test_LDADD        = @CHECK_LIBS@ $(top_builddir)/src/libfrozen/libfrozen.la
+test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
+test_LDADD        = @CHECK_LIBS@ $(top_srcdir)/src/libfrozen/libfrozen.la
 
 EXTRA_DIST        = test_valgrind test_gdb test_coverage test_frozenfs test.c.m4 test_*.c test_*.conf
 

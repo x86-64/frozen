@@ -13,14 +13,14 @@ START_TEST(test_backend_ipc){
 				{ HK(name),        DATA_STRING("ipc")                         },
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("server")                      },
-				{ HK(key),         DATA_INT32(1000)                           },
+				{ HK(key),         DATA_UINT32T(1000)                           },
 				hash_end
 			)},
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("ipc")                         },
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("client")                      },
-				{ HK(key),         DATA_INT32(1000)                           },
+				{ HK(key),         DATA_UINT32T(1000)                           },
 				hash_end
 			)},
 			hash_end
@@ -38,7 +38,7 @@ START_TEST(test_backend_ipc){
 	
 	// create new
 	request_t  r_create[] = {
-		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(size),       DATA_SIZET(sizeof(str))        },
 		{ HK(buffer),     DATA_RAW(str, sizeof(str))     },
 		hash_end
@@ -47,7 +47,7 @@ START_TEST(test_backend_ipc){
 		fail_unless(ret >= 0, "create failed");	
 	
 	request_t  r_read[] = {
-		{ HK(action),     DATA_INT32(ACTION_CRWD_READ)   },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)   },
 		{ HK(offset),     DATA_OFFT(0)                   },
 		{ HK(size),       DATA_SIZET(sizeof(test))       },
 		{ HK(buffer),     DATA_RAW(test, sizeof(test))   },
@@ -96,14 +96,14 @@ START_TEST(test_backend_ipc_speed){
 				{ HK(name),        DATA_STRING("ipc")                         },
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("server")                      },
-				{ HK(key),         DATA_INT32(1001)                           },
+				{ HK(key),         DATA_UINT32T(1001)                           },
 				hash_end
 			)},
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("ipc")                         },
 				{ HK(type),        DATA_STRING("shmem")                       },
 				{ HK(role),        DATA_STRING("client")                      },
-				{ HK(key),         DATA_INT32(1001)                           },
+				{ HK(key),         DATA_UINT32T(1001)                           },
 				hash_end
 			)},
 			hash_end
@@ -122,7 +122,7 @@ START_TEST(test_backend_ipc_speed){
 	
 	// create new
 	request_t  r_create[] = {
-		{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(size),       DATA_SIZET(0x0000BEEF)         },
 		{ HK(buffer),     DATA_RAW(str, sizeof(str))     },
 		hash_end

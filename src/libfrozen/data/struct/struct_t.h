@@ -9,4 +9,6 @@ typedef hash_t  struct_t;
 API size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buffer, data_ctx_t *ctx);
 API size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buffer, data_ctx_t *ctx);
 
+extern data_proto_t struct_t_proto;
+
 #endif

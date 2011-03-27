@@ -196,14 +196,14 @@ static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t          ret;
 	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRING, key_from_str,    config, HK(key_from));
-	hash_data_copy(ret, TYPE_STRING, key_to_str,      config, HK(key_to));
-	hash_data_copy(ret, TYPE_STRING, offset_out_str,  config, HK(offset_out));
-	hash_data_copy(ret, TYPE_STRING, keyid_str,       config, HK(keyid));
+	hash_data_copy(ret, TYPE_STRINGT, key_from_str,    config, HK(key_from));
+	hash_data_copy(ret, TYPE_STRINGT, key_to_str,      config, HK(key_to));
+	hash_data_copy(ret, TYPE_STRINGT, offset_out_str,  config, HK(offset_out));
+	hash_data_copy(ret, TYPE_STRINGT, keyid_str,       config, HK(keyid));
 	
-	hash_data_copy(ret, TYPE_STRING, mphf_type_str,   config, HK(type));
+	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_UINT64T,  buffer_size,     config, HK(buffer_size));
-	hash_data_copy(ret, TYPE_STRING, hash_type_str,   config, HK(hash));
+	hash_data_copy(ret, TYPE_STRINGT, hash_type_str,   config, HK(hash));
 	hash_data_copy(ret, TYPE_UINTT,  max_rebuilds,    config, HK(max_rebuilds));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
@@ -304,9 +304,9 @@ static ssize_t mphf_backend_queryinsert(backend_t *backend, request_t *request){
 	return ret;
 } // }}}
 
-backend_t backend_mphf = {
-	"mphf",
-	.supported_api = API_CRWD,
+backend_t mphf_proto = {
+	.class          = "mphf",
+	.supported_api  = API_CRWD,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
 	.func_destroy   = &mphf_destroy,

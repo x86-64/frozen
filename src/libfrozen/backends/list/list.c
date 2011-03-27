@@ -88,9 +88,9 @@ static ssize_t lists_delete(backend_t *backend, request_t *request){
 	return ret;
 }
 
-backend_t backend_lists = {
-	"list",
-	.supported_api = API_CRWD,
+backend_t list_proto = {
+	.class          = "list",
+	.supported_api  = API_CRWD,
 	.func_init      = &lists_init,
 	.func_configure = &lists_configure,
 	.func_destroy   = &lists_destroy,

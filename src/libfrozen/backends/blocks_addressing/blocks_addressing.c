@@ -577,8 +577,8 @@ static ssize_t addrs_count(backend_t *chain, request_t *request){
 	);
 }
 
-backend_t chain_addrs = {
-	"blocks-address",
+backend_t blocks_address_proto = {
+	"blocks_address",
 	.supported_api = API_CRWD,
 	&addrs_init,
 	&addrs_configure,

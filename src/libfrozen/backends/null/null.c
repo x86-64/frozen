@@ -28,9 +28,9 @@ static ssize_t null_create(backend_t *backend, request_t *request){
 	return backend_pass(backend, request);
 }
 
-backend_t backend_null_proxy = {
-	"null-proxy",
-	.supported_api = API_CRWD,
+backend_t null_proto = {
+	.class          = "null",
+	.supported_api  = API_CRWD,
 	.func_init      = &null_init,
 	.func_configure = &null_configure,
 	.func_destroy   = &null_destroy,

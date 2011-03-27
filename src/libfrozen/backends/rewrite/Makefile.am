@@ -7,3 +7,4 @@ rule_parser.tab.c: rule_parser.y
 rule_parser.lex.c: rule_parser.l
 	${FLEX}  -P rewrite_ --bison-bridge -o $@ $<
 
+CLEANFILES = rule_parser.tab.c rule_parser.lex.c rule_parser.tab.h

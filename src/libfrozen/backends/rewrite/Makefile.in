@@ -210,8 +210,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
-TAC = @TAC@
-TSORT = @TSORT@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -269,6 +267,7 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libfrozen_backend_rewrite.la
 libfrozen_backend_rewrite_la_SOURCES = rewrite.c rule_parser.tab.c rule_parser.lex.c
 libfrozen_backend_rewrite_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+CLEANFILES = rule_parser.tab.c rule_parser.lex.c rule_parser.tab.h
 all: all-am
 
 .SUFFIXES:
@@ -476,6 +475,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

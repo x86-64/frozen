@@ -26,7 +26,7 @@ START_TEST (test_backends_two_backends){
 	buffer_t       *buffer  = buffer_alloc();
 	ssize_t         ssize;
 	hash_t          request[] = {
-		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE)  },
+		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE)  },
 		{ HK(size),    DATA_SIZET( 0xBEEF )            },
 		{ HK(buffer),  DATA_BUFFERT(buffer)            },
 		hash_end

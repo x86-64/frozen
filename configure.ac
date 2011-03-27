@@ -59,8 +59,6 @@ AC_PATH_PROGS(BISON, [bison], no)
 AC_PATH_PROGS(FLEX, [flex], no)
 AC_PATH_PROGS(SWIG, [swig], no)
 AC_PATH_PROGS(PERL, [perl perl5], no)
-AC_PATH_PROGS(TSORT, [tsort], no)
-AC_PATH_PROGS(TAC, [tac], no)
 
 sinclude(./build/libfrozen_backends.m4)
 sinclude(./build/libfrozen_data.m4)

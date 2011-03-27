@@ -36,9 +36,9 @@ static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	struct_userdata  *userdata      = (struct_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_HASHT,  struct_hash,   config, HK(structure));
-	hash_data_copy(ret, TYPE_STRING, key_str,       config, HK(key));
-	hash_data_copy(ret, TYPE_STRING, key_value_str, config, HK(values));
-	hash_data_copy(ret, TYPE_STRING, size_str,      config, HK(size));
+	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
+	hash_data_copy(ret, TYPE_STRINGT, key_value_str, config, HK(values));
+	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
 	
 	userdata->key        = hash_string_to_key(key_str);
 	userdata->key_values = hash_string_to_key(key_value_str);
@@ -114,9 +114,9 @@ static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 	return ret;
 }
 
-backend_t backend_struct = {
-	"structs",
-	.supported_api = API_CRWD,
+backend_t structs_proto = {
+	.class          = "structs",
+	.supported_api  = API_CRWD,
 	.func_init      = &struct_init,
 	.func_configure = &struct_configure,
 	.func_destroy   = &struct_destroy,

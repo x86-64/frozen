@@ -134,9 +134,9 @@ static ssize_t cache_backend_count(backend_t *backend, request_t *request){
 	);
 }
 
-backend_t backend_cache = {
-	"cache",
-	.supported_api = API_CRWD,
+backend_t cache_proto = {
+	.class          = "cache",
+	.supported_api  = API_CRWD,
 	.func_init      = &cache_init,
 	.func_configure = &cache_configure,
 	.func_destroy   = &cache_destroy,

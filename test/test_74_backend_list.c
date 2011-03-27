@@ -32,7 +32,7 @@ START_TEST (test_backend_list){
 	
 	// create new
 	hash_t  hash_create[] = {
-		{ HK(action),  DATA_INT32(ACTION_CRWD_CREATE) },
+		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(size),    DATA_SIZET(10)                 },
 		{ HK(offset_out), DATA_PTR_OFFT(&key_off)     },
 		hash_end
@@ -42,7 +42,7 @@ START_TEST (test_backend_list){
 	
 	// write keys
 	hash_t  hash_write[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE)  },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE)  },
 		{ HK(offset), DATA_OFFT(key_off)             },
 		{ HK(size),   DATA_SIZET(10)                 },
 		{ HK(buffer), DATA_RAW(key_data, 10)         },
@@ -53,9 +53,9 @@ START_TEST (test_backend_list){
 	
 	// insert key
 	hash_t  hash_insert[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_WRITE) },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE) },
 		{ HK(offset), DATA_OFFT(key_off + 2)        },
-		{ HK(insert), DATA_INT32(1)                 },
+		{ HK(insert), DATA_UINT32T(1)                 },
 		{ HK(size),   DATA_SIZET(1)                 },
 		{ HK(buffer), DATA_RAW(key_insert, 1)       },
 		hash_end
@@ -66,7 +66,7 @@ START_TEST (test_backend_list){
 	// check
 	memset(temp, 0, 1024);
 	hash_t  hash_read[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_READ)  },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)  },
 		{ HK(offset), DATA_OFFT(key_off)            },
 		{ HK(size),   DATA_SIZET(11)                },
 		{ HK(buffer), DATA_RAW(temp, 1024)          },
@@ -81,7 +81,7 @@ START_TEST (test_backend_list){
 	
 	// delete key
 	hash_t  hash_delete[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_DELETE)   },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_DELETE)   },
 		{ HK(offset),    DATA_OFFT(key_off + 3)           },
 		{ HK(size),   DATA_SIZET(1)                    },
 		hash_end
@@ -91,7 +91,7 @@ START_TEST (test_backend_list){
 	
 	// check
 	hash_t  hash_read2[] = {
-		{ HK(action), DATA_INT32(ACTION_CRWD_READ)     },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)     },
 		{ HK(offset), DATA_OFFT(key_off)               },
 		{ HK(size),   DATA_SIZET(10)                   },
 		{ HK(buffer), DATA_RAW(temp, 1024)             },

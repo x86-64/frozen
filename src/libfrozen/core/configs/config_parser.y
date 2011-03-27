@@ -70,7 +70,7 @@ hash_name :
 	};
 
 hash_value :
-	  STRING             { data_assign_raw(&$$, TYPE_STRING, $1, strlen($1) + 1);  }  // fucking macro nesting
+	  STRING             { data_assign_raw(&$$, TYPE_STRINGT, $1, strlen($1) + 1);  }  // fucking macro nesting
 	| '{' hash_items '}' { data_assign_raw(&$$, TYPE_HASHT,  $2, 1 /*allocated*/); }  // no DATA_PTR_HASHT_FREE here
 	| '(' NAME ')' STRING {
 		ssize_t  retval;

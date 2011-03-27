@@ -64,7 +64,7 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 	ssize_t  ret;
 	char    *function;
 	
-	hash_data_copy(ret, TYPE_STRING, function, request, HK(function));
+	hash_data_copy(ret, TYPE_STRINGT, function, request, HK(function));
 	if(ret != 0)
 		return warning("no function supplied");
 	
@@ -125,9 +125,9 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 	return warning("no such function");
 }
 
-backend_t backend_allocator = {
-	"allocator",
-	.supported_api = API_CRWD,
+backend_t allocator_proto = {
+	.class          ="allocator",
+	.supported_api  = API_CRWD,
 	.func_init      = &allocator_init,
 	.func_configure = &allocator_configure,
 	.func_destroy   = &allocator_destroy,

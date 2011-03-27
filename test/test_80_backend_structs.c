@@ -16,7 +16,7 @@ START_TEST(test_backend_structs){
 			{ 0, DATA_HASHT(
 				{ HK(name),        DATA_STRING("structs")                     },
 				{ HK(structure),   DATA_HASHT(
-					{ HK(key1),  DATA_INT32(0)   },
+					{ HK(key1),  DATA_UINT32T(0)   },
 					{ HK(key2),  DATA_STRING("") },
 					hash_end
 				)},
@@ -46,16 +46,16 @@ START_TEST(test_backend_structs){
 	int        i;
 	ssize_t    ret;
 	char       test[100];
-	DT_INT32   test1;
+	DT_UINT32T   test1;
 	DT_STRING  test2;
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_INT32(ACTION_CRWD_CREATE)                          },
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)                          },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                            },
 			{ HK(buffer),     DATA_RAW(test, 100)                                     },
 			
-			{ HK(key1),       DATA_PTR_INT32      (&data_array[i].key1)               },
+			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)               },
 			{ HK(key2),       DATA_PTR_STRING_AUTO( data_array[i].key2)               },
 			hash_end
 		};
@@ -66,20 +66,20 @@ START_TEST(test_backend_structs){
 	// check
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_read[] = {
-			{ HK(action), DATA_INT32(ACTION_CRWD_READ)      },
+			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)      },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])           },
 			{ HK(buffer), DATA_RAW(test, 100)               },
 			
-			{ HK(key1),   DATA_INT32(0)                     },
+			{ HK(key1),   DATA_UINT32T(0)                     },
 			{ HK(key2),   DATA_STRING("")                   },
 			hash_end
 		};
 		ret = backend_query(backend, r_read);
 			fail_unless(ret > 0,                               "read array failed");
 		
-		hash_data_copy(ret, TYPE_INT32,  test1, r_read, HK(key1));
+		hash_data_copy(ret, TYPE_UINT32T,  test1, r_read, HK(key1));
 			fail_unless(ret == 0 && test1 == data_array[i].key1,           "data 1 failed\n");
-		hash_data_copy(ret, TYPE_STRING, test2, r_read, HK(key2));
+		hash_data_copy(ret, TYPE_STRINGT, test2, r_read, HK(key2));
 			fail_unless(ret == 0 && strcmp(test2,data_array[i].key2) == 0, "data 2 failed\n");
 	}
 	backend_destroy(backend);

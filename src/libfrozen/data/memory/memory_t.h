@@ -35,4 +35,6 @@ API ssize_t  memory_grow(memory_t *memory, size_t size, off_t *pointer);
 API ssize_t  memory_shrink(memory_t *memory, size_t size); 
 API ssize_t  memory_translate(memory_t *memory, off_t pointer, size_t size, void **pointer_out, size_t *size_out); 
 
+extern data_proto_t memory_t_proto;
+
 #endif

@@ -4,7 +4,10 @@ START_TEST (test_configs){
 	
 	char   test1[] = "key1 = 'hello1', key2 : \"hello2\", key3 => 'hello3'";
 	hash = configs_string_parse(test1);
-		fail_unless(hash != NULL,  "configs test1 failed");
+		if(hash == NULL){
+			fail("configs test1 failed");
+			return;
+		}
 	
 	fail_unless( (key1 = hash_find(hash, HK(key1))) != NULL, "hash not found existing entry");
 	fail_unless( (key2 = hash_find(hash, HK(key2))) != NULL, "hash not found existing entry");
@@ -17,9 +20,12 @@ START_TEST (test_configs){
 	
 	hash_free(hash);
 	
-	char   test2[] = "key1 => { key3 => 'hello1', key4 => \"hello2\"}, key2 => 'hello3', key5 => {}";
+	char   test2[] = "key1 => { key3 => 'hello1', key4 => \"hello2\"}, key2 => 'hello3'";
 	hash = configs_string_parse(test2);
-		fail_unless(hash != NULL,  "configs test1 failed");
+		if(hash == NULL){
+			fail("configs test1 failed");
+			return;
+		}
 	
 	fail_unless( (key1 = hash_find(hash, HK(key1))) != NULL, "hash not found existing entry");
 	fail_unless( (key2 = hash_find(hash, HK(key2))) != NULL, "hash not found existing entry");

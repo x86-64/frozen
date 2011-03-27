@@ -26,7 +26,7 @@ START_TEST (test_real_store_idx_strings){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_INT32(ACTION_CRWD_WRITE)                           },
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)                           },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                            },
 			{ HK(buffer),     DATA_PTR_STRING(data_array[i], strlen(data_array[i])+1) },
 			{ HK(size),       DATA_SIZET(strlen(data_array[i])+1)                     },
@@ -46,7 +46,7 @@ START_TEST (test_real_store_idx_strings){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ HK(action), DATA_INT32(ACTION_CRWD_READ)      },
+			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)      },
 			{ HK(offset), DATA_OFFT(i)                      },
 			{ HK(buffer), DATA_PTR_STRING(&data_read, 1024) },
 			hash_end

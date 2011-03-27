@@ -173,11 +173,11 @@ static int file_configure(backend_t *backend, hash_t *config){ // {{{
 	file_userdata *userdata    = (file_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_SIZET,  buffer_size, config, HK(buffer_size));
-	hash_data_copy(ret, TYPE_STRING, filename,    config, HK(filename));
+	hash_data_copy(ret, TYPE_STRINGT, filename,    config, HK(filename));
 	if(ret != 0)
 		return error("filename not defined");
 	
-	hash_data_copy(ret, TYPE_STRING, homedir,     global_settings, HK(homedir));
+	hash_data_copy(ret, TYPE_STRINGT, homedir,     global_settings, HK(homedir));
 	if(ret != 0)
 		homedir = ".";
 	
@@ -414,9 +414,9 @@ static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
 	);
 } // }}}
 
-backend_t backend_file = {
-	"file",
-	.supported_api = API_CRWD,
+backend_t file_proto = {
+	.class          = "file",
+	.supported_api  = API_CRWD,
 	.func_init      = &file_init,
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,

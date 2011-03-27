@@ -444,12 +444,12 @@ static ssize_t blocks_count(backend_t *chain, request_t *request){ // {{{
 	return backend_query(data->bk_map, request);  // transfer query to map backend _COUNT
 } // }}}
 
-backend_t chain_blocks = {
-	"blocks",
-	.supported_api = API_CRWD,
-	&blocks_init,
-	&blocks_configure,
-	&blocks_destroy,
+backend_t blocks_proto = {
+	.class          = "blocks",
+	.supported_api  = API_CRWD,
+	.func_init      = &blocks_init,
+	.func_configure = &blocks_configure,
+	.func_destroy   = &blocks_destroy,
 	{{
 		.func_create = &blocks_create,
 		.func_set    = &blocks_setget,

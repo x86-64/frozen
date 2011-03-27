@@ -23,4 +23,31 @@
 #include <uint/uint32_t.h>
 #include <uint/uint64_t.h>
 #include <void/void_t.h>
+#ifdef DATA_C
+data_proto_t * data_protos[] = {
+   [TYPE_BACKENDT] = &backend_t_proto,
+   [TYPE_BINARYT] = &binary_t_proto,
+   [TYPE_BUFFERT] = &buffer_t_proto,
+   [TYPE_HASHT] = &hash_t_proto,
+   [TYPE_IOT] = &io_t_proto,
+   [TYPE_MEMORYT] = &memory_t_proto,
+   [TYPE_RAWT] = &raw_t_proto,
+   [TYPE_STRINGT] = &string_t_proto,
+   [TYPE_STRUCTT] = &struct_t_proto,
+   [TYPE_OFFT] = &off_t_proto,
+   [TYPE_SIZET] = &size_t_proto,
+   [TYPE_UINTT] = &uint_t_proto,
+   [TYPE_INTT] = &int_t_proto,
+   [TYPE_INT8T] = &int8_t_proto,
+   [TYPE_INT16T] = &int16_t_proto,
+   [TYPE_INT32T] = &int32_t_proto,
+   [TYPE_INT64T] = &int64_t_proto,
+   [TYPE_UINT8T] = &uint8_t_proto,
+   [TYPE_UINT16T] = &uint16_t_proto,
+   [TYPE_UINT32T] = &uint32_t_proto,
+   [TYPE_UINT64T] = &uint64_t_proto,
+   [TYPE_VOIDT] = &void_t_proto,
+};
+size_t data_protos_size = (sizeof(data_protos)/sizeof(data_protos[0]));
+#endif
 #endif

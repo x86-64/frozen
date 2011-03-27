@@ -1,4 +1,6 @@
+#define BACKEND_C
 #include <libfrozen.h>
+#include <backend_selected.h>
 
 /*
 backend_t * chain_new(char *name){
@@ -81,7 +83,7 @@ static ssize_t backend_iter_chain_init(hash_t *config, void *p_backend, void *p_
 	
 	chain_config = (hash_t *) data_value_ptr(hash_item_data(config));
 	
-	hash_data_copy(ret, TYPE_STRING, chain_name, chain_config, HK(name));
+	hash_data_copy(ret, TYPE_STRINGT, chain_name, chain_config, HK(name));
 	if(ret != 0) return ITER_BREAK;
 	
 	if( (chain = chain_new(chain_name)) == NULL)
@@ -131,7 +133,7 @@ backend_t *  backend_new      (hash_t *config){
 	backend_t  *backend = NULL;
 	
 	hash_data_copy(ret, TYPE_HASHT,  chains, config, HK(chains)); if(ret != 0) return NULL;
-	hash_data_copy(ret, TYPE_STRING, name,   config, HK(name));
+	hash_data_copy(ret, TYPE_STRINGT, name,   config, HK(name));
 	
 	// register new one
 	if( (backend = malloc(sizeof(backend_t))) == NULL)
