@@ -6,7 +6,7 @@ enum { TYPE_HASHT = 17 };
 #define DATA_PTR_HASHT(_hash)       { TYPE_HASHT, (void *)_hash, 0 }
 #define DATA_PTR_HASHT_FREE(_hash)  { TYPE_HASHT, (void *)_hash, 1 }
 #define DT_HASHT                    hash_t *
-#define GET_TYPE_HASHT(value)       (hash_t *)value->data_ptr
+#define GET_TYPE_HASHT(value)       ((hash_t *)data_value_ptr(value))
 
 extern data_proto_t hash_t_proto;
 

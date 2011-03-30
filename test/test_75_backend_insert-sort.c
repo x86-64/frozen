@@ -4,24 +4,21 @@ START_TEST (test_backend_insert_sort){
 	backend_t      *backend;
 	
 	hash_t  settings[] = {
-		{ HK(backends), DATA_HASHT(
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("file")                         },
-				{ HK(filename),    DATA_STRING("data_backend_insert_sort.dat") },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("list")                     },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("insert-sort")              },
-				{ HK(engine),      DATA_STRING("binsearch")                },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+                { 0, DATA_HASHT(
+                        { HK(class),        DATA_STRING("file")                         },
+                        { HK(filename),     DATA_STRING("data_backend_insert_sort.dat") },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),        DATA_STRING("list")                         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),        DATA_STRING("insert-sort")                  },
+                        { HK(engine),       DATA_STRING("binsearch")                    },
+                        hash_end
+                )},
+                hash_end
 	};
 	
 	if( (backend = backend_new(settings)) == NULL){

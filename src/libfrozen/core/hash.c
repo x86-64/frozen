@@ -340,8 +340,9 @@ error:
 } // }}}
 
 inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
+inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
 inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
-inline hash_t *           hash_item_next               (hash_t *hash){ return (hash->key == hash_ptr_end) ? NULL : hash + 1; }
+inline hash_t *           hash_item_next               (hash_t *hash){ return ((hash+1)->key == hash_ptr_end) ? NULL : hash + 1; }
 inline void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx){
 	hash_t *temp;
 	if(data){
@@ -364,8 +365,10 @@ void hash_dump(hash_t *hash){ // {{{
 	printf("hash: %p\n", hash);
 start:
 	while(element->key != hash_ptr_end){
-		if(element->key == hash_ptr_null)
+		if(element->key == hash_ptr_null){
+			printf(" - hash_null\n");
 			goto next_item;
+		}
 		
 		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.data_ptr);
 		for(k=0; k<element->data.data_size; k++){

@@ -1,109 +1,85 @@
 START_TEST (test_backend_mphf){
 	hash_t config[] = {
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_g")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphf_g.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                  },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_v")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphf_v.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                  },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphf_e")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphf_e.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache-append")           },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),   DATA_STRING("backend_mphf")                              },
-			{ HK(backends), DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                  },
-					{ HK(filename),   DATA_STRING("data_backend_mphf.dat") },
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                 },
-					hash_end
-				)},
-                                { 0, DATA_HASHT(
-                                        { HK(name),       DATA_STRING("allocator")             },
-                                        hash_end
-                                )},
-                                { 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("incapsulate")           },
-					{ HK(multiply),   DATA_OFFT(30)                        },
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("structs")               },
-					{ HK(size),       DATA_STRING("size")                  },
-					{ HK(structure),  DATA_HASHT(
-						{ HK(keyid), DATA_UINT32T(0)                     },
-						{ HK(key),   DATA_STRING("")                   },
-                                                hash_end
-					)},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),        DATA_STRING("mphf")                 },
-					{ HK(type),        DATA_STRING("chm_imp")              },
-					{ HK(backend_g),   DATA_STRING("backend_mphf_g")       },
-					{ HK(backend_e),   DATA_STRING("backend_mphf_e")       },
-					{ HK(backend_v),   DATA_STRING("backend_mphf_v")       },
-					{ HK(nelements),   DATA_UINT64T(100)                     },
-					{ HK(value_bits),  DATA_UINT32T(32)                      },
-                                        { HK(keyid),       DATA_STRING("keyid")                },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphf_g.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphf_g")                },
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                hash_null,
+                
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphf_v.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphf_v")                },
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                hash_null,
+                
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphf_e.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphf_e")                },
+                        { HK(class),       DATA_STRING("cache-append")                  },
+                        hash_end
+                )},
+                hash_null,
+		
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphf.dat")         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("allocator")                     },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("incapsulate")                   },
+                        { HK(multiply),    DATA_OFFT(30)                                },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("structs")                       },
+                        { HK(size),        DATA_STRING("size")                          },
+                        { HK(structure),   DATA_HASHT(
+                                { HK(keyid), DATA_UINT32T(0)                            },
+                                { HK(key),   DATA_STRING("")                            },
+                                hash_end
+                        )},
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),         DATA_STRING("backend_mphf")                 },
+                        { HK(class),        DATA_STRING("mphf")                         },
+                        { HK(type),         DATA_STRING("chm_imp")                      },
+                        { HK(backend_g),    DATA_STRING("backend_mphf_g")               },
+                        { HK(backend_e),    DATA_STRING("backend_mphf_e")               },
+                        { HK(backend_v),    DATA_STRING("backend_mphf_v")               },
+                        { HK(nelements),    DATA_UINT64T(100)                           },
+                        { HK(value_bits),   DATA_UINT32T(32)                            },
+                        { HK(keyid),        DATA_STRING("keyid")                        },
+                        hash_end
+                )},
 		hash_end
 	};
 	
-	
-	backend_bulk_new(config);
-	
-	backend_t *b_dat = backend_find("backend_mphf");
-	backend_t *b_g = backend_find("backend_mphf_g");
-	backend_t *b_v = backend_find("backend_mphf_v");
-	backend_t *b_e = backend_find("backend_mphf_e");
+	backend_t *b_dat = backend_new(config);
 	
 	char  *data_array[] = {
 		"http://google.ru/",
@@ -150,9 +126,6 @@ START_TEST (test_backend_mphf){
 	}
 	
 	backend_destroy(b_dat);
-	backend_destroy(b_g);
-	backend_destroy(b_v);
-	backend_destroy(b_e);
 }
 END_TEST
 REGISTER_TEST(core, test_backend_mphf)
@@ -210,104 +183,86 @@ void bench_query(bench_t *bench){
 #define NTESTS 10000
 START_TEST (test_backend_mphf_speed){
 	hash_t config[] = {
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphfs_g")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphfs_g.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                  },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphfs_v")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphfs_v.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                  },
-					hash_end
-				)},
-	        		hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),    DATA_STRING("backend_mphfs_e")                            },
-			{ HK(backends),  DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                   },
-					{ HK(filename),   DATA_STRING("data_backend_mphfs_e.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache-append")            },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(name),   DATA_STRING("backend_mphf_speed")                        },
-			{ HK(backends), DATA_HASHT(
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("file")                  },
-					{ HK(filename),   DATA_STRING("data_backend_mphfs.dat")},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("cache")                 },
-					hash_end
-				)},
-                                { 0, DATA_HASHT(
-                                        { HK(name),       DATA_STRING("allocator")             },
-                                        hash_end
-                                )},
-                                { 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("incapsulate")           },
-					{ HK(multiply),   DATA_OFFT(30)                        },
-                                        hash_end
-				)},
-                                { 0, DATA_HASHT(
-					{ HK(name),       DATA_STRING("structs")               },
-					{ HK(size),       DATA_STRING("size")                  },
-					{ HK(structure),  DATA_HASHT(
-						{ HK(key), DATA_STRING("")                     },
-						hash_end
-					)},
-					hash_end
-				)},
-				{ 0, DATA_HASHT(
-					{ HK(name),        DATA_STRING("mphf")                 },
-					{ HK(type),        DATA_STRING("chm_imp")              },
-					{ HK(backend_g),   DATA_STRING("backend_mphfs_g")      },
-					{ HK(backend_e),   DATA_STRING("backend_mphfs_e")      },
-					{ HK(backend_v),   DATA_STRING("backend_mphfs_v")      },
-					{ HK(nelements),   DATA_UINT64T(NTESTS)                  },
-					{ HK(value_bits),  DATA_UINT32T(32)                      },
-					hash_end
-				)},
-				hash_end
-			)},
-			hash_end
-		)},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphs_g.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphs_g")                },
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                hash_null,
+                
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphs_v.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphs_v")                },
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                hash_null,
+                
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphs_e.dat")       },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),        DATA_STRING("backend_mphs_e")                },
+                        { HK(class),       DATA_STRING("cache-append")                  },
+                        hash_end
+                )},
+                hash_null,
+		
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_mphs.dat")         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("cache")                         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("allocator")                     },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("incapsulate")                   },
+                        { HK(multiply),    DATA_OFFT(30)                                },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("structs")                       },
+                        { HK(size),        DATA_STRING("size")                          },
+                        { HK(structure),   DATA_HASHT(
+                                { HK(keyid), DATA_UINT32T(0)                            },
+                                { HK(key),   DATA_STRING("")                            },
+                                hash_end
+                        )},
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(name),         DATA_STRING("backend_mphs")                 },
+                        { HK(class),        DATA_STRING("mphf")                         },
+                        { HK(type),         DATA_STRING("chm_imp")                      },
+                        { HK(backend_g),    DATA_STRING("backend_mphs_g")               },
+                        { HK(backend_e),    DATA_STRING("backend_mphs_e")               },
+                        { HK(backend_v),    DATA_STRING("backend_mphs_v")               },
+                        { HK(nelements),    DATA_UINT64T(NTESTS)                        },
+                        { HK(value_bits),   DATA_UINT32T(32)                            },
+                        { HK(keyid),        DATA_STRING("keyid")                        },
+                        hash_end
+                )},
 		hash_end
 	};
 	
-	backend_bulk_new(config);
-	
-	backend_t *b_dat = backend_find("backend_mphf_speed");
+	backend_t *b_dat = backend_new(config);
 		fail_unless(b_dat != NULL, "backend backend_mphf backend creating failed");
 
 	// write array to file

@@ -2,14 +2,11 @@
 START_TEST (test_real_store_idx_strings){
 	ssize_t  ret;
 	
-	hash_t     *c_idx = configs_file_parse("test_99_real_idx_str.conf");
+	hash_t    *c_idx = configs_file_parse("test_99_real_idx_str.conf");
 		fail_unless(c_idx != NULL, "backend real_store_idx_str config parse failed");
-	ret = backend_bulk_new(c_idx);
-		fail_unless(ret == 0,      "backend real_store_idx_str backends create failed");
+	backend_t *b_idx = backend_new(c_idx);
+		fail_unless(b_idx != NULL,      "backend real_store_idx_str backends create failed");
 	hash_free(c_idx);
-	
-	backend_t *b_idx = backend_find("be_file");
-	backend_t *b_dat = backend_find("be_file_dat");
 	
 	off_t  data_ptrs[6];
 	char  *data_array[] = {
@@ -61,7 +58,6 @@ START_TEST (test_real_store_idx_strings){
 	}
 	
 	backend_destroy(b_idx);
-	backend_destroy(b_dat);
 }
 END_TEST
 REGISTER_TEST(core, test_real_store_idx_strings)

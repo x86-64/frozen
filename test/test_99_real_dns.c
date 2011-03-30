@@ -16,14 +16,11 @@ START_TEST (test_real_dns){
 	
 	ssize_t  ret;
 	
-	hash_t     *c_idx = configs_file_parse("test_99_real_dns.conf");
+	hash_t    *c_idx = configs_file_parse("test_99_real_dns.conf");
 		fail_unless(c_idx != NULL, "backend real_dns config parse failed");
-	ret = backend_bulk_new(c_idx);
-		fail_unless(ret == 0,      "backend real_dns backends create failed");
+	backend_t *b_idx = backend_new(c_idx);
+		fail_unless(b_idx != NULL, "backend real_dns backends create failed");
 	hash_free(c_idx);
-	
-	backend_t *b_idx = backend_find("real_dns");
-	backend_t *b_dat = backend_find("real_dns_domains");
 	
 	off_t  data_ptr;
 	
@@ -32,10 +29,10 @@ START_TEST (test_real_dns){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(struct dns_entry); i++){
 		request_t r_write[] = {
-			{ HK(action),  DATA_UINT32T (ACTION_CRWD_WRITE)                           },
-			{ HK(offset_out), DATA_PTR_OFFT   (&data_ptr)                           },
+			{ HK(action),     DATA_UINT32T  (ACTION_CRWD_WRITE)                       },
+			{ HK(offset_out), DATA_PTR_OFFT (&data_ptr)                               },
 			
-			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)            },
+			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)              },
 			{ HK(dns_ip),     DATA_UINT32T  (data_array[i].ip)                        },
 			{ HK(dns_tstamp), DATA_UINT32T  (data_array[i].timestamp)                 },
 			hash_end
@@ -70,7 +67,6 @@ START_TEST (test_real_dns){
 	}
 	*/
 	backend_destroy(b_idx);
-	backend_destroy(b_dat);
 }
 END_TEST
 REGISTER_TEST(core, test_real_dns)

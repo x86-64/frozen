@@ -3,29 +3,26 @@ START_TEST(test_backend_ipc){
 	backend_t  *backend;
 	
 	hash_t  settings[] = {
-		{ HK(backends), DATA_HASHT(
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("file")                        },
-				{ HK(filename),    DATA_STRING("data_backend_ipc.dat")        },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("ipc")                         },
-				{ HK(type),        DATA_STRING("shmem")                       },
-				{ HK(role),        DATA_STRING("server")                      },
-				{ HK(key),         DATA_UINT32T(1000)                           },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("ipc")                         },
-				{ HK(type),        DATA_STRING("shmem")                       },
-				{ HK(role),        DATA_STRING("client")                      },
-				{ HK(key),         DATA_UINT32T(1000)                           },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                        },
+                        { HK(filename),    DATA_STRING("data_backend_ipc.dat")        },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("ipc")                         },
+                        { HK(type),        DATA_STRING("shmem")                       },
+                        { HK(role),        DATA_STRING("server")                      },
+                        { HK(key),         DATA_UINT32T(1000)                         },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("ipc")                         },
+                        { HK(type),        DATA_STRING("shmem")                       },
+                        { HK(role),        DATA_STRING("client")                      },
+                        { HK(key),         DATA_UINT32T(1000)                         },
+                        hash_end
+                )},
+                hash_end
 	};
 	
 	backend = backend_new(settings);
@@ -39,8 +36,8 @@ START_TEST(test_backend_ipc){
 	// create new
 	request_t  r_create[] = {
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
-		{ HK(size),       DATA_SIZET(sizeof(str))        },
-		{ HK(buffer),     DATA_RAW(str, sizeof(str))     },
+		{ HK(size),       DATA_SIZET(sizeof(str))          },
+		{ HK(buffer),     DATA_RAW(str, sizeof(str))       },
 		hash_end
 	};
 	ret = backend_query(backend, r_create);

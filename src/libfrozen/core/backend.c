@@ -2,6 +2,9 @@
 #include <libfrozen.h>
 #include <backend_selected.h>
 
+#define LIST_FREE_ITEM (void *)-1
+#define LIST_END       (void *)NULL
+
 /*
 backend_t * chain_new(char *name){
 	int      ret;
@@ -123,36 +126,120 @@ static ssize_t backend_iter_backend_new(hash_t *config, void *null1, void *null2
 	return ITER_CONTINUE;
 }
 */
-
-backend_t *  backend_new      (hash_t *config){
-	return NULL;
-	/*
-	ssize_t     ret;
-	DT_STRING   name = NULL;
-	DT_HASHT    chains;
-	backend_t  *backend = NULL;
+static backend_t * backend_find_class (char *class){
+	uintmax_t i;
 	
-	hash_data_copy(ret, TYPE_HASHT,  chains, config, HK(chains)); if(ret != 0) return NULL;
-	hash_data_copy(ret, TYPE_STRINGT, name,   config, HK(name));
-	
-	// register new one
-	if( (backend = malloc(sizeof(backend_t))) == NULL)
-		return NULL;
-	
-	backend->chain = NULL;
-	backend->refs  = 1;
-	backend->name  = name ? strdup(name) : NULL;
-	
-	ret = hash_iter(chains, &backend_iter_chain_init, backend, &backend->chain);
-	if(ret == ITER_BREAK){
-		backend_destroy(backend);
-		return NULL;
+	for(i=0; i<backend_protos_size; i++){
+		if(strcmp(backend_protos[i]->class, class) == 0)
+			return backend_protos[i];
 	}
 	
-	list_push(&backends, backend);
+	return NULL;
+}
+
+static void        backend_list_add(backend_t ***p_list, backend_t *item){
+	backend_t   **list;
+	backend_t    *curr;
+	size_t        lsz;
 	
-	return backend;
-	*/
+	list = *p_list;
+	lsz  = 0;
+	while( (curr = list[lsz]) != LIST_END){
+		if(curr == LIST_FREE_ITEM)
+			goto found;
+		
+		lsz++;
+	}
+	list = *p_list = realloc(list, sizeof(backend_t *) * (lsz + 2));
+	list[lsz + 1] = LIST_END;
+found:
+	list[lsz + 0] = item;
+}
+
+static void        backend_connect(backend_t *parent, backend_t *child){
+	pthread_mutex_lock(&child->mutex);
+	
+		backend_list_add(&child->parents, parent);
+		child->refs++;
+	
+	pthread_mutex_unlock(&child->mutex);
+	
+	if(parent == LIST_FREE_ITEM)
+		return;
+	
+	pthread_mutex_lock(&parent->mutex);
+	
+		backend_list_add(&parent->childs, child);
+		parent->refs++;
+	
+	pthread_mutex_unlock(&parent->mutex);
+}
+
+backend_t *  backend_new      (hash_t *config){
+	ssize_t                ret;
+	backend_t             *backend_curr, *backend_prev, *class;
+	hash_t                *backend_cfg;
+	data_t                *backend_cfg_data;
+	char                  *backend_name;
+	char                  *backend_class;
+	
+	backend_prev = LIST_FREE_ITEM;
+	do{
+		if(hash_item_is_null(config)){
+			backend_prev = LIST_FREE_ITEM;
+			continue;
+		}
+		
+		backend_cfg_data = hash_item_data(config);
+		
+		if(data_value_type(backend_cfg_data) != TYPE_HASHT)
+			goto type_error;
+		
+		backend_cfg = GET_TYPE_HASHT(backend_cfg_data);
+		
+		hash_data_copy(ret, TYPE_STRINGT, backend_name,  backend_cfg, HK(name));  if(ret != 0) backend_name  = NULL;
+		hash_data_copy(ret, TYPE_STRINGT, backend_class, backend_cfg, HK(class)); if(ret != 0) backend_class = NULL;
+		
+		if(backend_class == NULL && backend_name == NULL)
+			goto error;
+		
+		if(backend_class == NULL){
+			if( (backend_curr = backend_find(backend_name)) == NULL)
+				goto find_error;
+		}else{
+			if( (backend_curr = malloc(sizeof(backend_t))) == NULL)
+				goto error;
+			if( (class = backend_find_class(backend_class)) == NULL)
+				goto error;
+			
+			memcpy(backend_curr, class, sizeof(backend_t));
+			
+			if( (backend_curr->parents = malloc(sizeof(backend_t *) * (1 + 1))) == NULL)
+				goto error;
+			if( (backend_curr->childs  = malloc(sizeof(backend_t *) * (1 + 1))) == NULL)
+				goto error;
+			
+			pthread_mutex_init(&backend_curr->mutex, NULL);
+			backend_curr->name       = backend_name ? strdup(backend_name) : NULL;
+			backend_curr->refs       = 0;
+			backend_curr->userdata   = NULL;
+			
+			backend_curr->parents[0] = LIST_FREE_ITEM;
+			backend_curr->parents[1] = LIST_END;
+			backend_curr->childs[0]  = LIST_FREE_ITEM;
+			backend_curr->childs[1]  = LIST_END;
+			
+		}
+		backend_connect(backend_prev, backend_curr);
+		
+		backend_prev = backend_curr;
+	}while( (config = hash_item_next(config)) != NULL );
+	
+	return backend_prev;
+error:
+find_error:
+type_error:
+	return NULL;
 }
 
 backend_t *  backend_find(char *name){

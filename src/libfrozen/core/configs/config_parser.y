@@ -55,9 +55,13 @@ hash_items :
 	;
 
 hash_item : hash_name hash_value {
-	$$.key = $1;
-	data_assign_data_t(&$$.data, &$2);
-};
+		$$.key = $1;
+		data_assign_data_t(&$$.data, &$2);
+	}
+	| TNULL {
+		$$.key = hash_ptr_null;
+	}
+;
 
 hash_name :
           /* empty */  { $$ = 0; }

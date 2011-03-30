@@ -1,6 +1,8 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
+#include <pthread.h>
+
 enum request_actions {
 	ACTION_CRWD_CREATE = 1,
 	ACTION_CRWD_READ = 2,
@@ -26,12 +28,10 @@ typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
 struct backend_t {
 	char                  *name;
 	char                  *class;
-	backend_t             *childs;
-	backend_t             *lnext;
-	uintmax_t              refs;
-	api_types              supported_api;
-	void *                 userdata;
+	uintmax_t              refs;        // 1 - on creation; 2,3 and more - on links to childs or _acquire
+	pthread_mutex_t        mutex;
 	
+	api_types              supported_api;
 	f_init                 func_init;
 	f_configure            func_configure;
 	f_destroy              func_destroy;
@@ -46,6 +46,10 @@ struct backend_t {
 			f_crwd  func_custom;
 		} backend_type_crwd;
 	};
+	void *                 userdata;
+	
+	backend_t            **parents;
+	backend_t            **childs;
 };
 
 API backend_t *     backend_new             (hash_t *config);

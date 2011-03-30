@@ -3,19 +3,16 @@ START_TEST (test_backends_two_backends){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ HK(backends), DATA_HASHT(
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("file")                     },
-				{ HK(filename),    DATA_STRING("data_backend_file.dat")    },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("null-proxy")               },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+                { 0, DATA_HASHT(
+                        { HK(class),        DATA_STRING("file")                     },
+                        { HK(filename),     DATA_STRING("data_backend_file.dat")    },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),        DATA_STRING("null")                     },
+                        hash_end
+                )},
+                hash_end
 	};
 	
 	/* create backend */

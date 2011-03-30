@@ -13,3 +13,6 @@ config.*
 libtool
 callgrind.out
 *.c_
+backend_selected.h
+data_selected.h
+hashkeys*

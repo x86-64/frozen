@@ -3,20 +3,17 @@ START_TEST (test_backend_cache_app){
 	backend_t *backend;
 	
 	hash_t  settings[] = {
-		{ HK(backends), DATA_HASHT(
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("file")                          },
-				{ HK(filename),    DATA_STRING("data_backend_cache_app.dat")    },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("cache-append")                  },
-                                { HK(size),        DATA_SIZET(100)                              },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                          },
+                        { HK(filename),    DATA_STRING("data_backend_cache_app.dat")    },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("cache-append")                  },
+                        { HK(size),        DATA_SIZET(100)                              },
+                        hash_end
+                )},
+                hash_end
 	};
 	
 	/* create backend */

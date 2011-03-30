@@ -7,25 +7,22 @@ START_TEST(test_backend_structs){
 	backend_t  *backend;
 	
 	hash_t  settings[] = {
-		{ HK(backends), DATA_HASHT(
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("file")                        },
-				{ HK(filename),    DATA_STRING("data_backend_structs.dat")    },
-				hash_end
-			)},
-			{ 0, DATA_HASHT(
-				{ HK(name),        DATA_STRING("structs")                     },
-				{ HK(structure),   DATA_HASHT(
-					{ HK(key1),  DATA_UINT32T(0)   },
-					{ HK(key2),  DATA_STRING("") },
-					hash_end
-				)},
-				{ HK(size),        DATA_STRING("size")                        },
-				hash_end
-			)},
-			hash_end
-		)},
-		hash_end
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("file")                        },
+                        { HK(filename),    DATA_STRING("data_backend_structs.dat")    },
+                        hash_end
+                )},
+                { 0, DATA_HASHT(
+                        { HK(class),       DATA_STRING("structs")                     },
+                        { HK(structure),   DATA_HASHT(
+                                { HK(key1),  DATA_UINT32T(0)   },
+                                { HK(key2),  DATA_STRING("")   },
+                                hash_end
+                        )},
+                        { HK(size),        DATA_STRING("size")                        },
+                        hash_end
+                )},
+                hash_end
 	};
 	
 	/* create backend */
