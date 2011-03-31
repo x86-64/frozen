@@ -29,7 +29,7 @@ struct backend_t {
 	char                  *name;
 	char                  *class;
 	uintmax_t              refs;        // 1 - on creation; 2,3 and more - on links to childs or _acquire
-	pthread_mutex_t        mutex;
+	pthread_rwlock_t       rwlock;
 	
 	api_types              supported_api;
 	f_init                 func_init;
@@ -67,6 +67,7 @@ API ssize_t         backend_stdcall_create  (backend_t *backend, off_t *offset, 
 API ssize_t         backend_stdcall_read    (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
 API ssize_t         backend_stdcall_write   (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
 API ssize_t         backend_stdcall_fill    (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size);
+API ssize_t         backend_stdcall_move    (backend_t *backend, off_t  from,   off_t to,     size_t size);
 API ssize_t         backend_stdcall_delete  (backend_t *backend, off_t  offset, size_t size);
 API ssize_t         backend_stdcall_count   (backend_t *backend, size_t *count);
 

@@ -18,7 +18,12 @@ static ssize_t test_rewrite(char *rules, request_t *request){
 	};
 	backend_t  *backend = backend_new(config);
 	
-	ret = backend_query(backend, request);
+	request_t new_request[] = {
+                { HK(ret), DATA_PTR_SIZET(&ret) },
+                hash_next(request)
+        };
+
+        backend_query(backend, new_request);
 	backend_destroy(backend);
 	return ret;
 }
@@ -51,7 +56,7 @@ START_TEST (test_backend_rewrite){
 	// }}}
 	// unset key {{{
 	char rules_unset_key[] =
-		"request['size'] = (void)''; "
+		"request['size'] = (void_t)''; "
 		"ret = pass(request);";
 	
         ret = test_rewrite(rules_unset_key, req_create);
@@ -87,7 +92,7 @@ START_TEST (test_backend_rewrite){
 	// }}}
 	// do arith of key {{{
 	char rules_arith_key[] =
-		"data_arith((string)'+', request['size'], (size_t)'30');"
+		"data_arith((string_t)'+', request['size'], (size_t)'30');"
 		"ret = pass(request);";
 	ret = test_diff_rewrite(rules_arith_key, req_create);
 		fail_unless(ret == 40, "backend rewrite rules rules_arith_key failed\n");
@@ -110,10 +115,10 @@ START_TEST (test_backend_rewrite){
 		"subr['action']  = create; "
 		"subr['size']    = (size_t)'35'; "
 		
-		"subr['offset_out'] = data_alloca((string)'size_t', (size_t)'8'); "
+		"subr['offset_out'] = data_alloca((string_t)'size_t', (size_t)'8'); "
 		
-		"backend((string)'rewrite_be_test', subr); " // returns 0
-		"backend((string)'rewrite_be_test', subr); " // returns 35
+		"backend((string_t)'rewrite_be_test', subr); " // returns 0
+		"backend((string_t)'rewrite_be_test', subr); " // returns 35
 		
 		"request['size'] = subr['offset_out']; "
 		

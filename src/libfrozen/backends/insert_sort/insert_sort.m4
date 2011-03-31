@@ -103,12 +103,11 @@ static ssize_t sorts_set   (backend_t *backend, request_t *request){
 	}
 	*/
 	request_t req_insert[] = {
-		{ HK(offset), *key_out                    },
+		{ HK(offset), *key_out                      },
 		{ HK(insert), DATA_UINT32T(1)               },
 		hash_next(request)
 	};
-	ret = backend_pass(backend, req_insert);
-	if(ret <= 0)
+	if( (ret = backend_pass(backend, req_insert)) < 0)
 		return ret;
 	
 	/*
@@ -118,7 +117,7 @@ static ssize_t sorts_set   (backend_t *backend, request_t *request){
 	}
 	*/
 	// next("unlock");
-	return ret;
+	return -EEXIST;
 }
 
 static ssize_t sorts_custom(backend_t *backend, request_t *request){

@@ -1,6 +1,6 @@
 
 ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1, data_ctx_t *buffer1_ctx, data_t *key_out, data_ctx_t *key_out_ctx){
-	ssize_t         ret;
+	ssize_t         ret, q_ret;
 	off_t           range_start, range_end, current;
 	data_t          d_current = DATA_PTR_OFFT(&current);
 	
@@ -8,11 +8,12 @@ ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1,
 	
 	hash_t  req_count[] = {
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
-		{ HK(buffer), DATA_PTR_OFFT(&range_end)     },
+		{ HK(buffer), DATA_PTR_OFFT(&range_end)       },
+		{ HK(ret),    DATA_PTR_SIZET(&q_ret)          },
 		hash_end
 	};
 	ret = backend_pass(data->backend, req_count);
-	if(ret <= 0 || range_start == range_end){
+	if(ret < 0 || q_ret < 0 || range_start == range_end){
 		current = range_end;
 		
 		ret = KEY_NOT_FOUND;

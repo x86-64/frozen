@@ -25,16 +25,18 @@ static int cache_destroy(backend_t *backend){ // {{{
 	return 0;
 } // }}}
 static int cache_configure(backend_t *backend, hash_t *config){ // {{{
-	DT_UINT64T         file_size;
-	cache_userdata  *userdata   = (cache_userdata *)backend->userdata;
+	size_t                 ret;
+	uint64_t               file_size;
+	cache_userdata        *userdata   = (cache_userdata *)backend->userdata;
 	
 	/* get file size */
 	request_t r_count[] = {
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINT64T(&file_size)      },
+		{ HK(ret),    DATA_PTR_SIZET(&ret)              },
 		hash_end
 	};
-	if(backend_pass(backend, r_count) < 0)
+	if(backend_pass(backend, r_count) < 0 || ret < 0)
 		return error("count failed");
 	
 	if(__MAX(size_t) < file_size)

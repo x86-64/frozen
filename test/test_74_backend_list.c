@@ -1,7 +1,4 @@
-
 START_TEST (test_backend_list){
-	backend_t *backend;
-	
 	hash_t  settings[] = {
                 { 0, DATA_HASHT(
                         { HK(class),        DATA_STRING("file")                     },
@@ -15,7 +12,7 @@ START_TEST (test_backend_list){
                 hash_end
 	};
 		
-	backend = backend_new(settings);
+	backend_t *backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
 	ssize_t       ssize;
@@ -28,25 +25,13 @@ START_TEST (test_backend_list){
 	char          temp[1024];
 	
 	// create new
-	hash_t  hash_create[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE) },
-		{ HK(size),    DATA_SIZET(10)                 },
-		{ HK(offset_out), DATA_PTR_OFFT(&key_off)     },
-		hash_end
-	};
-	if( (ssize = backend_query(backend, hash_create)) < 0 )
-		fail("backend in_list create failed");	
+	ssize = backend_stdcall_create(backend, &key_off, 10);
+                fail_unless(ssize >= 0, "backend in_list create failed");	
 	
 	// write keys
-	hash_t  hash_write[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE)  },
-		{ HK(offset), DATA_OFFT(key_off)             },
-		{ HK(size),   DATA_SIZET(10)                 },
-		{ HK(buffer), DATA_RAW(key_data, 10)         },
-		hash_end
-	};
-	ssize = backend_query(backend, hash_write);
-		fail_unless(ssize == 10, "backend in_list write 1 failed");
+	ssize = backend_stdcall_write(backend, key_off, key_data, 10);
+		printf("ssize FILE: %d", (int)ssize);
+                fail_unless(ssize == 10, "backend in_list write 1 failed");
 	
 	// insert key
 	hash_t  hash_insert[] = {
@@ -55,9 +40,10 @@ START_TEST (test_backend_list){
 		{ HK(insert), DATA_UINT32T(1)                 },
 		{ HK(size),   DATA_SIZET(1)                 },
 		{ HK(buffer), DATA_RAW(key_insert, 1)       },
+		{ HK(ret),    DATA_PTR_SIZET(&ssize)           },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_insert);
+	backend_query(backend, hash_insert);
 		fail_unless(ssize == 1,  "backend in_list write 2 failed");
 	
 	// check
@@ -67,9 +53,10 @@ START_TEST (test_backend_list){
 		{ HK(offset), DATA_OFFT(key_off)            },
 		{ HK(size),   DATA_SIZET(11)                },
 		{ HK(buffer), DATA_RAW(temp, 1024)          },
+		{ HK(ret),    DATA_PTR_SIZET(&ssize)           },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_read);
+	backend_query(backend, hash_read);
 		fail_unless(ssize == 11,                                "backend in_list read 1 failed");
 		fail_unless(
 			memcmp(temp, key_inserted, ssize) == 0,
@@ -81,9 +68,10 @@ START_TEST (test_backend_list){
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_DELETE)   },
 		{ HK(offset),    DATA_OFFT(key_off + 3)           },
 		{ HK(size),   DATA_SIZET(1)                    },
+		{ HK(ret),    DATA_PTR_SIZET(&ssize)           },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_delete);
+	backend_query(backend, hash_delete);
 		fail_unless(ssize == 0,  "backend in_list delete failed");
 	
 	// check
@@ -92,9 +80,10 @@ START_TEST (test_backend_list){
 		{ HK(offset), DATA_OFFT(key_off)               },
 		{ HK(size),   DATA_SIZET(10)                   },
 		{ HK(buffer), DATA_RAW(temp, 1024)             },
+		{ HK(ret),    DATA_PTR_SIZET(&ssize)           },
 		hash_end
 	};
-	ssize = backend_query(backend, hash_read2);
+	backend_query(backend, hash_read2);
 		fail_unless(ssize == 10,                                "backend in_list read 1 failed");
 		fail_unless(
 			memcmp(temp, key_delete, 10) == 0,

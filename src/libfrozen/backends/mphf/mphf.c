@@ -81,8 +81,8 @@ error:
 } // }}}
 static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	ssize_t   ret;
-	DT_OFFT   i;
-	DT_OFFT   count = 0;
+	off_t     i;
+	off_t     count = 0;
 	char     *buffer;
 	data_t   *key;
 	uint64_t  keyid;
@@ -91,10 +91,11 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	// count elements
 	request_t r_count[] = {
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
-		{ HK(buffer), DATA_PTR_OFFT(&count)         },
+		{ HK(buffer), DATA_PTR_OFFT(&count)           },
+		{ HK(ret),    DATA_PTR_SIZET(&ret)            },
 		hash_end
 	};
-	if(backend_pass(userdata->backend_data, r_count) < 0)
+	if(backend_pass(userdata->backend_data, r_count) < 0 || ret < 0)
 		return 0;
 	
 	// prepare buffer
@@ -111,15 +112,16 @@ redo:
 	// process items
 	for(i=0; i<count; i++){
 		request_t r_read[] = {
-			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)            },
+			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
 			{ userdata->keyid,     DATA_VOID                               },
 			{ userdata->key_from,  DATA_VOID                               },
 			{ userdata->key_to,    DATA_OFFT(i)                            },
 			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
 			{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
+			{ HK(ret),             DATA_PTR_SIZET(&ret)                    },
 			hash_end
 		};
-		if( (ret = backend_pass(userdata->backend_data, r_read)) < 0){
+		if( backend_pass(userdata->backend_data, r_read) < 0 || ret < 0){
 			ret = error("failed call\n");
 			break;
 		}
@@ -238,23 +240,24 @@ static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)
-		return backend_pass(backend, request);
+		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	
 	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
 	
 	// get new key_out
 	request_t r_next[] = {
 		{ userdata->keyid,      DATA_PTR_UINT64T(&keyid)  },
-		{ userdata->offset_out, DATA_PTR_OFFT(&key_out) },
+		{ userdata->offset_out, DATA_PTR_OFFT(&key_out)   },
+		{ HK(ret),              DATA_PTR_SIZET(&ret)      },
 		hash_next(request)
 	};
-	if( (ret = backend_pass(backend, r_next)) < 0)
+	if( backend_pass(backend, r_next) < 0 || ret < 0)
 		goto error;
 	
 	// insert key
 	if( (ret = mphf_insert(userdata, keyid, key_out)) == -EBADF)
 		ret = mphf_rebuild(userdata);
-
+	
 error:
 	return ret;
 } // }}}
@@ -266,7 +269,7 @@ static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)
-		return backend_pass(backend, request);
+		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	
 	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
 	switch(userdata->mphf_proto->func_query(&userdata->mphf, keyid, &key_out)){
@@ -279,7 +282,8 @@ static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{
 				{ userdata->offset_out, DATA_PTR_OFFT(&key_new_out) },
 				hash_next(request)
 			};
-			ret = backend_pass(backend, r_next);
+			if( (ret = backend_pass(backend, r_next)) < 0)
+				return ret;
 			
 			if(key_out != key_new_out){
 				ssize_t ret;
@@ -290,10 +294,8 @@ static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{
 			}
 			
 			// TODO pass captured offset_out 
-			
-			return ret;
 	}
-	return 0;
+	return -EEXIST;
 } // }}}
 static ssize_t mphf_backend_queryinsert(backend_t *backend, request_t *request){ // {{{
 	ssize_t ret;

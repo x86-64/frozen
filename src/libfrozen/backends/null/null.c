@@ -25,7 +25,7 @@ static ssize_t null_create(backend_t *backend, request_t *request){
 	if(ret == 0 && value == 0x0000BEEF)
 		return value;
 	
-	return backend_pass(backend, request);
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 backend_t null_proto = {

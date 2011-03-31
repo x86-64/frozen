@@ -35,9 +35,10 @@ START_TEST (test_real_dns){
 			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)              },
 			{ HK(dns_ip),     DATA_UINT32T  (data_array[i].ip)                        },
 			{ HK(dns_tstamp), DATA_UINT32T  (data_array[i].timestamp)                 },
-			hash_end
+			{ HK(ret),        DATA_PTR_SIZET(&ret)                                    },
+                        hash_end
 		};
-		ret = backend_query(b_idx, r_write);
+		backend_query(b_idx, r_write);
 			fail_unless(ret > 0,    "backend real_dns: write array failed");
 		
 		//printf("writing: ret: %x, ptr: %d, str: %s\n", ret, (unsigned int)data_ptr, data_array[i].domain);

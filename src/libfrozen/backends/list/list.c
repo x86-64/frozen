@@ -41,19 +41,18 @@ static ssize_t lists_set(backend_t *backend, request_t *request){
 			return error("data_arithmetic failed");
 		
 		hash_t  new_request[] = {
-			{ HK(action),   DATA_UINT32T(ACTION_CRWD_MOVE)               },
+			{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
 			{ HK(offset_from), key_from                                   },
 			{ HK(offset_to),   key_to                                     },
-			{ HK(size),     DATA_VOID                                  },
+			{ HK(size),        DATA_VOID                                  },
 			hash_next(request)
 		};
 		
-		ret = backend_pass(backend, new_request); 
-		if(ret != 0)
+		if( (ret = backend_pass(backend, new_request)) < 0)
 			return ret;
 	}
 	
-	return backend_pass(backend, request);
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 static ssize_t lists_delete(backend_t *backend, request_t *request){
@@ -77,15 +76,14 @@ static ssize_t lists_delete(backend_t *backend, request_t *request){
 		return error("data_arithmetic failed");
 	
 	hash_t  new_request[] = {
-		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)               },
+		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
 		{ HK(offset_from), key_from                                   },
 		{ HK(offset_to),   key_to                                     },
 		{ HK(size),        DATA_VOID                                  },
 		hash_next(request)
 	};
 	
-	ret = backend_pass(backend, new_request);
-	return ret;
+	return ( (ret = backend_pass(backend, new_request)) < 0) ? ret : -EEXIST;
 }
 
 backend_t list_proto = {

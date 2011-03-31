@@ -99,12 +99,13 @@ START_TEST (test_backend_mphf){
 		memset(buffer, 0, sizeof(buffer));
 		
 		request_t r_write[] = {
-			{ HK(action),  DATA_UINT32T (ACTION_CRWD_CREATE)                          },
+			{ HK(action),  DATA_UINT32T (ACTION_CRWD_CREATE)                        },
 			{ HK(key),     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
 			{ HK(buffer),  DATA_RAW (buffer, 30)                                    },
+                        { HK(ret),     DATA_PTR_SIZET(&ret)                                     },
                         hash_end
 		};
-		ret = backend_query(b_dat, r_write);
+		backend_query(b_dat, r_write);
 			fail_unless(ret >= 0, "backend backend_mphf: write array failed");
 	}
 	
@@ -114,12 +115,13 @@ START_TEST (test_backend_mphf){
 		memset(data_read, 0, 1024);
 		
 		request_t r_read[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                              },
+			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                            },
 			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
 			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
+                        { HK(ret),    DATA_PTR_SIZET(&ret)                                      },
 			hash_end
 		};
-		ret = backend_query(b_dat, r_read);
+		backend_query(b_dat, r_read);
 			fail_unless(ret >= 0,                              "backend backend_mphf: read array failed");
                 //        fail_unless(strcmp(data_read, data_array[i]) == 0, "backend backend_mphf: read array data failed");
                 //printf("mphf_read: %s %s\n", data_read, data_array[i]);
@@ -273,10 +275,11 @@ START_TEST (test_backend_mphf_speed){
 	
 	request_t r_write[] = {
 		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE) },
-		{ HK(buffer),  DATA_RAW(test2, sizeof(test2)) },
+		{ HK(buffer),  DATA_RAW(test2, sizeof(test2))   },
 		
-		{ HK(key),     DATA_PTR_STRING(test, 8)       },
-		hash_end
+		{ HK(key),     DATA_PTR_STRING(test, 8)         },
+		{ HK(ret),     DATA_PTR_SIZET(&ret)             },
+                hash_end
 	};
 	
 	memset(test, 'a', sizeof(test));
@@ -291,7 +294,7 @@ START_TEST (test_backend_mphf_speed){
 			test[j] = 'a';
 		}
 		
-		if(backend_query(b_dat, r_write) < 0)
+		if(backend_query(b_dat, r_write) < 0 || ret < 0)
 			failed++;
 	}
 	bench_query(be);
@@ -320,14 +323,15 @@ START_TEST (test_backend_mphf_speed){
 		}
 		
 		request_t r_read[] = {
-			{ HK(action),  DATA_UINT32T(ACTION_CRWD_READ)   },
+			{ HK(action),  DATA_UINT32T(ACTION_CRWD_READ) },
 			{ HK(key),     DATA_RAW(test,  sizeof(test))  },
 			{ HK(buffer),  DATA_RAW(test2, sizeof(test2)) },
 			{ HK(size),    DATA_SIZET(sizeof(test2))      },
-			hash_end
+			{ HK(ret),     DATA_PTR_SIZET(&ret)           },
+                        hash_end
 		};
 		
-		if(backend_query(b_dat, r_read) < 0 || memcmp(test, test2, sizeof(test)) != 0){
+		if(backend_query(b_dat, r_read) < 0 || ret < 0 || memcmp(test, test2, sizeof(test)) != 0){
 			failed++;
 			printf("failed: %.*s %.*s\n", (int)sizeof(test), test, (int)sizeof(test2), test2);
 		}

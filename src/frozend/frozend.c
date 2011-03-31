@@ -235,7 +235,7 @@ void main_rest(void){
 	config_t *config = configs_file_parse(opt_config_file);
 	
 	if(config != NULL){
-		backend_bulk_new(config);
+		backend_new(config);
 		
 		// TODO do normal wait()
 		while(1) sleep(100);

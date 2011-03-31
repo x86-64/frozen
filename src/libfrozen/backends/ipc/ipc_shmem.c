@@ -29,7 +29,6 @@ typedef struct ipc_shmem_header {
 
 typedef struct ipc_shmem_block {
 	volatile size_t        status;
-	volatile ssize_t       query_ret;
 	unsigned int           data;
 	
 	sem_t                  sem_done;
@@ -108,7 +107,7 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 		
 		// run request
 		hash_from_memory(&request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
-		block->query_ret = backend_pass(((ipc_t *)ipc)->backend, request);
+		backend_pass(((ipc_t *)ipc)->backend, request);
 		
 		// update status
 		if(shmem_block_status(userdata, block, STATUS_EXECUTING, STATUS_DONE) < 0)
@@ -200,7 +199,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	
 	// read request back
 	hash_reread_from_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
-	ret = block->query_ret;
+	ret = -EEXIST;
 	
 	if(shmem_block_status(userdata, block, STATUS_DONE, STATUS_FREE) < 0)
 		return error("strange error 3");

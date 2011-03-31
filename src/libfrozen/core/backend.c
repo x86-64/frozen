@@ -5,127 +5,6 @@
 #define LIST_FREE_ITEM (void *)-1
 #define LIST_END       (void *)NULL
 
-/*
-backend_t * chain_new(char *name){
-	int      ret;
-	backend_t *chain;
-	backend_t *chain_proto = NULL;
-	
-	list_iter(&chains, (iter_callback)&chain_find_by_name, name, &chain_proto);
-	if(chain_proto == NULL)
-		return NULL;
-	
-	chain = (backend_t *)malloc(sizeof(backend_t));
-	if(chain == NULL)
-		return NULL;
-	
-	memcpy(chain, chain_proto, sizeof(backend_t));
-	
-	chain->cnext = NULL;
-	
-	ret = chain->func_init(chain);
-	if(ret != 0){
-		free(chain);
-		return NULL;
-	}
-	
-	return chain;
-}
-void chain_destroy(backend_t *chain){
-	if(chain == NULL)
-		return;
-
-	chain->func_destroy(chain);
-	
-	free(chain);
-}
-inline int  chain_configure    (backend_t *chain, hash_t *config){ return chain->func_configure(chain, config); }
-
-ssize_t     chain_query        (backend_t *chain, request_t *request){
-	f_crwd        func       = NULL;
-	ssize_t       ret;
-	uint32_t      r_action;
-	
-	if(chain == NULL || request == NULL)
-		return -ENOSYS;
-	
-	hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action));
-	if(ret != 0)
-		return -ENOSYS;
-	
-	switch(r_action){
-		case ACTION_CRWD_CREATE: func = chain->backend_type_crwd.func_create; break;
-		case ACTION_CRWD_READ:   func = chain->backend_type_crwd.func_get   ; break;
-		case ACTION_CRWD_WRITE:  func = chain->backend_type_crwd.func_set   ; break;
-		case ACTION_CRWD_DELETE: func = chain->backend_type_crwd.func_delete; break;
-		case ACTION_CRWD_MOVE:   func = chain->backend_type_crwd.func_move  ; break;
-		case ACTION_CRWD_COUNT:  func = chain->backend_type_crwd.func_count ; break;
-		case ACTION_CRWD_CUSTOM: func = chain->backend_type_crwd.func_custom; break;
-		default:
-			return -EINVAL;
-	};	
-	
-	if(func == NULL)
-		return chain_query(chain->cnext, request);
-	
-	return func(chain, request);
-}
-
-ssize_t     chain_next_query   (backend_t *chain, request_t *request){
-	return chain_query(chain->cnext, request);
-}
-
-static ssize_t backend_iter_chain_init(hash_t *config, void *p_backend, void *p_chain){
-	ssize_t    ret;
-	backend_t   *chain;
-	char      *chain_name;
-	hash_t    *chain_config;
-	
-	if(data_value_type(hash_item_data(config)) != TYPE_HASHT)
-		return ITER_BREAK;
-	
-	chain_config = (hash_t *) data_value_ptr(hash_item_data(config));
-	
-	hash_data_copy(ret, TYPE_STRINGT, chain_name, chain_config, HK(name));
-	if(ret != 0) return ITER_BREAK;
-	
-	if( (chain = chain_new(chain_name)) == NULL)
-		return ITER_BREAK;
-	
-	chain->cnext = *(backend_t **)p_chain;
-	
-	if(chain_configure(chain, chain_config) != 0)
-		goto cleanup;
-	
-	*(backend_t **)p_chain = chain;
-	
-	return ITER_CONTINUE;
-
-cleanup:	
-	chain_destroy(chain);
-	return ITER_BREAK;
-}
-
-static ssize_t backend_iter_find(void *p_backend, void *p_name, void *p_backend_t){
-	backend_t *backend = (backend_t *)p_backend;
-	
-	if(strcmp(backend->name, p_name) == 0){
-		*(backend_t **)p_backend_t = backend;
-		return ITER_BREAK;
-	}
-	return ITER_CONTINUE;
-}
-
-static ssize_t backend_iter_backend_new(hash_t *config, void *null1, void *null2){
-	if(data_value_type(hash_item_data(config)) != TYPE_HASHT)
-		return ITER_CONTINUE;
-	
-	if(backend_new( data_value_ptr(hash_item_data(config)) ) == NULL)
-		return ITER_BREAK;
-	
-	return ITER_CONTINUE;
-}
-*/
 static backend_t * backend_find_class (char *class){
 	uintmax_t i;
 	
@@ -157,22 +36,22 @@ found:
 }
 
 static void        backend_connect(backend_t *parent, backend_t *child){
-	pthread_mutex_lock(&child->mutex);
-	
-		backend_list_add(&child->parents, parent);
-		child->refs++;
-	
-	pthread_mutex_unlock(&child->mutex);
-	
-	if(parent == LIST_FREE_ITEM)
-		return;
-	
-	pthread_mutex_lock(&parent->mutex);
+	pthread_rwlock_wrlock(&parent->rwlock);
 	
 		backend_list_add(&parent->childs, child);
 		parent->refs++;
 	
-	pthread_mutex_unlock(&parent->mutex);
+	pthread_rwlock_unlock(&parent->rwlock);
+	
+	if(child == LIST_FREE_ITEM)
+		return;
+	
+	pthread_rwlock_wrlock(&child->rwlock);
+	
+		backend_list_add(&child->parents, parent);
+		child->refs++;
+	
+	pthread_rwlock_unlock(&child->rwlock);
 }
 
 backend_t *  backend_new      (hash_t *config){
@@ -206,6 +85,8 @@ backend_t *  backend_new      (hash_t *config){
 		if(backend_class == NULL){
 			if( (backend_curr = backend_find(backend_name)) == NULL)
 				goto find_error;
+			
+			backend_connect(backend_curr, backend_prev);
 		}else{
 			if( (backend_curr = malloc(sizeof(backend_t))) == NULL)
 				goto error;
@@ -219,7 +100,7 @@ backend_t *  backend_new      (hash_t *config){
 			if( (backend_curr->childs  = malloc(sizeof(backend_t *) * (1 + 1))) == NULL)
 				goto error;
 			
-			pthread_mutex_init(&backend_curr->mutex, NULL);
+			pthread_rwlock_init(&backend_curr->rwlock, NULL);
 			backend_curr->name       = backend_name ? strdup(backend_name) : NULL;
 			backend_curr->refs       = 0;
 			backend_curr->userdata   = NULL;
@@ -229,8 +110,14 @@ backend_t *  backend_new      (hash_t *config){
 			backend_curr->childs[0]  = LIST_FREE_ITEM;
 			backend_curr->childs[1]  = LIST_END;
 			
+			backend_connect(backend_curr, backend_prev);
+			
+			if(backend_curr->func_init(backend_curr) != 0)
+				goto error;
+			
+			if(backend_curr->func_configure(backend_curr, backend_cfg) != 0)
+				goto error;
 		}
-		backend_connect(backend_prev, backend_curr);
 		
 		backend_prev = backend_curr;
 	}while( (config = hash_item_next(config)) != NULL );
@@ -257,26 +144,61 @@ backend_t *  backend_acquire(char *name){
 	return backend;
 }
 
-ssize_t      backend_bulk_new(hash_t *config){
-	//if(hash_iter(config, &backend_iter_backend_new, NULL, NULL) == ITER_BREAK){
-		// TODO destory previosly allocated backends
-		return -EINVAL;
-	//}
-	//return 0;
-}
-
 char *          backend_get_name        (backend_t *backend){
 	return backend->name;
 }
 
 ssize_t      backend_query        (backend_t *backend, request_t *request){
-	if(backend == NULL || request == NULL)
-		return -EINVAL;
+	ssize_t                ret;
+	uint32_t               r_action;
+	f_crwd                 func              = NULL;
+	data_t                 ret_data          = DATA_PTR_SIZET(&ret);
+	data_t                *ret_req;
+	data_ctx_t            *ret_req_ctx;
 	
-	return -EINVAL; // chain_query(backend->chain, request);
+	if(backend == NULL || request == NULL)
+		return -ENOSYS;
+	
+	hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
+	
+	switch(r_action){
+		case ACTION_CRWD_CREATE: func = backend->backend_type_crwd.func_create; break;
+		case ACTION_CRWD_READ:   func = backend->backend_type_crwd.func_get   ; break;
+		case ACTION_CRWD_WRITE:  func = backend->backend_type_crwd.func_set   ; break;
+		case ACTION_CRWD_DELETE: func = backend->backend_type_crwd.func_delete; break;
+		case ACTION_CRWD_MOVE:   func = backend->backend_type_crwd.func_move  ; break;
+		case ACTION_CRWD_COUNT:  func = backend->backend_type_crwd.func_count ; break;
+		case ACTION_CRWD_CUSTOM: func = backend->backend_type_crwd.func_custom; break;
+		default:
+			return -EINVAL;
+	};	
+	if(func == NULL)
+		return backend_pass(backend, request);
+	
+	ret = func(backend, request);
+	
+	if(ret != -EEXIST){
+		hash_data_find(request, HK(ret), &ret_req, &ret_req_ctx);
+		data_transfer(ret_req, ret_req_ctx, &ret_data, NULL);
+	}
+	return 0;
 }
 ssize_t         backend_pass            (backend_t *backend, request_t *request){
-	return -EINVAL;
+	ssize_t                ret = 0;
+	uintmax_t              lsz = 0;
+	backend_t             *backend_next;
+	
+	pthread_rwlock_rdlock(&backend->rwlock);
+		while( (backend_next = backend->childs[lsz++]) != LIST_END){
+			if(backend_next == LIST_FREE_ITEM)
+				continue;
+			
+			if( (ret = backend_query(backend_next, request)) < 0)
+				goto error;
+		}
+error:
+	pthread_rwlock_unlock(&backend->rwlock);
+	return ret;
 }
 
 void         backend_destroy  (backend_t *backend){
@@ -306,43 +228,60 @@ void         backend_destroy  (backend_t *backend){
 
 void        backend_destroy_all (void){
 	//backend_t *backend;
-
+	
 	//while((backend = list_pop(&backends))){
 	//	backend_destroy(backend);
 	//}
 }
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
 	request_t  r_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)     },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)   },
 		{ HK(size),       DATA_PTR_SIZET(&size)              },
 		{ HK(offset_out), DATA_PTR_OFFT(offset)              },
+		{ HK(ret),        DATA_PTR_SIZET(&q_ret)             },
 		hash_end
 	};
+	if( (b_ret = backend_query(backend, r_create)) < 0)
+		return b_ret;
 	
-	return backend_query(backend, r_create);
+	return q_ret;
 } // }}}
 ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
 	request_t  r_read[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_READ)   },
-		{ HK(offset),  DATA_PTR_OFFT(&offset)         },
-		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
-		{ HK(buffer),  DATA_RAW(buffer, buffer_size)  },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)    },
+		{ HK(offset),     DATA_PTR_OFFT(&offset)            },
+		{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+		{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+		{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
 		hash_end
 	};
 	
-	return backend_query(backend, r_read);
+	if( (b_ret = backend_query(backend, r_read)) < 0)
+		return b_ret;
+	
+	return q_ret;
 } // }}}
 ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
 	request_t  r_write[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_WRITE)  },
-		{ HK(offset),  DATA_PTR_OFFT(&offset)         },
-		{ HK(size),    DATA_PTR_SIZET(&buffer_size)   },
-		{ HK(buffer),  DATA_RAW(buffer, buffer_size)  },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)   },
+		{ HK(offset),     DATA_PTR_OFFT(&offset)            },
+		{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+		{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+		{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
 		hash_end
 	};
 	
-	return backend_query(backend, r_write);
+	if( (b_ret = backend_query(backend, r_write)) < 0)
+		return b_ret;
+	
+	return q_ret;
 } // }}}
 ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size){ // {{{
 	size_t size;
@@ -356,24 +295,53 @@ ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *
 	}while(fill_size > 0);
 	return 0;
 } // }}}
+ssize_t         backend_stdcall_move  (backend_t *backend, off_t  from, off_t to, size_t size){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
+	request_t  r_move[] = {
+		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)       },
+		{ HK(offset_from), DATA_PTR_OFFT(&from)                 },
+		{ HK(offset_to),   DATA_PTR_OFFT(&to)                   },
+		{ HK(size),        DATA_PTR_SIZET(&size)                },
+		{ HK(ret),         DATA_PTR_SIZET(&q_ret)               },
+		hash_end
+	};
+	
+	if( (b_ret = backend_query(backend, r_move)) < 0)
+		return b_ret;
+	
+	return q_ret;
+} // }}}
 ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
 	request_t  r_delete[] = {
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_DELETE)     },
-		{ HK(offset),     DATA_PTR_OFFT(&offset)             },
-		{ HK(size),       DATA_PTR_SIZET(&size)              },
+		{ HK(offset),     DATA_PTR_OFFT(&offset)               },
+		{ HK(size),       DATA_PTR_SIZET(&size)                },
+		{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
 		hash_end
 	};
 	
-	return backend_query(backend, r_delete);
+	if( (b_ret = backend_query(backend, r_delete)) < 0)
+		return b_ret;
+	
+	return q_ret;
 } // }}}
 ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
 	request_t r_count[] = {
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_COUNT)      },
-		{ HK(buffer),     DATA_PTR_SIZET(count)              },
+		{ HK(buffer),     DATA_PTR_SIZET(count)                },
+		{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
 		hash_end
 	};
 	
-	return backend_query(backend, r_count);
+	if( (b_ret = backend_query(backend, r_count)) < 0)
+		return b_ret;
+	
+	return q_ret;
 } // }}}
 
 request_actions request_str_to_action(char *string){

@@ -86,7 +86,7 @@ static ssize_t cacheapp_backend_read(backend_t *backend, request_t *request){ //
 	
 	hash_data_copy(ret, TYPE_OFFT, offset, request, HK(offset));
 	if(ret != 0 || offset < userdata->cache_start_offset)
-		return backend_pass(backend, request);
+		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	
 	offset -= userdata->cache_start_offset;
 	
@@ -109,7 +109,7 @@ static ssize_t cacheapp_backend_write(backend_t *backend, request_t *request){ /
 	
 	hash_data_copy(ret, TYPE_OFFT, offset, request, HK(offset));
 	if(ret != 0 || offset < userdata->cache_start_offset)
-		return backend_pass(backend, request);
+		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	
 	offset -= userdata->cache_start_offset;
 	
@@ -165,7 +165,7 @@ static ssize_t cacheapp_backend_rest(backend_t *backend, request_t *request){ //
 	cacheapp_userdata *userdata = (cacheapp_userdata *)backend->userdata;
 	cacheapp_flush(userdata);
 	
-	ret = backend_pass(backend, request);
+	if( (ret = backend_pass(backend, request)) == 0) ret = -EEXIST;
 	
 	/* get file size */
 	request_t r_count[] = {

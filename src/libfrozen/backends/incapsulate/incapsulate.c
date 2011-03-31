@@ -88,7 +88,7 @@ static ssize_t incap_backend_createwrite(backend_t *backend, request_t *request)
 	if(offset != NULL)
 		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
 	
-	ret = backend_pass(backend, request);
+	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
 	
 	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
 	if(offset != NULL)
@@ -98,6 +98,7 @@ static ssize_t incap_backend_createwrite(backend_t *backend, request_t *request)
 }
 
 static ssize_t incap_backend_read(backend_t *backend, request_t *request){
+	ssize_t          ret;
 	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
@@ -106,10 +107,11 @@ static ssize_t incap_backend_read(backend_t *backend, request_t *request){
 	if(offset != NULL)
 		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
 	
-	return backend_pass(backend, request);
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 static ssize_t incap_backend_move(backend_t *backend, request_t *request){
+	ssize_t          ret;
 	data_t          *offset;
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
@@ -122,7 +124,7 @@ static ssize_t incap_backend_move(backend_t *backend, request_t *request){
 	if(offset != NULL)
 		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
 	
-	return backend_pass(backend, request);
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 static ssize_t incap_backend_count(backend_t *backend, request_t *request){
@@ -131,7 +133,7 @@ static ssize_t incap_backend_count(backend_t *backend, request_t *request){
 	data_ctx_t      *offset_ctx;
 	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
 	
-	ret = backend_pass(backend, request);
+	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
 	
 	hash_data_find(request, userdata->count, &offset, &offset_ctx);
 	if(offset != NULL)
@@ -150,7 +152,7 @@ static ssize_t incap_backend_custom(backend_t *backend, request_t *request){
 	if(offset != NULL)
 		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
 	
-	ret = backend_pass(backend, request);
+	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
 	
 	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
 	if(offset != NULL)
@@ -176,5 +178,4 @@ backend_t incapsulate_proto = {
 		.func_custom = &incap_backend_custom
 	}}
 };
-
 

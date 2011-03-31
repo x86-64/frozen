@@ -38,19 +38,21 @@ START_TEST(test_backend_ipc){
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
 		{ HK(size),       DATA_SIZET(sizeof(str))          },
 		{ HK(buffer),     DATA_RAW(str, sizeof(str))       },
+		{ HK(ret),        DATA_PTR_SIZET(&ret)             },
 		hash_end
 	};
-	ret = backend_query(backend, r_create);
+	backend_query(backend, r_create);
 		fail_unless(ret >= 0, "create failed");	
 	
 	request_t  r_read[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)   },
+		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ) },
 		{ HK(offset),     DATA_OFFT(0)                   },
 		{ HK(size),       DATA_SIZET(sizeof(test))       },
 		{ HK(buffer),     DATA_RAW(test, sizeof(test))   },
-		hash_end
+		{ HK(ret),        DATA_PTR_SIZET(&ret)           },
+                hash_end
 	};
-	ret = backend_query(backend, r_read);
+	backend_query(backend, r_read);
 		fail_unless(ret > 0,                "read failed");
 		fail_unless(strcmp(test, str) == 0, "read data failed");
 	

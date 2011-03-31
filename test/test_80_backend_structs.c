@@ -48,15 +48,16 @@ START_TEST(test_backend_structs){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)                          },
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)                        },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                            },
 			{ HK(buffer),     DATA_RAW(test, 100)                                     },
 			
-			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)               },
+			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)             },
 			{ HK(key2),       DATA_PTR_STRING_AUTO( data_array[i].key2)               },
-			hash_end
+			{ HK(ret),        DATA_PTR_SIZET(&ret)                                    },
+                        hash_end
 		};
-		ret = backend_query(backend, r_write);
+		backend_query(backend, r_write);
 			fail_unless(ret > 0, "write array failed");
 	}
 	
@@ -64,14 +65,15 @@ START_TEST(test_backend_structs){
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)      },
-			{ HK(offset), DATA_OFFT(data_ptrs[i])           },
-			{ HK(buffer), DATA_RAW(test, 100)               },
+			{ HK(offset), DATA_OFFT(data_ptrs[i])             },
+			{ HK(buffer), DATA_RAW(test, 100)                 },
 			
 			{ HK(key1),   DATA_UINT32T(0)                     },
-			{ HK(key2),   DATA_STRING("")                   },
+			{ HK(key2),   DATA_STRING("")                     },
+			{ HK(ret),    DATA_PTR_SIZET(&ret)                },
 			hash_end
 		};
-		ret = backend_query(backend, r_read);
+		backend_query(backend, r_read);
 			fail_unless(ret > 0,                               "read array failed");
 		
 		hash_data_copy(ret, TYPE_UINT32T,  test1, r_read, HK(key1));

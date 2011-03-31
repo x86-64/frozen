@@ -13,13 +13,14 @@ static ssize_t   data_backend_t_read  (data_t *data, data_ctx_t *ctx, off_t offs
 	d_offset += offset;
 	
 	request_t  req_read[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)  },
+		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)},
 		{ HK(offset), DATA_PTR_OFFT(&d_offset)      },
 		{ HK(size),   DATA_PTR_SIZET(size)          },
 		{ HK(buffer), DATA_RAW(*buffer, *size)      },
+		{ HK(ret),    DATA_PTR_SIZET(&ret)          },
 		hash_end
 	};
-	ret = backend_pass( *(backend_t **)(data->data_ptr), req_read);
+	backend_pass( *(backend_t **)(data->data_ptr), req_read);
 	if(ret < 0){
 		*size = 0;
 		return ret;
@@ -44,9 +45,10 @@ static ssize_t   data_backend_t_write (data_t *data, data_ctx_t *ctx, off_t offs
 		{ HK(offset), DATA_PTR_OFFT(&d_offset)      },
 		{ HK(size),   DATA_SIZET(size)              },
 		{ HK(buffer), DATA_RAW(buffer, size)        },
+		{ HK(ret),    DATA_PTR_SIZET(&ret)          },
 		hash_end
 	};
-	ret = backend_pass( *(backend_t **)(data->data_ptr), req_write);
+	backend_pass( *(backend_t **)(data->data_ptr), req_write);
 	return ret;
 }
 

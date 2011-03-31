@@ -246,7 +246,7 @@ ablock_continue:
 					goto exit;
 				}
 				
-				temp_ret = backend_pass(env->backend, env->requests[param1->id]);
+				temp_ret = ( (temp_ret = backend_pass(env->backend, env->requests[param1->id])) < 0) ? temp_ret : -EEXIST;
 				
 				from_data     = &temp_ret_data;
 				from_data_ctx = NULL;

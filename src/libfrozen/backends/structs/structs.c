@@ -81,10 +81,10 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 			hash_next(request)
 		};
 		
-		return backend_pass(backend, new_request);
+		return ( (ret = backend_pass(backend, new_request)) < 0) ? ret : -EEXIST;
 	}
 	
-	return backend_pass(backend, request);
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
@@ -94,7 +94,7 @@ static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
 	
-	ret = backend_pass(backend, request);
+	ret = (ret = backend_pass(backend, request)) < 0 ? ret : -EEXIST;
 	
 	hash_data_find(request, userdata->key, &buffer, &buffer_ctx);
 	if(buffer != NULL){
