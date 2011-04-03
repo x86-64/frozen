@@ -30,7 +30,6 @@ START_TEST (test_backend_list){
 	
 	// write keys
 	ssize = backend_stdcall_write(backend, key_off, key_data, 10);
-		printf("ssize FILE: %d", (int)ssize);
                 fail_unless(ssize == 10, "backend in_list write 1 failed");
 	
 	// insert key

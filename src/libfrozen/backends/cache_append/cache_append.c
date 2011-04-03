@@ -3,8 +3,9 @@
 #define EMODULE 4
 
 typedef struct cacheapp_userdata {
+	size_t      inited;
 	memory_t    memory;
-	backend_t    *backend;
+	backend_t  *backend;
 	off_t       cache_start_offset;
 	size_t      cache_max_size;
 } cacheapp_userdata;
@@ -41,9 +42,10 @@ static int cacheapp_init(backend_t *backend){ // {{{
 static int cacheapp_destroy(backend_t *backend){ // {{{
 	cacheapp_userdata *userdata = (cacheapp_userdata *)backend->userdata;
 	
-	cacheapp_flush(userdata);
-	
-	memory_free(&userdata->memory);
+	if(userdata->inited == 1){
+		cacheapp_flush(userdata);
+		memory_free(&userdata->memory);
+	}
 	free(userdata);
 	return 0;
 } // }}}
@@ -71,10 +73,11 @@ static int cacheapp_configure(backend_t *backend, hash_t *config){ // {{{
 	
 	userdata->cache_start_offset = file_size;
 	userdata->cache_max_size     = cache_max_size;
-	userdata->backend              = backend;
-
+	userdata->backend            = backend;
+	
 	memory_new(&userdata->memory, MEMORY_PAGE, ALLOC_MALLOC, 0x1000, 1);
 	
+	userdata->inited             = 1;
 	return 0;
 } // }}}
 static ssize_t cacheapp_backend_read(backend_t *backend, request_t *request){ // {{{
