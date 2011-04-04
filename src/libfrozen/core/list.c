@@ -1,15 +1,171 @@
 #include <list.h>
 
-void list_init(list *clist){
-	clist->head = NULL;
-	clist->tail = NULL;
-	pthread_mutex_init(&clist->lock, NULL);
-}
+void       list_init(list *clist){ // {{{
+	clist->items = NULL;
+	pthread_rwlock_init(&clist->lock, NULL);
+} // }}}
+void       list_destroy(list *clist){ // {{{
+	pthread_rwlock_wrlock(&clist->lock);
+		if(clist->items != NULL){
+			free(clist->items);
+			clist->items = NULL;
+		}
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
+void       list_add    (list *clist, void *item){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz      = 0;
+	
+	pthread_rwlock_wrlock(&clist->lock);
+	
+	if( (list = clist->items) != NULL){
+		while( (curr = list[lsz]) != LIST_END){
+			if(curr == LIST_FREE_ITEM)
+				goto found;
+			
+			lsz++;
+		}
+	}
+	list = clist->items = realloc(list, sizeof(void *) * (lsz + 2));
+	list[lsz + 1] = LIST_END;
+found:
+	list[lsz + 0] = item;
+	
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
+void       list_delete (list *clist, void *item){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz = 0;
+	
+	pthread_rwlock_wrlock(&clist->lock);
+	
+	if( (list = clist->items) == NULL)
+		goto exit;
+	
+	while( (curr = list[lsz]) != LIST_END){
+		if(curr == item){
+			list[lsz] = LIST_FREE_ITEM;
+			goto exit;
+		}
+		
+		lsz++;
+	}
+exit:
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
+intmax_t   list_is_empty(list *clist){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz = 0, ret;
+	
+	pthread_rwlock_rdlock(&clist->lock);
+	
+	if( (list = clist->items) == NULL)
+		goto fail;
+	
+	while( (curr = list[lsz]) != LIST_END){
+		if(curr != LIST_FREE_ITEM){
+			ret = 0; goto exit;
+		}
+		
+		lsz++;
+	}
+fail:
+	ret = 1;
+exit:
+	pthread_rwlock_unlock(&clist->lock);
+	return ret;
+} // }}}
+uintmax_t  list_flatten_frst(list *clist){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz = 0, size = 0;
+	
+	pthread_rwlock_rdlock(&clist->lock);
+	
+	if( (list = clist->items) == NULL)
+		goto exit;
+	
+	while( (curr = list[lsz++]) != LIST_END){
+		if(curr == LIST_FREE_ITEM)
+			continue;
+		
+		size++;
+	}
+	if(size == 0)
+		goto exit;
+return_res:
+	return size;
+exit:
+	pthread_rwlock_unlock(&clist->lock);
+	goto return_res;
+} // }}}
+void       list_flatten_scnd(list *clist, void **memory, size_t items){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 i = 0, lsz = 0;
+	
+	list = clist->items;
+	while( (curr = list[lsz++]) != LIST_END){
+		if(curr == LIST_FREE_ITEM)
+			continue;
+		
+		memory[i++] = curr;
+	}
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
+void       list_rdlock(list *clist){ // {{{
+	pthread_rwlock_rdlock(&clist->lock);
+} // }}}
+void       list_wrlock(list *clist){ // {{{
+	pthread_rwlock_wrlock(&clist->lock);
+} // }}}
+void       list_unlock(list *clist){ // {{{
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
+void *     list_iter_next(list *clist, void **iter){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz = 0;
+	
+	list = (*iter == NULL) ? clist->items : *iter;
+	if(list != NULL){ 
+		while( (curr = list[lsz++]) != LIST_END){
+			if(curr == LIST_FREE_ITEM)
+				continue;
+			
+			*iter = &list[lsz];
+			return curr;
+		}
+	}
+	return NULL;
+} // }}}
+void *     list_pop(list *clist){ // {{{
+	void                 **list;
+	void                  *curr = NULL;
+	size_t                 lsz = 0;
+	
+	pthread_rwlock_wrlock(&clist->lock);
+	
+	if( (list = clist->items) != NULL){
+		while( (curr = list[lsz]) != LIST_END){
+			if(curr != LIST_FREE_ITEM){
+				list[lsz] = LIST_FREE_ITEM;
+				goto exit;
+			}
+			
+			lsz++;
+		}
+	}
+exit:
+	pthread_rwlock_unlock(&clist->lock);
+	return curr;
+} // }}}
 
-void list_destroy(list *clist){
-	pthread_mutex_destroy(&clist->lock);
-}
 
+/*
 void list_push(list *clist, void *item){
 	litem *new_litem = (litem *)malloc(sizeof(litem));
 	if(new_litem != NULL){
@@ -44,28 +200,6 @@ void * list_pop(list *clist){
 	free(poped_item);
 	return item;
 }
-
-int list_iter(list *clist, iter_callback func, void *arg1, void *arg2){
-	int ret = 0;
-	
-	pthread_mutex_lock(&clist->lock);
-	
-	litem *curr;
-	curr = clist->head;
-	while(curr != NULL){
-		if(func(curr->item, arg1, arg2) == ITER_BREAK){
-			ret = ITER_BREAK; 
-			break;
-		}
-		
-		curr = curr->lnext;
-	}
-	
-	pthread_mutex_unlock(&clist->lock);
-	
-	return ret;
-}
-
 int list_unlink(list *clist, void *item){
 	int ret = -EINVAL;
 
@@ -94,4 +228,4 @@ int list_unlink(list *clist, void *item){
 	
 	return ret;
 }
-
+*/

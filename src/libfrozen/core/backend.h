@@ -28,8 +28,8 @@ typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
 struct backend_t {
 	char                  *name;
 	char                  *class;
-	uintmax_t              refs;        // 1 - on creation; 2,3 and more - on links to childs or _acquire
-	pthread_rwlock_t       rwlock;
+	uintmax_t              refs;
+	pthread_mutex_t        refs_mtx;
 	
 	api_types              supported_api;
 	f_init                 func_init;
@@ -48,8 +48,8 @@ struct backend_t {
 	};
 	void *                 userdata;
 	
-	backend_t            **parents;
-	backend_t            **childs;
+	list                   parents; // parent backends including private _acquires
+	list                   childs;  // child backends
 };
 
 API backend_t *     backend_new             (hash_t *config);

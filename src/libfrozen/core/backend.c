@@ -1,13 +1,12 @@
 #define BACKEND_C
 #include <libfrozen.h>
+#include <alloca.h>
 #include <backend_selected.h>
 
-#define LIST_FREE_ITEM (void *)-1
-#define LIST_END       (void *)NULL
+static list                    backends_top   = LIST_INITIALIZER;
+static list                    backends_names = LIST_INITIALIZER;
 
-static backend_t             **top_backends      = NULL;
-
-static backend_t *  backend_find_class (char *class){ // {{{
+static backend_t * backend_find_class (char *class){ // {{{
 	uintmax_t i;
 	
 	for(i=0; i<backend_protos_size; i++){
@@ -17,128 +16,46 @@ static backend_t *  backend_find_class (char *class){ // {{{
 	
 	return NULL;
 } // }}}
-static void         backend_list_add(backend_t ***p_list, backend_t *item){ // {{{
-	backend_t   **list;
-	backend_t    *curr;
-	size_t        lsz      = 0;
-	
-	if( (list = *p_list) != NULL){
-		while( (curr = list[lsz]) != LIST_END){
-			if(curr == LIST_FREE_ITEM)
-				goto found;
-			
-			lsz++;
-		}
-	}
-	list = *p_list = realloc(list, sizeof(backend_t *) * (lsz + 2));
-	list[lsz + 1] = LIST_END;
-found:
-	list[lsz + 0] = item;
+static void        backend_ref_inc(backend_t *backend){ // {{{
+	pthread_mutex_lock(&backend->refs_mtx);
+		backend->refs++;
+	pthread_mutex_unlock(&backend->refs_mtx);
 } // }}}
-static void         backend_list_delete(backend_t ***p_list, backend_t *item){ // {{{
-	backend_t   **list;
-	backend_t    *curr;
-	size_t        lsz;
-	
-	if( (list = *p_list) == NULL)
-		return;
-	
-	lsz  = 0;
-	while( (curr = list[lsz]) != LIST_END){
-		if(curr == item){
-			list[lsz] = LIST_FREE_ITEM;
-			return;
-		}
-		
-		lsz++;
-	}
+static uintmax_t   backend_ref_dec(backend_t *backend){ // {{{
+	uintmax_t              ret;
+	pthread_mutex_lock(&backend->refs_mtx);
+		ret = --backend->refs;
+	pthread_mutex_unlock(&backend->refs_mtx);
+	return ret;
 } // }}}
-static intmax_t     backend_list_is_empty(backend_t ***p_list){ // {{{
-	backend_t   **list;
-	backend_t    *curr;
-	size_t        lsz;
-	
-	if( (list = *p_list) == NULL)
-		return 1;
-	
-	lsz  = 0;
-	while( (curr = list[lsz]) != LIST_END){
-		if(curr != LIST_FREE_ITEM)
-			return 0;
-		
-		lsz++;
-	}
-	return 1;
-} // }}}
-static backend_t *  backend_list_next(backend_t ***p_list){ // {{{
-	backend_t    *curr;
-	backend_t   **list;
-	size_t        lsz;
-	
-	if( (list = *p_list) == NULL)
-		return NULL;
-	
-	lsz  = 0;
-	while( (curr = list[lsz]) != LIST_END){
-		if(curr != LIST_FREE_ITEM){
-			*p_list = &list[lsz+1];
-			return curr;
-		}
-		
-		lsz++;
-	}
-	*p_list = NULL;
-	return NULL;
-} // }}}
-
 static void        backend_top(backend_t *backend){ // {{{
-	if(backend_list_is_empty(&backend->parents)){
-			
-			backend_list_delete(&top_backends, backend);
-			backend_list_add(&top_backends, backend);
-		
+	if(list_is_empty(&backend->parents)){
+		list_delete (&backends_top, backend);
+		list_add    (&backends_top, backend);
 	}
 } // }}}
 static void        backend_untop(backend_t *backend){ // {{{
-		
-		backend_list_delete(&top_backends, backend);
-	
+	list_delete(&backends_top, backend);
 } // }}}
 static void        backend_connect(backend_t *parent, backend_t *child){ // {{{
-	pthread_rwlock_wrlock(&parent->rwlock);
-		backend_list_add(&parent->childs, child);
-		parent->refs++;
-		
-		backend_top(parent);
-	pthread_rwlock_unlock(&parent->rwlock);
+	list_add(&parent->childs, child);
+	backend_top(parent);
 	
 	if(child == LIST_FREE_ITEM)
 		return;
 	
-	pthread_rwlock_wrlock(&child->rwlock);
-		backend_untop(child);
-		
-		backend_list_add(&child->parents, parent);
-		child->refs++;
-	pthread_rwlock_unlock(&child->rwlock);
+	backend_untop(child);
+	list_add(&child->parents, parent);
 } // }}}
 static void        backend_disconnect(backend_t *parent, backend_t *child){ // {{{
-	pthread_rwlock_wrlock(&parent->rwlock);
-		backend_untop(parent);
-	
-		backend_list_delete(&parent->childs, child);
-		parent->refs--;
-	pthread_rwlock_unlock(&parent->rwlock);
+	backend_untop(parent);
+	list_delete(&parent->childs, child);
 	
 	if(child == LIST_FREE_ITEM)
 		return;
 	
-	pthread_rwlock_wrlock(&child->rwlock);
-		backend_list_delete(&child->parents, parent);
-		child->refs--;
-		
-		backend_top(child);
-	pthread_rwlock_unlock(&child->rwlock);
+	list_delete(&child->parents, parent);
+	backend_top(child);
 } // }}}
 static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // {{{
 	ssize_t                ret;
@@ -180,20 +97,18 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		
 		memcpy(backend_curr, class, sizeof(backend_t));
 		
-		if( (backend_curr->parents = malloc(sizeof(backend_t *) * (1 + 1))) == NULL)
-			goto error_malloc_parent;
-		if( (backend_curr->childs  = malloc(sizeof(backend_t *) * (1 + 1))) == NULL)
-			goto error_malloc_child;
+		list_init(&backend_curr->parents);
+		list_init(&backend_curr->childs);
+		pthread_mutex_init(&backend_curr->refs_mtx, NULL);
 		
-		pthread_rwlock_init(&backend_curr->rwlock, NULL);
-		backend_curr->name       = backend_name ? strdup(backend_name) : NULL;
-		backend_curr->refs       = 0;
+		if(backend_name){
+			backend_curr->name = strdup(backend_name);
+			list_add(&backends_names, backend_curr);
+		}else{
+			backend_curr->name = NULL;
+		}
+		backend_curr->refs       = 1;
 		backend_curr->userdata   = NULL;
-		
-		backend_curr->parents[0] = LIST_FREE_ITEM;
-		backend_curr->parents[1] = LIST_END;
-		backend_curr->childs[0]  = LIST_FREE_ITEM;
-		backend_curr->childs[1]  = LIST_END;
 		
 		backend_connect(backend_curr, backend_prev);
 		
@@ -220,16 +135,15 @@ error_configure:
 error_init:
 	backend_disconnect(backend_curr, backend_prev);
 	
-	if(backend_curr->name)
+	if(backend_curr->name){
+		list_delete(&backends_names, backend_curr);
 		free(backend_curr->name);
+	}
 	
-	pthread_rwlock_destroy(&backend_curr->rwlock);
-	free(backend_curr->childs);
+	pthread_mutex_destroy(&backend_curr->refs_mtx);
+	list_destroy(&backend_curr->childs);
+	list_destroy(&backend_curr->parents);
 	
-error_malloc_child:
-	free(backend_curr->parents);
-
-error_malloc_parent:
 error_class:
 	free(backend_curr);
 	
@@ -242,15 +156,24 @@ backend_t *  backend_new          (hash_t *config){ // {{{
 	return backend_new_rec(config, LIST_FREE_ITEM);
 } // }}}
 backend_t *  backend_find         (char *name){ // {{{
-	backend_t  *backend = NULL;
+	backend_t             *backend;
+	void                  *list_status  = NULL;
 	
-	//list_iter(&backends, (iter_callback)&backend_iter_find, name, &backend);
+	list_rdlock(&backends_names);
+		while( (backend = list_iter_next(&backends_names, &list_status)) != NULL){
+			if(strcmp(backend->name, name) == 0)
+				goto exit;
+		}
+		backend = NULL;
+exit:
+	list_unlock(&backends_names);
 	return backend;
 } // }}}
 backend_t *  backend_acquire      (char *name){ // {{{
-	backend_t  *backend = backend_find(name);
-	if(backend != NULL)
-		backend->refs++;
+	backend_t             *backend;
+	
+	if( (backend = backend_find(name)) != NULL)
+		backend_ref_inc(backend);
 	
 	return backend;
 } // }}}
@@ -281,8 +204,10 @@ ssize_t      backend_query        (backend_t *backend, request_t *request){ // {
 		default:
 			return -EINVAL;
 	};	
-	if(func == NULL)
-		return backend_pass(backend, request);
+	if(func == NULL){
+		ret = backend_pass(backend, request);
+		goto exit;
+	}
 	
 	ret = func(backend, request);
 	
@@ -290,77 +215,63 @@ ssize_t      backend_query        (backend_t *backend, request_t *request){ // {
 		hash_data_find(request, HK(ret), &ret_req, &ret_req_ctx);
 		data_transfer(ret_req, ret_req_ctx, &ret_data, NULL);
 	}
-	return 0;
+	ret = 0;
+exit:
+	return ret;
 } // }}}
 ssize_t      backend_pass         (backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret = 0;
-	uintmax_t              lsz = 0;
-	backend_t             *backend_next;
+	uintmax_t              lsz, i;
+	void                 **childs_list;
 	
-	pthread_rwlock_rdlock(&backend->rwlock);
-		while( (backend_next = backend->childs[lsz++]) != LIST_END){
-			if(backend_next == LIST_FREE_ITEM)
-				continue;
-			
-			if( (ret = backend_query(backend_next, request)) < 0)
-				goto error;
-		}
-error:
-	pthread_rwlock_unlock(&backend->rwlock);
-	return ret;
+	if( (lsz = list_flatten_frst(&backend->childs)) == 0)
+		return -ENOSYS; // no childs
+	
+	childs_list = (void **)alloca( sizeof(void *) * lsz );
+	list_flatten_scnd(&backend->childs, childs_list, lsz);
+	
+	for(i=0; i<lsz; i++){
+		if( (ret = backend_query((backend_t *)childs_list[i], request)) < 0)
+			return ret;
+	}
+	return 0;
 } // }}}
 void         backend_destroy      (backend_t *backend){ // {{{
 	backend_t             *curr;
-	backend_t            **list_cpy;
 	
-	if(backend == NULL)
+	if(backend == NULL || backend_ref_dec(backend) != 0)
 		return;
 	
-	// NOTE BUG bad things can happen if someone _acquire backend, _destory it, and _query
+	// call destroy
+	backend->func_destroy(backend);
 	
-	pthread_rwlock_wrlock(&backend->rwlock);
-		
-		// call destroy
-		backend->func_destroy(backend);
-		
-		// recursive destory of all left childs
-		list_cpy = backend->childs;
-		while( (curr = backend_list_next(&list_cpy)) != NULL){
-			backend_destroy(curr);
-		}
-		
-		// remove this backend from parents's childs list
-		list_cpy = backend->parents;
-		while( (curr = backend_list_next(&list_cpy)) != NULL){
-			backend_disconnect(curr, backend);
-		}
-		
-		backend_untop(backend);
-		
-	pthread_rwlock_unlock(&backend->rwlock);
-	pthread_rwlock_destroy(&backend->rwlock);
+	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destory of all left childs
+		backend_destroy(curr);
+	
+	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
+		backend_disconnect(curr, backend);
+	
+	backend_untop(backend);
 	
 	// free memory
-	if(backend->name)
+	if(backend->name){
+		list_delete(&backends_names, backend);
 		free(backend->name);
-	free(backend->childs);
-	free(backend->parents);
+	}
+	
+	list_destroy(&backend->parents);
+	list_destroy(&backend->childs);
+	
+	pthread_mutex_destroy(&backend->refs_mtx);
 	free(backend);
 } // }}}
 void         backend_destroy_all  (void){ // {{{
-	backend_t  *backend;
-	backend_t **top_backends_cpy;
+	backend_t             *backend;
 	
+	while( (backend = list_pop(&backends_top)) != NULL)
+		backend_destroy(backend);
 	
-		if( (top_backends_cpy = top_backends) == NULL)
-			return;
-		
-		while( (backend = backend_list_next(&top_backends_cpy)) != NULL)
-			backend_destroy(backend);
-		
-		free(top_backends);
-		top_backends = NULL;
-	
+	list_destroy(&backends_top);
 } // }}}
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{

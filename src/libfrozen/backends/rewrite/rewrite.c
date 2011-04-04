@@ -152,7 +152,7 @@ struct rewrite_stack_frame_t {
 
 static ssize_t rewrite_func_ablock(rewrite_script_env_t *env, rewrite_action_block_t *ablock){ // {{{
 	unsigned int           action_id;
-	ssize_t                ret = 0;
+	ssize_t                ret = -EEXIST;
 	data_t                 ret_data = DATA_PTR_SIZET(&ret);
 	rewrite_thing_t       *param1, *param2, *param3;
 	rewrite_action_t      *action;

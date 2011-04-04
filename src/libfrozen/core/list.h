@@ -4,31 +4,33 @@
 #include <errno.h>
 #include <pthread.h>
 #include <malloc.h>
+#include <stdint.h>
 
-typedef struct litem_ litem;
-struct litem_ {
-	litem *lnext;
-	void  *item;
-};
+typedef struct list {
+	pthread_rwlock_t       lock;
+	void                 **items;
+} list;
 
-typedef struct list_ list;
-struct list_ {
-	litem            *head;
-	litem     	 *tail;
-	pthread_mutex_t   lock;
-};
-
-typedef int  (*iter_callback)(void *, void *, void *);
+#define LIST_FREE_ITEM    (void *)-1
+#define LIST_END          (void *)NULL
+#define LIST_INITIALIZER  { .items = NULL, .lock = PTHREAD_RWLOCK_INITIALIZER }
 
 #define ITER_OK       0
 #define ITER_BREAK    1
 #define ITER_CONTINUE 2
 
-void  list_init   (list *clist);
-void  list_destroy(list *clist);
-void  list_push   (list *clist, void *item);
-void* list_pop    (list *clist);
-int   list_iter   (list *clist, iter_callback func, void *arg1, void *arg2);
-int   list_unlink (list *clist, void *item);
+void       list_init          (list *clist);
+void       list_destroy       (list *clist);
+void       list_add           (list *clist, void *item);
+void       list_delete        (list *clist, void *item);
+void **    list_flatten       (list *clist);
+intmax_t   list_is_empty      (list *clist);
+uintmax_t  list_flatten_frst  (list *clist);
+void       list_flatten_scnd  (list *clist, void **memory, size_t items);
+void       list_rdlock        (list *clist);
+void       list_wrlock        (list *clist);
+void       list_unlock        (list *clist);
+void *     list_iter_next     (list *clist, void **iter);
+void *     list_pop           (list *clist);
 
 #endif // LIST_H
