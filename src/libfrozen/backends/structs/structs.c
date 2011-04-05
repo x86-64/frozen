@@ -23,7 +23,6 @@ static int struct_init(backend_t *backend){ // {{{
 static int struct_destroy(backend_t *backend){ // {{{
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
 	
-	hash_free(userdata->structure);
 	free(userdata);
 	return 0;
 } // }}}
@@ -35,7 +34,7 @@ static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	DT_HASHT          struct_hash   = NULL;
 	struct_userdata  *userdata      = (struct_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT,  struct_hash,   config, HK(structure));
+	hash_data_copy(ret, TYPE_HASHT,   struct_hash,   config, HK(structure));
 	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
 	hash_data_copy(ret, TYPE_STRINGT, key_value_str, config, HK(values));
 	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
@@ -43,7 +42,7 @@ static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	userdata->key        = hash_string_to_key(key_str);
 	userdata->key_values = hash_string_to_key(key_value_str);
 	userdata->size       = hash_string_to_key(size_str);
-	userdata->structure  = hash_copy(struct_hash);
+	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	
 	if(userdata->key == 0)

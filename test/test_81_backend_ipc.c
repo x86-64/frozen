@@ -30,7 +30,7 @@ START_TEST(test_backend_ipc){
 	
 	usleep(1000);
 	
-	ssize_t  ret;
+	ssize_t  ret = -1;
 	char     test[10] = {0}, str[]="testtestm";
 	
 	// create new
@@ -44,6 +44,7 @@ START_TEST(test_backend_ipc){
 	backend_query(backend, r_create);
 		fail_unless(ret >= 0, "create failed");	
 	
+        ret = -1;
 	request_t  r_read[] = {
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ) },
 		{ HK(offset),     DATA_OFFT(0)                   },

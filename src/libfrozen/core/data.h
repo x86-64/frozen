@@ -23,6 +23,7 @@ typedef int     (*f_data_arith)     (char, data_t *, data_ctx_t *, data_t *, dat
 typedef ssize_t (*f_data_read)      (data_t *, data_ctx_t *, off_t, void **, size_t *);
 typedef ssize_t (*f_data_write)     (data_t *, data_ctx_t *, off_t, void *, size_t);
 typedef ssize_t (*f_data_convert)   (data_t *, data_ctx_t *, data_t *, data_ctx_t *);
+typedef ssize_t (*f_data_copy)      (data_t *, data_t *);
 
 #define DATA_INVALID  { TYPE_INVALID, NULL, 0 }
 #define DEF_BUFFER_SIZE 1024
@@ -52,6 +53,7 @@ struct data_proto_t {
 	f_data_read     func_read;
 	f_data_write    func_write;
 	f_data_convert  func_convert;
+	f_data_copy     func_copy;
 };
 
 /* api's */

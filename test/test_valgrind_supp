@@ -1,12 +1,98 @@
+# memcpy
 {
 	suppress-memcpy
 	Memcheck:Overlap
 	fun:memcpy
 }
+
+# dl
 {
-	suppress-chainreg
-	Memcheck:Leak
-	fun:malloc
+	suppress-dl_start1
+	Memcheck:Cond
+	fun:_dl_relocate_object
 	...
-	fun:_chain_register
+	fun:_dl_start
 }
+{
+	suppress-dl_start2
+	Memcheck:Cond
+	fun:index
+	...
+	fun:_dl_start
+}
+
+# gi
+{
+	suppress-GI1
+	Memcheck:Addr8
+	fun:__GI_strlen
+}
+{
+	suppress-GI2
+	Memcheck:Cond
+	fun:__GI_strlen
+}
+
+# libcheck
+{
+	suppress-libcheck
+	Memcheck:Addr8
+	fun:*
+	obj:*/libcheck*
+}
+
+# flex
+{
+   suppress-flex1
+   Memcheck:Value8
+   ...
+   fun:*_scan_string
+}
+{
+   suppress-flex2
+   Memcheck:Cond
+   ...
+   fun:*_scan_string
+}
+{
+   suppress-flex3
+   Memcheck:Cond
+   ...
+   fun:*_lex
+}
+
+# sse3 functions
+{
+   suppress-ssse3-1
+   Memcheck:Addr8
+   fun:*_ssse3
+}
+{
+   suppress-ssse3-2
+   Memcheck:Value8
+   fun:*_ssse3
+}
+{
+   suppress-ssse3-3
+   Memcheck:Cond
+   fun:*_ssse3
+}
+
+{
+   suppress-CHECKITOUT
+   Memcheck:Param
+   pwrite64(buf)
+   obj:/lib64/libpthread-2.13.so
+   fun:file_io_write
+   fun:data_io_t_write
+   fun:data_write
+   fun:data_transfer
+   fun:file_write
+   fun:backend_query
+   fun:backend_pass
+   fun:incap_backend_createwrite
+   fun:backend_query
+   fun:backend_pass
+   fun:rewrite_func_ablock
+}
+

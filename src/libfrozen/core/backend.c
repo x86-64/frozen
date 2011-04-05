@@ -57,6 +57,41 @@ static void        backend_disconnect(backend_t *parent, backend_t *child){ // {
 	list_delete(&child->parents, parent);
 	backend_top(child);
 } // }}}
+static backend_t * backend_copy_from_proto(backend_t *proto, char *backend_name){ // {{{
+	backend_t *backend_curr;
+	
+	if( (backend_curr = malloc(sizeof(backend_t))) == NULL)
+		return NULL;
+	
+	memcpy(backend_curr, proto, sizeof(backend_t));
+	
+	list_init(&backend_curr->parents);
+	list_init(&backend_curr->childs);
+	pthread_mutex_init(&backend_curr->refs_mtx, NULL);
+	
+	if(backend_name){
+		backend_curr->name = strdup(backend_name);
+		list_add(&backends_names, backend_curr);
+	}else{
+		backend_curr->name = NULL;
+	}
+	backend_curr->refs       = 1;
+	backend_curr->userdata   = NULL;
+	
+	return backend_curr;
+} // }}}
+static void        backend_free_from_proto(backend_t *backend_curr){ // {{{
+	if(backend_curr->name){
+		list_delete(&backends_names, backend_curr);
+		free(backend_curr->name);
+	}
+	
+	pthread_mutex_destroy(&backend_curr->refs_mtx);
+	list_destroy(&backend_curr->childs);
+	list_destroy(&backend_curr->parents);
+	
+	free(backend_curr);
+} // }}}
 static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // {{{
 	ssize_t                ret;
 	backend_t             *backend_curr, *backend_last, *class;
@@ -90,32 +125,19 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		
 		backend_connect(backend_curr, backend_prev);
 	}else{
-		if( (backend_curr = malloc(sizeof(backend_t))) == NULL)
-			goto error_malloc_backend;
 		if( (class = backend_find_class(backend_class)) == NULL)
-			goto error_class;
+			goto error_inval;
 		
-		memcpy(backend_curr, class, sizeof(backend_t));
+		if( (backend_curr = backend_copy_from_proto(class, backend_name)) == NULL)
+			goto error_inval;
 		
-		list_init(&backend_curr->parents);
-		list_init(&backend_curr->childs);
-		pthread_mutex_init(&backend_curr->refs_mtx, NULL);
-		
-		if(backend_name){
-			backend_curr->name = strdup(backend_name);
-			list_add(&backends_names, backend_curr);
-		}else{
-			backend_curr->name = NULL;
-		}
-		backend_curr->refs       = 1;
-		backend_curr->userdata   = NULL;
-		
+		backend_curr->config     = hash_copy(backend_cfg);
 		backend_connect(backend_curr, backend_prev);
 		
 		if(backend_curr->func_init(backend_curr) != 0)
 			goto error_init;
 		
-		if(backend_curr->func_configure(backend_curr, backend_cfg) != 0)
+		if(backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
 			goto error_configure;
 	}
 
@@ -131,23 +153,69 @@ recurse:
 	
 error_configure:
 	backend_curr->func_destroy(backend_curr);
-
+	
 error_init:
 	backend_disconnect(backend_curr, backend_prev);
+	hash_free(backend_curr->config);
 	
-	if(backend_curr->name){
-		list_delete(&backends_names, backend_curr);
-		free(backend_curr->name);
+	backend_free_from_proto(backend_curr);
+
+error_inval:
+	return NULL;
+} // }}}
+static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // {{{
+	uintmax_t              lsz, i;
+	backend_t             *backend_curr;
+	void                 **childs_list;
+	
+	if( (lsz = list_flatten_frst(&backend->childs)) != 0){
+		childs_list = (void **)alloca( sizeof(void *) * lsz );
+		list_flatten_scnd(&backend->childs, childs_list, lsz);
+		
+		for(i=0; i<lsz; i++){
+			if( (childs_list[i] = backend_fork_rec((backend_t *)childs_list[i], request)) == NULL){
+				// unwind
+				for(--i; i>=0; i--)
+					backend_destroy(childs_list[i]);
+				
+				return NULL;
+			}
+		}
 	}
 	
-	pthread_mutex_destroy(&backend_curr->refs_mtx);
-	list_destroy(&backend_curr->childs);
-	list_destroy(&backend_curr->parents);
+	// NOTE forked backend lose name and parents
+	if( (backend_curr = backend_copy_from_proto(backend, NULL)) == NULL)
+		goto error_inval;
+		
+	backend_curr->config = hash_copy(backend->config);
 	
-error_class:
-	free(backend_curr);
+	for(i=0; i<lsz; i++)
+		backend_connect(backend_curr, childs_list[i]);
 	
-error_malloc_backend:
+	if(backend_curr->func_init(backend_curr) != 0)
+		goto error_init;
+	
+	if(backend_curr->func_fork != NULL){
+		if(backend_curr->func_fork(backend_curr, request) != 0)
+			goto error_configure;
+	}else{
+		if(backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
+			goto error_configure;
+	}
+	
+	return backend_curr;
+	
+error_configure:
+	backend_curr->func_destroy(backend_curr);
+	
+error_init:
+	for(i=0; i<lsz; i++)
+		backend_disconnect(backend_curr, childs_list[i]);
+	
+	hash_free(backend_curr->config);
+	
+	backend_free_from_proto(backend_curr);
+	
 error_inval:
 	return NULL;
 } // }}}
@@ -176,6 +244,9 @@ backend_t *  backend_acquire      (char *name){ // {{{
 		backend_ref_inc(backend);
 	
 	return backend;
+} // }}}
+backend_t *  backend_fork         (backend_t *backend, request_t *request){ // {{{
+	return backend_fork_rec(backend, request);
 } // }}}
 char *       backend_get_name     (backend_t *backend){ // {{{
 	return backend->name;
@@ -259,6 +330,8 @@ void         backend_destroy      (backend_t *backend){ // {{{
 		free(backend->name);
 	}
 	
+	hash_free(backend->config);
+	
 	list_destroy(&backend->parents);
 	list_destroy(&backend->childs);
 	
@@ -272,6 +345,7 @@ void         backend_destroy_all  (void){ // {{{
 		backend_destroy(backend);
 	
 	list_destroy(&backends_top);
+	list_destroy(&backends_names);
 } // }}}
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{

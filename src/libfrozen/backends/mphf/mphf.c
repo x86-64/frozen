@@ -182,7 +182,6 @@ static int mphf_destroy(backend_t *backend){ // {{{
 	if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
 		return ret;
 	
-	hash_free(userdata->mphf.config);
 	free(userdata);
 	return 0;
 } // }}}
@@ -204,9 +203,9 @@ static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRINGT, keyid_str,       config, HK(keyid));
 	
 	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
-	hash_data_copy(ret, TYPE_UINT64T,  buffer_size,     config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_UINT64T, buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_STRINGT, hash_type_str,   config, HK(hash));
-	hash_data_copy(ret, TYPE_UINTT,  max_rebuilds,    config, HK(max_rebuilds));
+	hash_data_copy(ret, TYPE_UINTT,   max_rebuilds,    config, HK(max_rebuilds));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("backend mphf parameter mphf_type invalid or not supplied");
@@ -214,9 +213,8 @@ static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	if((userdata->mphf.hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
 		return error("backend mphf parameter hash invalid");
-	if( (userdata->mphf.config  = hash_copy(config)) == NULL)
-		return error("backend mphf insufficent memory");
 	
+	userdata->mphf.config     = config;
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
 	userdata->offset_out      = hash_string_to_key(offset_out_str);

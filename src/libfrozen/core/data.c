@@ -81,6 +81,18 @@ static size_t        data_def_rawlen        (data_t *data, data_ctx_t *context){
 static ssize_t       data_def_convert       (data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
 	return -ENOSYS;
 } // }}}
+static ssize_t       data_def_copy          (data_t *dst, data_t *src){ // {{{
+	void *data_ptr; // to support (dst eq src)
+	
+	data_ptr       = src->data_ptr;
+	dst->type      = src->type;
+	dst->data_size = src->data_size;
+	if( (dst->data_ptr = malloc(src->data_size)) == NULL)
+		return -EFAULT;
+	
+	memcpy(dst->data_ptr, data_ptr, src->data_size);
+	return 0;
+} // }}}
 
 /** @brief Read from data to buffer
  *  @param[out]  dst       Data structure
@@ -453,19 +465,12 @@ ssize_t              data_alloc             (data_t *dst, data_type type, size_t
  *  @post Free structure with data_free to avoid memory leak
  */
 ssize_t             data_copy                (data_t *dst, data_t *src){ // {{{
-	void *data_ptr; // to support (dst eq src)
-	
 	if(dst == NULL || !data_validate(src))
 		return -EINVAL;
 	
-	data_ptr       = src->data_ptr;
-	dst->type      = src->type;
-	dst->data_size = src->data_size;
-	if( (dst->data_ptr = malloc(src->data_size)) == NULL)
-		return -EFAULT;
-	
-	memcpy(dst->data_ptr, data_ptr, src->data_size);
-	return 0;
+	DATA_FUNC_CALL(src->type, copy,
+		dst, src
+	);
 } // }}}
 
 /** @brief Free data structure

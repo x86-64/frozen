@@ -21,6 +21,7 @@ typedef enum api_types {
 } api_types;
 
 typedef int     (*f_init)      (backend_t *);
+typedef int     (*f_fork)      (backend_t *, hash_t *);
 typedef int     (*f_configure) (backend_t *, hash_t *);
 typedef int     (*f_destroy)   (backend_t *);
 typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
@@ -30,10 +31,12 @@ struct backend_t {
 	char                  *class;
 	uintmax_t              refs;
 	pthread_mutex_t        refs_mtx;
+	config_t              *config;
 	
 	api_types              supported_api;
 	f_init                 func_init;
 	f_configure            func_configure;
+	f_fork                 func_fork;
 	f_destroy              func_destroy;
 	union {
 		struct {
@@ -56,6 +59,7 @@ API backend_t *     backend_new             (hash_t *config);
 API ssize_t         backend_bulk_new        (hash_t *config);
 API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
+API backend_t *     backend_fork            (backend_t *backend, request_t *request);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
     ssize_t         backend_pass            (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);

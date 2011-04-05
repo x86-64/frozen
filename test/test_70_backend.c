@@ -1,6 +1,6 @@
 
 START_TEST (test_backends){
-	backend_t *backend;
+	backend_t *backend, *backendf;
 	
 	hash_t  settings[] = {
                 { 0, DATA_HASHT(
@@ -15,6 +15,14 @@ START_TEST (test_backends){
 	backend = backend_new(settings);
 		fail_unless(backend != NULL, "backend creation failed");
 	
+	request_t r_fork[] = {
+		hash_end
+	};
+	
+	backendf = backend_fork(backend, r_fork);
+		fail_unless(backendf != NULL, "backend fork creation failed");
+	
+	backend_destroy(backendf);
 	backend_destroy(backend);
 }
 END_TEST
