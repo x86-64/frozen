@@ -19,6 +19,8 @@ int frozen_init(void){
 	
 	global_settings = malloc(sizeof(global_proto));
 	memcpy(global_settings, &global_proto, sizeof(global_proto));
+	
+	srandom(time(NULL));
 	return 0;
 }
 

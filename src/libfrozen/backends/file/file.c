@@ -1,5 +1,41 @@
 #include <libfrozen.h>
-#include <alloca.h>
+
+/**
+ * @file file.c
+ * @ingroup modules
+ * @brief File module
+ *
+ * File module can read and write to file
+ */
+/**
+ * @ingroup modules
+ * @addtogroup mod_file Module 'file'
+ */
+/**
+ * @ingroup mod_file
+ * @page page_file_config File configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * 	{
+ * 	        class    = "file",
+ * 		filename = "somefilename.dat",        # produce {homedir}{filename} file
+ *              filename = {                          # produce concat'ed string from following components:
+ *                           homedir => (void_t)'',   #  - {homedir}
+ *                           string  => "somename",   #  - any string, any times
+ *                           string  => ".dat",       #
+ *                           random  => "AAAA",       #  - random string [a-zA-Z0-9] of length 4
+ *                           fork    => "keyname"     #  - key from fork request array, strings only
+ *                         },
+ *              buffer_size = (size_t)'1024',         # default buffer size for move operation
+ *              readonly    = (size_t)'1',            # make file read-only, default is read-write
+ *              exclusive   = (size_t)'1',            # pass O_EXCL for open, see man page
+ *              create      = (size_t)'1',            # pass O_CREAT for open, see man page
+ *              mode        = (size_t)'0777',         # file mode on creation. TODO octal representation
+ *              retry       = (size_t)'1',            # regen filename and retry open. usefull for example for tmpname generation
+ * 	}
+ * @endcode
+ */
 
 #define EMODULE         1
 #define DEF_BUFFER_SIZE 1024
@@ -21,7 +57,6 @@ typedef struct file_userdata {
 	
 	data_t           file_io;
 } file_userdata;
-
 
 // IO's
 static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
@@ -91,16 +126,14 @@ data_t file_io = DATA_IOT(
 
 // internal functions
 static int               file_new_offset(backend_t *backend, off_t *new_key, unsigned int size){ // {{{
-	int               fd;
-	int               ret;
-	off_t             key;
-	pthread_mutex_t  *mutex;
-	file_userdata   *data        = ((file_userdata *)backend->userdata);
+	int                    fd;
+	int                    ret;
+	off_t                  key;
+	file_userdata         *data              = ((file_userdata *)backend->userdata);
 	
-	fd    =  data->handle;
-	mutex = &data->create_lock;
+	fd = data->handle;
 	
-	pthread_mutex_lock(mutex);
+	pthread_mutex_lock(&data->create_lock);
 		
 		key = lseek(fd, 0, SEEK_END);
 		ret = ftruncate(fd, key + size);
@@ -112,12 +145,12 @@ static int               file_new_offset(backend_t *backend, off_t *new_key, uns
 			ret                    = -errno;
 		}
 		
-	pthread_mutex_unlock(mutex);
+	pthread_mutex_unlock(&data->create_lock);
 	
 	return ret;
 } // }}}
 static file_stat_status  file_update_count(file_userdata *data){ // {{{
-	int              ret;
+	int                    ret;
 	
 	switch(data->file_stat_status){
 		case STAT_NEED_UPDATE:
@@ -133,6 +166,158 @@ static file_stat_status  file_update_count(file_userdata *data){ // {{{
 	};
 	return data->file_stat_status;
 } // }}}
+static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
+	size_t                 ret;
+	char                  *str;
+	size_t                 str_size;
+	char                  *p;
+	char                  *buffer            = NULL;
+	size_t                 buffer_size       = 0;
+	data_t                *curr_data;
+	
+	do{
+		curr_data = hash_item_data(config);
+		
+		switch( hash_item_key(config) ){
+			case HK(fork):;
+				hash_key_t      key;
+				
+				str_size = 0;
+				
+				if(fork_req == NULL) break;
+				
+				str = GET_TYPE_STRINGT(curr_data);
+				
+				if( (key = hash_string_to_key(str)) == 0) break;
+				
+				hash_data_copy(ret, TYPE_STRINGT, str, fork_req, key);
+				if(ret != 0)
+					break;
+				
+				str_size = strlen(str);
+				break;
+			case HK(string):
+				str = GET_TYPE_STRINGT(curr_data);
+				str_size = strlen(str);
+				break;
+			case HK(homedir):
+				hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
+				if(ret != 0)
+					str = "./";
+				str_size = strlen(str);
+				break;
+			case HK(random):
+				if( (str_size = data_value_len(curr_data)) <= 1)
+					str_size = 2;
+				str_size--;
+				break;
+			default:
+				goto error;
+		};
+		
+		if(str_size > 0){
+			if( (buffer = realloc(buffer, buffer_size + str_size + 1)) == NULL)
+				break;
+			p = buffer + buffer_size;
+			
+			switch( hash_item_key(config) ){
+				case HK(random):;
+					intmax_t           i;
+					static const char  abc[] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDGHJKLZXCVBNM1234567890";
+					
+					for(i = 1; i <= str_size; i++, p++)
+						*p = abc[ random() % (sizeof(abc) - 1) ];
+					
+					break;
+				default: memcpy(p, str, str_size); break;
+			};
+			buffer_size += str_size;
+			buffer[buffer_size] = '\0';
+		}
+	}while( (config = hash_item_next(config)) != NULL);
+	
+	return buffer;
+error:
+	if(buffer)
+		free(buffer);
+	return NULL;
+} // }}}
+static char *            file_gen_filepath(config_t *config, config_t *fork_req){ // {{{
+	char                  *filename_str;
+	hash_t                *filename_hash;
+	data_t                *filename_data;
+	
+	if( (filename_hash = hash_find(config, HK(filename))) == NULL)
+		return NULL;
+	
+	filename_data = hash_item_data(filename_hash);
+	switch(data_value_type(filename_data)){
+		case TYPE_STRINGT:
+			filename_str = GET_TYPE_STRINGT(filename_data);
+			
+			config_t r_gen[] = {
+				{ HK(homedir), DATA_STRING("")                    },
+				{ HK(string),  DATA_PTR_STRING_AUTO(filename_str) },
+				hash_end
+			};
+			return file_gen_filepath_from_hasht(r_gen, fork_req);
+		case TYPE_HASHT:
+			filename_hash = GET_TYPE_HASHT(filename_data);
+			
+			return file_gen_filepath_from_hasht(filename_hash, fork_req);
+		default:
+			break;
+	};
+	return NULL;
+} // }}}
+static int               file_configure_any(backend_t *backend, config_t *config, config_t *fork_req){ // {{{
+	ssize_t                ret;
+	int                    handle;
+	char                  *filepath;
+	size_t                 flags             = 0;
+	size_t                 cfg_buffsize      = DEF_BUFFER_SIZE;
+	size_t                 cfg_rdonly        = 0;
+	size_t                 cfg_excl          = 0;
+	size_t                 cfg_creat         = 1;
+	size_t                 cfg_retry         = 0;
+	size_t                 cfg_mode          = S_IRUSR | S_IWUSR;
+	file_userdata         *userdata          = (file_userdata *)backend->userdata;
+	
+	hash_data_copy(ret, TYPE_SIZET,   cfg_buffsize, config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_rdonly,   config, HK(readonly));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_excl,     config, HK(exclusive));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_creat,    config, HK(create));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_mode,     config, HK(mode));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_retry,    config, HK(retry));
+	
+retry:
+	if( (filepath = file_gen_filepath(config, fork_req)) == NULL)
+		return error("filepath invalid");
+	
+	flags |= cfg_rdonly == 1 ? O_RDONLY : O_RDWR;
+	flags |= cfg_excl   == 1 ? O_EXCL   : 0;
+	flags |= cfg_creat  == 1 ? O_CREAT  : 0;
+	flags |= O_LARGEFILE;
+	
+	if( (handle = open(filepath, flags, cfg_mode)) == -1){
+		if(cfg_retry == 1) goto retry;
+		
+		ret = error("file open() error");
+		goto cleanup;
+	}
+	
+	userdata->path             = filepath;
+	userdata->handle           = handle;
+	userdata->buffer_size      = cfg_buffsize;
+	userdata->file_stat_status = STAT_NEED_UPDATE;
+	
+	pthread_mutex_init(&(userdata->create_lock), NULL);
+	return 0;
+	
+cleanup:
+	free(filepath);
+	return ret;
+} // }}}
 
 // Init and destroy
 static int file_init(backend_t *backend){ // {{{
@@ -147,76 +332,20 @@ static int file_init(backend_t *backend){ // {{{
 static int file_destroy(backend_t *backend){ // {{{
 	file_userdata *data = (file_userdata *)backend->userdata;
 	
-	if(data->path){
-		// was inited
-		// TODO rewrite condition
-		
+	if(data->handle){
 		free(data->path);
 		close(data->handle);
 		pthread_mutex_destroy(&(data->create_lock));
 	}
 	
 	free(backend->userdata);
-	
-	backend->userdata = NULL;
-	
 	return 0;
 } // }}}
-static int file_configure(backend_t *backend, hash_t *config){ // {{{
-	ssize_t        ret;
-	int            handle;
-	size_t         s;
-	char          *filepath;
-	char          *filename;
-	char          *homedir;
-	size_t         buffer_size = DEF_BUFFER_SIZE;
-	file_userdata *userdata    = (file_userdata *)backend->userdata;
-	
-	hash_data_copy(ret, TYPE_SIZET,  buffer_size, config, HK(buffer_size));
-	hash_data_copy(ret, TYPE_STRINGT, filename,    config, HK(filename));
-	if(ret != 0)
-		return error("filename not defined");
-	
-	hash_data_copy(ret, TYPE_STRINGT, homedir,     global_settings, HK(homedir));
-	if(ret != 0)
-		homedir = ".";
-	
-	s = strlen(homedir) + 1 + strlen(filename) + 1;
-	
-	if((filepath = malloc(s)) == NULL)
-		return error("filename too long");
-	
-	/* snprintf can truncate strings, so malicious user can use it to access another file.
-	 * we check string len such way to ensure none of strings was truncated */
-	if(snprintf(filepath, s, "%s/%s", homedir, filename) >= s){
-		ret = error("filename too long");
-		goto cleanup;
-	}
-	
-	// TODO add realpath and checks
-	
-	handle = open(
-		filepath,
-		O_CREAT | O_RDWR | O_LARGEFILE,
-		S_IRUSR | S_IWUSR
-	);
-	
-	if(handle == -1){
-		ret = error("file open() error");
-		goto cleanup;
-	}
-	
-	userdata->path             = filepath;
-	userdata->handle           = handle;
-	userdata->buffer_size      = buffer_size;
-	userdata->file_stat_status = STAT_NEED_UPDATE;
-	
-	pthread_mutex_init(&(userdata->create_lock), NULL);
-	return 0;
-
-cleanup:
-	free(filepath);
-	return ret;
+static int file_fork(backend_t *backend, config_t *request){ // {{{
+	return file_configure_any(backend, backend->config, request);
+} // }}}
+static int file_configure(backend_t *backend, config_t *config){ // {{{
+	return file_configure_any(backend, config, NULL);
 } // }}}
 
 // Requests
@@ -418,6 +547,7 @@ backend_t file_proto = {
 	.class          = "file",
 	.supported_api  = API_CRWD,
 	.func_init      = &file_init,
+	.func_fork      = &file_fork,
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,
 	{{

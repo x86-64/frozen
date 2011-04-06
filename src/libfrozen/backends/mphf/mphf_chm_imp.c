@@ -417,7 +417,6 @@ ssize_t mphf_chm_imp_clean       (mphf_t *mphf){ // {{{
 	if( (ret = chm_imp_init(mphf, WRITEABLE)) < 0)
 		return ret;
 	
-	srandom(time(NULL));
 	data->params.hash1 = random();
 	data->params.hash2 = random();
 	

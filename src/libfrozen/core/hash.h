@@ -17,7 +17,7 @@ typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 #define hash_next(hash) {hash_ptr_end,  {0, (void *)hash,  0}}
 #define hash_end        hash_next(NULL)
 #define HASH_CTX_KEY_OFFSET 0x1000
-#define HK(value)       HASH_KEY_##value
+#define HK(value) HASH_KEY_##value
 
 // allocated hash functions
 API hash_t *           hash_new                     (size_t nelements);
