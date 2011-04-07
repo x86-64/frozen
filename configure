@@ -640,6 +640,7 @@ BACKEND_OBJECTS_incapsulate
 BACKEND_OBJECTS_file
 BACKEND_OBJECTS_cache_append
 BACKEND_OBJECTS_cache
+BACKEND_OBJECTS_balancer
 BACKEND_LIBS_SELECTED
 BACKEND_DIST_DIRS
 BACKEND_OBJECTS_allocator
@@ -785,6 +786,7 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_allocator
+enable_balancer
 enable_cache
 enable_cache_append
 enable_file
@@ -1471,6 +1473,8 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-backend-allocator
                           disable backend allocator
+  --disable-backend-balancer
+                          disable backend balancer
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
@@ -17233,6 +17237,43 @@ fi
 		BACKEND_MAKEFILE_allocator=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED allocator/libfrozen_backend_allocator.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-balancer was given.
+if test "${enable_balancer+set}" = set; then :
+  enableval=$enable_balancer;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_balancer}" = "yes"; then
+			enable_balancer="no"
+		else
+			enable_balancer="yes"
+		fi
+	fi
+
+	if test "${enable_balancer}" = "yes"; then
+		BACKEND_DIR_balancer="balancer"
+		BACKEND_DEP_balancer=""
+		BACKEND_OBJECTS_balancer="$BACKEND_OBJECTS_balancer libfrozen_backend_balancer_la-balancer.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED balancer"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_balancer" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/balancer/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS balancer"
+
+		BACKEND_MAKEFILE_balancer=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED balancer/libfrozen_backend_balancer.la"
 
 	fi
 

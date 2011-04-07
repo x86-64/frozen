@@ -25,7 +25,7 @@
  *                           string  => "somename",   #  - any string, any times
  *                           string  => ".dat",       #
  *                           random  => "AAAA",       #  - random string [a-zA-Z0-9] of length 4
- *                           fork    => "keyname"     #  - key from fork request array, strings only
+ *                           fork    => "keyname"     #  - key from fork request array, strings only. Skipped on non-fork requests
  *                         },
  *              buffer_size = (size_t)'1024',         # default buffer size for move operation
  *              readonly    = (size_t)'1',            # make file read-only, default is read-write
@@ -33,6 +33,7 @@
  *              create      = (size_t)'1',            # pass O_CREAT for open, see man page
  *              mode        = (size_t)'0777',         # file mode on creation. TODO octal representation
  *              retry       = (size_t)'1',            # regen filename and retry open. usefull for example for tmpname generation
+ *              fork_only   = (size_t)'1',            # open new file only on forks
  * 	}
  * @endcode
  */
@@ -280,6 +281,7 @@ static int               file_configure_any(backend_t *backend, config_t *config
 	size_t                 cfg_excl          = 0;
 	size_t                 cfg_creat         = 1;
 	size_t                 cfg_retry         = 0;
+	size_t                 cfg_forkonl       = 0;
 	size_t                 cfg_mode          = S_IRUSR | S_IWUSR;
 	file_userdata         *userdata          = (file_userdata *)backend->userdata;
 	
@@ -289,7 +291,11 @@ static int               file_configure_any(backend_t *backend, config_t *config
 	hash_data_copy(ret, TYPE_SIZET,   cfg_creat,    config, HK(create));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_mode,     config, HK(mode));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_retry,    config, HK(retry));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_forkonl,  config, HK(fork_only));
 	
+	if(cfg_forkonl == 1 && fork_req == NULL)
+		return 0;
+
 retry:
 	if( (filepath = file_gen_filepath(config, fork_req)) == NULL)
 		return error("filepath invalid");
