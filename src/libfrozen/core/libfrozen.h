@@ -64,7 +64,9 @@
 /* Global variables */
 API extern hash_t *global_settings;
 
-API int frozen_init(void);
-API int frozen_destroy(void);
+API int       frozen_init(void);
+API int       frozen_destroy(void);
+    ssize_t   safe_pow(size_t *res, size_t x, size_t y);
+    ssize_t   safe_mul(size_t *res, size_t x, size_t y);
 
 #endif

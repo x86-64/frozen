@@ -34,3 +34,29 @@ int frozen_destroy(void){
 	return 0;
 }
 
+ssize_t  safe_pow(size_t *res, size_t x, size_t y){
+	size_t t;
+	
+	if(y == 0) return 1;
+	if(y == 1) return x;
+	
+	t = x;
+	while(y-- >= 0){
+		if(__MAX(size_t) / x <= t)
+			return -EINVAL;
+		
+		t *= x;
+	}
+	*res = t;
+	return 0;
+}
+
+ssize_t safe_mul(size_t *res, size_t x, size_t y){
+	if(__MAX(size_t) / x <= y)
+		return -EINVAL;
+	
+	*res = x * y;
+	return 0;
+}
+
+
