@@ -71,7 +71,8 @@ START_TEST (test_backend_mphf){
                         { HK(backend_g),    DATA_STRING("backend_mphf_g")               },
                         { HK(backend_e),    DATA_STRING("backend_mphf_e")               },
                         { HK(backend_v),    DATA_STRING("backend_mphf_v")               },
-                        { HK(nelements),    DATA_UINT64T(100)                           },
+                        { HK(nelements_min),DATA_UINT64T(10)                            },
+                        { HK(nelements_step),DATA_UINT64T(2)                            },
                         { HK(value_bits),   DATA_UINT32T(32)                            },
                         { HK(keyid),        DATA_STRING("keyid")                        },
                         hash_end
@@ -82,12 +83,14 @@ START_TEST (test_backend_mphf){
 	backend_t *b_dat = backend_new(config);
 	
 	char  *data_array[] = {
-		"http://google.ru/",
-		"http://yandex.ru/",
-		"http://bing.com/",
-		"http://rambler.ru/",
-		"http://aport.ru/",
-		"http://hell.com/"
+		"http://google.ru/", "http://yandex.ru/",  "http://bing.com/",  "http://rambler.ru/",
+		"http://aport.ru/",  "http://site1.ru/",   "http://site2.ru/",  "http://site3.ru/",
+		"http://site4.ru/",  "http://site5.ru/",   "http://site6.ru/",  "http://site7.ru/",
+		"http://site8.ru/",  "http://site9.ru/",   "http://site10.ru/", "http://site11.ru/",
+		"http://site12.ru/", "http://site13.ru/",  "http://site14.ru/", "http://site15.ru/",
+		"http://site16.ru/", "http://site17.ru/",  "http://site18.ru/", "http://site19.ru/",
+		"http://site20.ru/", "http://site21.ru/",  "http://site22.ru/", "http://site23.ru/",
+		"http://site24.ru/", "http://site25.ru/",  "http://site26.ru/", "http://hell.com/"
 	};
 	char buffer[30];
 	

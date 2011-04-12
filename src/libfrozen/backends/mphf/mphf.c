@@ -10,7 +10,7 @@
 typedef struct mphf_userdata {
 	mphf_t               mphf;
 	mphf_proto_t        *mphf_proto;
-	backend_t             *backend_data;
+	backend_t           *backend_data;
 	size_t               buffer_size;
 	uintmax_t            max_rebuilds;
 	
@@ -106,7 +106,7 @@ redo:
 	if(rebuild_num++ >= userdata->max_rebuilds)
 		return error("mphf full");
 
-	if( (ret = userdata->mphf_proto->func_clean(&userdata->mphf)) < 0)
+	if( (ret = userdata->mphf_proto->func_rebuild(&userdata->mphf, count)) < 0)
 		return ret;
 	
 	// process items

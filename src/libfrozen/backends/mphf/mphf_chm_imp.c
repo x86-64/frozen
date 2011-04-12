@@ -8,6 +8,7 @@ typedef enum chm_imp_fill_flags {
 } chm_imp_fill_flags;
 
 typedef struct chm_imp_params_t {
+	uint64_t               nelements; // current mphf capacity
 	uint64_t               hash1;
 	uint64_t               hash2;
 } chm_imp_params_t;
@@ -20,6 +21,8 @@ typedef struct chm_imp_t {
 	backend_t             *be_e;
 	
 	chm_imp_params_t       params;
+	uintmax_t              nelements_min;  // minimum required capacity
+	uintmax_t              nelements_step; // minimum capacity step
 	uintmax_t              nvertex;
 	uintmax_t              bi_value;
 	uintmax_t              bt_value;
@@ -37,11 +40,12 @@ typedef struct vertex_list_t {
 	struct vertex_list_t  *next;
 } vertex_list_t;
 
-#define EMODULE              11
-#define CHM_CONST            209
-#define N_INITIAL_DEFAULT    256
-#define KEY_BITS_DEFAULT     32
-#define VALUE_BITS_DEFAULT   32
+#define EMODULE               11
+#define CHM_CONST             209
+#define CAPACITY_MIN_DEFAULT  256
+#define CAPACITY_STEP_DEFAULT 256
+#define KEY_BITS_DEFAULT      32
+#define VALUE_BITS_DEFAULT    32
 #define BITS_TO_BYTES(x) ( ((x - 1) >> 3) + 1)
 
 static char clean[100] = {0};
@@ -62,18 +66,98 @@ static uintmax_t log_any(uintmax_t x, uintmax_t power){ // {{{
 	return res + 1;
 } // }}}
 
-static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
-	ssize_t    ret;
-	char      *backend;
-	uintmax_t  nvertex;
-	uintmax_t  nelements     = N_INITIAL_DEFAULT;
-	uintmax_t  bvalue        = VALUE_BITS_DEFAULT;
-	chm_imp_t *data          = (chm_imp_t *)&mphf->data;
-
-	if((data->status & FILLED) == 0){
-		hash_data_copy(ret, TYPE_UINTT,  nelements,     mphf->config, HK(nelements));  // number of elements
-		hash_data_copy(ret, TYPE_UINTT,  bvalue,        mphf->config, HK(value_bits)); // number of bits per value to store
-		// TODO param 'writable' and 'readonly'
+static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	if(backend_stdcall_read  (data->be_g, 0, &data->params, sizeof(data->params)) < 0){
+		memset(&data->params, 0, sizeof(data->params));
+		return error("params read failed");
+	}
+	
+	return 0;
+} // }}}
+static ssize_t chm_imp_param_write(mphf_t *mphf){ // {{{
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	if(backend_stdcall_write (data->be_g, 0, &data->params, sizeof(data->params)) < 0)
+		return error("params write failed");
+	
+	return 0;
+} // }}}
+static ssize_t chm_imp_file_wipe  (mphf_t *mphf){ // {{{
+	size_t                 count;
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	// kill g
+	count = 0;
+	backend_stdcall_count(data->be_g, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_g, 0, count) < 0)
+			return error("g array delete failed");
+	}
+	
+	// kill e
+	count = 0;
+	backend_stdcall_count(data->be_e, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_e, 0, count) < 0)
+			return error("e array delete failed");
+	}
+	
+	// kill v
+	count = 0;
+	backend_stdcall_count(data->be_v, &count);
+	if(count != 0){
+		if(backend_stdcall_delete(data->be_v, 0, count) < 0)
+			return error("v array delete failed");
+	}
+	return 0;
+} // }}}
+static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
+	ssize_t                ret;
+	off_t                  t;
+	size_t                 size;
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	if( (ret = chm_imp_file_wipe(mphf)) < 0)
+		return ret;
+	
+	// fill g
+	size = sizeof(data->params) + data->nvertex * data->bt_value;
+	if(backend_stdcall_create(data->be_g, &t, size) < 0)
+		return error("g array create failed");
+	if(t != 0)
+		return error("g array file not empty");
+	if(backend_stdcall_fill  (data->be_g, t, &clean, sizeof(clean), size) < 0)
+		return error("g array fill failed");
+	
+	// fill v
+	size = data->nvertex * data->bt_vertex; 
+	if(backend_stdcall_create(data->be_v, &t, size) < 0)
+		return error("v array create failed");
+	if(t != 0)
+		return error("v array file not empty");
+	if(backend_stdcall_fill  (data->be_v, t, &clean, sizeof(clean), size) < 0)
+		return error("v array fill failed");
+	
+	// fill e
+	// empty
+	return 0;
+} // }}}
+static ssize_t chm_imp_configure  (mphf_t *mphf){ // {{{
+	ssize_t                ret;
+	char                  *backend;
+	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
+	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
+	uintmax_t              bi_value          = VALUE_BITS_DEFAULT;
+	uintmax_t              readonly          = 0;
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	if( (data->status & FILLED) == 0){
+		hash_data_copy(ret, TYPE_UINTT,  nelements_min,  mphf->config, HK(nelements_min));
+		hash_data_copy(ret, TYPE_UINTT,  nelements_step, mphf->config, HK(nelements_step));
+		hash_data_copy(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to store
+		hash_data_copy(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_g));
 		if(ret != 0 || (data->be_g = backend_acquire(backend)) == NULL)
@@ -87,48 +171,74 @@ static ssize_t chm_imp_init       (mphf_t *mphf, size_t flags){ // {{{
 		if(ret == 0)
 			data->be_e = backend_acquire(backend);
 		
-		if(data->be_v == NULL || data->be_e == NULL){
+		if(data->be_v == NULL || data->be_e == NULL || readonly != 0){
 			data->status &= ~WRITEABLE;
 		}else{
 			data->status |= WRITEABLE;
 		}
 		
-		// nvertex = (2.09 * nelements)
-		nvertex = nelements;
-		nvertex = (__MAX(uintmax_t) / CHM_CONST > nvertex) ? (nvertex * CHM_CONST) / 100 : (nvertex / 100) * CHM_CONST;
-		// TODO SEC check max elements
+		data->nelements_min  = nelements_min;
+		data->nelements_step = nelements_step;
+		data->bi_value       = bi_value;
+		data->bt_value       = BITS_TO_BYTES(data->bi_value);
 		
-		data->nvertex     = nvertex;
-		data->bi_vertex   = log_any(nvertex, 2);
-		data->bt_vertex   = BITS_TO_BYTES(data->bi_vertex);
-		data->bi_value    = bvalue;
-		data->bt_value    = BITS_TO_BYTES(bvalue);
-		
-		//if(__MAX(uintmax_t) / data->bt_value <= nvertex)
-		//	return -EINVAL;
-		//data->store_size  = sizeof(*data) + nvertex * data->bt_value;
-		//return backend_stdcall_read(mphf->backend, mphf->offset, &data->params, sizeof(data->params));
-		
-		data->status     |= FILLED;
+		data->status        |= FILLED;
 	}
+	return 0;
+} // }}}
+static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t nelements){ // {{{
+	uintmax_t              nvertex;
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	// nvertex = (2.09 * nelements)
+	nvertex = nelements;
+	nvertex = (__MAX(uintmax_t) / CHM_CONST > nvertex) ? (nvertex * CHM_CONST) / 100 : (nvertex / 100) * CHM_CONST;
+	// TODO SEC check max elements
+	
+	data->params.nelements   = nelements;
+	data->nvertex            = nvertex;
+	data->bi_vertex          = log_any(nvertex, 2);
+	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
+	return 0;
+} // }}}
+static ssize_t chm_imp_load       (mphf_t *mphf){ // {{{
+	ssize_t                ret;
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	
+	// configure initial parameters for mphf
+	if( (ret = chm_imp_configure(mphf)) < 0)
+		return ret;
+	
+	if( (ret = chm_imp_param_read(mphf)) < 0)
+		return -EBADF; // no params on disk found - rebuild array
+	
+	if( (ret = chm_imp_configure_r(mphf, data->params.nelements)) < 0)
+		return ret;
+	
+	return 0;
+} // }}}
+
+static ssize_t chm_imp_check      (mphf_t *mphf, size_t flags){ // {{{
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	if( (flags & WRITEABLE) && ((data->status & WRITEABLE) == 0) )
 		return error("mphf is read-only");
 	
 	return 0;
 } // }}}
-static ssize_t chm_imp_destroy    (mphf_t *mphf){ // {{{
+static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
 	
-	if( (data->status & FILLED)){
+	if(data->be_g)
 		backend_destroy(data->be_g);
-		if( (data->status & WRITEABLE) ){
-			backend_destroy(data->be_e);
-			backend_destroy(data->be_v);
-		}
+	
+	if( (data->status & WRITEABLE) ){
+		backend_destroy(data->be_e);
+		backend_destroy(data->be_v);
 	}
 	return 0;
 } // }}}
+
 static ssize_t graph_new_edge_id(chm_imp_t *data, uintmax_t *id){ // {{{
 	off_t                  offset;
 	uintmax_t              sizeof_edge;
@@ -386,94 +496,73 @@ static ssize_t graph_add_edge(chm_imp_t *data, uintmax_t *vertex, uintmax_t valu
 } // }}}
 
 ssize_t mphf_chm_imp_load        (mphf_t *mphf){ // {{{
-	size_t                 count = 0;
-	intmax_t               ret;
+	ssize_t                ret;
 	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_init(mphf, 0)) < 0)
-		return ret;
+	// try load rest parameters from disk
+	if( (ret = chm_imp_load(mphf)) < 0){
+		if(ret == -EBADF)
+			goto rebuild;
+	}
 	
-	if(backend_stdcall_count(data->be_g, &count) < 0 || count == 0)
-		return mphf_chm_imp_clean(mphf);
+	// check if array capacity match new _min requirements
+	if(data->params.nelements < data->nelements_min)
+		goto rebuild;
 	
 	return 0;
+	
+rebuild:
+	// if mphf not exist - run rebuild with minimum nelements
+	return mphf_chm_imp_rebuild(mphf, data->nelements_min);
 } // }}}
 ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
-	intmax_t               ret;
-
-	if( (ret = chm_imp_destroy(mphf)) < 0)
-		return ret;
-	
-	return 0;
+	return chm_imp_unload(mphf);
 } // }}}
-ssize_t mphf_chm_imp_clean       (mphf_t *mphf){ // {{{
-	off_t                  t;
-	intmax_t               ret;
+ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements){ // {{{
+	ssize_t                ret;
+	uint64_t               nelements;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = mphf_chm_imp_destroy(mphf)) < 0)
+	// run configure (just in case someone forget)
+	if( (ret = chm_imp_configure(mphf)) < 0)
 		return ret;
 	
-	if( (ret = chm_imp_init(mphf, WRITEABLE)) < 0)
-		return ret;
+	//                  |  empty array        |  existing array
+	// -----------------+---------------------+--------------------------
+	// e_nelements      |  HK(nelements_min)  |  array actual size
+	// params.nelements |  0                  |  array defined capacity
+	// -----------------+---------------------+--------------------------
 	
+	// calc new capacity
+	nelements  = MAX(e_nelements, data->params.nelements); // minimum capacity
+	nelements -= data->nelements_min;
+	if( (nelements % data->nelements_step) != 0){          // round to _step
+		nelements /= data->nelements_step;
+		nelements += 1;
+		nelements *= data->nelements_step;
+	}
+	nelements += data->nelements_min;
+	
+	//printf("mphf rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
+	
+	// set .params
 	data->params.hash1 = random();
 	data->params.hash2 = random();
+	if( (ret = chm_imp_configure_r(mphf, nelements)) < 0)
+		return ret;
 	
-	// TODO STRANGE create offset written to t, but we write in 0
+	// reinit files
+	if( (ret = chm_imp_file_init(mphf)) < 0)
+		return ret;
 	
-	// fill g
-	if(backend_stdcall_create(data->be_g, &t, sizeof(data->params) + data->nvertex * data->bt_value) < 0)
-		return error("g array create failed");
-	if(backend_stdcall_write (data->be_g, 0, &data->params, sizeof(data->params)) < 0)
-		return error("g array write failed");
-	if(backend_stdcall_fill  (data->be_g, sizeof(data->params), &clean, sizeof(clean), data->nvertex * data->bt_value) < 0)
-		return error("g array fill failed");
-	
-	// fill v
-	if(backend_stdcall_create(data->be_v, &t, data->nvertex * data->bt_vertex) < 0)
-		return error("v array create failed");
-	if(backend_stdcall_fill  (data->be_v, 0, &clean, sizeof(clean), data->nvertex * data->bt_vertex) < 0)
-		return error("v array fill failed");
+	// save new .params
+	if( (ret = chm_imp_param_write(mphf)) < 0)
+		return ret;
 	
 	return 0;
 } // }}}
 ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
-	intmax_t               ret;
-	size_t                 count;
-	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
-	
-	if( (ret = chm_imp_init(mphf, WRITEABLE)) < 0)
-		return ret;
-	
-	// TODO normal _destroy
-	// TODO remove inits
-	
-	// kill g
-	count = 0;
-	backend_stdcall_count(data->be_g, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_g, 0, count) < 0)
-			return error("g array delete failed");
-	}
-	
-	// kill e
-	count = 0;
-	backend_stdcall_count(data->be_e, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_e, 0, count) < 0)
-			return error("e array delete failed");
-	}
-	
-	// kill v
-	count = 0;
-	backend_stdcall_count(data->be_v, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_v, 0, count) < 0)
-			return error("v array delete failed");
-	}
-	
-	return 0;
+	return chm_imp_file_wipe(mphf);
 } // }}}
 
 ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {{{
@@ -481,7 +570,7 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	intmax_t               ret;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_init(mphf, WRITEABLE)) < 0)
+	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
 		return ret;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
@@ -501,7 +590,7 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	vertex_list_t          vertex_new;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_init(mphf, WRITEABLE)) < 0)
+	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
 		return ret;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
@@ -538,7 +627,7 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // 
 	uintmax_t              vertex[2], g[2], result;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_init(mphf, 0)) < 0)
+	if( (ret = chm_imp_check(mphf, 0)) < 0)
 		return ret;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);

@@ -4,7 +4,7 @@
 ssize_t  mphf_chm_imp_load        (mphf_t *mphf);
 ssize_t  mphf_chm_imp_unload      (mphf_t *mphf);
 
-ssize_t  mphf_chm_imp_clean       (mphf_t *mphf);
+ssize_t  mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements);
 ssize_t  mphf_chm_imp_destroy     (mphf_t *mphf);
 
 ssize_t  mphf_chm_imp_insert      (mphf_t *mphf, uint64_t key, uint64_t  value);

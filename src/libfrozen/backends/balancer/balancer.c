@@ -225,6 +225,7 @@ static ssize_t balancer_request_rest(backend_t *backend, request_t *request){ //
 	list                  *pool;
 	backend_t            **lchilds;
 	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
+	size_t                 clone_i           = userdata->clone;
 	
 	pool = userdata->pool;
 	if( (lsz = list_flatten_frst(pool)) == 0)
@@ -232,7 +233,8 @@ static ssize_t balancer_request_rest(backend_t *backend, request_t *request){ //
 	
 	lchilds = alloca( sizeof(backend_t *) * lsz );
 	list_flatten_scnd(pool, (void **)lchilds, lsz);
-	
+
+redo:
 	switch(userdata->mode){
 		case MODE_RANDOM:
 			i = random();
@@ -248,6 +250,8 @@ static ssize_t balancer_request_rest(backend_t *backend, request_t *request){ //
 	if( (ret = backend_query(lchilds[i], request)) < 0)
 		return ret;
 	
+	if(--clone_i > 0) goto redo;
+	
 	return -EEXIST;
 } // }}}
 static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ // {{{
@@ -258,7 +262,8 @@ static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ 
 	data_t                *field;
 	data_ctx_t            *field_ctx;
 	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
-	
+	size_t                 clone_i           = userdata->clone;
+
 	hash_data_find(request, userdata->field, &field, &field_ctx);
 	if(field == NULL)
 		return error("field not supplied");
@@ -295,9 +300,12 @@ static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ 
 		
 		userdata->linear_pool[array_val] = curr;
 	}
-	
+
+redo:
 	if( (ret = backend_query(curr, request)) < 0)
 		return ret;
+	
+	if(--clone_i > 0) goto redo;
 	
 	return -EEXIST;
 } // }}}

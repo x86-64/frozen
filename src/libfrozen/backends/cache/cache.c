@@ -3,7 +3,8 @@
 #define EMODULE 3
 
 typedef struct cache_userdata {
-	memory_t    memory;
+	memory_t         memory;
+	pthread_mutex_t  create_lock;
 } cache_userdata;
 
 static int cache_init(backend_t *backend){ // {{{
@@ -21,6 +22,8 @@ static int cache_destroy(backend_t *backend){ // {{{
 	data_transfer(&d_backend, NULL, &d_memory, NULL);
 	
 	memory_free(&userdata->memory);
+	pthread_mutex_destroy(&userdata->create_lock);
+	
 	free(userdata);
 	return 0;
 } // }}}
@@ -46,14 +49,15 @@ static int cache_configure(backend_t *backend, hash_t *config){ // {{{
 	if(memory_resize(&userdata->memory, (size_t)file_size) != 0)
 		return 0;
 	
-	data_t d_memory = DATA_MEMORYT(&userdata->memory);
+	data_t d_memory   = DATA_MEMORYT(&userdata->memory);
 	data_t d_backend  = DATA_BACKENDT(backend);
 	if(data_transfer(&d_memory, NULL, &d_backend, NULL) < 0)
 		goto error;
 	
+	pthread_mutex_init(&userdata->create_lock, NULL);
 exit:
 	return 0;
-error:
+error: // TODO wrong destroy
 	memory_free(&userdata->memory);
 	goto exit;
 } // }}}
@@ -93,8 +97,15 @@ static ssize_t cache_backend_create(backend_t *backend, request_t *request){
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
-	if(memory_grow(&userdata->memory, size, &offset) != 0)
-		return error("memory_grow failed");
+	pthread_mutex_lock(&userdata->create_lock);
+	
+		if(memory_grow(&userdata->memory, size, &offset) != 0)
+			ret = error("memory_grow failed");
+	
+	pthread_mutex_unlock(&userdata->create_lock);
+	
+	if(ret != 0)
+		return ret;
 	
 	/* optional return of offset */
 	hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
@@ -112,7 +123,34 @@ static ssize_t cache_backend_create(backend_t *backend, request_t *request){
 }
 
 static ssize_t cache_backend_delete(backend_t *backend, request_t *request){
+	ssize_t                ret;
+	off_t                  offset;
+	size_t                 size, mem_size;
+	cache_userdata         *userdata = (cache_userdata *)backend->userdata;
+	
 	// TIP cache, as like as file, can only truncate
+	
+	hash_data_copy(ret, TYPE_OFFT,  offset, request, HK(offset));  if(ret != 0) return warning("offset not supplied");
+	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
+	
+	pthread_mutex_lock(&userdata->create_lock);
+		
+		if(memory_size(&userdata->memory, &mem_size) < 0){
+			ret = error("memory_size failed");
+			goto exit;
+		}
+		
+		if(offset + size != mem_size){ // truncating only last elements
+			ret = warning("cant delete not last elements");
+			goto exit;
+		}
+		
+		if(memory_resize(&userdata->memory, (size_t)offset) != 0){
+			ret = error("memory_resize failed");
+			goto exit;
+		}
+exit:		
+	pthread_mutex_unlock(&userdata->create_lock);
 	
 	return 0; //-EFAULT;
 }
