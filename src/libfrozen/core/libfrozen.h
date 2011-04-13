@@ -66,7 +66,8 @@ API extern hash_t *global_settings;
 
 API int       frozen_init(void);
 API int       frozen_destroy(void);
-    ssize_t   safe_pow(size_t *res, size_t x, size_t y);
-    ssize_t   safe_mul(size_t *res, size_t x, size_t y);
+    intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y);
+    intmax_t  safe_mul(uintmax_t *res, uintmax_t x, uintmax_t y);
+    intmax_t  safe_div(uintmax_t *res, uintmax_t x, uintmax_t y);
 
 #endif

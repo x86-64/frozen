@@ -227,6 +227,9 @@ backend_t *  backend_find         (char *name){ // {{{
 	backend_t             *backend;
 	void                  *list_status  = NULL;
 	
+	if(name == NULL)
+		return NULL;
+	
 	list_rdlock(&backends_names);
 		while( (backend = list_iter_next(&backends_names, &list_status)) != NULL){
 			if(strcmp(backend->name, name) == 0)
@@ -246,6 +249,11 @@ backend_t *  backend_acquire      (char *name){ // {{{
 	return backend;
 } // }}}
 backend_t *  backend_fork         (backend_t *backend, request_t *request){ // {{{
+	static request_t       r_fork[] = { hash_end };
+	
+	if(request == NULL)
+		request = r_fork;
+	
 	return backend_fork_rec(backend, request);
 } // }}}
 char *       backend_get_name     (backend_t *backend){ // {{{

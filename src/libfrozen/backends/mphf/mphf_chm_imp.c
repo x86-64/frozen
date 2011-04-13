@@ -144,9 +144,13 @@ static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
 	// empty
 	return 0;
 } // }}}
-static ssize_t chm_imp_configure  (mphf_t *mphf){ // {{{
+static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	ssize_t                ret;
-	char                  *backend;
+	backend_t             *t;
+	backend_t             *be_g              = NULL;
+	backend_t             *be_v              = NULL;
+	backend_t             *be_e              = NULL;
+	char                  *backend           = NULL;
 	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
 	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
 	uintmax_t              bi_value          = VALUE_BITS_DEFAULT;
@@ -160,23 +164,45 @@ static ssize_t chm_imp_configure  (mphf_t *mphf){ // {{{
 		hash_data_copy(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_g));
-		if(ret != 0 || (data->be_g = backend_acquire(backend)) == NULL)
-			return error("backend chm_imp parameter backend_g invalid");
+		if(ret == 0){
+			be_g = t = backend_acquire(backend);
+			if(fork_req){
+				be_g = backend_fork(t, fork_req);
+				backend_destroy(t);
+			}
+		}
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_v));
-		if(ret == 0)
-			data->be_v = backend_acquire(backend);
+		if(ret == 0){
+			be_v = t = backend_acquire(backend);
+			if(fork_req){
+				be_v = backend_fork(t, fork_req);
+				backend_destroy(t);
+			}
+		}
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_e));
-		if(ret == 0)
-			data->be_e = backend_acquire(backend);
+		if(ret == 0){
+			be_e = t = backend_acquire(backend);
+			if(fork_req){
+				be_e = backend_fork(t, fork_req);
+				backend_destroy(t);
+			}
+		}
 		
-		if(data->be_v == NULL || data->be_e == NULL || readonly != 0){
+		
+		if(be_g == NULL)
+			return error("backend chm_imp parameter backend_g invalid");
+		
+		if(be_v == NULL || be_e == NULL || readonly != 0){
 			data->status &= ~WRITEABLE;
 		}else{
 			data->status |= WRITEABLE;
 		}
 		
+		data->be_g           = be_g;
+		data->be_v           = be_v;
+		data->be_e           = be_e;
 		data->nelements_min  = nelements_min;
 		data->nelements_step = nelements_step;
 		data->bi_value       = bi_value;
@@ -190,34 +216,47 @@ static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t nelements){ // {{{
 	uintmax_t              nvertex;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	// nvertex = (2.09 * nelements)
-	nvertex = nelements;
-	nvertex = (__MAX(uintmax_t) / CHM_CONST > nvertex) ? (nvertex * CHM_CONST) / 100 : (nvertex / 100) * CHM_CONST;
-	// TODO SEC check max elements
+	if(nelements == 0) nelements = 1; // at least one element
 	
-	data->params.nelements   = nelements;
+	// nvertex = (2.09 * nelements)
+	if(safe_mul(&nvertex, nelements, CHM_CONST) < 0){
+		safe_div(&nvertex, nelements, 100);
+		
+		if(safe_mul(&nvertex, nvertex, CHM_CONST) < 0)
+			return error("too many elements");
+	}
+	safe_div(&nvertex, nvertex, 100);
+	
 	data->nvertex            = nvertex;
+	data->params.nelements   = nelements;
 	data->bi_vertex          = log_any(nvertex, 2);
 	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
 	return 0;
 } // }}}
-static ssize_t chm_imp_load       (mphf_t *mphf){ // {{{
+static ssize_t chm_imp_load       (mphf_t *mphf, request_t *fork_req){ // {{{
 	ssize_t                ret;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	// configure initial parameters for mphf
-	if( (ret = chm_imp_configure(mphf)) < 0)
+	if( (ret = chm_imp_configure(mphf, fork_req)) < 0)
 		return ret;
 	
 	if( (ret = chm_imp_param_read(mphf)) < 0)
-		return -EBADF; // no params on disk found - rebuild array
+		goto rebuild; // no params on disk found - rebuild array
 	
 	if( (ret = chm_imp_configure_r(mphf, data->params.nelements)) < 0)
 		return ret;
 	
+	// check if array capacity match new _min requirements
+	if(data->params.nelements < data->nelements_min)
+		goto rebuild;
+	
 	return 0;
-} // }}}
 
+rebuild:
+	// if mphf not exist - run rebuild with minimum nelements
+	return mphf_chm_imp_rebuild(mphf, data->nelements_min);
+} // }}}
 static ssize_t chm_imp_check      (mphf_t *mphf, size_t flags){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
@@ -496,36 +535,18 @@ static ssize_t graph_add_edge(chm_imp_t *data, uintmax_t *vertex, uintmax_t valu
 } // }}}
 
 ssize_t mphf_chm_imp_load        (mphf_t *mphf){ // {{{
-	ssize_t                ret;
-	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
-	
-	// try load rest parameters from disk
-	if( (ret = chm_imp_load(mphf)) < 0){
-		if(ret == -EBADF)
-			goto rebuild;
-	}
-	
-	// check if array capacity match new _min requirements
-	if(data->params.nelements < data->nelements_min)
-		goto rebuild;
-	
-	return 0;
-	
-rebuild:
-	// if mphf not exist - run rebuild with minimum nelements
-	return mphf_chm_imp_rebuild(mphf, data->nelements_min);
+	return chm_imp_load(mphf, NULL);
 } // }}}
 ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
 	return chm_imp_unload(mphf);
+} // }}}
+ssize_t mphf_chm_imp_fork        (mphf_t *mphf, request_t *request){ // {{{
+	return chm_imp_load(mphf, request);
 } // }}}
 ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements){ // {{{
 	ssize_t                ret;
 	uint64_t               nelements;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
-	
-	// run configure (just in case someone forget)
-	if( (ret = chm_imp_configure(mphf)) < 0)
-		return ret;
 	
 	//                  |  empty array        |  existing array
 	// -----------------+---------------------+--------------------------

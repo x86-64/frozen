@@ -11,7 +11,7 @@ typedef struct mphf_userdata {
 	mphf_t               mphf;
 	mphf_proto_t        *mphf_proto;
 	backend_t           *backend_data;
-	size_t               buffer_size;
+	uintmax_t            buffer_size;
 	uintmax_t            max_rebuilds;
 	
 	hash_key_t           key_from;
@@ -167,35 +167,17 @@ exit:
 	
 	return 0;
 } // }}}
-
-static int mphf_init(backend_t *backend){ // {{{
-	mphf_userdata *userdata = backend->userdata = calloc(1, sizeof(mphf_userdata));
-	if(userdata == NULL)
-		return error("calloc failed");
-	
-	return 0;
-} // }}}
-static int mphf_destroy(backend_t *backend){ // {{{
-	intmax_t       ret;
-	mphf_userdata *userdata = (mphf_userdata *)backend->userdata;
-	
-	if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
-		return ret;
-	
-	free(userdata);
-	return 0;
-} // }}}
-static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
-	DT_UINT64T         buffer_size     = BUFFER_SIZE_DEFAULT;
-	DT_STRING        key_from_str    = "key";
-	DT_STRING        key_to_str      = "offset";
-	DT_STRING        offset_out_str  = "offset_out";
-	DT_STRING        keyid_str       = NULL;
-	DT_STRING        mphf_type_str   = NULL;
-	DT_STRING        hash_type_str   = "jenkins";
-	uintmax_t        max_rebuilds    = MAX_REBUILDS_DEFAULT;
+static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_t *fork_req){ // {{{
 	ssize_t          ret;
-	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
+	uintmax_t        buffer_size     = BUFFER_SIZE_DEFAULT;
+	uintmax_t        max_rebuilds    = MAX_REBUILDS_DEFAULT;
+	char            *key_from_str    = "key";
+	char            *key_to_str      = "offset";
+	char            *offset_out_str  = "offset_out";
+	char            *hash_type_str   = "jenkins";
+	char            *keyid_str       = NULL;
+	char            *mphf_type_str   = NULL;
+	mphf_userdata   *userdata        = (mphf_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRINGT, key_from_str,    config, HK(key_from));
 	hash_data_copy(ret, TYPE_STRINGT, key_to_str,      config, HK(key_to));
@@ -203,8 +185,8 @@ static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRINGT, keyid_str,       config, HK(keyid));
 	
 	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
-	hash_data_copy(ret, TYPE_UINT64T, buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_STRINGT, hash_type_str,   config, HK(hash));
+	hash_data_copy(ret, TYPE_UINTT,   buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_UINTT,   max_rebuilds,    config, HK(max_rebuilds));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
@@ -223,10 +205,39 @@ static int mphf_configure(backend_t *backend, hash_t *config){ // {{{
 	userdata->max_rebuilds    = max_rebuilds;
 	userdata->buffer_size     = buffer_size;
 	
-	if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)
-		return ret;
+	if(fork_req == NULL){
+		if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)
+			return ret;
+	}else{
+		if( (ret = userdata->mphf_proto->func_fork(&userdata->mphf, fork_req)) < 0)
+			return ret;
+	}
 	
 	return 0;
+} // }}}
+
+static int mphf_init(backend_t *backend){ // {{{
+	mphf_userdata *userdata = backend->userdata = calloc(1, sizeof(mphf_userdata));
+	if(userdata == NULL)
+		return error("calloc failed");
+	
+	return 0;
+} // }}}
+static int mphf_destroy(backend_t *backend){ // {{{
+	intmax_t       ret;
+	mphf_userdata *userdata = (mphf_userdata *)backend->userdata;
+	
+	if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
+		return ret;
+	
+	free(userdata);
+	return 0;
+} // }}}
+static int mphf_configure(backend_t *backend, config_t *config){ // {{{
+	return mphf_configure_any(backend, config, NULL);
+} // }}}
+static int mphf_fork(backend_t *backend, request_t *request){ // {{{
+	return mphf_configure_any(backend, backend->config, request);
 } // }}}
 
 static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {{{
@@ -309,6 +320,7 @@ backend_t mphf_proto = {
 	.supported_api  = API_CRWD,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
+	.func_fork      = &mphf_fork,
 	.func_destroy   = &mphf_destroy,
 	{{
 		.func_create = &mphf_backend_insert,

@@ -3,7 +3,7 @@
 
 ssize_t  mphf_chm_imp_load        (mphf_t *mphf);
 ssize_t  mphf_chm_imp_unload      (mphf_t *mphf);
-
+ssize_t  mphf_chm_imp_fork        (mphf_t *mphf, request_t *request);
 ssize_t  mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements);
 ssize_t  mphf_chm_imp_destroy     (mphf_t *mphf);
 

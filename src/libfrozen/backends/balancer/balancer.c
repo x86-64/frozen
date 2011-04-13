@@ -100,7 +100,7 @@ static int balancer_destroy(backend_t *backend){ // {{{
 	
 	if(userdata->mode == MODE_LINEAR){
 		if(userdata->linear_pool){
-			size_t  i, linear_len;
+			uintmax_t i, linear_len;
 			
 			safe_pow(&linear_len, 256, userdata->linear_len);
 			for(i=0; i<linear_len; i++){
@@ -124,7 +124,7 @@ static int balancer_destroy(backend_t *backend){ // {{{
 } // }}}
 static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	size_t                 t;
+	uintmax_t              t;
 	hash_t                 cfg_fork_def[]    = { hash_end };
 	hash_t                *cfg_fork_req      = cfg_fork_def;
 	char                  *cfg_mode          = NULL;

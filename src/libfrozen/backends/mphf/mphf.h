@@ -22,6 +22,7 @@ typedef struct mphf_hash_proto_t  mphf_hash_proto_t;
 typedef ssize_t  (*mphf_func_load)        (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_unload)      (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_rebuild)     (mphf_t *mphf, uint64_t e_nelements);
+typedef ssize_t  (*mphf_func_fork)        (mphf_t *mphf, request_t *request);
 typedef ssize_t  (*mphf_func_destroy)     (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, uint64_t key, uint64_t  value);
 typedef ssize_t  (*mphf_func_update)      (mphf_t *mphf, uint64_t key, uint64_t  value);
@@ -41,7 +42,7 @@ struct mphf_t {
 struct mphf_proto_t {
 	mphf_func_load           func_load;
 	mphf_func_unload         func_unload;
-	
+	mphf_func_fork           func_fork;
 	mphf_func_rebuild        func_rebuild;
 	mphf_func_destroy        func_destory;
 	
@@ -66,6 +67,7 @@ static mphf_proto_t mphf_protos[] = {
 	[MPHF_TYPE_CHM_IMP] = {
 		.func_load          = mphf_chm_imp_load,
 		.func_unload        = mphf_chm_imp_unload,
+		.func_fork          = mphf_chm_imp_fork,
 		.func_rebuild       = mphf_chm_imp_rebuild,
 		.func_destory       = mphf_chm_imp_destroy,
 		.func_insert        = mphf_chm_imp_insert,

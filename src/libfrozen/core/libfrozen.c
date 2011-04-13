@@ -34,29 +34,42 @@ int frozen_destroy(void){
 	return 0;
 }
 
-ssize_t  safe_pow(size_t *res, size_t x, size_t y){
-	size_t t;
+intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y){
+	uintmax_t t;
 	
-	if(y == 0) return 1;
-	if(y == 1) return x;
+	if(y == 0){ t = 1; goto exit; }
+	if(y == 1){ t = x; goto exit; }
 	
 	t = x;
 	while(y-- >= 0){
-		if(__MAX(size_t) / x <= t)
+		if(__MAX(uintmax_t) / x <= t)
 			return -EINVAL;
 		
 		t *= x;
 	}
+exit:
 	*res = t;
 	return 0;
 }
 
-ssize_t safe_mul(size_t *res, size_t x, size_t y){
-	if(__MAX(size_t) / x <= y)
+intmax_t safe_mul(uintmax_t *res, uintmax_t x, uintmax_t y){
+	if(x == 0 || y == 0){
+		*res = 0;
+		return 0;
+	}
+	
+	if(__MAX(uintmax_t) / x <= y)
 		return -EINVAL;
 	
 	*res = x * y;
 	return 0;
 }
 
+intmax_t safe_div(uintmax_t *res, uintmax_t x, uintmax_t y){
+	if(y == 0)
+		return -EINVAL;
+	
+	*res = x / y;
+	return 0;
+}
 
