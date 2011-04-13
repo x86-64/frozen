@@ -175,8 +175,10 @@ static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // 
 		for(i=0; i<lsz; i++){
 			if( (childs_list[i] = backend_fork_rec((backend_t *)childs_list[i], request)) == NULL){
 				// unwind
-				for(--i; i>=0; i--)
+				while(i > 0){
+					i--;
 					backend_destroy(childs_list[i]);
+				}
 				
 				return NULL;
 			}

@@ -41,7 +41,7 @@ intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y){
 	if(y == 1){ t = x; goto exit; }
 	
 	t = x;
-	while(y-- >= 0){
+	while(--y >= 1){
 		if(__MAX(uintmax_t) / x <= t)
 			return -EINVAL;
 		

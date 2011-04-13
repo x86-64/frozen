@@ -308,6 +308,7 @@ retry:
 	if( (handle = open(filepath, flags, cfg_mode)) == -1){
 		if(cfg_retry == 1) goto retry;
 		
+		printf("open error: %s\n", filepath);
 		ret = error("file open() error");
 		goto cleanup;
 	}
