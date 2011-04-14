@@ -21,7 +21,7 @@ typedef enum api_types {
 } api_types;
 
 typedef int     (*f_init)      (backend_t *);
-typedef int     (*f_fork)      (backend_t *, hash_t *);
+typedef int     (*f_fork)      (backend_t *, backend_t *, hash_t *);
 typedef int     (*f_configure) (backend_t *, hash_t *);
 typedef int     (*f_destroy)   (backend_t *);
 typedef ssize_t (*f_crwd)      (backend_t *, request_t *);

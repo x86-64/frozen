@@ -71,7 +71,7 @@ static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
 	
 	if(backend_stdcall_read  (data->be_g, 0, &data->params, sizeof(data->params)) < 0){
 		memset(&data->params, 0, sizeof(data->params));
-		return error("params read failed");
+		return -EFAULT;
 	}
 	
 	return 0;

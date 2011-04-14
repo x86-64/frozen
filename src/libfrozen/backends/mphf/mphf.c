@@ -171,6 +171,7 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 	ssize_t          ret;
 	uintmax_t        buffer_size     = BUFFER_SIZE_DEFAULT;
 	uintmax_t        max_rebuilds    = MAX_REBUILDS_DEFAULT;
+	uintmax_t        fork_only       = 0;
 	char            *key_from_str    = "key";
 	char            *key_to_str      = "offset";
 	char            *offset_out_str  = "offset_out";
@@ -188,6 +189,11 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 	hash_data_copy(ret, TYPE_STRINGT, hash_type_str,   config, HK(hash));
 	hash_data_copy(ret, TYPE_UINTT,   buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_UINTT,   max_rebuilds,    config, HK(max_rebuilds));
+	
+	hash_data_copy(ret, TYPE_UINTT,   fork_only,       config, HK(fork_only));
+	
+	if(fork_only == 1 && fork_req == NULL)
+		return 0;
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("backend mphf parameter mphf_type invalid or not supplied");
@@ -236,7 +242,7 @@ static int mphf_destroy(backend_t *backend){ // {{{
 static int mphf_configure(backend_t *backend, config_t *config){ // {{{
 	return mphf_configure_any(backend, config, NULL);
 } // }}}
-static int mphf_fork(backend_t *backend, request_t *request){ // {{{
+static int mphf_fork(backend_t *backend, backend_t *parent, request_t *request){ // {{{
 	return mphf_configure_any(backend, backend->config, request);
 } // }}}
 
@@ -246,6 +252,9 @@ static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {
 	off_t            key_out;
 	uint64_t         keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
+	
+	if(userdata->mphf_proto == NULL)
+		return error("called fork_only'ed");
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)
@@ -275,6 +284,9 @@ static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{
 	data_t          *key;
 	uint64_t         key_out, key_new_out, keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
+	
+	if(userdata->mphf_proto == NULL)
+		return error("called fork_only'ed");
 	
 	hash_data_find(request, userdata->key_from, &key, NULL);
 	if(key == NULL)

@@ -13,7 +13,7 @@ memory_t_alloc memory_string_to_alloc(char *string){ // {{{
 	if(strcmp(string, "malloc") == 0) return ALLOC_MALLOC;
 	return -1;
 } // }}}
-void     memory_new(memory_t *memory, memory_t_type type, memory_t_alloc alloc, size_t page_size, int zero){ // {{{
+void     memory_new(memory_t *memory, memory_t_type type, memory_t_alloc alloc, uintmax_t page_size, int zero){ // {{{
 	memory->ptr       = NULL;
 	memory->ptr_size  = 0;
 	memory->type      = type;
@@ -26,12 +26,12 @@ void     memory_free(memory_t *memory){ // {{{
 		free(memory->ptr);
 	memset(memory, 0, sizeof(memory_t));
 } // }}}
-ssize_t  memory_size(memory_t *memory, size_t *size){ // {{{
+ssize_t  memory_size(memory_t *memory, uintmax_t *size){ // {{{
 	*size = memory->exact_size;
 	return 0;
 } // }}}
-ssize_t  memory_resize(memory_t *memory, size_t new_size){ // {{{
-	size_t t;
+ssize_t  memory_resize(memory_t *memory, uintmax_t new_size){ // {{{
+	uintmax_t t;
 	
 	memory->exact_size = new_size;
 	switch(memory->type){
@@ -68,13 +68,13 @@ error:
 	memory_free(memory);
 	return -EFAULT;
 } // }}}
-ssize_t  memory_grow(memory_t *memory, size_t size, off_t *pointer){ // {{{
-	ssize_t ret;
-	size_t  new_offset;
+ssize_t  memory_grow(memory_t *memory, uintmax_t size, off_t *pointer){ // {{{
+	ssize_t                ret;
+	uintmax_t              new_offset;
 	
 	new_offset = memory->exact_size;
 	
-	if(__MAX(size_t) - size <= new_offset)
+	if(__MAX(uintmax_t) - size <= new_offset)
 		return -EINVAL;
 	
 	if(pointer)
@@ -87,13 +87,13 @@ ssize_t  memory_grow(memory_t *memory, size_t size, off_t *pointer){ // {{{
 	}
 	return ret;
 } // }}}
-ssize_t  memory_shrink(memory_t *memory, size_t size){ // {{{
+ssize_t  memory_shrink(memory_t *memory, uintmax_t size){ // {{{
 	if(memory->exact_size < size)
 		return -EINVAL;
 	
 	return memory_resize(memory, (memory->exact_size - size));
 } // }}}
-ssize_t  memory_translate(memory_t *memory, off_t pointer, size_t size, void **pointer_out, size_t *size_out){ // {{{
+ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, void **pointer_out, uintmax_t *size_out){ // {{{
 	switch(memory->alloc){
 		case ALLOC_MALLOC:
 			// TODO IMPORTANT SECURITY snap ptr+size to mem
@@ -114,39 +114,35 @@ ssize_t  memory_translate(memory_t *memory, off_t pointer, size_t size, void **p
 	return -EFAULT;
 } // }}}
 
-size_t  data_memory_t_len(data_t *data, data_ctx_t *ctx){
+uintmax_t  data_memory_t_len(data_t *data, data_ctx_t *ctx){
 	(void)ctx; // TODO add ctx parse
 	return ((memory_t *)data->data_ptr)->exact_size;
 }
 
-ssize_t   data_memory_t_read(data_t *data, data_ctx_t *ctx, off_t coffset, void **buffer, size_t *buffer_size){
-	ssize_t  ret;
-	DT_OFFT  offset = 0;
-	//DT_INT64 offset = 0;
-	DT_SIZET size   = __MAX(DT_SIZET);
+ssize_t   data_memory_t_read(data_t *data, data_ctx_t *ctx, off_t coffset, void **buffer, uintmax_t *buffer_size){
+	ssize_t                ret;
+	off_t                  offset            = 0;
+	size_t                 size              = __MAX(size_t);
 	
 	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	//hash_data_copy(ret, TYPE_INT64, offset, ctx, HK(offset));
 	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
 	
 	offset += coffset;
 	
-	if(memory_translate(((memory_t *)data->data_ptr), offset, size, buffer, buffer_size) != 0)
+	if(memory_translate(((memory_t *)data->data_ptr), offset, (uintmax_t)size, buffer, buffer_size) != 0)
 		return -1;
 	
 	return *buffer_size;
 }
 
-ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void *buffer, size_t buffer_size){
-	ssize_t   ret;
-	DT_OFFT   offset = 0;
-	//DT_INT64  offset = 0;
-	DT_SIZET  size   = __MAX(DT_SIZET);
-	void     *memory_ptr;
-	size_t    memory_size; 
+ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void *buffer, uintmax_t buffer_size){
+	ssize_t                ret;
+	off_t                  offset            = 0;
+	size_t                 size              = __MAX(size_t);
+	void                  *memory_ptr;
+	uintmax_t              memory_size; 
 	
 	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	//hash_data_copy(ret, TYPE_INT64,  offset, ctx, HK(offset));
 	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
 	
 	offset      += coffset;

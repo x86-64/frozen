@@ -136,19 +136,23 @@ static int               file_new_offset(backend_t *backend, off_t *new_key, uns
 	
 	pthread_mutex_lock(&data->create_lock);
 		
-		key = lseek(fd, 0, SEEK_END);
-		ret = ftruncate(fd, key + size);
-		if(ret != -1){
-			data->file_stat_status = STAT_NEED_UPDATE;
-			*new_key               = key;
-			ret                    = 0;
-		}else{
-			ret                    = -errno;
-		}
+		if( (key = lseek(fd, 0, SEEK_END)) == -1)
+			goto error;
 		
+		if( (ret = ftruncate(fd, key + size)) == -1)
+			goto error;
+		
+		data->file_stat_status = STAT_NEED_UPDATE;
+		*new_key               = key;
+		ret                    = 0;
+exit:
 	pthread_mutex_unlock(&data->create_lock);
 	
 	return ret;
+error:
+	ret  = -errno;
+	printf("file_new_offset on '%s': %s\n", data->path, strerror(errno));
+	goto exit;
 } // }}}
 static file_stat_status  file_update_count(file_userdata *data){ // {{{
 	int                    ret;
@@ -306,7 +310,10 @@ retry:
 	flags |= O_LARGEFILE;
 	
 	if( (handle = open(filepath, flags, cfg_mode)) == -1){
-		if(cfg_retry == 1) goto retry;
+		if(cfg_retry == 1){
+			free(filepath);
+			goto retry;
+		}
 		
 		printf("open error: %s\n", filepath);
 		ret = error("file open() error");
@@ -348,7 +355,7 @@ static int file_destroy(backend_t *backend){ // {{{
 	free(backend->userdata);
 	return 0;
 } // }}}
-static int file_fork(backend_t *backend, config_t *request){ // {{{
+static int file_fork(backend_t *backend, backend_t *parent, config_t *request){ // {{{
 	return file_configure_any(backend, backend->config, request);
 } // }}}
 static int file_configure(backend_t *backend, config_t *config){ // {{{
@@ -361,6 +368,9 @@ static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	data_ctx_t       *buffer_ctx;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
 	
+	if(data->path == NULL)
+		return error("called fork_only file");
+
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
@@ -375,6 +385,9 @@ static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	
+	if(data->path == NULL)
+		return error("called fork_only file");
 	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
@@ -393,6 +406,10 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	data_t            offset_data = DATA_PTR_OFFT(&offset);
 	data_t           *key_out;
 	data_ctx_t       *key_out_ctx;
+	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	
+	if(data->path == NULL)
+		return error("called fork_only file");
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("size not supplied");
 	
@@ -420,6 +437,9 @@ static ssize_t file_delete(backend_t *backend, request_t *request){ // {{{
 	DT_SIZET          size;
 	DT_UINT32T          forced = 0;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	
+	if(data->path == NULL)
+		return error("called fork_only file");
 	
 	hash_data_copy(ret, TYPE_UINT32T, forced, request, HK(forced));
 	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return warning("offset not supplied");
@@ -461,6 +481,9 @@ static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
 	file_userdata   *data        = ((file_userdata *)backend->userdata);
 	DT_OFFT          from, to;
 	DT_SIZET         move_size = -1;
+	
+	if(data->path == NULL)
+		return error("called fork_only file");
 	
 	hash_data_copy(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return warning("offset_from not supplied");
 	hash_data_copy(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return warning("offset_to not supplied");
@@ -534,6 +557,9 @@ static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
 	file_userdata   *data = ((file_userdata *)backend->userdata);
+	
+	if(data->path == NULL)
+		return error("called fork_only file");
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	if(buffer == NULL)

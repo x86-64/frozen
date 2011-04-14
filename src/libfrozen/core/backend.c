@@ -198,7 +198,7 @@ static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // 
 		goto error_init;
 	
 	if(backend_curr->func_fork != NULL){
-		if(backend_curr->func_fork(backend_curr, request) != 0)
+		if(backend_curr->func_fork(backend_curr, backend, request) != 0)
 			goto error_configure;
 	}else{
 		if(backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
