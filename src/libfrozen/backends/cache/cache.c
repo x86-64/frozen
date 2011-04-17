@@ -2,8 +2,42 @@
 #include <backend.h>
 #include <pthread.h>
 
+/**
+ * @file cache.c
+ * @ingroup modules
+ * @brief Cache module
+ *
+ * Cache module hold data in memory, instead of underlying backend
+ */
+/**
+ * @ingroup modules
+ * @addtogroup mod_cache Module 'cache'
+ */
+/**
+ * @ingroup mod_cacge
+ * @page page_cache_config Cache configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * 	{
+ * 	        class         = "cache",
+ *              max_perfile   = (uint_t)'1000',    # set maximum memory usage for one instance to 1000 bytes
+ *              max_perfork   = (uint_t)'2000',    # set maximum memory usage for group of forked backends to 2000 bytes
+ *              max_global    = (uint_t)'3000'     # set maximum global memory usage (can be different for each instance)
+ * 	}
+ *
+ * Memory limit behavior:
+ *   - all write requests locked while flushing in\from memory to\from backend
+ *   - _perfile checked on each create\delete request. Cache enable and disable performed in same request.
+ *   - _perfork and _global limits checked ones per CACHE_FREE_INTERVAL (default 5 seconds). In between backends can overconsume
+ *     memory.
+ *
+ * @endcode
+ */
+
 #define EMODULE 3
-#define CACHE_PAGE_SIZE 0x1000
+#define CACHE_PAGE_SIZE      0x1000
+#define CACHE_FREE_INTERVAL  5
 
 typedef enum usage_dir {
 	DIR_INC,
@@ -14,7 +48,8 @@ typedef enum usage_dir {
 typedef struct cache_userdata {
 	uintmax_t        enabled;
 	memory_t         memory;
-	pthread_mutex_t  lock;
+	pthread_mutex_t  resize_lock;
+	pthread_rwlock_t write_lock;
 	uintmax_t        memusage;
 	
 	pthread_mutex_t *perfork_lock;
@@ -25,8 +60,13 @@ typedef struct cache_userdata {
 	uintmax_t        limit_global;
 } cache_userdata;
 
-uintmax_t        memusage_global;
+uintmax_t        running_caches      = 0;
+pthread_mutex_t  running_caches_mtx  = PTHREAD_MUTEX_INITIALIZER;
+uintmax_t        memusage_global     = 0;
 pthread_mutex_t  memusage_global_mtx = PTHREAD_MUTEX_INITIALIZER; 
+pthread_t        main_thread;
+list             watch_perfork;
+list             watch_global;
 
 static uintmax_t cache_get_filesize(backend_t *backend){ // {{{
 	ssize_t                ret;
@@ -73,29 +113,37 @@ static void      cache_memusage(backend_t *backend, usage_dir dir, uintmax_t val
 } // }}}
 static void      cache_enable(backend_t *backend){ // {{{
 	uintmax_t              file_size;
-	cache_userdata        *userdata   = (cache_userdata *)backend->userdata;
+	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
 	if(userdata->enabled == 1)
 		return;
 	
-	pthread_mutex_lock(&userdata->lock);
+	pthread_mutex_lock(&userdata->resize_lock);
 		
 		file_size = cache_get_filesize(backend);
 		
+		// alloc new memory
 		memory_new(&userdata->memory, MEMORY_PAGE, ALLOC_MALLOC, CACHE_PAGE_SIZE, 1);
 		if(memory_resize(&userdata->memory, file_size) != 0)
 			goto failed;
 		
-		data_t d_memory   = DATA_MEMORYT(&userdata->memory);
-		data_t d_backend  = DATA_BACKENDT(backend);
-		if(data_transfer(&d_memory, NULL, &d_backend, NULL) < 0)
-			goto failed;
+		pthread_rwlock_wrlock(&userdata->write_lock); // prevent data update in backend
+			
+			// read data from backend to new memory
+			data_t d_memory   = DATA_MEMORYT(&userdata->memory);
+			data_t d_backend  = DATA_BACKENDT(backend);
+			if(data_transfer(&d_memory, NULL, &d_backend, NULL) < 0)
+				goto failed;
+			
+			// enable caching
+			userdata->enabled = 1;
+			
+		pthread_rwlock_unlock(&userdata->write_lock);
 		
-		userdata->enabled = 1;
-		
+		// update memory usage
 		cache_memusage(backend, DIR_INC, file_size, NULL, NULL);
 exit:
-	pthread_mutex_unlock(&userdata->lock);
+	pthread_mutex_unlock(&userdata->resize_lock);
 	return;
 failed:
 	memory_free(&userdata->memory);
@@ -108,66 +156,83 @@ static void      cache_disable(backend_t *backend){ // {{{
 	if(userdata->enabled == 0)
 		return;
 	
-	pthread_mutex_lock(&userdata->lock);
-	
+	pthread_mutex_lock(&userdata->resize_lock);
+		
 		if(memory_size(&userdata->memory, &file_size) < 0)
 			goto exit;
 		
-		// flush data
-		data_t d_memory  = DATA_MEMORYT(&userdata->memory);
-		data_t d_backend = DATA_BACKENDT(backend);
-		data_transfer(&d_backend, NULL, &d_memory, NULL);
+		pthread_rwlock_wrlock(&userdata->write_lock); // prevent writing new data
+			
+			// flush data from memory to backend
+			data_t d_memory  = DATA_MEMORYT(&userdata->memory);
+			data_t d_backend = DATA_BACKENDT(backend);
+			data_transfer(&d_backend, NULL, &d_memory, NULL);
+			
+			// free used memory
+			memory_free(&userdata->memory);
+			
+			// disable caching
+			userdata->enabled = 0;
+			
+		pthread_rwlock_unlock(&userdata->write_lock);
 		
-		// free mem
-		memory_free(&userdata->memory);
-		
-		userdata->enabled = 0;
-		
+		// update memory usage
 		cache_memusage(backend, DIR_DEC, file_size, NULL, NULL);
 exit:
-	pthread_mutex_unlock(&userdata->lock);
+	pthread_mutex_unlock(&userdata->resize_lock);
 } // }}}
-static void      cache_check(backend_t *backend, uintmax_t mem_file){ // {{{
-	uintmax_t              mem_global;
-	uintmax_t              mem_fork;
-	uintmax_t              verdict           = 1; // enable by default
-	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
-	
-	cache_memusage(backend, DIR_NONE, 0, &mem_global, &mem_fork);
-	
-	if(mem_file > userdata->limit_perfile)
-		verdict = 0;
-	
-	if(mem_fork > userdata->limit_perfork)
-		verdict = 0;
-	
-	if(mem_global > userdata->limit_global)
-		verdict = 0;
-	
-	switch(verdict){
-		case 0: cache_disable (backend); break;
-		case 1: cache_enable  (backend); break;
+void *     cache_main_thread(void *null){
+	while(1){
+		list_rdlock(&watch_global);
+			
+		list_unlock(&watch_global);
+
+		sleep(CACHE_FREE_INTERVAL);
 	};
-} // }}}
+}
 
 static int cache_init(backend_t *backend){ // {{{
-	cache_userdata        *userdata = backend->userdata = calloc(1, sizeof(cache_userdata));
+	ssize_t                ret               = 0;
+	cache_userdata        *userdata          = backend->userdata = calloc(1, sizeof(cache_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
 	
-	return 0;
+	// global
+	pthread_mutex_lock(&running_caches_mtx);
+		if(running_caches++ == 0){
+			if(pthread_create(&main_thread, NULL, &cache_main_thread, NULL) != 0)
+				ret = error("pthread_create failed");
+		}
+	pthread_mutex_unlock(&running_caches_mtx);
+	
+	return ret;
 } // }}}
 static int cache_destroy(backend_t *backend){ // {{{
-	cache_userdata        *userdata = (cache_userdata *)backend->userdata;
+	ssize_t                ret               = 0;
+	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
+	// remove cache
 	cache_disable(backend);
-	
-	pthread_mutex_destroy(&userdata->lock);
-	
+	pthread_mutex_destroy(&userdata->resize_lock);
+	pthread_rwlock_destroy(&userdata->write_lock);
 	free(userdata);
+	
+	// global
+	pthread_mutex_lock(&running_caches_mtx);
+		if(--running_caches == 0){
+			if(pthread_cancel(&main_thread) != 0){
+				ret = error("pthread_cancel failed");
+				goto exit;
+			}
+			if(pthread_join(&main_thread, &res) != 0)
+				ret = error("pthread_join failed");
+		}
+exit:
+	pthread_mutex_unlock(&running_caches_mtx);
+	
 	return 0;
 } // }}}
-static int cache_configure_any(backend_t *backend, config_t *config){ // {{{
+static int cache_configure_any(backend_t *backend, backend_t *parent, config_t *config){ // {{{
 	ssize_t                ret;
 	pthread_mutexattr_t    attr; 
 	uintmax_t              file_size;
@@ -178,12 +243,19 @@ static int cache_configure_any(backend_t *backend, config_t *config){ // {{{
 	
 	pthread_mutexattr_init(&attr); 
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&userdata->lock, &attr);
+	pthread_mutex_init(&userdata->resize_lock, &attr);
 	pthread_mutexattr_destroy(&attr);
+	
+	pthread_rwlock_init(&userdata->write_lock, NULL);
 	
 	hash_data_copy(ret, TYPE_UINTT, cfg_limit_file,   config, HK(max_perfile));
 	hash_data_copy(ret, TYPE_UINTT, cfg_limit_fork,   config, HK(max_perfork));
+	if(ret != 0)
+		list_add(&watch_perfork, (parent == NULL) ? backend : parent);
+	
 	hash_data_copy(ret, TYPE_UINTT, cfg_limit_global, config, HK(max_global));
+	if(ret != 0)
+		list_add(&watch_global,  backend);
 	
 	userdata->limit_perfile = cfg_limit_file;
 	userdata->limit_perfork = cfg_limit_fork;
@@ -199,10 +271,10 @@ static int cache_configure(backend_t *backend, config_t *config){ // {{{
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
 	// no fork, so use own data
-	userdata->perfork_lock     = &userdata->lock;
+	userdata->perfork_lock     = &userdata->resize_lock;
 	userdata->perfork_memusage = &userdata->memusage;
 	
-	return cache_configure_any(backend, config);
+	return cache_configure_any(backend, NULL, config);
 } // }}}
 static int cache_fork(backend_t *backend, backend_t *parent, config_t *config){ // {{{
 	cache_userdata        *userdata_parent   = (cache_userdata *)parent->userdata;
@@ -210,10 +282,10 @@ static int cache_fork(backend_t *backend, backend_t *parent, config_t *config){ 
 	
 	
 	// have fork, so use parent data
-	userdata->perfork_lock     = &userdata_parent->lock;
+	userdata->perfork_lock     = &userdata_parent->resize_lock;
 	userdata->perfork_memusage = &userdata_parent->memusage;
 	
-	return cache_configure_any(backend, config);
+	return cache_configure_any(backend, parent, config);
 } // }}}
 
 static ssize_t cache_backend_read(backend_t *backend, request_t *request){ // {{{
@@ -235,16 +307,23 @@ static ssize_t cache_backend_write(backend_t *backend, request_t *request){ // {
 	ssize_t                ret;
 	data_t                *buffer;
 	data_ctx_t            *buffer_ctx;
-	cache_userdata        *userdata = (cache_userdata *)backend->userdata;
+	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
-	if(userdata->enabled == 0)
-		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+	pthread_rwlock_rdlock(&userdata->write_lock); // read lock, many requests allowed
+		
+		if(userdata->enabled == 0){
+			ret = ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+		}else{
+			hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
+			
+			data_t d_memory = DATA_MEMORYT(&userdata->memory);
+			
+			ret = data_transfer(&d_memory, request, buffer, buffer_ctx);
+		}
 	
-	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
+	pthread_rwlock_unlock(&userdata->write_lock);
 	
-	data_t     d_memory = DATA_MEMORYT(&userdata->memory);
-	
-	return data_transfer(&d_memory, request, buffer, buffer_ctx);
+	return ret;
 } // }}}
 static ssize_t cache_backend_create(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
@@ -261,22 +340,25 @@ static ssize_t cache_backend_create(backend_t *backend, request_t *request){ // 
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
-	pthread_mutex_lock(&userdata->lock);
+	pthread_mutex_lock(&userdata->resize_lock);
 		
 		if(memory_grow(&userdata->memory, size, &offset) != 0){
 			ret = error("memory_grow failed");
 			goto end_grow;
 		}
 		
+		cache_memusage (backend, DIR_INC, size, NULL, NULL);
+		
 		if(memory_size(&userdata->memory, &file_size) != 0){
 			ret = error("memory_size failed");
 			goto end_grow;
 		}
 		
-		cache_memusage (backend, DIR_INC, size, NULL, NULL);
-		cache_check    (backend, file_size);
+		if(file_size > userdata->limit_perfile)
+			cache_disable(backend);
+		
 end_grow:
-	pthread_mutex_unlock(&userdata->lock);
+	pthread_mutex_unlock(&userdata->resize_lock);
 	
 	if(ret != 0)
 		return ret;
@@ -313,7 +395,7 @@ static ssize_t cache_backend_delete(backend_t *backend, request_t *request){ // 
 	hash_data_copy(ret, TYPE_OFFT,  offset, request, HK(offset));  if(ret != 0) return warning("offset not supplied");
 	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
 	
-	pthread_mutex_lock(&userdata->lock);
+	pthread_mutex_lock(&userdata->resize_lock);
 		
 		if(memory_size(&userdata->memory, &mem_size) < 0){
 			ret = error("memory_size failed");
@@ -332,7 +414,7 @@ static ssize_t cache_backend_delete(backend_t *backend, request_t *request){ // 
 		
 		cache_memusage(backend, DIR_DEC, size, NULL, NULL);
 exit:		
-	pthread_mutex_unlock(&userdata->lock);
+	pthread_mutex_unlock(&userdata->resize_lock);
 	
 	return 0; //-EFAULT;
 } // }}}
