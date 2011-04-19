@@ -165,22 +165,22 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 			backend_t  **lchilds;
 			backend_t   *curr;
 			
-			if( (lchilds_size = list_flatten_frst(&backend->childs)) != 0){
-				if( (lchilds = malloc(sizeof(backend_t *) * lchilds_size)) == NULL){
-					list_unlock(&backend->childs);
-					return error("no memory");
-				}
-				list_flatten_scnd(&backend->childs, (void **)lchilds, lchilds_size);
+			list_rdlock(&backend->childs);
 				
-				for(i=0; i<cfg_pool_size; i++){
-					for(j=0; j<lchilds_size; j++){
-						if( (curr = backend_fork(lchilds[j], userdata->fork_req)) == NULL)
-							return error("fork failed");
-						
-						list_add(&userdata->own_pool, curr);
-					}
+				if( (lchilds_size = list_count(&backend->childs)) != 0){
+					lchilds = alloca(sizeof(backend_t *) * lchilds_size);
+					list_flatten(&backend->childs, (void **)lchilds, lchilds_size);
 				}
-				free(lchilds);
+				
+			list_unlock(&backend->childs);
+			
+			for(i=0; i<cfg_pool_size; i++){
+				for(j=0; j<lchilds_size; j++){
+					if( (curr = backend_fork(lchilds[j], userdata->fork_req)) == NULL)
+						return error("fork failed");
+					
+					list_add(&userdata->own_pool, curr);
+				}
 			}
 			
 			/* fall */
@@ -228,12 +228,19 @@ static ssize_t balancer_request_rest(backend_t *backend, request_t *request){ //
 	size_t                 clone_i           = userdata->clone;
 	
 	pool = userdata->pool;
-	if( (lsz = list_flatten_frst(pool)) == 0)
+	
+	list_rdlock(pool);
+		
+		if( (lsz = list_count(pool)) != 0){
+			lchilds = alloca( sizeof(backend_t *) * lsz );
+			list_flatten(pool, (void **)lchilds, lsz);
+		}
+		
+	list_unlock(pool);
+	
+	if(lsz == 0)
 		return error("no childs");
 	
-	lchilds = alloca( sizeof(backend_t *) * lsz );
-	list_flatten_scnd(pool, (void **)lchilds, lsz);
-
 redo:
 	switch(userdata->mode){
 		case MODE_RANDOM:
@@ -277,15 +284,14 @@ static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ 
 		uintmax_t    lchilds_size;
 		backend_t  **lchilds;
 		
-		if( (lchilds_size = list_flatten_frst(&backend->childs)) == 0)
-			return error("childs list problems");
-		
-		if( (lchilds = alloca(sizeof(backend_t *) * lchilds_size)) == NULL){
-			list_unlock(&backend->childs);
-			return error("alloca failed");
-		}
-		
-		list_flatten_scnd(&backend->childs, (void **)lchilds, lchilds_size);
+		list_rdlock(&backend->childs);
+			
+			if( (lchilds_size = list_count(&backend->childs)) != 0){
+				lchilds = alloca(sizeof(backend_t *) * lchilds_size);
+				list_flatten(&backend->childs, (void **)lchilds, lchilds_size);
+			}
+			
+		list_unlock(&backend->childs);
 		
 		if(lchilds_size != 1)
 			return error("invalid childs count");

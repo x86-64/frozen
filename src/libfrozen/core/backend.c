@@ -168,20 +168,24 @@ static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // 
 	backend_t             *backend_curr;
 	void                 **childs_list;
 	
-	if( (lsz = list_flatten_frst(&backend->childs)) != 0){
-		childs_list = (void **)alloca( sizeof(void *) * lsz );
-		list_flatten_scnd(&backend->childs, childs_list, lsz);
+	list_rdlock(&backend->childs);
 		
-		for(i=0; i<lsz; i++){
-			if( (childs_list[i] = backend_fork_rec((backend_t *)childs_list[i], request)) == NULL){
-				// unwind
-				while(i > 0){
-					i--;
-					backend_destroy(childs_list[i]);
-				}
-				
-				return NULL;
+		if( (lsz = list_count(&backend->childs)) != 0){
+			childs_list = (void **)alloca( sizeof(void *) * lsz );
+			list_flatten(&backend->childs, childs_list, lsz);
+		}
+		
+	list_unlock(&backend->childs);
+	
+	for(i=0; i<lsz; i++){
+		if( (childs_list[i] = backend_fork_rec((backend_t *)childs_list[i], request)) == NULL){
+			// unwind
+			while(i > 0){
+				i--;
+				backend_destroy(childs_list[i]);
 			}
+			
+			return NULL;
 		}
 	}
 	
@@ -305,11 +309,17 @@ ssize_t      backend_pass         (backend_t *backend, request_t *request){ // {
 	uintmax_t              lsz, i;
 	void                 **childs_list;
 	
-	if( (lsz = list_flatten_frst(&backend->childs)) == 0)
-		return -ENOSYS; // no childs
+	list_rdlock(&backend->childs);
+		
+		if( (lsz = list_count(&backend->childs)) != 0){
+			childs_list = (void **)alloca( sizeof(void *) * lsz );
+			list_flatten(&backend->childs, childs_list, lsz);
+		}
+		
+	list_unlock(&backend->childs);
 	
-	childs_list = (void **)alloca( sizeof(void *) * lsz );
-	list_flatten_scnd(&backend->childs, childs_list, lsz);
+	if(lsz == 0)
+		return -ENOSYS;
 	
 	for(i=0; i<lsz; i++){
 		if( (ret = backend_query((backend_t *)childs_list[i], request)) < 0)

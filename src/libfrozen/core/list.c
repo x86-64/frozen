@@ -78,12 +78,10 @@ exit:
 	pthread_rwlock_unlock(&clist->lock);
 	return ret;
 } // }}}
-uintmax_t  list_flatten_frst(list *clist){ // {{{
+uintmax_t  list_count(list *clist){ // {{{
 	void                 **list;
 	void                  *curr;
 	size_t                 lsz = 0, size = 0;
-	
-	pthread_rwlock_rdlock(&clist->lock);
 	
 	if( (list = clist->items) == NULL)
 		goto exit;
@@ -96,25 +94,21 @@ uintmax_t  list_flatten_frst(list *clist){ // {{{
 	}
 	if(size == 0)
 		goto exit;
-return_res:
-	return size;
 exit:
-	pthread_rwlock_unlock(&clist->lock);
-	goto return_res;
+	return size;
 } // }}}
-void       list_flatten_scnd(list *clist, void **memory, size_t items){ // {{{
+void       list_flatten(list *clist, void **memory, size_t items){ // {{{
 	void                 **list;
 	void                  *curr;
 	size_t                 i = 0, lsz = 0;
 	
 	list = clist->items;
-	while( (curr = list[lsz++]) != LIST_END){
+	while( (curr = list[lsz++]) != LIST_END && i < items){
 		if(curr == LIST_FREE_ITEM)
 			continue;
 		
 		memory[i++] = curr;
 	}
-	pthread_rwlock_unlock(&clist->lock);
 } // }}}
 void       list_rdlock(list *clist){ // {{{
 	pthread_rwlock_rdlock(&clist->lock);
