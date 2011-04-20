@@ -14,7 +14,7 @@
  * @addtogroup mod_cache Module 'cache'
  */
 /**
- * @ingroup mod_cacge
+ * @ingroup mod_cache
  * @page page_cache_config Cache configuration
  * 
  * Accepted configuration:
