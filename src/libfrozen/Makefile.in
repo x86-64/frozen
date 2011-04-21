@@ -53,6 +53,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
@@ -176,6 +177,7 @@ BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
 BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
 BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
 BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
+BACKEND_OBJECTS_pool = @BACKEND_OBJECTS_pool@
 BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
 BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@

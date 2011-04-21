@@ -13,7 +13,7 @@
  */
 /**
  * @ingroup mod_file
- * @page page_file_config File configuration
+ * @page page_file_config Configuration
  * 
  * Accepted configuration:
  * @code
@@ -48,8 +48,9 @@ typedef enum file_stat_status {
 } file_stat_status;
 
 typedef struct file_userdata {
-	char *           path;
-	int              handle;
+	char *           path;            // string with full file path, or NULL if fork_only selected
+	int              handle;          // real file handle, or -1 if file suspended
+	size_t           flags;
 	size_t           buffer_size;
 	struct stat      file_stat;
 	file_stat_status file_stat_status;
@@ -170,6 +171,27 @@ static file_stat_status  file_update_count(file_userdata *data){ // {{{
 			break;
 	};
 	return data->file_stat_status;
+} // }}}
+static ssize_t           file_prepare(file_userdata *userdata){ // {{{
+	ssize_t                ret               = 0;
+	size_t                 new_flags;
+	
+	if(userdata->path == NULL)
+		return error("called fork_only file");
+	
+	pthread_mutex_lock(&userdata->create_lock);
+		
+		if(userdata->handle == -1){
+			// resume file
+			new_flags = userdata->flags & ~O_CREAT;
+			
+			if( (userdata->handle = open(userdata->path, new_flags)) == -1 )
+				ret = error("resume error");
+		}
+	
+	pthread_mutex_unlock(&userdata->create_lock);
+
+	return ret;
 } // }}}
 static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
 	size_t                 ret;
@@ -321,6 +343,7 @@ retry:
 	}
 	
 	userdata->path             = filepath;
+	userdata->flags            = flags;
 	userdata->handle           = handle;
 	userdata->buffer_size      = cfg_buffsize;
 	userdata->file_stat_status = STAT_NEED_UPDATE;
@@ -364,13 +387,14 @@ static int file_configure(backend_t *backend, config_t *config){ // {{{
 
 // Requests
 static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
+	ssize_t           ret;
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
-
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
+	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
@@ -382,12 +406,13 @@ static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	return data_transfer(&file_io, file_ctx, buffer, buffer_ctx);
 } // }}}
 static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
+	ssize_t           ret;
 	data_t           *buffer;
 	data_ctx_t       *buffer_ctx;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
 	
 	data->file_stat_status = STAT_NEED_UPDATE;
 	
@@ -400,7 +425,7 @@ static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
 	return data_transfer(buffer, buffer_ctx, &file_io, file_ctx);
 } // }}}
 static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
-	DT_SIZET          size;
+	size_t            size;
 	ssize_t           ret;
 	off_t             offset;
 	data_t            offset_data = DATA_PTR_OFFT(&offset);
@@ -408,8 +433,8 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	data_ctx_t       *key_out_ctx;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("size not supplied");
 	
@@ -433,15 +458,15 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 static ssize_t file_delete(backend_t *backend, request_t *request){ // {{{
 	ssize_t           ret;
 	int               fd;
-	DT_OFFT           key;
-	DT_SIZET          size;
-	DT_UINT32T          forced = 0;
+	off_t             key;
+	size_t            size;
+	uintmax_t         forced = 0;
 	file_userdata    *data        = ((file_userdata *)backend->userdata);
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
 	
-	hash_data_copy(ret, TYPE_UINT32T, forced, request, HK(forced));
+	hash_data_copy(ret, TYPE_UINTT, forced, request, HK(forced));
 	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return warning("offset not supplied");
 	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
 	
@@ -482,8 +507,8 @@ static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
 	DT_OFFT          from, to;
 	DT_SIZET         move_size = -1;
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
 	
 	hash_data_copy(ret, TYPE_OFFT,   from,      request, HK(offset_from)); if(ret != 0) return warning("offset_from not supplied");
 	hash_data_copy(ret, TYPE_OFFT,   to,        request, HK(offset_to));   if(ret != 0) return warning("offset_to not supplied");
@@ -554,12 +579,13 @@ static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
 	return ret;
 } // }}}
 static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
+	ssize_t          ret;
 	data_t          *buffer;
 	data_ctx_t      *buffer_ctx;
 	file_userdata   *data = ((file_userdata *)backend->userdata);
 	
-	if(data->path == NULL)
-		return error("called fork_only file");
+	if( (ret = file_prepare(data)) < 0)
+		return ret;
 	
 	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
 	if(buffer == NULL)
@@ -575,6 +601,39 @@ static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
 		&count,  NULL
 	);
 } // }}}
+static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret;
+	char                  *function;
+	file_userdata         *userdata          = ((file_userdata *)backend->userdata);
+	
+	hash_data_copy(ret, TYPE_STRINGT,  function,  request, HK(function));
+	if(ret != 0)
+		goto pass;
+	
+	if(strcmp(function, "file_suspend") == 0){
+		pthread_mutex_lock(&userdata->create_lock);
+			
+			close(userdata->handle);
+			userdata->handle = -1;
+			
+		pthread_mutex_unlock(&userdata->create_lock);
+		return 0;
+	}
+	if(strcmp(function, "file_running") == 0){
+		data_t                *buffer;
+		data_ctx_t            *buffer_ctx;
+		uintmax_t              answer            = (userdata->handle == -1) ? 0 : 1;
+		data_t                 answer_data       = DATA_PTR_UINTT(&answer);
+		
+		hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
+		if(buffer == NULL)
+			return warning("no buffer supplied");
+		
+		return data_transfer(buffer, buffer_ctx, &answer_data, NULL);
+	}
+pass:
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+} // }}}
 
 backend_t file_proto = {
 	.class          = "file",
@@ -589,7 +648,8 @@ backend_t file_proto = {
 		.func_get    = &file_read,
 		.func_delete = &file_delete,
 		.func_move   = &file_move,
-		.func_count  = &file_count
+		.func_count  = &file_count,
+		.func_custom = &file_custom
 	}}
 };
 

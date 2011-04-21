@@ -95,11 +95,11 @@ typedef struct cache_userdata {
 	kill_method      mode_global;
 } cache_userdata;
 
-uintmax_t        running_caches          = 0;
-pthread_mutex_t  running_caches_mtx      = PTHREAD_MUTEX_INITIALIZER;
-pthread_t        main_thread;
-list             watch_perfork;
-list             watch_global;
+static uintmax_t        running_caches          = 0;
+static pthread_mutex_t  running_caches_mtx      = PTHREAD_MUTEX_INITIALIZER;
+static pthread_t        main_thread;
+static list             watch_perfork;
+static list             watch_global;
 
 static kill_method cache_string_to_method(char *string){ // {{{
 	if(string != NULL){
@@ -346,6 +346,8 @@ static int cache_destroy(backend_t *backend){ // {{{
 	}else{
 		list_delete(userdata->perfork_childs, backend);
 	}
+	list_delete(&watch_perfork, backend);
+	list_delete(&watch_global, backend);
 	free(userdata);
 	
 	// global

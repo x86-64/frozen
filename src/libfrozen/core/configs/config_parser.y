@@ -88,7 +88,19 @@ hash_value :
 		
 		free($2);
 		free($4);
-	  };
+	}
+	| NAME {
+		request_actions action;
+		if((action = request_str_to_action($1)) != REQUEST_INVALID){
+			data_t d_act = DATA_UINT32T(action);
+			
+			data_copy(&$$, &d_act);
+			
+			free($1);
+		}else{
+			yyerror(hash, "wrong constant\n"); YYERROR;
+		}
+     };
 
 %%
 

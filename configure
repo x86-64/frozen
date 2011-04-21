@@ -631,6 +631,7 @@ DATA_DIST_DIRS
 DATA_OBJECTS_backend
 BACKEND_OBJECTS_structs
 BACKEND_OBJECTS_rewrite
+BACKEND_OBJECTS_pool
 BACKEND_OBJECTS_null
 BACKEND_OBJECTS_mphf
 BACKEND_OBJECTS_list
@@ -796,6 +797,7 @@ enable_ipc
 enable_list
 enable_mphf
 enable_null
+enable_pool
 enable_rewrite
 enable_structs
 enable_backend_t
@@ -1487,6 +1489,7 @@ Optional Features:
   --disable-backend-list  disable backend list
   --disable-backend-mphf  disable backend mphf
   --disable-backend-null  disable backend null
+  --disable-backend-pool  disable backend pool
   --disable-backend-rewrite
                           disable backend rewrite
   --disable-backend-structs
@@ -17607,6 +17610,43 @@ fi
 		BACKEND_MAKEFILE_null=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED null/libfrozen_backend_null.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-pool was given.
+if test "${enable_pool+set}" = set; then :
+  enableval=$enable_pool;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_pool}" = "yes"; then
+			enable_pool="no"
+		else
+			enable_pool="yes"
+		fi
+	fi
+
+	if test "${enable_pool}" = "yes"; then
+		BACKEND_DIR_pool="pool"
+		BACKEND_DEP_pool=""
+		BACKEND_OBJECTS_pool="$BACKEND_OBJECTS_pool libfrozen_backend_pool_la-pool.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED pool"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_pool" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/pool/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS pool"
+
+		BACKEND_MAKEFILE_pool=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED pool/libfrozen_backend_pool.la"
 
 	fi
 

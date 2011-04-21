@@ -67,7 +67,7 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 	
 	hash_data_copy(ret, TYPE_STRINGT, function, request, HK(function));
 	if(ret != 0)
-		return warning("no function supplied");
+		goto pass;
 	
 	if(strcmp(function, "resize") == 0){
 		off_t       rec_old_offset, rec_new_offset;
@@ -127,7 +127,8 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 		data_transfer(offset_out, offset_out_ctx, &rec_new_offset_data, NULL);
 		return 0;
 	}
-	return warning("no such function");
+pass:
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 backend_t allocator_proto = {
