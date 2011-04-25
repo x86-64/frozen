@@ -233,9 +233,11 @@ static int mphf_destroy(backend_t *backend){ // {{{
 	intmax_t       ret;
 	mphf_userdata *userdata = (mphf_userdata *)backend->userdata;
 	
-	if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
-		return ret;
-	
+	if(userdata->mphf_proto != NULL){
+		if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
+			return ret;
+	}
+
 	free(userdata);
 	return 0;
 } // }}}

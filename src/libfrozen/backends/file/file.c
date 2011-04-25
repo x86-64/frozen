@@ -613,8 +613,10 @@ static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 	if(strcmp(function, "file_suspend") == 0){
 		pthread_mutex_lock(&userdata->create_lock);
 			
-			close(userdata->handle);
-			userdata->handle = -1;
+			if(userdata->handle != -1){	
+				close(userdata->handle);
+				userdata->handle = -1;
+			}
 			
 		pthread_mutex_unlock(&userdata->create_lock);
 		return 0;

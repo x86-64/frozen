@@ -399,11 +399,11 @@ static int cache_configure_any(backend_t *backend, backend_t *parent, config_t *
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_file,   config, HK(max_perfile));
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_fork,   config, HK(max_perfork));
-	if(ret != 0)
+	if(ret == 0)
 		list_add(&watch_perfork, (parent == NULL) ? backend : parent);
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_global, config, HK(max_global));
-	if(ret != 0)
+	if(ret == 0)
 		list_add(&watch_global,  backend);
 	
 	userdata->limit_perfile = cfg_limit_file;
@@ -436,7 +436,7 @@ static int cache_fork(backend_t *backend, backend_t *parent, config_t *config){ 
 	userdata->perfork_childs       = &userdata_parent->perfork_childs_own;
 	list_add(userdata->perfork_childs, backend);
 	
-	return cache_configure_any(backend, parent, config);
+	return cache_configure_any(backend, parent, backend->config);
 } // }}}
 
 static ssize_t cache_backend_read(backend_t *backend, request_t *request){ // {{{

@@ -220,7 +220,9 @@ repeat:;
 				backend    = lchilds[i];
 				backend_ud = (pool_userdata *)backend->userdata;
 				
-				parameter        = backend_ud->usage_parameter;
+				if( (parameter = backend_ud->usage_parameter) == 0)
+					continue;
+				
 				parameter_group += parameter;
 				
 				#define pool_kill_check(_backend, _field, _moreless) { \
@@ -432,12 +434,12 @@ static int pool_configure_any(backend_t *backend, backend_t *parent, config_t *c
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_fork,   config, HK(max_perfork));
 	userdata->rule_perfork.limit          = cfg_limit_fork;
-	if(ret != 0)
+	if(ret == 0)
 		list_add(&watch_perfork, (parent == NULL) ? backend : parent);
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_global, config, HK(max_global));
 	userdata->rule_global.limit           = cfg_limit_global;
-	if(ret != 0)
+	if(ret == 0)
 		list_add(&watch_global,  backend);
 	
 	if(userdata->parameter == PARAMETER_TICKS){
@@ -468,7 +470,7 @@ static int pool_fork(backend_t *backend, backend_t *parent, config_t *config){ /
 	userdata->perfork_childs       = &userdata_parent->perfork_childs_own;
 	list_add(userdata->perfork_childs, backend);
 	
-	return pool_configure_any(backend, parent, config);
+	return pool_configure_any(backend, parent, backend->config);
 } // }}}
 
 static ssize_t pool_backend_request_cticks(backend_t *backend, request_t *request){ // {{{

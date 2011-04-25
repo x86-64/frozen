@@ -218,7 +218,6 @@ backend_t cache_append_proto = {
 		.func_set    = &cacheapp_backend_write,
 		.func_delete = &cacheapp_backend_rest,
 		.func_move   = &cacheapp_backend_rest,
-		.func_custom = &cacheapp_backend_rest,
 		.func_count  = &cacheapp_backend_count
 	}}
 };

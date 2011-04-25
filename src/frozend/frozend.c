@@ -65,8 +65,6 @@ void daemonize(void){ // {{{
 	signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
 	signal(SIGTTOU,SIG_IGN);
 	signal(SIGTTIN,SIG_IGN);
-	signal(SIGHUP,signal_handler); /* catch hangup signal */
-	signal(SIGTERM,signal_handler); /* catch kill signal */
 } // }}}
 // }}}
 // pid functions from memcachedb with modifications {{{
@@ -227,6 +225,9 @@ void main_rest(void){
 	/* options init */
 	if(opt_daemon != 0)
 		daemonize();
+	
+	signal(SIGHUP,signal_handler); /* catch hangup signal */
+	signal(SIGTERM,signal_handler); /* catch kill signal */
 	
 	save_pid(opt_pidfile);
 	
