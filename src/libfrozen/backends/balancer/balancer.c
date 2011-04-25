@@ -88,6 +88,58 @@ static balancer_pool    balancer_string_to_pool(char *string){ // {{{
 	return POOL_DEFAULT;
 } // }}}
 
+static backend_t * linear_get_backend(backend_t *backend, char *array){ // {{{
+	size_t                 array_val;
+	backend_t             *curr              = NULL;
+	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
+	
+	array_val = *((size_t *)array);
+	
+	if( (curr = userdata->linear_pool[array_val]) == NULL){
+		uintmax_t    lchilds_size;
+		backend_t  **lchilds;
+		
+		list_rdlock(&backend->childs);
+			
+			if( (lchilds_size = list_count(&backend->childs)) != 0){
+				lchilds = alloca(sizeof(backend_t *) * lchilds_size);
+				list_flatten(&backend->childs, (void **)lchilds, lchilds_size);
+			}
+			
+		list_unlock(&backend->childs);
+		
+		if(lchilds_size != 1)
+			goto exit;
+		
+		request_t r_fork[] = {
+			{ userdata->field, DATA_STRING(array) },
+			hash_next(userdata->fork_req)
+		};
+		
+		if( (curr = backend_fork(lchilds[0], r_fork)) == NULL)
+			goto exit;
+		
+		userdata->linear_pool[array_val] = curr;
+	}
+exit:
+
+	return curr;
+} // }}}
+static void    linear_remove_backend(backend_t *backend, char *array){ // {{{
+	size_t                 array_val;
+	backend_t             *curr;
+	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
+	
+	array_val = *((size_t *)array);
+	
+	if( (curr = userdata->linear_pool[array_val]) != NULL){
+		backend_destroy(curr);
+
+		userdata->linear_pool[array_val] = NULL;
+	}
+
+} // }}}
+
 static int balancer_init(backend_t *backend){ // {{{
 	if( (backend->userdata = calloc(1, sizeof(balancer_userdata))) == NULL)
 		return error("calloc returns null");
@@ -264,13 +316,12 @@ redo:
 static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	char                   array[MAX_LINEAR_LEN + 1] = {0};
-	size_t                 array_val;
 	backend_t             *curr;
 	data_t                *field;
 	data_ctx_t            *field_ctx;
 	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
 	size_t                 clone_i           = userdata->clone;
-
+	
 	hash_data_find(request, userdata->field, &field, &field_ctx);
 	if(field == NULL)
 		return error("field not supplied");
@@ -278,38 +329,21 @@ static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ 
 	if(data_read(field, field_ctx, 0, &array, userdata->linear_len) < 0)
 		return error("data_read failed");
 	
-	array_val = *((size_t *)array);
+	if( (curr = linear_get_backend(backend, array)) == NULL)
+		return error("fork error");
 	
-	if( (curr = userdata->linear_pool[array_val]) == NULL){
-		uintmax_t    lchilds_size;
-		backend_t  **lchilds;
-		
-		list_rdlock(&backend->childs);
-			
-			if( (lchilds_size = list_count(&backend->childs)) != 0){
-				lchilds = alloca(sizeof(backend_t *) * lchilds_size);
-				list_flatten(&backend->childs, (void **)lchilds, lchilds_size);
-			}
-			
-		list_unlock(&backend->childs);
-		
-		if(lchilds_size != 1)
-			return error("invalid childs count");
-		
-		request_t r_fork[] = {
-			{ userdata->field, DATA_STRING(array) },
-			hash_next(userdata->fork_req)
-		};
-		
-		if( (curr = backend_fork(lchilds[0], r_fork)) == NULL)
-			return error("fork failed");
-		
-		userdata->linear_pool[array_val] = curr;
-	}
-
 redo:
-	if( (ret = backend_query(curr, request)) < 0)
+	if( (ret = backend_query(curr, request)) < 0){
+		if(ret == -EBADF){ // backend dead
+			linear_remove_backend(backend, array); // remove corpse
+			
+			if( (curr = linear_get_backend(backend, array)) == NULL)
+				return error("fork error (resume)");
+			
+			goto redo;
+		}
 		return ret;
+	}
 	
 	if(--clone_i > 0) goto redo;
 	

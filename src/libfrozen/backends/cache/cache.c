@@ -337,6 +337,9 @@ static int cache_destroy(backend_t *backend){ // {{{
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
 	// remove cache
+	list_delete(&watch_perfork, backend);
+	list_delete(&watch_global,  backend);
+	
 	cache_disable(backend);
 	pthread_mutex_destroy(&userdata->resize_lock);
 	pthread_rwlock_destroy(&userdata->write_lock);
@@ -346,8 +349,6 @@ static int cache_destroy(backend_t *backend){ // {{{
 	}else{
 		list_delete(userdata->perfork_childs, backend);
 	}
-	list_delete(&watch_perfork, backend);
-	list_delete(&watch_global, backend);
 	free(userdata);
 	
 	// global
@@ -399,8 +400,10 @@ static int cache_configure_any(backend_t *backend, backend_t *parent, config_t *
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_file,   config, HK(max_perfile));
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_fork,   config, HK(max_perfork));
-	if(ret == 0)
-		list_add(&watch_perfork, (parent == NULL) ? backend : parent);
+	if(ret == 0){
+		list_delete (&watch_perfork, (parent == NULL) ? backend : parent);
+		list_add    (&watch_perfork, (parent == NULL) ? backend : parent);
+	}
 	
 	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_global, config, HK(max_global));
 	if(ret == 0)

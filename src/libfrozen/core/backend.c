@@ -296,10 +296,16 @@ ssize_t      backend_query        (backend_t *backend, request_t *request){ // {
 	
 	ret = func(backend, request);
 	
-	if(ret != -EEXIST){
-		hash_data_find(request, HK(ret), &ret_req, &ret_req_ctx);
-		data_transfer(ret_req, ret_req_ctx, &ret_data, NULL);
-	}
+	switch(ret){
+		case -EBADF:            // dead backend
+			return ret;
+		case -EEXIST:           // no ret override
+			break;
+		default:                // override ret
+			hash_data_find(request, HK(ret), &ret_req, &ret_req_ctx);
+			data_transfer(ret_req, ret_req_ctx, &ret_data, NULL);
+			break;
+	};
 	ret = 0;
 exit:
 	return ret;

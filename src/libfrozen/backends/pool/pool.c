@@ -26,7 +26,7 @@
  * 	        parameter         =                    # Step 1: how <parameter> value will be obtained:
  * 	                            "ticks",           #  - <parameter> is ticks collected in last <ticks_interval> seconds, default
  * 	                            "request",         #  - send <parameter_request> + HK(buffer) -> (uint_t).
- * 	                            "one",             #  - <parameter> == 1
+ * 	                            "one",             #  - <parameter> == 1 if pool not killed
  *
  *                                                     # Step 2: limit
  *              max_perinstance   = (uint_t)'1000',    # set maximum <parameter> value for one instance to 1000
@@ -90,6 +90,7 @@ typedef enum choose_method {
 } choose_method;
 
 typedef enum action_method {
+	ACTION_DESTROY,
 	ACTION_REQUEST,
 	
 	ACTION_DEFAULT = ACTION_REQUEST
@@ -132,6 +133,7 @@ static list             watch_perfork;
 static list             watch_global;
 
 static ssize_t pool_backend_request_cticks(backend_t *backend, request_t *request);
+static ssize_t pool_backend_request_died(backend_t *backend, request_t *request);
 
 static parameter_method  pool_string_to_parameter(char *string){ // {{{
 	if(string != NULL){
@@ -153,15 +155,23 @@ static choose_method     pool_string_to_method(char *string){ // {{{
 } // }}}
 static action_method     pool_string_to_action(char *string){ // {{{
 	if(string != NULL){
-		//if(strcasecmp(string, "destroy") == 0) return ACTION_DESTROY;
+		if(strcasecmp(string, "destroy") == 0) return ACTION_DESTROY;
 		if(strcasecmp(string, "request") == 0) return ACTION_REQUEST;
 	}
 	return ACTION_DEFAULT;
 } // }}}
 
+static void pool_set_handler(backend_t *backend, f_crwd func){ // {{{
+	backend->backend_type_crwd.func_create = func;
+	backend->backend_type_crwd.func_set    = func;
+	backend->backend_type_crwd.func_get    = func;
+	backend->backend_type_crwd.func_delete = func;
+	backend->backend_type_crwd.func_move   = func;
+	backend->backend_type_crwd.func_count  = func;
+} // }}}
 uintmax_t   pool_parameter_get(backend_t *backend, pool_userdata *userdata){ // {{{
 	switch(userdata->parameter){
-		case PARAMETER_ONE:   return 1;
+		case PARAMETER_ONE:   return (backend->backend_type_crwd.func_create == &pool_backend_request_died) ? 0 : 1;
 		case PARAMETER_TICKS: return userdata->usage_ticks_last;
 		case PARAMETER_REQUEST:;
 			uintmax_t buffer    = 0;
@@ -181,6 +191,19 @@ void        pool_backend_action(backend_t *backend, rule *rule){ // {{{
 	pool_userdata        *userdata          = (pool_userdata *)backend->userdata;
 	
 	switch(rule->action){
+		case ACTION_DESTROY:;
+			backend_t     *curr;
+			
+			// set backend mode to died
+			pool_set_handler(backend, &pool_backend_request_died);
+			
+			if(userdata->perfork_childs != &userdata->perfork_childs_own){
+				// kill childs for forked chains, keep for initial
+				while( (curr = list_pop(&backend->childs)) != NULL)
+					backend_destroy(curr);
+			}
+			
+			break;
 		case ACTION_REQUEST:;
 			backend_pass(backend, rule->action_request);
 			break;
@@ -259,7 +282,7 @@ repeat:;
 	
 	return;
 } // }}}
-void *     pool_main_thread(void *null){ // {{{
+void *      pool_main_thread(void *null){ // {{{
 	void                  *iter;
 	backend_t             *backend;
 	pool_userdata         *backend_ud;
@@ -443,12 +466,9 @@ static int pool_configure_any(backend_t *backend, backend_t *parent, config_t *c
 		list_add(&watch_global,  backend);
 	
 	if(userdata->parameter == PARAMETER_TICKS){
-		backend->backend_type_crwd.func_create = &pool_backend_request_cticks;
-		backend->backend_type_crwd.func_set    = &pool_backend_request_cticks;
-		backend->backend_type_crwd.func_get    = &pool_backend_request_cticks;
-		backend->backend_type_crwd.func_delete = &pool_backend_request_cticks;
-		backend->backend_type_crwd.func_move   = &pool_backend_request_cticks;
-		backend->backend_type_crwd.func_count  = &pool_backend_request_cticks;
+		pool_set_handler(backend, &pool_backend_request_cticks);
+	}else{
+		pool_set_handler(backend, NULL);
 	}
 	
 	return 0;
@@ -489,6 +509,9 @@ static ssize_t pool_backend_request_cticks(backend_t *backend, request_t *reques
 	userdata->usage_ticks_curr++;
 	
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+} // }}}
+static ssize_t pool_backend_request_died(backend_t *backend, request_t *request){ // {{{
+	return -EBADF;
 } // }}}
 
 backend_t pool_proto = {
