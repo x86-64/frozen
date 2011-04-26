@@ -614,6 +614,7 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+HAVE_DEBUG
 DATA_DIRS
 BACKEND_DIRS
 DATA_OBJECTS_void
@@ -18642,7 +18643,9 @@ if test "${enable_debug+set}" = set; then :
 fi
 
 if test "x$enable_debug" == "xyes"; then
-        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror -DDEBUG=1"
+	HAVE_DEBUG="-DDEBUG=1"
+        CFLAGS="$CFLAGS -g3 -O0 -Wall -Werror ${HAVE_DEBUG}"
+
 fi
 
 # Check whether --enable-profile was given.

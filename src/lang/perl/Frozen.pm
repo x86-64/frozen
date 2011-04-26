@@ -65,6 +65,7 @@ package Frozen;
 *hash_find = *Frozenc::hash_find;
 *hash_backend = *Frozenc::hash_backend;
 *hash_nelements = *Frozenc::hash_nelements;
+*hash_dump = *Frozenc::hash_dump;
 *hash_string_to_key = *Frozenc::hash_string_to_key;
 *hash_key_to_string = *Frozenc::hash_key_to_string;
 *hash_key_to_ctx_key = *Frozenc::hash_key_to_ctx_key;
@@ -90,4 +91,35 @@ package Frozen;
 *ACTION_CRWD_COUNT = *Frozenc::ACTION_CRWD_COUNT;
 *ACTION_CRWD_CUSTOM = *Frozenc::ACTION_CRWD_CUSTOM;
 *REQUEST_INVALID = *Frozenc::REQUEST_INVALID;
+
+INIT    { frozen_init();  }
+DESTROY { frozen_destory(); }
+
+sub query {
+	my $backend = shift;
+	my $request = shift;
+	my $code    = (shift or undef);
+	
+	my ($arrsz, $h_request, $ret);
+	
+	$arrsz = int(%$request)+1;
+	
+	$h_request = hash_new($arrsz);
+	while(my ($k,$va) = each(%$request)){
+		my ($t,$v) = %$va;
+		
+		hash_set($h_request, $k, $t, "$v");
+	}
+	
+	$ret = backend_query($backend, $h_request);
+	
+	if(defined $code){
+		&$code($h_request);
+	}
+	
+	hash_free($h_request);
+	
+	return $ret;
+}
+
 1;

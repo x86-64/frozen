@@ -2,7 +2,7 @@ PERLMAKEFILE=perl/Makefile
 PERLOUTDIR=perl/
 
 $(PERLMAKEFILE):
-	swig -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c swig.i
+	swig -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
 	cd $(PERLOUTDIR) && $(PERL) Makefile.PL
 
 all-local: $(PERLMAKEFILE)

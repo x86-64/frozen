@@ -2347,6 +2347,33 @@ XS(_wrap_hash_nelements) {
 }
 
 
+XS(_wrap_hash_dump) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: hash_dump(hash);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_dump" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    hash_dump(arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_hash_string_to_key) {
   {
     char *arg1 = (char *) 0 ;
@@ -2888,6 +2915,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_find", _wrap_hash_find},
 {"Frozenc::hash_backend", _wrap_hash_backend},
 {"Frozenc::hash_nelements", _wrap_hash_nelements},
+{"Frozenc::hash_dump", _wrap_hash_dump},
 {"Frozenc::hash_string_to_key", _wrap_hash_string_to_key},
 {"Frozenc::hash_key_to_string", _wrap_hash_key_to_string},
 {"Frozenc::hash_key_to_ctx_key", _wrap_hash_key_to_ctx_key},

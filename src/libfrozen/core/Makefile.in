@@ -44,8 +44,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
@@ -174,6 +174,7 @@ FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
 GREP = @GREP@
+HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@

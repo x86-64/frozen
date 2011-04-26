@@ -94,3 +94,38 @@ void               hash_get                     (hash_t *hash, char *key, char *
 }
 
 %}
+
+// temprorary solution, need remove data_convert
+
+%perlcode %{
+INIT    { frozen_init();  }
+DESTROY { frozen_destory(); }
+
+sub query {
+	my $backend = shift;
+	my $request = shift;
+	my $code    = (shift or undef);
+	
+	my ($arrsz, $h_request, $ret);
+	
+	$arrsz = int(%$request)+1;
+	
+	$h_request = hash_new($arrsz);
+	while(my ($k,$va) = each(%$request)){
+		my ($t,$v) = %$va;
+		
+		hash_set($h_request, $k, $t, "$v");
+	}
+	
+	$ret = backend_query($backend, $h_request);
+	
+	if(defined $code){
+		&$code($h_request);
+	}
+	
+	hash_free($h_request);
+	
+	return $ret;
+}
+
+%}
