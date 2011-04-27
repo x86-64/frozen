@@ -640,6 +640,7 @@ BACKEND_OBJECTS_ipc
 BACKEND_OBJECTS_insert_sort
 BACKEND_OBJECTS_incapsulate
 BACKEND_OBJECTS_file
+BACKEND_OBJECTS_debug
 BACKEND_OBJECTS_cache_append
 BACKEND_OBJECTS_cache
 BACKEND_OBJECTS_balancer
@@ -787,20 +788,21 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
-enable_allocator
-enable_balancer
-enable_cache
-enable_cache_append
-enable_file
-enable_incapsulate
-enable_insert_sort
-enable_ipc
-enable_list
-enable_mphf
-enable_null
-enable_pool
-enable_rewrite
-enable_structs
+enable_backendallocator
+enable_backendbalancer
+enable_backendcache
+enable_backendcache_append
+enable_backenddebug
+enable_backendfile
+enable_backendincapsulate
+enable_backendinsert_sort
+enable_backendipc
+enable_backendlist
+enable_backendmphf
+enable_backendnull
+enable_backendpool
+enable_backendrewrite
+enable_backendstructs
 enable_backend_t
 enable_binary_t
 enable_buffer_t
@@ -1481,6 +1483,7 @@ Optional Features:
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
+  --disable-backend-debug disable backend debug
   --disable-backend-file  disable backend file
   --disable-backend-incapsulate
                           disable backend incapsulate
@@ -17211,21 +17214,21 @@ test -n "$PERL" || PERL="no"
 
 
 
-	# Check whether --enable-allocator was given.
-if test "${enable_allocator+set}" = set; then :
-  enableval=$enable_allocator;
+	# Check whether --enable-backendallocator was given.
+if test "${enable_backendallocator+set}" = set; then :
+  enableval=$enable_backendallocator;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_allocator}" = "yes"; then
-			enable_allocator="no"
+		if test "${enable_backendallocator}" = "yes"; then
+			enable_backendallocator="no"
 		else
-			enable_allocator="yes"
+			enable_backendallocator="yes"
 		fi
 	fi
 
-	if test "${enable_allocator}" = "yes"; then
+	if test "${enable_backendallocator}" = "yes"; then
 		BACKEND_DIR_allocator="allocator"
 		BACKEND_DEP_allocator=""
 		BACKEND_OBJECTS_allocator="$BACKEND_OBJECTS_allocator libfrozen_backend_allocator_la-allocator.lo"
@@ -17248,21 +17251,21 @@ fi
 
 
 
-	# Check whether --enable-balancer was given.
-if test "${enable_balancer+set}" = set; then :
-  enableval=$enable_balancer;
+	# Check whether --enable-backendbalancer was given.
+if test "${enable_backendbalancer+set}" = set; then :
+  enableval=$enable_backendbalancer;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_balancer}" = "yes"; then
-			enable_balancer="no"
+		if test "${enable_backendbalancer}" = "yes"; then
+			enable_backendbalancer="no"
 		else
-			enable_balancer="yes"
+			enable_backendbalancer="yes"
 		fi
 	fi
 
-	if test "${enable_balancer}" = "yes"; then
+	if test "${enable_backendbalancer}" = "yes"; then
 		BACKEND_DIR_balancer="balancer"
 		BACKEND_DEP_balancer=""
 		BACKEND_OBJECTS_balancer="$BACKEND_OBJECTS_balancer libfrozen_backend_balancer_la-balancer.lo"
@@ -17285,21 +17288,21 @@ fi
 
 
 
-	# Check whether --enable-cache was given.
-if test "${enable_cache+set}" = set; then :
-  enableval=$enable_cache;
+	# Check whether --enable-backendcache was given.
+if test "${enable_backendcache+set}" = set; then :
+  enableval=$enable_backendcache;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_cache}" = "yes"; then
-			enable_cache="no"
+		if test "${enable_backendcache}" = "yes"; then
+			enable_backendcache="no"
 		else
-			enable_cache="yes"
+			enable_backendcache="yes"
 		fi
 	fi
 
-	if test "${enable_cache}" = "yes"; then
+	if test "${enable_backendcache}" = "yes"; then
 		BACKEND_DIR_cache="cache"
 		BACKEND_DEP_cache=""
 		BACKEND_OBJECTS_cache="$BACKEND_OBJECTS_cache libfrozen_backend_cache_la-cache.lo"
@@ -17322,21 +17325,21 @@ fi
 
 
 
-	# Check whether --enable-cache_append was given.
-if test "${enable_cache_append+set}" = set; then :
-  enableval=$enable_cache_append;
+	# Check whether --enable-backendcache_append was given.
+if test "${enable_backendcache_append+set}" = set; then :
+  enableval=$enable_backendcache_append;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_cache_append}" = "yes"; then
-			enable_cache_append="no"
+		if test "${enable_backendcache_append}" = "yes"; then
+			enable_backendcache_append="no"
 		else
-			enable_cache_append="yes"
+			enable_backendcache_append="yes"
 		fi
 	fi
 
-	if test "${enable_cache_append}" = "yes"; then
+	if test "${enable_backendcache_append}" = "yes"; then
 		BACKEND_DIR_cache_append="cache_append"
 		BACKEND_DEP_cache_append=""
 		BACKEND_OBJECTS_cache_append="$BACKEND_OBJECTS_cache_append libfrozen_backend_cache_append_la-cache_append.lo"
@@ -17359,21 +17362,58 @@ fi
 
 
 
-	# Check whether --enable-file was given.
-if test "${enable_file+set}" = set; then :
-  enableval=$enable_file;
+	# Check whether --enable-backenddebug was given.
+if test "${enable_backenddebug+set}" = set; then :
+  enableval=$enable_backenddebug;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_file}" = "yes"; then
-			enable_file="no"
+		if test "${enable_backenddebug}" = "yes"; then
+			enable_backenddebug="no"
 		else
-			enable_file="yes"
+			enable_backenddebug="yes"
 		fi
 	fi
 
-	if test "${enable_file}" = "yes"; then
+	if test "${enable_backenddebug}" = "yes"; then
+		BACKEND_DIR_debug="debug"
+		BACKEND_DEP_debug=""
+		BACKEND_OBJECTS_debug="$BACKEND_OBJECTS_debug libfrozen_backend_debug_la-debug.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED debug"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_debug" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/debug/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS debug"
+
+		BACKEND_MAKEFILE_debug=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED debug/libfrozen_backend_debug.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-backendfile was given.
+if test "${enable_backendfile+set}" = set; then :
+  enableval=$enable_backendfile;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfile}" = "yes"; then
+			enable_backendfile="no"
+		else
+			enable_backendfile="yes"
+		fi
+	fi
+
+	if test "${enable_backendfile}" = "yes"; then
 		BACKEND_DIR_file="file"
 		BACKEND_DEP_file=""
 		BACKEND_OBJECTS_file="$BACKEND_OBJECTS_file libfrozen_backend_file_la-file.lo"
@@ -17396,21 +17436,21 @@ fi
 
 
 
-	# Check whether --enable-incapsulate was given.
-if test "${enable_incapsulate+set}" = set; then :
-  enableval=$enable_incapsulate;
+	# Check whether --enable-backendincapsulate was given.
+if test "${enable_backendincapsulate+set}" = set; then :
+  enableval=$enable_backendincapsulate;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_incapsulate}" = "yes"; then
-			enable_incapsulate="no"
+		if test "${enable_backendincapsulate}" = "yes"; then
+			enable_backendincapsulate="no"
 		else
-			enable_incapsulate="yes"
+			enable_backendincapsulate="yes"
 		fi
 	fi
 
-	if test "${enable_incapsulate}" = "yes"; then
+	if test "${enable_backendincapsulate}" = "yes"; then
 		BACKEND_DIR_incapsulate="incapsulate"
 		BACKEND_DEP_incapsulate=""
 		BACKEND_OBJECTS_incapsulate="$BACKEND_OBJECTS_incapsulate libfrozen_backend_incapsulate_la-incapsulate.lo"
@@ -17433,21 +17473,21 @@ fi
 
 
 
-	# Check whether --enable-insert_sort was given.
-if test "${enable_insert_sort+set}" = set; then :
-  enableval=$enable_insert_sort;
+	# Check whether --enable-backendinsert_sort was given.
+if test "${enable_backendinsert_sort+set}" = set; then :
+  enableval=$enable_backendinsert_sort;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_insert_sort}" = "yes"; then
-			enable_insert_sort="no"
+		if test "${enable_backendinsert_sort}" = "yes"; then
+			enable_backendinsert_sort="no"
 		else
-			enable_insert_sort="yes"
+			enable_backendinsert_sort="yes"
 		fi
 	fi
 
-	if test "${enable_insert_sort}" = "yes"; then
+	if test "${enable_backendinsert_sort}" = "yes"; then
 		BACKEND_DIR_insert_sort="insert_sort"
 		BACKEND_DEP_insert_sort=""
 		BACKEND_OBJECTS_insert_sort="$BACKEND_OBJECTS_insert_sort libfrozen_backend_insert_sort_la-insert_sort.lo"
@@ -17470,21 +17510,21 @@ fi
 
 
 
-	# Check whether --enable-ipc was given.
-if test "${enable_ipc+set}" = set; then :
-  enableval=$enable_ipc;
+	# Check whether --enable-backendipc was given.
+if test "${enable_backendipc+set}" = set; then :
+  enableval=$enable_backendipc;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_ipc}" = "yes"; then
-			enable_ipc="no"
+		if test "${enable_backendipc}" = "yes"; then
+			enable_backendipc="no"
 		else
-			enable_ipc="yes"
+			enable_backendipc="yes"
 		fi
 	fi
 
-	if test "${enable_ipc}" = "yes"; then
+	if test "${enable_backendipc}" = "yes"; then
 		BACKEND_DIR_ipc="ipc"
 		BACKEND_DEP_ipc=""
 		BACKEND_OBJECTS_ipc="$BACKEND_OBJECTS_ipc libfrozen_backend_ipc_la-ipc.lo"
@@ -17507,21 +17547,21 @@ fi
 
 
 
-	# Check whether --enable-list was given.
-if test "${enable_list+set}" = set; then :
-  enableval=$enable_list;
+	# Check whether --enable-backendlist was given.
+if test "${enable_backendlist+set}" = set; then :
+  enableval=$enable_backendlist;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_list}" = "yes"; then
-			enable_list="no"
+		if test "${enable_backendlist}" = "yes"; then
+			enable_backendlist="no"
 		else
-			enable_list="yes"
+			enable_backendlist="yes"
 		fi
 	fi
 
-	if test "${enable_list}" = "yes"; then
+	if test "${enable_backendlist}" = "yes"; then
 		BACKEND_DIR_list="list"
 		BACKEND_DEP_list=""
 		BACKEND_OBJECTS_list="$BACKEND_OBJECTS_list libfrozen_backend_list_la-list.lo"
@@ -17544,21 +17584,21 @@ fi
 
 
 
-	# Check whether --enable-mphf was given.
-if test "${enable_mphf+set}" = set; then :
-  enableval=$enable_mphf;
+	# Check whether --enable-backendmphf was given.
+if test "${enable_backendmphf+set}" = set; then :
+  enableval=$enable_backendmphf;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_mphf}" = "yes"; then
-			enable_mphf="no"
+		if test "${enable_backendmphf}" = "yes"; then
+			enable_backendmphf="no"
 		else
-			enable_mphf="yes"
+			enable_backendmphf="yes"
 		fi
 	fi
 
-	if test "${enable_mphf}" = "yes"; then
+	if test "${enable_backendmphf}" = "yes"; then
 		BACKEND_DIR_mphf="mphf"
 		BACKEND_DEP_mphf=""
 		BACKEND_OBJECTS_mphf="$BACKEND_OBJECTS_mphf libfrozen_backend_mphf_la-mphf.lo"
@@ -17581,21 +17621,21 @@ fi
 
 
 
-	# Check whether --enable-null was given.
-if test "${enable_null+set}" = set; then :
-  enableval=$enable_null;
+	# Check whether --enable-backendnull was given.
+if test "${enable_backendnull+set}" = set; then :
+  enableval=$enable_backendnull;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_null}" = "yes"; then
-			enable_null="no"
+		if test "${enable_backendnull}" = "yes"; then
+			enable_backendnull="no"
 		else
-			enable_null="yes"
+			enable_backendnull="yes"
 		fi
 	fi
 
-	if test "${enable_null}" = "yes"; then
+	if test "${enable_backendnull}" = "yes"; then
 		BACKEND_DIR_null="null"
 		BACKEND_DEP_null=""
 		BACKEND_OBJECTS_null="$BACKEND_OBJECTS_null libfrozen_backend_null_la-null.lo"
@@ -17618,21 +17658,21 @@ fi
 
 
 
-	# Check whether --enable-pool was given.
-if test "${enable_pool+set}" = set; then :
-  enableval=$enable_pool;
+	# Check whether --enable-backendpool was given.
+if test "${enable_backendpool+set}" = set; then :
+  enableval=$enable_backendpool;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_pool}" = "yes"; then
-			enable_pool="no"
+		if test "${enable_backendpool}" = "yes"; then
+			enable_backendpool="no"
 		else
-			enable_pool="yes"
+			enable_backendpool="yes"
 		fi
 	fi
 
-	if test "${enable_pool}" = "yes"; then
+	if test "${enable_backendpool}" = "yes"; then
 		BACKEND_DIR_pool="pool"
 		BACKEND_DEP_pool=""
 		BACKEND_OBJECTS_pool="$BACKEND_OBJECTS_pool libfrozen_backend_pool_la-pool.lo"
@@ -17655,21 +17695,21 @@ fi
 
 
 
-	# Check whether --enable-rewrite was given.
-if test "${enable_rewrite+set}" = set; then :
-  enableval=$enable_rewrite;
+	# Check whether --enable-backendrewrite was given.
+if test "${enable_backendrewrite+set}" = set; then :
+  enableval=$enable_backendrewrite;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_rewrite}" = "yes"; then
-			enable_rewrite="no"
+		if test "${enable_backendrewrite}" = "yes"; then
+			enable_backendrewrite="no"
 		else
-			enable_rewrite="yes"
+			enable_backendrewrite="yes"
 		fi
 	fi
 
-	if test "${enable_rewrite}" = "yes"; then
+	if test "${enable_backendrewrite}" = "yes"; then
 		BACKEND_DIR_rewrite="rewrite"
 		BACKEND_DEP_rewrite=""
 		BACKEND_OBJECTS_rewrite="$BACKEND_OBJECTS_rewrite libfrozen_backend_rewrite_la-rewrite.lo"
@@ -17692,21 +17732,21 @@ fi
 
 
 
-	# Check whether --enable-structs was given.
-if test "${enable_structs+set}" = set; then :
-  enableval=$enable_structs;
+	# Check whether --enable-backendstructs was given.
+if test "${enable_backendstructs+set}" = set; then :
+  enableval=$enable_backendstructs;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_structs}" = "yes"; then
-			enable_structs="no"
+		if test "${enable_backendstructs}" = "yes"; then
+			enable_backendstructs="no"
 		else
-			enable_structs="yes"
+			enable_backendstructs="yes"
 		fi
 	fi
 
-	if test "${enable_structs}" = "yes"; then
+	if test "${enable_backendstructs}" = "yes"; then
 		BACKEND_DIR_structs="structs"
 		BACKEND_DEP_structs=""
 		BACKEND_OBJECTS_structs="$BACKEND_OBJECTS_structs libfrozen_backend_structs_la-structs.lo"

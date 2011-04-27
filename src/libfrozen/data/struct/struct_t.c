@@ -89,6 +89,30 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
 	
 	return ITER_CONTINUE;
 }
+
+static ssize_t  struct_iter_unpack_copy(hash_t *element, void *p_ctx, void *null){
+	data_t          *curr_data, new_data;
+	data_ctx_t      *curr_data_ctx;
+	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
+	
+	if(iter_ctx->curr_offset >= iter_ctx->buffer->data_size)
+		return ITER_BREAK;
+	
+	new_data.type      = element->data.type;
+	new_data.data_ptr  = iter_ctx->buffer->data_ptr + iter_ctx->curr_offset;
+	new_data.data_size = iter_ctx->buffer->data_size - iter_ctx->curr_offset;
+	
+	new_data.data_size = data_rawlen(&new_data, NULL);
+	iter_ctx->curr_offset += new_data.data_size;
+	
+	hash_data_find(iter_ctx->values, element->key, &curr_data, &curr_data_ctx);
+	if(curr_data != NULL){
+		data_transfer(curr_data, curr_data_ctx, &new_data, NULL);
+	}
+	
+	return ITER_CONTINUE;
+}
+
 /** Pack hash with values, using structure into buffer */
 size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buffer, data_ctx_t *ctx){
 	struct_iter_ctx  iter_ctx;
@@ -124,6 +148,27 @@ size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buff
 	return (size_t)iter_ctx.curr_offset;
 }
 
+/** Unpack buffer to values using structure. Copy data instead of pointing to buffer */
+size_t    struct_unpack_copy  (struct_t *structure, request_t *values, data_t *buffer, data_ctx_t *ctx){
+	ssize_t          ret;
+	struct_iter_ctx  iter_ctx;
+	
+	iter_ctx.values      = values;
+	iter_ctx.buffer      = buffer;
+	iter_ctx.ctx         = ctx;
+	iter_ctx.curr_offset = 0;
+	
+	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset));
+	if(iter_ctx.curr_offset >= buffer->data_size)
+		return 0;
+	// TODO size
+	
+	if(hash_iter(structure, &struct_iter_unpack_copy, &iter_ctx, NULL) == ITER_BREAK)
+		return 0;
+	
+	return (size_t)iter_ctx.curr_offset;
+}
+	
 data_proto_t struct_t_proto = {
 		.type                   = TYPE_STRUCTT,
 		.type_str               = "struct_t",

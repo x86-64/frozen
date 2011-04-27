@@ -88,6 +88,7 @@ static err_item errs_list[] = {
  { -32768, "src/libfrozen/backends/allocator/allocator.c: calloc failed" },
  { -28673, "src/libfrozen/backends/incapsulate/incapsulate.c: backend incapsulate parameter multiply invalid" },
  { -28672, "src/libfrozen/backends/incapsulate/incapsulate.c: calloc failed" },
+ { -24583, "src/libfrozen/backends/structs/structs.c: struct_unpack_copy failed" },
  { -24582, "src/libfrozen/backends/structs/structs.c: struct_unpack failed" },
  { -24581, "src/libfrozen/backends/structs/structs.c: hash with keys not supplied" },
  { -24580, "src/libfrozen/backends/structs/structs.c: struct_pack failed" },
@@ -158,6 +159,7 @@ static err_item errs_list[] = {
  { -4096, "src/libfrozen/backends/mphf/mphf_bdz_imp.c: mphf g_free" },
  { -4096, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'block_size' invalid" },
  { -4096, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: chain blocks-address no memory" },
+ { -4096, "src/libfrozen/backends/debug/debug.c: calloc failed" },
 
 };
 #define            errs_list_size      sizeof(errs_list[0])

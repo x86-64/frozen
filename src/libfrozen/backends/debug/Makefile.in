@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/libfrozen/core
+subdir = src/libfrozen/backends/debug
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -46,7 +46,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
@@ -76,20 +75,15 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfrozen_core_la_LIBADD =
-am__dirstamp = $(am__leading_dot)dirstamp
-am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
-	libfrozen_core_la-errors.lo libfrozen_core_la-data.lo \
-	libfrozen_core_la-hash.lo libfrozen_core_la-hashkeys.lo \
-	libfrozen_core_la-list.lo libfrozen_core_la-buffer.lo \
-	libfrozen_core_la-backend.lo \
-	configs/libfrozen_core_la-config_parser.tab.lo \
-	configs/libfrozen_core_la-config_parser.lex.lo
-libfrozen_core_la_OBJECTS = $(am_libfrozen_core_la_OBJECTS)
-libfrozen_core_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libfrozen_core_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+libfrozen_backend_debug_la_LIBADD =
+am_libfrozen_backend_debug_la_OBJECTS =  \
+	libfrozen_backend_debug_la-debug.lo
+libfrozen_backend_debug_la_OBJECTS =  \
+	$(am_libfrozen_backend_debug_la_OBJECTS)
+libfrozen_backend_debug_la_LINK = $(LIBTOOL) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libfrozen_backend_debug_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
 am__depfiles_maybe = depfiles
@@ -103,8 +97,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfrozen_core_la_SOURCES)
-DIST_SOURCES = $(libfrozen_core_la_SOURCES)
+SOURCES = $(libfrozen_backend_debug_la_SOURCES)
+DIST_SOURCES = $(libfrozen_backend_debug_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -123,7 +117,6 @@ BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
 BACKEND_OBJECTS_balancer = @BACKEND_OBJECTS_balancer@
 BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
 BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
-BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@
 BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
 BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
 BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
@@ -274,33 +267,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = subdir-objects
-EXTRA_DIST = \
-	configs/config_parser.l                 \
-	configs/config_parser.y                 
-
-noinst_LTLIBRARIES = libfrozen_core.la
-libfrozen_core_la_SOURCES = \
-                        libfrozen.h     libfrozen.c                          \
-                        errors.h        errors.c                             \
-			data.h          data.c                               \
-                        hash.h          hash.c                               \
-                        hashkeys.c      hashkeys.h                           \
-			list.h          list.c                               \
-                        buffer.h        buffer.c                             \
-                        backend.c           backend.h           \
-                        configs/config.h                        \
-                        configs/config_parser.tab.h             \
-                        configs/config_parser.tab.c             \
-                        configs/config_parser.lex.c             \
-                        public.h
-
-libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
-CLEANFILES = \
-		configs/config_parser.tab.c                            \
-		configs/config_parser.tab.h                            \
-		configs/config_parser.lex.c                            
-
+noinst_LTLIBRARIES = libfrozen_backend_debug.la
+libfrozen_backend_debug_la_SOURCES = debug.c
+libfrozen_backend_debug_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 
 .SUFFIXES:
@@ -314,9 +283,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/core/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/backends/debug/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/libfrozen/core/Makefile
+	  $(AUTOMAKE) --foreign src/libfrozen/backends/debug/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -344,140 +313,50 @@ clean-noinstLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-configs/$(am__dirstamp):
-	@$(MKDIR_P) configs
-	@: > configs/$(am__dirstamp)
-configs/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) configs/$(DEPDIR)
-	@: > configs/$(DEPDIR)/$(am__dirstamp)
-configs/libfrozen_core_la-config_parser.tab.lo:  \
-	configs/$(am__dirstamp) configs/$(DEPDIR)/$(am__dirstamp)
-configs/libfrozen_core_la-config_parser.lex.lo:  \
-	configs/$(am__dirstamp) configs/$(DEPDIR)/$(am__dirstamp)
-libfrozen_core.la: $(libfrozen_core_la_OBJECTS) $(libfrozen_core_la_DEPENDENCIES) 
-	$(libfrozen_core_la_LINK)  $(libfrozen_core_la_OBJECTS) $(libfrozen_core_la_LIBADD) $(LIBS)
+libfrozen_backend_debug.la: $(libfrozen_backend_debug_la_OBJECTS) $(libfrozen_backend_debug_la_DEPENDENCIES) 
+	$(libfrozen_backend_debug_la_LINK)  $(libfrozen_backend_debug_la_OBJECTS) $(libfrozen_backend_debug_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f configs/libfrozen_core_la-config_parser.lex.$(OBJEXT)
-	-rm -f configs/libfrozen_core_la-config_parser.lex.lo
-	-rm -f configs/libfrozen_core_la-config_parser.tab.$(OBJEXT)
-	-rm -f configs/libfrozen_core_la-config_parser.tab.lo
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-backend.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-buffer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-data.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-errors.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-hash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-hashkeys.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-libfrozen.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-list.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_debug_la-debug.Plo@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ $<
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-libfrozen_core_la-libfrozen.lo: libfrozen.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-libfrozen.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-libfrozen.Tpo -c -o libfrozen_core_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-libfrozen.Tpo $(DEPDIR)/libfrozen_core_la-libfrozen.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='libfrozen.c' object='libfrozen_core_la-libfrozen.lo' libtool=yes @AMDEPBACKSLASH@
+libfrozen_backend_debug_la-debug.lo: debug.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_debug_la_CFLAGS) $(CFLAGS) -MT libfrozen_backend_debug_la-debug.lo -MD -MP -MF $(DEPDIR)/libfrozen_backend_debug_la-debug.Tpo -c -o libfrozen_backend_debug_la-debug.lo `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_backend_debug_la-debug.Tpo $(DEPDIR)/libfrozen_backend_debug_la-debug.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='debug.c' object='libfrozen_backend_debug_la-debug.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-libfrozen.lo `test -f 'libfrozen.c' || echo '$(srcdir)/'`libfrozen.c
-
-libfrozen_core_la-errors.lo: errors.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-errors.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-errors.Tpo -c -o libfrozen_core_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-errors.Tpo $(DEPDIR)/libfrozen_core_la-errors.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='errors.c' object='libfrozen_core_la-errors.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-errors.lo `test -f 'errors.c' || echo '$(srcdir)/'`errors.c
-
-libfrozen_core_la-data.lo: data.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-data.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-data.Tpo -c -o libfrozen_core_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-data.Tpo $(DEPDIR)/libfrozen_core_la-data.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='data.c' object='libfrozen_core_la-data.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-data.lo `test -f 'data.c' || echo '$(srcdir)/'`data.c
-
-libfrozen_core_la-hash.lo: hash.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-hash.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-hash.Tpo -c -o libfrozen_core_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-hash.Tpo $(DEPDIR)/libfrozen_core_la-hash.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash.c' object='libfrozen_core_la-hash.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-
-libfrozen_core_la-hashkeys.lo: hashkeys.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-hashkeys.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-hashkeys.Tpo -c -o libfrozen_core_la-hashkeys.lo `test -f 'hashkeys.c' || echo '$(srcdir)/'`hashkeys.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-hashkeys.Tpo $(DEPDIR)/libfrozen_core_la-hashkeys.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hashkeys.c' object='libfrozen_core_la-hashkeys.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-hashkeys.lo `test -f 'hashkeys.c' || echo '$(srcdir)/'`hashkeys.c
-
-libfrozen_core_la-list.lo: list.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-list.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-list.Tpo -c -o libfrozen_core_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-list.Tpo $(DEPDIR)/libfrozen_core_la-list.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='list.c' object='libfrozen_core_la-list.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-
-libfrozen_core_la-buffer.lo: buffer.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-buffer.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-buffer.Tpo -c -o libfrozen_core_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-buffer.Tpo $(DEPDIR)/libfrozen_core_la-buffer.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='buffer.c' object='libfrozen_core_la-buffer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
-
-libfrozen_core_la-backend.lo: backend.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-backend.Tpo -c -o libfrozen_core_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-backend.Tpo $(DEPDIR)/libfrozen_core_la-backend.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backend.c' object='libfrozen_core_la-backend.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
-
-configs/libfrozen_core_la-config_parser.tab.lo: configs/config_parser.tab.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config_parser.tab.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Tpo -c -o configs/libfrozen_core_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c
-@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Tpo configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config_parser.tab.c' object='configs/libfrozen_core_la-config_parser.tab.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_core_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c
-
-configs/libfrozen_core_la-config_parser.lex.lo: configs/config_parser.lex.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config_parser.lex.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Tpo -c -o configs/libfrozen_core_la-config_parser.lex.lo `test -f 'configs/config_parser.lex.c' || echo '$(srcdir)/'`configs/config_parser.lex.c
-@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Tpo configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config_parser.lex.c' object='configs/libfrozen_core_la-config_parser.lex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_core_la-config_parser.lex.lo `test -f 'configs/config_parser.lex.c' || echo '$(srcdir)/'`configs/config_parser.lex.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_debug_la_CFLAGS) $(CFLAGS) -c -o libfrozen_backend_debug_la-debug.lo `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf configs/.libs configs/_libs
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -582,13 +461,10 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f configs/$(DEPDIR)/$(am__dirstamp)
-	-rm -f configs/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -599,7 +475,7 @@ clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -645,7 +521,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) configs/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -679,11 +555,6 @@ uninstall-am:
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am
 
-
-configs/config_parser.tab.c:
-	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
-configs/config_parser.lex.c:
-	${FLEX}  -P config_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

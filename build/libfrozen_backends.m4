@@ -1,17 +1,17 @@
 AC_DEFUN([FROZEN_BACKEND],[
 	define([backend_name],translit($1,_,-))
 	define([backend_action],ifelse($3,yes,disable,enable))
-	AC_ARG_ENABLE($1,AS_HELP_STRING([--]backend_action()[-backend-]backend_name(),backend_action()[ backend ]backend_name()))
+	AC_ARG_ENABLE(backend$1,AS_HELP_STRING([--]backend_action()[-backend-]backend_name(),backend_action()[ backend ]backend_name()))
 	
 	if test "$3" = "yes"; then
-		if test "${enable_$1}" = "yes"; then
-			enable_$1="no"
+		if test "${enable_backend$1}" = "yes"; then
+			enable_backend$1="no"
 		else
-			enable_$1="yes"
+			enable_backend$1="yes"
 		fi
 	fi
 	
-	if test "${enable_$1}" = "yes"; then
+	if test "${enable_backend$1}" = "yes"; then
 		BACKEND_DIR_$1="$2"
 		BACKEND_DEP_$1="$4"
 		BACKEND_OBJECTS_$2="$BACKEND_OBJECTS_$2 libfrozen_backend_$2_la-$1.lo"
