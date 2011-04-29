@@ -48,6 +48,8 @@ typedef struct vertex_list_t {
 #define VALUE_BITS_DEFAULT    32
 #define BITS_TO_BYTES(x) ( ((x - 1) >> 3) + 1)
 
+//#define MPHF_DEBUG
+
 static char clean[100] = {0};
 
 // TIP nice memory saving is: store edges in vertex table with additional bit field, if
@@ -563,9 +565,10 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements){ // {{{
 		nelements *= data->nelements_step;
 	}
 	nelements += data->nelements_min;
-	
-	//printf("mphf rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
-	
+
+#ifdef MPHF_DEBUG
+	printf("mphf rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
+#endif
 	// set .params
 	data->params.hash1 = random();
 	data->params.hash2 = random();
@@ -600,9 +603,11 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	if(vertex[0] == vertex[1])
 		return -EBADF;
 	
-	//printf("mphf: insert: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
-	//	key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
-	//);
+#ifdef MPHF_DEBUG
+	printf("mphf: insert: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
+		key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
+	);
+#endif
 	return graph_add_edge(data, (uintmax_t *)&vertex, value);
 } // }}}
 ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {{{
@@ -616,11 +621,13 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
 	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
-	
-	//printf("mphf: update: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
-	//	key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
-	//);
-	
+
+#ifdef MPHF_DEBUG
+	printf("mphf: update: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
+		key, value, vertex[0], vertex[1], data->params.hash1, data->params.hash2
+	);
+#endif
+
 	if(vertex[0] == vertex[1])
 		return MPHF_QUERY_NOTFOUND;
 	
@@ -662,9 +669,11 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // 
 	
 	result = ((g[0] + g[1]) & ( ((uintmax_t)1 << data->bi_value) - 1));
 	
-	//printf("mphf: query %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
-	//	key, result, vertex[0], vertex[1], data->params.hash1, data->params.hash2
-	//);
+#ifdef MPHF_DEBUG
+	printf("mphf: query %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
+		key, result, vertex[0], vertex[1], data->params.hash1, data->params.hash2
+	);
+#endif
 	*value = result;
 	return MPHF_QUERY_FOUND;
 } // }}}

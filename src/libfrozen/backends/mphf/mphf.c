@@ -111,10 +111,12 @@ redo:
 	
 	// process items
 	for(i=0; i<count; i++){
+		keyid = 0;
+		
 		request_t r_read[] = {
 			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
-			{ userdata->keyid,     DATA_VOID                               },
-			{ userdata->key_from,  DATA_VOID                               },
+			{ userdata->keyid,     DATA_PTR_UINT64T(&keyid)                },
+			{ userdata->key_from,  DATA_VOID                               }, // TODO buffer
 			{ userdata->key_to,    DATA_OFFT(i)                            },
 			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
 			{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
@@ -130,7 +132,6 @@ redo:
 			if(userdata->keyid != 0){
 				hash_data_find(r_read, userdata->keyid,    &key, NULL);
 				if(key != NULL){
-					keyid = 0;
 					data_to_dt(ret, TYPE_UINT64T, keyid, key, NULL); 
 					break;
 				}
@@ -301,7 +302,7 @@ static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{
 			key_new_out = key_out;
 			
 			request_t r_next[] = {
-				{ userdata->key_to,     DATA_PTR_OFFT(&key_out)     },
+				{ userdata->key_to,     DATA_OFFT(key_out)          },
 				{ userdata->offset_out, DATA_PTR_OFFT(&key_new_out) },
 				hash_next(request)
 			};

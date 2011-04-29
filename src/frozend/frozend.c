@@ -49,6 +49,7 @@ static struct cmdline_option *  map_opts      [96];
 void signal_handler(int sig){ // {{{
 	switch(sig) {
 		case SIGHUP:  break;
+		case SIGINT:
 		case SIGTERM: main_cleanup(); exit(0); break;
 	}
 } // }}}
@@ -227,6 +228,7 @@ void main_rest(void){
 		daemonize();
 	
 	signal(SIGHUP,signal_handler); /* catch hangup signal */
+	signal(SIGINT,signal_handler);
 	signal(SIGTERM,signal_handler); /* catch kill signal */
 	
 	save_pid(opt_pidfile);
