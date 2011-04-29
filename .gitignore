@@ -9,10 +9,12 @@ Makefile
 stamp-h1
 doc/*
 autom4te.cache/*
-config.*
 libtool
 callgrind.out
 *.c_
 backend_selected.h
 data_selected.h
 hashkeys*
+config.m4
+config.log
+config.status
