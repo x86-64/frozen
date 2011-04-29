@@ -8,6 +8,8 @@ EXTRA_libfrozen_data_uint_la_SOURCES = $(uint_src) $(uint_hdr) uint_init.m4
 libfrozen_data_uint_la_LIBADD        = @DATA_OBJECTS_uint@
 libfrozen_data_uint_la_DEPENDENCIES  = @DATA_OBJECTS_uint@
 
+EXTRA_DIST = uint.c.m4 uint.h.m4
+
 $(uint_src): $(uint_hdr) uint.c.m4
 	${M4} -sP -DNAME=$@ uint.c.m4 > $@
 $(uint_hdr): uint.h.m4

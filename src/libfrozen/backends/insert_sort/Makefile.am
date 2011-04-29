@@ -2,6 +2,9 @@ noinst_LTLIBRARIES = libfrozen_backend_insert_sort.la
 libfrozen_backend_insert_sort_la_SOURCES = insert_sort.c
 libfrozen_backend_insert_sort_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 
+EXTRA_DIST = insert_sort.m4 \
+	binsearch.c
+
 insert_sort.c: insert_sort.m4
 	${M4} -sP $< > $@
 

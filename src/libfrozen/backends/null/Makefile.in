@@ -43,8 +43,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./build/libfrozen_backends.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
@@ -52,6 +54,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
@@ -112,8 +115,10 @@ BACKEND_DIRS = @BACKEND_DIRS@
 BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
 BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
 BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
+BACKEND_OBJECTS_balancer = @BACKEND_OBJECTS_balancer@
 BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
 BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
+BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@
 BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
 BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
 BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
@@ -121,6 +126,7 @@ BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
 BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
 BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
 BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
+BACKEND_OBJECTS_pool = @BACKEND_OBJECTS_pool@
 BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
 BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@
@@ -165,6 +171,7 @@ FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
 GREP = @GREP@
+HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@

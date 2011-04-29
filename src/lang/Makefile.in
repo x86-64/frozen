@@ -245,7 +245,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 PERLMAKEFILE = perl/Makefile
 PERLOUTDIR = perl/
-EXTRA_DIST = swig.i $(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL
+EXTRA_DIST = swig.i $(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t
 all: all-am
 
 .SUFFIXES:

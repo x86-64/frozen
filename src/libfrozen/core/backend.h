@@ -56,7 +56,6 @@ struct backend_t {
 };
 
 API backend_t *     backend_new             (hash_t *config);
-API ssize_t         backend_bulk_new        (hash_t *config);
 API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
 API backend_t *     backend_fork            (backend_t *backend, request_t *request);

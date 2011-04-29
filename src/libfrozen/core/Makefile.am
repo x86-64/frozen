@@ -1,6 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
 EXTRA_DIST=                                     \
+	errors_list.c                           \
+	hashkeys_int.h                          \
 	configs/config_parser.l                 \
 	configs/config_parser.y                 
 

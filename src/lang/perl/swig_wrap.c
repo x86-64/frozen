@@ -1948,34 +1948,6 @@ XS(_wrap_backend_new) {
 }
 
 
-XS(_wrap_backend_bulk_new) {
-  {
-    hash_t *arg1 = (hash_t *) 0 ;
-    void *argp1 = 0 ;
-    int res1 = 0 ;
-    int argvi = 0;
-    ssize_t result;
-    dXSARGS;
-    
-    if ((items < 1) || (items > 1)) {
-      SWIG_croak("Usage: backend_bulk_new(config);");
-    }
-    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_bulk_new" "', argument " "1"" of type '" "hash_t *""'"); 
-    }
-    arg1 = (hash_t *)(argp1);
-    result = (ssize_t)backend_bulk_new(arg1);
-    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
-    
-    XSRETURN(argvi);
-  fail:
-    
-    SWIG_croak_null();
-  }
-}
-
-
 XS(_wrap_backend_acquire) {
   {
     char *arg1 = (char *) 0 ;
@@ -2282,7 +2254,7 @@ XS(_wrap_hash_find) {
 }
 
 
-XS(_wrap_hash_backend) {
+XS(_wrap_hash_chain) {
   {
     hash_t *arg1 = (hash_t *) 0 ;
     hash_t *arg2 = (hash_t *) 0 ;
@@ -2294,19 +2266,19 @@ XS(_wrap_hash_backend) {
     dXSARGS;
     
     if ((items < 2) || (items > 2)) {
-      SWIG_croak("Usage: hash_backend(hash,hash_next);");
+      SWIG_croak("Usage: hash_chain(hash,hash_next);");
     }
     res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_backend" "', argument " "1"" of type '" "hash_t *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_chain" "', argument " "1"" of type '" "hash_t *""'"); 
     }
     arg1 = (hash_t *)(argp1);
     res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_hash_t, 0 |  0 );
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_backend" "', argument " "2"" of type '" "hash_t *""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_chain" "', argument " "2"" of type '" "hash_t *""'"); 
     }
     arg2 = (hash_t *)(argp2);
-    hash_backend(arg1,arg2);
+    hash_chain(arg1,arg2);
     ST(argvi) = sv_newmortal();
     
     
@@ -2338,6 +2310,33 @@ XS(_wrap_hash_nelements) {
     arg1 = (hash_t *)(argp1);
     result = (size_t)hash_nelements(arg1);
     ST(argvi) = SWIG_From_size_t  SWIG_PERL_CALL_ARGS_1((size_t)(result)); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_hash_dump) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: hash_dump(hash);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_dump" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    hash_dump(arg1);
+    ST(argvi) = sv_newmortal();
     
     XSRETURN(argvi);
   fail:
@@ -2875,7 +2874,6 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::frozen_init", _wrap_frozen_init},
 {"Frozenc::frozen_destroy", _wrap_frozen_destroy},
 {"Frozenc::backend_new", _wrap_backend_new},
-{"Frozenc::backend_bulk_new", _wrap_backend_bulk_new},
 {"Frozenc::backend_acquire", _wrap_backend_acquire},
 {"Frozenc::backend_find", _wrap_backend_find},
 {"Frozenc::backend_query", _wrap_backend_query},
@@ -2886,8 +2884,9 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_copy", _wrap_hash_copy},
 {"Frozenc::hash_free", _wrap_hash_free},
 {"Frozenc::hash_find", _wrap_hash_find},
-{"Frozenc::hash_backend", _wrap_hash_backend},
+{"Frozenc::hash_chain", _wrap_hash_chain},
 {"Frozenc::hash_nelements", _wrap_hash_nelements},
+{"Frozenc::hash_dump", _wrap_hash_dump},
 {"Frozenc::hash_string_to_key", _wrap_hash_string_to_key},
 {"Frozenc::hash_key_to_string", _wrap_hash_key_to_string},
 {"Frozenc::hash_key_to_ctx_key", _wrap_hash_key_to_ctx_key},

@@ -276,6 +276,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = \
+	errors_list.c                           \
+	hashkeys_int.h                          \
 	configs/config_parser.l                 \
 	configs/config_parser.y                 
 

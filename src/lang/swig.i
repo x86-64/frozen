@@ -26,7 +26,6 @@ int                frozen_init(void);
 int                frozen_destroy(void);
 
 backend_t *        backend_new                  (hash_t *config);
-ssize_t            backend_bulk_new             (hash_t *config);
 backend_t *        backend_acquire              (char *name);
 backend_t *        backend_find                 (char *name);
 ssize_t            backend_query                (backend_t *backend, request_t *request);
@@ -40,7 +39,7 @@ hash_t *           hash_copy                    (hash_t *hash);
 void               hash_free                    (hash_t *hash);
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
-void               hash_backend                   (hash_t *hash, hash_t *hash_next);
+void               hash_chain                   (hash_t *hash, hash_t *hash_next);
 size_t             hash_nelements               (hash_t *hash);
 #ifdef DEBUG
 void               hash_dump                    (hash_t *hash);
