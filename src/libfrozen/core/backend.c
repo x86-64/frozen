@@ -375,53 +375,65 @@ void         backend_destroy_all  (void){ // {{{
 } // }}}
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t  r_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)   },
-		{ HK(size),       DATA_PTR_SIZET(&size)              },
-		{ HK(offset_out), DATA_PTR_OFFT(offset)              },
-		{ HK(ret),        DATA_PTR_SIZET(&q_ret)             },
-		hash_end
-	};
-	if( (b_ret = backend_query(backend, r_create)) < 0)
-		return b_ret;
-	
-	return q_ret;
+	if( (backend->supported_api & API_FAST) != 0){
+		return backend->backend_type_fast.func_fast_create(backend, offset, size);
+	}else{
+		ssize_t q_ret = 0, b_ret;
+		
+		request_t  r_create[] = {
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)   },
+			{ HK(size),       DATA_PTR_SIZET(&size)              },
+			{ HK(offset_out), DATA_PTR_OFFT(offset)              },
+			{ HK(ret),        DATA_PTR_SIZET(&q_ret)             },
+			hash_end
+		};
+		if( (b_ret = backend_query(backend, r_create)) < 0)
+			return b_ret;
+		
+		return q_ret;
+	}
 } // }}}
 ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t  r_read[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)    },
-		{ HK(offset),     DATA_PTR_OFFT(&offset)            },
-		{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-		{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-		{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-		hash_end
-	};
-	
-	if( (b_ret = backend_query(backend, r_read)) < 0)
-		return b_ret;
-	
-	return q_ret;
+	if( (backend->supported_api & API_FAST) != 0){
+		return backend->backend_type_fast.func_fast_read(backend, offset, buffer, buffer_size);
+	}else{
+		ssize_t q_ret = 0, b_ret;
+		
+		request_t  r_read[] = {
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)    },
+			{ HK(offset),     DATA_PTR_OFFT(&offset)            },
+			{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+			{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+			{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
+			hash_end
+		};
+		
+		if( (b_ret = backend_query(backend, r_read)) < 0)
+			return b_ret;
+		
+		return q_ret;
+	}
 } // }}}
 ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t  r_write[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)   },
-		{ HK(offset),     DATA_PTR_OFFT(&offset)            },
-		{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-		{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-		{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-		hash_end
-	};
-	
-	if( (b_ret = backend_query(backend, r_write)) < 0)
-		return b_ret;
-	
-	return q_ret;
+	if( (backend->supported_api & API_FAST) != 0){
+		return backend->backend_type_fast.func_fast_write(backend, offset, buffer, buffer_size);
+	}else{
+		ssize_t q_ret = 0, b_ret;
+		
+		request_t  r_write[] = {
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)   },
+			{ HK(offset),     DATA_PTR_OFFT(&offset)            },
+			{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+			{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+			{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
+			hash_end
+		};
+		
+		if( (b_ret = backend_query(backend, r_write)) < 0)
+			return b_ret;
+		
+		return q_ret;
+	}
 } // }}}
 ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size){ // {{{
 	size_t size;
@@ -453,20 +465,24 @@ ssize_t         backend_stdcall_move  (backend_t *backend, off_t  from, off_t to
 	return q_ret;
 } // }}}
 ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t  r_delete[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_DELETE)     },
-		{ HK(offset),     DATA_PTR_OFFT(&offset)               },
-		{ HK(size),       DATA_PTR_SIZET(&size)                },
-		{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
-		hash_end
-	};
-	
-	if( (b_ret = backend_query(backend, r_delete)) < 0)
-		return b_ret;
-	
-	return q_ret;
+	if( (backend->supported_api & API_FAST) != 0){
+		return backend->backend_type_fast.func_fast_delete(backend, offset, size);
+	}else{
+		ssize_t q_ret = 0, b_ret;
+		
+		request_t  r_delete[] = {
+			{ HK(action),     DATA_UINT32T(ACTION_CRWD_DELETE)     },
+			{ HK(offset),     DATA_PTR_OFFT(&offset)               },
+			{ HK(size),       DATA_PTR_SIZET(&size)                },
+			{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
+			hash_end
+		};
+		
+		if( (b_ret = backend_query(backend, r_delete)) < 0)
+			return b_ret;
+		
+		return q_ret;
+	}
 } // }}}
 ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{{
 	ssize_t q_ret = 0, b_ret;

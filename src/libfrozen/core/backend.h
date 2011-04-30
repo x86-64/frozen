@@ -16,7 +16,8 @@ enum request_actions {
 };
 
 typedef enum api_types {
-	API_CRWD
+	API_CRWD,
+	API_FAST
 	
 } api_types;
 
@@ -25,6 +26,11 @@ typedef int     (*f_fork)      (backend_t *, backend_t *, hash_t *);
 typedef int     (*f_configure) (backend_t *, hash_t *);
 typedef int     (*f_destroy)   (backend_t *);
 typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
+
+typedef ssize_t (*f_fast_create) (backend_t *, off_t *, size_t);
+typedef ssize_t (*f_fast_read)   (backend_t *, off_t, void *, size_t);
+typedef ssize_t (*f_fast_write)  (backend_t *, off_t, void *, size_t);
+typedef ssize_t (*f_fast_delete) (backend_t *, off_t, size_t);
 
 struct backend_t {
 	char                  *name;
@@ -48,6 +54,12 @@ struct backend_t {
 			f_crwd  func_count;
 			f_crwd  func_custom;
 		} backend_type_crwd;
+		struct {
+			f_fast_create  func_fast_create;
+			f_fast_read    func_fast_read;
+			f_fast_write   func_fast_write;
+			f_fast_delete  func_fast_delete;
+		} backend_type_fast;
 	};
 	void *                 userdata;
 	
