@@ -92,10 +92,10 @@ backend_t list_proto = {
 	.func_init      = &lists_init,
 	.func_configure = &lists_configure,
 	.func_destroy   = &lists_destroy,
-	{{
+	{
 		.func_set    = &lists_set,
 		.func_delete = &lists_delete
-	}}
+	}
 };
 
 

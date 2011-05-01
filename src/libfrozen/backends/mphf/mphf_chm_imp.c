@@ -681,7 +681,7 @@ ssize_t mphf_chm_imp_delete (mphf_t *mphf, uintmax_t key){ // {{{
 	return error("delete not supported");
 } // }}}
 
-/* Invalid code {{{
+/* Invalid code {{
 typedef struct graph_edge_t {
 	// public
 	uintmax_t  second_vertex;
@@ -917,4 +917,4 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 	
 	return 0;
 } // }}}
-}}} */
+}} */

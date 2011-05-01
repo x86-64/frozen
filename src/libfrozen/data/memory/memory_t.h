@@ -5,12 +5,15 @@ enum { TYPE_MEMORYT = 18 };
 #define DATA_MEMORYT(_mem) {TYPE_MEMORYT, _mem, 0}
 	
 typedef enum memory_t_type {
+	MEMORY_FREED = 0,
+	
 	MEMORY_EXACT,         // memory size is exact to hold data
 	MEMORY_PAGE,          // memory expand granularity is page
 	MEMORY_DOUBLE         // memory expands by doubling current size
 } memory_t_type;
 
 typedef enum memory_t_alloc {
+	ALLOC_FREED = 0,
 	ALLOC_MALLOC,
 } memory_t_alloc;
 
@@ -34,6 +37,9 @@ API ssize_t  memory_resize(memory_t *memory, uintmax_t new_size);
 API ssize_t  memory_grow(memory_t *memory, uintmax_t size, off_t *pointer); 
 API ssize_t  memory_shrink(memory_t *memory, uintmax_t size); 
 API ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, void **pointer_out, uintmax_t *size_out); 
+
+API size_t   memory_read  (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
+API size_t   memory_write (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
 
 extern data_proto_t memory_t_proto;
 

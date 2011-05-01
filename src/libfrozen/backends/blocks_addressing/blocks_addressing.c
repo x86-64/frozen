@@ -36,7 +36,7 @@ static unsigned int log_any(size_t x, size_t power){
 	return res;
 }
 
-/* size-tree {{{ */
+/* size-tree {{ */
 static int      tree_reinit(tree_t *tree){ // {{{
 	unsigned int      i;
 	size_t            ls;
@@ -428,9 +428,9 @@ static unsigned int tree_blocks_count(tree_t *tree){ // {{{
 	return tree->blocks_count;
 } // }}}
 
-/* }}} */
+/* }} */
 
-/* init {{{ */
+/* init {{ */
 static int addrs_init(backend_t *chain){
 	addrs_userdata *userdata = calloc(1, sizeof(addrs_userdata));
 	if(userdata == NULL)
@@ -477,7 +477,7 @@ static int addrs_configure(backend_t *chain, hash_t *config){
 	
 	return 0;
 }
-/* }}} */
+/* }} */
 
 static ssize_t addrs_set(backend_t *chain, request_t *request){
 	ssize_t           ret;
@@ -583,12 +583,12 @@ backend_t blocks_address_proto = {
 	&addrs_init,
 	&addrs_configure,
 	&addrs_destroy,
-	{{
+	{
 		.func_set    = &addrs_set,
 		.func_get    = &addrs_get,
 		.func_delete = &addrs_delete,
 		.func_count  = &addrs_count
-	}}
+	}
 };
 
 

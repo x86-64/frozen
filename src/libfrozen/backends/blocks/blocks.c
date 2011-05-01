@@ -260,7 +260,7 @@ static ssize_t   itms_delete        (backend_t *chain, off_t start, size_t size)
 	return 0;
 } // }}}
 
-/* init {{{ */
+/* init {{ */
 static int blocks_init(backend_t *chain){
 	blocks_userdata *userdata = calloc(1, sizeof(blocks_userdata));
 	if(userdata == NULL)
@@ -301,7 +301,7 @@ static int blocks_configure(backend_t *chain, hash_t *config){
 	map_blocks(data);
 	return 0;
 }
-/* }}} */
+/* }} */
 
 static ssize_t blocks_create(backend_t *chain, request_t *request){ // {{{
 	unsigned int      element_size;
@@ -450,14 +450,14 @@ backend_t blocks_proto = {
 	.func_init      = &blocks_init,
 	.func_configure = &blocks_configure,
 	.func_destroy   = &blocks_destroy,
-	{{
+	{
 		.func_create = &blocks_create,
 		.func_set    = &blocks_setget,
 		.func_get    = &blocks_setget,
 		.func_delete = &blocks_delete,
 		.func_move   = &blocks_move,
 		.func_count  = &blocks_count
-	}}
+	}
 };
 
 

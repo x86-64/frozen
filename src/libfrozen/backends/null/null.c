@@ -34,9 +34,9 @@ backend_t null_proto = {
 	.func_init      = &null_init,
 	.func_configure = &null_configure,
 	.func_destroy   = &null_destroy,
-	{{
+	{
 		.func_create = &null_create,
-	}}
+	}
 };
 
 

@@ -129,11 +129,11 @@ backend_t structs_proto = {
 	.func_init      = &struct_init,
 	.func_configure = &struct_configure,
 	.func_destroy   = &struct_destroy,
-	{{
+	{
 		.func_create = &struct_backend_pack,
 		.func_set    = &struct_backend_pack,
 		.func_get    = &struct_backend_unpack
-	}}
+	}
 };
 
 

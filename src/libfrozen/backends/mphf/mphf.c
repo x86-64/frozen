@@ -32,14 +32,14 @@ mphf_hash_proto_t *  mphf_string_to_hash_proto(char *string){ // {{{
 	return NULL;
 } // }}}
 
-/* hashes {{{ */
+/* hashes {{ */
 uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes){
 	if(type >= mphf_hash_protos_size)
 		return 0;
 	
 	return mphf_hash_protos[type].func_hash32(seed, key, key_size, hashes, nhashes);
 }
-/* }}} */
+/* }} */
 
 static uint64_t mphf_key_str_to_key(mphf_t *mphf, char *key, size_t key_len){ // {{{
 	uint64_t value = 0;
@@ -337,12 +337,12 @@ backend_t mphf_proto = {
 	.func_configure = &mphf_configure,
 	.func_fork      = &mphf_fork,
 	.func_destroy   = &mphf_destroy,
-	{{
+	{
 		.func_create = &mphf_backend_insert,
 		.func_set    = &mphf_backend_queryinsert,
 		.func_get    = &mphf_backend_query,
 		.func_delete = &mphf_backend_query
-	}}
+	}
 };
 
 

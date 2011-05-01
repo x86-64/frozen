@@ -644,7 +644,7 @@ backend_t file_proto = {
 	.func_fork      = &file_fork,
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,
-	{{
+	{
 		.func_create = &file_create,
 		.func_set    = &file_write,
 		.func_get    = &file_read,
@@ -652,7 +652,7 @@ backend_t file_proto = {
 		.func_move   = &file_move,
 		.func_count  = &file_count,
 		.func_custom = &file_custom
-	}}
+	}
 };
 
 

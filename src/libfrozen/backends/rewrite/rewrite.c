@@ -73,9 +73,9 @@ typedef struct rewrite_userdata {
 	unsigned int      inited;
 	rewrite_script_t  script;
 } rewrite_userdata;
-/* }}} */
+/* }} */
 
-/* init {{{ */
+/* init {{ */
 static int rewrite_init(backend_t *backend){ // {{{
 	if( (backend->userdata = malloc(sizeof(rewrite_userdata))) == NULL)
 		return error("calloc failed");
@@ -106,7 +106,7 @@ static int rewrite_configure(backend_t *backend, hash_t *config){ // {{{
 	data->inited = 1;
 	return 0;
 } // }}}
-/* }}} */
+/* }} */
 
 static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t **data, data_ctx_t **data_ctx){ // {{{
 	switch(thing->type){
@@ -451,7 +451,7 @@ backend_t rewrite_proto = {
 	.func_init      = &rewrite_init,
 	.func_configure = &rewrite_configure,
 	.func_destroy   = &rewrite_destroy,
-	{{
+	{
 		.func_create = &rewrite_func,
 		.func_set    = &rewrite_func,
 		.func_get    = &rewrite_func,
@@ -459,7 +459,7 @@ backend_t rewrite_proto = {
 		.func_move   = &rewrite_func,
 		.func_count  = &rewrite_func,
 		.func_custom = &rewrite_func
-	}}
+	}
 };
 
 

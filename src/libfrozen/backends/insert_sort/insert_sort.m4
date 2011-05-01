@@ -143,10 +143,10 @@ backend_t insert_sort_proto = {
 	.func_init      = &sorts_init,
 	.func_configure = &sorts_configure,
 	.func_destroy   = &sorts_destroy,
-	{{
+	{
 		.func_set    = &sorts_set,
 		.func_custom = &sorts_custom
-	}}
+	}
 };
 
 /* vim: set filetype=c: */

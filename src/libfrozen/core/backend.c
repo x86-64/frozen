@@ -226,10 +226,10 @@ error_inval:
 	return NULL;
 } // }}}
 
-backend_t *  backend_new          (hash_t *config){ // {{{
+backend_t *     backend_new          (hash_t *config){ // {{{
 	return backend_new_rec(config, LIST_FREE_ITEM);
 } // }}}
-backend_t *  backend_find         (char *name){ // {{{
+backend_t *     backend_find         (char *name){ // {{{
 	backend_t             *backend;
 	void                  *list_status  = NULL;
 	
@@ -246,7 +246,7 @@ exit:
 	list_unlock(&backends_names);
 	return backend;
 } // }}}
-backend_t *  backend_acquire      (char *name){ // {{{
+backend_t *     backend_acquire      (char *name){ // {{{
 	backend_t             *backend;
 	
 	if( (backend = backend_find(name)) != NULL)
@@ -254,7 +254,7 @@ backend_t *  backend_acquire      (char *name){ // {{{
 	
 	return backend;
 } // }}}
-backend_t *  backend_fork         (backend_t *backend, request_t *request){ // {{{
+backend_t *     backend_fork         (backend_t *backend, request_t *request){ // {{{
 	static request_t       r_fork[] = { hash_end };
 	
 	if(request == NULL)
@@ -262,10 +262,10 @@ backend_t *  backend_fork         (backend_t *backend, request_t *request){ // {
 	
 	return backend_fork_rec(backend, request);
 } // }}}
-char *       backend_get_name     (backend_t *backend){ // {{{
+char *          backend_get_name     (backend_t *backend){ // {{{
 	return backend->name;
 } // }}}
-ssize_t      backend_query        (backend_t *backend, request_t *request){ // {{{
+ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uint32_t               r_action;
 	f_crwd                 func              = NULL;
@@ -310,7 +310,7 @@ ssize_t      backend_query        (backend_t *backend, request_t *request){ // {
 exit:
 	return ret;
 } // }}}
-ssize_t      backend_pass         (backend_t *backend, request_t *request){ // {{{
+ssize_t         backend_pass         (backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret = 0;
 	uintmax_t              lsz, i;
 	void                 **childs_list;
@@ -333,7 +333,7 @@ ssize_t      backend_pass         (backend_t *backend, request_t *request){ // {
 	}
 	return 0;
 } // }}}
-void         backend_destroy      (backend_t *backend){ // {{{
+void            backend_destroy      (backend_t *backend){ // {{{
 	backend_t             *curr;
 	
 	if(backend == NULL || backend_ref_dec(backend) != 0)
@@ -364,7 +364,7 @@ void         backend_destroy      (backend_t *backend){ // {{{
 	pthread_mutex_destroy(&backend->refs_mtx);
 	free(backend);
 } // }}}
-void         backend_destroy_all  (void){ // {{{
+void            backend_destroy_all  (void){ // {{{
 	backend_t             *backend;
 	
 	while( (backend = list_pop(&backends_top)) != NULL)
@@ -499,6 +499,55 @@ ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{
 	
 	return q_ret;
 } // }}}
+
+// BACKEND_FAST_PASS {{{
+#define BACKEND_FAST_PASS(_backend, _action) {                                   \
+	ssize_t                ret = 0;                                          \
+	uintmax_t              lsz, i;                                           \
+	void                 **childs_list;                                      \
+	backend_t             *child;                                            \
+	                                                                         \
+	list_rdlock(&(_backend)->childs);                                        \
+		                                                                 \
+		if( (lsz = list_count(&(_backend)->childs)) != 0){               \
+			childs_list = (void **)alloca( sizeof(void *) * lsz );   \
+			list_flatten(&(_backend)->childs, childs_list, lsz);     \
+		}                                                                \
+		                                                                 \
+	list_unlock(&(_backend)->childs);                                        \
+	                                                                         \
+	if(lsz == 0)                                                             \
+		return 0;                                                        \
+	                                                                         \
+	for(i=0; i<lsz; i++){                                                    \
+	        child = (backend_t *)childs_list[i];                             \
+		ret   = _action;                                                 \
+		if( ret == 0 )                                                   \
+			break;                                                   \
+	}                                                                        \
+	return ret;                                                              \
+}
+// }}}
+size_t          backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size){ // {{{
+	BACKEND_FAST_PASS(backend,
+		backend_stdcall_create(child, offset, size)
+	);
+} // }}} 
+size_t          backend_pass_fast_read(backend_t *backend, off_t offset, void *buffer, size_t buffer_size){ // {{{
+	BACKEND_FAST_PASS(backend,
+		backend_stdcall_read(child, offset, buffer, buffer_size)
+	);
+} // }}} 
+size_t          backend_pass_fast_write(backend_t *backend, off_t offset, void *buffer, size_t buffer_size){ // {{{
+	BACKEND_FAST_PASS(backend,
+		backend_stdcall_write(child, offset, buffer, buffer_size)
+	);
+} // }}} 
+size_t          backend_pass_fast_delete(backend_t *backend, off_t offset, size_t size){ // {{{
+	BACKEND_FAST_PASS(backend,
+		backend_stdcall_delete(child, offset, size)
+	);
+} // }}} 
 
 request_actions request_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "create") == 0) return ACTION_CRWD_CREATE;

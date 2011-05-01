@@ -27,10 +27,10 @@ typedef int     (*f_configure) (backend_t *, hash_t *);
 typedef int     (*f_destroy)   (backend_t *);
 typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
 
-typedef ssize_t (*f_fast_create) (backend_t *, off_t *, size_t);
-typedef ssize_t (*f_fast_read)   (backend_t *, off_t, void *, size_t);
-typedef ssize_t (*f_fast_write)  (backend_t *, off_t, void *, size_t);
-typedef ssize_t (*f_fast_delete) (backend_t *, off_t, size_t);
+typedef size_t (*f_fast_create) (backend_t *, off_t *, size_t);
+typedef size_t (*f_fast_read)   (backend_t *, off_t, void *, size_t);
+typedef size_t (*f_fast_write)  (backend_t *, off_t, void *, size_t);
+typedef size_t (*f_fast_delete) (backend_t *, off_t, size_t);
 
 struct backend_t {
 	char                  *name;
@@ -44,23 +44,23 @@ struct backend_t {
 	f_configure            func_configure;
 	f_fork                 func_fork;
 	f_destroy              func_destroy;
-	union {
-		struct {
-			f_crwd  func_create;
-			f_crwd  func_set;
-			f_crwd  func_get;
-			f_crwd  func_delete;
-			f_crwd  func_move;
-			f_crwd  func_count;
-			f_crwd  func_custom;
-		} backend_type_crwd;
-		struct {
-			f_fast_create  func_fast_create;
-			f_fast_read    func_fast_read;
-			f_fast_write   func_fast_write;
-			f_fast_delete  func_fast_delete;
-		} backend_type_fast;
-	};
+	
+	struct {
+		f_crwd  func_create;
+		f_crwd  func_set;
+		f_crwd  func_get;
+		f_crwd  func_delete;
+		f_crwd  func_move;
+		f_crwd  func_count;
+		f_crwd  func_custom;
+	} backend_type_crwd;
+	struct {
+		f_fast_create  func_fast_create;
+		f_fast_read    func_fast_read;
+		f_fast_write   func_fast_write;
+		f_fast_delete  func_fast_delete;
+	} backend_type_fast;
+	
 	void *                 userdata;
 	
 	list                   parents; // parent backends including private _acquires
@@ -85,6 +85,11 @@ API ssize_t         backend_stdcall_fill    (backend_t *backend, off_t  offset, 
 API ssize_t         backend_stdcall_move    (backend_t *backend, off_t  from,   off_t to,     size_t size);
 API ssize_t         backend_stdcall_delete  (backend_t *backend, off_t  offset, size_t size);
 API ssize_t         backend_stdcall_count   (backend_t *backend, size_t *count);
+
+API  size_t         backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size);
+API  size_t         backend_pass_fast_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+API  size_t         backend_pass_fast_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+API  size_t         backend_pass_fast_delete(backend_t *backend, off_t  offset, size_t size);
 
     request_actions request_str_to_action   (char *string);
 

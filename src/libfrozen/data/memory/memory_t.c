@@ -54,6 +54,8 @@ ssize_t  memory_resize(memory_t *memory, uintmax_t new_size){ // {{{
 			
 			memory->ptr_size = t;
 			break;
+		case MEMORY_FREED:
+			return -EFAULT;
 	};
 	
 	switch(memory->alloc){
@@ -61,6 +63,8 @@ ssize_t  memory_resize(memory_t *memory, uintmax_t new_size){ // {{{
 			if( (memory->ptr = realloc(memory->ptr, memory->ptr_size)) == NULL)
 				goto error;
 			break;
+		default:
+			goto error;
 	};
 	
 	return 0;
@@ -110,8 +114,30 @@ ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, void 
 			if(size_out)
 				*size_out    = size;
 			return 0;
+		case ALLOC_FREED:
+			break;
 	};
 	return -EFAULT;
+} // }}}
+size_t   memory_read  (memory_t *memory, off_t offset, void *buffer, size_t buffer_size){ // {{{
+	void                  *memory_ptr;
+	uintmax_t              memory_size; 
+	
+	if(memory_translate(memory, offset, buffer_size, &memory_ptr, &memory_size) != 0)
+		return 0;
+	
+	memcpy(buffer, memory_ptr, memory_size);
+	return memory_size;
+} // }}}
+size_t   memory_write (memory_t *memory, off_t offset, void *buffer, size_t buffer_size){ // {{{
+	void                  *memory_ptr;
+	uintmax_t              memory_size; 
+	
+	if(memory_translate(memory, offset, buffer_size, &memory_ptr, &memory_size) != 0)
+		return 0;
+	
+	memcpy(memory_ptr, buffer, memory_size);
+	return memory_size;
 } // }}}
 
 uintmax_t  data_memory_t_len(data_t *data, data_ctx_t *ctx){
@@ -139,7 +165,6 @@ ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void
 	ssize_t                ret;
 	off_t                  offset            = 0;
 	size_t                 size              = __MAX(size_t);
-	void                  *memory_ptr;
 	uintmax_t              memory_size; 
 	
 	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
@@ -148,12 +173,12 @@ ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void
 	offset      += coffset;
 	memory_size  = MIN(size, buffer_size);
 	
-	if(memory_translate(((memory_t *)data->data_ptr), offset, memory_size, &memory_ptr, &memory_size) != 0)
+	if( (ret = memory_write( ((memory_t *)data->data_ptr), offset, buffer, memory_size)) == 0)
 		return -EFAULT;
 	
-	memcpy(memory_ptr, buffer, memory_size);
-	return (ssize_t)memory_size;
+	return ret;
 }
+
 
 data_proto_t memory_t_proto = {
 	.type          = TYPE_MEMORYT,

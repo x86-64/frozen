@@ -168,7 +168,7 @@ backend_t incapsulate_proto = {
 	.func_init      = &incap_init,
 	.func_configure = &incap_configure,
 	.func_destroy   = &incap_destroy,
-	{{
+	{
 		.func_create = &incap_backend_createwrite,
 		.func_set    = &incap_backend_createwrite,
 		.func_get    = &incap_backend_read,
@@ -176,6 +176,6 @@ backend_t incapsulate_proto = {
 		.func_move   = &incap_backend_move,
 		.func_count  = &incap_backend_count,
 		.func_custom = &incap_backend_custom
-	}}
+	}
 };
 

@@ -81,7 +81,7 @@ backend_t debug_proto = {
 	.func_init      = &debug_init,
 	.func_configure = &debug_configure,
 	.func_destroy   = &debug_destroy,
-	{{
+	{
 		.func_create  = &debug_request,
 		.func_get     = &debug_request,
 		.func_set     = &debug_request,
@@ -89,7 +89,7 @@ backend_t debug_proto = {
 		.func_move    = &debug_request,
 		.func_count   = &debug_request,
 		.func_custom  = &debug_request
-	}}
+	}
 };
 
 

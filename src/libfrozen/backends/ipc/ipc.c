@@ -67,7 +67,7 @@ backend_t ipc_proto = {
 	.func_init      = &ipc_init,
 	.func_configure = &ipc_configure,
 	.func_destroy   = &ipc_destroy,
-	{{
+	{
 		.func_create = &ipc_backend_query,
 		.func_set    = &ipc_backend_query,
 		.func_get    = &ipc_backend_query,
@@ -75,7 +75,7 @@ backend_t ipc_proto = {
 		.func_move   = &ipc_backend_query,
 		.func_count  = &ipc_backend_query,
 		.func_custom = &ipc_backend_query
-	}}
+	}
 };
 
 

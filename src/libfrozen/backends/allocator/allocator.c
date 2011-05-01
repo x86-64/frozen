@@ -137,10 +137,10 @@ backend_t allocator_proto = {
 	.func_init      = &allocator_init,
 	.func_configure = &allocator_configure,
 	.func_destroy   = &allocator_destroy,
-	{{
+	{
 		.func_delete  = &allocator_backend_delete,
 		.func_custom  = &allocator_backend_custom
-	}}
+	}
 };
 
 
