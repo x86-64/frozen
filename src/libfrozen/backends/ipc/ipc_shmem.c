@@ -16,8 +16,14 @@ typedef enum block_status {
 	STATUS_WRITING   = 1,
 	STATUS_WRITTEN   = 2,
 	STATUS_EXECUTING = 3,
-	STATUS_DONE      = 4
+	STATUS_EXEC_DONE = 4
 } block_status;
+
+typedef enum forced_states {
+	FORCE_ASYNC,
+	FORCE_SYNC,
+	FORCE_NONE
+} forced_states;
 
 typedef struct ipc_shmem_header {
 	size_t                 item_size;
@@ -29,7 +35,8 @@ typedef struct ipc_shmem_header {
 
 typedef struct ipc_shmem_block {
 	volatile size_t        status;
-	unsigned int           data;
+	volatile size_t        return_result;
+	unsigned int           data_rel_ptr;
 	
 	sem_t                  sem_done;
 } ipc_shmem_block;
@@ -37,6 +44,7 @@ typedef struct ipc_shmem_block {
 typedef struct ipc_shmem_userdata {
 	size_t                 inited;
 	ipc_role               role;
+	forced_states          forced_state;
 	
 	ipc_shmem_header      *shmaddr;
 	ipc_shmem_block       *shmblocks;
@@ -52,7 +60,7 @@ static ssize_t shmem_init(ipc_shmem_userdata *userdata){ // {{{
 	sem_init(&userdata->shmaddr->sem_free,    1, userdata->shmaddr->nitems);
 	for(i=0; i<userdata->shmaddr->nitems; i++){
 		sem_init(&userdata->shmblocks[i].sem_done, 1, 0);
-		userdata->shmblocks[i].data = i * userdata->shmaddr->item_size;
+		userdata->shmblocks[i].data_rel_ptr = i * userdata->shmaddr->item_size;
 	}
 	return 0;
 } // }}}
@@ -69,9 +77,9 @@ static ssize_t shmem_destroy(ipc_shmem_userdata *userdata){ // {{{
 static ssize_t           shmem_block_status(ipc_shmem_userdata *userdata, ipc_shmem_block *block, size_t old_status, size_t new_status){ // {{{
 	if(__sync_bool_compare_and_swap(&block->status, old_status, new_status)){
 		switch(new_status){
-			case STATUS_FREE:    sem_post(&userdata->shmaddr->sem_free);    break;
-			case STATUS_WRITTEN: sem_post(&userdata->shmaddr->sem_written); break;
-			case STATUS_DONE:    sem_post(&block->sem_done);                break;
+			case STATUS_FREE:      sem_post(&userdata->shmaddr->sem_free);    break;
+			case STATUS_WRITTEN:   sem_post(&userdata->shmaddr->sem_written); break;
+			case STATUS_EXEC_DONE: sem_post(&block->sem_done);                break;
 			default: break;
 		}
 		return 0;
@@ -106,30 +114,36 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 			break;
 		
 		// run request
-		hash_from_memory(&request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
+		hash_from_memory(&request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
 		backend_pass(((ipc_t *)ipc)->backend, request);
 		
-		// update status
-		if(shmem_block_status(userdata, block, STATUS_EXECUTING, STATUS_DONE) < 0)
+		// update status. if client don't want read results - free block, overwise notify client
+		if(shmem_block_status(userdata, block, STATUS_EXECUTING, 
+			((block->return_result == 0) ? STATUS_FREE : STATUS_EXEC_DONE)
+		) < 0)
 			break;
 	}
 	error("ipc_shmem_listen dead\n");
 	return NULL;
 } // }}}
 ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
-	ssize_t             ret;
-	int                 shmid;
-	DT_UINT32T            shmkey;
-	DT_SIZET            nitems    = NITEMS_DEFAULT;
-	DT_SIZET            item_size = ITEM_SIZE_DEFAULT;
-	DT_SIZET            shmsize;
-	DT_STRING           role_str;
-	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
+	ssize_t                ret;
+	int                    shmid;
+	uint32_t               shmkey;
+	size_t                 shmsize;
+	size_t                 nitems            = NITEMS_DEFAULT;
+	size_t                 item_size         = ITEM_SIZE_DEFAULT;
+	uintmax_t              f_async           = 0;
+	uintmax_t              f_sync            = 0;
+	char                  *role_str;
+	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
-	hash_data_copy(ret, TYPE_UINT32T,  shmkey,     config, HK(key)); if(ret != 0) return warning("no key supplied");
+	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
-	hash_data_copy(ret, TYPE_SIZET,  item_size,  config, HK(item_size));
-	hash_data_copy(ret, TYPE_SIZET,  nitems,     config, HK(size));
+	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
+	hash_data_copy(ret, TYPE_SIZET,   nitems,     config, HK(size));
+	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
+	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
 	
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -142,9 +156,16 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	if( (userdata->role = ipc_string_to_role(role_str)) == ROLE_INVALID)
 		return error("invalid role supplied");
 	
+	if( (f_async != 0 && f_sync != 0) )
+		return error("force_async with force_sync");
+	
 	userdata->shmblocks = (ipc_shmem_block *)((void *)userdata->shmaddr   + sizeof(ipc_shmem_header));
 	userdata->shmdata   = (void *)           ((void *)userdata->shmblocks + nitems * sizeof(ipc_shmem_block));
 	userdata->inited    = 1;
+	
+	userdata->forced_state = FORCE_NONE;
+	if(f_async != 0) userdata->forced_state = FORCE_ASYNC;
+	if(f_sync  != 0) userdata->forced_state = FORCE_SYNC;
 	
 	if(userdata->role == ROLE_SERVER){
 		userdata->shmaddr->item_size = item_size;
@@ -181,29 +202,41 @@ error:
 	return 0;
 } // }}}
 ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
-	ssize_t             ret;
-	ipc_shmem_block    *block;
-	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)ipc->userdata;
+	ssize_t                ret;
+	uintmax_t              f_async           = 0;
+	ipc_shmem_block       *block;
+	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
+	// check async state
+	switch(userdata->forced_state){
+		case FORCE_SYNC:  break; // already == 0
+		case FORCE_ASYNC: f_async = 1; break;
+		case FORCE_NONE:  hash_data_copy(ret, TYPE_UINTT, f_async, request, HK(async)); break;
+	};
+	
+	// send request
 	if( (block = shmem_get_block(userdata, STATUS_FREE, STATUS_WRITING)) == NULL)
 		return error("strange error");
 	
-	// write request
-	hash_to_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
+	hash_to_memory(request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
+	block->return_result = (f_async == 0) ? 1 : 0;
 	
 	if( (ret = shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN)) < 0)
 		return ret;
 	
-	// wait for answer
-	sem_wait(&block->sem_done);
-	
-	// read request back
-	hash_reread_from_memory(request, userdata->shmdata + block->data, userdata->shmaddr->item_size);
-	ret = -EEXIST;
-	
-	if(shmem_block_status(userdata, block, STATUS_DONE, STATUS_FREE) < 0)
-		return error("strange error 3");
-	
+	if(f_async == 0){ // synchronous request
+		// wait for answer
+		sem_wait(&block->sem_done);
+		
+		// read request back
+		hash_reread_from_memory(request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
+		ret = -EEXIST;
+		
+		if(shmem_block_status(userdata, block, STATUS_EXEC_DONE, STATUS_FREE) < 0)
+			return error("strange error 3");
+	}else{
+		ret = 0; // success
+	}
 	return ret;
 } // }}}
 

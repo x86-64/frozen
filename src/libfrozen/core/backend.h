@@ -72,9 +72,7 @@ API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
 API backend_t *     backend_fork            (backend_t *backend, request_t *request);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
-    ssize_t         backend_pass            (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
-    void            backend_destroy_all     (void);
 
 API char *          backend_get_name        (backend_t *backend);
 
@@ -86,10 +84,13 @@ API ssize_t         backend_stdcall_move    (backend_t *backend, off_t  from,   
 API ssize_t         backend_stdcall_delete  (backend_t *backend, off_t  offset, size_t size);
 API ssize_t         backend_stdcall_count   (backend_t *backend, size_t *count);
 
-API  size_t         backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size);
-API  size_t         backend_pass_fast_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
-API  size_t         backend_pass_fast_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
-API  size_t         backend_pass_fast_delete(backend_t *backend, off_t  offset, size_t size);
+    ssize_t         backend_pass            (backend_t *backend, request_t *request);
+     void           backend_destroy_all     (void);
+
+     size_t         backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size);
+     size_t         backend_pass_fast_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+     size_t         backend_pass_fast_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
+     size_t         backend_pass_fast_delete(backend_t *backend, off_t  offset, size_t size);
 
     request_actions request_str_to_action   (char *string);
 

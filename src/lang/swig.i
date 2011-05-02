@@ -107,7 +107,7 @@ sub query {
 	
 	my ($arrsz, $h_request, $ret);
 	
-	$arrsz = int(%$request)+1;
+	$arrsz = (scalar keys %$request) + 1;
 	
 	$h_request = hash_new($arrsz);
 	while(my ($k,$va) = each(%$request)){
