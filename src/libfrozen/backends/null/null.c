@@ -12,7 +12,7 @@ static int null_destroy(backend_t *backend){
 	return 0;
 }
 
-static int null_configure(backend_t *backend, hash_t *config){
+static int null_configure(backend_t *backend, config_t *config){
 	(void)backend; (void)config;
 	return 0;
 }

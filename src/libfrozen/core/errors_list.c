@@ -148,9 +148,11 @@ static err_item errs_list[] = {
  { -4099, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: no offset supplied" },
  { -4098, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'backend' invalid" },
  { -4098, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: no block_size supplied" },
+ { -4097, "src/libfrozen/backends/benchmark/benchmark.c: pthread_create failed" },
  { -4097, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'backend' not set" },
  { -4097, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: chain blocks-address tree recalc failed" },
  { -4096, "src/libfrozen/backends/mphf/mphf_bdz_imp.c: mphf g_free" },
+ { -4096, "src/libfrozen/backends/benchmark/benchmark.c: calloc failed" },
  { -4096, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'block_size' invalid" },
  { -4096, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: chain blocks-address no memory" },
 

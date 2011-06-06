@@ -44,6 +44,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/benchmark/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
@@ -169,6 +170,7 @@ BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
 BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
 BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
 BACKEND_OBJECTS_balancer = @BACKEND_OBJECTS_balancer@
+BACKEND_OBJECTS_benchmark = @BACKEND_OBJECTS_benchmark@
 BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
 BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
 BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@

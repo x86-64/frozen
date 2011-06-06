@@ -643,6 +643,7 @@ BACKEND_OBJECTS_file
 BACKEND_OBJECTS_debug
 BACKEND_OBJECTS_cache_append
 BACKEND_OBJECTS_cache
+BACKEND_OBJECTS_benchmark
 BACKEND_OBJECTS_balancer
 BACKEND_LIBS_SELECTED
 BACKEND_DIST_DIRS
@@ -790,6 +791,7 @@ with_sysroot
 enable_libtool_lock
 enable_backendallocator
 enable_backendbalancer
+enable_backendbenchmark
 enable_backendcache
 enable_backendcache_append
 enable_backenddebug
@@ -1480,6 +1482,8 @@ Optional Features:
                           disable backend allocator
   --disable-backend-balancer
                           disable backend balancer
+  --disable-backend-benchmark
+                          disable backend benchmark
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
@@ -17292,6 +17296,43 @@ fi
 		BACKEND_MAKEFILE_balancer=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED balancer/libfrozen_backend_balancer.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-backendbenchmark was given.
+if test "${enable_backendbenchmark+set}" = set; then :
+  enableval=$enable_backendbenchmark;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendbenchmark}" = "yes"; then
+			enable_backendbenchmark="no"
+		else
+			enable_backendbenchmark="yes"
+		fi
+	fi
+
+	if test "${enable_backendbenchmark}" = "yes"; then
+		BACKEND_DIR_benchmark="benchmark"
+		BACKEND_DEP_benchmark=""
+		BACKEND_OBJECTS_benchmark="$BACKEND_OBJECTS_benchmark libfrozen_backend_benchmark_la-benchmark.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED benchmark"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_benchmark" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/benchmark/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS benchmark"
+
+		BACKEND_MAKEFILE_benchmark=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED benchmark/libfrozen_backend_benchmark.la"
 
 	fi
 
