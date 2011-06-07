@@ -19,6 +19,10 @@
 #define _XOPEN_SOURCE 500 
 #endif
 
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
 /* Standart libraries */
 #include <stdint.h>
 #include <stdlib.h>
