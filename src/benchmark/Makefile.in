@@ -49,6 +49,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
@@ -119,6 +120,7 @@ BACKEND_OBJECTS_benchmark = @BACKEND_OBJECTS_benchmark@
 BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
 BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
 BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@
+BACKEND_OBJECTS_emitter = @BACKEND_OBJECTS_emitter@
 BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
 BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
 BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@

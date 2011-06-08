@@ -92,7 +92,7 @@ package Frozen;
 *REQUEST_INVALID = *Frozenc::REQUEST_INVALID;
 
 INIT    { frozen_init();  }
-DESTROY { frozen_destory(); }
+DESTROY { frozen_destroy(); }
 
 sub query {
 	my $backend = shift;

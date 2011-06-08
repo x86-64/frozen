@@ -98,7 +98,7 @@ void               hash_get                     (hash_t *hash, char *key, char *
 
 %perlcode %{
 INIT    { frozen_init();  }
-DESTROY { frozen_destory(); }
+DESTROY { frozen_destroy(); }
 
 sub query {
 	my $backend = shift;

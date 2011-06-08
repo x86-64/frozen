@@ -44,7 +44,7 @@ struct mphf_proto_t {
 	mphf_func_unload         func_unload;
 	mphf_func_fork           func_fork;
 	mphf_func_rebuild        func_rebuild;
-	mphf_func_destroy        func_destory;
+	mphf_func_destroy        func_destroy;
 	
 	mphf_func_insert         func_insert;
 	mphf_func_update         func_update;
@@ -69,7 +69,7 @@ static mphf_proto_t mphf_protos[] = {
 		.func_unload        = mphf_chm_imp_unload,
 		.func_fork          = mphf_chm_imp_fork,
 		.func_rebuild       = mphf_chm_imp_rebuild,
-		.func_destory       = mphf_chm_imp_destroy,
+		.func_destroy       = mphf_chm_imp_destroy,
 		.func_insert        = mphf_chm_imp_insert,
 		.func_update        = mphf_chm_imp_update,
 		.func_query         = mphf_chm_imp_query,

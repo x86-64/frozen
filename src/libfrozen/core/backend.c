@@ -342,7 +342,7 @@ void            backend_destroy      (backend_t *backend){ // {{{
 	// call destroy
 	backend->func_destroy(backend);
 	
-	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destory of all left childs
+	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
 		backend_destroy(curr);
 	
 	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list

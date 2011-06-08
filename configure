@@ -640,6 +640,7 @@ BACKEND_OBJECTS_ipc
 BACKEND_OBJECTS_insert_sort
 BACKEND_OBJECTS_incapsulate
 BACKEND_OBJECTS_file
+BACKEND_OBJECTS_emitter
 BACKEND_OBJECTS_debug
 BACKEND_OBJECTS_cache_append
 BACKEND_OBJECTS_cache
@@ -795,6 +796,7 @@ enable_backendbenchmark
 enable_backendcache
 enable_backendcache_append
 enable_backenddebug
+enable_backendemitter
 enable_backendfile
 enable_backendincapsulate
 enable_backendinsert_sort
@@ -1488,6 +1490,8 @@ Optional Features:
   --disable-backend-cache-append
                           disable backend cache-append
   --disable-backend-debug disable backend debug
+  --disable-backend-emitter
+                          disable backend emitter
   --disable-backend-file  disable backend file
   --disable-backend-incapsulate
                           disable backend incapsulate
@@ -17444,6 +17448,43 @@ fi
 		BACKEND_MAKEFILE_debug=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED debug/libfrozen_backend_debug.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-backendemitter was given.
+if test "${enable_backendemitter+set}" = set; then :
+  enableval=$enable_backendemitter;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendemitter}" = "yes"; then
+			enable_backendemitter="no"
+		else
+			enable_backendemitter="yes"
+		fi
+	fi
+
+	if test "${enable_backendemitter}" = "yes"; then
+		BACKEND_DIR_emitter="emitter"
+		BACKEND_DEP_emitter=""
+		BACKEND_OBJECTS_emitter="$BACKEND_OBJECTS_emitter libfrozen_backend_emitter_la-emitter.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED emitter"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_emitter" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/emitter/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS emitter"
+
+		BACKEND_MAKEFILE_emitter=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED emitter/libfrozen_backend_emitter.la"
 
 	fi
 
