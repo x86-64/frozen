@@ -1,5 +1,7 @@
 #!/bin/sh
 
+rm -rf data_*.dat
+
 ls *.bench | while read f; do
 	../src/frozend/frozend -c $f
 done;

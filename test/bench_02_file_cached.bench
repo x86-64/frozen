@@ -1,0 +1,16 @@
+{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy",
+	pre_request => {
+		action => create,
+		size   => (size_t)'100',
+		buffer => "abcdefghjklmnopqrstuvwxyz"
+	},
+	request = {
+		action => read,
+		offset => (off_t)'0',
+		size   => (size_t)'26',
+		buffer => "                         "
+	}
+},
+{ class => "benchmark", name => "file+cache"                          },
+{ class => "cache"                                                    },
+{ class => "file", filename => "data_bench_file_cached.dat"           }

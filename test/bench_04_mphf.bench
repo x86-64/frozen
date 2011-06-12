@@ -1,0 +1,90 @@
+{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy",
+	pre_request = {
+		action => create,
+		key    => "moo",
+		buffer => "aaaaaaaaaaaaaaaaaaaaaaaaa"
+	},
+	request = {
+		action => write,
+		key    => "moo",
+		buffer => "bbbbbbbbbbbbbbbbbbbbbbbbb"
+	}
+},
+{ class => "benchmark", name => "mphf"                                   },
+{
+	class = "mphf",
+	type = "chm_imp",
+	backend_g = "test_mphf_g",
+	backend_e = "test_mphf_e",
+	backend_v = "test_mphf_v",
+	nelements_min = (uint64_t)'1000000',
+	nelements_step = (uint64_t)'10000',
+	value_bits = (uint32_t)'32',
+	keyid = "keyid",
+	max_rebuilds = (uint_t)'20'
+},
+{
+	class = "structs",
+	size = "size",
+	structure = {
+		keyid = (uint32_t)'0'
+	},
+	copy = (uint_t)'1'
+},
+{
+	class = "incapsulate",
+	multiply = (off_t)'8'
+},
+{
+	class = "allocator"
+},
+{
+	class = "cache-append"
+},
+{
+	class = "file",
+	filename = "data_bench_mphf.dat"
+},
+NULL,
+
+{
+	name = "test_mphf_g",
+	class = "cache"
+},
+{
+	class = "file",
+	filename = {
+		string = ".dat",
+		string = "data_bench_mphf_g_",
+		homedir = (void_t)''
+	}
+},
+NULL,
+
+{
+	name = "test_mphf_v",
+	class = "cache"
+},
+{
+	class = "file",
+	filename = {
+		string = ".dat",
+		string = "data_bench_mphf_v_",
+		homedir = (void_t)''
+	}
+},
+NULL,
+
+{
+	name = "test_mphf_e",
+	class = "cache"
+},
+{
+	class = "file",
+	filename = {
+		string = ".dat",
+		string = "data_bench_mphf_e_",
+		homedir = (void_t)''
+	}
+}
+

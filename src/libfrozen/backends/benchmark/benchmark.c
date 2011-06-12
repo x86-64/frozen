@@ -64,7 +64,7 @@ static int  benchmark_control_query_long(backend_t *backend, char *string, size_
 	}
 	
 	return snprintf(string, size,
-		"benchmark '%s': %7lu ticks in %3lu.%.6lu sec; %7lu ticks/s; one: %10lu us",
+		"benchmark '%10s': %7lu ticks in %3lu.%.6lu sec; %7lu ticks/s; one: %10lu us",
 		backend_name,
 		(unsigned long)ticks,
 		(unsigned long)tv_diff.tv_sec, (unsigned long)tv_diff.tv_usec,

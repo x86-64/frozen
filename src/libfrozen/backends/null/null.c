@@ -28,6 +28,10 @@ static ssize_t null_create(backend_t *backend, request_t *request){
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
+static ssize_t null_read(backend_t *backend, request_t *request){
+	return 0;
+}
+
 backend_t null_proto = {
 	.class          = "null",
 	.supported_api  = API_CRWD,
@@ -36,7 +40,7 @@ backend_t null_proto = {
 	.func_destroy   = &null_destroy,
 	{
 		.func_create = &null_create,
+		.func_get    = &null_read
 	}
 };
-
 
