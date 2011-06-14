@@ -1,5 +1,9 @@
 %module Frozen
+
+#ifndef SWIGGO
 %include cstring.i
+#endif
+
 %{
 #include "libfrozen.h"
 %}
@@ -56,7 +60,9 @@ void               hash_data_find               (hash_t *hash, hash_key_t key, d
 
 void               data_free                    (data_t *data);
 
+#ifndef SWIGGO
 %cstring_output_allocate_size(char **string, size_t *len, );
+#endif
 void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len);
 ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
 ssize_t            data_from_string             (data_t *data, char *type, char *string);
@@ -96,6 +102,8 @@ void               hash_get                     (hash_t *hash, char *key, char *
 
 // temprorary solution, need remove data_convert
 
+#ifdef SWIGPERL
+
 %perlcode %{
 INIT    { frozen_init();  }
 DESTROY { frozen_destroy(); }
@@ -126,5 +134,6 @@ sub query {
 	
 	return $ret;
 }
-
 %}
+
+#endif

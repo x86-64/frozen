@@ -1,0 +1,11 @@
+include $(GOROOT)/src/Make.inc
+
+SWIG_CFLAGS=-I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+
+TARG=frozen
+SWIGFILES=frozen.swig
+
+check:
+	echo
+
+include $(GOROOT)/src/Make.pkg

@@ -99,6 +99,7 @@ AC_CONFIG_FILES([Makefile
 		src/frozenfs/Makefile
 		src/benchmark/Makefile
 		src/lang/Makefile
+		src/lang/go/Makefile
 		test/Makefile
 		$GEN_MAKEFILES
 ])

@@ -20,3 +20,4 @@ install-exec-local: $(PERLMAKEFILE)
 	cd $(PERLOUTDIR) && $(MAKE) $(AM_MAKEFLAGS) DESTDIR=$(DESTDIR) install
 
 EXTRA_DIST = swig.i $(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t
+SUBDIRS = . go

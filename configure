@@ -18791,7 +18791,7 @@ if test "x$enable_profile" == "xyes"; then
         LDFLAGS="$LDFLAGS -pg"
 fi
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile test/Makefile $GEN_MAKEFILES"
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile src/lang/go/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19917,6 +19917,7 @@ do
     "src/frozenfs/Makefile") CONFIG_FILES="$CONFIG_FILES src/frozenfs/Makefile" ;;
     "src/benchmark/Makefile") CONFIG_FILES="$CONFIG_FILES src/benchmark/Makefile" ;;
     "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;
+    "src/lang/go/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/go/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "$GEN_MAKEFILES") CONFIG_FILES="$CONFIG_FILES $GEN_MAKEFILES" ;;
 
