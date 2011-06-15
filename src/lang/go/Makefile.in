@@ -1,11 +1,13 @@
 include $(GOROOT)/src/Make.inc
 
 SWIG_CFLAGS=-I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+SWIG_LDFLAGS=-L@top_srcdir@/src/libfrozen/.libs/ -lfrozen
 
-TARG=frozen
+TARG=swig/frozen
 SWIGFILES=frozen.swig
 
 check:
 	echo
 
 include $(GOROOT)/src/Make.pkg
+
