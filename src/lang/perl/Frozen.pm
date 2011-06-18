@@ -72,6 +72,8 @@ package Frozen;
 *hash_item_data = *Frozenc::hash_item_data;
 *hash_item_next = *Frozenc::hash_item_next;
 *hash_data_find = *Frozenc::hash_data_find;
+*data_type_from_string = *Frozenc::data_type_from_string;
+*data_string_from_type = *Frozenc::data_string_from_type;
 *data_free = *Frozenc::data_free;
 *hash_get = *Frozenc::hash_get;
 *hash_set = *Frozenc::hash_set;

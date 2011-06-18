@@ -2,7 +2,10 @@
 
 #ifndef SWIGGO
 %include cstring.i
+#else
+#define DEBUG
 #endif
+
 
 %{
 #include "libfrozen.h"
@@ -25,6 +28,8 @@ typedef signed int   ssize_t;
 typedef unsigned int size_t;
 typedef signed long long int   intmax_t;
 typedef unsigned long long int uintmax_t;
+typedef uintmax_t              hash_key_t;
+typedef uintmax_t              data_type;
 
 int                frozen_init(void);
 int                frozen_destroy(void);
@@ -58,6 +63,8 @@ data_t *           hash_item_data               (hash_t *hash);
 hash_t *           hash_item_next               (hash_t *hash);
 void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx);
 
+data_type          data_type_from_string        (char *string);
+char *             data_string_from_type        (data_type type);
 void               data_free                    (data_t *data);
 
 #ifndef SWIGGO
@@ -134,6 +141,14 @@ sub query {
 	
 	return $ret;
 }
+%}
+
+#endif
+
+#ifdef SWIGGO
+
+%gocode %{
+
 %}
 
 #endif
