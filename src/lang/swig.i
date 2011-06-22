@@ -170,14 +170,17 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_len  uint64
 
         switch v := s.(type) {
-                case int:
-                        z := s.(int);
-                        data_ptr = unsafe.Pointer(&z)
-                        data_len = uint64(unsafe.Sizeof( 1 )) 
-                case string:
-                        data_ptr = unsafe.Pointer(&([]byte( s.(string) )[0]))
-                        data_len = uint64(len(s.(string)))
-        }  
+                case  int:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case uint:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case  int16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case uint16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case  int32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case uint32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case  int64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+                case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
+		case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
+        }
         return Hskel{ skey, sdata_type, data_ptr, data_len }
 }
 func Hnull() Hskel {
