@@ -1,7 +1,6 @@
 #ifndef DATA_STRUCT_H
 #define DATA_STRUCT_H
 
-enum { TYPE_STRUCTT = 2 };
 #define DATA_STRUCTT(_struct,_buffer) {TYPE_STRUCTT, NULL, 0}
 
 typedef hash_t  struct_t;

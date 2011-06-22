@@ -53,14 +53,16 @@
 #include <errors.h>
 #include <public.h>
 
-#include <list.h>            // internal data storage
-#include <buffer.h>          //
-#include <data.h>            //
-#include <hash.h>            //
+#include <list.h>               // internal data storage
+#include <buffer.h>             //
+#include <data_selected_enum.h> //
+#include <data.h>               //
+#include <hash.h>               //
 
 #ifndef DATA_TYPE_SOURCE
 	#include <data_selected.h>
 #endif
+
 
 #include <configs/config.h>  // confiurations
 #include <backend.h>         // db logic 

@@ -9,7 +9,6 @@ typedef struct hash_t          hash_t;
 typedef hash_t                 request_t;
 typedef hash_t                 config_t;
 
-typedef enum data_type         data_type;
 typedef enum size_type         size_type;
 typedef struct data_t          data_t;
 typedef hash_t                 data_ctx_t;

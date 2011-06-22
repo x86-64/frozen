@@ -1,7 +1,6 @@
 #ifndef DATA_HASH_T_H
 #define DATA_HASH_T_H
 
-enum { TYPE_HASHT = 17 };
 #define DATA_HASHT(...)             { TYPE_HASHT, (hash_t []){ __VA_ARGS__ }, sizeof((hash_t []){ __VA_ARGS__ }) }
 #define DATA_PTR_HASHT(_hash)       { TYPE_HASHT, (void *)_hash, 0 }
 #define DATA_PTR_HASHT_FREE(_hash)  { TYPE_HASHT, (void *)_hash, 1 }

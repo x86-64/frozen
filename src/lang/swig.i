@@ -1,11 +1,13 @@
 %module Frozen
 
+%include hashkeys.i
+%include datatypes.i
+
 #ifndef SWIGGO
 %include cstring.i
 #else
 #define DEBUG
 #endif
-
 
 %{
 #include "libfrozen.h"
@@ -23,13 +25,14 @@ enum request_actions {
 	REQUEST_INVALID = 0
 };
 
-typedef hash_t       request_t;
-typedef signed int   ssize_t;
-typedef unsigned int size_t;
-typedef signed long long int   intmax_t;
-typedef unsigned long long int uintmax_t;
-typedef uintmax_t              hash_key_t;
-typedef uintmax_t              data_type;
+typedef hash_t                   request_t;
+typedef signed int               ssize_t;
+typedef unsigned int             size_t;
+typedef signed long long int     intmax_t;
+typedef unsigned long long int   uintmax_t;
+typedef uintmax_t                hash_key_t;
+typedef uintmax_t                data_type;
+
 
 int                frozen_init(void);
 int                frozen_destroy(void);
@@ -147,8 +150,52 @@ sub query {
 
 #ifdef SWIGGO
 
-%gocode %{
+%insert("go_begin") %{
+
+import "unsafe"
+
+%}
+
+%insert("go_wrapper") %{
+
+type Hskel struct {
+	Key           uint64
+	Data_type     Enum_SS_data_type
+	Data_ptr      unsafe.Pointer
+	Data_length   uint64
+}; 
+
+func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
+        var data_ptr  unsafe.Pointer
+        var data_len  uint64
+
+        switch v := s.(type) {
+                case int:
+                        z := s.(int);
+                        data_ptr = unsafe.Pointer(&z)
+                        data_len = uint64(unsafe.Sizeof( 1 )) 
+                case string:
+                        data_ptr = unsafe.Pointer(&([]byte( s.(string) )[0]))
+                        data_len = uint64(len(s.(string)))
+        }  
+        return Hskel{ skey, sdata_type, data_ptr, data_len }
+}
+func Hnull() Hskel {
+        return Hskel{ (^uint64(0)), 0, unsafe.Pointer(nil), 0 }
+}
+func Hend() Hskel {
+        return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil), 0 }
+}
+func Hash(hk []Hskel) SwigcptrHash_t {
+        return SwigcptrHash_t(unsafe.Pointer(&hk[0]))
+}
+
+func init() {
+	Frozen_init()
+}
 
 %}
 
 #endif
+
+/* vim: set filetype=c: */

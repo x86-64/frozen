@@ -17879,6 +17879,7 @@ fi
 	if test "${enable_backend_t}" = "yes"; then
 		DATA_DIR_backend_t="backend"
 		DATA_DEP_backend_t="off_t size_t raw_t uint32_t"
+		DATA_ID_backend_t="1"
 		DATA_OBJECTS_backend="$DATA_OBJECTS_backend libfrozen_data_backend_la-backend_t.lo"
 		DATA_SELECTED="$DATA_SELECTED backend_t"
 		DATA_HEADERS="$DATA_HEADERS backend/backend_t.h"
@@ -17917,6 +17918,7 @@ fi
 	if test "${enable_binary_t}" = "yes"; then
 		DATA_DIR_binary_t="binary"
 		DATA_DEP_binary_t=""
+		DATA_ID_binary_t="21"
 		DATA_OBJECTS_binary="$DATA_OBJECTS_binary libfrozen_data_binary_la-binary_t.lo"
 		DATA_SELECTED="$DATA_SELECTED binary_t"
 		DATA_HEADERS="$DATA_HEADERS binary/binary_t.h"
@@ -17955,6 +17957,7 @@ fi
 	if test "${enable_buffer_t}" = "yes"; then
 		DATA_DIR_buffer_t="buffer"
 		DATA_DEP_buffer_t="off_t size_t"
+		DATA_ID_buffer_t="22"
 		DATA_OBJECTS_buffer="$DATA_OBJECTS_buffer libfrozen_data_buffer_la-buffer_t.lo"
 		DATA_SELECTED="$DATA_SELECTED buffer_t"
 		DATA_HEADERS="$DATA_HEADERS buffer/buffer_t.h"
@@ -17993,6 +17996,7 @@ fi
 	if test "${enable_hash_t}" = "yes"; then
 		DATA_DIR_hash_t="hash"
 		DATA_DEP_hash_t=""
+		DATA_ID_hash_t="17"
 		DATA_OBJECTS_hash="$DATA_OBJECTS_hash libfrozen_data_hash_la-hash_t.lo"
 		DATA_SELECTED="$DATA_SELECTED hash_t"
 		DATA_HEADERS="$DATA_HEADERS hash/hash_t.h"
@@ -18031,6 +18035,7 @@ fi
 	if test "${enable_io_t}" = "yes"; then
 		DATA_DIR_io_t="io"
 		DATA_DEP_io_t=""
+		DATA_ID_io_t="3"
 		DATA_OBJECTS_io="$DATA_OBJECTS_io libfrozen_data_io_la-io_t.lo"
 		DATA_SELECTED="$DATA_SELECTED io_t"
 		DATA_HEADERS="$DATA_HEADERS io/io_t.h"
@@ -18069,6 +18074,7 @@ fi
 	if test "${enable_memory_t}" = "yes"; then
 		DATA_DIR_memory_t="memory"
 		DATA_DEP_memory_t="off_t size_t"
+		DATA_ID_memory_t="18"
 		DATA_OBJECTS_memory="$DATA_OBJECTS_memory libfrozen_data_memory_la-memory_t.lo"
 		DATA_SELECTED="$DATA_SELECTED memory_t"
 		DATA_HEADERS="$DATA_HEADERS memory/memory_t.h"
@@ -18107,6 +18113,7 @@ fi
 	if test "${enable_raw_t}" = "yes"; then
 		DATA_DIR_raw_t="raw"
 		DATA_DEP_raw_t=""
+		DATA_ID_raw_t="19"
 		DATA_OBJECTS_raw="$DATA_OBJECTS_raw libfrozen_data_raw_la-raw_t.lo"
 		DATA_SELECTED="$DATA_SELECTED raw_t"
 		DATA_HEADERS="$DATA_HEADERS raw/raw_t.h"
@@ -18145,6 +18152,7 @@ fi
 	if test "${enable_string_t}" = "yes"; then
 		DATA_DIR_string_t="string"
 		DATA_DEP_string_t="off_t size_t"
+		DATA_ID_string_t="16"
 		DATA_OBJECTS_string="$DATA_OBJECTS_string libfrozen_data_string_la-string_t.lo"
 		DATA_SELECTED="$DATA_SELECTED string_t"
 		DATA_HEADERS="$DATA_HEADERS string/string_t.h"
@@ -18183,6 +18191,7 @@ fi
 	if test "${enable_struct_t}" = "yes"; then
 		DATA_DIR_struct_t="struct"
 		DATA_DEP_struct_t="off_t"
+		DATA_ID_struct_t="2"
 		DATA_OBJECTS_struct="$DATA_OBJECTS_struct libfrozen_data_struct_la-struct_t.lo"
 		DATA_SELECTED="$DATA_SELECTED struct_t"
 		DATA_HEADERS="$DATA_HEADERS struct/struct_t.h"
@@ -18221,6 +18230,7 @@ fi
 	if test "${enable_off_t}" = "yes"; then
 		DATA_DIR_off_t="uint"
 		DATA_DEP_off_t=""
+		DATA_ID_off_t="13"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-off_t.lo"
 		DATA_SELECTED="$DATA_SELECTED off_t"
 		DATA_HEADERS="$DATA_HEADERS uint/off_t.h"
@@ -18258,6 +18268,7 @@ fi
 	if test "${enable_size_t}" = "yes"; then
 		DATA_DIR_size_t="uint"
 		DATA_DEP_size_t=""
+		DATA_ID_size_t="12"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-size_t.lo"
 		DATA_SELECTED="$DATA_SELECTED size_t"
 		DATA_HEADERS="$DATA_HEADERS uint/size_t.h"
@@ -18295,6 +18306,7 @@ fi
 	if test "${enable_uint_t}" = "yes"; then
 		DATA_DIR_uint_t="uint"
 		DATA_DEP_uint_t=""
+		DATA_ID_uint_t="14"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-uint_t.lo"
 		DATA_SELECTED="$DATA_SELECTED uint_t"
 		DATA_HEADERS="$DATA_HEADERS uint/uint_t.h"
@@ -18332,6 +18344,7 @@ fi
 	if test "${enable_int_t}" = "yes"; then
 		DATA_DIR_int_t="uint"
 		DATA_DEP_int_t=""
+		DATA_ID_int_t="15"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-int_t.lo"
 		DATA_SELECTED="$DATA_SELECTED int_t"
 		DATA_HEADERS="$DATA_HEADERS uint/int_t.h"
@@ -18369,6 +18382,7 @@ fi
 	if test "${enable_int8_t}" = "yes"; then
 		DATA_DIR_int8_t="uint"
 		DATA_DEP_int8_t=""
+		DATA_ID_int8_t="4"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-int8_t.lo"
 		DATA_SELECTED="$DATA_SELECTED int8_t"
 		DATA_HEADERS="$DATA_HEADERS uint/int8_t.h"
@@ -18406,6 +18420,7 @@ fi
 	if test "${enable_int16_t}" = "yes"; then
 		DATA_DIR_int16_t="uint"
 		DATA_DEP_int16_t=""
+		DATA_ID_int16_t="5"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-int16_t.lo"
 		DATA_SELECTED="$DATA_SELECTED int16_t"
 		DATA_HEADERS="$DATA_HEADERS uint/int16_t.h"
@@ -18443,6 +18458,7 @@ fi
 	if test "${enable_int32_t}" = "yes"; then
 		DATA_DIR_int32_t="uint"
 		DATA_DEP_int32_t=""
+		DATA_ID_int32_t="6"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-int32_t.lo"
 		DATA_SELECTED="$DATA_SELECTED int32_t"
 		DATA_HEADERS="$DATA_HEADERS uint/int32_t.h"
@@ -18480,6 +18496,7 @@ fi
 	if test "${enable_int64_t}" = "yes"; then
 		DATA_DIR_int64_t="uint"
 		DATA_DEP_int64_t=""
+		DATA_ID_int64_t="7"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-int64_t.lo"
 		DATA_SELECTED="$DATA_SELECTED int64_t"
 		DATA_HEADERS="$DATA_HEADERS uint/int64_t.h"
@@ -18517,6 +18534,7 @@ fi
 	if test "${enable_uint8_t}" = "yes"; then
 		DATA_DIR_uint8_t="uint"
 		DATA_DEP_uint8_t=""
+		DATA_ID_uint8_t="8"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-uint8_t.lo"
 		DATA_SELECTED="$DATA_SELECTED uint8_t"
 		DATA_HEADERS="$DATA_HEADERS uint/uint8_t.h"
@@ -18554,6 +18572,7 @@ fi
 	if test "${enable_uint16_t}" = "yes"; then
 		DATA_DIR_uint16_t="uint"
 		DATA_DEP_uint16_t=""
+		DATA_ID_uint16_t="9"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-uint16_t.lo"
 		DATA_SELECTED="$DATA_SELECTED uint16_t"
 		DATA_HEADERS="$DATA_HEADERS uint/uint16_t.h"
@@ -18591,6 +18610,7 @@ fi
 	if test "${enable_uint32_t}" = "yes"; then
 		DATA_DIR_uint32_t="uint"
 		DATA_DEP_uint32_t=""
+		DATA_ID_uint32_t="10"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-uint32_t.lo"
 		DATA_SELECTED="$DATA_SELECTED uint32_t"
 		DATA_HEADERS="$DATA_HEADERS uint/uint32_t.h"
@@ -18628,6 +18648,7 @@ fi
 	if test "${enable_uint64_t}" = "yes"; then
 		DATA_DIR_uint64_t="uint"
 		DATA_DEP_uint64_t=""
+		DATA_ID_uint64_t="11"
 		DATA_OBJECTS_uint="$DATA_OBJECTS_uint libfrozen_data_uint_la-uint64_t.lo"
 		DATA_SELECTED="$DATA_SELECTED uint64_t"
 		DATA_HEADERS="$DATA_HEADERS uint/uint64_t.h"
@@ -18666,6 +18687,7 @@ fi
 	if test "${enable_void_t}" = "yes"; then
 		DATA_DIR_void_t="void"
 		DATA_DEP_void_t=""
+		DATA_ID_void_t="20"
 		DATA_OBJECTS_void="$DATA_OBJECTS_void libfrozen_data_void_la-void_t.lo"
 		DATA_SELECTED="$DATA_SELECTED void_t"
 		DATA_HEADERS="$DATA_HEADERS void/void_t.h"
@@ -18739,23 +18761,40 @@ fi
 
 
 	data_hdr_file=src/libfrozen/core/data_selected.h
+	data_enum_file=src/libfrozen/core/data_selected_enum.h
+	data_enum_swig_file=src/lang/datatypes.i
+
 	echo "/* Autogenerated file. Don't edit */" > $data_hdr_file
 	echo "#ifndef DATA_SELECTED_H" >> $data_hdr_file
 	echo "#define DATA_SELECTED_H" >> $data_hdr_file
 	for h in $DATA_HEADERS; do
 		echo "#include <$h>" >> $data_hdr_file
 	done;
-	echo "#ifdef DATA_C" >> $data_hdr_file
-	echo "data_proto_t * data_protos[] = {" >> $data_hdr_file
-	for h in $DATA_SELECTED; do
-		h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")
-		echo "   [TYPE_$h_upper] = &${h}_proto," >> $data_hdr_file
-	done;
-	echo "};" >> $data_hdr_file
-	echo "size_t data_protos_size = (sizeof(data_protos)/sizeof(data_protos[0]));" >> $data_hdr_file
-	echo "#endif" >> $data_hdr_file
+
+		echo "#ifdef DATA_C" >> $data_hdr_file
+		echo "data_proto_t * data_protos[] = {" >> $data_hdr_file
+		for h in $DATA_SELECTED; do
+			h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")
+			echo "   [TYPE_$h_upper] = &${h}_proto," >> $data_hdr_file
+		done;
+		echo "};" >> $data_hdr_file
+		echo "size_t data_protos_size = (sizeof(data_protos)/sizeof(data_protos[0]));" >> $data_hdr_file
+		echo "#endif" >> $data_hdr_file
 
 	echo "#endif" >> $data_hdr_file
+
+	echo "/* Autogenerated file. Don't edit */" > $data_enum_file
+	echo "#ifndef DATA_SELECTED_ENUM_H" >> $data_enum_file
+	echo "#define DATA_SELECTED_ENUM_H" >> $data_enum_file
+	echo "typedef enum data_type {" >> $data_enum_file
+	echo "   TYPE_INVALID = 0, " >> $data_enum_file
+	for h in $DATA_SELECTED; do
+		eval m_id="\$DATA_ID_$h"
+		h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")
+		echo "   TYPE_$h_upper = $m_id," >> $data_enum_file
+	done;
+	echo "} data_type;" >> $data_enum_file
+	echo "#endif" >> $data_enum_file
 
 
 

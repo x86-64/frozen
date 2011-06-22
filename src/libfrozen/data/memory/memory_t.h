@@ -1,7 +1,6 @@
 #ifndef DATA_MEMORY_T_H
 #define DATA_MEMORY_T_H
 
-enum { TYPE_MEMORYT = 18 };
 #define DATA_MEMORYT(_mem) {TYPE_MEMORYT, _mem, 0}
 	
 typedef enum memory_t_type {

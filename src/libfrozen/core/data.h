@@ -1,10 +1,6 @@
 #ifndef DATA_H
 #define DATA_H
 
-enum data_type {
-	TYPE_INVALID = 0
-};
-
 enum size_type {
 	SIZE_FIXED,
 	SIZE_VARIABLE
