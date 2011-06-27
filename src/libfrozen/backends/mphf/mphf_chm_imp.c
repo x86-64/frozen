@@ -23,6 +23,7 @@ typedef struct chm_imp_t {
 	chm_imp_params_t       params;
 	uintmax_t              nelements_min;  // minimum required capacity
 	uintmax_t              nelements_step; // minimum capacity step
+	uintmax_t              nelements_mul; // capacity step multiplexer
 	uintmax_t              nvertex;
 	uintmax_t              bi_value;
 	uintmax_t              bt_value;
@@ -44,6 +45,7 @@ typedef struct vertex_list_t {
 #define CHM_CONST             209
 #define CAPACITY_MIN_DEFAULT  256
 #define CAPACITY_STEP_DEFAULT 256
+#define CAPACITY_MUL_DEFAULT  1
 #define KEY_BITS_DEFAULT      32
 #define VALUE_BITS_DEFAULT    32
 #define BITS_TO_BYTES(x) ( ((x - 1) >> 3) + 1)
@@ -155,6 +157,7 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	char                  *backend           = NULL;
 	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
 	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
+	uintmax_t              nelements_mul     = CAPACITY_MUL_DEFAULT;
 	uintmax_t              bi_value          = VALUE_BITS_DEFAULT;
 	uintmax_t              readonly          = 0;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
@@ -162,6 +165,7 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	if( (data->status & FILLED) == 0){
 		hash_data_copy(ret, TYPE_UINTT,  nelements_min,  mphf->config, HK(nelements_min));
 		hash_data_copy(ret, TYPE_UINTT,  nelements_step, mphf->config, HK(nelements_step));
+		hash_data_copy(ret, TYPE_UINTT,  nelements_mul,  mphf->config, HK(nelements_mul));
 		hash_data_copy(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to store
 		hash_data_copy(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
@@ -207,6 +211,7 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		data->be_e           = be_e;
 		data->nelements_min  = nelements_min;
 		data->nelements_step = nelements_step;
+		data->nelements_mul  = nelements_mul;
 		data->bi_value       = bi_value;
 		data->bt_value       = BITS_TO_BYTES(data->bi_value);
 		
@@ -559,6 +564,7 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements){ // {{{
 	// calc new capacity
 	nelements  = MAX(e_nelements, data->params.nelements); // minimum capacity
 	nelements -= data->nelements_min;
+	nelements *= data->nelements_mul;
 	if( (nelements % data->nelements_step) != 0){          // round to _step
 		nelements /= data->nelements_step;
 		nelements += 1;

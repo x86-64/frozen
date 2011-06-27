@@ -156,6 +156,7 @@ static err_item errs_list[] = {
  { -4096, "src/libfrozen/backends/mphf/mphf_bdz_imp.c: mphf g_free" },
  { -4096, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'block_size' invalid" },
  { -4096, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: chain blocks-address no memory" },
+ { -4096, "src/libfrozen/backends/runtimecfg/runtimecfg.c: backend_config not supplied" },
 
 };
 #define            errs_list_size      sizeof(errs_list[0])

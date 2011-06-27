@@ -36,7 +36,7 @@ struct mphf_t {
 	void                    *build_data;
 	mphf_hash_proto_t       *hash;
 	
-	char                     data[112];
+	char                     data[20*sizeof(void *)];
 };
 
 struct mphf_proto_t {

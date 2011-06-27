@@ -75,6 +75,8 @@ API ssize_t         backend_query           (backend_t *backend, request_t *requ
 API void            backend_destroy         (backend_t *backend);
 
 API char *          backend_get_name        (backend_t *backend);
+API void            backend_connect         (backend_t *parent, backend_t *child);
+API void            backend_disconnect      (backend_t *parent, backend_t *child);
 
 API ssize_t         backend_stdcall_create  (backend_t *backend, off_t *offset, size_t size);
 API ssize_t         backend_stdcall_read    (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);

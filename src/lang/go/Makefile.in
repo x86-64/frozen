@@ -8,6 +8,8 @@ SWIGFILES=frozen.swig
 
 check:
 	echo
+distdir:
+	echo
 
 include $(GOROOT)/src/Make.pkg
 

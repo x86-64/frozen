@@ -631,6 +631,7 @@ DATA_LIBS_SELECTED
 DATA_DIST_DIRS
 DATA_OBJECTS_backend
 BACKEND_OBJECTS_structs
+BACKEND_OBJECTS_runtimecfg
 BACKEND_OBJECTS_rewrite
 BACKEND_OBJECTS_pool
 BACKEND_OBJECTS_null
@@ -806,6 +807,7 @@ enable_backendmphf
 enable_backendnull
 enable_backendpool
 enable_backendrewrite
+enable_backendruntimecfg
 enable_backendstructs
 enable_backend_t
 enable_binary_t
@@ -1504,6 +1506,8 @@ Optional Features:
   --disable-backend-pool  disable backend pool
   --disable-backend-rewrite
                           disable backend rewrite
+  --disable-backend-runtimecfg
+                          disable backend runtimecfg
   --disable-backend-structs
                           disable backend structs
   --disable-data-backend-t
@@ -17818,6 +17822,43 @@ fi
 		BACKEND_MAKEFILE_rewrite=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED rewrite/libfrozen_backend_rewrite.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-backendruntimecfg was given.
+if test "${enable_backendruntimecfg+set}" = set; then :
+  enableval=$enable_backendruntimecfg;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendruntimecfg}" = "yes"; then
+			enable_backendruntimecfg="no"
+		else
+			enable_backendruntimecfg="yes"
+		fi
+	fi
+
+	if test "${enable_backendruntimecfg}" = "yes"; then
+		BACKEND_DIR_runtimecfg="runtimecfg"
+		BACKEND_DEP_runtimecfg=""
+		BACKEND_OBJECTS_runtimecfg="$BACKEND_OBJECTS_runtimecfg libfrozen_backend_runtimecfg_la-runtimecfg.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED runtimecfg"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_runtimecfg" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/runtimecfg/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS runtimecfg"
+
+		BACKEND_MAKEFILE_runtimecfg=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED runtimecfg/libfrozen_backend_runtimecfg.la"
 
 	fi
 

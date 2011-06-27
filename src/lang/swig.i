@@ -40,7 +40,7 @@ int                frozen_destroy(void);
 backend_t *        backend_new                  (hash_t *config);
 backend_t *        backend_acquire              (char *name);
 backend_t *        backend_find                 (char *name);
-ssize_t            backend_query                (backend_t *backend, request_t *request);
+intmax_t           backend_query                (backend_t *backend, request_t *request);
 void               backend_destroy              (backend_t *backend);
 
 hash_t *           configs_string_parse         (char *string);

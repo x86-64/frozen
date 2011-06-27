@@ -45,8 +45,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
@@ -58,6 +58,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/runtimecfg/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
@@ -185,6 +186,7 @@ BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
 BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
 BACKEND_OBJECTS_pool = @BACKEND_OBJECTS_pool@
 BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
+BACKEND_OBJECTS_runtimecfg = @BACKEND_OBJECTS_runtimecfg@
 BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@
 CC = @CC@

@@ -37,7 +37,7 @@ static void        backend_top(backend_t *backend){ // {{{
 static void        backend_untop(backend_t *backend){ // {{{
 	list_delete(&backends_top, backend);
 } // }}}
-static void        backend_connect(backend_t *parent, backend_t *child){ // {{{
+void        backend_connect(backend_t *parent, backend_t *child){ // {{{
 	list_add(&parent->childs, child);
 	backend_top(parent);
 	
@@ -47,7 +47,7 @@ static void        backend_connect(backend_t *parent, backend_t *child){ // {{{
 	backend_untop(child);
 	list_add(&child->parents, parent);
 } // }}}
-static void        backend_disconnect(backend_t *parent, backend_t *child){ // {{{
+void        backend_disconnect(backend_t *parent, backend_t *child){ // {{{
 	backend_untop(parent);
 	list_delete(&parent->childs, child);
 	
