@@ -104,7 +104,7 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	
 redo:
 	if(rebuild_num++ >= userdata->max_rebuilds)
-		return error("mphf full");
+		return error("mphf max rebuilds reached");
 
 	if( (ret = userdata->mphf_proto->func_rebuild(&userdata->mphf, count)) < 0)
 		return ret;

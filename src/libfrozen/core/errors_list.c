@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -81920, "src/libfrozen/backends/runtimecfg/runtimecfg.c: backend_config not supplied" },
  { -77825, "src/libfrozen/backends/emitter/emitter.c: pthread_create failed" },
  { -77824, "src/libfrozen/backends/emitter/emitter.c: calloc failed" },
  { -73728, "src/libfrozen/backends/benchmark/benchmark.c: calloc failed" },
@@ -71,7 +72,7 @@ static err_item errs_list[] = {
  { -45060, "src/libfrozen/backends/mphf/mphf.c: backend mphf parameter mphf_type invalid or not supplied" },
  { -45059, "src/libfrozen/backends/mphf/mphf.c: no keyid or key found in item" },
  { -45058, "src/libfrozen/backends/mphf/mphf.c: failed call" },
- { -45057, "src/libfrozen/backends/mphf/mphf.c: mphf full" },
+ { -45057, "src/libfrozen/backends/mphf/mphf.c: mphf max rebuilds reached" },
  { -45056, "src/libfrozen/backends/mphf/mphf.c: malloc failed" },
  { -40969, "src/libfrozen/backends/ipc/ipc_shmem.c: strange error 3" },
  { -40968, "src/libfrozen/backends/ipc/ipc_shmem.c: strange error" },
@@ -156,7 +157,6 @@ static err_item errs_list[] = {
  { -4096, "src/libfrozen/backends/mphf/mphf_bdz_imp.c: mphf g_free" },
  { -4096, "src/libfrozen/backends/blocks/blocks.c: chain blocks variable 'block_size' invalid" },
  { -4096, "src/libfrozen/backends/blocks_addressing/blocks_addressing.c: chain blocks-address no memory" },
- { -4096, "src/libfrozen/backends/runtimecfg/runtimecfg.c: backend_config not supplied" },
 
 };
 #define            errs_list_size      sizeof(errs_list[0])

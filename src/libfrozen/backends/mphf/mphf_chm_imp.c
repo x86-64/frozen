@@ -8,7 +8,8 @@ typedef enum chm_imp_fill_flags {
 } chm_imp_fill_flags;
 
 typedef struct chm_imp_params_t {
-	uint64_t               nelements; // current mphf capacity
+	uint64_t               capacity;  // current mphf capacity
+	uint64_t               nelements; // real items count. can be less than real
 	uint64_t               hash1;
 	uint64_t               hash2;
 } chm_imp_params_t;
@@ -43,6 +44,7 @@ typedef struct vertex_list_t {
 
 #define EMODULE               11
 #define CHM_CONST             209
+#define REBUILD_CONST         80     // in case of rebuild if array size is <REBUILD_CONST>% of capacity of array - it expands
 #define CAPACITY_MIN_DEFAULT  256
 #define CAPACITY_STEP_DEFAULT 256
 #define CAPACITY_MUL_DEFAULT  1
@@ -219,15 +221,15 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	}
 	return 0;
 } // }}}
-static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t nelements){ // {{{
+static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t capacity){ // {{{
 	uintmax_t              nvertex;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	if(nelements == 0) nelements = 1; // at least one element
+	if(capacity == 0) capacity = 1; // at least one element
 	
-	// nvertex = (2.09 * nelements)
-	if(safe_mul(&nvertex, nelements, CHM_CONST) < 0){
-		safe_div(&nvertex, nelements, 100);
+	// nvertex = (2.09 * capacity)
+	if(safe_mul(&nvertex, capacity, CHM_CONST) < 0){
+		safe_div(&nvertex, capacity, 100);
 		
 		if(safe_mul(&nvertex, nvertex, CHM_CONST) < 0)
 			return error("too many elements");
@@ -235,7 +237,7 @@ static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t nelements){ // {{{
 	safe_div(&nvertex, nvertex, 100);
 	
 	data->nvertex            = nvertex;
-	data->params.nelements   = nelements;
+	data->params.capacity    = capacity;
 	data->bi_vertex          = log_any(nvertex, 2);
 	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
 	return 0;
@@ -251,11 +253,11 @@ static ssize_t chm_imp_load       (mphf_t *mphf, request_t *fork_req){ // {{{
 	if( (ret = chm_imp_param_read(mphf)) < 0)
 		goto rebuild; // no params on disk found - rebuild array
 	
-	if( (ret = chm_imp_configure_r(mphf, data->params.nelements)) < 0)
+	if( (ret = chm_imp_configure_r(mphf, data->params.capacity)) < 0)
 		return ret;
 	
 	// check if array capacity match new _min requirements
-	if(data->params.nelements < data->nelements_min)
+	if(data->params.capacity < data->nelements_min)
 		goto rebuild;
 	
 	return 0;
@@ -274,6 +276,9 @@ static ssize_t chm_imp_check      (mphf_t *mphf, size_t flags){ // {{{
 } // }}}
 static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
+	
+	// save .params
+	chm_imp_param_write(mphf);
 	
 	if(data->be_g)
 		backend_destroy(data->be_g);
@@ -532,11 +537,14 @@ static ssize_t graph_add_edge(chm_imp_t *data, uintmax_t *vertex, uintmax_t valu
 		if( (ret = graph_recalc(data, &vertex_new, tmp[1], g_new, new_edge_id)) < 0)
 			return ret;
 		
-		return 0;
+		goto insert_ok;
 	}
 	
 	if( (ret = graph_setg(data, 1, &vertex[g_free], &g_new)) < 0)
 		return ret;
+
+insert_ok:
+	data->params.nelements++; // not thread-safe, but still realistic
 	
 	return 0;
 } // }}}
@@ -550,34 +558,50 @@ ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
 ssize_t mphf_chm_imp_fork        (mphf_t *mphf, request_t *request){ // {{{
 	return chm_imp_load(mphf, request);
 } // }}}
-ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t e_nelements){ // {{{
+ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t nelements_real){ // {{{
 	ssize_t                ret;
 	uint64_t               nelements;
+	uint64_t               capacity_curr;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
 	//                  |  empty array        |  existing array
 	// -----------------+---------------------+--------------------------
-	// e_nelements      |  HK(nelements_min)  |  array actual size
-	// params.nelements |  0                  |  array defined capacity
+	// nelements_real   |  HK(nelements_min)  |  array actual size
+	// params.nelements |  0                  |  calculated array size
+	// params.capacity  |  0                  |  array defined capacity
 	// -----------------+---------------------+--------------------------
 	
-	// calc new capacity
-	nelements  = MAX(e_nelements, data->params.nelements); // minimum capacity
-	nelements -= data->nelements_min;
-	nelements *= data->nelements_mul;
-	if( (nelements % data->nelements_step) != 0){          // round to _step
-		nelements /= data->nelements_step;
-		nelements += 1;
-		nelements *= data->nelements_step;
-	}
-	nelements += data->nelements_min;
-
+	capacity_curr = data->params.capacity;
+	if(
+		safe_div(&capacity_curr, capacity_curr, 100) < 0 ||
+		safe_mul(&capacity_curr, capacity_curr, REBUILD_CONST) < 0
+	)
+		capacity_curr = data->params.capacity;
+	
+	nelements = MAX(nelements_real, data->params.nelements);  // number of elements in array
+	                                                          // NOTE .nelements here looks like overhead, but nelements_real
+								  // can be wrong in case of malicious configuration
+	
+	if(nelements >= capacity_curr){
+		// expand array
+		nelements  = MAX(MAX(data->params.capacity, data->nelements_min), nelements);
+		nelements += data->nelements_step;
+		nelements *= data->nelements_mul;
 #ifdef MPHF_DEBUG
-	printf("mphf rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
+	printf("mphf expand rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
 #endif
+	}else{
+		// ordinary rebuild
+		nelements = data->params.capacity;
+#ifdef MPHF_DEBUG
+	printf("mphf normal rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
+#endif
+	}
+	
 	// set .params
-	data->params.hash1 = random();
-	data->params.hash2 = random();
+	data->params.hash1     = random();
+	data->params.hash2     = random();
+	data->params.nelements = 0;
 	if( (ret = chm_imp_configure_r(mphf, nelements)) < 0)
 		return ret;
 	
