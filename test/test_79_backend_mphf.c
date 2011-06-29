@@ -58,7 +58,7 @@ START_TEST (test_backend_mphf){
                         { HK(class),       DATA_STRING("structs")                       },
                         { HK(size),        DATA_STRING("size")                          },
                         { HK(structure),   DATA_HASHT(
-                                { HK(keyid), DATA_UINT32T(0)                            },
+                                { HK(keyid), DATA_UINT64T(0)                            },
                                 { HK(key),   DATA_STRING("")                            },
                                 hash_end
                         )},
@@ -246,7 +246,7 @@ START_TEST (test_backend_mphf_speed){
                         { HK(class),       DATA_STRING("structs")                       },
                         { HK(size),        DATA_STRING("size")                          },
                         { HK(structure),   DATA_HASHT(
-                                { HK(keyid), DATA_UINT32T(0)                            },
+                                { HK(keyid), DATA_UINT64T(0)                            },
                                 { HK(key),   DATA_STRING("")                            },
                                 hash_end
                         )},

@@ -28,7 +28,8 @@ mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
 } // }}}
 mphf_hash_proto_t *  mphf_string_to_hash_proto(char *string){ // {{{
 	if(string == NULL)                 return NULL;
-	if(strcmp(string, "jenkins") == 0) return &mphf_hash_protos[MPHF_HASH_JENKINS32];
+	if(strcmp(string, "jenkins") == 0) return &mphf_hash_protos[MPHF_HASH_JENKINS];
+	if(strcmp(string, "murmur") == 0)  return &mphf_hash_protos[MPHF_HASH_MURMUR];
 	return NULL;
 } // }}}
 
@@ -39,13 +40,19 @@ uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key
 	
 	return mphf_hash_protos[type].func_hash32(seed, key, key_size, hashes, nhashes);
 }
+uint64_t        mphf_hash64      (mphf_hash_types type, uint64_t seed, void *key, size_t key_size, uint64_t hashes[], size_t nhashes){
+	if(type >= mphf_hash_protos_size)
+		return 0;
+	
+	return mphf_hash_protos[type].func_hash64(seed, key, key_size, hashes, nhashes);
+}
 /* }} */
 
 static uint64_t mphf_key_str_to_key(mphf_t *mphf, char *key, size_t key_len){ // {{{
 	uint64_t value = 0;
 	
 	// TODO 64-bit
-	mphf->hash->func_hash32(0, key, key_len, (uint32_t *)&value, 1);
+	mphf->hash->func_hash64(0, key, key_len, (uint64_t *)&value, 1);
 	return value;
 } // }}}
 static ssize_t mphf_insert(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
@@ -176,7 +183,7 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 	char            *key_from_str    = "key";
 	char            *key_to_str      = "offset";
 	char            *offset_out_str  = "offset_out";
-	char            *hash_type_str   = "jenkins";
+	char            *hash_type_str   = "murmur";
 	char            *keyid_str       = NULL;
 	char            *mphf_type_str   = NULL;
 	mphf_userdata   *userdata        = (mphf_userdata *)backend->userdata;
