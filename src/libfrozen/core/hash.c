@@ -339,6 +339,7 @@ error:
 	return -EFAULT;
 } // }}}
 
+
 inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
 inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
 inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }

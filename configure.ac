@@ -46,6 +46,7 @@ AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
 
+
 AC_CHECK_LIB(pthreads, pthread_create, [],
 [AC_CHECK_LIB(pthread, pthread_create)])
 
@@ -103,4 +104,10 @@ AC_CONFIG_FILES([Makefile
 		test/Makefile
 		$GEN_MAKEFILES
 ])
+
 AC_OUTPUT
+
+eval modulesdir=${libexecdir}/frozen
+echo $modulesdir
+AC_DEFINE_UNQUOTED(modulesdir, $modulesdir, [Modules folder])
+
