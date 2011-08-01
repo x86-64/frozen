@@ -277,7 +277,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 frozend_SOURCES = frozend.c paths.h
 frozend_CFLAGS = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
-frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la
+frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la -ldl
 CLEANFILES = paths.h
 all: all-am
 

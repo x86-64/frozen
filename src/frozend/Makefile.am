@@ -1,7 +1,7 @@
 bin_PROGRAMS    = frozend
 frozend_SOURCES = frozend.c paths.h
 frozend_CFLAGS  = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
-frozend_LDADD   = $(top_srcdir)/src/libfrozen/libfrozen.la
+frozend_LDADD   = $(top_srcdir)/src/libfrozen/libfrozen.la -ldl
 
 frozend.c: paths.h
 paths.h: paths.h.in

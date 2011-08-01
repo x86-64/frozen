@@ -41,7 +41,7 @@ static struct cmdline_option option_data[] = {
 	{ "config",         'c', OPT_VALUE_STR,  &opt_config_file,      "file with configuration"  },
 	{ "daemon",         'd', OPT_VALUE_BOOL, &opt_daemon,           "daemonize"                },
 	{ "pid-file",        0,  OPT_VALUE_STR,  &opt_pidfile,          "save pid to pidfile"      },
-	{ "modules"          0,  OPT_VALUE_STR,  &opt_modules_dir,      "frozen modules dir"       },
+	{ "modules",         0,  OPT_VALUE_STR,  &opt_modules_dir,      "frozen modules dir"       },
 
 	{ NULL, 0, 0, NULL, NULL }
 };
@@ -220,6 +220,41 @@ int  main (int argc, char **argv){ // {{{
 	return 0;
 } // }}}
 // }}}
+
+// run go code:
+
+#include <dlfcn.h>
+
+void rungo(void){
+	void (*gorountine)(void);
+	void (*goinitmain)(void);
+	void (*runtime_mallocinit)(void);
+	void (*runtime_goroutineinit)(void);
+
+	printf("Hello, c world!\n");
+	void *shared_ptr = dlopen("./test.so", RTLD_LAZY);
+	if(!shared_ptr){
+		printf("err: %s\n", dlerror());
+		return;
+	}
+	void *libgo_ptr = dlopen("libgo.so", RTLD_LAZY);
+	if(!libgo_ptr){
+		printf("err: %s\n", dlerror());
+		return;
+	}
+	dlerror();
+	*(void **)(&runtime_mallocinit)    = dlsym(libgo_ptr, "runtime_mallocinit");
+	*(void **)(&runtime_goroutineinit) = dlsym(libgo_ptr, "__go_gc_goroutine_init");
+	*(void **)(&goinitmain) = dlsym(shared_ptr, "__go_init_main");
+	*(void **)(&gorountine) = dlsym(shared_ptr, "go.main.Hello");
+	
+	(*runtime_mallocinit)();
+	(*runtime_goroutineinit)();
+	(*goinitmain)();
+	
+	(*gorountine)();
+}
+
 
 void main_cleanup(void){
 	/* cleanup */
