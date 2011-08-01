@@ -89,6 +89,9 @@ if test "x$enable_profile" == "xyes"; then
         LDFLAGS="$LDFLAGS -pg"
 fi
 
+modulesdir=${libexecdir}/frozen/
+AC_SUBST(modulesdir)
+
 AC_CONFIG_FILES([Makefile
 		doc/Makefile
 		src/Makefile
@@ -104,10 +107,4 @@ AC_CONFIG_FILES([Makefile
 		test/Makefile
 		$GEN_MAKEFILES
 ])
-
 AC_OUTPUT
-
-eval modulesdir=${libexecdir}/frozen
-echo $modulesdir
-AC_DEFINE_UNQUOTED(modulesdir, $modulesdir, [Modules folder])
-

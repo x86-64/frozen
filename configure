@@ -614,6 +614,7 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+modulesdir
 HAVE_DEBUG
 DATA_DIRS
 BACKEND_DIRS
@@ -18872,8 +18873,10 @@ if test "x$enable_profile" == "xyes"; then
         LDFLAGS="$LDFLAGS -pg"
 fi
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile src/lang/go/Makefile test/Makefile $GEN_MAKEFILES"
+modulesdir=${libexecdir}/frozen/
 
+
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile src/lang/go/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -21531,13 +21534,4 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
-
-eval modulesdir=${libexecdir}/frozen
-echo $modulesdir
-
-cat >>confdefs.h <<_ACEOF
-#define modulesdir $modulesdir
-_ACEOF
-
 

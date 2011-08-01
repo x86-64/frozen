@@ -1,4 +1,6 @@
 #include <libfrozen.h>
+#include <paths.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -6,9 +8,11 @@
 
 /* global options */
 char            defopt_config_file[] = "frozen.conf";
+char            defopt_modules_dir[] = FROZEN_MODULESDIR;
 
 char           *opt_pidfile        = NULL;
 char           *opt_config_file    = defopt_config_file;
+char           *opt_modules_dir    = defopt_modules_dir;
 unsigned int    opt_daemon         = 0;
 
 /* getopt arrays  {{{ */
@@ -37,7 +41,8 @@ static struct cmdline_option option_data[] = {
 	{ "config",         'c', OPT_VALUE_STR,  &opt_config_file,      "file with configuration"  },
 	{ "daemon",         'd', OPT_VALUE_BOOL, &opt_daemon,           "daemonize"                },
 	{ "pid-file",        0,  OPT_VALUE_STR,  &opt_pidfile,          "save pid to pidfile"      },
-	
+	{ "modules"          0,  OPT_VALUE_STR,  &opt_modules_dir,      "frozen modules dir"       },
+
 	{ NULL, 0, 0, NULL, NULL }
 };
 

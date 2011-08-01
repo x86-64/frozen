@@ -197,9 +197,6 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
-/* Modules folder */
-#undef modulesdir
-
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t
 

@@ -261,6 +261,7 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
+modulesdir = @modulesdir@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -274,9 +275,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-frozend_SOURCES = frozend.c
+frozend_SOURCES = frozend.c paths.h
 frozend_CFLAGS = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
 frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la
+CLEANFILES = paths.h
 all: all-am
 
 .SUFFIXES:
@@ -513,6 +515,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -607,6 +610,10 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
+
+frozend.c: paths.h
+paths.h: paths.h.in
+	sed "s#%modulesdir%#$(modulesdir)#g" $< > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
