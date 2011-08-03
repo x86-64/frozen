@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <signal.h>
+#include <dlfcn.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <strings.h>
 
 /* global options */
 char            defopt_config_file[] = "frozen.conf";
@@ -221,40 +225,81 @@ int  main (int argc, char **argv){ // {{{
 } // }}}
 // }}}
 
-// run go code:
+// modules {{{
+//   go modules {{{
+int go_inited = 0;
 
-#include <dlfcn.h>
-
-void rungo(void){
-	void (*gorountine)(void);
+void module_load_go(void *module_handle){ // {{{
+	void *libgo_ptr;
 	void (*goinitmain)(void);
-	void (*runtime_mallocinit)(void);
-	void (*runtime_goroutineinit)(void);
-
-	printf("Hello, c world!\n");
-	void *shared_ptr = dlopen("./test.so", RTLD_LAZY);
-	if(!shared_ptr){
-		printf("err: %s\n", dlerror());
-		return;
-	}
-	void *libgo_ptr = dlopen("libgo.so", RTLD_LAZY);
-	if(!libgo_ptr){
-		printf("err: %s\n", dlerror());
-		return;
-	}
-	dlerror();
-	*(void **)(&runtime_mallocinit)    = dlsym(libgo_ptr, "runtime_mallocinit");
-	*(void **)(&runtime_goroutineinit) = dlsym(libgo_ptr, "__go_gc_goroutine_init");
-	*(void **)(&goinitmain) = dlsym(shared_ptr, "__go_init_main");
-	*(void **)(&gorountine) = dlsym(shared_ptr, "go.main.Hello");
+	void (*libgo_mallocinit)(void);
+	void (*libgo_goroutineinit)(void);
+	void (*libgo_gc)(void);
 	
-	(*runtime_mallocinit)();
-	(*runtime_goroutineinit)();
+	if(go_inited == 0){
+		if( !(libgo_ptr = dlopen("libgo.so", RTLD_LAZY)) )
+			return;
+		
+		// TODO error handling
+		*(void **)(&libgo_mallocinit)    = dlsym(libgo_ptr, "runtime_mallocinit");
+		*(void **)(&libgo_goroutineinit) = dlsym(libgo_ptr, "__go_gc_goroutine_init");
+		*(void **)(&libgo_gc)            = dlsym(libgo_ptr, "__go_enable_gc");
+		
+		(*libgo_mallocinit)();
+		(*libgo_goroutineinit)();
+		(*libgo_gc)();
+		
+		go_inited = 1;
+	}
+	
+	*(void **)(&goinitmain)          = dlsym(module_handle, "__go_init_main");
 	(*goinitmain)();
 	
-	(*gorountine)();
-}
+	// TODO call init from frozen function
 
+	return;
+} // }}}
+int module_is_gomodule(void *module_handle){ // {{{
+	return (dlsym(module_handle, "main.main") != NULL); // TODO change to frozen_mod_init
+} // }}}
+	//void (*gorountine)(void);
+	//*(void **)(&gorountine) = dlsym(mod_ptr, "go.main.Hello");
+	//(*gorountine)();
+// }}}
+
+void modules_load(void){ // {{{
+	char                  *ext;
+	DIR                   *modules_dir;
+	struct dirent         *dir;
+	char                   module_path[4096];
+	void                  *module_handle;
+
+	if((modules_dir = opendir(opt_modules_dir)) == NULL)
+		return;
+	
+	while( (dir = readdir(modules_dir)) != NULL){
+		if((ext = rindex(dir->d_name, '.')) == NULL)
+			continue;
+		
+		if(strcasecmp(ext, ".so") != 0)
+			continue;
+
+		if( snprintf(module_path, sizeof(module_path), "%s/%s", opt_modules_dir, dir->d_name) >= sizeof(module_path) )
+			continue; // truncated path
+		
+		if( (module_handle = dlopen(module_path, RTLD_LAZY)) == NULL)
+			continue;
+
+		if( module_is_gomodule(module_handle) )
+			module_load_go(module_handle);
+
+		//if( module_is_cmodule(module_handle) )
+		//      module_load_c(module_handle);
+	}
+
+	closedir(modules_dir);
+} // }}}
+// }}}
 
 void main_cleanup(void){
 	/* cleanup */
@@ -275,6 +320,8 @@ void main_rest(void){
 	
 	frozen_init();
 	
+	modules_load();
+
 	config_t *config = configs_file_parse(opt_config_file);
 	
 	if(config != NULL){
