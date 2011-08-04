@@ -5,13 +5,16 @@
 
 #include "libfrozen.h"
 
-hash_t *global_settings; ///< Global settings
+hash_t *global_settings = NULL; ///< Global settings
 
 /** @brief Initialize library
  * @return 0 on success
  * @return -1 on error
  */
 int frozen_init(void){
+	if(global_settings != NULL)
+		return 0;
+
 	hash_t  global_proto[20] = {
 		[0 ... 18] = hash_null,
 		hash_end
@@ -29,8 +32,12 @@ int frozen_init(void){
  * @return -1 on error
  */
 int frozen_destroy(void){
+	if(global_settings == NULL)
+		return 0;
+
 	backend_destroy_all();
 	free(global_settings);
+	global_settings = NULL;
 	return 0;
 }
 

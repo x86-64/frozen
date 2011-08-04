@@ -34,6 +34,7 @@ struct cmdline_option {
 	void       *opt_ptr;
 	const char *helpmsg;
 }; 
+// }}}
 
 typedef void (*opt_func)(void);
 void opts_help(void);
@@ -224,7 +225,6 @@ int  main (int argc, char **argv){ // {{{
 	return 0;
 } // }}}
 // }}}
-
 // modules {{{
 //   go modules {{{
 int go_inited = 0;

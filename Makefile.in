@@ -37,7 +37,8 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure $(top_srcdir)/src/lang/go/Makefile.in \
-	TODO build/config.guess build/config.sub build/depcomp \
+	$(top_srcdir)/src/lang/gogcc/Makefile.in TODO \
+	build/config.guess build/config.sub build/depcomp \
 	build/install-sh build/ltmain.sh build/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -81,7 +82,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = src/lang/go/Makefile
+CONFIG_CLEAN_FILES = src/lang/go/Makefile src/lang/gogcc/Makefile
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -206,6 +207,7 @@ FGREP = @FGREP@
 FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
+GCCGO = @GCCGO@
 GREP = @GREP@
 HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
@@ -365,6 +367,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 src/lang/go/Makefile: $(top_builddir)/config.status $(top_srcdir)/src/lang/go/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+src/lang/gogcc/Makefile: $(top_builddir)/config.status $(top_srcdir)/src/lang/gogcc/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:

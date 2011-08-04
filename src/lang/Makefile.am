@@ -25,4 +25,4 @@ EXTRA_DIST = \
 	$(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t \
 	$(GODIR)/datatypes.i $(GODIR)/frozen.swig $(GODIR)/hashkeys.i
 
-SUBDIRS = . go
+SUBDIRS = . go gogcc

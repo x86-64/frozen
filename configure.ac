@@ -61,6 +61,8 @@ AC_PATH_PROGS(BISON, [bison], no)
 AC_PATH_PROGS(FLEX, [flex], no)
 AC_PATH_PROGS(SWIG, [swig], no)
 AC_PATH_PROGS(PERL, [perl perl5], no)
+AC_PATH_PROGS(GCCGO, [gccgo], no)
+AC_PATH_PROGS(AR, [ar], no)
 
 sinclude(./build/libfrozen_backends.m4)
 sinclude(./build/libfrozen_data.m4)
@@ -104,6 +106,7 @@ AC_CONFIG_FILES([Makefile
 		src/benchmark/Makefile
 		src/lang/Makefile
 		src/lang/go/Makefile
+		src/lang/gogcc/Makefile
 		test/Makefile
 		$GEN_MAKEFILES
 ])

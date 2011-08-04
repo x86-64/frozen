@@ -1,0 +1,34 @@
+CFLAGS=-I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+OBJECTS=libgofrozen_wrap.so libgofrozen.a
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+SWIG=@SWIG@
+CC=@CC@
+GCCGO=@GCCGO@
+AR=@AR@
+
+all: $(OBJECTS)
+
+Frozen.go frozen_wrap.c: frozen.swig
+	$(SWIG) -go -gccgo frozen.swig
+
+libgofrozen_wrap.so: frozen_wrap.c
+	$(CC) -o libgofrozen_wrap.so frozen_wrap.c -shared -fPIC $(CFLAGS) $(LDFLAGS)
+
+libgofrozen.a: Frozen.go
+	$(GCCGO) -c -o gofrozen.o Frozen.go $(CFLAGS) -L.
+	$(AR) cru libgofrozen.a gofrozen.o
+
+install:
+	cp $(OBJECTS) $(libdir)
+
+uninstall:
+	cd $(libdir) && rm $(OBJECTS)
+
+check:
+	echo
+
+clean:
+	rm Frozen.go frozen_wrap.c *.so *.[ao] || echo

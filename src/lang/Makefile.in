@@ -190,6 +190,7 @@ FGREP = @FGREP@
 FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
+GCCGO = @GCCGO@
 GREP = @GREP@
 HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
@@ -298,7 +299,7 @@ EXTRA_DIST = \
 	$(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t \
 	$(GODIR)/datatypes.i $(GODIR)/frozen.swig $(GODIR)/hashkeys.i
 
-SUBDIRS = . go
+SUBDIRS = . go gogcc
 all: all-recursive
 
 .SUFFIXES:

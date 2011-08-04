@@ -190,7 +190,7 @@ func Hend() Hskel {
         return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil), 0 }
 }
 func Hash(hk []Hskel) SwigcptrHash_t {
-        return SwigcptrHash_t(unsafe.Pointer(&hk[0]))
+        return SwigcptrHash_t(uintptr(unsafe.Pointer(&hk[0])))
 }
 
 func init() {
