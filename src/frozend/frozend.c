@@ -232,12 +232,13 @@ int go_inited = 0;
 void module_load_go(void *module_handle){ // {{{
 	void *libgo_ptr;
 	void (*goinitmain)(void);
+	void (*gomain)(void);
 	void (*libgo_mallocinit)(void);
 	void (*libgo_goroutineinit)(void);
 	void (*libgo_gc)(void);
 	
 	if(go_inited == 0){
-		if( !(libgo_ptr = dlopen("libgo.so", RTLD_LAZY)) )
+		if( !(libgo_ptr = dlopen("libgo.so",            RTLD_LAZY)) )
 			return;
 		
 		// TODO error handling
@@ -253,18 +254,15 @@ void module_load_go(void *module_handle){ // {{{
 	}
 	
 	*(void **)(&goinitmain)          = dlsym(module_handle, "__go_init_main");
+	*(void **)(&gomain)              = dlsym(module_handle, "main.main");
 	(*goinitmain)();
-	
-	// TODO call init from frozen function
+	(*gomain)();
 
 	return;
 } // }}}
 int module_is_gomodule(void *module_handle){ // {{{
-	return (dlsym(module_handle, "main.main") != NULL); // TODO change to frozen_mod_init
+	return (dlsym(module_handle, "main.main") != NULL);
 } // }}}
-	//void (*gorountine)(void);
-	//*(void **)(&gorountine) = dlsym(mod_ptr, "go.main.Hello");
-	//(*gorountine)();
 // }}}
 
 void modules_load(void){ // {{{
@@ -287,8 +285,11 @@ void modules_load(void){ // {{{
 		if( snprintf(module_path, sizeof(module_path), "%s/%s", opt_modules_dir, dir->d_name) >= sizeof(module_path) )
 			continue; // truncated path
 		
-		if( (module_handle = dlopen(module_path, RTLD_LAZY)) == NULL)
+		dlerror();
+		if( (module_handle = dlopen(module_path, RTLD_LAZY)) == NULL){
+			printf("warning: file '%s' failed: %s\n", dir->d_name, dlerror());
 			continue;
+		}
 
 		if( module_is_gomodule(module_handle) )
 			module_load_go(module_handle);
