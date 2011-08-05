@@ -9,6 +9,14 @@
 #define DEBUG
 #endif
 
+#ifdef SWIGGO
+%typemap(gotype) f_init,      const void * & "func(Backend_t) int"
+%typemap(gotype) f_fork,      const void * & "func(Backend_t, Backend_t, Hash_t) int"
+%typemap(gotype) f_configure, const void * & "func(Backend_t, Hash_t) int"
+%typemap(gotype) f_destroy,   const void * & "func(Backend_t) int"
+%typemap(gotype) f_crwd,      const void * & "func(Backend_t, Hash_t) int"
+#endif
+
 %{
 #include "libfrozen.h"
 %}
@@ -33,9 +41,37 @@ typedef unsigned long long int   uintmax_t;
 typedef uintmax_t                hash_key_t;
 typedef uintmax_t                data_type;
 
+typedef int     (*f_init)      (backend_t *);
+typedef int     (*f_fork)      (backend_t *, backend_t *, hash_t *);
+typedef int     (*f_configure) (backend_t *, hash_t *);
+typedef int     (*f_destroy)   (backend_t *);
+typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
+
+struct backend_t {
+	char                  *name;
+	char                  *class;
+	
+	uintmax_t              supported_api;
+	f_init                 func_init;
+	f_configure            func_configure;
+	f_fork                 func_fork;
+	f_destroy              func_destroy;
+	
+	struct {
+		f_crwd  func_create;
+		f_crwd  func_set;
+		f_crwd  func_get;
+		f_crwd  func_delete;
+		f_crwd  func_move;
+		f_crwd  func_count;
+		f_crwd  func_custom;
+	} backend_type_crwd;
+};
 
 int                frozen_init(void);
 int                frozen_destroy(void);
+
+void            backend_test(backend_t *func);
 
 backend_t *        backend_new                  (hash_t *config);
 backend_t *        backend_acquire              (char *name);
@@ -150,6 +186,7 @@ sub query {
 
 #ifdef SWIGGO
 
+
 %insert("go_begin") %{
 
 import "unsafe"
@@ -157,6 +194,24 @@ import "unsafe"
 %}
 
 %insert("go_wrapper") %{
+
+type BackendClass struct {
+	Name                   unsafe.Pointer
+	Class                  unsafe.Pointer
+	Supported_api          uint
+
+	Func_init       func(backend Backend_t) int
+	Func_configure  func(backend Backend_t, hash Hash_t) int
+	Func_fork       func(backend Backend_t, hash Hash_t) int
+	Func_destroy    func(backend Backend_t) int
+	
+	Func_create     func(backend Backend_t, hash Hash_t) int
+	Func_set        func(backend Backend_t, hash Hash_t) int
+	Func_get        func(backend Backend_t, hash Hash_t) int
+	Func_delete     func(backend Backend_t, hash Hash_t) int
+	Func_move       func(backend Backend_t, hash Hash_t) int
+	Func_count      func(backend Backend_t, hash Hash_t) int
+};
 
 type Hskel struct {
 	Key           uint64

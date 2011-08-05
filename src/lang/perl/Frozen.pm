@@ -51,6 +51,7 @@ package Frozen;
 
 *frozen_init = *Frozenc::frozen_init;
 *frozen_destroy = *Frozenc::frozen_destroy;
+*backend_test = *Frozenc::backend_test;
 *backend_new = *Frozenc::backend_new;
 *backend_acquire = *Frozenc::backend_acquire;
 *backend_find = *Frozenc::backend_find;
@@ -79,6 +80,110 @@ package Frozen;
 *hash_set = *Frozenc::hash_set;
 *data_from_string = *Frozenc::data_from_string;
 *describe_error = *Frozenc::describe_error;
+
+############# Class : Frozen::backend_t ##############
+
+package Frozen::backend_t;
+use vars qw(@ISA %OWNER %ITERATORS %BLESSEDMEMBERS);
+@ISA = qw( Frozen );
+%OWNER = ();
+%ITERATORS = ();
+*swig_name_get = *Frozenc::backend_t_name_get;
+*swig_name_set = *Frozenc::backend_t_name_set;
+*swig_class_get = *Frozenc::backend_t_class_get;
+*swig_class_set = *Frozenc::backend_t_class_set;
+*swig_supported_api_get = *Frozenc::backend_t_supported_api_get;
+*swig_supported_api_set = *Frozenc::backend_t_supported_api_set;
+*swig_func_init_get = *Frozenc::backend_t_func_init_get;
+*swig_func_init_set = *Frozenc::backend_t_func_init_set;
+*swig_func_configure_get = *Frozenc::backend_t_func_configure_get;
+*swig_func_configure_set = *Frozenc::backend_t_func_configure_set;
+*swig_func_fork_get = *Frozenc::backend_t_func_fork_get;
+*swig_func_fork_set = *Frozenc::backend_t_func_fork_set;
+*swig_func_destroy_get = *Frozenc::backend_t_func_destroy_get;
+*swig_func_destroy_set = *Frozenc::backend_t_func_destroy_set;
+*swig_backend_type_crwd_get = *Frozenc::backend_t_backend_type_crwd_get;
+*swig_backend_type_crwd_set = *Frozenc::backend_t_backend_type_crwd_set;
+sub new {
+    my $pkg = shift;
+    my $self = Frozenc::new_backend_t(@_);
+    bless $self, $pkg if defined($self);
+}
+
+sub DESTROY {
+    return unless $_[0]->isa('HASH');
+    my $self = tied(%{$_[0]});
+    return unless defined $self;
+    delete $ITERATORS{$self};
+    if (exists $OWNER{$self}) {
+        Frozenc::delete_backend_t($self);
+        delete $OWNER{$self};
+    }
+}
+
+sub DISOWN {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    delete $OWNER{$ptr};
+}
+
+sub ACQUIRE {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    $OWNER{$ptr} = 1;
+}
+
+
+############# Class : Frozen::backend_t_backend_type_crwd ##############
+
+package Frozen::backend_t_backend_type_crwd;
+use vars qw(@ISA %OWNER %ITERATORS %BLESSEDMEMBERS);
+@ISA = qw( Frozen );
+%OWNER = ();
+%ITERATORS = ();
+*swig_func_create_get = *Frozenc::backend_t_backend_type_crwd_func_create_get;
+*swig_func_create_set = *Frozenc::backend_t_backend_type_crwd_func_create_set;
+*swig_func_set_get = *Frozenc::backend_t_backend_type_crwd_func_set_get;
+*swig_func_set_set = *Frozenc::backend_t_backend_type_crwd_func_set_set;
+*swig_func_get_get = *Frozenc::backend_t_backend_type_crwd_func_get_get;
+*swig_func_get_set = *Frozenc::backend_t_backend_type_crwd_func_get_set;
+*swig_func_delete_get = *Frozenc::backend_t_backend_type_crwd_func_delete_get;
+*swig_func_delete_set = *Frozenc::backend_t_backend_type_crwd_func_delete_set;
+*swig_func_move_get = *Frozenc::backend_t_backend_type_crwd_func_move_get;
+*swig_func_move_set = *Frozenc::backend_t_backend_type_crwd_func_move_set;
+*swig_func_count_get = *Frozenc::backend_t_backend_type_crwd_func_count_get;
+*swig_func_count_set = *Frozenc::backend_t_backend_type_crwd_func_count_set;
+*swig_func_custom_get = *Frozenc::backend_t_backend_type_crwd_func_custom_get;
+*swig_func_custom_set = *Frozenc::backend_t_backend_type_crwd_func_custom_set;
+sub new {
+    my $pkg = shift;
+    my $self = Frozenc::new_backend_t_backend_type_crwd(@_);
+    bless $self, $pkg if defined($self);
+}
+
+sub DESTROY {
+    return unless $_[0]->isa('HASH');
+    my $self = tied(%{$_[0]});
+    return unless defined $self;
+    delete $ITERATORS{$self};
+    if (exists $OWNER{$self}) {
+        Frozenc::delete_backend_t_backend_type_crwd($self);
+        delete $OWNER{$self};
+    }
+}
+
+sub DISOWN {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    delete $OWNER{$ptr};
+}
+
+sub ACQUIRE {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    $OWNER{$ptr} = 1;
+}
+
 
 # ------- VARIABLE STUBS --------
 

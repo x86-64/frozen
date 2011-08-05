@@ -560,3 +560,15 @@ request_actions request_str_to_action(char *string){ // {{{
 	return REQUEST_INVALID;
 } // }}}
 
+void backend_test(backend_t *backend){
+	//backend = (backend_t *)( *(void **)backend );
+	printf("test pass %p\n", backend);
+	printf("test backend->name %s\n",  backend->name);
+	printf("test backend->class %s\n", backend->class);
+	printf("test backend->init %p\n", backend->func_init);
+	printf("test backend->count %p\n", backend->backend_type_crwd.func_count);
+
+	backend->func_init(backend);
+	backend->backend_type_crwd.func_count(backend, NULL);
+}
+

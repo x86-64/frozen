@@ -1501,19 +1501,23 @@ SWIG_Perl_SetModule(swig_module_info *module) {
 /* -------- TYPES TABLE (BEGIN) -------- */
 
 #define SWIGTYPE_p_backend_t swig_types[0]
-#define SWIGTYPE_p_char swig_types[1]
-#define SWIGTYPE_p_data_t swig_types[2]
-#define SWIGTYPE_p_data_type swig_types[3]
-#define SWIGTYPE_p_hash_t swig_types[4]
-#define SWIGTYPE_p_int swig_types[5]
-#define SWIGTYPE_p_long_long swig_types[6]
-#define SWIGTYPE_p_p_char swig_types[7]
-#define SWIGTYPE_p_p_data_ctx_t swig_types[8]
-#define SWIGTYPE_p_p_data_t swig_types[9]
-#define SWIGTYPE_p_unsigned_int swig_types[10]
-#define SWIGTYPE_p_unsigned_long_long swig_types[11]
-static swig_type_info *swig_types[13];
-static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
+#define SWIGTYPE_p_backend_t_backend_type_crwd swig_types[1]
+#define SWIGTYPE_p_char swig_types[2]
+#define SWIGTYPE_p_data_t swig_types[3]
+#define SWIGTYPE_p_data_type swig_types[4]
+#define SWIGTYPE_p_f_p_backend_t__int swig_types[5]
+#define SWIGTYPE_p_f_p_backend_t_p_backend_t_p_hash_t__int swig_types[6]
+#define SWIGTYPE_p_f_p_backend_t_p_hash_t__int swig_types[7]
+#define SWIGTYPE_p_hash_t swig_types[8]
+#define SWIGTYPE_p_int swig_types[9]
+#define SWIGTYPE_p_long_long swig_types[10]
+#define SWIGTYPE_p_p_char swig_types[11]
+#define SWIGTYPE_p_p_data_ctx_t swig_types[12]
+#define SWIGTYPE_p_p_data_t swig_types[13]
+#define SWIGTYPE_p_unsigned_int swig_types[14]
+#define SWIGTYPE_p_unsigned_long_long swig_types[15]
+static swig_type_info *swig_types[17];
+static swig_module_info swig_module = {swig_types, 16, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1669,6 +1673,37 @@ SWIG_AsCharPtrAndSize(SV *obj, char** cptr, size_t* psize, int *alloc)
 
 
 
+SWIGINTERNINLINE SV *
+SWIG_FromCharPtrAndSize(const char* carray, size_t size)
+{
+  SV *obj = sv_newmortal();
+  if (carray) {
+    sv_setpvn(obj, carray, size);
+  } else {
+    sv_setsv(obj, &PL_sv_undef);
+  }
+  return obj;
+}
+
+
+SWIGINTERNINLINE SV * 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
+
+
+#include <stdlib.h>
+#ifdef _MSC_VER
+# ifndef strtoull
+#  define strtoull _strtoui64
+# endif
+# ifndef strtoll
+#  define strtoll _strtoi64
+# endif
+#endif
+
+
 SWIGINTERN int
 SWIG_AsVal_double SWIG_PERL_DECL_ARGS_2(SV *obj, double *val)
 {
@@ -1737,6 +1772,63 @@ SWIG_CanCastAsInteger(double *d, double min, double max) {
 
 
 SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long long *val)
+{ 
+  if (SvUOK(obj)) {
+    if (val) *val = SvUV(obj);
+    return SWIG_OK;
+  } else  if (SvIOK(obj)) {
+    long v = SvIV(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
+  } else {
+    int dispatch = 0;
+    const char *nptr = SvPV_nolen(obj);
+    if (nptr) {
+      char *endptr;
+      unsigned long long v;
+      errno = 0;
+      v = strtoull(nptr, &endptr,0);
+      if (errno == ERANGE) {
+	errno = 0;
+	return SWIG_OverflowError;
+      } else {
+	if (*endptr == '\0') {
+	  if (val) *val = v;
+	  return SWIG_Str2NumCast(SWIG_OK);
+	}
+      }
+    }
+    if (!dispatch) {
+      const double mant_max = 1LL << DBL_MANT_DIG;
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
+	if (val) *val = (unsigned long long)(d);
+	return res;
+      }
+    }
+  }
+  return SWIG_TypeError;
+}
+
+typedef struct {
+  f_crwd  func_create;
+  f_crwd  func_set;
+  f_crwd  func_get;
+  f_crwd  func_delete;
+  f_crwd  func_move;
+  f_crwd  func_count;
+  f_crwd  func_custom;
+} backend_t_backend_type_crwd;
+
+
+
+SWIGINTERN int
 SWIG_AsVal_unsigned_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long *val) 
 {
   if (SvUOK(obj)) {
@@ -1791,63 +1883,6 @@ SWIG_AsVal_size_t SWIG_PERL_DECL_ARGS_2(SV * obj, size_t *val)
 }
 
 
-#include <stdlib.h>
-#ifdef _MSC_VER
-# ifndef strtoull
-#  define strtoull _strtoui64
-# endif
-# ifndef strtoll
-#  define strtoll _strtoi64
-# endif
-#endif
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long long *val)
-{ 
-  if (SvUOK(obj)) {
-    if (val) *val = SvUV(obj);
-    return SWIG_OK;
-  } else  if (SvIOK(obj)) {
-    long v = SvIV(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
-  } else {
-    int dispatch = 0;
-    const char *nptr = SvPV_nolen(obj);
-    if (nptr) {
-      char *endptr;
-      unsigned long long v;
-      errno = 0;
-      v = strtoull(nptr, &endptr,0);
-      if (errno == ERANGE) {
-	errno = 0;
-	return SWIG_OverflowError;
-      } else {
-	if (*endptr == '\0') {
-	  if (val) *val = v;
-	  return SWIG_Str2NumCast(SWIG_OK);
-	}
-      }
-    }
-    if (!dispatch) {
-      const double mant_max = 1LL << DBL_MANT_DIG;
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
-	if (val) *val = (unsigned long long)(d);
-	return res;
-      }
-    }
-  }
-  return SWIG_TypeError;
-}
-
-
 SWIGINTERNINLINE SV *
 SWIG_From_unsigned_SS_long  SWIG_PERL_DECL_ARGS_1(unsigned long value)
 {    
@@ -1861,26 +1896,6 @@ SWIGINTERNINLINE SV *
 SWIG_From_size_t  SWIG_PERL_DECL_ARGS_1(size_t value)
 {    
   return SWIG_From_unsigned_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long)(value));
-}
-
-
-SWIGINTERNINLINE SV *
-SWIG_FromCharPtrAndSize(const char* carray, size_t size)
-{
-  SV *obj = sv_newmortal();
-  if (carray) {
-    sv_setpvn(obj, carray, size);
-  } else {
-    sv_setsv(obj, &PL_sv_undef);
-  }
-  return obj;
-}
-
-
-SWIGINTERNINLINE SV * 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
 
@@ -2035,6 +2050,1037 @@ SWIGCLASS_STATIC int swig_magic_readonly(pTHX_ SV *SWIGUNUSEDPARM(sv), MAGIC *SW
 #ifdef __cplusplus
 extern "C" {
 #endif
+XS(_wrap_backend_t_name_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    char *arg2 = (char *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int res2 ;
+    char *buf2 = 0 ;
+    int alloc2 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_name_set(self,name);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_name_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    res2 = SWIG_AsCharPtrAndSize(ST(1), &buf2, NULL, &alloc2);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "backend_t_name_set" "', argument " "2"" of type '" "char *""'");
+    }
+    arg2 = (char *)(buf2);
+    if (arg1->name) free((char*)arg1->name);
+    if (arg2) {
+      size_t size = strlen((const char *)(arg2)) + 1;
+      arg1->name = (char *)(char *)memcpy((char *)malloc((size)*sizeof(char)), (const char *)(arg2), sizeof(char)*(size));
+    } else {
+      arg1->name = 0;
+    }
+    ST(argvi) = sv_newmortal();
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    XSRETURN(argvi);
+  fail:
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_name_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    char *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_name_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_name_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (char *) ((arg1)->name);
+    ST(argvi) = SWIG_FromCharPtr((const char *)result); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_class_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    char *arg2 = (char *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int res2 ;
+    char *buf2 = 0 ;
+    int alloc2 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_class_set(self,class);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_class_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    res2 = SWIG_AsCharPtrAndSize(ST(1), &buf2, NULL, &alloc2);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "backend_t_class_set" "', argument " "2"" of type '" "char *""'");
+    }
+    arg2 = (char *)(buf2);
+    if (arg1->class) free((char*)arg1->class);
+    if (arg2) {
+      size_t size = strlen((const char *)(arg2)) + 1;
+      arg1->class = (char *)(char *)memcpy((char *)malloc((size)*sizeof(char)), (const char *)(arg2), sizeof(char)*(size));
+    } else {
+      arg1->class = 0;
+    }
+    ST(argvi) = sv_newmortal();
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    XSRETURN(argvi);
+  fail:
+    
+    if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_class_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    char *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_class_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_class_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (char *) ((arg1)->class);
+    ST(argvi) = SWIG_FromCharPtr((const char *)result); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_supported_api_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    uintmax_t arg2 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    unsigned long long val2 ;
+    int ecode2 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_supported_api_set(self,supported_api);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_supported_api_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_CALL_ARGS_2(ST(1), &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "backend_t_supported_api_set" "', argument " "2"" of type '" "uintmax_t""'");
+    } 
+    arg2 = (uintmax_t)(val2);
+    if (arg1) (arg1)->supported_api = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_supported_api_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    uintmax_t result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_supported_api_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_supported_api_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (uintmax_t) ((arg1)->supported_api);
+    ST(argvi) = SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(result)); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_init_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    f_init arg2 = (f_init) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_func_init_set(self,func_init);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_init_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_func_init_set" "', argument " "2"" of type '" "f_init""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_init = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_init_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_init result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_func_init_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_init_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (f_init) ((arg1)->func_init);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_configure_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    f_configure arg2 = (f_configure) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_func_configure_set(self,func_configure);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_configure_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_func_configure_set" "', argument " "2"" of type '" "f_configure""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_configure = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_configure_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_configure result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_func_configure_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_configure_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (f_configure) ((arg1)->func_configure);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_fork_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    f_fork arg2 = (f_fork) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_func_fork_set(self,func_fork);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_fork_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_func_fork_set" "', argument " "2"" of type '" "f_fork""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_fork = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_fork_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_fork result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_func_fork_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_fork_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (f_fork) ((arg1)->func_fork);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_destroy_set) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    f_destroy arg2 = (f_destroy) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_func_destroy_set(self,func_destroy);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_destroy_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_func_destroy_set" "', argument " "2"" of type '" "f_destroy""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_destroy = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_func_destroy_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_destroy result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_func_destroy_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_func_destroy_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (f_destroy) ((arg1)->func_destroy);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    backend_t_backend_type_crwd *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (backend_t_backend_type_crwd *)& ((arg1)->backend_type_crwd);
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t_backend_type_crwd, 0 | SWIG_SHADOW); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_new_backend_t) {
+  {
+    int argvi = 0;
+    struct backend_t *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 0) || (items > 0)) {
+      SWIG_croak("Usage: new_backend_t();");
+    }
+    result = (struct backend_t *)calloc(1, sizeof(struct backend_t));
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, SWIG_OWNER | SWIG_SHADOW); argvi++ ;
+    XSRETURN(argvi);
+  fail:
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_delete_backend_t) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: delete_backend_t(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, SWIG_POINTER_DISOWN |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_backend_t" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    free((char *) arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_create_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_create_set(self,func_create);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_create_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_create_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_create = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_create_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_create_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_create_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_create);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_set_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_set_set(self,func_set);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_set_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_set_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_set = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_set_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_set_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_set_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_set);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_get_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_get_set(self,func_get);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_get_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_get_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_get = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_get_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_get_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_get_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_get);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_delete_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_delete_set(self,func_delete);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_delete_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_delete_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_delete = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_delete_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_delete_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_delete_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_delete);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_move_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_move_set(self,func_move);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_move_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_move_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_move = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_move_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_move_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_move_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_move);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_count_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_count_set(self,func_count);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_count_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_count_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_count = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_count_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_count_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_count_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_count);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_custom_set) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_custom_set(self,func_custom);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_custom_set" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_crwd_func_custom_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_custom = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_crwd_func_custom_get) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_crwd_func_custom_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_crwd_func_custom_get" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    result = (f_crwd) ((arg1)->func_custom);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_new_backend_t_backend_type_crwd) {
+  {
+    int argvi = 0;
+    backend_t_backend_type_crwd *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 0) || (items > 0)) {
+      SWIG_croak("Usage: new_backend_t_backend_type_crwd();");
+    }
+    result = (backend_t_backend_type_crwd *)calloc(1, sizeof(backend_t_backend_type_crwd));
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t_backend_type_crwd, SWIG_OWNER | SWIG_SHADOW); argvi++ ;
+    XSRETURN(argvi);
+  fail:
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_delete_backend_t_backend_type_crwd) {
+  {
+    backend_t_backend_type_crwd *arg1 = (backend_t_backend_type_crwd *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: delete_backend_t_backend_type_crwd(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_crwd, SWIG_POINTER_DISOWN |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_backend_t_backend_type_crwd" "', argument " "1"" of type '" "backend_t_backend_type_crwd *""'"); 
+    }
+    arg1 = (backend_t_backend_type_crwd *)(argp1);
+    free((char *) arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_frozen_init) {
   {
     int argvi = 0;
@@ -2071,6 +3117,33 @@ XS(_wrap_frozen_destroy) {
 }
 
 
+XS(_wrap_backend_test) {
+  {
+    backend_t *arg1 = (backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_test(func);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_test" "', argument " "1"" of type '" "backend_t *""'"); 
+    }
+    arg1 = (backend_t *)(argp1);
+    backend_test(arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_backend_new) {
   {
     hash_t *arg1 = (hash_t *) 0 ;
@@ -2089,7 +3162,7 @@ XS(_wrap_backend_new) {
     }
     arg1 = (hash_t *)(argp1);
     result = (backend_t *)backend_new(arg1);
-    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | 0); argvi++ ;
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | SWIG_SHADOW); argvi++ ;
     
     XSRETURN(argvi);
   fail:
@@ -2118,7 +3191,7 @@ XS(_wrap_backend_acquire) {
     }
     arg1 = (char *)(buf1);
     result = (backend_t *)backend_acquire(arg1);
-    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | 0); argvi++ ;
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | SWIG_SHADOW); argvi++ ;
     if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
     XSRETURN(argvi);
   fail:
@@ -2147,7 +3220,7 @@ XS(_wrap_backend_find) {
     }
     arg1 = (char *)(buf1);
     result = (backend_t *)backend_find(arg1);
-    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | 0); argvi++ ;
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t, 0 | SWIG_SHADOW); argvi++ ;
     if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
     XSRETURN(argvi);
   fail:
@@ -2994,10 +4067,14 @@ XS(_wrap_describe_error) {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
-static swig_type_info _swigt__p_backend_t = {"_p_backend_t", "backend_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_backend_t = {"_p_backend_t", "struct backend_t *|backend_t *", 0, 0, (void*)"Frozen::backend_t", 0};
+static swig_type_info _swigt__p_backend_t_backend_type_crwd = {"_p_backend_t_backend_type_crwd", "backend_t_backend_type_crwd *", 0, 0, (void*)"Frozen::backend_t_backend_type_crwd", 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_t = {"_p_data_t", "data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_type = {"_p_data_type", "enum data_type *|data_type *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_backend_t__int = {"_p_f_p_backend_t__int", "int (*)(backend_t *)|f_init|f_destroy", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_backend_t_p_backend_t_p_hash_t__int = {"_p_f_p_backend_t_p_backend_t_p_hash_t__int", "int (*)(backend_t *,backend_t *,hash_t *)|f_fork", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_backend_t_p_hash_t__int = {"_p_f_p_backend_t_p_hash_t__int", "int (*)(backend_t *,hash_t *)|f_crwd|f_configure", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_hash_t = {"_p_hash_t", "request_t *|hash_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *|ssize_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long_long = {"_p_long_long", "long long *|intmax_t *", 0, 0, (void*)0, 0};
@@ -3009,9 +4086,13 @@ static swig_type_info _swigt__p_unsigned_long_long = {"_p_unsigned_long_long", "
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_backend_t,
+  &_swigt__p_backend_t_backend_type_crwd,
   &_swigt__p_char,
   &_swigt__p_data_t,
   &_swigt__p_data_type,
+  &_swigt__p_f_p_backend_t__int,
+  &_swigt__p_f_p_backend_t_p_backend_t_p_hash_t__int,
+  &_swigt__p_f_p_backend_t_p_hash_t__int,
   &_swigt__p_hash_t,
   &_swigt__p_int,
   &_swigt__p_long_long,
@@ -3023,9 +4104,13 @@ static swig_type_info *swig_type_initial[] = {
 };
 
 static swig_cast_info _swigc__p_backend_t[] = {  {&_swigt__p_backend_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_backend_t_backend_type_crwd[] = {  {&_swigt__p_backend_t_backend_type_crwd, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_data_t[] = {  {&_swigt__p_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_data_type[] = {  {&_swigt__p_data_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_backend_t__int[] = {  {&_swigt__p_f_p_backend_t__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_backend_t_p_backend_t_p_hash_t__int[] = {  {&_swigt__p_f_p_backend_t_p_backend_t_p_hash_t__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_backend_t_p_hash_t__int[] = {  {&_swigt__p_f_p_backend_t_p_hash_t__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_hash_t[] = {  {&_swigt__p_hash_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long_long[] = {  {&_swigt__p_long_long, 0, 0, 0},{0, 0, 0, 0}};
@@ -3037,9 +4122,13 @@ static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_l
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_backend_t,
+  _swigc__p_backend_t_backend_type_crwd,
   _swigc__p_char,
   _swigc__p_data_t,
   _swigc__p_data_type,
+  _swigc__p_f_p_backend_t__int,
+  _swigc__p_f_p_backend_t_p_backend_t_p_hash_t__int,
+  _swigc__p_f_p_backend_t_p_hash_t__int,
   _swigc__p_hash_t,
   _swigc__p_int,
   _swigc__p_long_long,
@@ -3063,8 +4152,42 @@ static swig_variable_info swig_variables[] = {
 {0,0,0,0}
 };
 static swig_command_info swig_commands[] = {
+{"Frozenc::backend_t_name_set", _wrap_backend_t_name_set},
+{"Frozenc::backend_t_name_get", _wrap_backend_t_name_get},
+{"Frozenc::backend_t_class_set", _wrap_backend_t_class_set},
+{"Frozenc::backend_t_class_get", _wrap_backend_t_class_get},
+{"Frozenc::backend_t_supported_api_set", _wrap_backend_t_supported_api_set},
+{"Frozenc::backend_t_supported_api_get", _wrap_backend_t_supported_api_get},
+{"Frozenc::backend_t_func_init_set", _wrap_backend_t_func_init_set},
+{"Frozenc::backend_t_func_init_get", _wrap_backend_t_func_init_get},
+{"Frozenc::backend_t_func_configure_set", _wrap_backend_t_func_configure_set},
+{"Frozenc::backend_t_func_configure_get", _wrap_backend_t_func_configure_get},
+{"Frozenc::backend_t_func_fork_set", _wrap_backend_t_func_fork_set},
+{"Frozenc::backend_t_func_fork_get", _wrap_backend_t_func_fork_get},
+{"Frozenc::backend_t_func_destroy_set", _wrap_backend_t_func_destroy_set},
+{"Frozenc::backend_t_func_destroy_get", _wrap_backend_t_func_destroy_get},
+{"Frozenc::backend_t_backend_type_crwd_get", _wrap_backend_t_backend_type_crwd_get},
+{"Frozenc::new_backend_t", _wrap_new_backend_t},
+{"Frozenc::delete_backend_t", _wrap_delete_backend_t},
+{"Frozenc::backend_t_backend_type_crwd_func_create_set", _wrap_backend_t_backend_type_crwd_func_create_set},
+{"Frozenc::backend_t_backend_type_crwd_func_create_get", _wrap_backend_t_backend_type_crwd_func_create_get},
+{"Frozenc::backend_t_backend_type_crwd_func_set_set", _wrap_backend_t_backend_type_crwd_func_set_set},
+{"Frozenc::backend_t_backend_type_crwd_func_set_get", _wrap_backend_t_backend_type_crwd_func_set_get},
+{"Frozenc::backend_t_backend_type_crwd_func_get_set", _wrap_backend_t_backend_type_crwd_func_get_set},
+{"Frozenc::backend_t_backend_type_crwd_func_get_get", _wrap_backend_t_backend_type_crwd_func_get_get},
+{"Frozenc::backend_t_backend_type_crwd_func_delete_set", _wrap_backend_t_backend_type_crwd_func_delete_set},
+{"Frozenc::backend_t_backend_type_crwd_func_delete_get", _wrap_backend_t_backend_type_crwd_func_delete_get},
+{"Frozenc::backend_t_backend_type_crwd_func_move_set", _wrap_backend_t_backend_type_crwd_func_move_set},
+{"Frozenc::backend_t_backend_type_crwd_func_move_get", _wrap_backend_t_backend_type_crwd_func_move_get},
+{"Frozenc::backend_t_backend_type_crwd_func_count_set", _wrap_backend_t_backend_type_crwd_func_count_set},
+{"Frozenc::backend_t_backend_type_crwd_func_count_get", _wrap_backend_t_backend_type_crwd_func_count_get},
+{"Frozenc::backend_t_backend_type_crwd_func_custom_set", _wrap_backend_t_backend_type_crwd_func_custom_set},
+{"Frozenc::backend_t_backend_type_crwd_func_custom_get", _wrap_backend_t_backend_type_crwd_func_custom_get},
+{"Frozenc::new_backend_t_backend_type_crwd", _wrap_new_backend_t_backend_type_crwd},
+{"Frozenc::delete_backend_t_backend_type_crwd", _wrap_delete_backend_t_backend_type_crwd},
 {"Frozenc::frozen_init", _wrap_frozen_init},
 {"Frozenc::frozen_destroy", _wrap_frozen_destroy},
+{"Frozenc::backend_test", _wrap_backend_test},
 {"Frozenc::backend_new", _wrap_backend_new},
 {"Frozenc::backend_acquire", _wrap_backend_acquire},
 {"Frozenc::backend_find", _wrap_backend_find},
@@ -4087,6 +5210,8 @@ XS(SWIG_init) {
     sv_setsv(sv, SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(REQUEST_INVALID)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
+  SWIG_TypeClientData(SWIGTYPE_p_backend_t, (void*) "Frozen::backend_t");
+  SWIG_TypeClientData(SWIGTYPE_p_backend_t_backend_type_crwd, (void*) "Frozen::backend_t_backend_type_crwd");
   ST(0) = &PL_sv_yes;
   XSRETURN(1);
 }

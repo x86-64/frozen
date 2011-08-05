@@ -35,9 +35,6 @@ typedef size_t (*f_fast_delete) (backend_t *, off_t, size_t);
 struct backend_t {
 	char                  *name;
 	char                  *class;
-	uintmax_t              refs;
-	pthread_mutex_t        refs_mtx;
-	config_t              *config;
 	
 	api_types              supported_api;
 	f_init                 func_init;
@@ -61,11 +58,18 @@ struct backend_t {
 		f_fast_delete  func_fast_delete;
 	} backend_type_fast;
 	
+	
 	void *                 userdata;
+	
+	uintmax_t              refs;
+	pthread_mutex_t        refs_mtx;
+	config_t              *config;
 	
 	list                   parents; // parent backends including private _acquires
 	list                   childs;  // child backends
 };
+
+API void backend_test(backend_t *backend);
 
 API backend_t *     backend_new             (hash_t *config);
 API backend_t *     backend_acquire         (char *name);
