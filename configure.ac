@@ -66,9 +66,11 @@ AC_PATH_PROGS(AR, [ar], no)
 
 sinclude(./build/libfrozen_backends.m4)
 sinclude(./build/libfrozen_data.m4)
+sinclude(./build/libfrozen_modules.m4)
 esyscmd(./build/configs-find)
 FROZEN_BACKEND_END
 FROZEN_DATA_END
+FROZEN_MODULE_END
 
 esyscmd(./build/libfrozen_errors.pl)
 esyscmd(./build/libfrozen_hashkeys.sh)
@@ -107,6 +109,7 @@ AC_CONFIG_FILES([Makefile
 		src/lang/Makefile
 		src/lang/go/Makefile
 		src/lang/gogcc/Makefile
+		src/modules/Makefile
 		test/Makefile
 		$GEN_MAKEFILES
 ])

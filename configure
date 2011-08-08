@@ -616,6 +616,7 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 modulesdir
 HAVE_DEBUG
+MODULE_DIRS
 DATA_DIRS
 BACKEND_DIRS
 DATA_OBJECTS_void
@@ -651,6 +652,7 @@ BACKEND_OBJECTS_balancer
 BACKEND_LIBS_SELECTED
 BACKEND_DIST_DIRS
 BACKEND_OBJECTS_allocator
+MODULE_DIST_DIRS
 GCCGO
 PERL
 SWIG
@@ -793,6 +795,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+enable_modulego_test
 enable_backendallocator
 enable_backendbalancer
 enable_backendbenchmark
@@ -1484,6 +1487,8 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-module-go-test
+                          disable module go-test
   --disable-backend-allocator
                           disable backend allocator
   --disable-backend-balancer
@@ -17332,6 +17337,43 @@ test -n "$AR" || AR="no"
 
 
 
+
+
+
+
+
+	# Check whether --enable-modulego_test was given.
+if test "${enable_modulego_test+set}" = set; then :
+  enableval=$enable_modulego_test;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_modulego_test}" = "yes"; then
+			enable_modulego_test="no"
+		else
+			enable_modulego_test="yes"
+		fi
+	fi
+
+	if test "${enable_modulego_test}" = "yes"; then
+		MODULE_DIR_go_test="go_test"
+		MODULE_DEP_go_test=""
+		MODULE_SELECTED="$MODULE_SELECTED go_test"
+	fi
+
+	if test "$MODULE_MAKEFILE_go_test" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/go_test/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_test"
+
+		MODULE_MAKEFILE_go_test=yes
+	fi
+
+
+
+
+
+
 	# Check whether --enable-backendallocator was given.
 if test "${enable_backendallocator+set}" = set; then :
   enableval=$enable_backendallocator;
@@ -18933,6 +18975,23 @@ fi
 	echo "#endif" >> $data_enum_file
 
 
+	MODULE_SELECTED_DEPS=$MODULE_SELECTED
+	for m in $MODULE_SELECTED; do
+		eval m_deps="\$MODULE_DEP_$m"
+		for d in $m_deps; do
+			MODULE_SELECTED_DEPS=$( echo $MODULE_SELECTED_DEPS | sed "s|$d|$d $m|" | sed "s|$m||" )
+			# add this module after dependency and remove first occurence of module, leaving inserted
+		done;
+	done;
+	for m in $MODULE_SELECTED_DEPS; do
+		eval m_folder="\$MODULE_DIR_$m"
+		MODULE_DIRS="$MODULE_DIRS $m_folder"
+		MODULE_DIRS=$(echo $MODULE_DIRS | sed "s|$m_folder|REPLACEMEBACK|" | sed "s|$m_folder||g" | sed "s|REPLACEMEBACK|$m_folder|" )
+
+	done;
+
+
+
 
 
 
@@ -18969,7 +19028,7 @@ fi
 modulesdir=${libexecdir}/frozen/
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile test/Makefile $GEN_MAKEFILES"
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/benchmark/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -20097,6 +20156,7 @@ do
     "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;
     "src/lang/go/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/go/Makefile" ;;
     "src/lang/gogcc/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/gogcc/Makefile" ;;
+    "src/modules/Makefile") CONFIG_FILES="$CONFIG_FILES src/modules/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "$GEN_MAKEFILES") CONFIG_FILES="$CONFIG_FILES $GEN_MAKEFILES" ;;
 

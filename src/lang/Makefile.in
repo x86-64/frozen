@@ -41,6 +41,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/./build/libfrozen_backends.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
+	$(top_srcdir)/./build/libfrozen_modules.m4 \
+	$(top_srcdir)/./src/modules/go_test/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/benchmark/config.m4 \
@@ -211,6 +213,8 @@ M4 = @M4@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MODULE_DIRS = @MODULE_DIRS@
+MODULE_DIST_DIRS = @MODULE_DIST_DIRS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
