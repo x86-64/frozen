@@ -10,11 +10,16 @@
 #endif
 
 #ifdef SWIGGO
-%typemap(gotype) f_init,      const void * & "func(Backend_t) int"
-%typemap(gotype) f_fork,      const void * & "func(Backend_t, Backend_t, Hash_t) int"
-%typemap(gotype) f_configure, const void * & "func(Backend_t, Hash_t) int"
-%typemap(gotype) f_destroy,   const void * & "func(Backend_t) int"
-%typemap(gotype) f_crwd,      const void * & "func(Backend_t, Hash_t) int"
+%typemap(gotype) f_init,      const void * & "func(uintptr) int"
+%typemap(gotype) f_fork,      const void * & "func(uintptr, uintptr, uintptr) int"
+%typemap(gotype) f_configure, const void * & "func(uintptr, uintptr) int"
+%typemap(gotype) f_destroy,   const void * & "func(uintptr) int"
+%typemap(gotype) f_crwd,      const void * & "func(uintptr, uintptr) int"
+
+%typemap(gotype) backend_t *, const void * & "uintptr"
+%typemap(gotype) hash_t *,    const void * & "uintptr"
+%typemap(gotype) request_t *, const void * & "uintptr"
+%typemap(gotype) data_t *,    const void * & "uintptr"
 #endif
 
 %{
@@ -72,6 +77,7 @@ int                frozen_init(void);
 int                frozen_destroy(void);
 
 void            backend_test(backend_t *func);
+int             backend_test_pass(backend_t *backend, hash_t *request);
 
 backend_t *        backend_new                  (hash_t *config);
 backend_t *        backend_acquire              (char *name);
@@ -195,24 +201,6 @@ import "unsafe"
 
 %insert("go_wrapper") %{
 
-type BackendClass struct {
-	Name                   unsafe.Pointer
-	Class                  unsafe.Pointer
-	Supported_api          uint
-
-	Func_init       func(backend Backend_t) int
-	Func_configure  func(backend Backend_t, hash Hash_t) int
-	Func_fork       func(backend Backend_t, hash Hash_t) int
-	Func_destroy    func(backend Backend_t) int
-	
-	Func_create     func(backend Backend_t, hash Hash_t) int
-	Func_set        func(backend Backend_t, hash Hash_t) int
-	Func_get        func(backend Backend_t, hash Hash_t) int
-	Func_delete     func(backend Backend_t, hash Hash_t) int
-	Func_move       func(backend Backend_t, hash Hash_t) int
-	Func_count      func(backend Backend_t, hash Hash_t) int
-};
-
 type Hskel struct {
 	Key           uint64
 	Data_type     Enum_SS_data_type
@@ -238,14 +226,17 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         }
         return Hskel{ skey, sdata_type, data_ptr, data_len }
 }
+func Hnext(hash uintptr) Hskel {
+	return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(hash), 0 }
+}
 func Hnull() Hskel {
         return Hskel{ (^uint64(0)), 0, unsafe.Pointer(nil), 0 }
 }
 func Hend() Hskel {
         return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil), 0 }
 }
-func Hash(hk []Hskel) SwigcptrHash_t {
-        return SwigcptrHash_t(uintptr(unsafe.Pointer(&hk[0])))
+func Hash(hk []Hskel) uintptr {
+        return uintptr(unsafe.Pointer(&hk[0]))
 }
 
 func init() {

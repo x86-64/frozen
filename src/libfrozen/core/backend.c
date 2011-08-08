@@ -569,6 +569,17 @@ void backend_test(backend_t *backend){
 	printf("test backend->count %p\n", backend->backend_type_crwd.func_count);
 
 	backend->func_init(backend);
-	backend->backend_type_crwd.func_count(backend, NULL);
+	
+	hash_t test[] = {
+		{ HK(count), DATA_STRING("moo") },
+		hash_end
+	};
+
+	backend->backend_type_crwd.func_count(backend, test);
 }
 
+int backend_test_pass(backend_t *backend, hash_t *request){
+	printf("backend_test_pass: (%p, %p)\n", backend, request);
+	hash_dump(request);
+	return 0;
+}

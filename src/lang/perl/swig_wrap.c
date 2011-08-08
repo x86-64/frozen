@@ -3144,6 +3144,44 @@ XS(_wrap_backend_test) {
 }
 
 
+XS(_wrap_backend_test_pass) {
+  {
+    backend_t *arg1 = (backend_t *) 0 ;
+    hash_t *arg2 = (hash_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    void *argp2 = 0 ;
+    int res2 = 0 ;
+    int argvi = 0;
+    int result;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_test_pass(backend,request);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_test_pass" "', argument " "1"" of type '" "backend_t *""'"); 
+    }
+    arg1 = (backend_t *)(argp1);
+    res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "backend_test_pass" "', argument " "2"" of type '" "hash_t *""'"); 
+    }
+    arg2 = (hash_t *)(argp2);
+    result = (int)backend_test_pass(arg1,arg2);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_backend_new) {
   {
     hash_t *arg1 = (hash_t *) 0 ;
@@ -4188,6 +4226,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::frozen_init", _wrap_frozen_init},
 {"Frozenc::frozen_destroy", _wrap_frozen_destroy},
 {"Frozenc::backend_test", _wrap_backend_test},
+{"Frozenc::backend_test_pass", _wrap_backend_test_pass},
 {"Frozenc::backend_new", _wrap_backend_new},
 {"Frozenc::backend_acquire", _wrap_backend_acquire},
 {"Frozenc::backend_find", _wrap_backend_find},
