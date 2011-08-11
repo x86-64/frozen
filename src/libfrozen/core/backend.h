@@ -69,9 +69,6 @@ struct backend_t {
 	list                   childs;  // child backends
 };
 
-API void backend_test(backend_t *backend);
-API int backend_test_pass(backend_t *backend, hash_t *request);
-
 API backend_t *     backend_new             (hash_t *config);
 API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
@@ -83,6 +80,9 @@ API char *          backend_get_name        (backend_t *backend);
 API void            backend_connect         (backend_t *parent, backend_t *child);
 API void            backend_disconnect      (backend_t *parent, backend_t *child);
 
+API ssize_t         class_register          (backend_t *proto);
+API void            class_unregister        (backend_t *proto);
+
 API ssize_t         backend_stdcall_create  (backend_t *backend, off_t *offset, size_t size);
 API ssize_t         backend_stdcall_read    (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
 API ssize_t         backend_stdcall_write   (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size);
@@ -91,7 +91,7 @@ API ssize_t         backend_stdcall_move    (backend_t *backend, off_t  from,   
 API ssize_t         backend_stdcall_delete  (backend_t *backend, off_t  offset, size_t size);
 API ssize_t         backend_stdcall_count   (backend_t *backend, size_t *count);
 
-    ssize_t         backend_pass            (backend_t *backend, request_t *request);
+API ssize_t         backend_pass            (backend_t *backend, request_t *request);
      void           backend_destroy_all     (void);
 
      size_t         backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size);

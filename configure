@@ -795,7 +795,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
-enable_modulego_test
+enable_modulego_http
 enable_backendallocator
 enable_backendbalancer
 enable_backendbenchmark
@@ -1487,8 +1487,8 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --disable-module-go-test
-                          disable module go-test
+  --disable-module-go-http
+                          disable module go-http
   --disable-backend-allocator
                           disable backend allocator
   --disable-backend-balancer
@@ -17342,31 +17342,31 @@ test -n "$AR" || AR="no"
 
 
 
-	# Check whether --enable-modulego_test was given.
-if test "${enable_modulego_test+set}" = set; then :
-  enableval=$enable_modulego_test;
+	# Check whether --enable-modulego_http was given.
+if test "${enable_modulego_http+set}" = set; then :
+  enableval=$enable_modulego_http;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_modulego_test}" = "yes"; then
-			enable_modulego_test="no"
+		if test "${enable_modulego_http}" = "yes"; then
+			enable_modulego_http="no"
 		else
-			enable_modulego_test="yes"
+			enable_modulego_http="yes"
 		fi
 	fi
 
-	if test "${enable_modulego_test}" = "yes"; then
-		MODULE_DIR_go_test="go_test"
-		MODULE_DEP_go_test=""
-		MODULE_SELECTED="$MODULE_SELECTED go_test"
+	if test "${enable_modulego_http}" = "yes"; then
+		MODULE_DIR_go_http="go_http"
+		MODULE_DEP_go_http=""
+		MODULE_SELECTED="$MODULE_SELECTED go_http"
 	fi
 
-	if test "$MODULE_MAKEFILE_go_test" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/go_test/Makefile"
-		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_test"
+	if test "$MODULE_MAKEFILE_go_http" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/go_http/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_http"
 
-		MODULE_MAKEFILE_go_test=yes
+		MODULE_MAKEFILE_go_http=yes
 	fi
 
 

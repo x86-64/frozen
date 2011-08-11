@@ -51,13 +51,14 @@ package Frozen;
 
 *frozen_init = *Frozenc::frozen_init;
 *frozen_destroy = *Frozenc::frozen_destroy;
-*backend_test = *Frozenc::backend_test;
-*backend_test_pass = *Frozenc::backend_test_pass;
+*class_register = *Frozenc::class_register;
+*class_unregister = *Frozenc::class_unregister;
 *backend_new = *Frozenc::backend_new;
 *backend_acquire = *Frozenc::backend_acquire;
 *backend_find = *Frozenc::backend_find;
 *backend_query = *Frozenc::backend_query;
 *backend_destroy = *Frozenc::backend_destroy;
+*backend_pass = *Frozenc::backend_pass;
 *configs_string_parse = *Frozenc::configs_string_parse;
 *configs_file_parse = *Frozenc::configs_file_parse;
 *hash_new = *Frozenc::hash_new;

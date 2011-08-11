@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/modules/go_test
+subdir = src/modules/go_http
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -280,9 +280,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 MYLDFLAGS = -lgofrozen -lgofrozen_wrap -L@top_srcdir@/src/lang/gogcc/
-EXTRA_DIST = test.go
-CLEANFILES = module_test.so
-modules_DATA = module_test.so
+EXTRA_DIST = main.go
+CLEANFILES = module_go_http.so
+modules_DATA = module_go_http.so
 all: all-am
 
 .SUFFIXES:
@@ -295,9 +295,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/modules/go_test/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/modules/go_http/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/modules/go_test/Makefile
+	  $(AUTOMAKE) --foreign src/modules/go_http/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -493,7 +493,7 @@ uninstall-am: uninstall-modulesDATA
 	uninstall uninstall-am uninstall-modulesDATA
 
 
-module_test.so: test.go
+module_go_http.so: main.go
 	$(GCCGO) -shared -fPIC $(CFLAGS) $(MYLDFLAGS) -o $@ $< 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

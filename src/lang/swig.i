@@ -76,14 +76,16 @@ struct backend_t {
 int                frozen_init(void);
 int                frozen_destroy(void);
 
-void            backend_test(backend_t *func);
-int             backend_test_pass(backend_t *backend, hash_t *request);
+ssize_t            class_register               (backend_t *proto);
+void               class_unregister             (backend_t *proto);
 
 backend_t *        backend_new                  (hash_t *config);
 backend_t *        backend_acquire              (char *name);
 backend_t *        backend_find                 (char *name);
 intmax_t           backend_query                (backend_t *backend, request_t *request);
 void               backend_destroy              (backend_t *backend);
+
+ssize_t            backend_pass                 (backend_t *backend, request_t *request);
 
 hash_t *           configs_string_parse         (char *string);
 hash_t *           configs_file_parse           (char *filename);
@@ -196,6 +198,7 @@ sub query {
 %insert("go_begin") %{
 
 import "unsafe"
+import "fmt"
 
 %}
 
@@ -223,6 +226,9 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
                 case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
                 case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
 		case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
+		case Enum_SS_request_actions: 
+		             data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+		default: fmt.Printf("Hitem: unexpected type %T\n", v)
         }
         return Hskel{ skey, sdata_type, data_ptr, data_len }
 }

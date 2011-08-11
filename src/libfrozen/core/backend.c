@@ -3,19 +3,49 @@
 #include <alloca.h>
 #include <backend_selected.h>
 
+static list                    classes        = LIST_INITIALIZER; // dynamic classes passed from modules
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
 
-static backend_t * backend_find_class (char *class){ // {{{
-	uintmax_t i;
+static backend_t * class_find              (char *class){ // {{{
+	uintmax_t              i;
+	backend_t             *backend;
+	void                  *list_status  = NULL;
 	
 	for(i=0; i<backend_protos_size; i++){
-		if(strcmp(backend_protos[i]->class, class) == 0)
-			return backend_protos[i];
+		backend = backend_protos[i];
+
+		if(backend->class != NULL && strcmp(backend->class, class) == 0)
+			return backend;
 	}
 	
-	return NULL;
+	list_rdlock(&classes);
+		while( (backend = list_iter_next(&classes, &list_status)) != NULL){
+			if(backend->class != NULL && strcmp(backend->class, class) == 0)
+				goto exit;
+		}
+		backend = NULL;
+exit:
+	list_unlock(&classes);
+	
+	return backend;
 } // }}}
+ssize_t            class_register          (backend_t *proto){ // {{{
+	if(
+		proto->class == NULL          || 
+		proto->func_init == NULL      ||
+		proto->func_configure == NULL || 
+		proto->func_destroy == NULL
+	)
+		return -EINVAL;
+	
+	list_add(&classes, proto);
+	return 0;
+} // }}}
+void               class_unregister        (backend_t *proto){ // {{{
+	list_delete(&classes, proto);
+} // }}}
+
 static void        backend_ref_inc(backend_t *backend){ // {{{
 	pthread_mutex_lock(&backend->refs_mtx);
 		backend->refs++;
@@ -37,7 +67,7 @@ static void        backend_top(backend_t *backend){ // {{{
 static void        backend_untop(backend_t *backend){ // {{{
 	list_delete(&backends_top, backend);
 } // }}}
-void        backend_connect(backend_t *parent, backend_t *child){ // {{{
+void               backend_connect(backend_t *parent, backend_t *child){ // {{{
 	list_add(&parent->childs, child);
 	backend_top(parent);
 	
@@ -47,7 +77,7 @@ void        backend_connect(backend_t *parent, backend_t *child){ // {{{
 	backend_untop(child);
 	list_add(&child->parents, parent);
 } // }}}
-void        backend_disconnect(backend_t *parent, backend_t *child){ // {{{
+void               backend_disconnect(backend_t *parent, backend_t *child){ // {{{
 	backend_untop(parent);
 	list_delete(&parent->childs, child);
 	
@@ -125,7 +155,7 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		
 		backend_connect(backend_curr, backend_prev);
 	}else{
-		if( (class = backend_find_class(backend_class)) == NULL)
+		if( (class = class_find(backend_class)) == NULL)
 			goto error_inval;
 		
 		if( (backend_curr = backend_copy_from_proto(class, backend_name)) == NULL)
@@ -559,27 +589,3 @@ request_actions request_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "custom") == 0) return ACTION_CRWD_CUSTOM;
 	return REQUEST_INVALID;
 } // }}}
-
-void backend_test(backend_t *backend){
-	//backend = (backend_t *)( *(void **)backend );
-	printf("test pass %p\n", backend);
-	printf("test backend->name %s\n",  backend->name);
-	printf("test backend->class %s\n", backend->class);
-	printf("test backend->init %p\n", backend->func_init);
-	printf("test backend->count %p\n", backend->backend_type_crwd.func_count);
-
-	backend->func_init(backend);
-	
-	hash_t test[] = {
-		{ HK(count), DATA_STRING("moo") },
-		hash_end
-	};
-
-	backend->backend_type_crwd.func_count(backend, test);
-}
-
-int backend_test_pass(backend_t *backend, hash_t *request){
-	printf("backend_test_pass: (%p, %p)\n", backend, request);
-	hash_dump(request);
-	return 0;
-}
