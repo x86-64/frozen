@@ -3,13 +3,13 @@
 %include hashkeys.i
 %include datatypes.i
 
-#ifndef SWIGGO
-%include cstring.i
-#else
-#define DEBUG
-#endif
+%{
+#include "libfrozen.h"
+%}
 
 #ifdef SWIGGO
+#define DEBUG // for missing -DDEBUG from configure
+
 %typemap(gotype) f_init,      const void * & "func(uintptr) int"
 %typemap(gotype) f_fork,      const void * & "func(uintptr, uintptr, uintptr) int"
 %typemap(gotype) f_configure, const void * & "func(uintptr, uintptr) int"
@@ -21,10 +21,6 @@
 %typemap(gotype) request_t *, const void * & "uintptr"
 %typemap(gotype) data_t *,    const void * & "uintptr"
 #endif
-
-%{
-#include "libfrozen.h"
-%}
 
 enum request_actions {
 	ACTION_CRWD_CREATE = 1,
@@ -71,6 +67,8 @@ struct backend_t {
 		f_crwd  func_count;
 		f_crwd  func_custom;
 	} backend_type_crwd;
+
+	void *                 userdata;
 };
 
 int                frozen_init(void);
@@ -113,50 +111,16 @@ void               hash_data_find               (hash_t *hash, hash_key_t key, d
 data_type          data_type_from_string        (char *string);
 char *             data_string_from_type        (data_type type);
 void               data_free                    (data_t *data);
-
-#ifndef SWIGGO
-%cstring_output_allocate_size(char **string, size_t *len, );
-#endif
-void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len);
-ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
-ssize_t            data_from_string             (data_t *data, char *type, char *string);
+data_type          data_value_type              (data_t *data);
+void *             data_value_ptr               (data_t *data); // TODO deprecate this
+size_t             data_value_len               (data_t *data); // TODO deprecate this
 
 const char *       describe_error               (intmax_t errnum);
 
-%inline %{
-ssize_t            data_from_string             (data_t *data, char *type, char *string){
-        ssize_t   retval;
-        data_type d_type = data_type_from_string(type);
-        data_t    d_str  = DATA_PTR_STRING(string, strlen(string)+1);
-        
-        data_convert_to_alloc(retval, d_type, data, &d_str, NULL);
-        return retval;
-}
-
-ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string){
-        if( (hash = hash_find(hash, hash_ptr_null)) == NULL)
-                return -EINVAL;
-        
-        hash->key = hash_string_to_key(key);
-        return data_from_string(hash_item_data(hash), type, string);
-}
-
-void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len){
-        data_t     *data;
-        
-        hash_data_find(hash, hash_string_to_key(key), &data, NULL);
-        if(data == NULL)
-                return;
-        
-        *string = data_value_ptr(data);
-        *len    = data_value_len(data);
-}
-
-%}
-
+#ifdef SWIGPERL // {{{
 // temprorary solution, need remove data_convert
 
-#ifdef SWIGPERL
+%include cstring.i
 
 %perlcode %{
 INIT    { frozen_init();  }
@@ -190,15 +154,87 @@ sub query {
 }
 %}
 
-#endif
+%cstring_output_allocate_size(char **string, size_t *len, );
+void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len);
+ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
+ssize_t            data_from_string             (data_t *data, char *type, char *string);
 
-#ifdef SWIGGO
+%inline %{
+ssize_t            data_from_string             (data_t *data, char *type, char *string){
+        ssize_t   retval;
+        data_type d_type = data_type_from_string(type);
+        data_t    d_str  = DATA_PTR_STRING(string, strlen(string)+1);
+        
+        data_convert_to_alloc(retval, d_type, data, &d_str, NULL);
+        return retval;
+}
 
+ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string){
+        if( (hash = hash_find(hash, hash_ptr_null)) == NULL)
+                return -EINVAL;
+        
+        hash->key = hash_string_to_key(key);
+        return data_from_string(hash_item_data(hash), type, string);
+}
+
+void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len){
+        data_t     *data;
+        
+        hash_data_find(hash, hash_string_to_key(key), &data, NULL);
+        if(data == NULL)
+                return;
+        
+        *string = data_value_ptr(data);
+        *len    = data_value_len(data);
+}
+%}
+
+#endif // }}}
+#ifdef SWIGGO // {{{
+
+%typemap(gotype) (char **string, size_t *string_len) "[]string"
+%typemap(in) (char **string, size_t *string_len) {
+	_gostring_ *a = (_gostring_ *)$input.array;
+	$1 = ($1_ltype)&(a[0].p);
+	$2 = ($2_ltype)&(a[0].n);
+}
+
+%inline %{
+
+void go_data_to_string(data_t *data, char **string, size_t *string_len){
+	*string     = data_value_ptr(data);
+	*string_len = data_value_len(data);
+}
+uintmax_t  go_data_to_uint(data_t *data){
+	uintmax_t ret = 0;
+	memcpy(&ret, data_value_ptr(data), MIN(data_value_len(data), sizeof(ret)));
+	return ret;
+}
+
+%}
 
 %insert("go_begin") %{
+	import "unsafe"
+	import "fmt"
+%}
 
-import "unsafe"
-import "fmt"
+%insert("go_wrapper") %{
+
+func Hget(hash uintptr, skey uint64) interface {} {
+	item := Hash_find(hash, skey)
+	if item == 0 {
+		return nil
+	}
+	data := Hash_item_data(item)
+	switch t := Data_value_type(data); t {
+		case TYPE_INTT:    return  int(Go_data_to_uint(data))
+		case TYPE_UINTT:   return uint(Go_data_to_uint(data))
+		case TYPE_RAWT:    s := []string{""}; Go_data_to_string(data, s); return s[0]
+		case TYPE_STRINGT: s := []string{""}; Go_data_to_string(data, s); return s[0]
+		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
+	}
+	return nil
+}
 
 %}
 
@@ -251,6 +287,6 @@ func init() {
 
 %}
 
-#endif
+#endif // }}}
 
 /* vim: set filetype=c: */

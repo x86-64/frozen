@@ -78,10 +78,13 @@ package Frozen;
 *data_type_from_string = *Frozenc::data_type_from_string;
 *data_string_from_type = *Frozenc::data_string_from_type;
 *data_free = *Frozenc::data_free;
+*data_value_type = *Frozenc::data_value_type;
+*data_value_ptr = *Frozenc::data_value_ptr;
+*data_value_len = *Frozenc::data_value_len;
+*describe_error = *Frozenc::describe_error;
 *hash_get = *Frozenc::hash_get;
 *hash_set = *Frozenc::hash_set;
 *data_from_string = *Frozenc::data_from_string;
-*describe_error = *Frozenc::describe_error;
 
 ############# Class : Frozen::backend_t ##############
 
@@ -104,6 +107,8 @@ use vars qw(@ISA %OWNER %ITERATORS %BLESSEDMEMBERS);
 *swig_func_fork_set = *Frozenc::backend_t_func_fork_set;
 *swig_func_destroy_get = *Frozenc::backend_t_func_destroy_get;
 *swig_func_destroy_set = *Frozenc::backend_t_func_destroy_set;
+*swig_userdata_get = *Frozenc::backend_t_userdata_get;
+*swig_userdata_set = *Frozenc::backend_t_userdata_set;
 *swig_backend_type_crwd_get = *Frozenc::backend_t_backend_type_crwd_get;
 *swig_backend_type_crwd_set = *Frozenc::backend_t_backend_type_crwd_set;
 sub new {
@@ -199,6 +204,7 @@ package Frozen;
 *HK_action_request_global = *Frozenc::HK_action_request_global;
 *HK_action_request_one = *Frozenc::HK_action_request_one;
 *HK_action_request_perfork = *Frozenc::HK_action_request_perfork;
+*HK_addr = *Frozenc::HK_addr;
 *HK_after = *Frozenc::HK_after;
 *HK_async = *Frozenc::HK_async;
 *HK_backend = *Frozenc::HK_backend;
@@ -296,6 +302,7 @@ package Frozen;
 *HK_structure = *Frozenc::HK_structure;
 *HK_tick_interval = *Frozenc::HK_tick_interval;
 *HK_type = *Frozenc::HK_type;
+*HK_url = *Frozenc::HK_url;
 *HK_value = *Frozenc::HK_value;
 *HK_value_bits = *Frozenc::HK_value_bits;
 *HK_values = *Frozenc::HK_values;
