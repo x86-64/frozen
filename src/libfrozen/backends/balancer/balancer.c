@@ -193,7 +193,7 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 	hash_data_copy(ret, TYPE_SIZET,   cfg_clone,      config, HK(clone));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_pool_size,  config, HK(pool_size));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_linear_len, config, HK(linear_len));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_fork_req,   config, HK(fork_request));
+	hash_data_copy(ret, TYPE_HASHT,   cfg_fork_req,   config, HK(fork_request)); (void)ret;
 	
 	if(
 		cfg_linear_len > MAX_LINEAR_LEN           ||

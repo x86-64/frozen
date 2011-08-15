@@ -201,7 +201,13 @@ void               hash_get                     (hash_t *hash, char *key, char *
 
 %inline %{
 
+void __morestack(void){}
+
 void go_data_to_string(data_t *data, char **string, size_t *string_len){
+	*string     = data_value_ptr(data);
+	*string_len = MIN(data_value_len(data), strlen(*string));
+}
+void go_data_to_raw(data_t *data, char **string, size_t *string_len){
 	*string     = data_value_ptr(data);
 	*string_len = data_value_len(data);
 }
@@ -229,7 +235,7 @@ func Hget(hash uintptr, skey uint64) interface {} {
 	switch t := Data_value_type(data); t {
 		case TYPE_INTT:    return  int(Go_data_to_uint(data))
 		case TYPE_UINTT:   return uint(Go_data_to_uint(data))
-		case TYPE_RAWT:    s := []string{""}; Go_data_to_string(data, s); return s[0]
+		case TYPE_RAWT:    s := []string{""}; Go_data_to_raw(data, s);    return s[0]
 		case TYPE_STRINGT: s := []string{""}; Go_data_to_string(data, s); return s[0]
 		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
 	}

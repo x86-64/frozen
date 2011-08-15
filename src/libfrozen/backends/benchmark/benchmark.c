@@ -132,7 +132,7 @@ static int benchmark_configure(backend_t *backend, config_t *config){ // {{{
 	char                  *cfg_ondestroy     = NULL;
 	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, cfg_ondestroy,  config, HK(on_destroy));
+	hash_data_copy(ret, TYPE_STRINGT, cfg_ondestroy,  config, HK(on_destroy)); (void)ret;
 	
 	userdata->on_destroy = benchmark_action_from_string(cfg_ondestroy);
 	if(userdata->on_destroy == ACTION_NONE) userdata->on_destroy = ACTION_PRINTF;

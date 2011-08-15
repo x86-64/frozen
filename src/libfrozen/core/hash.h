@@ -72,6 +72,7 @@ API void               hash_data_find               (hash_t *hash, hash_key_t ke
 	if( (__temp = hash_find(_hash,_key)) != NULL){              \
 		data_to_dt(_ret,_type,_dt,(&(__temp->data)),NULL);  \
 	}else{ _ret = -EINVAL; }                                    \
+	(void)_ret; \
 }
 
 #define hash_assign_hash_t(_dst, _src) {        \

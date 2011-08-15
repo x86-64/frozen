@@ -10,7 +10,7 @@ ssize_t   data_buffer_t_read  (data_t *data, data_ctx_t *context, off_t offset, 
 	void     *chunk;
 	
 	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, d_size,   context, HK(size));
+	hash_data_copy(ret, TYPE_SIZET, d_size,   context, HK(size)); (void)ret;
 	
 	if(d_size != 0 && offset >= d_size)
 		return -1; // EOF
@@ -27,7 +27,7 @@ ssize_t   data_buffer_t_write (data_t *data, data_ctx_t *context, off_t offset, 
 	ssize_t  ret;
 	off_t    d_offset = 0;
 	
-	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset));
+	hash_data_copy(ret, TYPE_OFFT,  d_offset, context, HK(offset)); (void)ret;
 	
 	buffer_write((buffer_t *)data->data_ptr, d_offset + offset, buffer, size);
 	

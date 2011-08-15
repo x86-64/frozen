@@ -22,7 +22,7 @@ static ssize_t       data_def_read          (data_t *data, data_ctx_t *context, 
 	// TODO SECURITY
 
 	hash_data_copy(ret, TYPE_OFFT,  d_offset,  context, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, d_size,    context, HK(size));
+	hash_data_copy(ret, TYPE_SIZET, d_size,    context, HK(size)); (void)ret;
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters
@@ -47,7 +47,7 @@ static ssize_t       data_def_write         (data_t *data, data_ctx_t *context, 
 	DT_SIZET     d_size   = data->data_size;
 	
 	hash_data_copy(ret, TYPE_OFFT,  d_offset,  context, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, d_size,    context, HK(size));
+	hash_data_copy(ret, TYPE_SIZET, d_size,    context, HK(size)); (void)ret;
 	
 	if(d_offset > data->data_size || d_size > data->data_size || d_offset + d_size > data->data_size)
 		return -EINVAL;  // invalid context parameters

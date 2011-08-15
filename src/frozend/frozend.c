@@ -229,29 +229,36 @@ int  main (int argc, char **argv){ // {{{
 //   go modules {{{
 int go_inited = 0;
 
-void module_load_go(void *module_handle){ // {{{
+void module_init_go(void){
 	void *libgo_ptr;
-	void (*goinitmain)(void);
-	void (*gomain)(void);
 	void (*libgo_mallocinit)(void);
-	void (*libgo_goroutineinit)(void);
+	void (*libgo_goroutineinit)(void *);
 	void (*libgo_gc)(void);
-	
+	void (*libgo_sig)(void);
+	char t[20];
+
 	if(go_inited == 0){
-		if( !(libgo_ptr = dlopen("libgo.so",            RTLD_LAZY)) )
+		if( !(libgo_ptr = dlopen("libgo.so",            RTLD_NOW | RTLD_GLOBAL )) )
 			return;
 		
 		// TODO error handling
 		*(void **)(&libgo_mallocinit)    = dlsym(libgo_ptr, "runtime_mallocinit");
 		*(void **)(&libgo_goroutineinit) = dlsym(libgo_ptr, "__go_gc_goroutine_init");
+		*(void **)(&libgo_sig)           = dlsym(libgo_ptr, "__initsig");
 		*(void **)(&libgo_gc)            = dlsym(libgo_ptr, "__go_enable_gc");
 		
 		(*libgo_mallocinit)();
-		(*libgo_goroutineinit)();
-		(*libgo_gc)();
+		(*libgo_goroutineinit)(&t);
+		(*libgo_sig)();
+		//(*libgo_gc)();
 		
 		go_inited = 1;
 	}
+}
+
+void module_load_go(void *module_handle){ // {{{
+	void (*goinitmain)(void);
+	void (*gomain)(void);
 	
 	*(void **)(&goinitmain)          = dlsym(module_handle, "__go_init_main");
 	*(void **)(&gomain)              = dlsym(module_handle, "main.main");
@@ -271,6 +278,8 @@ void modules_load(void){ // {{{
 	struct dirent         *dir;
 	char                   module_path[4096];
 	void                  *module_handle;
+	
+	module_init_go();
 
 	if((modules_dir = opendir(opt_modules_dir)) == NULL)
 		return;
@@ -286,7 +295,7 @@ void modules_load(void){ // {{{
 			continue; // truncated path
 		
 		dlerror();
-		if( (module_handle = dlopen(module_path, RTLD_LAZY)) == NULL){
+		if( (module_handle = dlopen(module_path, RTLD_NOW)) == NULL){
 			printf("warning: file '%s' failed: %s\n", dir->d_name, dlerror());
 			continue;
 		}

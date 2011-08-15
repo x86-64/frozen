@@ -30,11 +30,10 @@ static ssize_t test_rewrite(char *rules, request_t *request){
 
 static size_t test_diff_rewrite(char *rules, request_t *request){
 	off_t   key1, key2;
-	ssize_t ret;
 	
-	ret = test_rewrite(rules, request);
+	test_rewrite(rules, request);
 		key1 = buffer;
-	ret = test_rewrite(rules, request);
+	test_rewrite(rules, request);
 		key2 = buffer;
 	
 	return (key2-key1);

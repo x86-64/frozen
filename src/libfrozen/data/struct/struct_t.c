@@ -137,7 +137,7 @@ size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buff
 	iter_ctx.ctx         = ctx;
 	iter_ctx.curr_offset = 0;
 	
-	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset)); (void)ret;
 	if(iter_ctx.curr_offset >= buffer->data_size)
 		return 0;
 	// TODO size
@@ -158,7 +158,7 @@ size_t    struct_unpack_copy  (struct_t *structure, request_t *values, data_t *b
 	iter_ctx.ctx         = ctx;
 	iter_ctx.curr_offset = 0;
 	
-	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset));
+	hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset)); (void)ret;
 	if(iter_ctx.curr_offset >= buffer->data_size)
 		return 0;
 	// TODO size

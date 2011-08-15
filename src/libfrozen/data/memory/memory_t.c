@@ -151,7 +151,7 @@ ssize_t   data_memory_t_read(data_t *data, data_ctx_t *ctx, off_t coffset, void 
 	size_t                 size              = __MAX(size_t);
 	
 	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
+	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size)); (void)ret;
 	
 	offset += coffset;
 	

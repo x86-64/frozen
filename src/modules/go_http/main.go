@@ -3,7 +3,7 @@ package main
 import (
 	"io"
 	"os"
-	"net"
+	//"net"
 	"log"
 	"http"
 	f "gofrozen"
@@ -25,11 +25,15 @@ type myHttp struct {
 		//})
 		mux.HandleFunc("/", handleFunc)
 
-		l, e := net.Listen("tcp", addr)
-		if e != nil {
-			return e
+		//l, e := net.Listen("tcp", addr)
+		//if e != nil {
+		//	return e
+		//}
+		//go http.Serve(l, mux)
+		err := http.ListenAndServe(addr, mux)
+		if err != nil {
+			log.Print(err)
 		}
-		go http.Serve(l, mux)
 		return nil
 	}
 
@@ -43,7 +47,7 @@ func http_init(backend uintptr) int{
 }
 func http_configure(backend uintptr, config uintptr) int{
 	addr, ok := f.Hget(config, f.HK_addr).(string)
-	log.Printf("addr %v", addr)
+	log.Printf("addr %v", []byte(addr))
 
 	srv := &myHttp{ backend: backend }
 	if e := srv.Run(addr); e != nil {
@@ -64,6 +68,14 @@ func main(){
 	g.SetFunc_configure(http_configure)
 	g.SetFunc_destroy(http_destroy)
 	f.Class_register(g.Swigcptr())
+	
+	//srv := &myHttp{ }
+	//if e := srv.Run(":12345"); e != nil {
+	//	log.Print("Failed %v", e)
+	//	return
+	//}
+	//log.Print("Ok")
+	
 	return
 }
 
