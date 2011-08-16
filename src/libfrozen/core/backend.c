@@ -32,10 +32,7 @@ exit:
 } // }}}
 ssize_t            class_register          (backend_t *proto){ // {{{
 	if(
-		proto->class == NULL          || 
-		proto->func_init == NULL      ||
-		proto->func_configure == NULL || 
-		proto->func_destroy == NULL
+		proto->class == NULL
 	)
 		return -EINVAL;
 	
@@ -164,10 +161,10 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		backend_curr->config     = hash_copy(backend_cfg);
 		backend_connect(backend_curr, backend_prev);
 		
-		if(backend_curr->func_init(backend_curr) != 0)
+		if(backend_curr->func_init != NULL && backend_curr->func_init(backend_curr) != 0)
 			goto error_init;
 		
-		if(backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
+		if(backend_curr->func_configure != NULL && backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
 			goto error_configure;
 	}
 
@@ -182,7 +179,8 @@ recurse:
 		return NULL;
 	
 error_configure:
-	backend_curr->func_destroy(backend_curr);
+	if(backend_curr->func_destroy != NULL)
+		backend_curr->func_destroy(backend_curr);
 	
 error_init:
 	backend_disconnect(backend_curr, backend_prev);
@@ -228,21 +226,22 @@ static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // 
 	for(i=0; i<lsz; i++)
 		backend_connect(backend_curr, childs_list[i]);
 	
-	if(backend_curr->func_init(backend_curr) != 0)
+	if(backend_curr->func_init != NULL && backend_curr->func_init(backend_curr) != 0)
 		goto error_init;
 	
 	if(backend_curr->func_fork != NULL){
 		if(backend_curr->func_fork(backend_curr, backend, request) != 0)
 			goto error_configure;
 	}else{
-		if(backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
+		if(backend_curr->func_configure != NULL && backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
 			goto error_configure;
 	}
 	
 	return backend_curr;
 	
 error_configure:
-	backend_curr->func_destroy(backend_curr);
+	if(backend_curr->func_destroy != NULL)
+		backend_curr->func_destroy(backend_curr);
 	
 error_init:
 	for(i=0; i<lsz; i++)
@@ -296,9 +295,8 @@ char *          backend_get_name     (backend_t *backend){ // {{{
 	return backend->name;
 } // }}}
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
-	uint32_t               r_action;
 	f_crwd                 func              = NULL;
+	ssize_t                ret;
 	data_t                 ret_data          = DATA_PTR_SIZET(&ret);
 	data_t                *ret_req;
 	data_ctx_t            *ret_req_ctx;
@@ -306,19 +304,31 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 	if(backend == NULL || request == NULL)
 		return -ENOSYS;
 	
-	hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
+	do {
+		if( (backend->supported_api & API_HASH) != 0){
+			func = backend->backend_type_hash.func_handler;
+			break;
+		}
+		
+		if( (backend->supported_api & API_CRWD) != 0){
+			uint32_t               r_action;
+			
+			hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
+			
+			switch(r_action){
+				case ACTION_CRWD_CREATE: func = backend->backend_type_crwd.func_create; break;
+				case ACTION_CRWD_READ:   func = backend->backend_type_crwd.func_get   ; break;
+				case ACTION_CRWD_WRITE:  func = backend->backend_type_crwd.func_set   ; break;
+				case ACTION_CRWD_DELETE: func = backend->backend_type_crwd.func_delete; break;
+				case ACTION_CRWD_MOVE:   func = backend->backend_type_crwd.func_move  ; break;
+				case ACTION_CRWD_COUNT:  func = backend->backend_type_crwd.func_count ; break;
+				case ACTION_CRWD_CUSTOM: func = backend->backend_type_crwd.func_custom; break;
+				default:
+					return -EINVAL;
+			};
+		}
+	}while(0);
 	
-	switch(r_action){
-		case ACTION_CRWD_CREATE: func = backend->backend_type_crwd.func_create; break;
-		case ACTION_CRWD_READ:   func = backend->backend_type_crwd.func_get   ; break;
-		case ACTION_CRWD_WRITE:  func = backend->backend_type_crwd.func_set   ; break;
-		case ACTION_CRWD_DELETE: func = backend->backend_type_crwd.func_delete; break;
-		case ACTION_CRWD_MOVE:   func = backend->backend_type_crwd.func_move  ; break;
-		case ACTION_CRWD_COUNT:  func = backend->backend_type_crwd.func_count ; break;
-		case ACTION_CRWD_CUSTOM: func = backend->backend_type_crwd.func_custom; break;
-		default:
-			return -EINVAL;
-	};	
 	if(func == NULL){
 		ret = backend_pass(backend, request);
 		goto exit;
@@ -370,7 +380,8 @@ void            backend_destroy      (backend_t *backend){ // {{{
 		return;
 	
 	// call destroy
-	backend->func_destroy(backend);
+	if(backend->func_destroy != NULL)
+		backend->func_destroy(backend);
 	
 	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
 		backend_destroy(curr);

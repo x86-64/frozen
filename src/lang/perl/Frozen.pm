@@ -111,6 +111,8 @@ use vars qw(@ISA %OWNER %ITERATORS %BLESSEDMEMBERS);
 *swig_userdata_set = *Frozenc::backend_t_userdata_set;
 *swig_backend_type_crwd_get = *Frozenc::backend_t_backend_type_crwd_get;
 *swig_backend_type_crwd_set = *Frozenc::backend_t_backend_type_crwd_set;
+*swig_backend_type_hash_get = *Frozenc::backend_t_backend_type_hash_get;
+*swig_backend_type_hash_set = *Frozenc::backend_t_backend_type_hash_set;
 sub new {
     my $pkg = shift;
     my $self = Frozenc::new_backend_t(@_);
@@ -124,6 +126,45 @@ sub DESTROY {
     delete $ITERATORS{$self};
     if (exists $OWNER{$self}) {
         Frozenc::delete_backend_t($self);
+        delete $OWNER{$self};
+    }
+}
+
+sub DISOWN {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    delete $OWNER{$ptr};
+}
+
+sub ACQUIRE {
+    my $self = shift;
+    my $ptr = tied(%$self);
+    $OWNER{$ptr} = 1;
+}
+
+
+############# Class : Frozen::backend_t_backend_type_hash ##############
+
+package Frozen::backend_t_backend_type_hash;
+use vars qw(@ISA %OWNER %ITERATORS %BLESSEDMEMBERS);
+@ISA = qw( Frozen );
+%OWNER = ();
+%ITERATORS = ();
+*swig_func_handler_get = *Frozenc::backend_t_backend_type_hash_func_handler_get;
+*swig_func_handler_set = *Frozenc::backend_t_backend_type_hash_func_handler_set;
+sub new {
+    my $pkg = shift;
+    my $self = Frozenc::new_backend_t_backend_type_hash(@_);
+    bless $self, $pkg if defined($self);
+}
+
+sub DESTROY {
+    return unless $_[0]->isa('HASH');
+    my $self = tied(%{$_[0]});
+    return unless defined $self;
+    delete $ITERATORS{$self};
+    if (exists $OWNER{$self}) {
+        Frozenc::delete_backend_t_backend_type_hash($self);
         delete $OWNER{$self};
     }
 }
@@ -340,6 +381,9 @@ package Frozen;
 *ACTION_CRWD_COUNT = *Frozenc::ACTION_CRWD_COUNT;
 *ACTION_CRWD_CUSTOM = *Frozenc::ACTION_CRWD_CUSTOM;
 *REQUEST_INVALID = *Frozenc::REQUEST_INVALID;
+*API_HASH = *Frozenc::API_HASH;
+*API_CRWD = *Frozenc::API_CRWD;
+*API_FAST = *Frozenc::API_FAST;
 
 INIT    { frozen_init();  }
 DESTROY { frozen_destroy(); }

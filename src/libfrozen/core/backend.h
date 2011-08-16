@@ -16,9 +16,9 @@ enum request_actions {
 };
 
 typedef enum api_types {
+	API_HASH,
 	API_CRWD,
 	API_FAST
-	
 } api_types;
 
 typedef int     (*f_init)      (backend_t *);
@@ -57,8 +57,10 @@ struct backend_t {
 		f_fast_write   func_fast_write;
 		f_fast_delete  func_fast_delete;
 	} backend_type_fast;
-	
-	
+	struct {
+		f_crwd  func_handler;
+	} backend_type_hash;
+
 	void *                 userdata;
 	
 	uintmax_t              refs;

@@ -33,6 +33,11 @@ enum request_actions {
 	
 	REQUEST_INVALID = 0
 };
+typedef enum api_types {
+	API_HASH,
+	API_CRWD,
+	API_FAST
+} api_types;
 
 typedef hash_t                   request_t;
 typedef signed int               ssize_t;
@@ -52,7 +57,7 @@ struct backend_t {
 	char                  *name;
 	char                  *class;
 	
-	uintmax_t              supported_api;
+	enum api_types         supported_api;
 	f_init                 func_init;
 	f_configure            func_configure;
 	f_fork                 func_fork;
@@ -67,6 +72,9 @@ struct backend_t {
 		f_crwd  func_count;
 		f_crwd  func_custom;
 	} backend_type_crwd;
+	struct {
+		f_crwd  func_handler;
+	} backend_type_hash;
 
 	void *                 userdata;
 };

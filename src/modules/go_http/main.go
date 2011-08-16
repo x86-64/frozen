@@ -33,9 +33,6 @@ type myHttp struct {
 		return nil
 	}
 
-func http_init(backend uintptr) int{
-	return 0
-}
 func http_configure(backend uintptr, config uintptr) int{
 	addr, ok := f.Hget(config, f.HK_addr).(string)
 
@@ -46,16 +43,12 @@ func http_configure(backend uintptr, config uintptr) int{
 	}
 	return 0
 }
-func http_destroy(backend uintptr) int{
-	return 0
-}
 
 func main(){
 	g := f.NewBackend_t()
 	g.SetClass("go_http")
-	g.SetFunc_init(http_init)
+	g.SetSupported_api(f.API_HASH)
 	g.SetFunc_configure(http_configure)
-	g.SetFunc_destroy(http_destroy)
 	f.Class_register(g.Swigcptr())
 	return
 }

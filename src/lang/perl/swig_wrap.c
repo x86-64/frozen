@@ -1500,25 +1500,27 @@ SWIG_Perl_SetModule(swig_module_info *module) {
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_backend_t swig_types[0]
-#define SWIGTYPE_p_backend_t_backend_type_crwd swig_types[1]
-#define SWIGTYPE_p_char swig_types[2]
-#define SWIGTYPE_p_data_t swig_types[3]
-#define SWIGTYPE_p_data_type swig_types[4]
-#define SWIGTYPE_p_f_p_backend_t__int swig_types[5]
-#define SWIGTYPE_p_f_p_backend_t_p_backend_t_p_hash_t__int swig_types[6]
-#define SWIGTYPE_p_f_p_backend_t_p_hash_t__int swig_types[7]
-#define SWIGTYPE_p_hash_t swig_types[8]
-#define SWIGTYPE_p_int swig_types[9]
-#define SWIGTYPE_p_long_long swig_types[10]
-#define SWIGTYPE_p_p_char swig_types[11]
-#define SWIGTYPE_p_p_data_ctx_t swig_types[12]
-#define SWIGTYPE_p_p_data_t swig_types[13]
-#define SWIGTYPE_p_unsigned_int swig_types[14]
-#define SWIGTYPE_p_unsigned_long_long swig_types[15]
-#define SWIGTYPE_p_void swig_types[16]
-static swig_type_info *swig_types[18];
-static swig_module_info swig_module = {swig_types, 17, 0, 0, 0, 0};
+#define SWIGTYPE_p_api_types swig_types[0]
+#define SWIGTYPE_p_backend_t swig_types[1]
+#define SWIGTYPE_p_backend_t_backend_type_crwd swig_types[2]
+#define SWIGTYPE_p_backend_t_backend_type_hash swig_types[3]
+#define SWIGTYPE_p_char swig_types[4]
+#define SWIGTYPE_p_data_t swig_types[5]
+#define SWIGTYPE_p_data_type swig_types[6]
+#define SWIGTYPE_p_f_p_backend_t__int swig_types[7]
+#define SWIGTYPE_p_f_p_backend_t_p_backend_t_p_hash_t__int swig_types[8]
+#define SWIGTYPE_p_f_p_backend_t_p_hash_t__int swig_types[9]
+#define SWIGTYPE_p_hash_t swig_types[10]
+#define SWIGTYPE_p_int swig_types[11]
+#define SWIGTYPE_p_long_long swig_types[12]
+#define SWIGTYPE_p_p_char swig_types[13]
+#define SWIGTYPE_p_p_data_ctx_t swig_types[14]
+#define SWIGTYPE_p_p_data_t swig_types[15]
+#define SWIGTYPE_p_unsigned_int swig_types[16]
+#define SWIGTYPE_p_unsigned_long_long swig_types[17]
+#define SWIGTYPE_p_void swig_types[18]
+static swig_type_info *swig_types[20];
+static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1694,17 +1696,6 @@ SWIG_FromCharPtr(const char *cptr)
 }
 
 
-#include <stdlib.h>
-#ifdef _MSC_VER
-# ifndef strtoull
-#  define strtoull _strtoui64
-# endif
-# ifndef strtoll
-#  define strtoll _strtoi64
-# endif
-#endif
-
-
 SWIGINTERN int
 SWIG_AsVal_double SWIG_PERL_DECL_ARGS_2(SV *obj, double *val)
 {
@@ -1773,27 +1764,19 @@ SWIG_CanCastAsInteger(double *d, double min, double max) {
 
 
 SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long long *val)
-{ 
-  if (SvUOK(obj)) {
-    if (val) *val = SvUV(obj);
+SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
+{
+  if (SvIOK(obj)) {
+    if (val) *val = SvIV(obj);
     return SWIG_OK;
-  } else  if (SvIOK(obj)) {
-    long v = SvIV(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
   } else {
     int dispatch = 0;
     const char *nptr = SvPV_nolen(obj);
     if (nptr) {
       char *endptr;
-      unsigned long long v;
+      long v;
       errno = 0;
-      v = strtoull(nptr, &endptr,0);
+      v = strtol(nptr, &endptr,0);
       if (errno == ERANGE) {
 	errno = 0;
 	return SWIG_OverflowError;
@@ -1805,16 +1788,31 @@ SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long
       }
     }
     if (!dispatch) {
-      const double mant_max = 1LL << DBL_MANT_DIG;
       double d;
       int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
-	if (val) *val = (unsigned long long)(d);
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
+	if (val) *val = (long)(d);
 	return res;
       }
     }
   }
   return SWIG_TypeError;
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_int SWIG_PERL_DECL_ARGS_2(SV * obj, int *val)
+{
+  long v;
+  int res = SWIG_AsVal_long SWIG_PERL_CALL_ARGS_2(obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v < INT_MIN || v > INT_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = (int)(v);
+    }
+  }  
+  return res;
 }
 
 typedef struct {
@@ -1826,6 +1824,11 @@ typedef struct {
   f_crwd  func_count;
   f_crwd  func_custom;
 } backend_t_backend_type_crwd;
+
+
+typedef struct {
+  f_crwd  func_handler;
+} backend_t_backend_type_hash;
 
 
 
@@ -1884,6 +1887,63 @@ SWIG_AsVal_size_t SWIG_PERL_DECL_ARGS_2(SV * obj, size_t *val)
 }
 
 
+#include <stdlib.h>
+#ifdef _MSC_VER
+# ifndef strtoull
+#  define strtoull _strtoui64
+# endif
+# ifndef strtoll
+#  define strtoll _strtoi64
+# endif
+#endif
+
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_DECL_ARGS_2(SV *obj, unsigned long long *val)
+{ 
+  if (SvUOK(obj)) {
+    if (val) *val = SvUV(obj);
+    return SWIG_OK;
+  } else  if (SvIOK(obj)) {
+    long v = SvIV(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
+  } else {
+    int dispatch = 0;
+    const char *nptr = SvPV_nolen(obj);
+    if (nptr) {
+      char *endptr;
+      unsigned long long v;
+      errno = 0;
+      v = strtoull(nptr, &endptr,0);
+      if (errno == ERANGE) {
+	errno = 0;
+	return SWIG_OverflowError;
+      } else {
+	if (*endptr == '\0') {
+	  if (val) *val = v;
+	  return SWIG_Str2NumCast(SWIG_OK);
+	}
+      }
+    }
+    if (!dispatch) {
+      const double mant_max = 1LL << DBL_MANT_DIG;
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
+	if (val) *val = (unsigned long long)(d);
+	return res;
+      }
+    }
+  }
+  return SWIG_TypeError;
+}
+
+
 SWIGINTERNINLINE SV *
 SWIG_From_unsigned_SS_long  SWIG_PERL_DECL_ARGS_1(unsigned long value)
 {    
@@ -1897,59 +1957,6 @@ SWIGINTERNINLINE SV *
 SWIG_From_size_t  SWIG_PERL_DECL_ARGS_1(size_t value)
 {    
   return SWIG_From_unsigned_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long)(value));
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_long SWIG_PERL_DECL_ARGS_2(SV *obj, long* val)
-{
-  if (SvIOK(obj)) {
-    if (val) *val = SvIV(obj);
-    return SWIG_OK;
-  } else {
-    int dispatch = 0;
-    const char *nptr = SvPV_nolen(obj);
-    if (nptr) {
-      char *endptr;
-      long v;
-      errno = 0;
-      v = strtol(nptr, &endptr,0);
-      if (errno == ERANGE) {
-	errno = 0;
-	return SWIG_OverflowError;
-      } else {
-	if (*endptr == '\0') {
-	  if (val) *val = v;
-	  return SWIG_Str2NumCast(SWIG_OK);
-	}
-      }
-    }
-    if (!dispatch) {
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double SWIG_PERL_CALL_ARGS_2(obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
-	if (val) *val = (long)(d);
-	return res;
-      }
-    }
-  }
-  return SWIG_TypeError;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_int SWIG_PERL_DECL_ARGS_2(SV * obj, int *val)
-{
-  long v;
-  int res = SWIG_AsVal_long SWIG_PERL_CALL_ARGS_2(obj, &v);
-  if (SWIG_IsOK(res)) {
-    if ((v < INT_MIN || v > INT_MAX)) {
-      return SWIG_OverflowError;
-    } else {
-      if (val) *val = (int)(v);
-    }
-  }  
-  return res;
 }
 
 
@@ -2197,10 +2204,10 @@ XS(_wrap_backend_t_class_get) {
 XS(_wrap_backend_t_supported_api_set) {
   {
     struct backend_t *arg1 = (struct backend_t *) 0 ;
-    uintmax_t arg2 ;
+    enum api_types arg2 ;
     void *argp1 = 0 ;
     int res1 = 0 ;
-    unsigned long long val2 ;
+    int val2 ;
     int ecode2 = 0 ;
     int argvi = 0;
     dXSARGS;
@@ -2213,11 +2220,11 @@ XS(_wrap_backend_t_supported_api_set) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_supported_api_set" "', argument " "1"" of type '" "struct backend_t *""'"); 
     }
     arg1 = (struct backend_t *)(argp1);
-    ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long SWIG_PERL_CALL_ARGS_2(ST(1), &val2);
+    ecode2 = SWIG_AsVal_int SWIG_PERL_CALL_ARGS_2(ST(1), &val2);
     if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "backend_t_supported_api_set" "', argument " "2"" of type '" "uintmax_t""'");
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "backend_t_supported_api_set" "', argument " "2"" of type '" "enum api_types""'");
     } 
-    arg2 = (uintmax_t)(val2);
+    arg2 = (enum api_types)(val2);
     if (arg1) (arg1)->supported_api = arg2;
     ST(argvi) = sv_newmortal();
     
@@ -2237,7 +2244,7 @@ XS(_wrap_backend_t_supported_api_get) {
     void *argp1 = 0 ;
     int res1 = 0 ;
     int argvi = 0;
-    uintmax_t result;
+    enum api_types result;
     dXSARGS;
     
     if ((items < 1) || (items > 1)) {
@@ -2248,8 +2255,8 @@ XS(_wrap_backend_t_supported_api_get) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_supported_api_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
     }
     arg1 = (struct backend_t *)(argp1);
-    result = (uintmax_t) ((arg1)->supported_api);
-    ST(argvi) = SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(result)); argvi++ ;
+    result = (enum api_types) ((arg1)->supported_api);
+    ST(argvi) = SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(result)); argvi++ ;
     
     XSRETURN(argvi);
   fail:
@@ -2606,6 +2613,34 @@ XS(_wrap_backend_t_backend_type_crwd_get) {
 }
 
 
+XS(_wrap_backend_t_backend_type_hash_get) {
+  {
+    struct backend_t *arg1 = (struct backend_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    backend_t_backend_type_hash *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_hash_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_hash_get" "', argument " "1"" of type '" "struct backend_t *""'"); 
+    }
+    arg1 = (struct backend_t *)(argp1);
+    result = (backend_t_backend_type_hash *)& ((arg1)->backend_type_hash);
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t_backend_type_hash, 0 | SWIG_SHADOW); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_new_backend_t) {
   {
     int argvi = 0;
@@ -2640,6 +2675,115 @@ XS(_wrap_delete_backend_t) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_backend_t" "', argument " "1"" of type '" "struct backend_t *""'"); 
     }
     arg1 = (struct backend_t *)(argp1);
+    free((char *) arg1);
+    ST(argvi) = sv_newmortal();
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_hash_func_handler_set) {
+  {
+    backend_t_backend_type_hash *arg1 = (backend_t_backend_type_hash *) 0 ;
+    f_crwd arg2 = (f_crwd) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: backend_t_backend_type_hash_func_handler_set(self,func_handler);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_hash, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_hash_func_handler_set" "', argument " "1"" of type '" "backend_t_backend_type_hash *""'"); 
+    }
+    arg1 = (backend_t_backend_type_hash *)(argp1);
+    {
+      int res = SWIG_ConvertFunctionPtr(ST(1), (void**)(&arg2), SWIGTYPE_p_f_p_backend_t_p_hash_t__int);
+      if (!SWIG_IsOK(res)) {
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "backend_t_backend_type_hash_func_handler_set" "', argument " "2"" of type '" "f_crwd""'"); 
+      }
+    }
+    if (arg1) (arg1)->func_handler = arg2;
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_backend_t_backend_type_hash_func_handler_get) {
+  {
+    backend_t_backend_type_hash *arg1 = (backend_t_backend_type_hash *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    f_crwd result;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: backend_t_backend_type_hash_func_handler_get(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_hash, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "backend_t_backend_type_hash_func_handler_get" "', argument " "1"" of type '" "backend_t_backend_type_hash *""'"); 
+    }
+    arg1 = (backend_t_backend_type_hash *)(argp1);
+    result = (f_crwd) ((arg1)->func_handler);
+    ST(argvi) = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p_backend_t_p_hash_t__int); argvi++ ;
+    
+    XSRETURN(argvi);
+  fail:
+    
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_new_backend_t_backend_type_hash) {
+  {
+    int argvi = 0;
+    backend_t_backend_type_hash *result = 0 ;
+    dXSARGS;
+    
+    if ((items < 0) || (items > 0)) {
+      SWIG_croak("Usage: new_backend_t_backend_type_hash();");
+    }
+    result = (backend_t_backend_type_hash *)calloc(1, sizeof(backend_t_backend_type_hash));
+    ST(argvi) = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_backend_t_backend_type_hash, SWIG_OWNER | SWIG_SHADOW); argvi++ ;
+    XSRETURN(argvi);
+  fail:
+    SWIG_croak_null();
+  }
+}
+
+
+XS(_wrap_delete_backend_t_backend_type_hash) {
+  {
+    backend_t_backend_type_hash *arg1 = (backend_t_backend_type_hash *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 1) || (items > 1)) {
+      SWIG_croak("Usage: delete_backend_t_backend_type_hash(self);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_backend_t_backend_type_hash, SWIG_POINTER_DISOWN |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_backend_t_backend_type_hash" "', argument " "1"" of type '" "backend_t_backend_type_hash *""'"); 
+    }
+    arg1 = (backend_t_backend_type_hash *)(argp1);
     free((char *) arg1);
     ST(argvi) = sv_newmortal();
     
@@ -4280,8 +4424,10 @@ XS(_wrap_data_from_string) {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static swig_type_info _swigt__p_api_types = {"_p_api_types", "enum api_types *|api_types *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_backend_t = {"_p_backend_t", "struct backend_t *|backend_t *", 0, 0, (void*)"Frozen::backend_t", 0};
 static swig_type_info _swigt__p_backend_t_backend_type_crwd = {"_p_backend_t_backend_type_crwd", "backend_t_backend_type_crwd *", 0, 0, (void*)"Frozen::backend_t_backend_type_crwd", 0};
+static swig_type_info _swigt__p_backend_t_backend_type_hash = {"_p_backend_t_backend_type_hash", "backend_t_backend_type_hash *", 0, 0, (void*)"Frozen::backend_t_backend_type_hash", 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_t = {"_p_data_t", "data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_data_type = {"_p_data_type", "enum data_type *|data_type *", 0, 0, (void*)0, 0};
@@ -4299,8 +4445,10 @@ static swig_type_info _swigt__p_unsigned_long_long = {"_p_unsigned_long_long", "
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
+  &_swigt__p_api_types,
   &_swigt__p_backend_t,
   &_swigt__p_backend_t_backend_type_crwd,
+  &_swigt__p_backend_t_backend_type_hash,
   &_swigt__p_char,
   &_swigt__p_data_t,
   &_swigt__p_data_type,
@@ -4318,8 +4466,10 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_void,
 };
 
+static swig_cast_info _swigc__p_api_types[] = {  {&_swigt__p_api_types, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_backend_t[] = {  {&_swigt__p_backend_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_backend_t_backend_type_crwd[] = {  {&_swigt__p_backend_t_backend_type_crwd, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_backend_t_backend_type_hash[] = {  {&_swigt__p_backend_t_backend_type_hash, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_data_t[] = {  {&_swigt__p_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_data_type[] = {  {&_swigt__p_data_type, 0, 0, 0},{0, 0, 0, 0}};
@@ -4337,8 +4487,10 @@ static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_l
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
+  _swigc__p_api_types,
   _swigc__p_backend_t,
   _swigc__p_backend_t_backend_type_crwd,
+  _swigc__p_backend_t_backend_type_hash,
   _swigc__p_char,
   _swigc__p_data_t,
   _swigc__p_data_type,
@@ -4386,8 +4538,13 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::backend_t_userdata_set", _wrap_backend_t_userdata_set},
 {"Frozenc::backend_t_userdata_get", _wrap_backend_t_userdata_get},
 {"Frozenc::backend_t_backend_type_crwd_get", _wrap_backend_t_backend_type_crwd_get},
+{"Frozenc::backend_t_backend_type_hash_get", _wrap_backend_t_backend_type_hash_get},
 {"Frozenc::new_backend_t", _wrap_new_backend_t},
 {"Frozenc::delete_backend_t", _wrap_delete_backend_t},
+{"Frozenc::backend_t_backend_type_hash_func_handler_set", _wrap_backend_t_backend_type_hash_func_handler_set},
+{"Frozenc::backend_t_backend_type_hash_func_handler_get", _wrap_backend_t_backend_type_hash_func_handler_get},
+{"Frozenc::new_backend_t_backend_type_hash", _wrap_new_backend_t_backend_type_hash},
+{"Frozenc::delete_backend_t_backend_type_hash", _wrap_delete_backend_t_backend_type_hash},
 {"Frozenc::backend_t_backend_type_crwd_func_create_set", _wrap_backend_t_backend_type_crwd_func_create_set},
 {"Frozenc::backend_t_backend_type_crwd_func_create_get", _wrap_backend_t_backend_type_crwd_func_create_get},
 {"Frozenc::backend_t_backend_type_crwd_func_set_set", _wrap_backend_t_backend_type_crwd_func_set_set},
@@ -5454,7 +5611,23 @@ XS(SWIG_init) {
     sv_setsv(sv, SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(REQUEST_INVALID)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "API_HASH", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(API_HASH)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "API_CRWD", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(API_CRWD)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "API_FAST", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_int  SWIG_PERL_CALL_ARGS_1((int)(API_FAST)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
   SWIG_TypeClientData(SWIGTYPE_p_backend_t, (void*) "Frozen::backend_t");
+  SWIG_TypeClientData(SWIGTYPE_p_backend_t_backend_type_hash, (void*) "Frozen::backend_t_backend_type_hash");
   SWIG_TypeClientData(SWIGTYPE_p_backend_t_backend_type_crwd, (void*) "Frozen::backend_t_backend_type_crwd");
   ST(0) = &PL_sv_yes;
   XSRETURN(1);
