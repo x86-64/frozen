@@ -265,7 +265,7 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_ptr  unsafe.Pointer
         var data_len  uint64
 
-        if(sdata_type == TYPE_VOIDT){
+        if(sdata_type == TYPE_GOINTERFACET){
 		data_ptr, data_len = unsafe.Pointer(reflect_ToPtr(s)), 0
 	}else{
 		switch v := s.(type) {
@@ -284,7 +284,7 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
 			default: fmt.Printf("Hitem: unexpected type %T\n", v)
 		}
 	}
-        return Hskel{ skey, sdata_type, data_ptr, data_len }
+	return Hskel{ skey, sdata_type, data_ptr, data_len }
 }
 
 func Hget(hash uintptr, skey uint64) interface {} {
@@ -294,11 +294,11 @@ func Hget(hash uintptr, skey uint64) interface {} {
 	}
 	data := Hash_item_data(item)
 	switch t := Data_value_type(data); t {
-		case TYPE_VOIDT:   return reflect_FromPtr( Data_value_ptr(data) )
-		case TYPE_INTT:    return  int(Go_data_to_uint(data))
-		case TYPE_UINTT:   return uint(Go_data_to_uint(data))
-		case TYPE_RAWT:    s := []string{""}; Go_data_to_raw(data, s);    return s[0]
-		case TYPE_STRINGT: s := []string{""}; Go_data_to_string(data, s); return s[0]
+		case TYPE_GOINTERFACET: return reflect_FromPtr( Data_value_ptr(data) )
+		case TYPE_INTT:         return  int(Go_data_to_uint(data))
+		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
+		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s);    return s[0]
+		case TYPE_STRINGT:      s := []string{""}; Go_data_to_string(data, s); return s[0]
 		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
 	}
 	return nil

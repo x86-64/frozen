@@ -17,9 +17,9 @@ type myHttp struct {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/", func (w http.ResponseWriter, req *http.Request){
 			h := f.Hash([]f.Hskel {
-				f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_CREATE ),
-				f.Hitem(f.HK_url,    f.TYPE_STRINGT, req.URL.RawPath ),
-				f.Hitem(f.HK_go_req, f.TYPE_VOIDT,   req),
+				f.Hitem(f.HK_action, f.TYPE_UINT32T,      f.ACTION_CRWD_CREATE ),
+				f.Hitem(f.HK_url,    f.TYPE_STRINGT,      req.URL.RawPath ),
+				f.Hitem(f.HK_go_req, f.TYPE_GOINTERFACET, req),
 				f.Hend() });
 
 			f.Backend_query(srv.backend, h)

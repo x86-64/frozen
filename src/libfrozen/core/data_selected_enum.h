@@ -6,6 +6,7 @@ typedef enum data_type {
    TYPE_BACKENDT = 1,
    TYPE_BINARYT = 21,
    TYPE_BUFFERT = 22,
+   TYPE_GOINTERFACET = 23,
    TYPE_HASHT = 17,
    TYPE_IOT = 3,
    TYPE_MEMORYT = 18,
