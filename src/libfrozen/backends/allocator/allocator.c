@@ -15,22 +15,6 @@ typedef struct allocator_userdata {
 } allocator_userdata;
 	*/
 
-static int allocator_init(backend_t *backend){ // {{{
-	//if((backend->userdata = calloc(1, sizeof(allocator_userdata))) == NULL)
-	//	return error("calloc failed");
-	
-	return 0;
-} // }}}
-static int allocator_destroy(backend_t *backend){ // {{{
-	//allocator_userdata *userdata = (allocator_userdata *)backend->userdata;
-	//free(userdata);
-	
-	return 0;
-} // }}}
-static int allocator_configure(backend_t *backend, hash_t *config){ // {{{
-	return 0;
-} // }}}
-
 static ssize_t allocator_backend_delete(backend_t *backend, request_t *request){
 	ssize_t   ret, q_ret;
 	off_t     offset;
@@ -134,10 +118,7 @@ pass:
 backend_t allocator_proto = {
 	.class          ="allocator",
 	.supported_api  = API_CRWD,
-	.func_init      = &allocator_init,
-	.func_configure = &allocator_configure,
-	.func_destroy   = &allocator_destroy,
-	{
+	.backend_type_crwd = {
 		.func_delete  = &allocator_backend_delete,
 		.func_custom  = &allocator_backend_custom
 	}

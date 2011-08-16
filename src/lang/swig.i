@@ -34,9 +34,9 @@ enum request_actions {
 	REQUEST_INVALID = 0
 };
 typedef enum api_types {
-	API_HASH,
-	API_CRWD,
-	API_FAST
+	API_HASH = 1,
+	API_CRWD = 2,
+	API_FAST = 4
 } api_types;
 
 typedef hash_t                   request_t;

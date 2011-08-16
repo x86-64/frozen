@@ -77,18 +77,12 @@ static ssize_t debug_request(backend_t *backend, request_t *request){ // {{{
 
 backend_t debug_proto = {
 	.class          = "debug",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &debug_init,
 	.func_configure = &debug_configure,
 	.func_destroy   = &debug_destroy,
-	{
-		.func_create  = &debug_request,
-		.func_get     = &debug_request,
-		.func_set     = &debug_request,
-		.func_delete  = &debug_request,
-		.func_move    = &debug_request,
-		.func_count   = &debug_request,
-		.func_custom  = &debug_request
+	.backend_type_hash = {
+		.func_handler = &debug_request,
 	}
 };
 

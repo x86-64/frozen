@@ -16,9 +16,9 @@ enum request_actions {
 };
 
 typedef enum api_types {
-	API_HASH,
-	API_CRWD,
-	API_FAST
+	API_HASH = 1,
+	API_CRWD = 2,
+	API_FAST = 4
 } api_types;
 
 typedef int     (*f_init)      (backend_t *);

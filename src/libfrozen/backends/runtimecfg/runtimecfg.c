@@ -2,14 +2,6 @@
 
 #define EMODULE 19
 
-static int runtimecfg_init(backend_t *backend){ // {{{
-	(void)backend;
-	return 0;
-} // }}}
-static int runtimecfg_destroy(backend_t *backend){ // {{{
-	(void)backend;
-	return 0;
-} // }}}
 static int runtimecfg_configure_any(backend_t *backend, config_t *config, config_t *forkreq){ // {{{
 	ssize_t                ret;
 	backend_t             *new_backend;
@@ -35,10 +27,8 @@ static int runtimecfg_fork(backend_t *backend, backend_t *parent, config_t *fork
 
 backend_t runtimecfg_proto = {
 	.class          = "runtimecfg",
-	.supported_api  = API_CRWD,
-	.func_init      = &runtimecfg_init,
+	.supported_api  = API_HASH,
 	.func_configure = &runtimecfg_configure,
-	.func_fork      = &runtimecfg_fork,
-	.func_destroy   = &runtimecfg_destroy,
+	.func_fork      = &runtimecfg_fork
 };
 

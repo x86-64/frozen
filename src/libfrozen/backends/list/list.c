@@ -5,21 +5,6 @@
 // 'list' backend provide insert capability using underlying backends.
 // This is useful for upper-level backends like 'insert-sort'
 
-static int lists_init(backend_t *backend){
-	(void)backend;
-	return 0;
-}
-
-static int lists_destroy(backend_t *backend){
-	(void)backend;
-	return 0;
-}
-
-static int lists_configure(backend_t *backend, hash_t *config){
-	(void)backend; (void)config;
-	return 0;
-}
-
 static ssize_t lists_set(backend_t *backend, request_t *request){
 	ssize_t           ret;
 	data_t           *key_orig;
@@ -89,10 +74,7 @@ static ssize_t lists_delete(backend_t *backend, request_t *request){
 backend_t list_proto = {
 	.class          = "list",
 	.supported_api  = API_CRWD,
-	.func_init      = &lists_init,
-	.func_configure = &lists_configure,
-	.func_destroy   = &lists_destroy,
-	{
+	.backend_type_crwd = {
 		.func_set    = &lists_set,
 		.func_delete = &lists_delete
 	}

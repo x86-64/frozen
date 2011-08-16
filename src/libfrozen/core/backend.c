@@ -326,6 +326,7 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 				default:
 					return -EINVAL;
 			};
+			break;
 		}
 	}while(0);
 	
