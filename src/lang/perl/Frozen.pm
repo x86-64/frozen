@@ -239,6 +239,7 @@ package Frozen;
 *HK_fork_only = *Frozenc::HK_fork_only;
 *HK_fork_request = *Frozenc::HK_fork_request;
 *HK_function = *Frozenc::HK_function;
+*HK_go_req = *Frozenc::HK_go_req;
 *HK_handle = *Frozenc::HK_handle;
 *HK_hash = *Frozenc::HK_hash;
 *HK_homedir = *Frozenc::HK_homedir;

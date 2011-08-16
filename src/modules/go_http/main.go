@@ -8,7 +8,7 @@ import (
 	f "gofrozen"
 )
 
-// HK(addr) HK(url)     // dont remove
+// HK(addr) HK(url) HK(go_req)    // dont remove
 
 type myHttp struct {
 	backend uintptr
@@ -19,6 +19,7 @@ type myHttp struct {
 			h := f.Hash([]f.Hskel {
 				f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_CREATE ),
 				f.Hitem(f.HK_url,    f.TYPE_STRINGT, req.URL.RawPath ),
+				f.Hitem(f.HK_go_req, f.TYPE_VOIDT,   req),
 				f.Hend() });
 
 			f.Backend_query(srv.backend, h)

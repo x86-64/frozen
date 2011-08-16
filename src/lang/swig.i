@@ -191,6 +191,33 @@ void               hash_get                     (hash_t *hash, char *key, char *
 
 #endif // }}}
 #ifdef SWIGGO // {{{
+#ifdef SWIGGO_GCCGO // {{{
+%insert("go_wrapper") %{
+func reflect_ToPtr(e interface {}) uintptr {
+        rv := reflect.NewValue(&e)
+        return rv.Addr()
+}
+func reflect_FromPtr(ptr uintptr) interface {} {
+        var z *interface {}
+        rv := reflect.NewValue(z)
+        sn := unsafe.Unreflect(rv.Type(), unsafe.Pointer(ptr)).(*interface {})
+        return *sn
+}
+%}
+#else
+%insert("go_wrapper") %{
+func reflect_ToPtr(e interface {}) uintptr {
+        rv := reflect.ValueOf(&e)
+        return rv.UnsafeAddr()
+}
+func reflect_FromPtr(ptr uintptr) interface {} {
+        var z *interface {}
+        rv := reflect.ValueOf(z)
+        sn := unsafe.Unreflect(rv.Type(), unsafe.Pointer(ptr)).(*interface {})
+        return *sn
+}
+%}
+#endif // }}}
 
 %typemap(gotype) (char **string, size_t *string_len) "[]string"
 %typemap(in) (char **string, size_t *string_len) {
@@ -220,28 +247,9 @@ uintmax_t  go_data_to_uint(data_t *data){
 %}
 
 %insert("go_begin") %{
-	import "unsafe"
 	import "fmt"
-%}
-
-%insert("go_wrapper") %{
-
-func Hget(hash uintptr, skey uint64) interface {} {
-	item := Hash_find(hash, skey)
-	if item == 0 {
-		return nil
-	}
-	data := Hash_item_data(item)
-	switch t := Data_value_type(data); t {
-		case TYPE_INTT:    return  int(Go_data_to_uint(data))
-		case TYPE_UINTT:   return uint(Go_data_to_uint(data))
-		case TYPE_RAWT:    s := []string{""}; Go_data_to_raw(data, s);    return s[0]
-		case TYPE_STRINGT: s := []string{""}; Go_data_to_string(data, s); return s[0]
-		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
-	}
-	return nil
-}
-
+	import "unsafe"
+	import "reflect"
 %}
 
 %insert("go_wrapper") %{
@@ -257,23 +265,45 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_ptr  unsafe.Pointer
         var data_len  uint64
 
-        switch v := s.(type) {
-                case  int:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case uint:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case  int16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case uint16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case  int32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case uint32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case  int64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-                case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
-		case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
-		case Enum_SS_request_actions: 
-		             data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-		default: fmt.Printf("Hitem: unexpected type %T\n", v)
-        }
+        if(sdata_type == TYPE_VOIDT){
+		data_ptr, data_len = unsafe.Pointer(reflect_ToPtr(s)), 0
+	}else{
+		switch v := s.(type) {
+			case  int:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case uint:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case  int16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case uint16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case  int32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case uint32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case  int64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
+			case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
+			case Enum_SS_request_actions: 
+				     data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+			default: fmt.Printf("Hitem: unexpected type %T\n", v)
+		}
+	}
         return Hskel{ skey, sdata_type, data_ptr, data_len }
 }
+
+func Hget(hash uintptr, skey uint64) interface {} {
+	item := Hash_find(hash, skey)
+	if item == 0 {
+		return nil
+	}
+	data := Hash_item_data(item)
+	switch t := Data_value_type(data); t {
+		case TYPE_VOIDT:   return reflect_FromPtr( Data_value_ptr(data) )
+		case TYPE_INTT:    return  int(Go_data_to_uint(data))
+		case TYPE_UINTT:   return uint(Go_data_to_uint(data))
+		case TYPE_RAWT:    s := []string{""}; Go_data_to_raw(data, s);    return s[0]
+		case TYPE_STRINGT: s := []string{""}; Go_data_to_string(data, s); return s[0]
+		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
+	}
+	return nil
+}
+
 func Hnext(hash uintptr) Hskel {
 	return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(hash), 0 }
 }
