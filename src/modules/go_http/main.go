@@ -8,36 +8,32 @@ import (
 	f "gofrozen"
 )
 
-// HK(addr) HK(url) HK(go_req)    // dont remove
+// HK(addr) HK(url) HK(http_resp) HK(http_req)    // dont remove
 
-type myHttp struct {
-	backend uintptr
-}
-	func (srv *myHttp) Run(addr string) os.Error {
-		mux := http.NewServeMux()
-		mux.HandleFunc("/", func (w http.ResponseWriter, req *http.Request){
-			h := f.Hash([]f.Hskel {
-				f.Hitem(f.HK_action, f.TYPE_UINT32T,      f.ACTION_CRWD_CREATE ),
-				f.Hitem(f.HK_url,    f.TYPE_STRINGT,      req.URL.RawPath ),
-				f.Hitem(f.HK_go_req, f.TYPE_GOINTERFACET, req),
-				f.Hend() });
+func runServer(addr string, backend uintptr) os.Error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func (resp http.ResponseWriter, req *http.Request){
+		h := f.Hash([]f.Hskel {
+			f.Hitem(f.HK_url,        f.TYPE_STRINGT,      req.URL.RawPath ),
+			f.Hitem(f.HK_http_resp,  f.TYPE_GOINTERFACET, resp),
+			f.Hitem(f.HK_http_req,   f.TYPE_GOINTERFACET, req),
+			f.Hend() });
 
-			f.Backend_query(srv.backend, h)
-		})
+		f.Backend_query(backend, h)
+	})
 
-		l, e := net.Listen("tcp", addr)
-		if e != nil {
-			return e
-		}
-		go http.Serve(l, mux)
-		return nil
+	l, e := net.Listen("tcp", addr)
+	if e != nil {
+		return e
 	}
+	go http.Serve(l, mux)
+	return nil
+}
 
 func http_configure(backend uintptr, config uintptr) int{
 	addr, ok := f.Hget(config, f.HK_addr).(string)
 
-	srv := &myHttp{ backend: backend }
-	if e := srv.Run(addr); e != nil {
+	if e := runServer(addr, backend); e != nil {
 		log.Print("go_http failed configure: %v", e)
 		return -1
 	}
