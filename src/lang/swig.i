@@ -201,11 +201,11 @@ void               hash_get                     (hash_t *hash, char *key, char *
 #ifdef SWIGGO // {{{
 #ifdef SWIGGO_GCCGO // {{{
 %insert("go_wrapper") %{
-func reflect_ToPtr(e interface {}) uintptr {
+func ObjToPtr(e interface {}) uintptr {
         rv := reflect.NewValue(&e)
         return rv.Addr()
 }
-func reflect_FromPtr(ptr uintptr) interface {} {
+func ObjFromPtr(ptr uintptr) interface {} {
         var z *interface {}
         rv := reflect.NewValue(z)
         sn := unsafe.Unreflect(rv.Type(), unsafe.Pointer(ptr)).(*interface {})
@@ -214,11 +214,11 @@ func reflect_FromPtr(ptr uintptr) interface {} {
 %}
 #else
 %insert("go_wrapper") %{
-func reflect_ToPtr(e interface {}) uintptr {
+func ObjToPtr(e interface {}) uintptr {
         rv := reflect.ValueOf(&e)
         return rv.UnsafeAddr()
 }
-func reflect_FromPtr(ptr uintptr) interface {} {
+func ObjFromPtr(ptr uintptr) interface {} {
         var z *interface {}
         rv := reflect.ValueOf(z)
         sn := unsafe.Unreflect(rv.Type(), unsafe.Pointer(ptr)).(*interface {})
@@ -252,6 +252,17 @@ uintmax_t  go_data_to_uint(data_t *data){
 	return ret;
 }
 
+// TODO remove this
+void backend_setuserdata(backend_t *backend, void *data){
+	backend->userdata = data;
+}
+void *backend_getuserdata(backend_t *backend){
+	return backend->userdata;
+}
+void data_assign(data_t *data, data_type type, void *ptr, size_t ptr_size){
+	data_assign_raw(data, type, ptr, ptr_size);
+}
+
 %}
 
 %insert("go_begin") %{
@@ -274,7 +285,7 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_len  uint64
 
         if(sdata_type == TYPE_GOINTERFACET){
-		data_ptr, data_len = unsafe.Pointer(reflect_ToPtr(s)), 0
+		data_ptr, data_len = unsafe.Pointer(ObjToPtr(s)), 0
 	}else{
 		switch v := s.(type) {
 			case  int:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
@@ -302,7 +313,7 @@ func Hget(hash uintptr, skey uint64) interface {} {
 	}
 	data := Hash_item_data(item)
 	switch t := Data_value_type(data); t {
-		case TYPE_GOINTERFACET: return reflect_FromPtr( Data_value_ptr(data) )
+		case TYPE_GOINTERFACET: return ObjFromPtr( Data_value_ptr(data) )
 		case TYPE_INTT:         return  int(Go_data_to_uint(data))
 		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
 		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s);    return s[0]
