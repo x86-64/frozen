@@ -29,7 +29,7 @@ func templateExec_configure(backend uintptr, config uintptr) int{
 	userdata := &templateExec_userdata{
 		data_key: f.Hash_string_to_key(data_key),
 		out_key:  f.Hash_string_to_key(out_key) }
-	f.Backend_setuserdata(backend, f.ObjToPtr(userdata))
+	f.Backend_SetUserdata(backend, userdata)
 	return 0
 }
 
@@ -48,7 +48,7 @@ func templateLoad_handler(backend uintptr, request uintptr) int {
 	return 0
 }
 func templateExecute_handler(backend uintptr, request uintptr) int {
-	userdata, ok := f.ObjFromPtr( f.Backend_getuserdata(backend) ).(*templateExec_userdata)
+	userdata := f.Backend_GetUserdata(backend).(*templateExec_userdata)
 
 	h := f.Hash([]f.Hskel {
 		f.Hitem(f.HK_go_template, f.TYPE_GOINTERFACET, nil ),

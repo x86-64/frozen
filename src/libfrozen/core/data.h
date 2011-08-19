@@ -34,7 +34,7 @@ struct data_proto_t {
 	char *          type_str;
 	data_type       type;
 	size_type       size_type;
-	size_t          fixed_size;
+	size_t          fixed_size; // TODO IMPORTANT deprecate this
 	
 	f_data_alloc    func_alloc;
 	f_data_free     func_free;
@@ -77,7 +77,7 @@ API ssize_t              data_validate          (data_t *data);
 API void                 data_free              (data_t *data);
 
 _inline
-API data_type            data_value_type        (data_t *data); // TODO deprecate this
+API data_type            data_value_type        (data_t *data);
 _inline
 API void *               data_value_ptr         (data_t *data); // TODO deprecate this
 _inline

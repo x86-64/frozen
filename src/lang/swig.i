@@ -253,10 +253,10 @@ uintmax_t  go_data_to_uint(data_t *data){
 }
 
 // TODO remove this
-void backend_setuserdata(backend_t *backend, void *data){
+void _backend_setuserdata(backend_t *backend, void *data){
 	backend->userdata = data;
 }
-void *backend_getuserdata(backend_t *backend){
+void *_backend_getuserdata(backend_t *backend){
 	return backend->userdata;
 }
 void data_assign(data_t *data, data_type type, void *ptr, size_t ptr_size){
@@ -272,6 +272,13 @@ void data_assign(data_t *data, data_type type, void *ptr, size_t ptr_size){
 %}
 
 %insert("go_wrapper") %{
+
+func Backend_SetUserdata(backend uintptr, userdata interface{}) {
+	X_backend_setuserdata(backend, ObjToPtr(userdata))
+}
+func Backend_GetUserdata(backend uintptr) interface {} {
+	return ObjFromPtr( X_backend_getuserdata(backend) )
+}
 
 type Hskel struct {
 	Key           uint64

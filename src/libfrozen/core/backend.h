@@ -103,8 +103,4 @@ API ssize_t         backend_pass            (backend_t *backend, request_t *requ
 
     request_actions request_str_to_action   (char *string);
 
-// TODO move to buffer_t.c
-API void            backend_buffer_io_init  (buffer_t *buffer, backend_t *chain, int cached);
-API buffer_t *      backend_buffer_io_alloc (backend_t *backend, int cached);
-
 #endif // BACKEND_H
