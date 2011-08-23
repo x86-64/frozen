@@ -322,6 +322,7 @@ func Hget(hash uintptr, skey uint64) interface {} {
 	switch t := Data_value_type(data); t {
 		case TYPE_GOINTERFACET: return ObjFromPtr( Data_value_ptr(data) )
 		case TYPE_INTT:         return  int(Go_data_to_uint(data))
+		case TYPE_SIZET:        return uint(Go_data_to_uint(data))
 		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
 		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s);    return s[0]
 		case TYPE_STRINGT:      s := []string{""}; Go_data_to_string(data, s); return s[0]

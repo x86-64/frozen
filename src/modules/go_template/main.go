@@ -3,50 +3,102 @@ package main
 import (
 	"io"
 	"log"
+	"fmt"
 	"template"
 	f "gofrozen"
 )
 
-// HK(data_key) HK(out_key) HK(go_template)
+// HK(error) HK(input) HK(output) HK(go_template)
 
 type templateExec_userdata struct {
-	out_key                uint64
-	data_key               uint64
+	k_output               uint64
+	k_input                uint64
+}
+	func templateExec_configure(backend uintptr, config uintptr) int{
+		d_input, ok := f.Hget(config, f.HK_input).(string)
+		if !ok {
+			log.Print("template_configure: no HK(input) supplied")
+			return -1
+		}
+
+		d_output, ok := f.Hget(config, f.HK_output).(string)
+		if !ok {
+			log.Print("template_configure: no HK(output) supplied")
+			return -1
+		}
+
+		userdata := &templateExec_userdata{
+			k_input: f.Hash_string_to_key(d_input),
+			k_output:  f.Hash_string_to_key(d_output) }
+		f.Backend_SetUserdata(backend, userdata)
+		return 0
+	}
+
+func template_load(backend uintptr) (tpl *template.Template, err string) {
+	var tpl_str []byte
+
+	// request size
+	q_count := f.Hash([]f.Hskel {
+		f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_COUNT),
+		f.Hitem(f.HK_buffer, f.TYPE_SIZET,   0),
+		f.Hend() })
+	f.Backend_pass(backend, q_count)
+
+	str_len, ok := f.Hget(q_count, f.HK_buffer).(uint)
+	if !ok || str_len == 0 {
+		tpl_str = []byte("")
+	}else{
+		tpl_str = make([]byte, str_len)
+
+		// read all
+		q_read := f.Hash([]f.Hskel {
+			f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_READ),
+			f.Hitem(f.HK_buffer, f.TYPE_RAWT,    tpl_str),
+			f.Hend() })
+
+		f.Backend_pass(backend, q_read)
+	}
+
+	tpl, e := template.Parse(string(tpl_str), nil) // TODO BAD BAD BAD
+	if e != nil {
+		err := fmt.Sprintf("templateLoad_handler template parse error: %v", e)
+		return nil, err
+	}
+	return tpl, ""
 }
 
-func templateExec_configure(backend uintptr, config uintptr) int{
-	data_key, ok := f.Hget(config, f.HK_data_key).(string)
-	if !ok {
-		log.Print("template_configure: no 'data_key' supplied")
-		return -1
-	}
-	out_key, ok := f.Hget(config, f.HK_out_key).(string)
-	if !ok {
-		log.Print("template_configure: no 'out_key' supplied")
-		return -1
+func template_exec(tpl *template.Template, request uintptr, k_output uint64, k_input uint64) (err string) {
+	wr,   ok2 := f.Hget(request,  k_output).(io.Writer)
+	data      := f.Hget(request,  k_input)
+	if !ok2 {
+		return fmt.Sprintf("templateExecute_handler input data invalid: tpl {%v}; output {%v, %v}; data {%v}",
+			tpl, wr, ok2,  data)
 	}
 
-	userdata := &templateExec_userdata{
-		data_key: f.Hash_string_to_key(data_key),
-		out_key:  f.Hash_string_to_key(out_key) }
-	f.Backend_SetUserdata(backend, userdata)
-	return 0
+	if e := tpl.Execute(data, wr); e != nil {
+		return fmt.Sprintf("templateExecute_handler template execution error: %v", e)
+	}
+	return ""
 }
 
 func templateLoad_handler(backend uintptr, request uintptr) int {
 	hash := f.Hash_find(request, f.HK_go_template)
 	if hash == 0 {
+		log.Printf("templateLoad_handler HK(go_template) not supplied")
 		return -1
 	}
 	data := f.Hash_item_data(hash)
 
-	tpl, e := template.Parse(" mooo ", nil)
-	if e != nil {
+	tpl, err := template_load(backend)
+	if err != "" {
+		log.Printf(err)
 		return -1
 	}
+
 	f.Data_assign(data, f.TYPE_GOINTERFACET, f.ObjToPtr(tpl), 0)
 	return 0
 }
+
 func templateExecute_handler(backend uintptr, request uintptr) int {
 	userdata := f.Backend_GetUserdata(backend).(*templateExec_userdata)
 
@@ -56,20 +108,35 @@ func templateExecute_handler(backend uintptr, request uintptr) int {
 	if e := f.Backend_pass(backend, h); e < 0 {
 		return e
 	}
-
 	tpl,  ok1 := f.Hget(h,        f.HK_go_template).(*template.Template)
-	wr,   ok2 := f.Hget(request,  userdata.out_key).(io.Writer)
-	data      := f.Hget(request,  userdata.data_key)
-	if !ok1 || !ok2 {
+	if !ok1 {
+		log.Print("templateExecute_handler HK(go_template) not supplied")
 		return -1
 	}
 
-	if e := tpl.Execute(data, wr); e != nil {
+	err := template_exec(tpl, request, userdata.k_output, userdata.k_input)
+	if err != "" {
+		log.Printf(err)
 		return -1
 	}
+
 	return 0
 }
+
 func template_handler(backend uintptr, request uintptr) int {
+	userdata := f.Backend_GetUserdata(backend).(*templateExec_userdata)
+
+	tpl, err := template_load(backend)
+	if err != "" {
+		log.Printf(err)
+		return -1
+	}
+
+	if err := template_exec(tpl, request, userdata.k_output, userdata.k_input); err != "" {
+		log.Printf(err)
+		return -1
+	}
+
 	return 0
 }
 
