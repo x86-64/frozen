@@ -34,14 +34,14 @@ type templateExec_userdata struct {
 		return 0
 	}
 
-func template_load(backend uintptr) (tpl *template.Template, err string) {
+func template_load(backend uintptr, request uintptr) (tpl *template.Template, err string) {
 	var tpl_str []byte
 
 	// request size
 	q_count := f.Hash([]f.Hskel {
 		f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_COUNT),
 		f.Hitem(f.HK_buffer, f.TYPE_SIZET,   0),
-		f.Hend() })
+		f.Hnext(request) })
 	f.Backend_pass(backend, q_count)
 
 	str_len, ok := f.Hget(q_count, f.HK_buffer).(uint)
@@ -54,7 +54,7 @@ func template_load(backend uintptr) (tpl *template.Template, err string) {
 		q_read := f.Hash([]f.Hskel {
 			f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_READ),
 			f.Hitem(f.HK_buffer, f.TYPE_RAWT,    tpl_str),
-			f.Hend() })
+			f.Hnext(request) })
 
 		f.Backend_pass(backend, q_read)
 	}
@@ -89,7 +89,7 @@ func templateLoad_handler(backend uintptr, request uintptr) int {
 	}
 	data := f.Hash_item_data(hash)
 
-	tpl, err := template_load(backend)
+	tpl, err := template_load(backend, request)
 	if err != "" {
 		log.Printf(err)
 		return -1
@@ -126,7 +126,7 @@ func templateExecute_handler(backend uintptr, request uintptr) int {
 func template_handler(backend uintptr, request uintptr) int {
 	userdata := f.Backend_GetUserdata(backend).(*templateExec_userdata)
 
-	tpl, err := template_load(backend)
+	tpl, err := template_load(backend, request)
 	if err != "" {
 		log.Printf(err)
 		return -1

@@ -28,6 +28,7 @@ API void               hash_free                    (hash_t *hash);
 API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
 API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
 API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
+API void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain);
 API size_t             hash_nelements               (hash_t *hash);
 
 // hash <=> buffer

@@ -2,6 +2,8 @@
 
 #define EMODULE 19
 
+// TODO deprecate this module
+
 static int runtimecfg_configure_any(backend_t *backend, config_t *config, config_t *forkreq){ // {{{
 	ssize_t                ret;
 	backend_t             *new_backend;

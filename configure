@@ -644,6 +644,7 @@ BACKEND_OBJECTS_ipc
 BACKEND_OBJECTS_insert_sort
 BACKEND_OBJECTS_incapsulate
 BACKEND_OBJECTS_file
+BACKEND_OBJECTS_factory
 BACKEND_OBJECTS_emitter
 BACKEND_OBJECTS_debug
 BACKEND_OBJECTS_cache_append
@@ -805,6 +806,7 @@ enable_backendcache
 enable_backendcache_append
 enable_backenddebug
 enable_backendemitter
+enable_backendfactory
 enable_backendfile
 enable_backendincapsulate
 enable_backendinsert_sort
@@ -1506,6 +1508,8 @@ Optional Features:
   --disable-backend-debug disable backend debug
   --disable-backend-emitter
                           disable backend emitter
+  --disable-backend-factory
+                          disable backend factory
   --disable-backend-file  disable backend file
   --disable-backend-incapsulate
                           disable backend incapsulate
@@ -17665,6 +17669,43 @@ fi
 		BACKEND_MAKEFILE_emitter=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED emitter/libfrozen_backend_emitter.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-backendfactory was given.
+if test "${enable_backendfactory+set}" = set; then :
+  enableval=$enable_backendfactory;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfactory}" = "yes"; then
+			enable_backendfactory="no"
+		else
+			enable_backendfactory="yes"
+		fi
+	fi
+
+	if test "${enable_backendfactory}" = "yes"; then
+		BACKEND_DIR_factory="factory"
+		BACKEND_DEP_factory=""
+		BACKEND_OBJECTS_factory="$BACKEND_OBJECTS_factory libfrozen_backend_factory_la-factory.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED factory"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_factory" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/factory/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS factory"
+
+		BACKEND_MAKEFILE_factory=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED factory/libfrozen_backend_factory.la"
 
 	fi
 

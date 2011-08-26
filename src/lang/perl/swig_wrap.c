@@ -3784,6 +3784,43 @@ XS(_wrap_hash_chain) {
 }
 
 
+XS(_wrap_hash_unchain) {
+  {
+    hash_t *arg1 = (hash_t *) 0 ;
+    hash_t *arg2 = (hash_t *) 0 ;
+    void *argp1 = 0 ;
+    int res1 = 0 ;
+    void *argp2 = 0 ;
+    int res2 = 0 ;
+    int argvi = 0;
+    dXSARGS;
+    
+    if ((items < 2) || (items > 2)) {
+      SWIG_croak("Usage: hash_unchain(hash,hash_unchain);");
+    }
+    res1 = SWIG_ConvertPtr(ST(0), &argp1,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "hash_unchain" "', argument " "1"" of type '" "hash_t *""'"); 
+    }
+    arg1 = (hash_t *)(argp1);
+    res2 = SWIG_ConvertPtr(ST(1), &argp2,SWIGTYPE_p_hash_t, 0 |  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "hash_unchain" "', argument " "2"" of type '" "hash_t *""'"); 
+    }
+    arg2 = (hash_t *)(argp2);
+    hash_unchain(arg1,arg2);
+    ST(argvi) = sv_newmortal();
+    
+    
+    XSRETURN(argvi);
+  fail:
+    
+    
+    SWIG_croak_null();
+  }
+}
+
+
 XS(_wrap_hash_nelements) {
   {
     hash_t *arg1 = (hash_t *) 0 ;
@@ -4578,6 +4615,7 @@ static swig_command_info swig_commands[] = {
 {"Frozenc::hash_free", _wrap_hash_free},
 {"Frozenc::hash_find", _wrap_hash_find},
 {"Frozenc::hash_chain", _wrap_hash_chain},
+{"Frozenc::hash_unchain", _wrap_hash_unchain},
 {"Frozenc::hash_nelements", _wrap_hash_nelements},
 {"Frozenc::hash_dump", _wrap_hash_dump},
 {"Frozenc::hash_string_to_key", _wrap_hash_string_to_key},

@@ -154,10 +154,14 @@ void               hash_free                    (hash_t *hash){ // {{{
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ // {{{
 	for(; hash != NULL; hash = (hash_t *)hash->data.data_ptr){
-		for(; hash->key != hash_ptr_end; hash++){
+		goto loop_start;
+		do{
+			hash++;
+
+		loop_start:
 			if(hash->key == key)
 				return hash;
-		}
+		}while(hash->key != hash_ptr_end);
 	}
 	return NULL;
 } // }}}
@@ -185,8 +189,18 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 	return ITER_OK;
 } // }}}
 void               hash_chain                   (hash_t *hash, hash_t *hash_next){ // {{{
-	hash_t *hend = hash_find(hash, hash_ptr_end);
+	hash_t *hend;
+	do{
+		hend = hash_find(hash, hash_ptr_end);
+	}while( (hash = hend->data.data_ptr) != NULL );
 	hend->data.data_ptr = hash_next;
+} // }}}
+void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain){ // {{{
+	hash_t *hend;
+	do{
+		hend = hash_find(hash, hash_ptr_end);
+	}while( (hash = hend->data.data_ptr) != hash_unchain );
+	hend->data.data_ptr = NULL;
 } // }}}
 size_t             hash_nelements               (hash_t *hash){ // {{{
 	hash_t       *el;

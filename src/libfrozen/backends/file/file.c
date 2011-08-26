@@ -224,8 +224,8 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 				str_size = strlen(str);
 				break;
 			case HK(string):
-				str = GET_TYPE_STRINGT(curr_data);
-				str_size = strlen(str);
+				str      = GET_TYPE_STRINGT(curr_data); // TODO rewrite to data_read
+				str_size = GET_TYPE_STRINGT_LEN(curr_data);
 				break;
 			case HK(homedir):
 				hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
@@ -270,7 +270,6 @@ error:
 	return NULL;
 } // }}}
 static char *            file_gen_filepath(config_t *config, config_t *fork_req){ // {{{
-	char                  *filename_str;
 	hash_t                *filename_hash;
 	data_t                *filename_data;
 	
@@ -279,12 +278,10 @@ static char *            file_gen_filepath(config_t *config, config_t *fork_req)
 	
 	filename_data = hash_item_data(filename_hash);
 	switch(data_value_type(filename_data)){
-		case TYPE_STRINGT:
-			filename_str = GET_TYPE_STRINGT(filename_data);
-			
+		case TYPE_STRINGT:;
 			config_t r_gen[] = {
 				{ HK(homedir), DATA_STRING("")                    },
-				{ HK(string),  DATA_PTR_STRING_AUTO(filename_str) },
+				{ HK(string),  *filename_data }, // DATA_PTR_STRING_AUTO(filename_str) },
 				hash_end
 			};
 			return file_gen_filepath_from_hasht(r_gen, fork_req);

@@ -66,6 +66,7 @@ package Frozen;
 *hash_free = *Frozenc::hash_free;
 *hash_find = *Frozenc::hash_find;
 *hash_chain = *Frozenc::hash_chain;
+*hash_unchain = *Frozenc::hash_unchain;
 *hash_nelements = *Frozenc::hash_nelements;
 *hash_dump = *Frozenc::hash_dump;
 *hash_string_to_key = *Frozenc::hash_string_to_key;

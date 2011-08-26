@@ -4,6 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -86019, "src/libfrozen/backends/factory/factory.c: child creation error" },
+ { -86018, "src/libfrozen/backends/factory/factory.c: not enough memory" },
+ { -86017, "src/libfrozen/backends/factory/factory.c: HK(config) not supplied" },
+ { -86016, "src/libfrozen/backends/factory/factory.c: calloc failed" },
  { -81920, "src/libfrozen/backends/runtimecfg/runtimecfg.c: backend_config not supplied" },
  { -77825, "src/libfrozen/backends/emitter/emitter.c: pthread_create failed" },
  { -77824, "src/libfrozen/backends/emitter/emitter.c: calloc failed" },
