@@ -7,6 +7,25 @@ static list                    classes        = LIST_INITIALIZER; // dynamic cla
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
 
+static int         class_strcmp            (char *class_str1, char *class_str2){ // {{{
+	char                  *class_str1_name;
+	char                  *class_str2_name;
+	uintmax_t              only_names        = 0;
+	
+	                                  class_str1_name = index(class_str1, '/') + 1;
+	if(class_str1_name == (char *)1)  class_str1_name = index(class_str1, '.') + 1;
+	if(class_str1_name == (char *)1){ class_str1_name = class_str1; only_names = 1; } 
+	                                  class_str2_name = index(class_str2, '/') + 1;
+	if(class_str2_name == (char *)1)  class_str2_name = index(class_str2, '.') + 1;
+	if(class_str2_name == (char *)1){ class_str2_name = class_str2; only_names = 1; } 
+	
+	if(only_names == 1){
+		class_str1 = class_str1_name;
+		class_str2 = class_str2_name;
+	}
+	
+	return strcmp(class_str1, class_str2);
+} // }}}
 static backend_t * class_find              (char *class){ // {{{
 	uintmax_t              i;
 	backend_t             *backend;
@@ -15,13 +34,13 @@ static backend_t * class_find              (char *class){ // {{{
 	for(i=0; i<backend_protos_size; i++){
 		backend = backend_protos[i];
 
-		if(backend->class != NULL && strcmp(backend->class, class) == 0)
+		if(backend->class != NULL && class_strcmp(backend->class, class) == 0)
 			return backend;
 	}
 	
 	list_rdlock(&classes);
 		while( (backend = list_iter_next(&classes, &list_status)) != NULL){
-			if(backend->class != NULL && strcmp(backend->class, class) == 0)
+			if(backend->class != NULL && class_strcmp(backend->class, class) == 0)
 				goto exit;
 		}
 		backend = NULL;

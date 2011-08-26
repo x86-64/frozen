@@ -46,25 +46,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./build/libfrozen_modules.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/factory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/ipc/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/runtimecfg/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
@@ -77,6 +58,24 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -121,25 +120,24 @@ AWK = @AWK@
 BACKEND_DIRS = @BACKEND_DIRS@
 BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
 BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
-BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
-BACKEND_OBJECTS_balancer = @BACKEND_OBJECTS_balancer@
-BACKEND_OBJECTS_benchmark = @BACKEND_OBJECTS_benchmark@
-BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
-BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
-BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@
-BACKEND_OBJECTS_emitter = @BACKEND_OBJECTS_emitter@
-BACKEND_OBJECTS_factory = @BACKEND_OBJECTS_factory@
-BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
-BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
-BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
-BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
-BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
-BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
-BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
-BACKEND_OBJECTS_pool = @BACKEND_OBJECTS_pool@
-BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
-BACKEND_OBJECTS_runtimecfg = @BACKEND_OBJECTS_runtimecfg@
-BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
+BACKEND_OBJECTS_backend_benchmark = @BACKEND_OBJECTS_backend_benchmark@
+BACKEND_OBJECTS_backend_factory = @BACKEND_OBJECTS_backend_factory@
+BACKEND_OBJECTS_backend_pool = @BACKEND_OBJECTS_backend_pool@
+BACKEND_OBJECTS_cache_cache = @BACKEND_OBJECTS_cache_cache@
+BACKEND_OBJECTS_cache_cache_append = @BACKEND_OBJECTS_cache_cache_append@
+BACKEND_OBJECTS_communication_ipc = @BACKEND_OBJECTS_communication_ipc@
+BACKEND_OBJECTS_data_allocator = @BACKEND_OBJECTS_data_allocator@
+BACKEND_OBJECTS_data_incapsulate = @BACKEND_OBJECTS_data_incapsulate@
+BACKEND_OBJECTS_data_list = @BACKEND_OBJECTS_data_list@
+BACKEND_OBJECTS_data_structs = @BACKEND_OBJECTS_data_structs@
+BACKEND_OBJECTS_examples_null = @BACKEND_OBJECTS_examples_null@
+BACKEND_OBJECTS_index_mphf = @BACKEND_OBJECTS_index_mphf@
+BACKEND_OBJECTS_request_balancer = @BACKEND_OBJECTS_request_balancer@
+BACKEND_OBJECTS_request_debug = @BACKEND_OBJECTS_request_debug@
+BACKEND_OBJECTS_request_emitter = @BACKEND_OBJECTS_request_emitter@
+BACKEND_OBJECTS_request_rewrite = @BACKEND_OBJECTS_request_rewrite@
+BACKEND_OBJECTS_rest_insert_sort = @BACKEND_OBJECTS_rest_insert_sort@
+BACKEND_OBJECTS_storage_file = @BACKEND_OBJECTS_storage_file@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@

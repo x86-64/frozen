@@ -15,6 +15,5 @@ callgrind.out
 backend_selected.h
 data_selected.h
 hashkeys*
-config.m4
 config.log
 config.status

@@ -105,7 +105,6 @@ AC_CONFIG_FILES([Makefile
 		src/libfrozen/data/Makefile
 		src/frozend/Makefile
 		src/frozenfs/Makefile
-		src/benchmark/Makefile
 		src/lang/Makefile
 		src/lang/go/Makefile
 		src/lang/gogcc/Makefile
