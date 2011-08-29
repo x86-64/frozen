@@ -22,7 +22,7 @@ static int factory_destroy(backend_t *backend){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int factory_configure_any(backend_t *backend, config_t *config, config_t *forkreq){ // {{{
+static int factory_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
 	config_t              *c_backend_config  = NULL;
 	factory_userdata      *userdata          = (factory_userdata *)backend->userdata;
@@ -36,12 +36,6 @@ static int factory_configure_any(backend_t *backend, config_t *config, config_t 
 		return error("not enough memory");
 	
 	return 0;
-} // }}}
-static int factory_configure(backend_t *backend, config_t *config){ // {{{
-	return factory_configure_any(backend, config, NULL);
-} // }}}
-static int factory_fork(backend_t *backend, backend_t *parent, config_t *forkreq){ // {{{
-	return factory_configure_any(backend, backend->config, forkreq);
 } // }}}
 
 static ssize_t factory_handler(backend_t *backend, request_t *request){ // {{{
@@ -76,7 +70,6 @@ backend_t factory_proto = {
 	.func_init      = &factory_init,
 	.func_destroy   = &factory_destroy,
 	.func_configure = &factory_configure,
-	.func_fork      = &factory_fork,
 	.backend_type_hash = {
 		.func_handler = &factory_handler
 	}

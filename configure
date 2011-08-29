@@ -626,6 +626,7 @@ BACKEND_OBJECTS_request_emitter
 BACKEND_OBJECTS_request_debug
 BACKEND_OBJECTS_request_balancer
 BACKEND_OBJECTS_index_mphf
+BACKEND_OBJECTS_index_lookup
 BACKEND_OBJECTS_examples_null
 BACKEND_OBJECTS_data_structs
 BACKEND_OBJECTS_data_list
@@ -832,6 +833,7 @@ enable_backendincapsulate
 enable_backendlist
 enable_backendstructs
 enable_backendnull
+enable_backendlookup
 enable_backendmphf
 enable_backendbalancer
 enable_backenddebug
@@ -1536,6 +1538,8 @@ Optional Features:
   --disable-backend-structs
                           disable backend structs
   --disable-backend-null  disable backend null
+  --disable-backend-lookup
+                          disable backend lookup
   --disable-backend-mphf  disable backend mphf
   --disable-backend-balancer
                           disable backend balancer
@@ -18710,6 +18714,44 @@ fi
 		BACKEND_MAKEFILE_examples_null=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED examples/null/libfrozen_backend_null.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendlookup was given.
+if test "${enable_backendlookup+set}" = set; then :
+  enableval=$enable_backendlookup;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendlookup}" = "yes"; then
+			enable_backendlookup="no"
+		else
+			enable_backendlookup="yes"
+		fi
+	fi
+
+	if test "${enable_backendlookup}" = "yes"; then
+		BACKEND_DIR_lookup="index/lookup"
+		BACKEND_DEP_lookup=""
+		BACKEND_OBJECTS_index_lookup="$BACKEND_OBJECTS_index_lookup libfrozen_backend_lookup_la-lookup.lo"
+		BACKEND_SELECTED="$BACKEND_SELECTED lookup"
+
+
+	fi
+
+	if test "$BACKEND_MAKEFILE_index_lookup" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/lookup/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/lookup"
+
+		BACKEND_MAKEFILE_index_lookup=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/lookup/libfrozen_backend_lookup.la"
 
 	fi
 

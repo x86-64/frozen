@@ -4,6 +4,9 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -90114, "src/libfrozen/backends/index/lookup/lookup.c: supplied index backend not valid, or not found" },
+ { -90113, "src/libfrozen/backends/index/lookup/lookup.c: HK(index) not supplied" },
+ { -90112, "src/libfrozen/backends/index/lookup/lookup.c: calloc failed" },
  { -86019, "src/libfrozen/backends/backend/factory/factory.c: child creation error" },
  { -86018, "src/libfrozen/backends/backend/factory/factory.c: not enough memory" },
  { -86017, "src/libfrozen/backends/backend/factory/factory.c: HK(config) not supplied" },
@@ -26,15 +29,10 @@ static err_item errs_list[] = {
  { -61441, "src/libfrozen/backends/request/balancer/balancer.c: invalid linear_len supplied" },
  { -61440, "src/libfrozen/backends/request/balancer/balancer.c: calloc returns null" },
  { -57348, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no key_out supplied" },
- { -57348, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no key_out supplied" },
  { -57347, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no buffer supplied" },
- { -57347, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no buffer supplied" },
  { -57346, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: backend insert-sort engine not found" },
- { -57346, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort engine not found" },
  { -57345, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: backend insert-sort parameter engine not supplied" },
- { -57345, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort parameter engine not supplied" },
  { -57344, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: calloc failed" },
- { -57344, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: calloc failed" },
  { -53256, "src/libfrozen/backends/request/rewrite/rewrite.c: backend_acquire failed" },
  { -53255, "src/libfrozen/backends/request/rewrite/rewrite.c: alloca data invalid" },
  { -53254, "src/libfrozen/backends/request/rewrite/rewrite.c: arithmetic failed" },

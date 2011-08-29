@@ -77,6 +77,7 @@ API backend_t *     backend_find            (char *name);
 API backend_t *     backend_fork            (backend_t *backend, request_t *request);
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
+    backend_t *     backend_from_data       (data_t *data); // TODO not fits
 
 API char *          backend_get_name        (backend_t *backend);
 API void            backend_connect         (backend_t *parent, backend_t *child);

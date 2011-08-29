@@ -72,6 +72,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
@@ -163,6 +164,7 @@ BACKEND_OBJECTS_data_incapsulate = @BACKEND_OBJECTS_data_incapsulate@
 BACKEND_OBJECTS_data_list = @BACKEND_OBJECTS_data_list@
 BACKEND_OBJECTS_data_structs = @BACKEND_OBJECTS_data_structs@
 BACKEND_OBJECTS_examples_null = @BACKEND_OBJECTS_examples_null@
+BACKEND_OBJECTS_index_lookup = @BACKEND_OBJECTS_index_lookup@
 BACKEND_OBJECTS_index_mphf = @BACKEND_OBJECTS_index_mphf@
 BACKEND_OBJECTS_request_balancer = @BACKEND_OBJECTS_request_balancer@
 BACKEND_OBJECTS_request_debug = @BACKEND_OBJECTS_request_debug@
