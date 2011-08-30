@@ -67,6 +67,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
@@ -136,25 +138,6 @@ AWK = @AWK@
 BACKEND_DIRS = @BACKEND_DIRS@
 BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
 BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
-BACKEND_OBJECTS_backend_benchmark = @BACKEND_OBJECTS_backend_benchmark@
-BACKEND_OBJECTS_backend_factory = @BACKEND_OBJECTS_backend_factory@
-BACKEND_OBJECTS_backend_pool = @BACKEND_OBJECTS_backend_pool@
-BACKEND_OBJECTS_cache_cache = @BACKEND_OBJECTS_cache_cache@
-BACKEND_OBJECTS_cache_cache_append = @BACKEND_OBJECTS_cache_cache_append@
-BACKEND_OBJECTS_communication_ipc = @BACKEND_OBJECTS_communication_ipc@
-BACKEND_OBJECTS_data_allocator = @BACKEND_OBJECTS_data_allocator@
-BACKEND_OBJECTS_data_incapsulate = @BACKEND_OBJECTS_data_incapsulate@
-BACKEND_OBJECTS_data_list = @BACKEND_OBJECTS_data_list@
-BACKEND_OBJECTS_data_structs = @BACKEND_OBJECTS_data_structs@
-BACKEND_OBJECTS_examples_null = @BACKEND_OBJECTS_examples_null@
-BACKEND_OBJECTS_index_lookup = @BACKEND_OBJECTS_index_lookup@
-BACKEND_OBJECTS_index_mphf = @BACKEND_OBJECTS_index_mphf@
-BACKEND_OBJECTS_request_balancer = @BACKEND_OBJECTS_request_balancer@
-BACKEND_OBJECTS_request_debug = @BACKEND_OBJECTS_request_debug@
-BACKEND_OBJECTS_request_emitter = @BACKEND_OBJECTS_request_emitter@
-BACKEND_OBJECTS_request_rewrite = @BACKEND_OBJECTS_request_rewrite@
-BACKEND_OBJECTS_rest_insert_sort = @BACKEND_OBJECTS_rest_insert_sort@
-BACKEND_OBJECTS_storage_file = @BACKEND_OBJECTS_storage_file@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@

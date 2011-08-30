@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = src/libfrozen/backends/mphf
+subdir = src/libfrozen/backends/index/mphf
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -42,27 +42,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/./build/libfrozen_backends.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/allocator/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/balancer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache_append/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/debug/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/file/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/incapsulate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/insert_sort/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/ipc/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/list/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/mphf/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/null/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/rewrite/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/runtimecfg/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/structs/config.m4 \
+	$(top_srcdir)/./build/libfrozen_modules.m4 \
+	$(top_srcdir)/./src/modules/go_http/config.m4 \
+	$(top_srcdir)/./src/modules/go_template/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/go_interface/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
@@ -71,6 +57,27 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -80,9 +87,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfrozen_backend_mphf_la_LIBADD =
-am__objects_1 = libfrozen_backend_mphf_la-hash_jenkins.lo \
-	libfrozen_backend_mphf_la-hash_murmur.lo \
-	libfrozen_backend_mphf_la-mphf_chm_imp.lo \
+am__objects_1 = libfrozen_backend_mphf_la-mphf_chm_imp.lo \
 	libfrozen_backend_mphf_la-mphf_bdz_imp.lo
 am_libfrozen_backend_mphf_la_OBJECTS =  \
 	libfrozen_backend_mphf_la-mphf.lo $(am__objects_1)
@@ -121,24 +126,6 @@ AWK = @AWK@
 BACKEND_DIRS = @BACKEND_DIRS@
 BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
 BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
-BACKEND_OBJECTS_allocator = @BACKEND_OBJECTS_allocator@
-BACKEND_OBJECTS_balancer = @BACKEND_OBJECTS_balancer@
-BACKEND_OBJECTS_benchmark = @BACKEND_OBJECTS_benchmark@
-BACKEND_OBJECTS_cache = @BACKEND_OBJECTS_cache@
-BACKEND_OBJECTS_cache_append = @BACKEND_OBJECTS_cache_append@
-BACKEND_OBJECTS_debug = @BACKEND_OBJECTS_debug@
-BACKEND_OBJECTS_emitter = @BACKEND_OBJECTS_emitter@
-BACKEND_OBJECTS_file = @BACKEND_OBJECTS_file@
-BACKEND_OBJECTS_incapsulate = @BACKEND_OBJECTS_incapsulate@
-BACKEND_OBJECTS_insert_sort = @BACKEND_OBJECTS_insert_sort@
-BACKEND_OBJECTS_ipc = @BACKEND_OBJECTS_ipc@
-BACKEND_OBJECTS_list = @BACKEND_OBJECTS_list@
-BACKEND_OBJECTS_mphf = @BACKEND_OBJECTS_mphf@
-BACKEND_OBJECTS_null = @BACKEND_OBJECTS_null@
-BACKEND_OBJECTS_pool = @BACKEND_OBJECTS_pool@
-BACKEND_OBJECTS_rewrite = @BACKEND_OBJECTS_rewrite@
-BACKEND_OBJECTS_runtimecfg = @BACKEND_OBJECTS_runtimecfg@
-BACKEND_OBJECTS_structs = @BACKEND_OBJECTS_structs@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -158,6 +145,7 @@ DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
 DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
 DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
+DATA_OBJECTS_go_interface = @DATA_OBJECTS_go_interface@
 DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
 DATA_OBJECTS_io = @DATA_OBJECTS_io@
 DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
@@ -180,6 +168,7 @@ FGREP = @FGREP@
 FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
+GCCGO = @GCCGO@
 GREP = @GREP@
 HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
@@ -200,6 +189,8 @@ M4 = @M4@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MODULE_DIRS = @MODULE_DIRS@
+MODULE_DIST_DIRS = @MODULE_DIST_DIRS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -266,6 +257,7 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
+modulesdir = @modulesdir@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -279,8 +271,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-mphf_modules = hash_jenkins.c hash_jenkins.h hash_murmur.c \
-	hash_murmur.h mphf_chm_imp.c mphf_chm_imp.h mphf_bdz_imp.c \
+mphf_modules = mphf_chm_imp.c mphf_chm_imp.h mphf_bdz_imp.c \
 	mphf_bdz_imp.h
 noinst_LTLIBRARIES = libfrozen_backend_mphf.la
 libfrozen_backend_mphf_la_SOURCES = mphf.c mphf.h $(mphf_modules)
@@ -298,9 +289,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/backends/mphf/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/backends/index/mphf/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/libfrozen/backends/mphf/Makefile
+	  $(AUTOMAKE) --foreign src/libfrozen/backends/index/mphf/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -337,8 +328,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_mphf_la-hash_jenkins.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_mphf_la-hash_murmur.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_mphf_la-mphf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_mphf_la-mphf_bdz_imp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_backend_mphf_la-mphf_chm_imp.Plo@am__quote@
@@ -370,20 +359,6 @@ libfrozen_backend_mphf_la-mphf.lo: mphf.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mphf.c' object='libfrozen_backend_mphf_la-mphf.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -c -o libfrozen_backend_mphf_la-mphf.lo `test -f 'mphf.c' || echo '$(srcdir)/'`mphf.c
-
-libfrozen_backend_mphf_la-hash_jenkins.lo: hash_jenkins.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -MT libfrozen_backend_mphf_la-hash_jenkins.lo -MD -MP -MF $(DEPDIR)/libfrozen_backend_mphf_la-hash_jenkins.Tpo -c -o libfrozen_backend_mphf_la-hash_jenkins.lo `test -f 'hash_jenkins.c' || echo '$(srcdir)/'`hash_jenkins.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_backend_mphf_la-hash_jenkins.Tpo $(DEPDIR)/libfrozen_backend_mphf_la-hash_jenkins.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash_jenkins.c' object='libfrozen_backend_mphf_la-hash_jenkins.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -c -o libfrozen_backend_mphf_la-hash_jenkins.lo `test -f 'hash_jenkins.c' || echo '$(srcdir)/'`hash_jenkins.c
-
-libfrozen_backend_mphf_la-hash_murmur.lo: hash_murmur.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -MT libfrozen_backend_mphf_la-hash_murmur.lo -MD -MP -MF $(DEPDIR)/libfrozen_backend_mphf_la-hash_murmur.Tpo -c -o libfrozen_backend_mphf_la-hash_murmur.lo `test -f 'hash_murmur.c' || echo '$(srcdir)/'`hash_murmur.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_backend_mphf_la-hash_murmur.Tpo $(DEPDIR)/libfrozen_backend_mphf_la-hash_murmur.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash_murmur.c' object='libfrozen_backend_mphf_la-hash_murmur.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -c -o libfrozen_backend_mphf_la-hash_murmur.lo `test -f 'hash_murmur.c' || echo '$(srcdir)/'`hash_murmur.c
 
 libfrozen_backend_mphf_la-mphf_chm_imp.lo: mphf_chm_imp.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_backend_mphf_la_CFLAGS) $(CFLAGS) -MT libfrozen_backend_mphf_la-mphf_chm_imp.lo -MD -MP -MF $(DEPDIR)/libfrozen_backend_mphf_la-mphf_chm_imp.Tpo -c -o libfrozen_backend_mphf_la-mphf_chm_imp.lo `test -f 'mphf_chm_imp.c' || echo '$(srcdir)/'`mphf_chm_imp.c

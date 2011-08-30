@@ -17,7 +17,6 @@ typedef struct mphf_userdata {
 	hash_key_t           key_from;
 	hash_key_t           key_to;
 	hash_key_t           offset_out;
-	hash_key_t           keyid;
 } mphf_userdata;
 
 mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
@@ -26,35 +25,7 @@ mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
 	if(strcmp(string, "bdz_imp") == 0) return &mphf_protos[MPHF_TYPE_BDZ_IMP];
 	return NULL;
 } // }}}
-mphf_hash_proto_t *  mphf_string_to_hash_proto(char *string){ // {{{
-	if(string == NULL)                 return NULL;
-	if(strcmp(string, "jenkins") == 0) return &mphf_hash_protos[MPHF_HASH_JENKINS];
-	if(strcmp(string, "murmur") == 0)  return &mphf_hash_protos[MPHF_HASH_MURMUR];
-	return NULL;
-} // }}}
 
-/* hashes {{ */
-uint32_t        mphf_hash32      (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes){
-	if(type >= mphf_hash_protos_size)
-		return 0;
-	
-	return mphf_hash_protos[type].func_hash32(seed, key, key_size, hashes, nhashes);
-}
-uint64_t        mphf_hash64      (mphf_hash_types type, uint64_t seed, void *key, size_t key_size, uint64_t hashes[], size_t nhashes){
-	if(type >= mphf_hash_protos_size)
-		return 0;
-	
-	return mphf_hash_protos[type].func_hash64(seed, key, key_size, hashes, nhashes);
-}
-/* }} */
-
-static uint64_t mphf_key_str_to_key(mphf_t *mphf, char *key, size_t key_len){ // {{{
-	uint64_t value = 0;
-	
-	// TODO 64-bit
-	mphf->hash->func_hash64(0, key, key_len, (uint64_t *)&value, 1);
-	return value;
-} // }}}
 static ssize_t mphf_insert(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
 	ssize_t   ret;
 	
@@ -91,7 +62,6 @@ static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
 	off_t     i;
 	off_t     count = 0;
 	char     *buffer;
-	data_t   *key;
 	uint64_t  keyid;
 	uintmax_t rebuild_num = 0;
 	
@@ -122,8 +92,7 @@ redo:
 		
 		request_t r_read[] = {
 			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
-			{ userdata->keyid,     DATA_PTR_UINT64T(&keyid)                },
-			{ userdata->key_from,  DATA_VOID                               }, // TODO buffer
+			{ userdata->key_from,  DATA_PTR_UINT64T(&keyid)                },
 			{ userdata->key_to,    DATA_OFFT(i)                            },
 			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
 			{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
@@ -135,25 +104,13 @@ redo:
 			break;
 		}
 		
-		do {
-			if(userdata->keyid != 0){
-				hash_data_find(r_read, userdata->keyid,    &key, NULL);
-				if(key != NULL){
-					data_to_dt(ret, TYPE_UINT64T, keyid, key, NULL); 
-					break;
-				}
+		if(userdata->key_from != 0){
+			hash_data_copy(ret, TYPE_UINT64T, keyid, r_read, userdata->key_from);
+			if(ret != 0){
+				ret = error("no keyid found in item");
+				goto exit;
 			}
-			
-			if(userdata->key_from != 0){
-				hash_data_find(r_read, userdata->key_from, &key, NULL);
-				if(key != NULL){
-					keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_len(key, NULL));
-					break;
-				}
-			}
-			ret = error("no keyid or key found in item");
-			goto exit;
-		}while(0);
+		}
 		//printf("mphf: rebuild: key: %lx value: %x\n", keyid, (int)i);
 		
 		if( (ret = mphf_insert(userdata,
@@ -183,18 +140,14 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 	char            *key_from_str    = "key";
 	char            *key_to_str      = "offset";
 	char            *offset_out_str  = "offset_out";
-	char            *hash_type_str   = "murmur";
-	char            *keyid_str       = NULL;
 	char            *mphf_type_str   = NULL;
 	mphf_userdata   *userdata        = (mphf_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRINGT, key_from_str,    config, HK(key_from));
 	hash_data_copy(ret, TYPE_STRINGT, key_to_str,      config, HK(key_to));
 	hash_data_copy(ret, TYPE_STRINGT, offset_out_str,  config, HK(offset_out));
-	hash_data_copy(ret, TYPE_STRINGT, keyid_str,       config, HK(keyid));
 	
 	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
-	hash_data_copy(ret, TYPE_STRINGT, hash_type_str,   config, HK(hash));
 	hash_data_copy(ret, TYPE_UINTT,   buffer_size,     config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_UINTT,   max_rebuilds,    config, HK(max_rebuilds));
 	
@@ -207,14 +160,11 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 		return error("backend mphf parameter mphf_type invalid or not supplied");
 	
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
-	if((userdata->mphf.hash = mphf_string_to_hash_proto(hash_type_str)) == NULL)
-		return error("backend mphf parameter hash invalid");
 	
 	userdata->mphf.config     = config;
 	userdata->key_from        = hash_string_to_key(key_from_str);
 	userdata->key_to          = hash_string_to_key(key_to_str);
 	userdata->offset_out      = hash_string_to_key(offset_out_str);
-	userdata->keyid           = hash_string_to_key(keyid_str);
 	userdata->backend_data    = backend;
 	userdata->max_rebuilds    = max_rebuilds;
 	userdata->buffer_size     = buffer_size;
@@ -258,7 +208,6 @@ static int mphf_fork(backend_t *backend, backend_t *parent, request_t *request){
 
 static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {{{
 	ssize_t          ret;
-	data_t          *key;
 	off_t            key_out;
 	uint64_t         keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
@@ -266,15 +215,13 @@ static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {
 	if(userdata->mphf_proto == NULL)
 		return error("called fork_only'ed");
 	
-	hash_data_find(request, userdata->key_from, &key, NULL);
-	if(key == NULL)
+	hash_data_copy(ret, TYPE_UINT64T,  keyid,  request, userdata->key_from);
+	if(ret != 0)
 		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-	
-	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
 	
 	// get new key_out
 	request_t r_next[] = {
-		{ userdata->keyid,      DATA_PTR_UINT64T(&keyid)  },
+		{ userdata->key_from,   DATA_PTR_UINT64T(&keyid)  },
 		{ userdata->offset_out, DATA_PTR_OFFT(&key_out)   },
 		{ HK(ret),              DATA_PTR_SIZET(&ret)      },
 		hash_next(request)
@@ -291,18 +238,16 @@ error:
 } // }}}
 static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{{
 	ssize_t          ret;
-	data_t          *key;
 	uint64_t         key_out, key_new_out, keyid;
 	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
 	
 	if(userdata->mphf_proto == NULL)
 		return error("called fork_only'ed");
 	
-	hash_data_find(request, userdata->key_from, &key, NULL);
-	if(key == NULL)
+	hash_data_copy(ret, TYPE_UINT64T,  keyid,  request, userdata->key_from);
+	if(ret != 0)
 		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	
-	keyid = mphf_key_str_to_key(&userdata->mphf, data_value_ptr(key), data_value_len(key));
 	switch(userdata->mphf_proto->func_query(&userdata->mphf, keyid, &key_out)){
 		case MPHF_QUERY_NOTFOUND: return -EBADF;
 		case MPHF_QUERY_FOUND:

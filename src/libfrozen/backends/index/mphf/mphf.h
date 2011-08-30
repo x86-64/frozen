@@ -10,12 +10,6 @@ typedef enum mphf_types {
 	MPHF_TYPE_BDZ_IMP = 2
 } mphf_types;
 
-typedef enum mphf_hash_types {
-	MPHF_HASH_JENKINS = 0,
-	MPHF_HASH_MURMUR  = 1
-} mphf_hash_types;
-
-
 typedef struct mphf_t             mphf_t;
 typedef struct mphf_proto_t       mphf_proto_t;
 typedef struct mphf_hash_proto_t  mphf_hash_proto_t;
@@ -29,9 +23,6 @@ typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, uint64_t key, uint64_t 
 typedef ssize_t  (*mphf_func_update)      (mphf_t *mphf, uint64_t key, uint64_t  value);
 typedef ssize_t  (*mphf_func_query)       (mphf_t *mphf, uint64_t key, uint64_t *value);
 typedef ssize_t  (*mphf_func_delete)      (mphf_t *mphf, uint64_t key);
-
-typedef uint32_t (*mphf_hash_hash32)      (uint32_t seed, char *k, size_t keylen, uint32_t hashes[], size_t nhashes);
-typedef uint64_t (*mphf_hash_hash64)      (uint64_t seed, char *k, size_t keylen, uint64_t hashes[], size_t nhashes);
 
 struct mphf_t {
 	config_t                *config;
@@ -54,15 +45,6 @@ struct mphf_proto_t {
 	mphf_func_delete         func_delete;
 };
 
-struct mphf_hash_proto_t {
-	mphf_hash_hash32         func_hash32;
-	mphf_hash_hash64         func_hash64;
-};
-
-mphf_hash_proto_t *  mphf_string_to_hash_proto (char *string);
-uint32_t             mphf_hash32               (mphf_hash_types type, uint32_t seed, void *key, size_t key_size, uint32_t hashes[], size_t nhashes);
-uint64_t             mphf_hash64               (mphf_hash_types type, uint64_t seed, void *key, size_t key_size, uint64_t hashes[], size_t nhashes);
-
 #ifdef MPHF_C
 #include <mphf_chm_imp.h>
 #include <mphf_bdz_imp.h>
@@ -81,19 +63,6 @@ static mphf_proto_t mphf_protos[] = {
 	}
 };
 //static size_t mphf_protos_size = sizeof(mphf_protos) / sizeof(mphf_protos[0]);
-
-#include <hash_jenkins.h>
-#include <hash_murmur.h>
-static mphf_hash_proto_t mphf_hash_protos[] = {
-	[MPHF_HASH_JENKINS] = {
-		.func_hash32  = jenkins32_hash,
-		.func_hash64  = jenkins64_hash
-	},
-	[MPHF_HASH_MURMUR]  = {
-		.func_hash64  = murmur64_hash
-	}
-};
-static size_t mphf_hash_protos_size = sizeof(mphf_hash_protos) / sizeof(mphf_hash_protos[0]);
 
 #endif
 #endif

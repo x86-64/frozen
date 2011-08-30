@@ -11,8 +11,7 @@ all-local: $(PERLMAKEFILE)
 
 clean-local: $(PERLMAKEFILE)
 	cd $(PERLOUTDIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-	rm -rf $(PERLOUTDIR)/Makefile.old
-	rm -rf $(PERLOUTDIR)/data_*.dat
+	rm -rf $(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.old $(PERLOUTDIR)/data_*.dat
 
 check-local: $(PERLMAKEFILE)
 	cd $(PERLOUTDIR) && $(PERL) t/Frozen.t
@@ -20,6 +19,7 @@ check-local: $(PERLMAKEFILE)
 install-exec-local: $(PERLMAKEFILE)
 	cd $(PERLOUTDIR) && $(MAKE) $(AM_MAKEFLAGS) DESTDIR=$(DESTDIR) install
 
+CLEANFILES = 
 EXTRA_DIST = \
 	swig.i datatypes.i hashkeys.i \
 	$(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t \

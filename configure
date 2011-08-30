@@ -619,27 +619,8 @@ HAVE_DEBUG
 MODULE_DIRS
 DATA_DIRS
 BACKEND_DIRS
-BACKEND_OBJECTS_storage_file
-BACKEND_OBJECTS_rest_insert_sort
-BACKEND_OBJECTS_request_rewrite
-BACKEND_OBJECTS_request_emitter
-BACKEND_OBJECTS_request_debug
-BACKEND_OBJECTS_request_balancer
-BACKEND_OBJECTS_index_mphf
-BACKEND_OBJECTS_index_lookup
-BACKEND_OBJECTS_examples_null
-BACKEND_OBJECTS_data_structs
-BACKEND_OBJECTS_data_list
-BACKEND_OBJECTS_data_incapsulate
-BACKEND_OBJECTS_data_allocator
-BACKEND_OBJECTS_communication_ipc
-BACKEND_OBJECTS_cache_cache_append
-BACKEND_OBJECTS_cache_cache
-BACKEND_OBJECTS_backend_pool
-BACKEND_OBJECTS_backend_factory
 BACKEND_LIBS_SELECTED
 BACKEND_DIST_DIRS
-BACKEND_OBJECTS_backend_benchmark
 DATA_OBJECTS_void
 DATA_OBJECTS_uint
 DATA_OBJECTS_struct
@@ -833,6 +814,11 @@ enable_backendincapsulate
 enable_backendlist
 enable_backendstructs
 enable_backendnull
+enable_backendjenkins32
+enable_backendjenkins64
+enable_backendmurmur2_32
+enable_backendmurmur2_64
+enable_backendmurmur2_64_on_32
 enable_backendlookup
 enable_backendmphf
 enable_backendbalancer
@@ -1538,6 +1524,16 @@ Optional Features:
   --disable-backend-structs
                           disable backend structs
   --disable-backend-null  disable backend null
+  --disable-backend-jenkins32
+                          disable backend jenkins32
+  --disable-backend-jenkins64
+                          disable backend jenkins64
+  --disable-backend-murmur2-32
+                          disable backend murmur2-32
+  --disable-backend-murmur2-64
+                          disable backend murmur2-64
+  --disable-backend-murmur2-64-on-32
+                          disable backend murmur2-64-on-32
   --disable-backend-lookup
                           disable backend lookup
   --disable-backend-mphf  disable backend mphf
@@ -18304,6 +18300,7 @@ fi
 
 
 
+
 	# Check whether --enable-backendbenchmark was given.
 if test "${enable_backendbenchmark+set}" = set; then :
   enableval=$enable_backendbenchmark;
@@ -18321,11 +18318,9 @@ fi
 	if test "${enable_backendbenchmark}" = "yes"; then
 		BACKEND_DIR_benchmark="backend/benchmark"
 		BACKEND_DEP_benchmark=""
-		BACKEND_OBJECTS_backend_benchmark="$BACKEND_OBJECTS_backend_benchmark libfrozen_backend_benchmark_la-benchmark.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED benchmark"
+				BACKEND_SELECTED="$BACKEND_SELECTED benchmark"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_backend_benchmark" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/benchmark/Makefile"
@@ -18336,6 +18331,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/benchmark/libfrozen_backend_benchmark.la"
 
 	fi
+
 
 
 
@@ -18359,11 +18355,9 @@ fi
 	if test "${enable_backendfactory}" = "yes"; then
 		BACKEND_DIR_factory="backend/factory"
 		BACKEND_DEP_factory=""
-		BACKEND_OBJECTS_backend_factory="$BACKEND_OBJECTS_backend_factory libfrozen_backend_factory_la-factory.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED factory"
+				BACKEND_SELECTED="$BACKEND_SELECTED factory"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_backend_factory" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/factory/Makefile"
@@ -18374,6 +18368,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/factory/libfrozen_backend_factory.la"
 
 	fi
+
 
 
 
@@ -18397,11 +18392,9 @@ fi
 	if test "${enable_backendpool}" = "yes"; then
 		BACKEND_DIR_pool="backend/pool"
 		BACKEND_DEP_pool=""
-		BACKEND_OBJECTS_backend_pool="$BACKEND_OBJECTS_backend_pool libfrozen_backend_pool_la-pool.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED pool"
+				BACKEND_SELECTED="$BACKEND_SELECTED pool"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_backend_pool" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/pool/Makefile"
@@ -18412,6 +18405,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/pool/libfrozen_backend_pool.la"
 
 	fi
+
 
 
 
@@ -18435,11 +18429,9 @@ fi
 	if test "${enable_backendcache}" = "yes"; then
 		BACKEND_DIR_cache="cache/cache"
 		BACKEND_DEP_cache=""
-		BACKEND_OBJECTS_cache_cache="$BACKEND_OBJECTS_cache_cache libfrozen_backend_cache_la-cache.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED cache"
+				BACKEND_SELECTED="$BACKEND_SELECTED cache"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_cache_cache" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/cache/cache/Makefile"
@@ -18450,6 +18442,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED cache/cache/libfrozen_backend_cache.la"
 
 	fi
+
 
 
 
@@ -18473,11 +18466,9 @@ fi
 	if test "${enable_backendcache_append}" = "yes"; then
 		BACKEND_DIR_cache_append="cache/cache_append"
 		BACKEND_DEP_cache_append=""
-		BACKEND_OBJECTS_cache_cache_append="$BACKEND_OBJECTS_cache_cache_append libfrozen_backend_cache_append_la-cache_append.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED cache_append"
+				BACKEND_SELECTED="$BACKEND_SELECTED cache_append"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_cache_cache_append" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/cache/cache_append/Makefile"
@@ -18488,6 +18479,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED cache/cache_append/libfrozen_backend_cache_append.la"
 
 	fi
+
 
 
 
@@ -18511,11 +18503,9 @@ fi
 	if test "${enable_backendipc}" = "yes"; then
 		BACKEND_DIR_ipc="communication/ipc"
 		BACKEND_DEP_ipc=""
-		BACKEND_OBJECTS_communication_ipc="$BACKEND_OBJECTS_communication_ipc libfrozen_backend_ipc_la-ipc.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED ipc"
+				BACKEND_SELECTED="$BACKEND_SELECTED ipc"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_communication_ipc" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/communication/ipc/Makefile"
@@ -18526,6 +18516,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED communication/ipc/libfrozen_backend_ipc.la"
 
 	fi
+
 
 
 
@@ -18549,11 +18540,9 @@ fi
 	if test "${enable_backendallocator}" = "yes"; then
 		BACKEND_DIR_allocator="data/allocator"
 		BACKEND_DEP_allocator=""
-		BACKEND_OBJECTS_data_allocator="$BACKEND_OBJECTS_data_allocator libfrozen_backend_allocator_la-allocator.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED allocator"
+				BACKEND_SELECTED="$BACKEND_SELECTED allocator"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_data_allocator" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/allocator/Makefile"
@@ -18564,6 +18553,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/allocator/libfrozen_backend_allocator.la"
 
 	fi
+
 
 
 
@@ -18587,11 +18577,9 @@ fi
 	if test "${enable_backendincapsulate}" = "yes"; then
 		BACKEND_DIR_incapsulate="data/incapsulate"
 		BACKEND_DEP_incapsulate=""
-		BACKEND_OBJECTS_data_incapsulate="$BACKEND_OBJECTS_data_incapsulate libfrozen_backend_incapsulate_la-incapsulate.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED incapsulate"
+				BACKEND_SELECTED="$BACKEND_SELECTED incapsulate"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_data_incapsulate" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/incapsulate/Makefile"
@@ -18602,6 +18590,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/incapsulate/libfrozen_backend_incapsulate.la"
 
 	fi
+
 
 
 
@@ -18625,11 +18614,9 @@ fi
 	if test "${enable_backendlist}" = "yes"; then
 		BACKEND_DIR_list="data/list"
 		BACKEND_DEP_list=""
-		BACKEND_OBJECTS_data_list="$BACKEND_OBJECTS_data_list libfrozen_backend_list_la-list.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED list"
+				BACKEND_SELECTED="$BACKEND_SELECTED list"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_data_list" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/list/Makefile"
@@ -18640,6 +18627,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/list/libfrozen_backend_list.la"
 
 	fi
+
 
 
 
@@ -18663,11 +18651,9 @@ fi
 	if test "${enable_backendstructs}" = "yes"; then
 		BACKEND_DIR_structs="data/structs"
 		BACKEND_DEP_structs=""
-		BACKEND_OBJECTS_data_structs="$BACKEND_OBJECTS_data_structs libfrozen_backend_structs_la-structs.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED structs"
+				BACKEND_SELECTED="$BACKEND_SELECTED structs"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
@@ -18678,6 +18664,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
 
 	fi
+
 
 
 
@@ -18701,11 +18688,9 @@ fi
 	if test "${enable_backendnull}" = "yes"; then
 		BACKEND_DIR_null="examples/null"
 		BACKEND_DEP_null=""
-		BACKEND_OBJECTS_examples_null="$BACKEND_OBJECTS_examples_null libfrozen_backend_null_la-null.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED null"
+				BACKEND_SELECTED="$BACKEND_SELECTED null"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_examples_null" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/examples/null/Makefile"
@@ -18716,6 +18701,189 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED examples/null/libfrozen_backend_null.la"
 
 	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendjenkins32 was given.
+if test "${enable_backendjenkins32+set}" = set; then :
+  enableval=$enable_backendjenkins32;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendjenkins32}" = "yes"; then
+			enable_backendjenkins32="no"
+		else
+			enable_backendjenkins32="yes"
+		fi
+	fi
+
+	if test "${enable_backendjenkins32}" = "yes"; then
+		BACKEND_DIR_jenkins32="hash/jenkins"
+		BACKEND_DEP_jenkins32=""
+				BACKEND_SELECTED="$BACKEND_SELECTED jenkins32"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_hash_jenkins" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/jenkins/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/jenkins"
+
+		BACKEND_MAKEFILE_hash_jenkins=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/jenkins/libfrozen_backend_jenkins.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendjenkins64 was given.
+if test "${enable_backendjenkins64+set}" = set; then :
+  enableval=$enable_backendjenkins64;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendjenkins64}" = "yes"; then
+			enable_backendjenkins64="no"
+		else
+			enable_backendjenkins64="yes"
+		fi
+	fi
+
+	if test "${enable_backendjenkins64}" = "yes"; then
+		BACKEND_DIR_jenkins64="hash/jenkins"
+		BACKEND_DEP_jenkins64=""
+				BACKEND_SELECTED="$BACKEND_SELECTED jenkins64"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_hash_jenkins" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/jenkins/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/jenkins"
+
+		BACKEND_MAKEFILE_hash_jenkins=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/jenkins/libfrozen_backend_jenkins.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendmurmur2_32 was given.
+if test "${enable_backendmurmur2_32+set}" = set; then :
+  enableval=$enable_backendmurmur2_32;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendmurmur2_32}" = "yes"; then
+			enable_backendmurmur2_32="no"
+		else
+			enable_backendmurmur2_32="yes"
+		fi
+	fi
+
+	if test "${enable_backendmurmur2_32}" = "yes"; then
+		BACKEND_DIR_murmur2_32="hash/murmur"
+		BACKEND_DEP_murmur2_32=""
+				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_32"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
+
+		BACKEND_MAKEFILE_hash_murmur=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendmurmur2_64 was given.
+if test "${enable_backendmurmur2_64+set}" = set; then :
+  enableval=$enable_backendmurmur2_64;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendmurmur2_64}" = "yes"; then
+			enable_backendmurmur2_64="no"
+		else
+			enable_backendmurmur2_64="yes"
+		fi
+	fi
+
+	if test "${enable_backendmurmur2_64}" = "yes"; then
+		BACKEND_DIR_murmur2_64="hash/murmur"
+		BACKEND_DEP_murmur2_64=""
+				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_64"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
+
+		BACKEND_MAKEFILE_hash_murmur=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendmurmur2_64_on_32 was given.
+if test "${enable_backendmurmur2_64_on_32+set}" = set; then :
+  enableval=$enable_backendmurmur2_64_on_32;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendmurmur2_64_on_32}" = "yes"; then
+			enable_backendmurmur2_64_on_32="no"
+		else
+			enable_backendmurmur2_64_on_32="yes"
+		fi
+	fi
+
+	if test "${enable_backendmurmur2_64_on_32}" = "yes"; then
+		BACKEND_DIR_murmur2_64_on_32="hash/murmur"
+		BACKEND_DEP_murmur2_64_on_32=""
+				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_64_on_32"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
+
+		BACKEND_MAKEFILE_hash_murmur=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
+
+	fi
+
 
 
 
@@ -18739,11 +18907,9 @@ fi
 	if test "${enable_backendlookup}" = "yes"; then
 		BACKEND_DIR_lookup="index/lookup"
 		BACKEND_DEP_lookup=""
-		BACKEND_OBJECTS_index_lookup="$BACKEND_OBJECTS_index_lookup libfrozen_backend_lookup_la-lookup.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED lookup"
+				BACKEND_SELECTED="$BACKEND_SELECTED lookup"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_index_lookup" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/lookup/Makefile"
@@ -18754,6 +18920,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/lookup/libfrozen_backend_lookup.la"
 
 	fi
+
 
 
 
@@ -18777,11 +18944,9 @@ fi
 	if test "${enable_backendmphf}" = "yes"; then
 		BACKEND_DIR_mphf="index/mphf"
 		BACKEND_DEP_mphf=""
-		BACKEND_OBJECTS_index_mphf="$BACKEND_OBJECTS_index_mphf libfrozen_backend_mphf_la-mphf.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED mphf"
+				BACKEND_SELECTED="$BACKEND_SELECTED mphf"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_index_mphf" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/mphf/Makefile"
@@ -18792,6 +18957,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/mphf/libfrozen_backend_mphf.la"
 
 	fi
+
 
 
 
@@ -18815,11 +18981,9 @@ fi
 	if test "${enable_backendbalancer}" = "yes"; then
 		BACKEND_DIR_balancer="request/balancer"
 		BACKEND_DEP_balancer=""
-		BACKEND_OBJECTS_request_balancer="$BACKEND_OBJECTS_request_balancer libfrozen_backend_balancer_la-balancer.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED balancer"
+				BACKEND_SELECTED="$BACKEND_SELECTED balancer"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_request_balancer" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/balancer/Makefile"
@@ -18830,6 +18994,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/balancer/libfrozen_backend_balancer.la"
 
 	fi
+
 
 
 
@@ -18853,11 +19018,9 @@ fi
 	if test "${enable_backenddebug}" = "yes"; then
 		BACKEND_DIR_debug="request/debug"
 		BACKEND_DEP_debug=""
-		BACKEND_OBJECTS_request_debug="$BACKEND_OBJECTS_request_debug libfrozen_backend_debug_la-debug.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED debug"
+				BACKEND_SELECTED="$BACKEND_SELECTED debug"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_request_debug" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/debug/Makefile"
@@ -18868,6 +19031,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/debug/libfrozen_backend_debug.la"
 
 	fi
+
 
 
 
@@ -18891,11 +19055,9 @@ fi
 	if test "${enable_backendemitter}" = "yes"; then
 		BACKEND_DIR_emitter="request/emitter"
 		BACKEND_DEP_emitter=""
-		BACKEND_OBJECTS_request_emitter="$BACKEND_OBJECTS_request_emitter libfrozen_backend_emitter_la-emitter.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED emitter"
+				BACKEND_SELECTED="$BACKEND_SELECTED emitter"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_request_emitter" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/emitter/Makefile"
@@ -18906,6 +19068,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/emitter/libfrozen_backend_emitter.la"
 
 	fi
+
 
 
 
@@ -18929,11 +19092,9 @@ fi
 	if test "${enable_backendrewrite}" = "yes"; then
 		BACKEND_DIR_rewrite="request/rewrite"
 		BACKEND_DEP_rewrite=""
-		BACKEND_OBJECTS_request_rewrite="$BACKEND_OBJECTS_request_rewrite libfrozen_backend_rewrite_la-rewrite.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED rewrite"
+				BACKEND_SELECTED="$BACKEND_SELECTED rewrite"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_request_rewrite" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/rewrite/Makefile"
@@ -18944,6 +19105,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/rewrite/libfrozen_backend_rewrite.la"
 
 	fi
+
 
 
 
@@ -18967,11 +19129,9 @@ fi
 	if test "${enable_backendinsert_sort}" = "yes"; then
 		BACKEND_DIR_insert_sort="rest/insert_sort"
 		BACKEND_DEP_insert_sort=""
-		BACKEND_OBJECTS_rest_insert_sort="$BACKEND_OBJECTS_rest_insert_sort libfrozen_backend_insert_sort_la-insert_sort.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED insert_sort"
+				BACKEND_SELECTED="$BACKEND_SELECTED insert_sort"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_rest_insert_sort" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/rest/insert_sort/Makefile"
@@ -18982,6 +19142,7 @@ fi
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED rest/insert_sort/libfrozen_backend_insert_sort.la"
 
 	fi
+
 
 
 
@@ -19005,11 +19166,9 @@ fi
 	if test "${enable_backendfile}" = "yes"; then
 		BACKEND_DIR_file="storage/file"
 		BACKEND_DEP_file=""
-		BACKEND_OBJECTS_storage_file="$BACKEND_OBJECTS_storage_file libfrozen_backend_file_la-file.lo"
-		BACKEND_SELECTED="$BACKEND_SELECTED file"
+				BACKEND_SELECTED="$BACKEND_SELECTED file"
 
-
-	fi
+			fi
 
 	if test "$BACKEND_MAKEFILE_storage_file" = ""; then
 		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/storage/file/Makefile"
