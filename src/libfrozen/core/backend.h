@@ -12,6 +12,8 @@ enum request_actions {
 	ACTION_CRWD_COUNT = 32,
 	ACTION_CRWD_CUSTOM = 64,
 	
+	ACTION_REBUILD = 128,
+
 	REQUEST_INVALID = 0
 };
 
