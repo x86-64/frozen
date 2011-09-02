@@ -1,18 +1,76 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup modules
+ * @addtogroup mod_backend_rebuild Module 'backend/rebuild'
+ */
+/**
+ * @ingroup mod_backend_rebuild
+ * @page page_rebuild_info Description
+ *
+ * This module rebuild chain when underlying backend turns out unconsistent and return special error code
+ */
+/**
+ * @ingroup mod_backend_rebuild
+ * @page page_rebuild_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "backend/rebuild",
+ *              enum_method             = 
+ *                                        "iterate"           # count elements and read all of them from 0 to <count>
+ *                                        "cursor"            # create cursor at starting position and start iterate
+ *              retry_request           = (uint_t)'1'         # rerun request with triggered rebuild after rebuild, default 1
+ *              req_rebuild             = { ... }             # custom rebuild request
+ *              req_rebuild_enable      = (uint_t)'1'         # enable\disable rebuild request at all, default 1
+ *              req_rebuild_destination = "far_index"         # set rebuild request destination backend
+ *              
+ *              # options for 'iterate' method
+ *                 offset_key  = "offset",                    # key with with would be current index requested
+ *                 req_count   = { ... }                      # additional parameters for count request
+ *                 req_read    = { ... }                      # additional parameters for read request (eg. buffer)
+ * }
+ * @endcode
+ */
+/**
+ * @ingroup mod_backend_rebuild
+ * @page page_rebuild_io Input and output
+ * 
+ * Module by default pass all requests to underlying backend unchanged.
+ * If return code equal -EBADF, rebuild started.
+ *
+ * @li Enum 'iterate' count request
+ * @return 0:      request ok
+ * @return -<ANY>  request failed
+ * 
+ * @li Enum 'iterate' read request
+ * @return 0:      request ok
+ * @return -EBADF: request failed, chain is again in unconsistend state, starting rebuild again
+ * @return -<ANY>  request failed
+ * 
+ * @li Rebuild request
+ * @return -EBADF: request ok
+ * @return -<ANY>: request failed
+ * 
+ */
+
 #define EMODULE 24
 
 typedef enum enum_method {
 	ENUM_COUNT_AND_READ_ITERATE,
-	ENUM_CURSOR_ITERATE,           // TODO
+	ENUM_CURSOR_ITERATE,
 
 	ENUM_DEFAULT = ENUM_COUNT_AND_READ_ITERATE
 } enum_method;
 
 typedef struct rebuild_userdata {
 	enum_method            enum_method;
-	hash_t                *rebuild_signal;
-	uintmax_t              requery_after_rebuild;
+	uintmax_t              retry_request;
+	hash_t                *req_rebuild;
+	hash_t                *req_count;
+	hash_t                *req_read;
+	hash_key_t             hk_offset;
 } rebuild_userdata;
 
 static enum_method  rebuild_string_to_method(char *str){ // {{{
@@ -23,57 +81,54 @@ static enum_method  rebuild_string_to_method(char *str){ // {{{
 	return ENUM_DEFAULT;
 } // }}}
 static ssize_t rebuild_rebuild(backend_t *backend){ // {{{
-	ssize_t                ret;
-	//uint64_t               keyid;
-	off_t                  i;
-	off_t                  count = 0;
+	ssize_t                ret, rret;
+	rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
 	//uintmax_t              rebuild_num = 0;
-	//char                  *buffer;
-	//rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
 	
-	
-	// prepare buffer
-	//if( (buffer = malloc(userdata->buffer_size)) == NULL)
-	//	return error("malloc failed");
-	
-//redo:
+redo:
 	//if(rebuild_num++ >= userdata->max_rebuilds)
 	//	return error("rebuild max rebuilds reached");
-
-	//if( (ret = userdata->rebuild_proto->func_rebuild(&userdata->rebuild, count)) < 0)
-	//	return ret;
 	
-	
-	// count elements
-	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
-		{ HK(buffer), DATA_PTR_OFFT(&count)           },
-		{ HK(ret),    DATA_PTR_SIZET(&ret)            },
-		hash_end
-	};
-	if(backend_pass(backend, r_count) < 0 || ret < 0)
-		return 0;
-	
-	// process items
-	for(i=0; i<count; i++){
-	//	keyid = 0;
-		
-		request_t r_read[] = {
-			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
-	//		{ userdata->key_from,  DATA_PTR_UINT64T(&keyid)                },
-	//		{ userdata->key_to,    DATA_OFFT(i)                            },
-	//		{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
-	//		{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
-			{ HK(ret),             DATA_PTR_SIZET(&ret)                    },
-			hash_end
-		};
-		if( backend_pass(backend, r_read) < 0 || ret < 0){
-			ret = error("failed call\n");
-			break;
-		}
+	if(userdata->req_rebuild != NULL){
+		if( (ret = backend_pass(backend, userdata->req_rebuild)) != -EBADF) // NOTE rebuild request must return -EBADF as good result
+			return ret;
 	}
 	
-	//free(buffer);
+	switch(userdata->enum_method){
+		case ENUM_COUNT_AND_READ_ITERATE:;
+			uintmax_t              i;
+			uintmax_t              count = 0;
+			
+			request_t r_count[] = {
+				{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
+				{ HK(buffer), DATA_PTR_UINTT(&count)          },
+				{ HK(ret),    DATA_PTR_SIZET(&rret)           },
+				hash_next(userdata->req_count)
+			};
+			if( (ret = backend_pass(backend, r_count)) < 0 )
+				return ret;
+			if( rret < 0 )
+				return rret;
+			
+			for(i=0; i<count; i++){
+				request_t r_read[] = {
+					{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
+					{ userdata->hk_offset, DATA_UINTT(i)                           }, // copy of i, not ptr
+					{ HK(ret),             DATA_PTR_SIZET(&rret)                   },
+					hash_next(userdata->req_read)
+				};
+				if( (ret = backend_pass(backend, r_read)) < 0 )
+					return ret;
+				if( rret == -EBADF )
+					goto redo;   // start from beginning
+				if( rret < 0 )
+					return rret;
+			}
+			break;
+		case ENUM_CURSOR_ITERATE:
+			// TODO actual code
+			break;
+	};
 	return 0;
 } // }}}
 
@@ -91,39 +146,48 @@ static int rebuild_destroy(backend_t *backend){ // {{{
 } // }}}
 static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	uintmax_t              rebuild_sig_emit  = 1;
-	char                  *rebuild_sig_name  = NULL;
-	hash_t                *rebuild_signal    = NULL;
+	uintmax_t              req_rebuild_enable= 1;
+	char                  *req_rebuild_dest  = NULL;
+	hash_t                *req_rebuild       = NULL;
+	hash_t                *req_count         = NULL;
+	hash_t                *req_read          = NULL;
 	char                  *enum_method_str   = NULL;
+	char                  *hk_offset_str     = NULL;
 	rebuild_userdata      *userdata          = (rebuild_userdata *)backend->userdata;
 	
-	userdata->requery_after_rebuild = 1;
+	userdata->retry_request = 1;
 	
+	hash_data_copy(ret, TYPE_UINTT,   userdata->retry_request,         config, HK(retry_request));
 	hash_data_copy(ret, TYPE_STRINGT, enum_method_str,                 config, HK(enum_method));
-	hash_data_copy(ret, TYPE_UINTT,   userdata->requery_after_rebuild, config, HK(requery_after_rebuild));
+	hash_data_copy(ret, TYPE_STRINGT, hk_offset_str,                   config, HK(offset_key));
+	hash_data_copy(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
+	hash_data_copy(ret, TYPE_HASHT,   req_read,                        config, HK(req_read));
+	hash_data_copy(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
+	hash_data_copy(ret, TYPE_UINTT,   req_rebuild_enable,              config, HK(req_rebuild_enable));
+	hash_data_copy(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
 	
-	hash_data_copy(ret, TYPE_UINTT,   rebuild_sig_emit,                config, HK(sig_rebuild));
-	hash_data_copy(ret, TYPE_HASHT,   rebuild_signal,                  config, HK(sig_rebuild_hash));
-	hash_data_copy(ret, TYPE_STRINGT, rebuild_sig_name,                config, HK(sig_rebuild_destination));
-	if(rebuild_sig_emit != 0){                           // emit allowed, prepare signal
+	if(req_rebuild_enable != 0){                         // emit allowed, prepare signal
 		hash_t r_signal_orig[] = {
 			{ HK(action),        DATA_UINT32T(ACTION_REBUILD)           },
 			hash_end	
 		};
-		if(rebuild_signal == NULL)                   // no custom signal supplied, use standard
-			rebuild_signal = r_signal_orig;
+		if(req_rebuild == NULL)                      // no custom signal supplied, use standard
+			req_rebuild = r_signal_orig;
 		
 		hash_t r_signal_dest[] = {
-			{ HK(destination),   DATA_PTR_STRING_AUTO(rebuild_sig_name) },
-			hash_next(rebuild_signal)
+			{ HK(destination),   DATA_PTR_STRING_AUTO(req_rebuild_dest) },
+			hash_next(req_rebuild)
 		};
-		if(rebuild_sig_name != NULL)                 // destination supplied, append to hash
-			rebuild_signal = r_signal_dest;
+		if(req_rebuild_dest != NULL)                 // destination supplied, append to hash
+			req_rebuild = r_signal_dest;
 		
-		userdata->rebuild_signal = hash_copy(rebuild_signal);
+		userdata->req_rebuild = hash_copy(req_rebuild);
 	}
 	
 	userdata->enum_method = rebuild_string_to_method(enum_method_str);
+	userdata->hk_offset   = hash_string_to_key(hk_offset_str);
+	userdata->req_count   = hash_copy(req_count);
+	userdata->req_read    = hash_copy(req_read);
 
 	return 0;
 } // }}}
@@ -143,7 +207,7 @@ retry:;
 	}else{
 		if(ret2 == -EBADF){
 			rebuild_rebuild(backend);
-			if(userdata->requery_after_rebuild != 0)
+			if(userdata->retry_request != 0)
 				goto retry;
 		}
 		return ret2;

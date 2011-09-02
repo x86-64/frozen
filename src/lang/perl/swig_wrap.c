@@ -5340,208 +5340,228 @@ XS(SWIG_init) {
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_offset_out", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_offset_key", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(83)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_offset_to", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_offset_out", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(84)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_on_destroy", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_offset_to", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(85)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_on_end", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_on_destroy", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(86)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_on_start", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_on_end", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(87)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_output", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_on_start", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(88)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_output_out", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_output", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(89)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_param", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_output_out", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(90)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_parameter", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_param", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(91)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_parameter_request", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_parameter", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(92)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_path", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_parameter_request", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(93)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_perlevel", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_path", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(94)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_pool", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_perlevel", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(95)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_pool_interval", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_pool", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(96)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_pool_size", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_pool_interval", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(97)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_post_request", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_pool_size", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(98)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_pre_request", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_post_request", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(99)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_random", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_pre_request", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(100)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_read_size", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_random", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(101)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_readonly", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_read_size", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(102)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_real_offset", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_readonly", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(103)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_requery_after_rebuild", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_real_offset", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(104)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_request", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_req_count", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(105)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_ret", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_req_read", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(106)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_retry", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_req_rebuild", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(107)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_role", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_req_rebuild_destination", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(108)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_script", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_req_rebuild_enable", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(109)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_sig_rebuild", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_requery_after_rebuild", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(110)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_sig_rebuild_destination", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_request", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(111)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_sig_rebuild_hash", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_ret", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(112)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_size", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_retry", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(113)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_size_old", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_retry_request", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(114)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_string", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_role", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(115)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_structure", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_script", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(116)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_tick_interval", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_size", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(117)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_type", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_size_old", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(118)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_url", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_string", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(119)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_value", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_structure", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(120)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_value_bits", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_tick_interval", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(121)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_values", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_type", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(122)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
-    SV *sv = get_sv((char*) SWIG_prefix "HK_verbose", TRUE | 0x2 | GV_ADDMULTI);
+    SV *sv = get_sv((char*) SWIG_prefix "HK_url", TRUE | 0x2 | GV_ADDMULTI);
     sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(123)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "HK_value", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(124)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "HK_value_bits", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(125)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "HK_values", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(126)));
+    SvREADONLY_on(sv);
+  } while(0) /*@SWIG@*/;
+  /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {
+    SV *sv = get_sv((char*) SWIG_prefix "HK_verbose", TRUE | 0x2 | GV_ADDMULTI);
+    sv_setsv(sv, SWIG_From_unsigned_SS_long_SS_long  SWIG_PERL_CALL_ARGS_1((unsigned long long)(127)));
     SvREADONLY_on(sv);
   } while(0) /*@SWIG@*/;
   /*@SWIG:/usr/share/swig/2.0.4/perl5/perltypemaps.swg,65,%set_constant@*/ do {

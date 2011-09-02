@@ -1,5 +1,47 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup modules
+ * @addtogroup mod_backend_lookup Module 'index/lookup'
+ */
+/**
+ * @ingroup mod_backend_lookup
+ * @page page_lookup_info Description
+ *
+ * This module query supplied index for key, and pass request to underlying backends with returned value
+ */
+/**
+ * @ingroup mod_backend_lookup
+ * @page page_lookup_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "index/lookup",
+ *              output                  = "offset",           # output key for value
+ *              output_out              = "offset_out",       # output_out key for value, it changed from underlying backends
+ *              readonly                = (uint_t)'1',        # forbid writes and updates to index, default 0
+ *              index                   = 
+ *                                        "index_name",       # existing index
+ *                                        { ... },            # new index configuration
+ * }
+ * @endcode
+ */
+/**
+ * @ingroup mod_backend_lookup
+ * @page page_lookup_io Input and output
+ * 
+ * First, query supplied index with request. Next, pass request to underlying backends with returned value
+ * 
+ * @li If index return error - request stopped.
+ * @li If after passing request <output> and <output_out> data differs - module will update index.
+ *
+ * Input rebuild request handles by following algo:
+ * @li check destination (current backend name), if not match - pass lower in chain
+ * @li pass request to index. index in any case return ret code less than 0, so return triggered
+ *
+ */
+
 #define EMODULE 21
 
 typedef struct lookup_userdata {
@@ -48,11 +90,22 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 
 static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
+	char                  *destination       = NULL;
 	data_t                 d_void            = DATA_VOID;
 	data_t                *d_output;
 	data_t                *d_output_out;
 	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
 	
+	// NOTE Input rebuild request handles by following algo:
+	//      1) check destination (current backend name), if not match - pass lower in chain
+	//      2) pass request to index.  index in any case return ret code less than 0, so return triggered
+	
+	hash_data_copy(ret, TYPE_STRINGT, destination, request, HK(destination));
+	if(ret == 0){
+		if(strcmp(backend->name, destination) != 0)
+			return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+	}
+
 	request_t r_next[] = {
 		{ userdata->output,      DATA_VOID },
 		{ userdata->output_out,  DATA_VOID },
