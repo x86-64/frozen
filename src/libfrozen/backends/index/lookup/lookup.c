@@ -41,6 +41,17 @@
  * @li pass request to index. index in any case return ret code less than 0, so return triggered
  *
  */
+/**
+ * @ingroup mod_backend_lookup
+ * @page page_lookup_overview Architecture
+ * 
+ * Most modules follow "chain" structure, then module do something with input request and pass it to next
+ * module in chain. This module differs. It query "index" and pass special variable HK(pass_to) to it.
+ * Doing so, "index" module then passing request, use this variable and request flow to next module in "lookup" module chain.
+ * Advantages of this: first, all data handling moved to "index" module, where it belongs, so data can be
+ * stored in stack and don't use malloc() at all. And second, such structure hide "index" from main stream of requests,
+ * allowing HK(destination) and HK(readonly) work properly.
+ */
 
 #define EMODULE 21
 
@@ -107,14 +118,12 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 	}
 
 	request_t r_next[] = {
-		{ userdata->output,      DATA_VOID },
-		{ userdata->output_out,  DATA_VOID },
+		{ HK(pass_to),           DATA_BACKENDT(backend) },
+		{ userdata->output,      DATA_VOID              },
+		{ userdata->output_out,  DATA_VOID              },
 		hash_next(request)
 	};
 	if( (ret = backend_query(userdata->backend, r_next)) != 0)
-		return ret;
-	
-	if( (ret = backend_pass(backend, r_next)) < 0)
 		return ret;
 	
 	if(userdata->readonly == 0){ // can update if not readonly

@@ -558,7 +558,7 @@ ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
 ssize_t mphf_chm_imp_fork        (mphf_t *mphf, request_t *request){ // {{{
 	return chm_imp_load(mphf, request);
 } // }}}
-ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t nelements_real){ // {{{
+ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 	ssize_t                ret;
 	uint64_t               nelements;
 	uint64_t               capacity_curr;
@@ -566,7 +566,6 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t nelements_real){ // {{{
 	
 	//                  |  empty array        |  existing array
 	// -----------------+---------------------+--------------------------
-	// nelements_real   |  HK(nelements_min)  |  array actual size
 	// params.nelements |  0                  |  calculated array size
 	// params.capacity  |  0                  |  array defined capacity
 	// -----------------+---------------------+--------------------------
@@ -578,9 +577,7 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf, uint64_t nelements_real){ // {{{
 	)
 		capacity_curr = data->params.capacity;
 	
-	nelements = MAX(nelements_real, data->params.nelements);  // number of elements in array
-	                                                          // NOTE .nelements here looks like overhead, but nelements_real
-								  // can be wrong in case of malicious configuration
+	nelements = data->params.nelements;
 	
 	if(nelements >= capacity_curr){
 		// expand array

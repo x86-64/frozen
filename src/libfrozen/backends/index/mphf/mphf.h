@@ -16,7 +16,7 @@ typedef struct mphf_hash_proto_t  mphf_hash_proto_t;
 
 typedef ssize_t  (*mphf_func_load)        (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_unload)      (mphf_t *mphf);
-typedef ssize_t  (*mphf_func_rebuild)     (mphf_t *mphf, uint64_t e_nelements);
+typedef ssize_t  (*mphf_func_rebuild)     (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_fork)        (mphf_t *mphf, request_t *request);
 typedef ssize_t  (*mphf_func_destroy)     (mphf_t *mphf);
 typedef ssize_t  (*mphf_func_insert)      (mphf_t *mphf, uint64_t key, uint64_t  value);

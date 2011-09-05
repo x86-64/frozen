@@ -10,151 +10,29 @@
 typedef struct mphf_userdata {
 	mphf_t               mphf;
 	mphf_proto_t        *mphf_proto;
-	backend_t           *backend_data;
-	uintmax_t            buffer_size;
-	uintmax_t            max_rebuilds;
-	
-	hash_key_t           key_from;
-	hash_key_t           key_to;
-	hash_key_t           offset_out;
+	uintmax_t            broken;
+
+	hash_key_t           input;
+	hash_key_t           output;
+
 } mphf_userdata;
 
-mphf_proto_t *       mphf_string_to_proto(char *string){ // {{{
+static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
 	if(string == NULL)                 return NULL;
 	if(strcmp(string, "chm_imp") == 0) return &mphf_protos[MPHF_TYPE_CHM_IMP];
 	if(strcmp(string, "bdz_imp") == 0) return &mphf_protos[MPHF_TYPE_BDZ_IMP];
 	return NULL;
 } // }}}
-
-static ssize_t mphf_insert(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
-	ssize_t   ret;
-	
-	// insert item
-	if( (ret = userdata->mphf_proto->func_insert(
-		&userdata->mphf, 
-		keyid,
-		value
-	)) < 0)
-		goto error;
-	
-	ret = 0;
-error:
-	return ret;
-} // }}}
-static ssize_t mphf_update(mphf_userdata *userdata, uint64_t keyid, uint64_t value){ // {{{
-	ssize_t   ret;
-	
-	// insert item
-	if( (ret = userdata->mphf_proto->func_update(
-		&userdata->mphf, 
-		keyid,
-		value
-	)) < 0)
-		goto error;
-	
-	ret = 0;
-error:
-	
-	return ret;
-} // }}}
-static ssize_t mphf_rebuild(mphf_userdata *userdata){ // {{{
-	ssize_t   ret;
-	off_t     i;
-	off_t     count = 0;
-	char     *buffer;
-	uint64_t  keyid;
-	uintmax_t rebuild_num = 0;
-	
-	// count elements
-	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
-		{ HK(buffer), DATA_PTR_OFFT(&count)           },
-		{ HK(ret),    DATA_PTR_SIZET(&ret)            },
-		hash_end
-	};
-	if(backend_pass(userdata->backend_data, r_count) < 0 || ret < 0)
-		return 0;
-	
-	// prepare buffer
-	if( (buffer = malloc(userdata->buffer_size)) == NULL)
-		return error("malloc failed");
-	
-redo:
-	if(rebuild_num++ >= userdata->max_rebuilds)
-		return error("mphf max rebuilds reached");
-
-	if( (ret = userdata->mphf_proto->func_rebuild(&userdata->mphf, count)) < 0)
-		return ret;
-	
-	// process items
-	for(i=0; i<count; i++){
-		keyid = 0;
-		
-		request_t r_read[] = {
-			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
-			{ userdata->key_from,  DATA_PTR_UINT64T(&keyid)                },
-			{ userdata->key_to,    DATA_OFFT(i)                            },
-			{ HK(buffer),          DATA_RAW(buffer, userdata->buffer_size) },
-			{ HK(size),            DATA_SIZET(userdata->buffer_size)       },
-			{ HK(ret),             DATA_PTR_SIZET(&ret)                    },
-			hash_end
-		};
-		if( backend_pass(userdata->backend_data, r_read) < 0 || ret < 0){
-			ret = error("failed call\n");
-			break;
-		}
-		
-		if(userdata->key_from != 0){
-			hash_data_copy(ret, TYPE_UINT64T, keyid, r_read, userdata->key_from);
-			if(ret != 0){
-				ret = error("no keyid found in item");
-				goto exit;
-			}
-		}
-		//printf("mphf: rebuild: key: %lx value: %x\n", keyid, (int)i);
-		
-		if( (ret = mphf_insert(userdata,
-			keyid,
-			i
-		)) < 0){
-			if(ret == -EBADF) goto redo; // bad mphf
-			//printf("failed insert %x\n", ret);
-			break;
-		}
-		
-	}
-exit:
-	free(buffer);
-	
-	// if error - exit
-	if(ret < 0)
-		return ret;
-	
-	return 0;
-} // }}}
-static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_t *fork_req){ // {{{
+static ssize_t          mphf_configure_any(backend_t *backend, config_t *config, request_t *fork_req){ // {{{
 	ssize_t          ret;
-	uintmax_t        buffer_size     = BUFFER_SIZE_DEFAULT;
-	uintmax_t        max_rebuilds    = MAX_REBUILDS_DEFAULT;
-	uintmax_t        fork_only       = 0;
-	char            *key_from_str    = "key";
-	char            *key_to_str      = "offset";
-	char            *offset_out_str  = "offset_out";
+	char            *input_str       = "key";
+	char            *output_str      = "offset";
 	char            *mphf_type_str   = NULL;
 	mphf_userdata   *userdata        = (mphf_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, key_from_str,    config, HK(key_from));
-	hash_data_copy(ret, TYPE_STRINGT, key_to_str,      config, HK(key_to));
-	hash_data_copy(ret, TYPE_STRINGT, offset_out_str,  config, HK(offset_out));
-	
 	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
-	hash_data_copy(ret, TYPE_UINTT,   buffer_size,     config, HK(buffer_size));
-	hash_data_copy(ret, TYPE_UINTT,   max_rebuilds,    config, HK(max_rebuilds));
-	
-	hash_data_copy(ret, TYPE_UINTT,   fork_only,       config, HK(fork_only));
-	
-	if(fork_only == 1 && fork_req == NULL)
-		return 0;
+	hash_data_copy(ret, TYPE_STRINGT, input_str,       config, HK(input));
+	hash_data_copy(ret, TYPE_STRINGT, output_str,      config, HK(output));
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("backend mphf parameter mphf_type invalid or not supplied");
@@ -162,13 +40,10 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	
 	userdata->mphf.config     = config;
-	userdata->key_from        = hash_string_to_key(key_from_str);
-	userdata->key_to          = hash_string_to_key(key_to_str);
-	userdata->offset_out      = hash_string_to_key(offset_out_str);
-	userdata->backend_data    = backend;
-	userdata->max_rebuilds    = max_rebuilds;
-	userdata->buffer_size     = buffer_size;
-	
+	userdata->input           = hash_string_to_key(input_str);
+	userdata->output          = hash_string_to_key(output_str);
+	userdata->broken          = 0;
+
 	if(fork_req == NULL){
 		if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)
 			return ret;
@@ -176,7 +51,6 @@ static ssize_t mphf_configure_any(backend_t *backend, config_t *config, request_
 		if( (ret = userdata->mphf_proto->func_fork(&userdata->mphf, fork_req)) < 0)
 			return ret;
 	}
-	
 	return 0;
 } // }}}
 
@@ -206,95 +80,67 @@ static int mphf_fork(backend_t *backend, backend_t *parent, request_t *request){
 	return mphf_configure_any(backend, backend->config, request);
 } // }}}
 
-static ssize_t mphf_backend_insert(backend_t *backend, request_t *request){ // {{{
-	ssize_t          ret;
-	off_t            key_out;
-	uint64_t         keyid;
-	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
+static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t               ret;
+	uint32_t              action;
+	uint64_t              d_input;
+	uint64_t              d_output;
+	data_t               *data_output;
+	backend_t            *pass_to            = backend;
 	
-	if(userdata->mphf_proto == NULL)
-		return error("called fork_only'ed");
-	
-	hash_data_copy(ret, TYPE_UINT64T,  keyid,  request, userdata->key_from);
-	if(ret != 0)
-		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-	
-	// get new key_out
-	request_t r_next[] = {
-		{ userdata->key_from,   DATA_PTR_UINT64T(&keyid)  },
-		{ userdata->offset_out, DATA_PTR_OFFT(&key_out)   },
-		{ HK(ret),              DATA_PTR_SIZET(&ret)      },
-		hash_next(request)
-	};
-	if( backend_pass(backend, r_next) < 0 || ret < 0)
-		goto error;
-	
-	// insert key
-	if( (ret = mphf_insert(userdata, keyid, key_out)) == -EBADF)
-		ret = mphf_rebuild(userdata);
-	
-error:
-	return ret;
-} // }}}
-static ssize_t mphf_backend_query(backend_t *backend, request_t *request){ // {{{
-	ssize_t          ret;
-	uint64_t         key_out, key_new_out, keyid;
-	mphf_userdata   *userdata = (mphf_userdata *)backend->userdata;
-	
-	if(userdata->mphf_proto == NULL)
-		return error("called fork_only'ed");
-	
-	hash_data_copy(ret, TYPE_UINT64T,  keyid,  request, userdata->key_from);
-	if(ret != 0)
-		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-	
-	switch(userdata->mphf_proto->func_query(&userdata->mphf, keyid, &key_out)){
-		case MPHF_QUERY_NOTFOUND: return -EBADF;
-		case MPHF_QUERY_FOUND:
-			key_new_out = key_out;
-			
-			request_t r_next[] = {
-				{ userdata->key_to,     DATA_OFFT(key_out)          },
-				{ userdata->offset_out, DATA_PTR_OFFT(&key_new_out) },
-				hash_next(request)
-			};
-			if( (ret = backend_pass(backend, r_next)) < 0)
-				return ret;
-			
-			if(key_out != key_new_out){
-				ssize_t ret;
-				
-				// TODO ret & rebuild?
-				if( (ret = mphf_update(userdata, keyid, key_new_out)) < 0)
-					return ret;
-			}
-			
-			// TODO pass captured offset_out 
+	hash_data_copy(ret, TYPE_UINT32T, action, request, HK(action));
+	if(ret == 0 && action == ACTION_REBUILD){
+		if( (ret = userdata->mphf_proto->func_rebuild(&userdata->mphf)) < 0)
+			return ret;
+		
+		userdata->broken = 0;
+		return -EBADF;
 	}
-	return -EEXIST;
-} // }}}
-static ssize_t mphf_backend_queryinsert(backend_t *backend, request_t *request){ // {{{
-	ssize_t ret;
+	if(userdata->broken != 0)
+		return -EBADF;
 	
-	if((ret = mphf_backend_query(backend, request)) == -EBADF){
-		return mphf_backend_insert(backend, request);
+	hash_data_copy(ret, TYPE_UINT64T, d_input, request, userdata->input);
+	if(ret != 0)
+		goto pass;
+	
+	hash_data_find(request, userdata->output, &data_output, NULL);
+	if(data_output == NULL)
+		return -EINVAL;
+	
+	switch( data_value_type(data_output) ){
+		case TYPE_VOIDT: // query
+			switch(userdata->mphf_proto->func_query(&userdata->mphf, d_input, &d_output)
+				case MPHF_QUERY_NOTFOUND: return -EBADF;
+				case MPHF_QUERY_FOUND:
+			
+			goto pass;
+			break;
+		default:        // update
+			data_to_dt(ret, TYPE_UINT64T, d_output, data_output, NULL);
+			
+			if( (ret = userdata->mphf_proto->func_update(
+				&userdata->mphf, 
+				d_input,
+				d_output
+			)) < 0)
+			break;
 	}
-	return ret;
+	return 0;
+	
+pass:
+	hash_data_copy(ret, TYPE_BACKENDT, pass_to, request, HK(pass_to)); 
+	return ( (ret = backend_pass(pass_to, request)) < 0 ) ? ret : -EEXIST;
 } // }}}
 
 backend_t mphf_proto = {
 	.class          = "index/mphf",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
 	.func_fork      = &mphf_fork,
 	.func_destroy   = &mphf_destroy,
-	{
-		.func_create = &mphf_backend_insert,
-		.func_set    = &mphf_backend_queryinsert,
-		.func_get    = &mphf_backend_query,
-		.func_delete = &mphf_backend_query
-	}
+	.backend_type_hash = {
+		.func_handler = &mphf_handler
+	},
 };
-
 
