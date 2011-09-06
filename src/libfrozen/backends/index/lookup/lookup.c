@@ -46,11 +46,9 @@
  * @page page_lookup_overview Architecture
  * 
  * Most modules follow "chain" structure, then module do something with input request and pass it to next
- * module in chain. This module differs. It query "index" and pass special variable HK(pass_to) to it.
- * Doing so, "index" module then passing request, use this variable and request flow to next module in "lookup" module chain.
- * Advantages of this: first, all data handling moved to "index" module, where it belongs, so data can be
- * stored in stack and don't use malloc() at all. And second, such structure hide "index" from main stream of requests,
- * allowing HK(destination) and HK(readonly) work properly.
+ * module in chain. This module differs. It wraps "index" with itself, so every input request and output request
+ * from "index" catched and can be modified. To do so, module use functions backend_clone (to make copy of itself and
+ * put it after "index") and backend_insert (to connect backends in proper way)
  */
 
 #define EMODULE 21
@@ -59,8 +57,11 @@ typedef struct lookup_userdata {
 	uintmax_t              readonly;
 	hash_key_t             output;
 	hash_key_t             output_out;
-	backend_t             *backend;
+	backend_t             *backend_index;
+	backend_t             *backend_lookupend;
 } lookup_userdata;
+
+static ssize_t lookupend_handler(backend_t *backend, request_t *request);
 
 static int lookup_init(backend_t *backend){ // {{{
 	if((backend->userdata = calloc(1, sizeof(lookup_userdata))) == NULL)
@@ -86,7 +87,7 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	if(backend_data == NULL)
 		return error("HK(index) not supplied");
 	
-	if( (userdata->backend = backend_from_data(backend_data)) == NULL)
+	if( (userdata->backend_index = backend_from_data(backend_data)) == NULL)
 		return error("supplied index backend not valid, or not found");
 	
 	hash_data_copy(ret, TYPE_STRINGT, output_str,         config, HK(output));
@@ -96,15 +97,19 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	userdata->readonly   = ( readonly == 0 ) ? 0 : 1;
 	userdata->output     = hash_string_to_key(output_str);
 	userdata->output_out = hash_string_to_key(output_out_str);
+
+	userdata->backend_lookupend = backend_clone(backend);	
+	userdata->backend_lookupend->func_destroy                   = NULL;
+	userdata->backend_lookupend->backend_type_hash.func_handler = &lookupend_handler;
+	
+	// connect
+
 	return 0;
 } // }}}
 
 static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	char                  *destination       = NULL;
-	data_t                 d_void            = DATA_VOID;
-	data_t                *d_output;
-	data_t                *d_output_out;
 	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
 	
 	// NOTE Input rebuild request handles by following algo:
@@ -114,26 +119,37 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 	hash_data_copy(ret, TYPE_STRINGT, destination, request, HK(destination));
 	if(ret == 0){
 		if(strcmp(backend->name, destination) != 0)
-			return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+			return ( (ret = backend_pass(userdata->backend_lookupend, request)) < 0) ? ret : -EEXIST;
 	}
 
 	request_t r_next[] = {
-		{ HK(pass_to),           DATA_BACKENDT(backend) },
 		{ userdata->output,      DATA_VOID              },
 		{ userdata->output_out,  DATA_VOID              },
 		hash_next(request)
 	};
-	if( (ret = backend_query(userdata->backend, r_next)) != 0)
+	if( (ret = backend_pass(backend, r_next)) != 0)
+		return ret;
+	
+	return -EEXIST;
+} // }}}
+static ssize_t lookupend_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret;
+	data_t                 d_void            = DATA_VOID;
+	data_t                *d_output;
+	data_t                *d_output_out;
+	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
+	
+	if( (ret = backend_pass(backend, request)) < 0)
 		return ret;
 	
 	if(userdata->readonly == 0){ // can update if not readonly
 		do{
-			hash_data_find(r_next, userdata->output, &d_output_out, NULL);
+			hash_data_find(request, userdata->output, &d_output_out, NULL);
 		
 			if( data_cmp(d_output, NULL, &d_void, NULL) == 0 )
 				break;
 
-			hash_data_find(r_next, userdata->output, &d_output,     NULL);
+			hash_data_find(request, userdata->output, &d_output,     NULL);
 			
 			if( data_cmp(d_output, NULL, d_output_out, NULL) == 0 )
 				break;
@@ -143,7 +159,7 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 				{ userdata->output, *d_output_out },
 				hash_next(request)
 			};
-			if( (ret = backend_query(userdata->backend, r_update)) != 0)
+			if( (ret = backend_query(userdata->backend_index, r_update)) != 0)
 				return ret;
 		}while(0);
 	}

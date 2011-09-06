@@ -86,7 +86,6 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	uint64_t              d_input;
 	uint64_t              d_output;
 	data_t               *data_output;
-	backend_t            *pass_to            = backend;
 	
 	hash_data_copy(ret, TYPE_UINT32T, action, request, HK(action));
 	if(ret == 0 && action == ACTION_REBUILD){
@@ -109,10 +108,10 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	
 	switch( data_value_type(data_output) ){
 		case TYPE_VOIDT: // query
-			switch(userdata->mphf_proto->func_query(&userdata->mphf, d_input, &d_output)
+			switch(userdata->mphf_proto->func_query(&userdata->mphf, d_input, &d_output){
 				case MPHF_QUERY_NOTFOUND: return -EBADF;
-				case MPHF_QUERY_FOUND:
-			
+				case MPHF_QUERY_FOUND: break;
+			};
 			goto pass;
 			break;
 		default:        // update
@@ -123,13 +122,13 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 				d_input,
 				d_output
 			)) < 0)
+				return;
 			break;
 	}
 	return 0;
 	
 pass:
-	hash_data_copy(ret, TYPE_BACKENDT, pass_to, request, HK(pass_to)); 
-	return ( (ret = backend_pass(pass_to, request)) < 0 ) ? ret : -EEXIST;
+	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;
 } // }}}
 
 backend_t mphf_proto = {

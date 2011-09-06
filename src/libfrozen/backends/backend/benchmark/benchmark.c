@@ -53,7 +53,7 @@ static int  benchmark_control_query_long(backend_t *backend, char *string, size_
 	
 	timersub(&tv_end, &userdata->tv_start, &tv_diff);
 	
-	backend_name = backend_get_name(backend);
+	backend_name = backend->name;
 	backend_name = backend_name ? backend_name : "(undefined)";
 	if(ticks != 0){
 		// TODO rewrite math

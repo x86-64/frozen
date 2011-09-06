@@ -76,14 +76,17 @@ struct backend_t {
 API backend_t *     backend_new             (hash_t *config);
 API backend_t *     backend_acquire         (char *name);
 API backend_t *     backend_find            (char *name);
-API backend_t *     backend_fork            (backend_t *backend, request_t *request);
-API ssize_t         backend_query           (backend_t *backend, request_t *request);
 API void            backend_destroy         (backend_t *backend);
-    backend_t *     backend_from_data       (data_t *data); // TODO not fits
 
-API char *          backend_get_name        (backend_t *backend);
+API backend_t *     backend_clone           (backend_t *backend);
+API backend_t *     backend_fork            (backend_t *backend, request_t *request);
+
+API ssize_t         backend_query           (backend_t *backend, request_t *request);
+    backend_t *     backend_from_data       (data_t *data); // TODO not fits (move to backend_t + convert)
+
 API void            backend_connect         (backend_t *parent, backend_t *child);
 API void            backend_disconnect      (backend_t *parent, backend_t *child);
+API void            backend_insert          (backend_t *parent, backend_t *new_child);
 
 API ssize_t         class_register          (backend_t *proto);
 API void            class_unregister        (backend_t *proto);

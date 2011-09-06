@@ -19,7 +19,7 @@ static void debug_do(backend_t *backend, request_t *request, debug_flags flag){ 
 		( flag == DEBUG_BEFORE ) ? "before" : "after",
 		backend,
 		request,
-		backend_get_name(backend)
+		backend->name
 	);
 	
 #ifdef DEBUG

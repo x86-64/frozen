@@ -103,30 +103,12 @@ void               backend_disconnect(backend_t *parent, backend_t *child){ // {
 	list_delete(&child->parents, parent);
 	backend_top(child);
 } // }}}
-static backend_t * backend_copy_from_proto(backend_t *proto, char *backend_name){ // {{{
-	backend_t *backend_curr;
+void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
 	
-	if( (backend_curr = malloc(sizeof(backend_t))) == NULL)
-		return NULL;
-	
-	memcpy(backend_curr, proto, sizeof(backend_t));
-	
-	list_init(&backend_curr->parents);
-	list_init(&backend_curr->childs);
-	pthread_mutex_init(&backend_curr->refs_mtx, NULL);
-	
-	if(backend_name){
-		backend_curr->name = strdup(backend_name);
-		list_add(&backends_names, backend_curr);
-	}else{
-		backend_curr->name = NULL;
-	}
-	backend_curr->refs       = 1;
-	backend_curr->userdata   = NULL;
-	
-	return backend_curr;
 } // }}}
 static void        backend_free_from_proto(backend_t *backend_curr){ // {{{
+	hash_free(backend_curr->config);
+	
 	if(backend_curr->name){
 		list_delete(&backends_names, backend_curr);
 		free(backend_curr->name);
@@ -174,10 +156,17 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		if( (class = class_find(backend_class)) == NULL)
 			goto error_inval;
 		
-		if( (backend_curr = backend_copy_from_proto(class, backend_name)) == NULL)
+		if( (backend_curr = backend_clone(class, backend)) == NULL)
 			goto error_inval;
+	
+		if(backend_name){
+			backend_curr->name = strdup(backend_name);
+			list_add(&backends_names, backend_curr);
+		}else{
+			backend_curr->name = NULL;
+		}
 		
-		backend_curr->config     = hash_copy(backend_cfg);
+		backend_curr->userdata   = NULL;
 		backend_connect(backend_curr, backend_prev);
 		
 		if(backend_curr->func_init != NULL && backend_curr->func_init(backend_curr) != 0)
@@ -203,7 +192,6 @@ error_configure:
 	
 error_init:
 	backend_disconnect(backend_curr, backend_prev);
-	hash_free(backend_curr->config);
 	
 	backend_free_from_proto(backend_curr);
 
@@ -236,11 +224,12 @@ static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // 
 		}
 	}
 	
-	// NOTE forked backend lose name and parents
-	if( (backend_curr = backend_copy_from_proto(backend, NULL)) == NULL)
+	if( (backend_curr = backend_clone(backend)) == NULL)
 		goto error_inval;
 		
-	backend_curr->config = hash_copy(backend->config);
+	// NOTE forked backend lose name and parents
+	backend_curr->name     = NULL;
+	backend_curr->userdata = NULL;
 	
 	for(i=0; i<lsz; i++)
 		backend_connect(backend_curr, childs_list[i]);
@@ -265,8 +254,6 @@ error_configure:
 error_init:
 	for(i=0; i<lsz; i++)
 		backend_disconnect(backend_curr, childs_list[i]);
-	
-	hash_free(backend_curr->config);
 	
 	backend_free_from_proto(backend_curr);
 	
@@ -310,8 +297,22 @@ backend_t *     backend_fork         (backend_t *backend, request_t *request){ /
 	
 	return backend_fork_rec(backend, request);
 } // }}}
-char *          backend_get_name     (backend_t *backend){ // {{{
-	return backend->name;
+backend_t *     backend_clone        (backend_t *backend){ // {{{
+	backend_t *clone;
+	
+	if( (clone = malloc(sizeof(backend_t))) == NULL)
+		return NULL;
+	
+	memcpy(clone, backend, sizeof(backend_t));
+	
+	list_init(&clone->parents);
+	list_init(&clone->childs);
+	pthread_mutex_init(&clone->refs_mtx, NULL);
+	
+	clone->refs     = 1;
+	clone->config   = hash_copy(backend->config);
+	
+	return clone;
 } // }}}
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
 	f_crwd                 func              = NULL;

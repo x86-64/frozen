@@ -209,7 +209,7 @@ static backend_t *  wfrozen_backend_new(hash_t *config){
 	if( (backend = backend_new(config)) == NULL)
 		return NULL;
 	
-	if( (backend_name = backend_get_name(backend)) == NULL){
+	if( (backend_name = backend->name) == NULL){
 		snprintf(bp, 1024, "/backends/unnamed_%d", cnt_unnamed++);
 	}else{
 		snprintf(bp, 1024, "/backends/%s", backend_name);
