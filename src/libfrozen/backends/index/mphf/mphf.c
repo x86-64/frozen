@@ -81,6 +81,8 @@ static int mphf_fork(backend_t *backend, backend_t *parent, request_t *request){
 } // }}}
 
 static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
+	return -EINVAL;
+/*
 	ssize_t               ret;
 	uint32_t              action;
 	uint64_t              d_input;
@@ -128,7 +130,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	return 0;
 	
 pass:
-	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;
+	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;*/
 } // }}}
 
 backend_t mphf_proto = {

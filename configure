@@ -804,7 +804,9 @@ enable_uint32_t
 enable_uint64_t
 enable_void_t
 enable_backendbenchmark
+enable_backendcall
 enable_backendfactory
+enable_backendfork
 enable_backendpool
 enable_backendrebuild
 enable_backendcache
@@ -813,6 +815,7 @@ enable_backendipc
 enable_backendallocator
 enable_backendincapsulate
 enable_backendlist
+enable_backendregexp
 enable_backendstructs
 enable_backendnull
 enable_backendjenkins32
@@ -1510,8 +1513,10 @@ Optional Features:
   --disable-data-void-t   disable data void-t
   --disable-backend-benchmark
                           disable backend benchmark
+  --disable-backend-call  disable backend call
   --disable-backend-factory
                           disable backend factory
+  --disable-backend-fork  disable backend fork
   --disable-backend-pool  disable backend pool
   --disable-backend-rebuild
                           disable backend rebuild
@@ -1524,6 +1529,8 @@ Optional Features:
   --disable-backend-incapsulate
                           disable backend incapsulate
   --disable-backend-list  disable backend list
+  --disable-backend-regexp
+                          disable backend regexp
   --disable-backend-structs
                           disable backend structs
   --disable-backend-null  disable backend null
@@ -18341,6 +18348,43 @@ fi
 
 
 
+	# Check whether --enable-backendcall was given.
+if test "${enable_backendcall+set}" = set; then :
+  enableval=$enable_backendcall;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendcall}" = "yes"; then
+			enable_backendcall="no"
+		else
+			enable_backendcall="yes"
+		fi
+	fi
+
+	if test "${enable_backendcall}" = "yes"; then
+		BACKEND_DIR_call="backend/call"
+		BACKEND_DEP_call=""
+				BACKEND_SELECTED="$BACKEND_SELECTED call"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_call" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/call/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/call"
+
+		BACKEND_MAKEFILE_backend_call=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/call/libfrozen_backend_call.la"
+
+	fi
+
+
+
+
+
+
+
 	# Check whether --enable-backendfactory was given.
 if test "${enable_backendfactory+set}" = set; then :
   enableval=$enable_backendfactory;
@@ -18369,6 +18413,43 @@ fi
 		BACKEND_MAKEFILE_backend_factory=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/factory/libfrozen_backend_factory.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendfork was given.
+if test "${enable_backendfork+set}" = set; then :
+  enableval=$enable_backendfork;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfork}" = "yes"; then
+			enable_backendfork="no"
+		else
+			enable_backendfork="yes"
+		fi
+	fi
+
+	if test "${enable_backendfork}" = "yes"; then
+		BACKEND_DIR_fork="backend/fork"
+		BACKEND_DEP_fork=""
+				BACKEND_SELECTED="$BACKEND_SELECTED fork"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_fork" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/fork/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/fork"
+
+		BACKEND_MAKEFILE_backend_fork=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/fork/libfrozen_backend_fork.la"
 
 	fi
 
@@ -18665,6 +18746,43 @@ fi
 		BACKEND_MAKEFILE_data_list=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/list/libfrozen_backend_list.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendregexp was given.
+if test "${enable_backendregexp+set}" = set; then :
+  enableval=$enable_backendregexp;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendregexp}" = "yes"; then
+			enable_backendregexp="no"
+		else
+			enable_backendregexp="yes"
+		fi
+	fi
+
+	if test "${enable_backendregexp}" = "yes"; then
+		BACKEND_DIR_regexp="data/regexp"
+		BACKEND_DEP_regexp=""
+				BACKEND_SELECTED="$BACKEND_SELECTED regexp"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_data_regexp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/regexp/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/regexp"
+
+		BACKEND_MAKEFILE_data_regexp=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/regexp/libfrozen_backend_regexp.la"
 
 	fi
 

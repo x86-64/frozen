@@ -33,7 +33,7 @@ static int fork_configure(backend_t *backend, config_t *config){ // {{{
 	if(ret != 0)
 		return error("HK(config) not supplied");
 	
-	if( (userdata->backend_config = hash_copy(c_backend_config)) == NULL)
+	if( (userdata->backend_config = hash_copy(backend_config)) == NULL)
 		return error("not enough memory");
 	
 	userdata->hk_backend = hash_string_to_key(hk_backend_str);
@@ -50,7 +50,7 @@ static ssize_t fork_handler(backend_t *backend, request_t *request){ // {{{
 		if( (call_to = backend_new(userdata->backend_config)) == NULL)
 			return error("child creation error");
 		
-		request_t r_next[] = {
+		request_t r_next[] = { // TODO write call_to to hash, not only pass
 			{ userdata->hk_backend, DATA_BACKENDT(call_to) },
 			hash_next(request)
 		};

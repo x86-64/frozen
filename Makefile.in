@@ -62,7 +62,9 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/fork/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
@@ -71,6 +73,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \

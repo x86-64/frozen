@@ -264,7 +264,7 @@ static ssize_t chm_imp_load       (mphf_t *mphf, request_t *fork_req){ // {{{
 
 rebuild:
 	// if mphf not exist - run rebuild with minimum nelements
-	return mphf_chm_imp_rebuild(mphf, data->nelements_min);
+	return mphf_chm_imp_rebuild(mphf);
 } // }}}
 static ssize_t chm_imp_check      (mphf_t *mphf, size_t flags){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;

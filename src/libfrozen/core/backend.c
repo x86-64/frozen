@@ -156,7 +156,7 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		if( (class = class_find(backend_class)) == NULL)
 			goto error_inval;
 		
-		if( (backend_curr = backend_clone(class, backend)) == NULL)
+		if( (backend_curr = backend_clone(class)) == NULL)
 			goto error_inval;
 	
 		if(backend_name){
@@ -166,6 +166,7 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 			backend_curr->name = NULL;
 		}
 		
+		backend_curr->config     = hash_copy(backend_cfg);
 		backend_curr->userdata   = NULL;
 		backend_connect(backend_curr, backend_prev);
 		
