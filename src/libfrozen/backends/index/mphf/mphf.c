@@ -25,6 +25,7 @@ static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
 } // }}}
 static ssize_t          mphf_configure_any(backend_t *backend, config_t *config, request_t *fork_req){ // {{{
 	ssize_t          ret;
+	uintmax_t        fork_only       = 0;
 	char            *input_str       = "key";
 	char            *output_str      = "offset";
 	char            *mphf_type_str   = NULL;
@@ -33,7 +34,11 @@ static ssize_t          mphf_configure_any(backend_t *backend, config_t *config,
 	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
 	hash_data_copy(ret, TYPE_STRINGT, input_str,       config, HK(input));
 	hash_data_copy(ret, TYPE_STRINGT, output_str,      config, HK(output));
-	
+	hash_data_copy(ret, TYPE_UINTT,   fork_only,       config, HK(fork_only));
+       
+	if(fork_only == 1 && fork_req == NULL)
+		return 0;
+
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("backend mphf parameter mphf_type invalid or not supplied");
 	

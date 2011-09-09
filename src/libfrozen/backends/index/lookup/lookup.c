@@ -102,8 +102,8 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	userdata->backend_lookupend->func_destroy                   = NULL;
 	userdata->backend_lookupend->backend_type_hash.func_handler = &lookupend_handler;
 	
-	// connect
-
+	backend_connect(backend, userdata->backend_lookupend);
+	backend_insert(backend,  userdata->backend_index);
 	return 0;
 } // }}}
 

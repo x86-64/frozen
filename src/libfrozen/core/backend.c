@@ -103,8 +103,36 @@ void               backend_disconnect(backend_t *parent, backend_t *child){ // {
 	list_delete(&child->parents, parent);
 	backend_top(child);
 } // }}}
-void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
+void               backend_insert_rec(backend_t *backend, list *new_childs){ // {{{
+	uintmax_t              lsz;
+	backend_t             *child;
+	void                  *childs_iter = NULL;
 	
+	list_rdlock(&backend->childs); // TODO loop chains bugs
+		
+		if( (lsz = list_count(&backend->childs)) != 0){
+			// go recurse
+			while( (child = list_iter_next(&backend->childs, &childs_iter)) != NULL)
+				backend_insert_rec(child, new_childs);
+		}
+	
+	list_unlock(&backend->childs);
+		
+	if(lsz == 0){
+		// add new childs to terminating backends without childs
+		while( (child = list_iter_next(new_childs, &childs_iter)) != NULL)
+			backend_connect(backend, child);
+	}
+} // }}}
+void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
+	backend_t             *child;
+	
+	backend_insert_rec(new_child, &parent->childs);
+	
+	while( (child = list_pop(&parent->childs)) != NULL)
+		backend_disconnect(parent, child);
+	
+	backend_connect(parent, new_child);
 } // }}}
 static void        backend_free_from_proto(backend_t *backend_curr){ // {{{
 	hash_free(backend_curr->config);
