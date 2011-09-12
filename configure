@@ -825,6 +825,7 @@ enable_backendmurmur2_64
 enable_backendmurmur2_64_on_32
 enable_backendlookup
 enable_backendmphf
+enable_backendfuse
 enable_backendbalancer
 enable_backenddebug
 enable_backendemitter
@@ -1547,6 +1548,7 @@ Optional Features:
   --disable-backend-lookup
                           disable backend lookup
   --disable-backend-mphf  disable backend mphf
+  --disable-backend-fuse  disable backend fuse
   --disable-backend-balancer
                           disable backend balancer
   --disable-backend-debug disable backend debug
@@ -19113,6 +19115,43 @@ fi
 		BACKEND_MAKEFILE_index_mphf=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/mphf/libfrozen_backend_mphf.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendfuse was given.
+if test "${enable_backendfuse+set}" = set; then :
+  enableval=$enable_backendfuse;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfuse}" = "yes"; then
+			enable_backendfuse="no"
+		else
+			enable_backendfuse="yes"
+		fi
+	fi
+
+	if test "${enable_backendfuse}" = "yes"; then
+		BACKEND_DIR_fuse="io/fuse"
+		BACKEND_DEP_fuse=""
+				BACKEND_SELECTED="$BACKEND_SELECTED fuse"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_fuse" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/fuse/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/fuse"
+
+		BACKEND_MAKEFILE_io_fuse=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/fuse/libfrozen_backend_fuse.la"
 
 	fi
 

@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -118784, "src/libfrozen/backends/io/fuse/fuse.c: calloc failed" },
  { -114693, "src/libfrozen/backends/data/regexp/regexp.c: no input string in request" },
  { -114692, "src/libfrozen/backends/data/regexp/regexp.c: invalid regexp supplied - compilation error" },
  { -114691, "src/libfrozen/backends/data/regexp/regexp.c: HK(regexp) not supplied" },
