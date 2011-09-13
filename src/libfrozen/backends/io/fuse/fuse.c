@@ -5,6 +5,7 @@
 #include <fuse.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
 
 #define EMODULE 28
 
@@ -22,27 +23,25 @@ struct vfs_item {
 	char                  *name;
 	char                  *path;
 	
-	backend_t             *backend;
+	void                  *userdata;
 	
 	// fs related
 	struct stat            stat;
 };
 
-vfs_item  vfs = {
-	.next       = NULL,
-	.childs     = NULL,
-	.type       = VFS_FOLDER,
-	.name       = "",
-	.path   = "/",
-	.stat       = {
-		.st_mode  = S_IFDIR | 0755,
-		.st_size  = 0,
-		.st_nlink = 1
-	}
-};
+typedef struct vfs_root_userdata {
+	struct fuse           *fuse;
+	struct fuse_chan      *ch;
+	char                  *mountpoint;
+	pthread_t              fs_thread;
+	uintmax_t              fs_thread_ok;
+} vfs_root_userdata;
+
+static list                    vfs_catalog       = LIST_INITIALIZER;
+struct fuse_operations         fuse_operations;
 
 /* vfs {{{ */
-static int            match_path(char *folderpath, char *filepath){
+static int            match_path(char *folderpath, char *filepath){ // {{{
 	char c1, c2;
 	int  folder_len = 0;
 	
@@ -64,16 +63,16 @@ check_slash:
 	if(folder_len == 1 || c2 == '/')
 		return (strchr(filepath, '/') == NULL) ? 2 : 1;
 	return 0;
-}
+} // }}}
 
-static vfs_item *  vfs_find(char *path, size_t path_len){
+static vfs_item * vfs_item_find(vfs_item *root, char *path, size_t path_len){ // {{{
 	vfs_item    *folder;
 	
 	if(strcmp(path, "") == 0 || strcmp(path, "/") == 0)
-		return &vfs;
+		return root;
 	
 	//printf("find: %s\n", path);
-	for(folder = &vfs; folder != NULL;){
+	for(folder = root; folder != NULL;){
 		//printf("find: do: %s\n", folder->path);
 		
 		if(strncmp(folder->path, path, path_len) == 0)
@@ -91,9 +90,101 @@ static vfs_item *  vfs_find(char *path, size_t path_len){
 		folder = folder->next;
 	}
 	return NULL;
-}
+} // }}}
 
-static vfs_item *  vfs_item_create(char *path, vfs_item_type vfs_type, backend_t *backend){
+static void       vfs_destroy(vfs_item *vfs){ // {{{
+	void                  *res;
+	vfs_root_userdata     *vfs_userdata;
+	
+	if(vfs != NULL){
+		list_delete(&vfs_catalog, vfs);
+
+		vfs_userdata = (vfs_root_userdata *)vfs->userdata;
+		if(vfs_userdata != NULL){
+			if(vfs_userdata->fs_thread_ok == 1){
+				fuse_exit(vfs_userdata->fuse);
+				
+				// remove thread (remove this?)
+				pthread_cancel(vfs_userdata->fs_thread);
+				pthread_join(vfs_userdata->fs_thread, &res);
+			}
+			
+			if(vfs_userdata->ch)
+				fuse_unmount(vfs_userdata->mountpoint, vfs_userdata->ch);
+			if(vfs_userdata->fuse)
+				fuse_destroy(vfs_userdata->fuse);
+			if(vfs_userdata->mountpoint)
+				free(vfs_userdata->mountpoint);
+			
+			free(vfs_userdata);
+		}
+		
+		// TODO recursive remove childs
+		
+		if(vfs->path)
+			free(vfs->path);
+		free(vfs);
+	}
+} // }}}
+static vfs_item * vfs_create(char *mountpoint, uintmax_t multithreaded){ // {{{
+	vfs_item              *vfs; 
+	vfs_root_userdata     *vfs_userdata;
+	
+	if( (vfs = calloc(1, sizeof(vfs_item))) == NULL)
+		goto err;
+	if( (vfs_userdata = calloc(1, sizeof(vfs_root_userdata))) == NULL)
+		goto err;
+	
+	vfs->name          = vfs->path + 1;
+	vfs->type          = VFS_FOLDER;
+	vfs->stat.st_mode  = S_IFDIR | 0755;
+	vfs->stat.st_size  = 0;
+	vfs->stat.st_nlink = 1;
+	vfs->userdata      = vfs_userdata;
+	
+	if( (vfs->path = strdup("/")) == NULL)
+		goto err;
+	if( (vfs_userdata->mountpoint = strdup(mountpoint)) == NULL)
+		goto err;
+	if( (vfs_userdata->ch = fuse_mount(mountpoint, NULL)) == NULL )
+		goto err;
+	if( (vfs_userdata->fuse = fuse_new(vfs_userdata->ch, NULL, &fuse_operations, sizeof(fuse_operations), (void *)vfs)) == NULL)
+		goto err;
+	
+	if(multithreaded){
+		if(pthread_create(&vfs_userdata->fs_thread, NULL, (void *(*)(void *))&fuse_loop_mt, vfs_userdata->fuse) != 0)
+			goto err;
+	}else{
+		if(pthread_create(&vfs_userdata->fs_thread, NULL, (void *(*)(void *))&fuse_loop,    vfs_userdata->fuse) != 0)
+			goto err;
+	}
+	vfs_userdata->fs_thread_ok = 1;
+	
+	list_add(&vfs_catalog, vfs);
+	return vfs;	
+err:
+	vfs_destroy(vfs);
+	return NULL;
+} // }}}
+static vfs_item * vfs_find(char *mountpoint){ // {{{
+	vfs_item              *vfs;
+	vfs_root_userdata     *vfs_userdata;
+	void                  *iter              = NULL;
+	
+	list_rdlock(&vfs_catalog);
+		while( (vfs = list_iter_next(&vfs_catalog, &iter)) != NULL){
+			vfs_userdata = (vfs_root_userdata *)vfs->userdata;
+			
+			if(strcasecmp(mountpoint, vfs_userdata->mountpoint) == 0)
+				goto found;
+		}
+		vfs = NULL;
+found:
+	list_unlock(&vfs_catalog);
+	return vfs;
+} // }}}
+
+static vfs_item *  vfs_item_create(vfs_item *root, char *path, vfs_item_type vfs_type, backend_t *backend){
 	size_t                 path_len;
 	char                  *name;
 	vfs_item              *folder, *new_item;
@@ -103,7 +194,7 @@ static vfs_item *  vfs_item_create(char *path, vfs_item_type vfs_type, backend_t
 	name++;
 	path_len = name - path - 1;
 	
-	if( (folder = vfs_find(path, path_len)) == NULL)
+	if( (folder = vfs_item_find(root, path, path_len)) == NULL)
 		return NULL;
 	
 	if( (new_item = calloc(sizeof(vfs_item), 1)) == NULL)
@@ -126,7 +217,7 @@ static vfs_item *  vfs_item_create(char *path, vfs_item_type vfs_type, backend_t
 	new_item->stat.st_mtime =
 	new_item->stat.st_ctime = time(NULL);
 	
-	new_item->backend = backend;
+	new_item->userdata = (void *)backend;
 	
 	// link it
 	new_item->next = folder->childs;
@@ -137,8 +228,10 @@ static vfs_item *  vfs_item_create(char *path, vfs_item_type vfs_type, backend_t
 /* folders {{{ */
 static int fuseh_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t off, struct fuse_file_info *fi){
 	vfs_item              *folder, *child;
+	struct fuse_context   *fctx              = fuse_get_context();
+	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
-	if( (folder = vfs_find((char *)path, ~0)) == NULL)
+	if( (folder = vfs_item_find(root, (char *)path, ~0)) == NULL)
 		return -ENOENT;
 	
 	filler(buf, ".",  NULL, 0);
@@ -153,14 +246,17 @@ static int fuseh_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 	//}
 	for(child = folder->childs; child != NULL; child = child->next)
 		filler(buf, child->name, NULL, 0);
+	
 	return 0;
 }
 
 static int fuseh_getattr(const char *path, struct stat *buf){
 	vfs_item              *item;
 	off_t                  size              = 0;
+	struct fuse_context   *fctx              = fuse_get_context();
+	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
-	if( (item = vfs_find((char *)path, ~0)) == NULL)
+	if( (item = vfs_item_find(root, (char *)path, ~0)) == NULL)
 		return -ENOENT;
 	
 	if(item->type == VFS_FILE){
@@ -170,7 +266,7 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 			{ HK(buffer),  DATA_PTR_OFFT(&size)                  },
 			hash_end
 		};
-		backend_query(item->backend, r_count);
+		backend_query((backend_t *)item->userdata, r_count);
 	}
 	item->stat.st_size = size; //(param) ?
 	//	((offset > size) ? 0 : size - offset) :
@@ -181,10 +277,12 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 }
 /* }}} */
 /* files {{{ */ 
-static int fuseh_open(const char *path, struct fuse_file_info *fi){
+static int fuseh_open(const char *path, struct fuse_file_info *fi){ // {{{
 	vfs_item              *item;
+	struct fuse_context   *fctx              = fuse_get_context();
+	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
-	if( (item = vfs_find((char *)path, ~0)) == NULL)
+	if( (item = vfs_item_find(root, (char *)path, ~0)) == NULL)
 		return -ENOENT;
 	
 	// TODO check access
@@ -192,9 +290,8 @@ static int fuseh_open(const char *path, struct fuse_file_info *fi){
 	
 	fi->fh = (unsigned long)item;
 	return 0;
-}
-
-static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+} // }}}
+static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struct fuse_file_info *fi){ // {{{
 	ssize_t                ret;
 	vfs_item              *item              = (vfs_item *)(uintptr_t)fi->fh;
 	
@@ -205,14 +302,13 @@ static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struc
 		{ HK(path),   DATA_PTR_STRING_AUTO((char *)path)              },
 		hash_end
 	};
-	ret = backend_query(item->backend, r_read);
+	ret = backend_query((backend_t *)item->userdata, r_read);
 	
 	printf("read: %x bytes from %x. ret: %x, data: %s\n", (int)size, (int)off, (int)ret, buf);
 	
 	return (ret < 0) ? 0 : (int)ret; //(int)size;
-}
-
-static int fuseh_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){
+} // }}}
+static int fuseh_write(const char *path, const char *buf, size_t size, off_t off, struct fuse_file_info *fi){ // {{{
 	ssize_t                ret;
 	vfs_item              *item              = (vfs_item *)(uintptr_t)fi->fh;
 	
@@ -223,19 +319,18 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 		{ HK(path),    DATA_PTR_STRING_AUTO((char *)path)              },
 		hash_end
 	};
-	ret = backend_query(item->backend, r_write);
+	ret = backend_query((backend_t *)item->userdata, r_write);
 	
 	printf("write: %x bytes from %x. ret: %x\n", (int)size, (int)off, (int)ret);
 	
 	return (ret < 0) ?
 		0 :
 		((ret > (ssize_t)size) ? size : (int)ret);
-}
-
-static int fuseh_release(const char *path, struct fuse_file_info *fi){
+} // }}}
+static int fuseh_release(const char *path, struct fuse_file_info *fi){ // {{{
 	// TODO unlock item
 	return 0;
-}
+} // }}}
 /* }}} */
 /* stubs {{{
 static int fuseh_flush(const char *path, struct fuse_file_info *fi){
@@ -389,49 +484,35 @@ struct fuse_operations fuse_operations = { // {{{
 	.release = fuseh_release,
 }; // }}}
 
-static int fuseb_init(backend_t *backend){ // {{{
-	//if((backend->userdata = calloc(1, sizeof(fuse_userdata))) == NULL)
-	//	return error("calloc failed");
-	
-	return 0;
-} // }}}
 static int fuseb_destroy(backend_t *backend){ // {{{
-	//fuse_userdata      *userdata = (fuse_userdata *)backend->userdata;
-	//free(userdata);
 	return 0;
 } // }}}
 static int fuseb_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *hk_backend_str    = "backend";
-	//fuse_userdata         *userdata          = (fuse_userdata *)backend->userdata;
+	vfs_item              *root;
+	uintmax_t              multithreaded     = 0;
+	char                  *mountpoint        = NULL;
 	
-	hash_data_copy(ret, TYPE_STRINGT, hk_backend_str, config, HK(input));
+	hash_data_copy(ret, TYPE_STRINGT, mountpoint,    config, HK(mountpoint));
+	hash_data_copy(ret, TYPE_UINTT,   multithreaded, config, HK(multithread));
 	
-	vfs_item_create("/backends", VFS_FOLDER, NULL);
-	if(vfs_item_create("",              VFS_FOLDER, backend) == NULL)
+	if( (root = vfs_find(mountpoint)) == NULL)
+		root = vfs_create(mountpoint, multithreaded);
+	
+	// TODO hash iter
+	
+	if(vfs_item_create(root, "",              VFS_FOLDER, backend) == NULL)
 		return -1;
-	if(vfs_item_create("/whole",        VFS_FILE,   backend) == NULL)
+	if(vfs_item_create(root, "/whole",        VFS_FILE,   backend) == NULL)
 		return -1;
-	/*
-	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 	
-	if(fuse_opt_parse(&args, &opts, frozenfs_opts, frozenfs_opt_proc) == -1)
-		exit(1);
-	
-	if(!opts.datadir){
-		fprintf(stderr, "missing datadir");
-		exit(1);
-	}
-	
-	ret = fuse_main(args.argc, args.argv, &fuse_operations, NULL);*/
 	return 0;
 } // }}}
 
 backend_t fuse_proto = {
 	.class          = "io/fuse",
 	.supported_api  = API_HASH,
-	.func_init      = &fuseb_init,
-	.func_destroy   = &fuseb_destroy,
-	.func_configure = &fuseb_configure
+	.func_configure = &fuseb_configure,
+	.func_destroy   = &fuseb_destroy
 };
 
