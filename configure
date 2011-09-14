@@ -17441,7 +17441,7 @@ fi
 
 	if test "${enable_backend_t}" = "yes"; then
 		DATA_DIR_backend_t="backend"
-		DATA_DEP_backend_t="off_t size_t raw_t uint32_t"
+		DATA_DEP_backend_t="off_t size_t raw_t uint32_t string_t hash_t"
 		DATA_ID_backend_t="1"
 		DATA_OBJECTS_backend="$DATA_OBJECTS_backend libfrozen_data_backend_la-backend_t.lo"
 		DATA_SELECTED="$DATA_SELECTED backend_t"
@@ -19522,7 +19522,7 @@ fi
 modulesdir=${libexecdir}/frozen/
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/frozenfs/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -20645,7 +20645,6 @@ do
     "src/libfrozen/backends/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/backends/Makefile" ;;
     "src/libfrozen/data/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/data/Makefile" ;;
     "src/frozend/Makefile") CONFIG_FILES="$CONFIG_FILES src/frozend/Makefile" ;;
-    "src/frozenfs/Makefile") CONFIG_FILES="$CONFIG_FILES src/frozenfs/Makefile" ;;
     "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;
     "src/lang/go/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/go/Makefile" ;;
     "src/lang/gogcc/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/gogcc/Makefile" ;;

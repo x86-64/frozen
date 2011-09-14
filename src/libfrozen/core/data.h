@@ -128,6 +128,7 @@ API size_t               data_value_len         (data_t *data); // TODO deprecat
 	data_t m_dst;                                             \
 	data_assign_dt(&m_dst,_type,_dt);                         \
 	_retval = data_convert(&m_dst,NULL,_src,_src_ctx);        \
+	_dt     = GET_##_type((&m_dst));                          \
 }
 
 #define data_to_dt(_retval,_type,_dt,_src,_src_ctx){                 \

@@ -1,1 +1,1 @@
-SUBDIRS = libfrozen lang frozend frozenfs modules
+SUBDIRS = libfrozen lang frozend modules

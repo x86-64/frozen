@@ -4,6 +4,8 @@
 #include <uint/off_t.h>
 #include <uint/size_t.h>
 #include <raw/raw_t.h>
+#include <string/string_t.h>
+#include <hash/hash_t.h>
 
 static ssize_t   data_backend_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void **buffer, size_t *size){
 	ssize_t         ret;
@@ -51,11 +53,39 @@ static ssize_t   data_backend_t_write (data_t *data, data_ctx_t *ctx, off_t offs
 	backend_pass( *(backend_t **)(data->data_ptr), req_write);
 	return ret;
 }
+static ssize_t data_backend_t_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+	ssize_t                ret;
+	hash_t                *backend_config    = NULL;
+	char                  *backend_name      = NULL;
+	
+	switch( data_value_type(src) ){
+		case TYPE_STRINGT:
+			data_to_dt(ret, TYPE_STRINGT, backend_name, src, src_ctx);
+			if(ret == 0){
+				dst->data_ptr = backend_find(backend_name);
+				return 0;
+			}
+			break;
+
+		case TYPE_HASHT:
+			data_to_dt(ret, TYPE_HASHT, backend_config, src, src_ctx);
+			if(ret == 0){
+				dst->data_ptr = backend_new(backend_config);
+				return 0;
+			}
+			break;
+
+		default:
+			break;
+	};
+	return -ENOSYS;
+} // }}}
 
 data_proto_t backend_t_proto = {
 	.type                   = TYPE_BACKENDT,
 	.type_str               = "backend_t",
 	.size_type              = SIZE_VARIABLE,
 	.func_read              = &data_backend_t_read,
-	.func_write             = &data_backend_t_write
+	.func_write             = &data_backend_t_write,
+	.func_convert           = &data_backend_t_convert
 };

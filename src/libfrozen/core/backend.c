@@ -464,7 +464,7 @@ void            backend_destroy_all  (void){ // {{{
 	list_destroy(&backends_top);
 	list_destroy(&backends_names);
 } // }}}
-backend_t *     backend_from_data  (data_t *data){ // {{{
+/*backend_t *     backend_from_data  (data_t *data){ // {{{
 	ssize_t                ret;
 	hash_t                *backend_config    = NULL;
 	char                  *backend_name      = NULL;
@@ -484,7 +484,7 @@ backend_t *     backend_from_data  (data_t *data){ // {{{
 			return NULL;
 	}
 	return NULL;
-} // }}}
+} */
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
 	if( (backend->supported_api & API_FAST) != 0){

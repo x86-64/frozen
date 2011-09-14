@@ -80,20 +80,15 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	uintmax_t              readonly          = 0;
 	char                  *output_str        = NULL;
 	char                  *output_out_str    = NULL;
-	data_t                *backend_data      = NULL;
 	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
 	
-	hash_data_find(config, HK(index), &backend_data, NULL);
-	if(backend_data == NULL)
-		return error("HK(index) not supplied");
-	
-	if( (userdata->backend_index = backend_from_data(backend_data)) == NULL)
+	hash_data_copy(ret, TYPE_STRINGT,  output_str,              config, HK(output));
+	hash_data_copy(ret, TYPE_STRINGT,  output_out_str,          config, HK(output_out));
+	hash_data_copy(ret, TYPE_UINTT,    readonly,                config, HK(readonly));
+	hash_data_copy(ret, TYPE_BACKENDT, userdata->backend_index, config, HK(index));
+	if(ret != 0)
 		return error("supplied index backend not valid, or not found");
-	
-	hash_data_copy(ret, TYPE_STRINGT, output_str,         config, HK(output));
-	hash_data_copy(ret, TYPE_STRINGT, output_out_str,     config, HK(output_out));
-	hash_data_copy(ret, TYPE_UINTT,   readonly,           config, HK(readonly));
-	
+
 	userdata->readonly   = ( readonly == 0 ) ? 0 : 1;
 	userdata->output     = hash_string_to_key(output_str);
 	userdata->output_out = hash_string_to_key(output_out_str);

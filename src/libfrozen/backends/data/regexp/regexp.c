@@ -74,16 +74,8 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 	uintmax_t              flag_noteol       = 0;
 	char                  *hk_input_str      = "buffer";
 	char                  *regexp_str;
-	data_t                *backend_data      = NULL;
 	regexp_userdata       *userdata          = (regexp_userdata *)backend->userdata;
 	
-	hash_data_find(config, HK(pass_to), &backend_data, NULL);
-	if(backend_data == NULL)
-		return error("HK(pass_to) not supplied");
-	
-	if( (userdata->backend = backend_from_data(backend_data)) == NULL)
-		return error("supplied HK(pass_to) backend not valid, or not found");
-
 	hash_data_copy(ret, TYPE_UINTT,   flag_extended, config, HK(reg_extended));
 	hash_data_copy(ret, TYPE_UINTT,   flag_icase,    config, HK(reg_icase));
 	hash_data_copy(ret, TYPE_UINTT,   flag_newline,  config, HK(reg_newline));
@@ -93,6 +85,10 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRINGT, regexp_str,    config, HK(regexp));
 	if(ret != 0 || regexp_str == NULL)
 		return error("HK(regexp) not supplied");
+	
+	hash_data_copy(ret, TYPE_BACKENDT, userdata->backend, config, HK(pass_to));
+	if(ret != 0)
+		return error("supplied HK(pass_to) backend not valid, or not found");
 	
 	if(regcomp(
 		&userdata->regex,

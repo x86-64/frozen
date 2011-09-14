@@ -82,7 +82,7 @@ API backend_t *     backend_clone           (backend_t *backend);
 API backend_t *     backend_fork            (backend_t *backend, request_t *request);
 
 API ssize_t         backend_query           (backend_t *backend, request_t *request);
-    backend_t *     backend_from_data       (data_t *data); // TODO not fits (move to backend_t + convert)
+    //backend_t *     backend_from_data       (data_t *data); // TODO not fits (move to backend_t + convert)
 
 API void            backend_connect         (backend_t *parent, backend_t *child);
 API void            backend_disconnect      (backend_t *parent, backend_t *child);

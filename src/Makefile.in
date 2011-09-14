@@ -288,7 +288,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = libfrozen lang frozend frozenfs modules
+SUBDIRS = libfrozen lang frozend modules
 all: all-recursive
 
 .SUFFIXES:

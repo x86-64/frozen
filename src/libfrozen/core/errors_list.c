@@ -4,11 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -114693, "src/libfrozen/backends/data/regexp/regexp.c: no input string in request" },
- { -114692, "src/libfrozen/backends/data/regexp/regexp.c: invalid regexp supplied - compilation error" },
- { -114691, "src/libfrozen/backends/data/regexp/regexp.c: HK(regexp) not supplied" },
+ { -114692, "src/libfrozen/backends/data/regexp/regexp.c: no input string in request" },
+ { -114691, "src/libfrozen/backends/data/regexp/regexp.c: invalid regexp supplied - compilation error" },
  { -114690, "src/libfrozen/backends/data/regexp/regexp.c: supplied HK(pass_to) backend not valid, or not found" },
- { -114689, "src/libfrozen/backends/data/regexp/regexp.c: HK(pass_to) not supplied" },
+ { -114689, "src/libfrozen/backends/data/regexp/regexp.c: HK(regexp) not supplied" },
  { -114688, "src/libfrozen/backends/data/regexp/regexp.c: calloc failed" },
  { -110595, "src/libfrozen/backends/backend/fork/fork.c: child creation error" },
  { -110594, "src/libfrozen/backends/backend/fork/fork.c: not enough memory" },
@@ -25,8 +24,7 @@ static err_item errs_list[] = {
  { -94210, "src/libfrozen/backends/hash/murmur/murmur.c: input key not supplied" },
  { -94209, "src/libfrozen/backends/hash/murmur/murmur.c: input key not supplied" },
  { -94208, "src/libfrozen/backends/hash/murmur/murmur.c: calloc failed" },
- { -90114, "src/libfrozen/backends/index/lookup/lookup.c: supplied index backend not valid, or not found" },
- { -90113, "src/libfrozen/backends/index/lookup/lookup.c: HK(index) not supplied" },
+ { -90113, "src/libfrozen/backends/index/lookup/lookup.c: supplied index backend not valid, or not found" },
  { -90112, "src/libfrozen/backends/index/lookup/lookup.c: calloc failed" },
  { -86019, "src/libfrozen/backends/backend/factory/factory.c: child creation error" },
  { -86018, "src/libfrozen/backends/backend/factory/factory.c: not enough memory" },

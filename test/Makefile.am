@@ -1,4 +1,4 @@
-TESTS          = test test_frozenfs
+TESTS          = test
 check_PROGRAMS = test
 
 test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
