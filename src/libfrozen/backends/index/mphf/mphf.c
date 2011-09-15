@@ -86,16 +86,19 @@ static int mphf_fork(backend_t *backend, backend_t *parent, request_t *request){
 } // }}}
 
 static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
-	return -EINVAL;
-/*
 	ssize_t               ret;
 	uint32_t              action;
-	uint64_t              d_input;
-	uint64_t              d_output;
+	uintmax_t             d_input;
+	uintmax_t            *d_output;
 	data_t               *data_output;
-	
+	mphf_userdata        *userdata           = (mphf_userdata *)backend->userdata;
+
 	hash_data_copy(ret, TYPE_UINT32T, action, request, HK(action));
-	if(ret == 0 && action == ACTION_REBUILD){
+	if(ret != 0)
+		return -ENOSYS;
+	
+	// rebuilds
+	if(action == ACTION_REBUILD){
 		if( (ret = userdata->mphf_proto->func_rebuild(&userdata->mphf)) < 0)
 			return ret;
 		
@@ -104,49 +107,66 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	}
 	if(userdata->broken != 0)
 		return -EBADF;
+	//
 	
-	hash_data_copy(ret, TYPE_UINT64T, d_input, request, userdata->input);
+	hash_data_copy(ret, TYPE_UINTT, d_input, request, userdata->input);
 	if(ret != 0)
-		goto pass;
+		return -EINVAL;
 	
 	hash_data_find(request, userdata->output, &data_output, NULL);
 	if(data_output == NULL)
 		return -EINVAL;
 	
-	switch( data_value_type(data_output) ){
-		case TYPE_VOIDT: // query
-			switch(userdata->mphf_proto->func_query(&userdata->mphf, d_input, &d_output){
-				case MPHF_QUERY_NOTFOUND: return -EBADF;
-				case MPHF_QUERY_FOUND: break;
-			};
-			goto pass;
+	d_output = data_value_ptr(data_output);
+	
+	switch(action){
+		case ACTION_CRWD_CREATE:
+			if( (ret = userdata->mphf_proto->func_insert(
+				&userdata->mphf, 
+				d_input,
+				*d_output
+			)) < 0)
+				return ret;
 			break;
-		default:        // update
-			data_to_dt(ret, TYPE_UINT64T, d_output, data_output, NULL);
-			
+		case ACTION_CRWD_WRITE:
 			if( (ret = userdata->mphf_proto->func_update(
 				&userdata->mphf, 
 				d_input,
-				d_output
+				*d_output
 			)) < 0)
-				return;
+				return ret;
+		case ACTION_CRWD_READ:
+			switch( (ret = userdata->mphf_proto->func_query(
+				&userdata->mphf,
+				d_input,
+				d_output
+			))){
+				case MPHF_QUERY_NOTFOUND: return -ENOENT;
+				case MPHF_QUERY_FOUND:    break;
+				default:                  return ret;
+			};
+			break;
+		case ACTION_CRWD_DELETE:
+			if( (ret = userdata->mphf_proto->func_delete(
+				&userdata->mphf, 
+				d_input
+			)) < 0)
+				return ret;
+			
 			break;
 	}
 	return 0;
-	
-pass:
-	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;*/
 } // }}}
 
 backend_t mphf_proto = {
 	.class          = "index/mphf",
-	.supported_api  = API_HASH,
+	.supported_api  = API_CRWD,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
 	.func_fork      = &mphf_fork,
 	.func_destroy   = &mphf_destroy,
 	.backend_type_hash = {
 		.func_handler = &mphf_handler
-	},
+	}
 };
 
