@@ -65,15 +65,23 @@ START_TEST (test_backend_mphf){
                         hash_end
                 )},
                 { 0, DATA_HASHT(
-                        { HK(class),        DATA_STRING("mphf")                         },
-                        { HK(type),         DATA_STRING("chm_imp")                      },
-                        { HK(backend_g),    DATA_STRING("backend_mphf_g")               },
-                        { HK(backend_e),    DATA_STRING("backend_mphf_e")               },
-                        { HK(backend_v),    DATA_STRING("backend_mphf_v")               },
-                        { HK(nelements_min),DATA_UINT64T(10)                            },
-                        { HK(nelements_step),DATA_UINT64T(2)                            },
-                        { HK(value_bits),   DATA_UINT32T(32)                            },
-                        { HK(key_from),     DATA_STRING("keyid")                        },
+			{ HK(class),        DATA_STRING("index/lookup")                 },
+			{ HK(output_type),  DATA_STRING("uint_t")                       },
+			{ HK(index),        DATA_HASHT(
+                        	{ 0, DATA_HASHT(
+					{ HK(class),        DATA_STRING("mphf")                         },
+					{ HK(type),         DATA_STRING("chm_imp")                      },
+					{ HK(backend_g),    DATA_STRING("backend_mphf_g")               },
+					{ HK(backend_e),    DATA_STRING("backend_mphf_e")               },
+					{ HK(backend_v),    DATA_STRING("backend_mphf_v")               },
+					{ HK(nelements_min),DATA_UINT64T(10)                            },
+					{ HK(nelements_step),DATA_UINT64T(2)                            },
+					{ HK(value_bits),   DATA_UINT32T(32)                            },
+					{ HK(input),        DATA_STRING("keyid")                        },
+					hash_end
+				)},
+				hash_end
+			)},
                         hash_end
                 )},
 		{ 0, DATA_HASHT(
@@ -132,8 +140,8 @@ START_TEST (test_backend_mphf){
 		};
 		backend_query(b_dat, r_read);
 			fail_unless(ret >= 0,                              "backend backend_mphf: read array failed");
-                //        fail_unless(strcmp(data_read, data_array[i]) == 0, "backend backend_mphf: read array data failed");
-                //printf("mphf_read: %s %s\n", data_read, data_array[i]);
+                        fail_unless(strcmp(data_read, data_array[i]) == 0, "backend backend_mphf: read array data failed");
+                printf("mphf_read: %s %s\n", data_read, data_array[i]);
 	}
 	
 	backend_destroy(b_dat);
