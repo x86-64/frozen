@@ -94,7 +94,7 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 	
 	if(
 		userdata->force_query != 0 ||
-		hash_find(request, userdata->output) != NULL
+		hash_find(request, userdata->output) == NULL
 	){
 		if( data_alloc(&d_output, userdata->output_type, 100) < 0)
 			return -ENOMEM;

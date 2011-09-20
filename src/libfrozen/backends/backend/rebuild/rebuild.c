@@ -174,14 +174,15 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 		if(req_rebuild == NULL)                      // no custom signal supplied, use standard
 			req_rebuild = r_signal_orig;
 		
-		hash_t r_signal_dest[] = {
-			{ HK(destination),   DATA_PTR_STRING_AUTO(req_rebuild_dest) },
-			hash_next(req_rebuild)
-		};
-		if(req_rebuild_dest != NULL)                 // destination supplied, append to hash
-			req_rebuild = r_signal_dest;
-		
-		userdata->req_rebuild = hash_copy(req_rebuild);
+		if(req_rebuild_dest != NULL){                 // destination supplied, append to hash
+			hash_t r_signal_dest[] = {
+				{ HK(destination),   DATA_PTR_STRING_AUTO(req_rebuild_dest) },
+				hash_next(req_rebuild)
+			};
+			userdata->req_rebuild = hash_copy(r_signal_dest);
+		}else{
+			userdata->req_rebuild = hash_copy(req_rebuild);
+		}
 	}
 	
 	userdata->enum_method = rebuild_string_to_method(enum_method_str);

@@ -823,6 +823,7 @@ enable_backendjenkins64
 enable_backendmurmur2_32
 enable_backendmurmur2_64
 enable_backendmurmur2_64_on_32
+enable_backendfill
 enable_backendlookup
 enable_backendmphf
 enable_backendfuse
@@ -1545,6 +1546,7 @@ Optional Features:
                           disable backend murmur2-64
   --disable-backend-murmur2-64-on-32
                           disable backend murmur2-64-on-32
+  --disable-backend-fill  disable backend fill
   --disable-backend-lookup
                           disable backend lookup
   --disable-backend-mphf  disable backend mphf
@@ -19041,6 +19043,43 @@ fi
 		BACKEND_MAKEFILE_hash_murmur=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendfill was given.
+if test "${enable_backendfill+set}" = set; then :
+  enableval=$enable_backendfill;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfill}" = "yes"; then
+			enable_backendfill="no"
+		else
+			enable_backendfill="yes"
+		fi
+	fi
+
+	if test "${enable_backendfill}" = "yes"; then
+		BACKEND_DIR_fill="index/fill"
+		BACKEND_DEP_fill=""
+				BACKEND_SELECTED="$BACKEND_SELECTED fill"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_index_fill" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/fill/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/fill"
+
+		BACKEND_MAKEFILE_index_fill=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/fill/libfrozen_backend_fill.la"
 
 	fi
 

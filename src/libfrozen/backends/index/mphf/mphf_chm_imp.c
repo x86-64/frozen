@@ -345,7 +345,7 @@ static ssize_t graph_get_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 		&buffer,
 		sizeof_edge
 	) < 0)
-		return error("get_edge failed");
+		return -ENOENT; //error("get_edge failed");
 	
 	edge->vertex[0] = (*(uintmax_t *)(buffer                                           )) & vertex_mask;
 	edge->vertex[1] = (*(uintmax_t *)(buffer +  data->bt_vertex                        )) & vertex_mask;
@@ -401,7 +401,7 @@ static ssize_t graph_find_edge(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 		}else return error("find_edge db inconsistency");
 	}while(curr_edge_id != 0);
 	
-	return debug("edge not found");
+	return -ENOENT;
 } // }}}
 static ssize_t graph_getg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *g){ // {{{
 	size_t                 i;
@@ -656,13 +656,13 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 #endif
 
 	if(vertex[0] == vertex[1])
-		return MPHF_QUERY_NOTFOUND;
+		goto insert_new;
 	
 	if(graph_find_edge(data, 2, (uintmax_t *)&vertex, &edge_id) < 0)
-		return MPHF_QUERY_NOTFOUND;
+		goto insert_new;
 	
 	if(graph_getg(data, 1, (uintmax_t *)&vertex[1], &g_old) < 0)
-		return MPHF_QUERY_NOTFOUND;
+		goto insert_new;
 	
 	g_new = value - g_old;
 		
@@ -676,6 +676,8 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 		return ret;
 	
 	return 0;
+insert_new:
+	return mphf_chm_imp_insert(mphf, key, value);
 } // }}}
 ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // {{{
 	intmax_t               ret;

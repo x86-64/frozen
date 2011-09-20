@@ -36,6 +36,32 @@ START_TEST (test_backend_mphf){
                 )},
                 hash_null,
 		
+		{ 0, DATA_HASHT(
+			{ HK(name),         DATA_STRING("mphf_test")                    },
+			{ HK(class),        DATA_STRING("mphf")                         },
+			{ HK(type),         DATA_STRING("chm_imp")                      },
+			{ HK(backend_g),    DATA_STRING("backend_mphf_g")               },
+			{ HK(backend_e),    DATA_STRING("backend_mphf_e")               },
+			{ HK(backend_v),    DATA_STRING("backend_mphf_v")               },
+			{ HK(nelements_min),DATA_UINT64T(100)                           },
+			{ HK(nelements_step),DATA_UINT64T(2)                            },
+			{ HK(value_bits),   DATA_UINT32T(32)                            },
+			{ HK(input),        DATA_STRING("keyid")                        },
+			hash_end
+		)},
+//		{ 0, DATA_HASHT(
+//			{ HK(name),         DATA_STRING("mphf_test")                    },
+//			{ HK(class),        DATA_STRING("debug")                        },
+//			hash_end
+//		)},
+		{ 0, DATA_HASHT(
+			{ HK(name),         DATA_STRING("mphf_test_fill")               },
+			{ HK(class),        DATA_STRING("rewrite")                      },
+			{ HK(script),       DATA_STRING("request['offset'] = request['offset_out']; ret = pass(request);")  },
+			hash_end
+		)},
+		hash_null,
+
                 { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("file")                          },
                         { HK(filename),    DATA_STRING("data_backend_mphf.dat")         },
@@ -55,6 +81,7 @@ START_TEST (test_backend_mphf){
                         hash_end
                 )},
                 { 0, DATA_HASHT(
+			{ HK(name),        DATA_STRING("mphf_no_fill")                  },
                         { HK(class),       DATA_STRING("structs")                       },
                         { HK(size),        DATA_STRING("size")                          },
                         { HK(structure),   DATA_HASHT(
@@ -65,25 +92,36 @@ START_TEST (test_backend_mphf){
                         hash_end
                 )},
                 { 0, DATA_HASHT(
+			{ HK(class),        DATA_STRING("index/fill")                   },
+			{ HK(action),       DATA_STRING("write")                        },
+			{ HK(index),        DATA_STRING("mphf_test_fill")               },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(class),        DATA_STRING("rewrite")                      },
+			{ HK(script),       DATA_STRING(
+			"request['offset_out'] = data_alloca((string_t)'uint_t', (size_t)'8');"
+			"if(!data_cmp(request['action'], create )){ ret = pass(request); };"
+			"if(!data_cmp(request['action'], read )){ ret = backend((string_t)'mphf_no_fill', request); };") },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
 			{ HK(class),        DATA_STRING("index/lookup")                 },
+			{ HK(output),       DATA_STRING("offset")                       },
 			{ HK(output_type),  DATA_STRING("uint_t")                       },
-			{ HK(index),        DATA_HASHT(
-                        	{ 0, DATA_HASHT(
-					{ HK(class),        DATA_STRING("mphf")                         },
-					{ HK(type),         DATA_STRING("chm_imp")                      },
-					{ HK(backend_g),    DATA_STRING("backend_mphf_g")               },
-					{ HK(backend_e),    DATA_STRING("backend_mphf_e")               },
-					{ HK(backend_v),    DATA_STRING("backend_mphf_v")               },
-					{ HK(nelements_min),DATA_UINT64T(10)                            },
-					{ HK(nelements_step),DATA_UINT64T(2)                            },
-					{ HK(value_bits),   DATA_UINT32T(32)                            },
-					{ HK(input),        DATA_STRING("keyid")                        },
-					hash_end
-				)},
-				hash_end
-			)},
+			{ HK(index),        DATA_STRING("mphf_test")                    },
+			{ HK(fatal),        DATA_UINTT(1)                               },
                         hash_end
                 )},
+		{ 0, DATA_HASHT(
+			{ HK(class),        DATA_STRING("backend/rebuild")              },
+			{ HK(enum_method),  DATA_STRING("iterate")                      },
+			{ HK(req_read),     DATA_HASHT(
+				{ HK(buffer), DATA_STRING("                                                              ")   },
+				hash_end
+			)},
+			hash_end
+		)},
 		{ 0, DATA_HASHT(
                         { HK(name),         DATA_STRING("backend_mphf")                 },
 			{ HK(class),        DATA_STRING("hash/murmur2_64")              },
@@ -134,14 +172,16 @@ START_TEST (test_backend_mphf){
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                            },
 			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
-			{ HK(buffer), DATA_PTR_STRING (&data_read, 1024)                        },
+			{ HK(buffer), DATA_RAW (&data_read, 1024)                               },
                         { HK(ret),    DATA_PTR_SIZET(&ret)                                      },
 			hash_end
 		};
 		backend_query(b_dat, r_read);
 			fail_unless(ret >= 0,                              "backend backend_mphf: read array failed");
-                        fail_unless(strcmp(data_read, data_array[i]) == 0, "backend backend_mphf: read array data failed");
-                printf("mphf_read: %s %s\n", data_read, data_array[i]);
+                if(strcmp(&data_read[8], data_array[i]) != 0){
+			fail("backend backend_mphf: read array data failed");
+                	printf("mphf_read: %s %s\n", &data_read[8], data_array[i]);
+		}
 	}
 	
 	backend_destroy(b_dat);

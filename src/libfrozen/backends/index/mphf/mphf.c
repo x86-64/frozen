@@ -125,16 +125,23 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 				&userdata->mphf, 
 				d_input,
 				*d_output
-			)) < 0)
+			)) < 0){
+				if(ret == -EBADF)
+					userdata->broken = 1;
 				return ret;
+			}
 			break;
 		case ACTION_CRWD_WRITE:
 			if( (ret = userdata->mphf_proto->func_update(
 				&userdata->mphf, 
 				d_input,
 				*d_output
-			)) < 0)
+			)) < 0){
+				if(ret == -EBADF)
+					userdata->broken = 1;
 				return ret;
+			}
+			break;
 		case ACTION_CRWD_READ:
 			switch( (ret = userdata->mphf_proto->func_query(
 				&userdata->mphf,
@@ -150,8 +157,11 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 			if( (ret = userdata->mphf_proto->func_delete(
 				&userdata->mphf, 
 				d_input
-			)) < 0)
+			)) < 0){
+				if(ret == -EBADF)
+					userdata->broken = 1;
 				return ret;
+			}
 			
 			break;
 	}
@@ -160,7 +170,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 
 backend_t mphf_proto = {
 	.class          = "index/mphf",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
 	.func_fork      = &mphf_fork,

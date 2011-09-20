@@ -74,6 +74,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/fill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
