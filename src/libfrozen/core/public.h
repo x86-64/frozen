@@ -11,7 +11,6 @@ typedef hash_t                 config_t;
 
 typedef enum size_type         size_type;
 typedef struct data_t          data_t;
-typedef hash_t                 data_ctx_t;
 typedef struct data_proto_t    data_proto_t;
 
 

@@ -7,28 +7,22 @@
 
 static ssize_t lists_set(backend_t *backend, request_t *request){
 	ssize_t           ret;
-	data_t           *key_orig;
-	data_t            key_from, key_to;
-	data_t            d_one = DATA_OFFT(1);
+	off_t             from, to;
 	
 	if(hash_find(request, HK(insert)) != NULL){
 		// on insert we move all items from 'key' to 'key'+1
 		// recommended use of 'blocks' backend as under-lying backend to improve perfomance
 		
-		hash_data_find(request, HK(offset), &key_orig, NULL);
-		if(key_orig == NULL)
+		hash_data_copy(ret, TYPE_OFFT, from, request, HK(offset));
+		if(ret != 0)
 			return warning("no offset supplied");
 		
-		data_copy_local(&key_from, key_orig);
-		data_copy_local(&key_to,   key_orig);
-			
-		if(data_arithmetic('+', &key_to, NULL, &d_one, NULL) != 0) // TODO contexts
-			return error("data_arithmetic failed");
+		to = from + 1;
 		
 		hash_t  new_request[] = {
 			{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
-			{ HK(offset_from), key_from                                   },
-			{ HK(offset_to),   key_to                                     },
+			{ HK(offset_from), DATA_PTR_OFFT(&from)                       },
+			{ HK(offset_to),   DATA_PTR_OFFT(&to)                         },
 			{ HK(size),        DATA_VOID                                  },
 			hash_next(request)
 		};
@@ -42,32 +36,21 @@ static ssize_t lists_set(backend_t *backend, request_t *request){
 
 static ssize_t lists_delete(backend_t *backend, request_t *request){
 	ssize_t           ret;
-	hash_t           *key_orig;
-	data_t           *key_data;
-	data_t            key_from, key_to;
-	size_t            r_size;
+	off_t             from, to;
+	size_t            size;
 	
-	if( (key_orig = hash_find(request, HK(offset))) == NULL)
-		return warning("no offset supplied");
-
-	key_data = hash_item_data(key_orig);
-	hash_data_copy(ret, TYPE_SIZET, r_size, request, HK(size)); if(ret != 0) return warning("no size supplied");
+	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));   if(ret != 0) return warning("no size supplied");
+	hash_data_copy(ret, TYPE_OFFT,  from,   request, HK(offset)); if(ret != 0) return warning("no offset supplied");
 	
-	data_copy_local(&key_from, key_data);
-	data_copy_local(&key_to,   key_data);
-	
-	data_t  d_size = DATA_OFFT(r_size);                           // TODO pass real data from hash
-	if(data_arithmetic('+', &key_from, NULL, &d_size, NULL) != 0) // TODO contexts
-		return error("data_arithmetic failed");
+	from += size;
 	
 	hash_t  new_request[] = {
 		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
-		{ HK(offset_from), key_from                                   },
-		{ HK(offset_to),   key_to                                     },
+		{ HK(offset_from), DATA_PTR_OFFT(&from)                       },
+		{ HK(offset_to),   DATA_PTR_OFFT(&to)                         },
 		{ HK(size),        DATA_VOID                                  },
 		hash_next(request)
 	};
-	
 	return ( (ret = backend_pass(backend, new_request)) < 0) ? ret : -EEXIST;
 }
 

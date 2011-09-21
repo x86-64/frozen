@@ -16,7 +16,6 @@ typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 #define hash_null       {hash_ptr_null, {0, NULL, 0}}
 #define hash_next(hash) {hash_ptr_end,  {0, (void *)hash,  0}}
 #define hash_end        hash_next(NULL)
-#define HASH_CTX_KEY_OFFSET 0x1000
 #define HK(value) HASH_KEY_##value
 
 // allocated hash functions
@@ -36,9 +35,9 @@ API ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *bu
 API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
 // hash <=> raw memory
-API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
-API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
-API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
+//API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
+//API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
+//API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
 
 // hash keys routines
 API hash_key_t         hash_string_to_key           (char *string);
@@ -54,24 +53,19 @@ API data_t *           hash_item_data               (hash_t *hash){ return &(has
 _inline
 API hash_t *           hash_item_next               (hash_t *hash){ return ((hash + 1)->key == hash_ptr_end) ? NULL : hash + 1; }
 _inline
-API void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx){
+API void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data){
 	hash_t *temp;
 	if(data){
 		*data     =
 			((temp = hash_find(hash, key                     )) == NULL) ?
 			NULL : hash_item_data(temp);
 	}
-	if(data_ctx){
-		*data_ctx =
-			((temp = hash_find(hash, hash_key_to_ctx_key(key))) == NULL) ?
-			NULL : (data_ctx_t *)hash_item_data(temp);
-	}
 }
 
 #define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
 	hash_t *__temp;                                             \
 	if( (__temp = hash_find(_hash,_key)) != NULL){              \
-		data_to_dt(_ret,_type,_dt,(&(__temp->data)),NULL);  \
+		data_to_dt(_ret,_type,_dt,(&(__temp->data)));       \
 	}else{ _ret = -EINVAL; }                                    \
 	(void)_ret; \
 }
@@ -83,7 +77,6 @@ API void               hash_data_find               (hash_t *hash, hash_key_t ke
 	(_dst)->key = hash_ptr_null;   \
 	(_dst)->data.type = TYPE_VOIDT; \
 	(_dst)->data.data_ptr = NULL;  \
-	(_dst)->data.data_size = 0;    \
 }
 #define hash_assign_hash_end(_dst) {  \
 	(_dst)->key = hash_ptr_end;   \

@@ -52,6 +52,10 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 		// TODO IMPORTANT bad packing, TYPE_BINARYT in troubles
 		
 		data_convert_to_local(ret, data_value_type(hash_item_data(element)), &need_data, curr_data, curr_ctx);
+	//size_t m_len = data_len(_src,_src_ctx);                  \
+	//m_len = data_len2raw(_type, m_len);                      \
+	//data_alloc_local(_dst,_type,m_len);                      \
+	//_retval = data_convert(_dst,NULL,_src,_src_ctx);         \
 		if(ret < 0)
 			return ITER_BREAK;
 		

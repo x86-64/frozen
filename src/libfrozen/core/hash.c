@@ -264,12 +264,9 @@ ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer
 		if(data_size > size)
 			goto error;
 		
-		data_assign_raw(
-			&curr->data,
-			data_value_type(&curr->data),
-			ptr,
-			data_size
-		);
+		curr->data->type = data_value_type(&curr->data);
+		curr->data->ptr  = ptr;
+		
 		data_off += data_size;
 	}	
 	
@@ -278,7 +275,7 @@ ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer
 error:
 	return -EFAULT;
 } // }}}
-
+/*
 ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size){ // {{{
 	size_t  i, nelements, hash_size;
 	
@@ -336,13 +333,12 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 			goto error;
 		
 		curr->data.data_ptr = memory + data_off;
-		/*
-		data_assign_raw(
-			&curr->data,
-			data_value_type(&curr->data),
-			memory + data_off,
-			data_size
-		);*/
+		//data_assign_raw(
+		//	&curr->data,
+		//	data_value_type(&curr->data),
+		//	memory + data_off,
+		//	data_size
+		//);
 		memory_size -= data_size;
 		data_off    += data_size;
 	}	
@@ -352,23 +348,18 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 error:
 	return -EFAULT;
 } // }}}
-
+*/
 
 inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
 inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
 inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
 inline hash_t *           hash_item_next               (hash_t *hash){ return ((hash+1)->key == hash_ptr_end) ? NULL : hash + 1; }
-inline void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx){
+inline void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data){
 	hash_t *temp;
 	if(data){
 		*data     =
 			((temp = hash_find(hash, key                     )) == NULL) ?
 			NULL : hash_item_data(temp);
-	}
-	if(data_ctx){
-		*data_ctx =
-			((temp = hash_find(hash, hash_key_to_ctx_key(key))) == NULL) ?
-			NULL : (data_ctx_t *)hash_item_data(temp);
 	}
 }
 
