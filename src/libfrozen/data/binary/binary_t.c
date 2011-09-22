@@ -1,70 +1,40 @@
 #include <libfrozen.h>
+#include <default/default_t.h>
 #include <binary_t.h>
 
 typedef struct data_binary_t {
-	unsigned int size;
-	// data here
+	uintmax_t              size;
 } data_binary_t;
 
-/*
-int     data_binary_buff_cmp(data_ctx_t *ctx, buffer_t *buffer1, off_t buffer1_off, buffer_t *buffer2, off_t buffer2_off){
-	int           cret;
-	unsigned int  item1_len = 0;
-	unsigned int  item2_len = 0;	
-	
-	buffer_read(buffer1, buffer1_off, &item1_len, sizeof(item1_len));
-	buffer_read(buffer2, buffer2_off, &item2_len, sizeof(item2_len));
-	     if(item1_len > item2_len){ cret =  1; }
-	else if(item1_len < item2_len){ cret = -1; }
-	else {
-		cret = buffer_memcmp(
-			buffer1, buffer1_off + sizeof(item1_len),
-			buffer2, buffer2_off + sizeof(item2_len),
-			item1_len);
-		if(cret > 0) cret =  1;
-		if(cret < 0) cret = -1;
-	}
-	return cret;
-}*/
-void *  data_binary_ptr(data_t *data){
-	return (void *)((data_binary_t *)data + 1);
-}
+static ssize_t data_binary_t_physlen(data_t *data, fastcall_physicallen *fargs){ // {{{
+	data_binary_t         *fdata             = (data_binary_t *)data->ptr;
 
-size_t  data_binary_len(data_t *data, data_ctx_t *ctx){
-	unsigned int data_size;
-	(void)ctx;
-
-	if(data->data_size < sizeof(data_binary_t))
-		return 0;
+	fargs->length = fdata->size + sizeof(data_binary_t);
+	return 0;
+} // }}}
+static ssize_t data_binary_t_loglen(data_t *data, fastcall_logicallen *fargs){ // {{{
+	data_binary_t         *fdata             = (data_binary_t *)data->ptr;
 	
-	data_size = ((data_binary_t *)(data->data_ptr))->size;
-	if(data_size > data->data_size)
-		return 0;
+	fargs->length = fdata->size;
+	return 0;
+} // }}}
+static ssize_t data_binary_t_io(data_t *data, fastcall_io *fargs){ // {{{
+	data_t                 new_data;
 	
-	return (size_t)data_size;
-}
-
-
-int     data_binary_cmp(data_t *data1, data_ctx_t *ctx1, data_t *data2, data_ctx_t *ctx2){
-	int           cret;
-	size_t        item1_len, item2_len;	
-	
-	item1_len = data_binary_len(data1, ctx1);
-	item2_len = data_binary_len(data2, ctx2);
-	     if(item1_len > item2_len){ cret =  1; }
-	else if(item1_len < item2_len){ cret = -1; }
-	else {
-		cret = memcmp(data_binary_ptr(data1), data_binary_ptr(data2), item1_len);
-		if(cret > 0) cret =  1;
-		if(cret < 0) cret = -1;
-	}
-	return cret;
-}
+	new_data.type = data->type;
+	new_data.ptr  = (void *) ( ((data_binary_t *)data->ptr) + 1 );
+	return default_t_proto.handlers[fargs->header.action](&new_data, fargs);
+} // }}}
 
 data_proto_t binary_t_proto = {
 	.type            = TYPE_BINARYT,
 	.type_str        = "binary_t",
-	.size_type       = SIZE_VARIABLE,
-	.func_cmp        = &data_binary_cmp,
-	.func_len        = &data_binary_len
+	.api_type        = API_HANDLERS,
+	.handlers        = {
+		[ACTION_PHYSICALLEN] = (f_data_func)&data_binary_t_physlen,
+		[ACTION_LOGICALLEN]  = (f_data_func)&data_binary_t_loglen,
+		[ACTION_READ]        = (f_data_func)&data_binary_t_io,
+		[ACTION_WRITE]       = (f_data_func)&data_binary_t_io
+	}
 };
+

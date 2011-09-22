@@ -65,8 +65,11 @@ ssize_t              data_query         (data_t *data, void *args){ // {{{
 		case API_DEFAULT_HANDLER: func = proto->handler_default;           break;
 		case API_HANDLERS:        func = proto->handlers[ fargs->action ]; break;
 	};
-	if( func == NULL && (func = data_default[ fargs->action ]) == NULL)
+	if( func == NULL && (func = data_proto[TYPE_DEFAULTT]->handlers[ fargs->action ]) == NULL)
 		return -ENOSYS;
+	
+	if( fargs->nargs < fastcall_nargs[ fargs->action ] )
+		return -EINVAL;
 	
 	return func(data, args);
 } // }}}
@@ -204,75 +207,5 @@ ssize_t              data_transfer          (data_t *dst, data_ctx_t *dst_ctx, d
 } // }}}
 */
 
-static ssize_t       data_default_read          (data_t *data, void *args){ // {{{
-	uintmax_t              data_size;
-	fastcall_read         *fargs             = (fastcall_read *)args;
-	
-	if(fargs->header->nargs < 5 || fargs->buffer == NULL)
-		return -EINVAL;
-	
-	fastcall_physicallen  r_len = { .header = { .nargs = 3, .action = ACTION_PHYSICALLEN } };
-	if( data_query(data, &r_len) != 0)
-		return -EFAULT;
-	if( (data_size = r_len.length) == 0)
-		return -1; // EOF
-	
-	if(fargs->offset > data_size)
-		return -EINVAL; // invalid range
-	
-	fargs->buffer_size = MIN(fargs->buffer_size, data_size - fargs->offset);
-	
-	if(fargs->buffer_size == 0)
-		return -1; // EOF
-	
-	memcpy(fargs->buffer, data->ptr + fargs->offset, fargs->buffer_size);
-	return 0;
-} // }}}
-static ssize_t       data_default_write         (data_t *data, void *args){ // {{{
-	uintmax_t              data_size;
-	fastcall_write        *fargs             = (fastcall_write *)args;
-	
-	if(fargs->header->nargs < 5 || fargs->buffer == NULL)
-		return -EINVAL;
-	
-	fastcall_physicallen  r_len = { .header = { .nargs = 3, .action = ACTION_PHYSICALLEN } };
-	if( data_query(data, &r_len) != 0)
-		return -EFAULT;
-	if( (data_size = r_len.length) == 0)
-		return -1; // EOF
-	
-	if(fargs->offset > data_size)
-		return -EINVAL; // invalid range
-	
-	fargs->buffer_size = MIN(fargs->buffer_size, data_size - fargs->offset);
-	
-	if(fargs->buffer_size == 0)
-		return -1; // EOF
-	
-	memcpy(data->ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
-	return 0;
-} // }}}
-static ssize_t       data_default_copy          (data_t *src, void *args){ // {{{
-	uintmax_t              data_size;
-	data_t                *dest
-	fastcall_copy         *fargs             = (fastcall_copy *)args;
-	
-	if(fargs->header->nargs < 3 || fargs->dest == NULL)
-		return -EINVAL;
-	
-	fastcall_physicallen  r_len = { .header = { .nargs = 3, .action = ACTION_PHYSICALLEN } };
-	if( data_query(data, &r_len) != 0)
-		return -EFAULT;
-	
-	dest = (data_t *)fargs->dest;
-	
-	if( (dest->ptr = malloc(r_len.length)) == NULL)
-		return -EFAULT;
-	
-	dest->type = src->type;
-	
-	memcpy(dest->ptr, src->ptr, r_len.length);
-	return 0;
-} // }}}
 
 /* vim: set filetype=c: */

@@ -19,7 +19,9 @@ typedef enum data_functions {
 	ACTION_WRITE,
 	ACTION_CONVERT,
 	ACTION_TRANSFER,
-	ACTION_COPY
+	ACTION_COPY,
+
+	ACTION_LAST
 } data_functions;
 
 typedef enum data_api_type {
@@ -53,6 +55,33 @@ typedef struct fastcall_copy {
 	void                  *dest;
 } fastcall_copy;
 
+typedef struct fastcall_convert {
+	fastcall_header        header;
+	void                  *src;
+} fastcall_convert;
+
+typedef struct fastcall_compare {
+	fastcall_header        header;
+	void                  *data2;
+} fastcall_compare;
+
+typedef struct fastcall_free {
+	fastcall_header        header;
+} fastcall_free;
+
+#ifdef DATA_C
+uintmax_t fastcall_nargs[ACTION_LAST] = {
+	[ACTION_READ] = 5,
+	[ACTION_WRITE] = 5,
+	[ACTION_PHYSICALLEN] = 3,
+	[ACTION_LOGICALLEN] = 3,
+	[ACTION_COPY] = 3,
+	[ACTION_CONVERT] = 3,
+	[ACTION_COMPARE] = 3,
+	[ACTION_FREE] = 2
+};
+#endif
+
 struct data_t {
 	data_type       type;
 	void           *ptr;
@@ -66,7 +95,7 @@ struct data_proto_t {
 	data_api_type   api_type;
 	
 	f_data_func     handler_default;
-	f_data_func     handlers[sizeof(data_functions)];
+	f_data_func     handlers[ACTION_LAST];
 };
 
 /* api's */

@@ -7,85 +7,85 @@
 #include <string/string_t.h>
 #include <hash/hash_t.h>
 
-static ssize_t   data_backend_t_read  (data_t *data, data_ctx_t *ctx, off_t offset, void **buffer, size_t *size){
-	ssize_t         ret;
-	off_t           d_offset = 0;
+static ssize_t   data_backend_t_read  (data_t *data, void *args){
+	fastcall_read         *fargs             = (fastcall_read *)args;
 	
-	hash_data_copy(ret, TYPE_OFFT, d_offset, ctx, HK(offset));
-	d_offset += offset;
+	if(fargs->header->nargs < 5 || fargs->buffer == NULL)
+		return -EINVAL;
 	
-	request_t  req_read[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)},
-		{ HK(offset), DATA_PTR_OFFT(&d_offset)      },
-		{ HK(size),   DATA_PTR_SIZET(size)          },
-		{ HK(buffer), DATA_RAW(*buffer, *size)      },
-		{ HK(ret),    DATA_PTR_SIZET(&ret)          },
-		hash_end
-	};
-	backend_pass( *(backend_t **)(data->data_ptr), req_read);
-	if(ret < 0){
-		*size = 0;
+	if( (ret = backend_stdcall_read(
+		(backend_t *)data->ptr,
+		fargs->offset,
+		fargs->buffer,
+		fargs->buffer_size
+	)) < 0)
 		return ret;
-	}
-	
-	*size = ret;
 	if(ret == 0)
 		return -1; // EOF
 	
-	return ret;
+	fargs->buffer_size = ret;
+	return 0;
 }
 
-static ssize_t   data_backend_t_write (data_t *data, data_ctx_t *ctx, off_t offset, void *buffer, size_t size){
-	ssize_t         ret;
-	off_t           d_offset = 0;
+static ssize_t   data_backend_t_write (data_t *data, void *args){
+	fastcall_read         *fargs             = (fastcall_read *)args;
 	
-	hash_data_copy(ret, TYPE_OFFT, d_offset, ctx, HK(offset));
-	d_offset += offset;
+	if(fargs->header->nargs < 5 || fargs->buffer == NULL)
+		return -EINVAL;
 	
-	request_t  req_write[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE) },
-		{ HK(offset), DATA_PTR_OFFT(&d_offset)      },
-		{ HK(size),   DATA_SIZET(size)              },
-		{ HK(buffer), DATA_RAW(buffer, size)        },
-		{ HK(ret),    DATA_PTR_SIZET(&ret)          },
-		hash_end
-	};
-	backend_pass( *(backend_t **)(data->data_ptr), req_write);
-	return ret;
+	if( (ret = backend_stdcall_write(
+		(backend_t *)data->ptr,
+		fargs->offset,
+		fargs->buffer,
+		fargs->buffer_size
+	)) < 0)
+		return ret;
+	if(ret == 0)
+		return -1; // EOF
+	
+	fargs->buffer_size = ret;
+	return 0;
 }
-static ssize_t data_backend_t_convert(data_t *dst, data_ctx_t *dst_ctx, data_t *src, data_ctx_t *src_ctx){ // {{{
+
+static ssize_t data_backend_t_convert(data_t *dst, void *args){ // {{{
 	ssize_t                ret;
+	data_t                *src;
 	hash_t                *backend_config    = NULL;
 	char                  *backend_name      = NULL;
+	fastcall_convert      *fargs             = (fastcall_convert *)args;
 	
-	switch( data_value_type(src) ){
-		case TYPE_STRINGT:
-			data_to_dt(ret, TYPE_STRINGT, backend_name, src, src_ctx);
-			if(ret == 0){
-				dst->data_ptr = backend_find(backend_name);
-				return 0;
-			}
-			break;
-
-		case TYPE_HASHT:
-			data_to_dt(ret, TYPE_HASHT, backend_config, src, src_ctx);
-			if(ret == 0){
-				dst->data_ptr = backend_new(backend_config);
-				return 0;
-			}
-			break;
-
-		default:
-			break;
+	if(fargs->header->nargs < 3 || fargs->src == NULL)
+		return -EINVAL;
+	
+	src = (data_t *)fargs->src;
+	
+	switch( src->type ){
+		case TYPE_STRINGT: dst->data_ptr = backend_find( (char *)src->ptr );  break;
+		case TYPE_HASHT:   dst->data_ptr = backend_new( (hash_t *)src->ptr ); break;
+		default: break;
 	};
 	return -ENOSYS;
 } // }}}
 
+static ssize_t data_backend_t_len(data_t *data, void *args){
+	fastcall_len          *fargs             = (fastcall_len *)args;
+	
+	if(fargs->header->nargs < 3)
+		return -EINVAL;
+
+	fargs->length = 0;
+	return 0;
+}
+
 data_proto_t backend_t_proto = {
 	.type                   = TYPE_BACKENDT,
 	.type_str               = "backend_t",
-	.size_type              = SIZE_VARIABLE,
-	.func_read              = &data_backend_t_read,
-	.func_write             = &data_backend_t_write,
-	.func_convert           = &data_backend_t_convert
+	.api_type               = API_HANDLERS,
+	.handlers = {
+		[ACTION_READ]        = &data_backend_t_read,
+		[ACTION_WRITE]       = &data_backend_t_write,
+		[ACTION_CONVERT]     = &data_backend_t_convert,
+		[ACTION_PHYSICALLEN] = &data_backend_t_len,
+		[ACTION_LOGICALLEN]  = &data_backend_t_len
+	}
 };
