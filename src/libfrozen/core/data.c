@@ -7,7 +7,6 @@
 
 extern data_proto_t * data_protos[];
 extern size_t         data_protos_size;
-extern f_data_func    data_default[sizeof(data_functions)];
 
 ssize_t              data_validate(data_t *data){ // {{{
 	if(data == NULL || data->type == TYPE_INVALID || (unsigned)data->type >= data_protos_size)
@@ -59,13 +58,13 @@ ssize_t              data_query         (data_t *data, void *args){ // {{{
 	)
 		return -EINVAL;
 	
-	proto = &data_proto[data->type];
+	proto = data_protos[data->type];
 	
 	switch(proto->api_type){
 		case API_DEFAULT_HANDLER: func = proto->handler_default;           break;
 		case API_HANDLERS:        func = proto->handlers[ fargs->action ]; break;
 	};
-	if( func == NULL && (func = data_proto[TYPE_DEFAULTT]->handlers[ fargs->action ]) == NULL)
+	if( func == NULL && (func = data_protos[TYPE_DEFAULTT]->handlers[ fargs->action ]) == NULL)
 		return -ENOSYS;
 	
 	if( fargs->nargs < fastcall_nargs[ fargs->action ] )

@@ -74,6 +74,7 @@ API int             buffer_seek                (buffer_t *buffer, off_t b_offset
 
 API ssize_t         buffer_write               (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
 API ssize_t         buffer_read                (buffer_t *buffer, off_t offset, void *buf, size_t buf_size);
+// TODO bad read\write api
 
 API void *          buffer_add_head_chunk      (buffer_t *buffer, size_t size);
 API void *          buffer_add_tail_chunk      (buffer_t *buffer, size_t size);

@@ -13,8 +13,8 @@ typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 #define hash_ptr_null  (hash_key_t)-1
 #define hash_ptr_end   (hash_key_t)-2 
 
-#define hash_null       {hash_ptr_null, {0, NULL, 0}}
-#define hash_next(hash) {hash_ptr_end,  {0, (void *)hash,  0}}
+#define hash_null       {hash_ptr_null, {0, NULL}}
+#define hash_next(hash) {hash_ptr_end,  {0, (void *)hash}}
 #define hash_end        hash_next(NULL)
 #define HK(value) HASH_KEY_##value
 

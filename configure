@@ -630,6 +630,7 @@ DATA_OBJECTS_memory
 DATA_OBJECTS_io
 DATA_OBJECTS_hash
 DATA_OBJECTS_go_interface
+DATA_OBJECTS_default
 DATA_OBJECTS_buffer
 DATA_OBJECTS_binary
 DATA_LIBS_SELECTED
@@ -783,6 +784,7 @@ enable_modulego_template
 enable_backend_t
 enable_binary_t
 enable_buffer_t
+enable_default_t
 enable_go_interface_t
 enable_hash_t
 enable_io_t
@@ -1492,6 +1494,8 @@ Optional Features:
                           disable data backend-t
   --disable-data-binary-t disable data binary-t
   --disable-data-buffer-t disable data buffer-t
+  --disable-data-default-t
+                          disable data default-t
   --disable-data-go-interface-t
                           disable data go-interface-t
   --disable-data-hash-t   disable data hash-t
@@ -17443,7 +17447,7 @@ fi
 
 	if test "${enable_backend_t}" = "yes"; then
 		DATA_DIR_backend_t="backend"
-		DATA_DEP_backend_t="off_t size_t raw_t uint32_t string_t hash_t"
+		DATA_DEP_backend_t="string_t hash_t"
 		DATA_ID_backend_t="1"
 		DATA_OBJECTS_backend="$DATA_OBJECTS_backend libfrozen_data_backend_la-backend_t.lo"
 		DATA_SELECTED="$DATA_SELECTED backend_t"
@@ -17537,6 +17541,45 @@ fi
 		DATA_MAKEFILE_buffer=yes
 
 		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED buffer/libfrozen_data_buffer.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-default_t was given.
+if test "${enable_default_t+set}" = set; then :
+  enableval=$enable_default_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_default_t}" = "yes"; then
+			enable_default_t="no"
+		else
+			enable_default_t="yes"
+		fi
+	fi
+
+	if test "${enable_default_t}" = "yes"; then
+		DATA_DIR_default_t="default"
+		DATA_DEP_default_t=""
+		DATA_ID_default_t="0"
+		DATA_OBJECTS_default="$DATA_OBJECTS_default libfrozen_data_default_la-default_t.lo"
+		DATA_SELECTED="$DATA_SELECTED default_t"
+		DATA_HEADERS="$DATA_HEADERS default/default_t.h"
+
+
+	fi
+
+	if test "$DATA_MAKEFILE_default" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/default/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS default"
+
+		DATA_MAKEFILE_default=yes
+
+		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED default/libfrozen_data_default.la"
 
 	fi
 
@@ -17755,7 +17798,7 @@ fi
 
 	if test "${enable_string_t}" = "yes"; then
 		DATA_DIR_string_t="string"
-		DATA_DEP_string_t="off_t size_t"
+		DATA_DEP_string_t=""
 		DATA_ID_string_t="16"
 		DATA_OBJECTS_string="$DATA_OBJECTS_string libfrozen_data_string_la-string_t.lo"
 		DATA_SELECTED="$DATA_SELECTED string_t"

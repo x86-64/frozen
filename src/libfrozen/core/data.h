@@ -13,6 +13,8 @@ typedef enum data_functions {
 	ACTION_COMPARE,
 	ACTION_INCREMENT,
 	ACTION_DECREMENT,
+	ACTION_ADD,
+	ACTION_SUB,
 	ACTION_MULTIPLY,
 	ACTION_DIVIDE,
 	ACTION_READ,
@@ -28,6 +30,23 @@ typedef enum data_api_type {
 	API_DEFAULT_HANDLER,
 	API_HANDLERS
 } data_api_type;
+
+struct data_t {
+	data_type       type;
+	void           *ptr;
+};
+
+typedef ssize_t    (*f_data_func)  (data_t *, void *args);
+
+struct data_proto_t {
+	char *          type_str;
+	data_type       type;
+	data_api_type   api_type;
+	
+	f_data_func     handler_default;
+	f_data_func     handlers[ACTION_LAST];
+};
+
 
 typedef struct fastcall_header {
 	uintmax_t              nargs;
@@ -50,24 +69,39 @@ typedef struct fastcall_len {
 typedef struct fastcall_len    fastcall_physicallen;
 typedef struct fastcall_len    fastcall_logicallen;
 
+typedef struct fastcall_free {
+	fastcall_header        header;
+} fastcall_free;
+
 typedef struct fastcall_copy {
 	fastcall_header        header;
-	void                  *dest;
+	data_t                *dest;
 } fastcall_copy;
 
 typedef struct fastcall_convert {
 	fastcall_header        header;
-	void                  *src;
+	data_t                *src;
 } fastcall_convert;
 
 typedef struct fastcall_compare {
 	fastcall_header        header;
-	void                  *data2;
+	data_t                *data2;
 } fastcall_compare;
 
-typedef struct fastcall_free {
+typedef struct fastcall_arith {
 	fastcall_header        header;
-} fastcall_free;
+	data_t                *data2;
+} fastcall_arith;
+typedef struct fastcall_arith  fastcall_add;
+typedef struct fastcall_arith  fastcall_sub;
+typedef struct fastcall_arith  fastcall_mul;
+typedef struct fastcall_arith  fastcall_div;
+
+typedef struct fastcall_arith_no_arg {
+	fastcall_header        header;
+} fastcall_arith_no_arg;
+typedef struct fastcall_arith_no_arg fastcall_increment;
+typedef struct fastcall_arith_no_arg fastcall_decrement;
 
 #ifdef DATA_C
 uintmax_t fastcall_nargs[ACTION_LAST] = {
@@ -78,25 +112,16 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_COPY] = 3,
 	[ACTION_CONVERT] = 3,
 	[ACTION_COMPARE] = 3,
-	[ACTION_FREE] = 2
+	[ACTION_FREE] = 2,
+	[ACTION_ADD] = 3,
+	[ACTION_SUB] = 3,
+	[ACTION_MULTIPLY] = 3,
+	[ACTION_DIVIDE] = 3,
+	[ACTION_INCREMENT] = 2,
+	[ACTION_DECREMENT] = 2,
 };
 #endif
 
-struct data_t {
-	data_type       type;
-	void           *ptr;
-};
-
-typedef ssize_t    (*f_data_func)  (data_t *, void *args);
-
-struct data_proto_t {
-	char *          type_str;
-	data_type       type;
-	data_api_type   api_type;
-	
-	f_data_func     handler_default;
-	f_data_func     handlers[ACTION_LAST];
-};
 
 /* api's */
 

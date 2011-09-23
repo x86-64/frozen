@@ -32,15 +32,17 @@ static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
 } // }}}
 static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
 	void     *data_ptr;
-	size_t    data_size;
 	
-	data_ptr  = data_value_ptr(&hash->data);
-	data_size = data_value_len(&hash->data);
+	data_ptr  = hash->data->ptr;
 	
-	if(data_ptr == NULL || data_size == 0)
+	if(data_ptr == NULL)
 		return ITER_CONTINUE;
 	
-	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, data_size);
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	if(data_query(&hash->data, &r_len) < 0)
+		return ITER_BREAK;
+	
+	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, r_len.length);
 	return ITER_CONTINUE;
 } // }}}
 
@@ -131,7 +133,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		el_new++;
 	}
 	el_new->key           = hash_ptr_end;
-	el_new->data.data_ptr = (el->data.data_ptr != NULL) ? hash_copy(el->data.data_ptr) : NULL;
+	el_new->data.ptr = (el->data.ptr != NULL) ? hash_copy(el->data.ptr) : NULL;
 	
 	return new_hash;
 } // }}}
@@ -147,13 +149,13 @@ void               hash_free                    (hash_t *hash){ // {{{
 		
 		data_free(&el->data);
 	}
-	hash_free(el->data.data_ptr);
+	hash_free(el->data.ptr);
 	
 	free(hash);
 } // }}}
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ // {{{
-	for(; hash != NULL; hash = (hash_t *)hash->data.data_ptr){
+	for(; hash != NULL; hash = (hash_t *)hash->data.ptr){
 		goto loop_start;
 		do{
 			hash++;
@@ -183,8 +185,8 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 	next:	
 		value++;
 	}
-	if(value->data.data_ptr != NULL)
-		return hash_iter((hash_t *)value->data.data_ptr, func, arg1, arg2);
+	if(value->data.ptr != NULL)
+		return hash_iter((hash_t *)value->data.ptr, func, arg1, arg2);
 	
 	return ITER_OK;
 } // }}}
@@ -192,15 +194,15 @@ void               hash_chain                   (hash_t *hash, hash_t *hash_next
 	hash_t *hend;
 	do{
 		hend = hash_find(hash, hash_ptr_end);
-	}while( (hash = hend->data.data_ptr) != NULL );
-	hend->data.data_ptr = hash_next;
+	}while( (hash = hend->data.ptr) != NULL );
+	hend->data.ptr = hash_next;
 } // }}}
 void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain){ // {{{
 	hash_t *hend;
 	do{
 		hend = hash_find(hash, hash_ptr_end);
-	}while( (hash = hend->data.data_ptr) != hash_unchain );
-	hend->data.data_ptr = NULL;
+	}while( (hash = hend->data.ptr) != hash_unchain );
+	hend->data.ptr = NULL;
 } // }}}
 size_t             hash_nelements               (hash_t *hash){ // {{{
 	hash_t       *el;
@@ -284,10 +286,10 @@ ssize_t            hash_to_memory               (hash_t  *hash, void *memory, si
 	
 	_hash_to_memory_cpy(hash, hash_size);
 	for(i=0; i<nelements; i++, hash++){
-		if(hash->data.data_ptr == NULL || hash->data.data_size == 0)
+		if(hash->data.ptr == NULL || hash->data.data_size == 0)
 			continue;
 		
-		_hash_to_memory_cpy(hash->data.data_ptr, hash->data.data_size);
+		_hash_to_memory_cpy(hash->data.ptr, hash->data.data_size);
 	}
 	return 0;
 } // }}}
@@ -300,12 +302,12 @@ ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, si
 	memory      += hash_size;
 	memory_size -= hash_size;
 	for(i=0; i<nelements; i++, hash++){
-		if(hash->data.data_ptr == NULL || hash->data.data_size == 0)
+		if(hash->data.ptr == NULL || hash->data.data_size == 0)
 			continue;
 		if(hash->key == hash_ptr_null)
 			continue;
 		
-		_hash_from_memory_cpy(hash->data.data_ptr, hash->data.data_size);
+		_hash_from_memory_cpy(hash->data.ptr, hash->data.data_size);
 	}
 	return 0;
 } // }}}
@@ -332,7 +334,7 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 		if(data_size > memory_size)
 			goto error;
 		
-		curr->data.data_ptr = memory + data_off;
+		curr->data.ptr = memory + data_off;
 		//data_assign_raw(
 		//	&curr->data,
 		//	data_value_type(&curr->data),
@@ -376,12 +378,12 @@ start:
 			goto next_item;
 		}
 		
-		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.data_ptr);
+		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.ptr);
 		for(k=0; k<element->data.data_size; k++){
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);
 			
-			printf("%.2hhx ", (unsigned int)(*((char *)element->data.data_ptr + k)));
+			printf("%.2hhx ", (unsigned int)(*((char *)element->data.ptr + k)));
 		}
 		printf("\n");
 	
@@ -389,9 +391,9 @@ start:
 		element++;
 	}
 	printf("end_hash\n");
-	if(element->data.data_ptr != NULL){
-		printf("recursive hash: %p\n", element->data.data_ptr);
-		element = element->data.data_ptr;
+	if(element->data.ptr != NULL){
+		printf("recursive hash: %p\n", element->data.ptr);
+		element = element->data.ptr;
 		goto start;
 	}
 } // }}}

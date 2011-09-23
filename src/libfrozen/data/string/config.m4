@@ -1,1 +1,1 @@
-FROZEN_DATA(string_t, string, yes, off_t size_t, 16)
+FROZEN_DATA(string_t, string, yes,, 16)

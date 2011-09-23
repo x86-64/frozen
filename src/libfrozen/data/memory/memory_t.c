@@ -1,7 +1,5 @@
 #include <libfrozen.h>
 #include <memory_t.h>
-#include <uint/off_t.h>
-#include <uint/size_t.h>
 
 memory_t_type  memory_string_to_type(char *string){ // {{{
 	if(strcmp(string, "exact") == 0)  return MEMORY_EXACT;
@@ -100,14 +98,13 @@ ssize_t  memory_shrink(memory_t *memory, uintmax_t size){ // {{{
 ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, void **pointer_out, uintmax_t *size_out){ // {{{
 	switch(memory->alloc){
 		case ALLOC_MALLOC:
-			// TODO IMPORTANT SECURITY snap ptr+size to mem
-			if(pointer >= memory->exact_size)
+			if(pointer > memory->exact_size)
 				return -EINVAL;
 			
 			size = MIN(size, memory->exact_size - pointer);
 			
-			if(pointer + size > memory->exact_size)
-				return -EINVAL;
+			if(size == 0)
+				return -1; // EOF
 			
 			if(pointer_out)
 				*pointer_out = (char *)memory->ptr + pointer;
@@ -139,54 +136,29 @@ size_t   memory_write (memory_t *memory, off_t offset, void *buffer, size_t buff
 	memcpy(memory_ptr, buffer, memory_size);
 	return memory_size;
 } // }}}
+// TODO bad read write api
 
-uintmax_t  data_memory_t_len(data_t *data, data_ctx_t *ctx){
-	(void)ctx; // TODO add ctx parse
-	return ((memory_t *)data->data_ptr)->exact_size;
-}
-
-ssize_t   data_memory_t_read(data_t *data, data_ctx_t *ctx, off_t coffset, void **buffer, uintmax_t *buffer_size){
-	ssize_t                ret;
-	off_t                  offset            = 0;
-	size_t                 size              = __MAX(size_t);
-	
-	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size)); (void)ret;
-	
-	offset += coffset;
-	
-	if(memory_translate(((memory_t *)data->data_ptr), offset, (uintmax_t)size, buffer, buffer_size) != 0)
-		return -1;
-	
-	return *buffer_size;
-}
-
-ssize_t   data_memory_t_write(data_t *data, data_ctx_t *ctx, off_t coffset, void *buffer, uintmax_t buffer_size){
-	ssize_t                ret;
-	off_t                  offset            = 0;
-	size_t                 size              = __MAX(size_t);
-	uintmax_t              memory_size; 
-	
-	hash_data_copy(ret, TYPE_OFFT,  offset, ctx, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,   ctx, HK(size));
-	
-	offset      += coffset;
-	memory_size  = MIN(size, buffer_size);
-	
-	if( (ret = memory_write( ((memory_t *)data->data_ptr), offset, buffer, memory_size)) == 0)
-		return -EFAULT;
-	
-	return ret;
-}
-
+static ssize_t data_memory_t_len(data_t *data, fastcall_len *fargs){ // {{{
+	fargs->length = ((memory_t *)data->ptr)->exact_size;
+	return 0;
+} // }}}
+static ssize_t data_memory_t_read(data_t *data, fastcall_read *fargs){ // {{{
+	fargs->buffer_size = memory_read(((memory_t *)data->ptr), fargs->offset, fargs->buffer, fargs->buffer_size);
+	return 0;
+} // }}}
+static ssize_t data_memory_t_write(data_t *data, fastcall_write *fargs){ // {{{
+	fargs->buffer_size = memory_write(((memory_t *)data->ptr), fargs->offset, fargs->buffer, fargs->buffer_size);
+	return 0;
+} // }}}
 
 data_proto_t memory_t_proto = {
 	.type          = TYPE_MEMORYT,
 	.type_str      = "memory_t",
-	.size_type     = SIZE_VARIABLE,
-	.func_len      = &data_memory_t_len,
-	.func_rawlen   = &data_memory_t_len,
-	.func_read     = &data_memory_t_read,
-	.func_write    = &data_memory_t_write
+	.api_type      = API_HANDLERS,
+	.handlers      = {
+		[ACTION_PHYSICALLEN] = (f_data_func)&data_memory_t_len,
+		[ACTION_LOGICALLEN]  = (f_data_func)&data_memory_t_len,
+		[ACTION_READ]        = (f_data_func)&data_memory_t_read,
+		[ACTION_WRITE]       = (f_data_func)&data_memory_t_write,
+	}
 };
-

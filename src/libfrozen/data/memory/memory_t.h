@@ -1,7 +1,7 @@
 #ifndef DATA_MEMORY_T_H
 #define DATA_MEMORY_T_H
 
-#define DATA_MEMORYT(_mem) {TYPE_MEMORYT, _mem, 0}
+#define DATA_MEMORYT(_mem) {TYPE_MEMORYT, _mem}
 	
 typedef enum memory_t_type {
 	MEMORY_FREED = 0,
@@ -37,8 +37,8 @@ API ssize_t  memory_grow(memory_t *memory, uintmax_t size, off_t *pointer);
 API ssize_t  memory_shrink(memory_t *memory, uintmax_t size); 
 API ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, void **pointer_out, uintmax_t *size_out); 
 
-API size_t   memory_read  (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
-API size_t   memory_write (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
+API size_t   memory_read   (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
+API size_t   memory_write  (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
 
 extern data_proto_t memory_t_proto;
 
