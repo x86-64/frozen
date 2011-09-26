@@ -8,7 +8,7 @@
 typedef struct sort_proto_t     sort_proto_t;
 typedef struct sorts_userdata  sorts_userdata;
 
-typedef ssize_t (*func_find_key)(sorts_userdata *data, data_t *, data_ctx_t *, data_t *, data_ctx_t *);
+typedef ssize_t (*func_find_key)(sorts_userdata *data, data_t *, data_t *);
 
 struct sort_proto_t {
 	char           *name;
@@ -85,16 +85,15 @@ static int sorts_configure(backend_t *backend, hash_t *config){ // {{{
 static ssize_t sorts_set   (backend_t *backend, request_t *request){
 	ssize_t          ret;
 	data_t          *buffer,     *key_out;
-	data_ctx_t      *buffer_ctx, *key_out_ctx;
 	sorts_userdata  *data = (sorts_userdata *)backend->userdata;
 	
-	hash_data_find(request, data->sort_field, &buffer,  &buffer_ctx);  if(buffer == NULL)  return warning("no buffer supplied");
-	hash_data_find(request, HK(offset_out),   &key_out, &key_out_ctx); if(key_out == NULL) return warning("no key_out supplied");
+	buffer  = hash_data_find(request, data->sort_field);  if(buffer == NULL)  return warning("no buffer supplied");
+	key_out = hash_data_find(request, HK(offset_out));    if(key_out == NULL) return warning("no key_out supplied");
 	
 	// TODO underlying locking and threading
 	// next("lock");
 	
-	ret = data->engine->func_find(data, buffer, buffer_ctx, key_out, key_out_ctx);
+	ret = data->engine->func_find(data, buffer, key_out);
 	/*
 	if(ret == KEY_FOUND){
 		

@@ -113,11 +113,11 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	if(ret != 0)
 		return -EINVAL;
 	
-	hash_data_find(request, userdata->output, &data_output, NULL);
+	data_output = hash_data_find(request, userdata->output);
 	if(data_output == NULL)
 		return -EINVAL;
 	
-	d_output = data_value_ptr(data_output);
+	d_output = data_output->ptr;
 	
 	switch(action){
 		case ACTION_CRWD_CREATE:

@@ -58,7 +58,6 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 		size_t      rec_old_size,   rec_new_size;
 		data_t      rec_new_offset_data = DATA_PTR_OFFT(&rec_new_offset);
 		data_t     *offset_out;
-		data_ctx_t *offset_out_ctx;
 		
 		hash_data_copy(ret, TYPE_OFFT,  rec_old_offset, request, HK(offset));   if(ret != 0) return warning("no offset supplied");
 		hash_data_copy(ret, TYPE_SIZET, rec_new_size,   request, HK(size));     if(ret != 0) return warning("no size supplied");
@@ -107,8 +106,9 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 			return ret;
 		
 		// optional offset fill
-		hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
-		data_transfer(offset_out, offset_out_ctx, &rec_new_offset_data, NULL);
+		offset_out = hash_data_find(request, HK(offset_out));
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, offset_out };
+		data_query(&rec_new_offset_data, &r_transfer);
 		return 0;
 	}
 pass:

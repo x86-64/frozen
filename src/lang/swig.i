@@ -19,7 +19,7 @@
 %typemap(gotype) backend_t *, const void * & "uintptr"
 %typemap(gotype) hash_t *,    const void * & "uintptr"
 %typemap(gotype) request_t *, const void * & "uintptr"
-%typemap(gotype) data_t *,    const void * & "uintptr"
+//%typemap(gotype) data_t *,    const void * & "uintptr"
 #endif
 
 enum request_actions {
@@ -78,6 +78,10 @@ struct backend_t {
 
 	void *                 userdata;
 };
+struct data_t {
+	data_type       type;
+	void           *ptr;
+};
 
 int                frozen_init(void);
 int                frozen_destroy(void);
@@ -110,19 +114,14 @@ void               hash_dump                    (hash_t *hash);
 
 hash_key_t         hash_string_to_key           (char *string);
 char *             hash_key_to_string           (hash_key_t key);
-hash_key_t         hash_key_to_ctx_key          (hash_key_t key);
 
 hash_key_t         hash_item_key                (hash_t *hash);
 data_t *           hash_item_data               (hash_t *hash);
 hash_t *           hash_item_next               (hash_t *hash);
-void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data, data_ctx_t **data_ctx);
+data_t *           hash_data_find               (hash_t *hash, hash_key_t key);
 
 data_type          data_type_from_string        (char *string);
 char *             data_string_from_type        (data_type type);
-void               data_free                    (data_t *data);
-data_type          data_value_type              (data_t *data);
-void *             data_value_ptr               (data_t *data); // TODO deprecate this
-size_t             data_value_len               (data_t *data); // TODO deprecate this
 
 const char *       describe_error               (intmax_t errnum);
 
@@ -163,16 +162,17 @@ sub query {
 }
 %}
 
-%cstring_output_allocate_size(char **string, size_t *len, );
-void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len);
-ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
-ssize_t            data_from_string             (data_t *data, char *type, char *string);
+//%cstring_output_allocate_size(char **string, size_t *len, );
+//void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len);
+//ssize_t            hash_set                     (hash_t *hash, char *key, char *type, char *string);
+//ssize_t            data_from_string             (data_t *data, char *type, char *string);
 
 %inline %{
+/*
 ssize_t            data_from_string             (data_t *data, char *type, char *string){
         ssize_t   retval;
         data_type d_type = data_type_from_string(type);
-        data_t    d_str  = DATA_PTR_STRING(string, strlen(string)+1);
+        data_t    d_str  = DATA_PTR_STRING(string);
         
         data_convert_to_alloc(retval, d_type, data, &d_str, NULL);
         return retval;
@@ -189,13 +189,14 @@ ssize_t            hash_set                     (hash_t *hash, char *key, char *
 void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len){
         data_t     *data;
         
-        hash_data_find(hash, hash_string_to_key(key), &data, NULL);
+        data = hash_data_find(hash, hash_string_to_key(key));
         if(data == NULL)
                 return;
         
-        *string = data_value_ptr(data);
-        *len    = data_value_len(data);
+        *string = data->ptr;
+        *len    = strlen(data->ptr); // BAD BAD BAD WROOOONG
 }
+*/
 %}
 
 #endif // }}}
@@ -239,17 +240,16 @@ func ObjFromPtr(ptr uintptr) interface {} {
 
 void __morestack(void){}
 
-void go_data_to_string(data_t *data, char **string, size_t *string_len){
-	*string     = data_value_ptr(data);
-	*string_len = MIN(data_value_len(data), strlen(*string));
-}
 void go_data_to_raw(data_t *data, char **string, size_t *string_len){
-	*string     = data_value_ptr(data);
-	*string_len = data_value_len(data);
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	data_query(data, &r_len);
+	
+	*string     = data->ptr;
+	*string_len = r_len.length;
 }
 uintmax_t  go_data_to_uint(data_t *data){
 	uintmax_t ret = 0;
-	memcpy(&ret, data_value_ptr(data), MIN(data_value_len(data), sizeof(ret)));
+	memcpy(&ret, data->ptr, sizeof(ret));
 	return ret;
 }
 
@@ -320,13 +320,13 @@ func Hget(hash uintptr, skey uint64) interface {} {
 		return nil
 	}
 	data := Hash_item_data(item)
-	switch t := Data_value_type(data); t {
-		case TYPE_GOINTERFACET: return ObjFromPtr( Data_value_ptr(data) )
+	switch t := data.GetXtype(); t {
+		case TYPE_GOINTERFACET: return ObjFromPtr( data.GetPtr() )
 		case TYPE_INTT:         return  int(Go_data_to_uint(data))
 		case TYPE_SIZET:        return uint(Go_data_to_uint(data))
 		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
-		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s);    return s[0]
-		case TYPE_STRINGT:      s := []string{""}; Go_data_to_string(data, s); return s[0]
+		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s); return s[0]
+		case TYPE_STRINGT:      s := []string{""}; Go_data_to_raw(data, s); return s[0]
 		default: fmt.Printf("Hget: unexpected data type: %v\n", t)
 	}
 	return nil

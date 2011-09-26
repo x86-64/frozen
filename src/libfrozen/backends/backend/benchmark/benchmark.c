@@ -155,13 +155,14 @@ static ssize_t benchmark_handler_custom(backend_t *backend, request_t *request){
 	char                  *function;
 	data_t                *value;
 	data_t                *string;
+	char                   buffer[1024];
 	
 	hash_data_copy(ret, TYPE_STRINGT,  function,  request, HK(function));
 	if(ret != 0)
 		goto pass;
 	
-	hash_data_find(request, HK(value),  &value,  NULL);
-	hash_data_find(request, HK(string), &string, NULL);
+	value  = hash_data_find(request, HK(value));
+	string = hash_data_find(request, HK(string));
 	
 	if(strcmp(function, "benchmark_restart") == 0){
 		benchmark_control_restart(backend);
@@ -169,28 +170,36 @@ static ssize_t benchmark_handler_custom(backend_t *backend, request_t *request){
 	}
 	
 	if(string != NULL){
-		if(strcmp(function, "benchmark_short") == 0)
-			return benchmark_control_query_short (backend, data_value_ptr(string), data_value_len(string) );
-		if(strcmp(function, "benchmark_long") == 0)
-			return benchmark_control_query_long  (backend, data_value_ptr(string), data_value_len(string) );
+		if(strcmp(function, "benchmark_short") == 0){
+			ret = benchmark_control_query_short (backend, buffer, sizeof(buffer) );
+			goto write;
+		}
+		if(strcmp(function, "benchmark_long") == 0){
+			ret = benchmark_control_query_long  (backend, buffer, sizeof(buffer) );
+			goto write;
+		}
 	}
 	
-	if(value != NULL && data_value_type(value) == TYPE_UINTT){
+	if(value != NULL && value->type == TYPE_UINTT){
 		if(strcmp(function, "benchmark_ticks") == 0){
-			benchmark_control_query_ticks(backend, data_value_ptr(value) );
+			benchmark_control_query_ticks(backend, value->ptr );
 			return 0;
 		}
 		if(strcmp(function, "benchmark_ms") == 0){
-			benchmark_control_query_ms(backend, data_value_ptr(value) );
+			benchmark_control_query_ms(backend, value->ptr );
 			return 0;
 		}
 		if(strcmp(function, "benchmark_us") == 0){
-			benchmark_control_query_us(backend, data_value_ptr(value) );
+			benchmark_control_query_us(backend, value->ptr );
 			return 0;
 		}
 	}
 pass:
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+write:;
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &buffer, sizeof(buffer) };	
+	data_query(string, &r_write);
+	return ret;
 } // }}}
 
 backend_t benchmark_proto = {

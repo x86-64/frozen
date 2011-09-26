@@ -55,7 +55,6 @@ struct rewrite_thing_t {
 typedef struct rewrite_variable_t {
 	unsigned int             id;
 	data_t                   data;
-	data_ctx_t              *data_ctx;
 } rewrite_variable_t;
 
 typedef struct rewrite_name_t rewrite_name_t;

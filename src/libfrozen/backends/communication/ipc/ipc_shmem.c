@@ -45,6 +45,7 @@ typedef struct ipc_shmem_userdata {
 	size_t                 inited;
 	ipc_role               role;
 	forced_states          forced_state;
+	hash_key_t             buffer;
 	
 	ipc_shmem_header      *shmaddr;
 	ipc_shmem_block       *shmblocks;
@@ -74,7 +75,7 @@ static ssize_t shmem_destroy(ipc_shmem_userdata *userdata){ // {{{
 	}
 	return 0;
 } // }}}
-static ssize_t           shmem_block_status(ipc_shmem_userdata *userdata, ipc_shmem_block *block, size_t old_status, size_t new_status){ // {{{
+static ssize_t shmem_block_status(ipc_shmem_userdata *userdata, ipc_shmem_block *block, size_t old_status, size_t new_status){ // {{{
 	if(__sync_bool_compare_and_swap(&block->status, old_status, new_status)){
 		switch(new_status){
 			case STATUS_FREE:      sem_post(&userdata->shmaddr->sem_free);    break;
@@ -105,7 +106,6 @@ static ipc_shmem_block * shmem_get_block(ipc_shmem_userdata *userdata, size_t ol
 } // }}}
 
 void *  ipc_shmem_listen  (void *ipc){ // {{{
-	request_t          *request;
 	ipc_shmem_block    *block;
 	ipc_shmem_userdata *userdata = (ipc_shmem_userdata *)((ipc_t *)ipc)->userdata;
 	
@@ -114,8 +114,12 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 			break;
 		
 		// run request
-		hash_from_memory(&request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
-		backend_pass(((ipc_t *)ipc)->backend, request);
+		// TODO pass real size
+		request_t req[] = {
+			{ userdata->buffer, DATA_RAW( userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size ) },
+			hash_end
+		};
+		backend_pass(((ipc_t *)ipc)->backend, req);
 		
 		// update status. if client don't want read results - free block, overwise notify client
 		if(shmem_block_status(userdata, block, STATUS_EXECUTING, 
@@ -136,15 +140,17 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	uintmax_t              f_async           = 0;
 	uintmax_t              f_sync            = 0;
 	char                  *role_str;
+	char                  *buffer_str        = NULL;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
 	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
+	hash_data_copy(ret, TYPE_STRINGT, buffer_str, config, HK(buffer));
 	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
 	hash_data_copy(ret, TYPE_SIZET,   nitems,     config, HK(size));
 	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
 	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
-	
+
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
 	if( (shmid = shmget(shmkey, shmsize, IPC_CREAT | 0666)) < 0)
@@ -163,6 +169,7 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	userdata->shmdata   = (void *)           ((void *)userdata->shmblocks + nitems * sizeof(ipc_shmem_block));
 	userdata->inited    = 1;
 	
+	userdata->buffer       = hash_string_to_key(buffer_str);
 	userdata->forced_state = FORCE_NONE;
 	if(f_async != 0) userdata->forced_state = FORCE_ASYNC;
 	if(f_sync  != 0) userdata->forced_state = FORCE_SYNC;
@@ -204,6 +211,7 @@ error:
 ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              f_async           = 0;
+	data_t                *buffer;
 	ipc_shmem_block       *block;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
@@ -214,11 +222,16 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		case FORCE_NONE:  hash_data_copy(ret, TYPE_UINTT, f_async, request, HK(async)); break;
 	};
 	
+	buffer = hash_data_find(request, userdata->buffer);
+	
 	// send request
 	if( (block = shmem_get_block(userdata, STATUS_FREE, STATUS_WRITING)) == NULL)
 		return error("strange error");
 	
-	hash_to_memory(request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
+	// write data to ipc memory
+	fastcall_read r_read = { { 5, ACTION_READ }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
+	data_query(buffer, &r_read);
+
 	block->return_result = (f_async == 0) ? 1 : 0;
 	
 	if( (ret = shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN)) < 0)
@@ -228,8 +241,9 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		// wait for answer
 		sem_wait(&block->sem_done);
 		
-		// read request back
-		hash_reread_from_memory(request, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
+		// read request back // TODO make it optional?
+		fastcall_read r_write = { { 5, ACTION_WRITE }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
+		data_query(buffer, &r_write);
 		ret = -EEXIST;
 		
 		if(shmem_block_status(userdata, block, STATUS_EXEC_DONE, STATUS_FREE) < 0)

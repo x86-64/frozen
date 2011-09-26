@@ -31,8 +31,8 @@ API void               hash_unchain                 (hash_t *hash, hash_t *hash_
 API size_t             hash_nelements               (hash_t *hash);
 
 // hash <=> buffer
-API ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer);
+//API ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
+//API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer);
 
 // hash <=> raw memory
 //API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
@@ -42,7 +42,6 @@ API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *bu
 // hash keys routines
 API hash_key_t         hash_string_to_key           (char *string);
 API char *             hash_key_to_string           (hash_key_t key);
-API hash_key_t         hash_key_to_ctx_key          (hash_key_t key);
 
 _inline
 API hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
@@ -53,13 +52,10 @@ API data_t *           hash_item_data               (hash_t *hash){ return &(has
 _inline
 API hash_t *           hash_item_next               (hash_t *hash){ return ((hash + 1)->key == hash_ptr_end) ? NULL : hash + 1; }
 _inline
-API void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data){
+API data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
 	hash_t *temp;
-	if(data){
-		*data     =
-			((temp = hash_find(hash, key                     )) == NULL) ?
-			NULL : hash_item_data(temp);
-	}
+	return ((temp = hash_find(hash, key)) == NULL) ?
+		NULL : hash_item_data(temp);
 }
 
 #define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
@@ -75,12 +71,12 @@ API void               hash_data_find               (hash_t *hash, hash_key_t ke
 }
 #define hash_assign_hash_null(_dst) {  \
 	(_dst)->key = hash_ptr_null;   \
-	(_dst)->data.type = TYPE_VOIDT; \
-	(_dst)->data.data_ptr = NULL;  \
+	(_dst)->data.type = TYPE_VOIDT;\
+	(_dst)->data.ptr = NULL;       \
 }
 #define hash_assign_hash_end(_dst) {  \
 	(_dst)->key = hash_ptr_end;   \
-	(_dst)->data.data_ptr = NULL; \
+	(_dst)->data.ptr = NULL;      \
 }
 
 

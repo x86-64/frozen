@@ -151,19 +151,20 @@ function : NAME '(' args_list ')' {
 
 constant : '(' NAME ')' STRING {
 	rewrite_variable_t *constant = rewrite_new_constant(script);
-	data_t              d_str    = DATA_PTR_STRING($4, strlen($4)+1);
+	//data_t              d_str    = DATA_PTR_STRING($4);
 	
 	/* convert string to needed data */
-	ssize_t retval;
+	//ssize_t retval;
 
-	data_convert_to_alloc(retval, data_type_from_string($2), &constant->data, &d_str, NULL);
-	//size_t m_len = data_len(_src,_src_ctx);                  \
-	//m_len = data_len2raw(_type, m_len);                      \
-	//data_alloc(_dst,_type,m_len);                            \
+	// BAD BAD BAD
+	//data_convert_to_alloc(retval, data_type_from_string($2), &constant->data, &d_str, NULL);
+	//size_t m_len = data_len(_src,_src_ctx);                  
+	//m_len = data_len2raw(_type, m_len);                      
+	//data_alloc(_dst,_type,m_len);                            
 	//_retval = data_convert(_dst,NULL,_src,_src_ctx);         
-	if(retval != 0){
-		yyerror(script, "failed convert data\n"); YYERROR;
-	}
+	//if(retval != 0){
+	//	yyerror(script, "failed convert data\n"); YYERROR;
+	//}
 	
 	/* fill output type */
 	$$.type = THING_CONST;
@@ -203,7 +204,8 @@ label : NAME {
 		rewrite_variable_t *constant = rewrite_new_constant(script);
 		data_t              d_act    = DATA_UINT32T(action);
 		
-		data_copy(&constant->data, &d_act);
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &constant->data };
+		data_query(&d_act, &r_copy);
 		
 		/* fill output type */
 		$$.type = THING_CONST;
@@ -325,7 +327,8 @@ static void                 rewrite_free_constants(rewrite_script_t *script){ //
 	for(i=0; i<script->constants_count; i++){
 		rewrite_variable_t *constant = &script->constants[i];
 		
-		data_free(&constant->data);
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&constant->data, &r_free);
 	}
 	free(script->constants);
 } // }}}

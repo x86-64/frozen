@@ -8,8 +8,8 @@ typedef struct incap_userdata {
 	hash_key_t     key_from;
 	hash_key_t     count;
 	hash_key_t     size;
-	DT_SIZET       multiply_as_sizet;
-	DT_OFFT        multiply_as_offt;
+	size_t         multiply_as_sizet;
+	off_t          multiply_as_offt;
 	data_t         multiply_as_sizet_data;
 	data_t         multiply_as_offt_data;
 } incap_userdata;
@@ -27,15 +27,15 @@ static int incap_destroy(backend_t *backend){ // {{{
 	return 0;
 } // }}}
 static int incap_configure(backend_t *backend, hash_t *config){ // {{{
-	ssize_t          ret;
-	DT_STRING        key_str       = "offset";
-	DT_STRING        key_out_str   = "offset_out";
-	DT_STRING        key_to_str    = "offset_to";
-	DT_STRING        key_from_str  = "offset_from";
-	DT_STRING        count_str     = "buffer";
-	DT_STRING        size_str      = "size";
-	DT_OFFT          multiply      = 1;
-	incap_userdata  *userdata      = (incap_userdata *)backend->userdata;
+	ssize_t                ret;
+	char                  *key_str       = "offset";
+	char                  *key_out_str   = "offset_out";
+	char                  *key_to_str    = "offset_to";
+	char                  *key_from_str  = "offset_from";
+	char                  *count_str     = "buffer";
+	char                  *size_str      = "size";
+	off_t                  multiply      = 1;
+	incap_userdata        *userdata      = (incap_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
 	hash_data_copy(ret, TYPE_STRINGT, key_out_str,   config, HK(key_out));
@@ -64,7 +64,7 @@ static int incap_configure(backend_t *backend, hash_t *config){ // {{{
 	
 	return 0;
 } // }}}
-
+/*
 static ssize_t incap_backend_createwrite(backend_t *backend, request_t *request){
 	ssize_t          ret;
 	size_t           size, new_size;
@@ -161,7 +161,7 @@ static ssize_t incap_backend_custom(backend_t *backend, request_t *request){
 	return ret;
 	
 }
-
+*/
 backend_t incapsulate_proto = {
 	.class          = "data/incapsulate",
 	.supported_api  = API_CRWD,
@@ -169,13 +169,13 @@ backend_t incapsulate_proto = {
 	.func_configure = &incap_configure,
 	.func_destroy   = &incap_destroy,
 	{
-		.func_create = &incap_backend_createwrite,
-		.func_set    = &incap_backend_createwrite,
-		.func_get    = &incap_backend_read,
-		.func_delete = &incap_backend_read,
-		.func_move   = &incap_backend_move,
-		.func_count  = &incap_backend_count,
-		.func_custom = &incap_backend_custom
+//		.func_create = &incap_backend_createwrite,
+//		.func_set    = &incap_backend_createwrite,
+//		.func_get    = &incap_backend_read,
+//		.func_delete = &incap_backend_read,
+//		.func_move   = &incap_backend_move,
+//		.func_count  = &incap_backend_count,
+//		.func_custom = &incap_backend_custom
 	}
 };
 

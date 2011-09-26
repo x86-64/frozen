@@ -30,10 +30,10 @@ static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
 	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
 	return (mi1->key_val - mi2->key_val);
 } // }}}
-static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
+/*static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
 	void     *data_ptr;
 	
-	data_ptr  = hash->data->ptr;
+	data_ptr  = hash->data.ptr;
 	
 	if(data_ptr == NULL)
 		return ITER_CONTINUE;
@@ -45,7 +45,7 @@ static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ /
 	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, r_len.length);
 	return ITER_CONTINUE;
 } // }}}
-
+*/
 hash_key_t         hash_string_to_key           (char *string){ // {{{
 	hash_keypair_t  key, *ret;
 	key.key_str = string;
@@ -86,9 +86,6 @@ char *             hash_key_to_string           (hash_key_t key_val){ // {{{
 ret_null:
 	return "(null)";
 } // }}}
-hash_key_t         hash_key_to_ctx_key          (hash_key_t key){ // {{{
-	return key + HASH_CTX_KEY_OFFSET;
-} // }}}
 
 hash_t *           hash_new                     (size_t nelements){ // {{{
 	size_t  i;
@@ -128,11 +125,13 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 			continue;
 		
 		el_new->key = el->key;
-		data_copy(&el_new->data, &el->data);
+		
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &el_new->data };
+		data_query(&el->data, &r_copy);
 		
 		el_new++;
 	}
-	el_new->key           = hash_ptr_end;
+	el_new->key      = hash_ptr_end;
 	el_new->data.ptr = (el->data.ptr != NULL) ? hash_copy(el->data.ptr) : NULL;
 	
 	return new_hash;
@@ -147,7 +146,8 @@ void               hash_free                    (hash_t *hash){ // {{{
 		if(el->key == hash_ptr_null)
 			continue;
 		
-		data_free(&el->data);
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&el->data, &r_free);
 	}
 	hash_free(el->data.ptr);
 	
@@ -217,6 +217,7 @@ size_t             hash_nelements               (hash_t *hash){ // {{{
 	return i + 1;
 } // }}}
 
+/*
 ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer){ // {{{
 	size_t  nelements;
 	
@@ -277,7 +278,6 @@ ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer
 error:
 	return -EFAULT;
 } // }}}
-/*
 ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size){ // {{{
 	size_t  i, nelements, hash_size;
 	
@@ -356,20 +356,17 @@ inline hash_key_t         hash_item_key                (hash_t *hash){ return ha
 inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
 inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
 inline hash_t *           hash_item_next               (hash_t *hash){ return ((hash+1)->key == hash_ptr_end) ? NULL : hash + 1; }
-inline void               hash_data_find               (hash_t *hash, hash_key_t key, data_t **data){
+inline data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
 	hash_t *temp;
-	if(data){
-		*data     =
-			((temp = hash_find(hash, key                     )) == NULL) ?
-			NULL : hash_item_data(temp);
-	}
+	return ((temp = hash_find(hash, key)) == NULL) ?
+		NULL : hash_item_data(temp);
 }
 
 #ifdef DEBUG
 void hash_dump(hash_t *hash){ // {{{
 	unsigned int  k;
 	hash_t       *element = hash;
-	
+
 	printf("hash: %p\n", hash);
 start:
 	while(element->key != hash_ptr_end){
@@ -379,7 +376,11 @@ start:
 		}
 		
 		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.ptr);
-		for(k=0; k<element->data.data_size; k++){
+		
+		fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+		data_query(&element->data, &r_len);
+
+		for(k = 0; k < r_len.length; k++){
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);
 			

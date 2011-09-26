@@ -1,5 +1,7 @@
 
-ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1, data_ctx_t *buffer1_ctx, data_t *key_out, data_ctx_t *key_out_ctx){
+ssize_t sorts_binsearch_find (sorts_userdata *data, data_t *buffer1, data_t *key_out){
+	return -1;
+	/* BAD BAD BAD
 	ssize_t         ret, q_ret;
 	off_t           range_start, range_end, current;
 	data_t          d_current = DATA_PTR_OFFT(&current);
@@ -26,7 +28,7 @@ ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1,
 		hash_end
 	};
 	
-	/* check last element of list to fast-up incremental inserts */
+	// check last element of list to fast-up incremental inserts //
 	current = range_end - 1;
 	if( (ret = data_cmp(buffer1, buffer1_ctx, &backend, backend_ctx)) >= 0){
 		current = range_end;
@@ -40,12 +42,10 @@ ssize_t             sorts_binsearch_find (sorts_userdata *data, data_t *buffer1,
 		
 		ret = data_cmp(buffer1, buffer1_ctx, &backend, backend_ctx);
 		
-		/*
-		printf("range: %x-%x curr: %x ret: %x\n",
-			(unsigned int)range_start, (unsigned int)range_end,
-			(unsigned int)current, (unsigned int)ret
-		);
-		*/
+		//printf("range: %x-%x curr: %x ret: %x\n",
+		//	(unsigned int)range_start, (unsigned int)range_end,
+		//	(unsigned int)current, (unsigned int)ret
+		//);
 		
 		if(ret == 0){
 			ret = KEY_FOUND;
@@ -68,7 +68,7 @@ exit:
 		key_out,    key_out_ctx,
 		&d_current, NULL
 	);
-	return ret;
+	return ret;*/
 }
 
 REGISTER(`{ .name = "binsearch", .func_find = &sorts_binsearch_find }')

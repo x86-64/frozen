@@ -164,10 +164,10 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		
 	backend_cfg_data = hash_item_data(config);
 	
-	if(data_value_type(backend_cfg_data) != TYPE_HASHT)
+	if(backend_cfg_data->type != TYPE_HASHT)
 		goto error_inval;
 	
-	backend_cfg = GET_TYPE_HASHT(backend_cfg_data);
+	backend_cfg = (hash_t *)backend_cfg_data->ptr;
 	
 	hash_data_copy(ret, TYPE_STRINGT, backend_name,  backend_cfg, HK(name));  if(ret != 0) backend_name  = NULL;
 	hash_data_copy(ret, TYPE_STRINGT, backend_class, backend_cfg, HK(class)); if(ret != 0) backend_class = NULL;
@@ -348,7 +348,6 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 	ssize_t                ret;
 	data_t                 ret_data          = DATA_PTR_SIZET(&ret);
 	data_t                *ret_req;
-	data_ctx_t            *ret_req_ctx;
 	
 	if(backend == NULL || request == NULL)
 		return -ENOSYS;
@@ -392,8 +391,9 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 		case -EEXIST:           // no ret override
 			break;
 		default:                // override ret
-			hash_data_find(request, HK(ret), &ret_req, &ret_req_ctx);
-			data_transfer(ret_req, ret_req_ctx, &ret_data, NULL);
+			ret_req = hash_data_find(request, HK(ret));
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, ret_req };
+			data_query(&ret_data, &r_transfer);
 			break;
 	};
 	ret = 0;

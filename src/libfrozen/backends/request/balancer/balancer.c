@@ -318,15 +318,15 @@ static ssize_t balancer_request_linear(backend_t *backend, request_t *request){ 
 	char                   array[MAX_LINEAR_LEN + 1] = {0};
 	backend_t             *curr;
 	data_t                *field;
-	data_ctx_t            *field_ctx;
 	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
 	size_t                 clone_i           = userdata->clone;
 	
-	hash_data_find(request, userdata->field, &field, &field_ctx);
+	field = hash_data_find(request, userdata->field);
 	if(field == NULL)
 		return error("field not supplied");
 	
-	if(data_read(field, field_ctx, 0, &array, userdata->linear_len) < 0)
+	fastcall_read r_read = { { 5, ACTION_READ }, 0, &array, userdata->linear_len };
+	if(data_query(field, &r_read) < 0)
 		return error("data_read failed");
 	
 	if( (curr = linear_get_backend(backend, array)) == NULL)

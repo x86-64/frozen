@@ -108,36 +108,32 @@ static int rewrite_configure(backend_t *backend, hash_t *config){ // {{{
 } // }}}
 /* }} */
 
-static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t **data, data_ctx_t **data_ctx){ // {{{
+static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t **data){ // {{{
 	switch(thing->type){
 		case THING_ARRAY_REQUEST_KEY:;
 			request_t *request = env->requests[thing->id];
 			
-			hash_data_find(request, thing->array_key, data, data_ctx);
+			*data = hash_data_find(request, thing->array_key);
 			break;
 		
 		case THING_CONST:;
 			rewrite_variable_t *constant = &env->script->constants[thing->id];
 			
 			*data     = &constant->data;
-			*data_ctx =  constant->data_ctx;
 			break;
 		
 		case THING_VARIABLE:;
 			rewrite_variable_t *variable = &env->variables[thing->id];
 			
 			*data     = &variable->data;
-			*data_ctx =  variable->data_ctx;
 			break;
 		
 		case THING_RET:;
 			*data     = env->ret_data;
-			*data_ctx = NULL;
 			break;
 		
 		default:
 			*data     = NULL;
-			*data_ctx = NULL;
 			return;
 	};
 } // }}}
@@ -179,7 +175,6 @@ ablock_continue:
 	){
 		rewrite_thing_t *to;
 		data_t          *from_data;
-		data_ctx_t      *from_data_ctx;
 		size_t           temp_ret;
 		data_t           temp_ret_data = DATA_PTR_SIZET(&temp_ret);
 		data_t           temp_any;
@@ -189,20 +184,20 @@ ablock_continue:
 				to     = action->params->list;
 				param1 = action->params->list->next;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				break;
 			case VALUE_CMP:
 				param1 = action->params->list;
 				param2 = action->params->list->next;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				
 				// TODO call data_is_null
 				unsigned int cmp_res = 0;
 				switch(from_data->type){
 					case TYPE_SIZET:;
 					case TYPE_UINT32T:;
-						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
+						unsigned int m_i32 = *(unsigned int *)(from_data->ptr);
 						cmp_res = (m_i32 == 0) ? 0 : 1;
 						break;
 					default:
@@ -218,14 +213,14 @@ ablock_continue:
 				to     = action->params->list;
 				param1 = action->params->list->next;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				
 				// TODO call data_is_null
 				unsigned int cmp_res2 = 0;
 				switch(from_data->type){
 					case TYPE_SIZET:;
 					case TYPE_UINT32T:;
-						unsigned int m_i32 = *(unsigned int *)(from_data->data_ptr);
+						unsigned int m_i32 = *(unsigned int *)(from_data->ptr);
 						cmp_res2 = (m_i32 == 0) ? 0 : 1;
 						break;
 					default:
@@ -235,7 +230,6 @@ ablock_continue:
 				
 				temp_ret      = (cmp_res2 == 0) ? 1 : 0;
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case CALL_PASS:
 				to     = action->ret;
@@ -249,29 +243,29 @@ ablock_continue:
 				temp_ret = ( (temp_ret = backend_pass(env->backend, env->requests[param1->id])) < 0) ? temp_ret : -EEXIST;
 				
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case VALUE_LENGTH:
 				to     = action->ret;
 				param1 = action->params->list;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				
-				temp_ret = data_value_len(from_data);
+				// BAD BAD BAD
+				//temp_ret = data_value_len(from_data);
 				
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case DATA_LENGTH:
 				to     = action->ret;
 				param1 = action->params->list;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				
-				temp_ret = data_len(from_data, from_data_ctx);
+				fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+				data_query(from_data, &r_len);
+				temp_ret = r_len.length;
 				
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case DATA_ARITH:
 				to     = action->ret;
@@ -280,24 +274,22 @@ ablock_continue:
 				param3 = action->params->list->next->next;
 				
 				data_t      *dst_data,     *src_data;
-				data_ctx_t  *dst_data_ctx, *src_data_ctx;
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
-				rewrite_thing_get_data(env, param2, &dst_data,  &dst_data_ctx);
-				rewrite_thing_get_data(env, param3, &src_data,  &src_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
+				rewrite_thing_get_data(env, param2, &dst_data);
+				rewrite_thing_get_data(env, param3, &src_data);
 				
-				if(data_value_type(from_data) != TYPE_STRINGT){
+				if(from_data->type != TYPE_STRINGT){
 					ret = error("arithmetic failed");
 					goto exit;
 				}
 				
-				char operator;
-				data_read(from_data, from_data_ctx, 0, &operator, sizeof(operator));
-				
-				temp_ret = data_arithmetic(operator, dst_data, dst_data_ctx, src_data, src_data_ctx);
-				
+				//char operator;
+				//data_read(from_data, from_data_ctx, 0, &operator, sizeof(operator));
+				// BAD BAD BAD
+				//temp_ret = data_arithmetic(operator, dst_data, dst_data_ctx, src_data, src_data_ctx);
+				temp_ret = 0;
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case DATA_CMP:
 				to     = action->ret;
@@ -305,15 +297,14 @@ ablock_continue:
 				param2 = action->params->list->next;
 				
 				data_t      *data1,     *data2;
-				data_ctx_t  *data1_ctx, *data2_ctx;
 				
-				rewrite_thing_get_data(env, param1, &data1,  &data1_ctx);
-				rewrite_thing_get_data(env, param2, &data2,  &data2_ctx);
+				rewrite_thing_get_data(env, param1, &data1);
+				rewrite_thing_get_data(env, param2, &data2);
 				
-				temp_ret = data_cmp(data1, data1_ctx, data2, data2_ctx);
+				// BAD BAD BAD
+				//temp_ret = data_cmp(data1, data1_ctx, data2, data2_ctx);
 				
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			case DATA_ALLOCA:
 				// TODO this is dangerous! Rewrite with data_alloc, or something..
@@ -322,24 +313,23 @@ ablock_continue:
 				param2 = action->params->list->next;
 				
 				data_t      *type_data,     *size_data;
-				data_ctx_t  *type_data_ctx, *size_data_ctx;
 				
-				rewrite_thing_get_data(env, param1, &type_data, &type_data_ctx);
-				rewrite_thing_get_data(env, param2, &size_data, &size_data_ctx);
+				rewrite_thing_get_data(env, param1, &type_data);
+				rewrite_thing_get_data(env, param2, &size_data);
 				
 				data_type  new_type;
-				if((new_type = data_type_from_string(data_value_ptr(type_data))) == TYPE_INVALID){
+				if((new_type = data_type_from_string(type_data->ptr)) == TYPE_INVALID){
 					ret = error("alloca data invalid");
 					goto exit;
 				}
 				
-				size_t     new_size;
-				data_read(size_data, size_data_ctx, 0, &new_size, sizeof(new_size));
+				//BAD BAD BAD
+				//size_t     new_size;
+				//data_read(size_data, size_data_ctx, 0, &new_size, sizeof(new_size));
 				
-				data_alloc_local(&temp_any, new_type, new_size);
+				//data_alloc_local(&temp_any, new_type, new_size);
 				
 				from_data     = &temp_any;
-				from_data_ctx = NULL;
 				break;
 			case CALL_BACKEND:
 				to     = action->ret;
@@ -349,13 +339,13 @@ ablock_continue:
 				if(param1 == NULL || param1->type != THING_CONST){         ret = -EINVAL; goto exit; }
 				if(param2 == NULL || param2->type != THING_ARRAY_REQUEST){ ret = -EINVAL; goto exit; }
 				
-				rewrite_thing_get_data(env, param1, &from_data, &from_data_ctx);
+				rewrite_thing_get_data(env, param1, &from_data);
 				
 				// TODO SEC insecure
-				if(data_value_type(from_data) != TYPE_STRINGT){ ret = -EINVAL; goto exit; }
+				if(from_data->type != TYPE_STRINGT){ ret = -EINVAL; goto exit; }
 				
 				backend_t *backend;
-				if( (backend = backend_acquire(data_value_ptr(from_data))) == NULL){ // TODO ctx
+				if( (backend = backend_acquire(from_data->ptr)) == NULL){ // TODO ctx
 					ret = error("backend_acquire failed");
 					goto exit;
 				}
@@ -365,7 +355,6 @@ ablock_continue:
 				backend_destroy(backend);
 				
 				from_data     = &temp_ret_data;
-				from_data_ctx = NULL;
 				break;
 			default:
 				ret = -ENOSYS;
@@ -375,7 +364,8 @@ ablock_continue:
 		switch(to->type){
 			case THING_ARRAY_REQUEST_KEY:;
 				if(from_data == NULL){
-					data_alloc_local(&temp_any, TYPE_VOIDT, 0);
+					temp_any.type = TYPE_VOIDT;
+					temp_any.ptr  = NULL;
 					from_data = &temp_any;
 				}
 				request_t **request = &env->requests[to->id];
@@ -390,7 +380,8 @@ ablock_continue:
 				memcpy(*request, proto_key, sizeof(proto_key));
 				break;
 			case THING_RET:;
-				data_read(from_data, from_data_ctx, 0, &ret, sizeof(ret));
+				fastcall_read r_read = { { 5, ACTION_READ }, 0, &ret, sizeof(ret) };
+				data_query(from_data, &r_read);
 				break;
 			
 			case THING_VARIABLE:;
@@ -398,7 +389,6 @@ ablock_continue:
 				
 				//data_copy_local(&pass_var->data, from_data);
 				memcpy(&pass_var->data, from_data, sizeof(data_t));
-				pass_var->data_ctx = NULL;
 				break;
 			default:
 				break;

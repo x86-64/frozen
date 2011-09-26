@@ -29,13 +29,13 @@ static int struct_destroy(backend_t *backend){ // {{{
 	return 0;
 } // }}}
 static int struct_configure(backend_t *backend, hash_t *config){ // {{{
-	ssize_t           ret;
-	DT_STRING         key_str       = "buffer";
-	DT_STRING         key_value_str = NULL;
-	DT_STRING         size_str      = NULL;
-	DT_HASHT          struct_hash   = NULL;
-	uintmax_t         copy          = 0;
-	struct_userdata  *userdata      = (struct_userdata *)backend->userdata;
+	ssize_t                ret;
+	char                  *key_str       = "buffer";
+	char                  *key_value_str = NULL;
+	char                  *size_str      = NULL;
+	hash_t                *struct_hash   = NULL;
+	uintmax_t              copy          = 0;
+	struct_userdata       *userdata      = (struct_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_HASHT,   struct_hash,   config, HK(structure));
 	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
@@ -62,11 +62,10 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 	ssize_t          ret;
 	size_t           struct_size;
 	data_t          *buffer;
-	data_ctx_t      *buffer_ctx;
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
 	
-	hash_data_find(request, userdata->key, &buffer, &buffer_ctx);
+	buffer = hash_data_find(request, userdata->key);
 	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
@@ -77,7 +76,7 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 				break;
 		};
 		
-		if( (struct_size = struct_pack(userdata->structure, values, buffer, buffer_ctx)) == 0)
+		if( (struct_size = struct_pack(userdata->structure, values, buffer)) == 0)
 			return error("struct_pack failed");
 		
 		request_t new_request[] = {
@@ -94,13 +93,12 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 	ssize_t          ret, ret2;
 	data_t          *buffer;
-	data_ctx_t      *buffer_ctx;
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
 	
 	ret = (ret = backend_pass(backend, request)) < 0 ? ret : -EEXIST;
 	
-	hash_data_find(request, userdata->key, &buffer, &buffer_ctx);
+	buffer = hash_data_find(request, userdata->key);
 	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
@@ -112,10 +110,10 @@ static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 		};
 		
 		if(userdata->copy == 0){
-			if(struct_unpack(userdata->structure, values, buffer, buffer_ctx) == 0)
+			if(struct_unpack(userdata->structure, values, buffer) == 0)
 				return error("struct_unpack failed");
 		}else{
-			if(struct_unpack_copy(userdata->structure, values, buffer, buffer_ctx) == 0)
+			if(struct_unpack_copy(userdata->structure, values, buffer) == 0)
 				return error("struct_unpack_copy failed");
 		}
 	}

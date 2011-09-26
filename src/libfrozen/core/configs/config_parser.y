@@ -56,7 +56,7 @@ hash_items :
 
 hash_item : hash_name hash_value {
 		$$.key = $1;
-		data_assign_data_t(&$$.data, &$2);
+		$$.data = $2;
 	}
 	| TNULL {
 		$$.key = hash_ptr_null;
@@ -74,21 +74,23 @@ hash_name :
 	};
 
 hash_value :
-	  STRING             { data_assign_raw(&$$, TYPE_STRINGT, $1, strlen($1) + 1);  }  // fucking macro nesting
-	| '{' hash_items '}' { data_assign_raw(&$$, TYPE_HASHT,  $2, 1 /*allocated*/); }  // no DATA_PTR_HASHT_FREE here
+	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }  // fucking macro nesting
+	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }  // no DATA_PTR_HASHT_FREE here
 	| '(' NAME ')' STRING {
-		ssize_t  retval;
-		data_t   d_str = DATA_PTR_STRING($4, strlen($4)+1);
+		//ssize_t  retval;
+		//data_t   d_str = DATA_PTR_STRING($4);
 		
 		/* convert string to needed data */
-		data_convert_to_alloc(retval, data_type_from_string($2), &$$, &d_str, NULL);
-	//size_t m_len = data_len(_src,_src_ctx);                  \
-	//m_len = data_len2raw(_type, m_len);                      \
-	//data_alloc(_dst,_type,m_len);                            \
-	//_retval = data_convert(_dst,NULL,_src,_src_ctx);         
-		if(retval != 0){
-			yyerror(hash, "failed convert data\n"); YYERROR;
-		}
+		// TODO convert
+		//data_convert_to_alloc(retval, data_type_from_string($2), &$$, &d_str, NULL);
+		//size_t m_len = data_len(_src,_src_ctx);                  
+		//m_len = data_len2raw(_type, m_len);                      
+		//data_alloc(_dst,_type,m_len);                            
+		//_retval = data_convert(_dst,NULL,_src,_src_ctx);         
+		
+		//if(retval != 0){
+		//	yyerror(hash, "failed convert data\n"); YYERROR;
+		//}
 		
 		free($2);
 		free($4);
@@ -98,8 +100,9 @@ hash_value :
 		if((action = request_str_to_action($1)) != REQUEST_INVALID){
 			data_t d_act = DATA_UINT32T(action);
 			
-			data_copy(&$$, &d_act);
-			
+			fastcall_copy r_copy = { { 3, ACTION_COPY }, &$$ };
+			data_query(&d_act, &r_copy);
+
 			free($1);
 		}else{
 			yyerror(hash, "wrong constant\n"); YYERROR;

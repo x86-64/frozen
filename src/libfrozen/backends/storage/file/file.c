@@ -61,6 +61,7 @@ typedef struct file_userdata {
 } file_userdata;
 
 // IO's
+/*
 static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
 	ssize_t      ret;
 	DT_UINT32T     handle;
@@ -193,6 +194,7 @@ static ssize_t           file_prepare(file_userdata *userdata){ // {{{
 
 	return ret;
 } // }}}
+*/
 static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
 	size_t                 ret;
 	char                  *str;
@@ -213,7 +215,8 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 				
 				if(fork_req == NULL) break;
 				
-				str = GET_TYPE_STRINGT(curr_data);
+				// BAD
+				str = (char *)(curr_data->ptr);
 				
 				if( (key = hash_string_to_key(str)) == 0) break;
 				
@@ -224,8 +227,8 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 				str_size = strlen(str);
 				break;
 			case HK(string):
-				str      = GET_TYPE_STRINGT(curr_data); // TODO rewrite to data_read
-				str_size = GET_TYPE_STRINGT_LEN(curr_data);
+				str      = (char *)curr_data->ptr; // TODO rewrite to data_read  BAD
+				str_size = strlen(str); //GET_TYPE_STRINGT_LEN(curr_data);
 				break;
 			case HK(homedir):
 				hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
@@ -234,7 +237,7 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 				str_size = strlen(str);
 				break;
 			case HK(random):
-				if( (str_size = data_value_len(curr_data)) <= 1)
+				//if( (str_size = data_value_len(curr_data)) <= 1)
 					str_size = 2;
 				str_size--;
 				break;
@@ -277,7 +280,7 @@ static char *            file_gen_filepath(config_t *config, config_t *fork_req)
 		return NULL;
 	
 	filename_data = hash_item_data(filename_hash);
-	switch(data_value_type(filename_data)){
+	switch(filename_data->type){
 		case TYPE_STRINGT:;
 			config_t r_gen[] = {
 				{ HK(homedir), DATA_STRING("")                    },
@@ -286,7 +289,7 @@ static char *            file_gen_filepath(config_t *config, config_t *fork_req)
 			};
 			return file_gen_filepath_from_hasht(r_gen, fork_req);
 		case TYPE_HASHT:
-			filename_hash = GET_TYPE_HASHT(filename_data);
+			filename_hash = (hash_t *)filename_data->ptr;
 			
 			return file_gen_filepath_from_hasht(filename_hash, fork_req);
 		default:
@@ -383,6 +386,7 @@ static int file_configure(backend_t *backend, config_t *config){ // {{{
 } // }}}
 
 // Requests
+/*
 static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	ssize_t           ret;
 	data_t           *buffer;
@@ -438,11 +442,11 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	if( file_new_offset(backend, &offset, size) != 0)
 		return error("file expand error");
 	
-	/* optional offset fill */
+	// optional offset fill
 	hash_data_find(request, HK(offset_out), &key_out, &key_out_ctx);
 	data_transfer(key_out, key_out_ctx, &offset_data, NULL);
 	
-	/* optional write from buffer */
+	// optional write from buffer
 	request_t r_write[] = {
 		{ HK(offset), offset_data },
 		hash_next(request)
@@ -633,7 +637,7 @@ static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 pass:
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 } // }}}
-
+*/
 backend_t file_proto = {
 	.class          = "storage/file",
 	.supported_api  = API_CRWD,
@@ -642,13 +646,13 @@ backend_t file_proto = {
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,
 	{
-		.func_create = &file_create,
-		.func_set    = &file_write,
-		.func_get    = &file_read,
-		.func_delete = &file_delete,
-		.func_move   = &file_move,
-		.func_count  = &file_count,
-		.func_custom = &file_custom
+//		.func_create = &file_create,
+//		.func_set    = &file_write,
+//		.func_get    = &file_read,
+//		.func_delete = &file_delete,
+//		.func_move   = &file_move,
+//		.func_count  = &file_count,
+//		.func_custom = &file_custom
 	}
 };
 

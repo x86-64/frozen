@@ -96,7 +96,10 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 		userdata->force_query != 0 ||
 		hash_find(request, userdata->output) == NULL
 	){
-		if( data_alloc(&d_output, userdata->output_type, 100) < 0)
+		d_output.type = userdata->output_type;
+		
+		fastcall_alloc r_alloc = { { 3, ACTION_ALLOC }, 100 };
+		if(data_query(&d_output, &r_alloc) < 0)
 			return -ENOMEM;
 		
 		request_t r_query[] = {
@@ -116,7 +119,8 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 		};
 		ret = backend_pass(backend, r_next);
 		
-		data_free(&d_output);
+		fastcall_alloc r_free = { { 2, ACTION_FREE } };
+		data_query(&d_output, &r_free);
 		
 		return (ret < 0) ? ret : -EEXIST;
 	}

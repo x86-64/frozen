@@ -176,7 +176,7 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 		
 		if(req_rebuild_dest != NULL){                 // destination supplied, append to hash
 			hash_t r_signal_dest[] = {
-				{ HK(destination),   DATA_PTR_STRING_AUTO(req_rebuild_dest) },
+				{ HK(destination),   DATA_PTR_STRING(req_rebuild_dest) },
 				hash_next(req_rebuild)
 			};
 			userdata->req_rebuild = hash_copy(r_signal_dest);

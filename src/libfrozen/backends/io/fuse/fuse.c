@@ -327,7 +327,7 @@ static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struc
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                  },
 		{ HK(offset), DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer), DATA_RAW(buf, size)                             },
-		{ HK(path),   DATA_PTR_STRING_AUTO((char *)path)              },
+		{ HK(path),   DATA_PTR_STRING((char *)path)                   },
 		{ HK(ret),    DATA_PTR_SIZET(&ret2)                           },
 		hash_end
 	};
@@ -345,7 +345,7 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 		{ HK(action),  DATA_UINT32T(ACTION_CRWD_WRITE)                 },
 		{ HK(offset),  DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },
-		{ HK(path),    DATA_PTR_STRING_AUTO((char *)path)              },
+		{ HK(path),    DATA_PTR_STRING((char *)path)                   },
 		hash_end
 	};
 	ret = backend_query((backend_t *)item->userdata, r_write);
@@ -522,8 +522,8 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root, void *null){ /
 	backend_t             *item_backend      = NULL;
 	
 	data = hash_item_data(hash);
-	if( data_value_type(data) == TYPE_HASHT ){
-		item_config = GET_TYPE_HASHT(data);
+	if( data->type == TYPE_HASHT ){
+		item_config = (hash_t *)(data->ptr);
 		
 		hash_data_copy(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
 		hash_data_copy(ret, TYPE_UINTT,    item_type,    item_config, HK(folder));
@@ -546,8 +546,8 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root, void *null){ // 
 	char                  *item_path         = NULL;
 	
 	data = hash_item_data(hash);
-	if( data_value_type(data) == TYPE_HASHT ){
-		item_config = GET_TYPE_HASHT(data);
+	if( data->type == TYPE_HASHT ){
+		item_config = (hash_t *)(data->ptr);
 		
 		hash_data_copy(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
 		

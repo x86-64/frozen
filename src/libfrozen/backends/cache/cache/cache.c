@@ -94,7 +94,8 @@ error:
 	pthread_rwlock_unlock(&userdata->lock);
 	return 0;
 } // }}}
-
+/*
+TODO BAD BAD BAD
 static ssize_t cache_backend_read(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                *buffer;
@@ -130,14 +131,13 @@ static ssize_t cache_backend_write(backend_t *backend, request_t *request){ // {
 	pthread_rwlock_unlock(&userdata->lock);
 	
 	return ret;
-} // }}}
+} // }}}*/
 static ssize_t cache_backend_create(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	size_t                 size;
 	off_t                  offset;
 	data_t                 offset_data       = DATA_PTR_OFFT(&offset);
 	data_t                *offset_out;
-	data_ctx_t            *offset_out_ctx;
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
@@ -145,16 +145,17 @@ static ssize_t cache_backend_create(backend_t *backend, request_t *request){ // 
 		return error("memory_grow failed");
 	
 	/* optional return of offset */
-	hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
-	data_transfer(offset_out, offset_out_ctx, &offset_data, NULL);
+	offset_out = hash_data_find(request, HK(offset_out));
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, offset_out };
+	data_query(&offset_data, &r_transfer);
 	
 	/* optional write from buffer */
-	request_t r_write[] = {
-		{ HK(offset), offset_data },
-		hash_next(request)
-	};
-	if( (ret = cache_backend_write(backend, r_write)) != -EINVAL)
-		return ret;
+	//request_t r_write[] = {
+	//	{ HK(offset), offset_data },
+	//	hash_next(request)
+	//};
+	//if( (ret = cache_backend_write(backend, r_write)) != -EINVAL) BAD
+	//	return ret;
 	
 	return 0;
 } // }}}
@@ -175,7 +176,6 @@ static ssize_t cache_backend_delete(backend_t *backend, request_t *request){ // 
 } // }}}
 static ssize_t cache_backend_count(backend_t *backend, request_t *request){ // {{{
 	data_t                *buffer;
-	data_ctx_t            *buffer_ctx;
 	uintmax_t              size;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
@@ -186,14 +186,11 @@ static ssize_t cache_backend_count(backend_t *backend, request_t *request){ // {
 	
 	pthread_rwlock_unlock(&userdata->lock);
 	
-	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
-	
 	data_t count = DATA_PTR_UINTT(&size);
 	
-	return data_transfer(
-		buffer, buffer_ctx,
-		&count,  NULL
-	);
+	buffer = hash_data_find(request, HK(buffer));
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
+	return data_query(&count, &r_transfer);
 } // }}}
 
 static uintmax_t cache_get_filesize(backend_t *backend){ // {{{
@@ -231,14 +228,15 @@ static void      cache_enable(backend_t *backend){ // {{{
 		// read data from backend to new memory
 		data_t d_memory   = DATA_MEMORYT(&userdata->memory);
 		data_t d_backend  = DATA_BACKENDT(backend);
-		if(data_transfer(&d_memory, NULL, &d_backend, NULL) < 0)
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_memory };
+		if(data_query(&d_backend, &r_transfer) < 0)
 			goto failed;
 		
 		// enable caching
 		userdata->enabled = 1;
 		backend->backend_type_crwd.func_create      = &cache_backend_create;
-		backend->backend_type_crwd.func_get         = &cache_backend_read;
-		backend->backend_type_crwd.func_set         = &cache_backend_write;
+		//backend->backend_type_crwd.func_get         = &cache_backend_read;
+		//backend->backend_type_crwd.func_set         = &cache_backend_write; BAD BAD
 		backend->backend_type_crwd.func_delete      = &cache_backend_delete;
 		backend->backend_type_crwd.func_count       = &cache_backend_count;
 		backend->backend_type_fast.func_fast_create = &cache_fast_create; 
@@ -268,7 +266,8 @@ static void      cache_disable(backend_t *backend){ // {{{
 		// flush data from memory to backend
 		data_t d_memory  = DATA_MEMORYT(&userdata->memory);
 		data_t d_backend = DATA_BACKENDT(backend);
-		data_transfer(&d_backend, NULL, &d_memory, NULL);
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_backend };
+		data_query(&d_memory, &r_transfer);
 		
 		// free used memory
 		memory_free(&userdata->memory);

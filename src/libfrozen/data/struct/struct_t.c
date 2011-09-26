@@ -21,8 +21,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 	//data_t           need_data;
 	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
 	
-	hash_data_find(iter_ctx->values, element->key, &curr_data);
-	if(curr_data == NULL)
+	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL)
 		return ITER_BREAK;
 	
 	//DT_OFFT    new_offset = 0;
@@ -71,8 +70,7 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
 	//new_data.data_size = data_rawlen(&new_data, NULL);
 	//iter_ctx->curr_offset += new_data.data_size;
 	
-	hash_data_find(iter_ctx->values, element->key, &curr_data);
-	if(curr_data != NULL){
+	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) != NULL){
 		memcpy(curr_data, &new_data, sizeof(new_data));
 	}
 	
@@ -93,8 +91,7 @@ static ssize_t  struct_iter_unpack_copy(hash_t *element, void *p_ctx, void *null
 	//new_data.data_size = data_rawlen(&new_data, NULL);
 	//iter_ctx->curr_offset += new_data.data_size;
 	
-	hash_data_find(iter_ctx->values, element->key, &curr_data);
-	if(curr_data != NULL){
+	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) != NULL){
 		(void)new_data;
 //		data_transfer(curr_data, &new_data);
 	}

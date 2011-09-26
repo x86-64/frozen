@@ -69,6 +69,11 @@ typedef struct fastcall_len {
 typedef struct fastcall_len    fastcall_physicallen;
 typedef struct fastcall_len    fastcall_logicallen;
 
+typedef struct fastcall_alloc {
+	fastcall_header        header;
+	uintmax_t              length;
+} fastcall_alloc;
+
 typedef struct fastcall_free {
 	fastcall_header        header;
 } fastcall_free;
@@ -77,6 +82,11 @@ typedef struct fastcall_copy {
 	fastcall_header        header;
 	data_t                *dest;
 } fastcall_copy;
+
+typedef struct fastcall_transfer {
+	fastcall_header        header;
+	data_t                *dest;
+} fastcall_transfer;
 
 typedef struct fastcall_convert {
 	fastcall_header        header;
@@ -112,6 +122,7 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_COPY] = 3,
 	[ACTION_CONVERT] = 3,
 	[ACTION_COMPARE] = 3,
+	[ACTION_ALLOC] = 3,
 	[ACTION_FREE] = 2,
 	[ACTION_ADD] = 3,
 	[ACTION_SUB] = 3,
@@ -119,6 +130,7 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_DIVIDE] = 3,
 	[ACTION_INCREMENT] = 2,
 	[ACTION_DECREMENT] = 2,
+	[ACTION_TRANSFER]  = 3,
 };
 #endif
 
@@ -132,16 +144,16 @@ API data_proto_t *       data_proto_from_type   (data_type type);
 
 API ssize_t              data_query             (data_t *data, void *args);
 
-#define data_to_dt(_retval,_type,_dt,_src){                          \
-	if((_src)->type == _type){                                   \
-		_dt = GET_##_type(_src);                             \
-		_retval = 0;                                         \
-	}else{                                                       \
-		data_t m_dst;                                        \
-		data_assign_dt(&m_dst,_type,_dt);                    \
-		_retval = data_convert(&m_dst,NULL,_src);            \
-		_dt     = GET_##_type((&m_dst));                     \
-	}                                                            \
+#define data_to_dt(_retval,_type,_dt,_src){                                    \
+	if((_src)->type == _type){                                             \
+		_dt = *( typeof(_dt) *)_src->ptr;                              \
+		_retval = 0;                                                   \
+	}else{                                                                 \
+		data_t           m_dst     = { _type, &_dt };                  \
+		fastcall_convert r_convert = {{ 3, ACTION_CONVERT }, &m_dst }; \
+		_retval = data_query(_src, &r_convert);                        \
+		_dt     = *( typeof(_dt) *)m_dst.ptr;                          \
+	}                                                                      \
 }
 
 #endif // DATA_H

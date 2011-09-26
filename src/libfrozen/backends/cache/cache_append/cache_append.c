@@ -13,7 +13,7 @@ typedef struct cacheapp_userdata {
 #define DEF_CACHE_SIZE 1000
 
 // LIMIT no cross-file-memory reads and write 
-
+/*
 static ssize_t  cacheapp_flush(cacheapp_userdata *userdata){ // {{{
 	ssize_t    ret;
 	
@@ -31,7 +31,7 @@ static ssize_t  cacheapp_flush(cacheapp_userdata *userdata){ // {{{
 	userdata->cache_start_offset += ret;
 	return 0;
 } // }}}
-
+*/
 static int cacheapp_init(backend_t *backend){ // {{{
 	cacheapp_userdata *userdata = backend->userdata = calloc(1, sizeof(cacheapp_userdata));
 	if(userdata == NULL)
@@ -43,7 +43,7 @@ static int cacheapp_destroy(backend_t *backend){ // {{{
 	cacheapp_userdata *userdata = (cacheapp_userdata *)backend->userdata;
 	
 	if(userdata->inited == 1){
-		cacheapp_flush(userdata);
+		//cacheapp_flush(userdata);
 		memory_free(&userdata->memory);
 	}
 	free(userdata);
@@ -59,7 +59,7 @@ static int cacheapp_configure(backend_t *backend, hash_t *config){ // {{{
 	if(cache_max_size == 0)
 		return error("size too small");
 	
-	/* get file size */
+	//get file size //
 	request_t r_count[] = {
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINT64T(&file_size)      },
@@ -80,6 +80,7 @@ static int cacheapp_configure(backend_t *backend, hash_t *config){ // {{{
 	userdata->inited             = 1;
 	return 0;
 } // }}}
+/*
 static ssize_t cacheapp_backend_read(backend_t *backend, request_t *request){ // {{{
 	ssize_t            ret;
 	off_t              offset;
@@ -147,12 +148,12 @@ static ssize_t cacheapp_backend_create(backend_t *backend, request_t *request){ 
 	if(memory_grow(&userdata->memory, size, &offset) != 0)
 		return error("memory_grow failed");
 	
-	/* optional return of offset */
+	//optional return of offset //
 	offset += userdata->cache_start_offset;
 	hash_data_find(request, HK(offset_out), &offset_out, &offset_out_ctx);
 	data_transfer(offset_out, offset_out_ctx, &offset_data, NULL);
 	
-	/* optional write from buffer */
+	//optional write from buffer //
 	request_t r_write[] = {
 		{ HK(offset), offset_data },
 		hash_next(request)
@@ -170,7 +171,7 @@ static ssize_t cacheapp_backend_rest(backend_t *backend, request_t *request){ //
 	
 	if( (ret = backend_pass(backend, request)) == 0) ret = -EEXIST;
 	
-	/* get file size */
+	//get file size //
 	request_t r_count[] = {
 		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINT64T(&file_size)      },
@@ -205,7 +206,7 @@ static ssize_t cacheapp_backend_count(backend_t *backend, request_t *request){ /
 		&count, NULL
 	);
 } // }}}
-
+*/
 backend_t cache_append_proto = {
 	.class          = "cache/cache-append",
 	.supported_api  = API_CRWD,
@@ -213,12 +214,12 @@ backend_t cache_append_proto = {
 	.func_configure = &cacheapp_configure,
 	.func_destroy   = &cacheapp_destroy,
 	{
-		.func_create = &cacheapp_backend_create,
-		.func_get    = &cacheapp_backend_read,
-		.func_set    = &cacheapp_backend_write,
-		.func_delete = &cacheapp_backend_rest,
-		.func_move   = &cacheapp_backend_rest,
-		.func_count  = &cacheapp_backend_count
+//		.func_create = &cacheapp_backend_create,
+//		.func_get    = &cacheapp_backend_read,
+//		.func_set    = &cacheapp_backend_write,
+//		.func_delete = &cacheapp_backend_rest,
+//		.func_move   = &cacheapp_backend_rest,
+//		.func_count  = &cacheapp_backend_count
 	}
 };
 
