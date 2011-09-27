@@ -155,7 +155,7 @@ START_TEST (test_backend_mphf){
 		
 		request_t r_write[] = {
 			{ HK(action),  DATA_UINT32T (ACTION_CRWD_CREATE)                        },
-			{ HK(key),     DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1) },
+			{ HK(key),     DATA_PTR_STRING (data_array[i])                          },
 			{ HK(buffer),  DATA_RAW (buffer, 30)                                    },
                         { HK(ret),     DATA_PTR_SIZET(&ret)                                     },
                         hash_end
@@ -171,7 +171,7 @@ START_TEST (test_backend_mphf){
 		
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                            },
-			{ HK(key),    DATA_PTR_STRING (data_array[i], strlen(data_array[i])+1)  },
+			{ HK(key),    DATA_PTR_STRING (data_array[i])                           },
 			{ HK(buffer), DATA_RAW (&data_read, 1024)                               },
                         { HK(ret),    DATA_PTR_SIZET(&ret)                                      },
 			hash_end

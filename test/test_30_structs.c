@@ -23,13 +23,13 @@ START_TEST (test_structs){
 		"hello\x00";
 	data_t  test_data = DATA_RAW(test, 100);
 	
-	ret = struct_pack(structure, values, &test_data, NULL);
+	ret = struct_pack(structure, values, &test_data);
 		fail_unless(ret > 0,                                "struct_pack failed");
 		fail_unless(memcmp(test, orig, sizeof(orig)) == 0,  "struct_pack data failed");
 	
-	DT_UINT32T  test1;
-	DT_OFFT   test2;
-	DT_STRING test3;
+	uint32_t  test1;
+	off_t     test2;
+	char     *test3;
 	
 	request_t query[] = {
 		{ HK(key4), DATA_STRING("") },
@@ -38,7 +38,7 @@ START_TEST (test_structs){
 		hash_end
 	};
 	
-	ret = struct_unpack(structure, query, &test_data, NULL);
+	ret = struct_unpack(structure, query, &test_data);
 		fail_unless(ret > 0,                                "struct_unpack failed");
 	
 	hash_data_copy(ret, TYPE_UINT32T,  test1, query, HK(key1));

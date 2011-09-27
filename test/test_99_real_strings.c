@@ -29,7 +29,7 @@ START_TEST (test_real_store_strings){
 		request_t r_write[] = {
 			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)                          },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                              },
-			{ HK(buffer),     DATA_PTR_STRING(data_array[i], strlen(data_array[i])+1)   },
+			{ HK(buffer),     DATA_PTR_STRING(data_array[i])                            },
 			{ HK(size),       DATA_UINT32T(strlen(data_array[i])+1)                     },
 			{ HK(ret),        DATA_PTR_SIZET(&ret)                                      },
                         hash_end
@@ -44,7 +44,7 @@ START_TEST (test_real_store_strings){
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)    },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])           },
-			{ HK(buffer), DATA_PTR_STRING(&data_read, 1024) },
+			{ HK(buffer), DATA_PTR_STRING(&data_read)       },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)              },
                         hash_end
 		};

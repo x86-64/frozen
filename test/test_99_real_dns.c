@@ -32,7 +32,7 @@ START_TEST (test_real_dns){
 			{ HK(action),     DATA_UINT32T  (ACTION_CRWD_WRITE)                       },
 			{ HK(offset_out), DATA_PTR_OFFT (&data_ptr)                               },
 			
-			{ HK(dns_domain), DATA_PTR_STRING_AUTO(data_array[i].domain)              },
+			{ HK(dns_domain), DATA_PTR_STRING(data_array[i].domain)                   },
 			{ HK(dns_ip),     DATA_UINT32T  (data_array[i].ip)                        },
 			{ HK(dns_tstamp), DATA_UINT32T  (data_array[i].timestamp)                 },
 			{ HK(ret),        DATA_PTR_SIZET(&ret)                                    },

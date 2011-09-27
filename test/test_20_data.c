@@ -2,6 +2,7 @@
 START_TEST (test_data){
 	fail_unless( data_type_from_string("void_t") == TYPE_VOIDT, "data types invalid");
 	
+	/*
 	// test data_convert
 	data_t  d_from1 = DATA_STRING("12345");
 	data_t  d_from2 = DATA_STRING("12346");
@@ -32,6 +33,7 @@ START_TEST (test_data){
 	}else{
 		fail("data_convert call failed");
 	}
+	*/
 }
 END_TEST
 REGISTER_TEST(core, test_data)

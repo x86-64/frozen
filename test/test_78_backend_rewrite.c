@@ -11,7 +11,7 @@ static ssize_t test_rewrite(char *rules, request_t *request){
 		)},
 		{ 0, DATA_HASHT(
 			{ HK(class),        DATA_STRING("rewrite")                    },
-			{ HK(script),       DATA_PTR_STRING_AUTO(rules)               },
+			{ HK(script),       DATA_PTR_STRING(rules)                    },
 			hash_end
 		)},
 		hash_end

@@ -43,8 +43,8 @@ START_TEST(test_backend_structs){
 	int        i;
 	ssize_t    ret;
 	char       test[100];
-	DT_UINT32T   test1;
-	DT_STRING  test2;
+	uint32_t   test1;
+	char      *test2;
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
@@ -53,7 +53,7 @@ START_TEST(test_backend_structs){
 			{ HK(buffer),     DATA_RAW(test, 100)                                     },
 			
 			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)             },
-			{ HK(key2),       DATA_PTR_STRING_AUTO( data_array[i].key2)               },
+			{ HK(key2),       DATA_PTR_STRING( data_array[i].key2)                    },
 			{ HK(ret),        DATA_PTR_SIZET(&ret)                                    },
                         hash_end
 		};

@@ -144,15 +144,24 @@ API data_proto_t *       data_proto_from_type   (data_type type);
 
 API ssize_t              data_query             (data_t *data, void *args);
 
-#define data_to_dt(_retval,_type,_dt,_src){                                    \
-	if((_src)->type == _type){                                             \
+#define data_convert(_ret, _type, _dst, _src) {                                \
+	data_t __data_dst = { _type, &(_dst) };                                \
+	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
+	_ret = data_query(_src, &_r_convert);                                  \
+};
+#define data_convert_ptr(_ret, _type, _dst, _src) {                            \
+	data_t __data_dst = { _type, NULL };                                   \
+	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
+	_ret = data_query(_src, &_r_convert);                                  \
+	_dst = (typeof(_dst))__data_dst.ptr;                                   \
+};
+
+#define data_buff_convert(_ret,_type,_dt,_src){                                \
+	if((_src) != NULL && (_src)->type == _type){                           \
 		_dt = *( typeof(_dt) *)_src->ptr;                              \
-		_retval = 0;                                                   \
+		_ret = 0;                                                      \
 	}else{                                                                 \
-		data_t           m_dst     = { _type, &_dt };                  \
-		fastcall_convert r_convert = {{ 3, ACTION_CONVERT }, &m_dst }; \
-		_retval = data_query(_src, &r_convert);                        \
-		_dt     = *( typeof(_dt) *)m_dst.ptr;                          \
+		data_convert(_ret, _type, _dt, _src);                          \
 	}                                                                      \
 }
 

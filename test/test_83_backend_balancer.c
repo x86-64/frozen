@@ -93,7 +93,7 @@ START_TEST (test_backend_balancer_linear){
 		
 		request_t r_create[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_CREATE) },
-			{ HK(buffer), DATA_PTR_STRING_AUTO(buf)        },
+			{ HK(buffer), DATA_PTR_STRING(buf)             },
 			{ HK(size),   DATA_SIZET(10)                   },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)             },
 			hash_end

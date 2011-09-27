@@ -59,12 +59,27 @@ API data_t *           hash_data_find               (hash_t *hash, hash_key_t ke
 }
 
 #define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
-	hash_t *__temp;                                             \
-	if( (__temp = hash_find(_hash,_key)) != NULL){              \
-		data_to_dt(_ret,_type,_dt,(&(__temp->data)));       \
-	}else{ _ret = -EINVAL; }                                    \
-	(void)_ret; \
-}
+	data_buff_convert(_ret,                                     \
+		_type,                                              \
+		_dt,                                                \
+		hash_data_find(_hash,_key)                          \
+	);                                                          \
+	(void)_ret;                                                 \
+};
+#define hash_data_convert(_ret,_type,_dt,_hash,_key){               \
+	data_convert(_ret,                                          \
+		_type,                                              \
+		_dt,                                                \
+		hash_data_find(_hash,_key)                          \
+	);                                                          \
+};
+#define hash_data_convert_ptr(_ret,_type,_dt,_hash,_key){           \
+	data_convert_ptr(_ret,                                      \
+		_type,                                              \
+		_dt,                                                \
+		hash_data_find(_hash,_key)                          \
+	);                                                          \
+};
 
 #define hash_assign_hash_t(_dst, _src) {        \
 	memcpy((_dst), (_src), sizeof(hash_t)); \

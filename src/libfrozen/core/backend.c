@@ -169,8 +169,8 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 	
 	backend_cfg = (hash_t *)backend_cfg_data->ptr;
 	
-	hash_data_copy(ret, TYPE_STRINGT, backend_name,  backend_cfg, HK(name));  if(ret != 0) backend_name  = NULL;
-	hash_data_copy(ret, TYPE_STRINGT, backend_class, backend_cfg, HK(class)); if(ret != 0) backend_class = NULL;
+	hash_data_convert_ptr(ret, TYPE_STRINGT, backend_name,  backend_cfg, HK(name));  if(ret != 0) backend_name  = NULL;
+	hash_data_convert_ptr(ret, TYPE_STRINGT, backend_class, backend_cfg, HK(class)); if(ret != 0) backend_class = NULL;
 	
 	if(backend_class == NULL && backend_name == NULL)
 		goto error_inval;
