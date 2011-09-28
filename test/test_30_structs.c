@@ -9,8 +9,9 @@ START_TEST (test_structs){
 	
 	request_t values[] = {
 		{ HK(key4), DATA_STRING("hello") },
-		{ HK(key1), DATA_UINT32T(100)      },
+		{ HK(key1), DATA_UINT32T(100)    },
 		{ HK(key2), DATA_OFFT(10)        },
+		{ HK(key3), DATA_UINT32T(0)      },
 		hash_end
 	};
 	

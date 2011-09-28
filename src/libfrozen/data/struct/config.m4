@@ -1,1 +1,1 @@
-FROZEN_DATA(struct_t, struct, yes, off_t, 2)
+FROZEN_DATA(struct_t, struct, yes, slice_t, 2)

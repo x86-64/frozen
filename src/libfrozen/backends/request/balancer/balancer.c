@@ -187,14 +187,13 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 	size_t                 cfg_linear_len    = 1;
 	balancer_userdata     *userdata          = (balancer_userdata *)backend->userdata;
 
-	data_convert(ret, TYPE_SIZET, cfg_clone,      hash_data_find(config, HK(clone)));
-	data_convert(ret, TYPE_SIZET, cfg_pool_size,  hash_data_find(config, HK(pool_size)));
-	data_convert(ret, TYPE_SIZET, cfg_linear_len, hash_data_find(config, HK(linear_len)));
-	
-	data_convert_ptr(ret, TYPE_STRINGT, cfg_mode,       hash_data_find(config, HK(mode)));
-	data_convert_ptr(ret, TYPE_STRINGT, cfg_pool,       hash_data_find(config, HK(pool)));
-	data_convert_ptr(ret, TYPE_STRINGT, cfg_field,      hash_data_find(config, HK(field)));
-	data_convert_ptr(ret, TYPE_HASHT,   cfg_fork_req,   hash_data_find(config, HK(fork_request)));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_clone,      config, HK(clone));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_pool_size,  config, HK(pool_size));
+	hash_data_copy(ret, TYPE_SIZET,   cfg_linear_len, config, HK(linear_len));
+	hash_data_copy(ret, TYPE_STRINGT, cfg_mode,       config, HK(mode));
+	hash_data_copy(ret, TYPE_STRINGT, cfg_pool,       config, HK(pool));
+	hash_data_copy(ret, TYPE_STRINGT, cfg_field,      config, HK(field));
+	hash_data_copy(ret, TYPE_HASHT,   cfg_fork_req,   config, HK(fork_request));
 	
 	if(
 		cfg_linear_len > MAX_LINEAR_LEN           ||

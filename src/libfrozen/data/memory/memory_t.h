@@ -2,6 +2,9 @@
 #define DATA_MEMORY_T_H
 
 #define DATA_MEMORYT(_mem) {TYPE_MEMORYT, _mem}
+#define DEREF_TYPE_MEMORYT(_data) (memory_t *)((_data)->ptr)
+#define REF_TYPE_MEMORYT(_dt) _dt
+#define HAVEBUFF_TYPE_MEMORYT 0
 	
 typedef enum memory_t_type {
 	MEMORY_FREED = 0,

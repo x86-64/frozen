@@ -4,6 +4,15 @@ m4_include(uint_init.m4)
 
 [#include <]NAME()[.h>]
 
+static ssize_t data_[]NAME()_len(data_t *data, fastcall_len *fargs){ // {{{
+	fargs->length = sizeof([]TYPE());
+	return 0;
+} // }}}
+static ssize_t data_[]NAME()_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
+	if( (data->ptr = malloc(sizeof([]TYPE()))) == NULL)
+		return -ENOMEM;
+	return 0;
+} // }}}
 static ssize_t data_[]NAME()_compare(data_t *data1, fastcall_compare *fargs){ // {{{
 	int           cret;
 	TYPE          data1_val, data2_val;
@@ -97,6 +106,11 @@ static ssize_t data_[]NAME()_convert(data_t *dst, fastcall_convert *fargs){ // {
 	if(data_query(fargs->src, &r_read) != 0)
 		return -EFAULT;
 	
+	if(dst->ptr == NULL){ // no buffer, alloc new
+		if(data_[]NAME()_alloc(dst, NULL) != 0)
+			return -ENOMEM;
+	}
+
 	switch( fargs->src->type ){
 		case TYPE_STRINGT:; 
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
@@ -125,6 +139,9 @@ data_proto_t NAME()_proto = {
 	.type_str               = "[]NAME()",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
+		[[ACTION_ALLOC]]          = (f_data_func)&data_[]NAME()_alloc,
+		[[ACTION_PHYSICALLEN]]    = (f_data_func)&data_[]NAME()_len,
+		[[ACTION_LOGICALLEN]]     = (f_data_func)&data_[]NAME()_len,
 		[[ACTION_COMPARE]]        = (f_data_func)&data_[]NAME()_compare,
 		[[ACTION_ADD]]            = (f_data_func)&data_[]NAME()_arith,
 		[[ACTION_SUB]]            = (f_data_func)&data_[]NAME()_arith,

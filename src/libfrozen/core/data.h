@@ -144,26 +144,25 @@ API data_proto_t *       data_proto_from_type   (data_type type);
 
 API ssize_t              data_query             (data_t *data, void *args);
 
-#define data_convert(_ret, _type, _dst, _src) {                                \
-	data_t __data_dst = { _type, &(_dst) };                                \
-	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
-	_ret = data_query(_src, &_r_convert);                                  \
-};
-#define data_convert_ptr(_ret, _type, _dst, _src) {                            \
-	data_t __data_dst = { _type, NULL };                                   \
-	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
-	_ret = data_query(_src, &_r_convert);                                  \
-	_dst = (typeof(_dst))__data_dst.ptr;                                   \
-};
-
-#define data_buff_convert(_ret,_type,_dt,_src){                                \
+#define data_get(_ret,_type,_dt,_src){                                         \
 	if((_src) != NULL && (_src)->type == _type){                           \
-		_dt = *( typeof(_dt) *)_src->ptr;                              \
+		_dt  = DEREF_##_type(_src);                                    \
 		_ret = 0;                                                      \
 	}else{                                                                 \
-		data_convert(_ret, _type, _dt, _src);                          \
+		if( HAVEBUFF_##_type == 1 ){                                   \
+			data_convert(_ret, _type, _dt, _src);                  \
+		}else{                                                         \
+			_ret = -EINVAL;                                        \
+		}                                                              \
 	}                                                                      \
 }
+
+#define data_convert(_ret, _type, _dst, _src) {                                \
+	data_t __data_dst = { _type, REF_##_type(_dst) };                      \
+	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, _src };         \
+	_ret = data_query(&__data_dst, &_r_convert);                           \
+	_dst = DEREF_##_type(&__data_dst);                                     \
+};
 
 #endif // DATA_H
 

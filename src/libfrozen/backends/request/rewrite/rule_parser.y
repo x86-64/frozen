@@ -150,22 +150,18 @@ function : NAME '(' args_list ')' {
 };
 
 constant : '(' NAME ')' STRING {
+	data_t              d_src    = DATA_PTR_STRING($4);
 	rewrite_variable_t *constant = rewrite_new_constant(script);
-	//data_t              d_str    = DATA_PTR_STRING($4);
+	
+	constant->data.type = data_type_from_string($2);
+	constant->data.ptr  = NULL;
 	
 	/* convert string to needed data */
-	//ssize_t retval;
+	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_src }; 
+	if(data_query(&constant->data, &r_convert) != 0){
+		yyerror(script, "failed convert data\n"); YYERROR;
+	}
 
-	// BAD BAD BAD
-	//data_convert_to_alloc(retval, data_type_from_string($2), &constant->data, &d_str, NULL);
-	//size_t m_len = data_len(_src,_src_ctx);                  
-	//m_len = data_len2raw(_type, m_len);                      
-	//data_alloc(_dst,_type,m_len);                            
-	//_retval = data_convert(_dst,NULL,_src,_src_ctx);         
-	//if(retval != 0){
-	//	yyerror(script, "failed convert data\n"); YYERROR;
-	//}
-	
 	/* fill output type */
 	$$.type = THING_CONST;
 	$$.id   = constant->id;

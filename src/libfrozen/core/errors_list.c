@@ -109,7 +109,6 @@ static err_item errs_list[] = {
  { -32768, "src/libfrozen/backends/data/allocator/allocator.c: no offset supplied" },
  { -28673, "src/libfrozen/backends/data/incapsulate/incapsulate.c: backend incapsulate parameter multiply invalid" },
  { -28672, "src/libfrozen/backends/data/incapsulate/incapsulate.c: calloc failed" },
- { -24583, "src/libfrozen/backends/data/structs/structs.c: struct_unpack_copy failed" },
  { -24582, "src/libfrozen/backends/data/structs/structs.c: struct_unpack failed" },
  { -24581, "src/libfrozen/backends/data/structs/structs.c: hash with keys not supplied" },
  { -24580, "src/libfrozen/backends/data/structs/structs.c: struct_pack failed" },

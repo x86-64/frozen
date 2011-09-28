@@ -1,6 +1,6 @@
 #include <libfrozen.h>
 #include <struct_t.h>
-#include <uint/off_t.h>
+#include <slice/slice_t.h>
 
 static ssize_t   data_struct_t_read  (data_t *data, fastcall_read *fargs){
 	return -1;
@@ -10,92 +10,96 @@ static ssize_t   data_struct_t_write (data_t *data, fastcall_write *fargs){
 }
 
 typedef struct struct_iter_ctx {
-	request_t  *values;
-	data_t     *buffer;
-	off_t       curr_offset;
+	request_t             *values;
+	off_t                  curr_offset;
+	data_t                *buffer;
+	uintmax_t              buffer_size;
 } struct_iter_ctx;
 
 static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
-	//ssize_t          ret;
-	data_t          *curr_data;
-	//data_t           need_data;
-	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
+	data_t                *curr_data;
+	data_t                 need_data;
+	uintmax_t              need_data_free    = 0;
+	struct_iter_ctx       *iter_ctx          = (struct_iter_ctx *)p_ctx;
 	
+	// find value for current key
 	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL)
+		return ITER_BREAK; // TODO alloc empty value and free it after transferring
+	
+	// convert if need
+	if(curr_data->type != element->data.type){
+		need_data.type = element->data.type;
+		need_data.ptr  = NULL;
+		
+		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, curr_data }; 
+		if(data_query(&need_data, &r_convert) != 0)
+			return ITER_BREAK;
+		
+		curr_data      = &need_data;
+		need_data_free = 1;
+	}
+	
+	// get length ( + backroom check )
+	fastcall_physicallen r_len = { { 3, ACTION_PHYSICALLEN } };
+	if(data_query(curr_data, &r_len) != 0)
 		return ITER_BREAK;
 	
-	//DT_OFFT    new_offset = 0;
-	//hash_data_copy(ret, TYPE_OFFT, new_offset, iter_ctx->ctx, HK(offset));
-	//new_offset += iter_ctx->curr_offset;
-	//data_ctx_t new_ctx[] = {
-	//	{ HK(offset), DATA_PTR_OFFT(&new_offset) },
-	//	hash_next(iter_ctx->ctx)
-	//};
-	//if( (ret = data_transfer(iter_ctx->buffer, new_ctx, curr_data)) < 0)
-	//	return ITER_BREAK;
+	// make new slice from buffer
+	data_t d_slice = DATA_SLICET(iter_ctx->buffer, iter_ctx->curr_offset, ~0);
 	
-	// TODO IMPORTANT bad packing, TYPE_BINARYT in troubles
+	// write data to buffer
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_slice };
+	if(data_query(curr_data, &r_transfer) != 0)
+		return ITER_BREAK;
 	
-	////data_convert_to_local(ret, data_value_type(hash_item_data(element)), &need_data, curr_data);
-	//size_t m_len = data_len(_src,_src_ctx);                  
-	//m_len = data_len2raw(_type, m_len);                      
-	//data_alloc_local(_dst,_type,m_len);                      
-	//_retval = data_convert(_dst,NULL,_src,_src_ctx);         
-	//if(ret < 0)
-	//	return ITER_BREAK;
+	// update offset
+	iter_ctx->curr_offset += r_len.length;
 	
-	//size_t rawlen = data_rawlen(&need_data, NULL);
-	
-	//ret = data_write(
-	//	iter_ctx->buffer, iter_ctx->ctx, iter_ctx->curr_offset,
-	//	data_value_ptr(&need_data), rawlen
-	//);
-	
-	//iter_ctx->curr_offset += ret;
-	
+	if(need_data_free == 1){
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(curr_data, &r_free);
+	}
 	return ITER_CONTINUE;
 }
 
 static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
-	data_t          *curr_data, new_data;
-	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
+	data_t                *curr_data;
+	data_t                 need_data;
+	uintmax_t              need_data_free          = 0;
+	struct_iter_ctx       *iter_ctx                = (struct_iter_ctx *)p_ctx;
 	
-	//if(iter_ctx->curr_offset >= iter_ctx->buffer->data_size)
-	//	return ITER_BREAK;
+	if(iter_ctx->curr_offset >= iter_ctx->buffer_size)
+		return ITER_BREAK;
 	
-	new_data.type      = element->data.type;
-	new_data.ptr  = iter_ctx->buffer->ptr + iter_ctx->curr_offset;
-	//new_data.data_size = iter_ctx->buffer->data_size - iter_ctx->curr_offset;
+	// make new slice from buffer
+	data_t d_slice = DATA_SLICET(iter_ctx->buffer, iter_ctx->curr_offset, ~0);
 	
-	//new_data.data_size = data_rawlen(&new_data, NULL);
-	//iter_ctx->curr_offset += new_data.data_size;
-	
-	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) != NULL){
-		memcpy(curr_data, &new_data, sizeof(new_data));
+	// prepare data
+	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL){
+		need_data.type = element->data.type;
+		need_data.ptr  = NULL;
+		
+		curr_data      = &need_data;
+		need_data_free = 1;
 	}
 	
-	return ITER_CONTINUE;
-}
+	// read data from buffer
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, curr_data };
+	if(data_query(&d_slice, &r_transfer) != 0)
+		return ITER_BREAK;
+	
+	// get length
+	fastcall_physicallen r_len = { { 3, ACTION_PHYSICALLEN } };
+	if(data_query(curr_data, &r_len) != 0)
+		return ITER_BREAK;
+	
+	iter_ctx->curr_offset += r_len.length;
+	
+	if(need_data_free == 1){
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(curr_data, &r_free);
+	}
 
-static ssize_t  struct_iter_unpack_copy(hash_t *element, void *p_ctx, void *null){
-	data_t          *curr_data, new_data;
-	struct_iter_ctx *iter_ctx = (struct_iter_ctx *)p_ctx;
-	
-	//if(iter_ctx->curr_offset >= iter_ctx->buffer->data_size)
-	//	return ITER_BREAK;
-	
-	new_data.type      = element->data.type;
-	new_data.ptr  = iter_ctx->buffer->ptr + iter_ctx->curr_offset;
-	//new_data.data_size = iter_ctx->buffer->data_size - iter_ctx->curr_offset;
-	
-	//new_data.data_size = data_rawlen(&new_data, NULL);
-	//iter_ctx->curr_offset += new_data.data_size;
-	
-	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) != NULL){
-		(void)new_data;
-//		data_transfer(curr_data, &new_data);
-	}
-	
 	return ITER_CONTINUE;
 }
 
@@ -105,8 +109,8 @@ size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buff
 	
 	iter_ctx.values      = values;
 	iter_ctx.buffer      = buffer;
-	//iter_ctx.ctx         = ctx;
 	iter_ctx.curr_offset = 0;
+	
 	if(hash_iter(structure, &struct_iter_pack, &iter_ctx, NULL) == ITER_BREAK)
 		return 0;
 	
@@ -115,39 +119,18 @@ size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buff
 
 /** Unpack buffer to values using structure */
 size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buffer){
-	//ssize_t          ret;
 	struct_iter_ctx  iter_ctx;
+	
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	if(data_query(buffer, &r_len) != 0)
+		return -EINVAL;
 	
 	iter_ctx.values      = values;
 	iter_ctx.buffer      = buffer;
+	iter_ctx.buffer_size = r_len.length;
 	iter_ctx.curr_offset = 0;
-	
-	//hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, HK(offset)); (void)ret;
-	//if(iter_ctx.curr_offset >= buffer->data_size)
-	//	return 0;
-	// TODO size
 	
 	if(hash_iter(structure, &struct_iter_unpack, &iter_ctx, NULL) == ITER_BREAK)
-		return 0;
-	
-	return (size_t)iter_ctx.curr_offset;
-}
-
-/** Unpack buffer to values using structure. Copy data instead of pointing to buffer */
-size_t    struct_unpack_copy  (struct_t *structure, request_t *values, data_t *buffer){
-	//ssize_t          ret;
-	struct_iter_ctx  iter_ctx;
-	
-	iter_ctx.values      = values;
-	iter_ctx.buffer      = buffer;
-	iter_ctx.curr_offset = 0;
-	
-	//hash_data_copy(ret, TYPE_OFFT, iter_ctx.curr_offset, ctx, HK(offset)); (void)ret;
-	//if(iter_ctx.curr_offset >= buffer->data_size)
-	//	return 0;
-	// TODO size
-	
-	if(hash_iter(structure, &struct_iter_unpack_copy, &iter_ctx, NULL) == ITER_BREAK)
 		return 0;
 	
 	return (size_t)iter_ctx.curr_offset;
