@@ -19,6 +19,18 @@ static ssize_t data_string_t_convert(data_t *dst, fastcall_convert *fargs){ // {
 	};
 	return -ENOSYS;
 } // }}}
+static ssize_t data_string_t_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
+	ssize_t                ret;
+
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, strlen(src->ptr) };
+	if( (ret = data_query(fargs->dest, &r_write)) < -1)
+		return ret;
+	
+	return 0;
+} // }}}
 
 data_proto_t string_t_proto = {
 	.type          = TYPE_STRINGT,
@@ -27,6 +39,7 @@ data_proto_t string_t_proto = {
 	.handlers      = {
 		[ACTION_PHYSICALLEN] = (f_data_func)&data_string_t_physlen,
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_string_t_loglen,
-		[ACTION_CONVERT]     = (f_data_func)&data_string_t_convert
+		[ACTION_CONVERT]     = (f_data_func)&data_string_t_convert,
+		[ACTION_TRANSFER]    = (f_data_func)&data_string_t_transfer,
 	}
 };

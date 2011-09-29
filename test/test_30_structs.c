@@ -30,10 +30,12 @@ START_TEST (test_structs){
 	
 	uint32_t  test1;
 	off_t     test2;
-	char     *test3;
+	char     *test3 = malloc(100);
+	memset(test3, 0x41, 99);
+	test3[99] = 0;
 	
 	request_t query[] = {
-		{ HK(key4), DATA_STRING("") },
+		{ HK(key4), DATA_STRING(test3) },
 		{ HK(key1), DATA_UINT32T(0)   },
 		{ HK(key2), DATA_OFFT(0)    },
 		hash_end
@@ -49,6 +51,7 @@ START_TEST (test_structs){
 	hash_data_copy(ret, TYPE_STRINGT, test3, query, HK(key4));
 		fail_unless(ret == 0 && strcmp(test3,"hello") == 0, "struct_unpack data 3 failed\n");
 	
+	free(test3);
 }
 END_TEST
 REGISTER_TEST(core, test_structs)

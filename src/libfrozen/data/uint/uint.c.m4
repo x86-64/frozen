@@ -133,6 +133,18 @@ static ssize_t data_[]NAME()_convert(data_t *dst, fastcall_convert *fargs){ // {
 	};
 	return -ENOSYS;
 } // }}}
+static ssize_t data_[]NAME()_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
+	ssize_t                ret;
+
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof([]TYPE()) };
+	if( (ret = data_query(fargs->dest, &r_write)) < -1)
+		return ret;
+	
+	return 0;
+} // }}}
 
 data_proto_t NAME()_proto = {
 	.type                   = TYPE_[]DEF(),
@@ -150,6 +162,7 @@ data_proto_t NAME()_proto = {
 		[[ACTION_INCREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
 		[[ACTION_DECREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
 		[[ACTION_CONVERT]]        = (f_data_func)&data_[]NAME()_convert,
+		[[ACTION_TRANSFER]]       = (f_data_func)&data_[]NAME()_transfer,
 	}
 };
 /* vim: set filetype=m4: */

@@ -76,8 +76,9 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
 	
 	// prepare data
 	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL){
-		need_data.type = element->data.type;
-		need_data.ptr  = NULL;
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data }; 
+		if(data_query(&element->data, &r_copy) != 0)
+			return ITER_BREAK;
 		
 		curr_data      = &need_data;
 		need_data_free = 1;

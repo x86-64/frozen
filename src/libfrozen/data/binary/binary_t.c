@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <default/default_t.h>
 #include <binary_t.h>
 
 typedef struct data_binary_t {
@@ -18,12 +17,21 @@ static ssize_t data_binary_t_loglen(data_t *data, fastcall_logicallen *fargs){ /
 	fargs->length = fdata->size;
 	return 0;
 } // }}}
-static ssize_t data_binary_t_io(data_t *data, fastcall_io *fargs){ // {{{
-	data_t                 new_data;
+static ssize_t data_binary_t_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
+	fargs->ptr = (void *) ( ((data_binary_t *)data->ptr) + 1 );
+	return 0;
+} // }}}
+static ssize_t data_binary_t_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
+	ssize_t                ret;
+
+	if(fargs->dest == NULL)
+		return -EINVAL;
 	
-	new_data.type = data->type;
-	new_data.ptr  = (void *) ( ((data_binary_t *)data->ptr) + 1 );
-	return default_t_proto.handlers[fargs->header.action](&new_data, fargs);
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, (((data_binary_t *)src->ptr) + 1), ((data_binary_t *)src->ptr)->size };
+	if( (ret = data_query(fargs->dest, &r_write)) < -1)
+		return ret;
+	
+	return 0;
 } // }}}
 
 data_proto_t binary_t_proto = {
@@ -33,8 +41,8 @@ data_proto_t binary_t_proto = {
 	.handlers        = {
 		[ACTION_PHYSICALLEN] = (f_data_func)&data_binary_t_physlen,
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_binary_t_loglen,
-		[ACTION_READ]        = (f_data_func)&data_binary_t_io,
-		[ACTION_WRITE]       = (f_data_func)&data_binary_t_io
+		[ACTION_GETDATAPTR]  = (f_data_func)&data_binary_t_getdataptr,
+		[ACTION_TRANSFER]    = (f_data_func)&data_binary_t_transfer,
 	}
 };
 

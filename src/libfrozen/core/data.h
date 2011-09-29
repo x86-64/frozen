@@ -22,6 +22,8 @@ typedef enum data_functions {
 	ACTION_CONVERT,
 	ACTION_TRANSFER,
 	ACTION_COPY,
+	
+	ACTION_GETDATAPTR,
 
 	ACTION_LAST
 } data_functions;
@@ -113,6 +115,11 @@ typedef struct fastcall_arith_no_arg {
 typedef struct fastcall_arith_no_arg fastcall_increment;
 typedef struct fastcall_arith_no_arg fastcall_decrement;
 
+typedef struct fastcall_getdataptr {
+	fastcall_header        header;
+	void                  *ptr;
+} fastcall_getdataptr;
+
 #ifdef DATA_C
 uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_READ] = 5,
@@ -131,9 +138,12 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_INCREMENT] = 2,
 	[ACTION_DECREMENT] = 2,
 	[ACTION_TRANSFER]  = 3,
+	[ACTION_GETDATAPTR] = 3,
 };
 #endif
 
+extern data_proto_t * data_protos[];
+extern size_t         data_protos_size;
 
 /* api's */
 
