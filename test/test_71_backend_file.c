@@ -41,25 +41,25 @@ START_TEST (test_backend_file){
 
 	/* write {{{1 */
 	ssize = backend_stdcall_write(backend, new_key1, key1_data, 10);
-		fail_unless(ssize == 10,                  "backend file key 1 set failed");
+		fail_unless(ssize == 0,                  "backend file key 1 set failed");
 	
 	ssize = backend_stdcall_write(backend, new_key2, key2_data, 10);
-		fail_unless(ssize == 10,                  "backend file key 2 set failed");
+		fail_unless(ssize == 0,                  "backend file key 2 set failed");
 		
 	/* }}}1 */
 	/* read {{{1 */
 	ssize = backend_stdcall_read(backend, new_key1, test_chunk, 10); 
-		fail_unless(ssize == 10,                               "backend file key 1 get failed");
+		fail_unless(ssize == 0,                                "backend file key 1 get failed");
 		fail_unless(memcmp(test_chunk, key1_data, ssize) == 0, "backend file key 1 get data failed"); 
 	
 	ssize = backend_stdcall_read(backend, new_key2, test_chunk, 10); 
-		fail_unless(ssize == 10,                               "backend file key 2 get failed");
+		fail_unless(ssize == 0,                                "backend file key 2 get failed");
 		fail_unless(memcmp(test_chunk, key2_data, ssize) == 0, "backend file key 2 get data failed"); 
 
 	/* }}}1 */
 	/* count {{{1 */
 	ssize = backend_stdcall_count(backend, &count);
-		fail_unless(ssize > 0,                                "backend file count failed");
+		fail_unless(ssize == 0,                               "backend file count failed");
 		fail_unless( (count / 20) >= 1,                       "backend file count failed");
 		
 	/* }}}1 */

@@ -1,7 +1,6 @@
 #ifndef DATA_H
 #define DATA_H
 
-#define DATA_INVALID  { TYPE_INVALID, NULL, 0 }
 #define DEF_BUFFER_SIZE 1024
 
 typedef enum data_functions {

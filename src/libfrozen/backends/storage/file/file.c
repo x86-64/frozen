@@ -61,71 +61,56 @@ typedef struct file_userdata {
 } file_userdata;
 
 // IO's
-/*
-static ssize_t file_io_write(data_t *data, data_ctx_t *context, off_t offset, void *buffer, size_t size){ // {{{
+static ssize_t file_io_handler(file_userdata *userdata, fastcall_header *hargs){ // {{{
 	ssize_t      ret;
-	DT_UINT32T     handle;
-	DT_OFFT      key      = 0;
-	DT_SIZET     size_min = size;
 	
-	(void)data;
-	
-	hash_data_copy(ret, TYPE_UINT32T, handle,    context, HK(handle)); if(ret != 0) return error("handle not supplied");
-	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size_min,  context, HK(size));
-	
-	// apply size limits
-	size_min = MIN(size, size_min);
-	
-redo:   ret = pwrite(
-		handle,
-		buffer,
-		size_min,
-		key + offset
-	);
-	if(ret == -1){
-		if(errno == EINTR) goto redo;
-	}
-	return ret;
-} // }}}
-static ssize_t file_io_read (data_t *data, data_ctx_t *context, off_t offset, void **buffer, size_t *buffer_size){ // {{{
-	ssize_t    ret;
-	DT_UINT32T   handle;
-	DT_OFFT    key  = 0;
-	DT_SIZET   size = *buffer_size;
-	
-	(void)data;
-	
-	hash_data_copy(ret, TYPE_UINT32T, handle,    context, HK(handle)); if(ret != 0) return error("handle not supplied");
-	hash_data_copy(ret, TYPE_OFFT,  key,       context, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,      context, HK(size));
-	
-	if(offset >= size)
-		return -1; // EOF
-	
-	size = (size > *buffer_size) ? *buffer_size : size;
-		
-redo:   ret = pread(
-		handle,
-		*buffer,
-		size,
-		key + offset
-	);
-	if(ret == -1){
-		if(errno == EINTR) goto redo;
-		return -errno;
-	}
-	if(ret == 0 && size != 0)
-		return -1; // EOF
-	
-	*buffer_size = ret;
-	return ret;
-} // }}}
+	switch(hargs->action){
+		case ACTION_READ:;
+			fastcall_read *rargs = (fastcall_read *)hargs;
+			
+		redo_read:
+			ret = pread(
+				userdata->handle,
+				rargs->buffer,
+				rargs->buffer_size,
+				rargs->offset
+			);
+			if(ret == -1){
+				if(errno == EINTR) goto redo_read;
+				return -errno;
+			}
+			if(ret == 0 && rargs->buffer_size != 0)
+				return -1; // EOF
+			
+			rargs->buffer_size = ret;
+			return 0;
 
-data_t file_io = DATA_IOT(
-	file_io_read,
-	file_io_write
-);
+		case ACTION_WRITE:;
+			fastcall_write *wargs = (fastcall_write *)hargs;
+		
+		redo_write:
+			ret = pwrite(
+				userdata->handle,
+				wargs->buffer,
+				wargs->buffer_size,
+				wargs->offset
+			);
+			if(ret == -1){
+				if(errno == EINTR) goto redo_write;
+				return -errno;
+			}
+			
+			wargs->buffer_size = ret;
+			return 0;
+
+		case ACTION_TRANSFER:
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](&userdata->file_io, hargs);
+
+		default:
+			break;
+	};
+	return -ENOSYS;
+} // }}}
 
 // internal functions
 static int               file_new_offset(backend_t *backend, off_t *new_key, unsigned int size){ // {{{
@@ -194,7 +179,6 @@ static ssize_t           file_prepare(file_userdata *userdata){ // {{{
 
 	return ret;
 } // }}}
-*/
 static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
 	size_t                 ret;
 	char                  *str;
@@ -342,11 +326,16 @@ retry:
 		goto cleanup;
 	}
 	
+	data_t file_io = DATA_IOT(userdata, (f_io_func)&file_io_handler);
+	
 	userdata->path             = filepath;
 	userdata->flags            = flags;
 	userdata->handle           = handle;
 	userdata->buffer_size      = cfg_buffsize;
 	userdata->file_stat_status = STAT_NEED_UPDATE;
+	
+	fastcall_copy r_copy = { { 3, ACTION_COPY }, &userdata->file_io };
+	data_query(&file_io, &r_copy); // TODO err handle
 	
 	pthread_mutex_init(&(userdata->create_lock), NULL);
 	return 0;
@@ -370,6 +359,9 @@ static int file_destroy(backend_t *backend){ // {{{
 	file_userdata *data = (file_userdata *)backend->userdata;
 	
 	if(data->handle){
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&data->file_io, &r_free);
+		
 		free(data->path);
 		close(data->handle);
 		pthread_mutex_destroy(&(data->create_lock));
@@ -385,56 +377,63 @@ static int file_configure(backend_t *backend, config_t *config){ // {{{
 	return file_configure_any(backend, config, NULL);
 } // }}}
 
+
 // Requests
-/*
 static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	ssize_t           ret;
+	uintmax_t         offset                 = 0;
+	uintmax_t         size                   = ~0;
 	data_t           *buffer;
-	data_ctx_t       *buffer_ctx;
-	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
-	if( (ret = file_prepare(data)) < 0)
+	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
-	data->file_stat_status = STAT_NEED_UPDATE;
+	userdata->file_stat_status = STAT_NEED_UPDATE;
 	
-	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
-	data_ctx_t  file_ctx[] = {
-		{ HK(handle), DATA_UINT32T(data->handle) },
-		hash_next(request)
-	};
+	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
+	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
 	
-	return data_transfer(&file_io, file_ctx, buffer, buffer_ctx);
+	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+		return -EINVAL;
+	
+	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
+	
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_slice };
+	return data_query(buffer, &r_transfer);
 } // }}}
 static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
 	ssize_t           ret;
+	uintmax_t         offset                 = 0;
+	uintmax_t         size                   = ~0;
 	data_t           *buffer;
-	data_ctx_t       *buffer_ctx;
-	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
-	if( (ret = file_prepare(data)) < 0)
+	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
-	data->file_stat_status = STAT_NEED_UPDATE;
+	//userdata->file_stat_status = STAT_NEED_UPDATE;
 	
-	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
-	data_ctx_t  file_ctx[] = {
-		{ HK(handle), DATA_UINT32T(data->handle) },
-		hash_next(request)
-	};
+	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
+	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
 	
-	return data_transfer(buffer, buffer_ctx, &file_io, file_ctx);
+	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+		return -EINVAL;
+	
+	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
+	
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
+	return data_query(&d_slice, &r_transfer);
 } // }}}
 static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	size_t            size;
 	ssize_t           ret;
 	off_t             offset;
-	data_t            offset_data = DATA_PTR_OFFT(&offset);
+	data_t            offset_data            = DATA_PTR_OFFT(&offset);
 	data_t           *key_out;
-	data_ctx_t       *key_out_ctx;
-	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
-	if( (ret = file_prepare(data)) < 0)
+	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
 	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("size not supplied");
@@ -443,8 +442,9 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 		return error("file expand error");
 	
 	// optional offset fill
-	hash_data_find(request, HK(offset_out), &key_out, &key_out_ctx);
-	data_transfer(key_out, key_out_ctx, &offset_data, NULL);
+	key_out = hash_data_find(request, HK(offset_out));
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, key_out };
+	data_query(&offset_data, &r_transfer);
 	
 	// optional write from buffer
 	request_t r_write[] = {
@@ -461,27 +461,27 @@ static ssize_t file_delete(backend_t *backend, request_t *request){ // {{{
 	int               fd;
 	off_t             key;
 	size_t            size;
-	uintmax_t         forced = 0;
-	file_userdata    *data        = ((file_userdata *)backend->userdata);
+	uintmax_t         forced                 = 0;
+	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
-	if( (ret = file_prepare(data)) < 0)
+	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
 	hash_data_copy(ret, TYPE_UINTT, forced, request, HK(forced));
 	hash_data_copy(ret, TYPE_OFFT,  key,    request, HK(offset));  if(ret != 0) return warning("offset not supplied");
 	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
 	
-	fd  = data->handle;
+	fd  = userdata->handle;
 	ret = 0;
-	pthread_mutex_lock(&data->create_lock);
+	pthread_mutex_lock(&userdata->create_lock);
 		
-		if(file_update_count(data) == STAT_ERROR){
+		if(file_update_count(userdata) == STAT_ERROR){
 			ret = error("file_update_count failed");
 			goto exit;
 		}
 		
 		if(
-			key + size != data->file_stat.st_size
+			key + size != userdata->file_stat.st_size
 			&& forced == 0
 		){ // truncating only last elements
 			ret = warning("cant delete not last elements");
@@ -493,10 +493,10 @@ static ssize_t file_delete(backend_t *backend, request_t *request){ // {{{
 			goto exit;
 		}
 		
-		data->file_stat_status = STAT_NEED_UPDATE;
+		userdata->file_stat_status = STAT_NEED_UPDATE;
 		
 exit:		
-	pthread_mutex_unlock(&data->create_lock);
+	pthread_mutex_unlock(&userdata->create_lock);
 	return 0;
 } // }}}
 static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
@@ -504,9 +504,9 @@ static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
 	ssize_t          ssize, ret;
 	char *           buff;
 	int              direction;
-	file_userdata   *data        = ((file_userdata *)backend->userdata);
-	DT_OFFT          from, to;
-	DT_SIZET         move_size = -1;
+	off_t            from, to;
+	size_t           move_size               = -1;
+	file_userdata   *data                    = ((file_userdata *)backend->userdata);
 	
 	if( (ret = file_prepare(data)) < 0)
 		return ret;
@@ -580,16 +580,14 @@ static ssize_t file_move(backend_t *backend, request_t *request){ // {{{
 	return ret;
 } // }}}
 static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
-	ssize_t          ret;
-	data_t          *buffer;
-	data_ctx_t      *buffer_ctx;
-	file_userdata   *data = ((file_userdata *)backend->userdata);
+	ssize_t                ret;
+	data_t                *buffer;
+	file_userdata         *data              = ((file_userdata *)backend->userdata);
 	
 	if( (ret = file_prepare(data)) < 0)
 		return ret;
 	
-	hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
-	if(buffer == NULL)
+	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
 		return warning("no buffer supplied");
 	
 	if(file_update_count(data) == STAT_ERROR)
@@ -597,10 +595,8 @@ static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
 	
 	data_t count = DATA_PTR_OFFT(&(data->file_stat.st_size));
 	
-	return data_transfer(
-		buffer, buffer_ctx,
-		&count,  NULL
-	);
+	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
+	return data_query(&count, &r_transfer);
 } // }}}
 static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
@@ -624,20 +620,19 @@ static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 	}
 	if(strcmp(function, "file_running") == 0){
 		data_t                *buffer;
-		data_ctx_t            *buffer_ctx;
 		uintmax_t              answer            = (userdata->handle == -1) ? 0 : 1;
 		data_t                 answer_data       = DATA_PTR_UINTT(&answer);
 		
-		hash_data_find(request, HK(buffer), &buffer, &buffer_ctx);
-		if(buffer == NULL)
+		if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
 			return warning("no buffer supplied");
 		
-		return data_transfer(buffer, buffer_ctx, &answer_data, NULL);
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
+		return data_query(&answer_data, &r_transfer);
 	}
 pass:
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 } // }}}
-*/
+
 backend_t file_proto = {
 	.class          = "storage/file",
 	.supported_api  = API_CRWD,
@@ -646,13 +641,13 @@ backend_t file_proto = {
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,
 	{
-//		.func_create = &file_create,
-//		.func_set    = &file_write,
-//		.func_get    = &file_read,
-//		.func_delete = &file_delete,
-//		.func_move   = &file_move,
-//		.func_count  = &file_count,
-//		.func_custom = &file_custom
+		.func_create = &file_create,
+		.func_set    = &file_write,
+		.func_get    = &file_read,
+		.func_delete = &file_delete,
+		.func_move   = &file_move,
+		.func_count  = &file_count,
+		.func_custom = &file_custom
 	}
 };
 

@@ -77,7 +77,7 @@ AC_DEFUN([FROZEN_DATA_END],[
 	echo "#ifndef DATA_SELECTED_ENUM_H" >> $data_enum_file
 	echo "#define DATA_SELECTED_ENUM_H" >> $data_enum_file
 	echo "typedef enum data_type {" >> $data_enum_file
-	echo "   TYPE_INVALID = 0, " >> $data_enum_file
+	echo "   TYPE_INVALID = 0," >> $data_enum_file
 	for h in $DATA_SELECTED; do
 		eval m_id="\$DATA_ID_$h"
 		h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")

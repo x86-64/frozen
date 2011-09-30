@@ -42,6 +42,7 @@ static ssize_t lists_delete(backend_t *backend, request_t *request){
 	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));   if(ret != 0) return warning("no size supplied");
 	hash_data_copy(ret, TYPE_OFFT,  from,   request, HK(offset)); if(ret != 0) return warning("no offset supplied");
 	
+	to = from;
 	from += size;
 	
 	hash_t  new_request[] = {

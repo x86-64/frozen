@@ -44,7 +44,7 @@ START_TEST(test_backend_structs){
 	ssize_t    ret;
 	char       test[100];
 	uint32_t   test1;
-	char      *test2;
+	char       test2[100];
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
@@ -58,7 +58,7 @@ START_TEST(test_backend_structs){
                         hash_end
 		};
 		backend_query(backend, r_write);
-			fail_unless(ret > 0, "write array failed");
+			fail_unless(ret == 0, "write array failed");
 	}
 	
 	// check
@@ -68,18 +68,15 @@ START_TEST(test_backend_structs){
 			{ HK(offset), DATA_OFFT(data_ptrs[i])             },
 			{ HK(buffer), DATA_RAW(test, 100)                 },
 			
-			{ HK(key1),   DATA_UINT32T(0)                     },
-			{ HK(key2),   DATA_STRING("")                     },
+			{ HK(key1),   DATA_PTR_UINT32T(&test1)            },
+			{ HK(key2),   DATA_RAW(test2, 100)                },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)                },
 			hash_end
 		};
 		backend_query(backend, r_read);
-			fail_unless(ret > 0,                               "read array failed");
-		
-		hash_data_copy(ret, TYPE_UINT32T,  test1, r_read, HK(key1));
-			fail_unless(ret == 0 && test1 == data_array[i].key1,           "data 1 failed\n");
-		hash_data_copy(ret, TYPE_STRINGT, test2, r_read, HK(key2));
-			fail_unless(ret == 0 && strcmp(test2,data_array[i].key2) == 0, "data 2 failed\n");
+			fail_unless(ret == 0,                               "read array failed");
+			fail_unless(test1 == data_array[i].key1,            "data 1 failed\n");
+			fail_unless(strcmp(test2, data_array[i].key2) == 0, "data 2 failed\n");
 	}
 	backend_destroy(backend);
 }

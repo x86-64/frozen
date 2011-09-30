@@ -123,6 +123,7 @@ static ssize_t data_[]NAME()_convert(data_t *dst, fastcall_convert *fargs){ // {
 		case TYPE_INT16T: 
 		case TYPE_INT32T: 
 		case TYPE_INT64T: 
+		case TYPE_OFFT:
 		case TYPE_SIZET: 
 		case TYPE_INTT: 
 		case TYPE_UINTT:

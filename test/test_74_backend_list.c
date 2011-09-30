@@ -26,11 +26,11 @@ START_TEST (test_backend_list){
 	
 	// create new
 	ssize = backend_stdcall_create(backend, &key_off, 10);
-                fail_unless(ssize >= 0, "backend in_list create failed");	
+                fail_unless(ssize == 0, "backend in_list create failed");	
 	
 	// write keys
 	ssize = backend_stdcall_write(backend, key_off, key_data, 10);
-                fail_unless(ssize == 10, "backend in_list write 1 failed");
+                fail_unless(ssize == 0, "backend in_list write 1 failed");
 	
 	// insert key
 	hash_t  hash_insert[] = {
@@ -43,7 +43,7 @@ START_TEST (test_backend_list){
 		hash_end
 	};
 	backend_query(backend, hash_insert);
-		fail_unless(ssize == 1,  "backend in_list write 2 failed");
+		fail_unless(ssize == 0,  "backend in_list write 2 failed");
 	
 	// check
 	memset(temp, 0, 1024);
@@ -56,7 +56,7 @@ START_TEST (test_backend_list){
 		hash_end
 	};
 	backend_query(backend, hash_read);
-		fail_unless(ssize == 11,                                "backend in_list read 1 failed");
+		fail_unless(ssize == 0,                                "backend in_list read 1 failed");
 		fail_unless(
 			memcmp(temp, key_inserted, ssize) == 0,
 			"backend in_list read 1 data failed"
@@ -83,7 +83,7 @@ START_TEST (test_backend_list){
 		hash_end
 	};
 	backend_query(backend, hash_read2);
-		fail_unless(ssize == 10,                                "backend in_list read 1 failed");
+		fail_unless(ssize == 0,                                "backend in_list read 1 failed");
 		fail_unless(
 			memcmp(temp, key_delete, 10) == 0,
 			"backend in_list read 1 data failed"

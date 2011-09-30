@@ -35,7 +35,7 @@ START_TEST (test_real_store_strings){
                         hash_end
 		};
 		backend_query(backend, r_write);
-			fail_unless(ret > 0, "backend real_store_strings: write array failed");
+			fail_unless(ret == 0, "backend real_store_strings: write array failed");
 	}
 	
 	// check
@@ -44,12 +44,12 @@ START_TEST (test_real_store_strings){
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)    },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])           },
-			{ HK(buffer), DATA_PTR_STRING(&data_read)       },
+			{ HK(buffer), DATA_RAW(&data_read, 1024)        },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)              },
                         hash_end
 		};
 		backend_query(backend, r_read);
-			fail_unless(ret > 0,                               "backend real_store_strings: read array failed");
+			fail_unless(ret == 0,                              "backend real_store_strings: read array failed");
 			fail_unless(strcmp(data_read, data_array[i]) == 0, "backend real_store_strings: read array data failed");
 	}
 	
@@ -57,6 +57,4 @@ START_TEST (test_real_store_strings){
 }
 END_TEST
 REGISTER_TEST(core, test_real_store_strings)
-
-
 

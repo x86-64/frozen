@@ -2,7 +2,7 @@
 #ifndef DATA_SELECTED_ENUM_H
 #define DATA_SELECTED_ENUM_H
 typedef enum data_type {
-   TYPE_INVALID = 0, 
+   TYPE_INVALID = 0,
    TYPE_BACKENDT = 1,
    TYPE_BINARYT = 21,
    TYPE_BUFFERT = 22,
