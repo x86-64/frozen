@@ -108,34 +108,18 @@ static int rewrite_configure(backend_t *backend, hash_t *config){ // {{{
 } // }}}
 /* }} */
 
-static void         rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing, data_t **data){ // {{{
+static data_t * rewrite_thing_get_data(rewrite_script_env_t *env, rewrite_thing_t *thing){ // {{{
 	switch(thing->type){
-		case THING_ARRAY_REQUEST_KEY:;
+		case THING_HASH_ELEMENT:;
 			request_t *request = env->requests[thing->id];
-			
-			*data = hash_data_find(request, thing->array_key);
-			break;
+			return hash_data_find(request, thing->array_key);
 		
-		case THING_CONST:;
-			rewrite_variable_t *constant = &env->script->constants[thing->id];
-			
-			*data     = &constant->data;
-			break;
-		
-		case THING_VARIABLE:;
-			rewrite_variable_t *variable = &env->variables[thing->id];
-			
-			*data     = &variable->data;
-			break;
-		
-		case THING_RET:;
-			*data     = env->ret_data;
-			break;
-		
-		default:
-			*data     = NULL;
-			return;
+		case THING_CONST:    return &(env->script->constants[thing->id].data);
+		case THING_VARIABLE: return &(env->variables[thing->id].data);
+		case THING_RET:      return env->ret_data;
+		default:             break;
 	};
+	return NULL;
 } // }}}
 
 typedef struct rewrite_stack_frame_t rewrite_stack_frame_t;
@@ -150,7 +134,7 @@ static ssize_t rewrite_func_ablock(rewrite_script_env_t *env, rewrite_action_blo
 	unsigned int           action_id;
 	ssize_t                ret = -EEXIST;
 	data_t                 ret_data = DATA_PTR_SIZET(&ret);
-	rewrite_thing_t       *param1, *param2, *param3;
+	rewrite_thing_t       *param1, *param2;
 	rewrite_action_t      *action;
 	rewrite_stack_frame_t *stack, *frame;
 	unsigned int           frame_id, stack_items;
@@ -174,205 +158,81 @@ ablock_continue:
 		action_id++, action++
 	){
 		rewrite_thing_t *to;
-		data_t          *from_data;
-		size_t           temp_ret;
-		data_t           temp_ret_data = DATA_PTR_SIZET(&temp_ret);
+		data_t          *from;
+		size_t           action_ret;
+		data_t           action_ret_data = DATA_PTR_SIZET(&action_ret);
 		data_t           temp_any;
 		
 		switch(action->action){
-			case VALUE_SET:
+			case LANG_SET:
 				to     = action->params->list;
 				param1 = action->params->list->next;
 				
-				rewrite_thing_get_data(env, param1, &from_data);
+				from   = rewrite_thing_get_data(env, param1);
 				break;
-			case VALUE_CMP:
+			
+			case LANG_IF:
 				param1 = action->params->list;
 				param2 = action->params->list->next;
 				
-				rewrite_thing_get_data(env, param1, &from_data);
+				if(param1 == NULL){                                       ret = -EINVAL; goto exit; }
+				if(param2 == NULL || param2->type != THING_ACTION_BLOCK){ ret = -EINVAL; goto exit; }
 				
-				// TODO call data_is_null
-				unsigned int cmp_res = 0;
-				switch(from_data->type){
-					case TYPE_SIZET:;
-					case TYPE_UINT32T:;
-						unsigned int m_i32 = *(unsigned int *)(from_data->ptr);
-						cmp_res = (m_i32 == 0) ? 0 : 1;
-						break;
-					default:
-						ret = error("no cmp");
-						goto exit;
-				};
+				from = rewrite_thing_get_data(env, param1);
 				
-				if(cmp_res == 1){
+				fastcall_is_null r_isnull = { { 3, ACTION_IS_NULL } };
+				if(data_query(from, &r_isnull) == 0 && r_isnull.is_null == 0){
 					ablock_call(param2->block);
-				}			
-				break;
-			case VALUE_NEG:
-				to     = action->params->list;
-				param1 = action->params->list->next;
-				
-				rewrite_thing_get_data(env, param1, &from_data);
-				
-				// TODO call data_is_null
-				unsigned int cmp_res2 = 0;
-				switch(from_data->type){
-					case TYPE_SIZET:;
-					case TYPE_UINT32T:;
-						unsigned int m_i32 = *(unsigned int *)(from_data->ptr);
-						cmp_res2 = (m_i32 == 0) ? 0 : 1;
-						break;
-					default:
-						ret = error("no cmp");
-						goto exit;
-				};
-				
-				temp_ret      = (cmp_res2 == 0) ? 1 : 0;
-				from_data     = &temp_ret_data;
-				break;
-			case CALL_PASS:
-				to     = action->ret;
-				param1 = action->params->list;
-				
-				if(param1 == NULL || param1->type != THING_ARRAY_REQUEST){
-					ret = error("pass failed");
-					goto exit;
 				}
-				
-				temp_ret = ( (temp_ret = backend_pass(env->backend, env->requests[param1->id])) < 0) ? temp_ret : -EEXIST;
-				
-				from_data     = &temp_ret_data;
 				break;
-			case VALUE_LENGTH:
-				to     = action->ret;
-				param1 = action->params->list;
-				
-				rewrite_thing_get_data(env, param1, &from_data);
-				
-				// BAD BAD BAD
-				//temp_ret = data_value_len(from_data);
-				
-				from_data     = &temp_ret_data;
-				break;
-			case DATA_LENGTH:
-				to     = action->ret;
-				param1 = action->params->list;
-				
-				rewrite_thing_get_data(env, param1, &from_data);
-				
-				fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-				data_query(from_data, &r_len);
-				temp_ret = r_len.length;
-				
-				from_data     = &temp_ret_data;
-				break;
-			case DATA_ARITH:
-				to     = action->ret;
-				param1 = action->params->list; // TODO error handling
-				param2 = action->params->list->next;
-				param3 = action->params->list->next->next;
-				
-				data_t      *dst_data,     *src_data;
-				
-				rewrite_thing_get_data(env, param1, &from_data);
-				rewrite_thing_get_data(env, param2, &dst_data);
-				rewrite_thing_get_data(env, param3, &src_data);
-				
-				if(from_data->type != TYPE_STRINGT){
-					ret = error("arithmetic failed");
-					goto exit;
-				}
-				
-				//char operator;
-				//data_read(from_data, from_data_ctx, 0, &operator, sizeof(operator));
-				// BAD BAD BAD
-				//temp_ret = data_arithmetic(operator, dst_data, dst_data_ctx, src_data, src_data_ctx);
-				temp_ret = 0;
-				from_data     = &temp_ret_data;
-				break;
-			case DATA_CMP:
-				to     = action->ret;
-				param1 = action->params->list; // TODO error handling
-				param2 = action->params->list->next;
-				
-				data_t      *data1,     *data2;
-				
-				rewrite_thing_get_data(env, param1, &data1);
-				rewrite_thing_get_data(env, param2, &data2);
-				
-				// BAD BAD BAD
-				//temp_ret = data_cmp(data1, data1_ctx, data2, data2_ctx);
-				
-				from_data     = &temp_ret_data;
-				break;
-			case DATA_ALLOCA:
-				// TODO this is dangerous! Rewrite with data_alloc, or something..
-				to     = action->ret;
-				param1 = action->params->list; // TODO error handling
-				param2 = action->params->list->next;
-				
-				data_t      *type_data,     *size_data;
-				
-				rewrite_thing_get_data(env, param1, &type_data);
-				rewrite_thing_get_data(env, param2, &size_data);
-				
-				data_type  new_type;
-				if((new_type = data_type_from_string(type_data->ptr)) == TYPE_INVALID){
-					ret = error("alloca data invalid");
-					goto exit;
-				}
-				
-				//BAD BAD BAD
-				//size_t     new_size;
-				//data_read(size_data, size_data_ctx, 0, &new_size, sizeof(new_size));
-				
-				//data_alloc_local(&temp_any, new_type, new_size);
-				
-				from_data     = &temp_any;
-				break;
-			case CALL_BACKEND:
+			
+			case BACKEND_QUERY:
 				to     = action->ret;
 				param1 = action->params->list;
 				param2 = action->params->list->next;
 				
-				if(param1 == NULL || param1->type != THING_CONST){         ret = -EINVAL; goto exit; }
-				if(param2 == NULL || param2->type != THING_ARRAY_REQUEST){ ret = -EINVAL; goto exit; }
+				if(param1 == NULL || param1->type != THING_CONST){ ret = -EINVAL; goto exit; }
+				if(param2 == NULL || param2->type != THING_HASHT){ ret = -EINVAL; goto exit; }
 				
-				rewrite_thing_get_data(env, param1, &from_data);
+				from = rewrite_thing_get_data(env, param1);
 				
-				// TODO SEC insecure
-				if(from_data->type != TYPE_STRINGT){ ret = -EINVAL; goto exit; }
+				if(from->type != TYPE_BACKENDT){ ret = -EINVAL; goto exit; }
 				
-				backend_t *backend;
-				if( (backend = backend_acquire(from_data->ptr)) == NULL){ // TODO ctx
-					ret = error("backend_acquire failed");
-					goto exit;
-				}
+				action_ret = backend_query(from->ptr, env->requests[param2->id]);
 				
-				temp_ret = backend_query(backend, env->requests[param2->id]);
+				from   = &action_ret_data;
+				break;
 				
-				backend_destroy(backend);
+			case BACKEND_PASS:
+				to     = action->ret;
+				param1 = action->params->list;
 				
-				from_data     = &temp_ret_data;
+				if(param1 == NULL || param1->type != THING_HASHT){ ret = error("pass failed"); goto exit; }
+				
+				action_ret = ( (action_ret = backend_pass(env->backend, env->requests[param1->id])) < 0) ? action_ret : -EEXIST;
+				
+				from   = &action_ret_data;
+				break;
+			
+			case DATA_QUERY:
 				break;
 			default:
 				ret = -ENOSYS;
 				goto exit;
 		};
 		
+		if(from == NULL){
+			temp_any.type = TYPE_VOIDT;
+			temp_any.ptr  = NULL;
+			from          = &temp_any;
+		}
+		
 		switch(to->type){
-			case THING_ARRAY_REQUEST_KEY:;
-				if(from_data == NULL){
-					temp_any.type = TYPE_VOIDT;
-					temp_any.ptr  = NULL;
-					from_data = &temp_any;
-				}
+			case THING_HASH_ELEMENT:;
 				request_t **request = &env->requests[to->id];
 				
 				hash_t  proto_key[] = {
-					{ to->array_key, *from_data },
-					// TODO ctx
+					{ to->array_key, *from },
 					hash_next(*request)
 				};
 				
@@ -381,18 +241,16 @@ ablock_continue:
 				break;
 			case THING_RET:;
 				fastcall_read r_read = { { 5, ACTION_READ }, 0, &ret, sizeof(ret) };
-				data_query(from_data, &r_read);
+				data_query(from, &r_read);
 				break;
 			
 			case THING_VARIABLE:;
 				rewrite_variable_t *pass_var = &env->variables[to->id];
-				
-				//data_copy_local(&pass_var->data, from_data);
-				memcpy(&pass_var->data, from_data, sizeof(data_t));
+				memcpy(&pass_var->data, from, sizeof(data_t));
 				break;
+			
 			default:
 				break;
-				
 		};
 	}
 //ablock_leave:
@@ -409,16 +267,16 @@ exit:
 	return ret;
 } // }}}
 static ssize_t rewrite_func(backend_t *backend, request_t *request){ // {{{
-	size_t                temp_size;
-	rewrite_script_env_t  env;
-	rewrite_userdata    *data = (rewrite_userdata *)backend->userdata;
+	size_t                 temp_size;
+	rewrite_script_env_t   env;
+	rewrite_userdata      *data              = (rewrite_userdata *)backend->userdata;
 	
 	/* if no actions - pass to next backend */
 	if(data->script.main->actions_count == 0)
 		return backend_pass(backend, request);
 	
-	env.script   = &data->script;
-	env.backend    = backend;
+	env.script    = &data->script;
+	env.backend   = backend;
 	
 	/* alloc requests */
 	temp_size = (data->script.requests_count + 1) * sizeof(request_t *);
@@ -437,19 +295,12 @@ static ssize_t rewrite_func(backend_t *backend, request_t *request){ // {{{
 
 backend_t rewrite_proto = {
 	.class          = "request/rewrite",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &rewrite_init,
 	.func_configure = &rewrite_configure,
 	.func_destroy   = &rewrite_destroy,
-	{
-		.func_create = &rewrite_func,
-		.func_set    = &rewrite_func,
-		.func_get    = &rewrite_func,
-		.func_delete = &rewrite_func,
-		.func_move   = &rewrite_func,
-		.func_count  = &rewrite_func,
-		.func_custom = &rewrite_func
+	.backend_type_hash = {
+		.func_handler = &rewrite_func,
 	}
 };
-
 

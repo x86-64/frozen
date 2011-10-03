@@ -1,18 +1,11 @@
 #define MAX_ALLOCA_SIZE 0x1000
 
 typedef enum rewrite_actions {
-	VALUE_SET,
-	VALUE_LENGTH,
-	VALUE_CMP,
-	VALUE_NEG,
-	CALL_BACKEND,
-	CALL_PASS,
-	DATA_LENGTH,
-	DATA_ARITH,
-	DATA_CONVERT,
-	DATA_ALLOCA,
-	DATA_FREE,
-	DATA_CMP,
+	LANG_SET,
+	LANG_IF,
+	BACKEND_QUERY,
+	BACKEND_PASS,
+	DATA_QUERY,
 
 #ifdef DEBUG
 	HASH_DUMP,
@@ -22,49 +15,52 @@ typedef enum rewrite_actions {
 } rewrite_actions;
 
 typedef enum things {
-	THING_ARRAY_REQUEST,
-	THING_ARRAY_REQUEST_KEY,
+	THING_ACTION_BLOCK,
+	THING_HASHT,
+	THING_HASH_ELEMENT,
 	THING_CONST,
 	THING_VARIABLE,
 	THING_LIST,
 	THING_RET,
-	THING_ACTION_BLOCK
 } things;
 
 typedef struct rewrite_action_t       rewrite_action_t;
 typedef struct rewrite_action_block_t rewrite_action_block_t;
+typedef struct rewrite_name_t         rewrite_name_t;
+typedef struct rewrite_thing_t        rewrite_thing_t;
+typedef struct rewrite_variable_t     rewrite_variable_t;
 
-typedef struct rewrite_thing_t rewrite_thing_t;
 struct rewrite_thing_t {
 	things                   type;
 	rewrite_thing_t         *next;
 	
-	// THING_ARRAY_REQUEST
-	hash_key_t               array_key;
-	
-	// THING_CONST or THING_VARIABLE
-	unsigned int             id;
-	
-	// THING_ACTION_BLOCK
-	rewrite_action_block_t  *block;
-	
-	// THING_LIST
-	rewrite_thing_t         *list;
+	union {
+		struct {
+			// THING_HASHT_KEY
+			hash_key_t               array_key;
+
+			// THING_HASHT or THING_CONST or THING_VARIABLE
+			unsigned int             id;
+		};
+		// THING_ACTION_BLOCK
+		rewrite_action_block_t  *block;
+
+		// THING_LIST
+		rewrite_thing_t         *list;
+	};
 };
 
-typedef struct rewrite_variable_t {
+struct rewrite_variable_t {
 	unsigned int             id;
 	data_t                   data;
-} rewrite_variable_t;
+};
 
-typedef struct rewrite_name_t rewrite_name_t;
 struct rewrite_name_t {
 	rewrite_name_t          *next;
 	char                    *name;
 	things                   type;
 	unsigned int             id;
 };
-
 
 struct rewrite_action_t {
 	unsigned int             id;

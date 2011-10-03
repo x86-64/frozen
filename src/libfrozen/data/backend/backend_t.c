@@ -46,14 +46,22 @@ static ssize_t data_backend_t_convert(data_t *dst, fastcall_convert *fargs){ // 
 		return -EINVAL;
 	
 	switch( fargs->src->type ){
-		case TYPE_STRINGT: dst->ptr = backend_find( (char *)fargs->src->ptr );  break;
-		case TYPE_HASHT:   dst->ptr = backend_new( (hash_t *)fargs->src->ptr ); break;
-		default: break;
+		case TYPE_STRINGT: dst->ptr = backend_acquire( (char *)fargs->src->ptr );  break;
+		case TYPE_HASHT:   dst->ptr = backend_new( (hash_t *)fargs->src->ptr );    break;
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(dst->ptr != NULL)
+		return 0;
+	
+	return -EFAULT;
 } // }}}
 static ssize_t data_backend_t_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = 0;
+	return 0;
+} // }}}
+static ssize_t data_backend_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	backend_destroy((backend_t *)data->ptr);
 	return 0;
 } // }}}
 
@@ -62,10 +70,11 @@ data_proto_t backend_t_proto = {
 	.type_str               = "backend_t",
 	.api_type               = API_HANDLERS,
 	.handlers = {
+		[ACTION_PHYSICALLEN] = (f_data_func)&data_backend_t_len,
+		[ACTION_LOGICALLEN]  = (f_data_func)&data_backend_t_len,
 		[ACTION_READ]        = (f_data_func)&data_backend_t_read,
 		[ACTION_WRITE]       = (f_data_func)&data_backend_t_write,
 		[ACTION_CONVERT]     = (f_data_func)&data_backend_t_convert,
-		[ACTION_PHYSICALLEN] = (f_data_func)&data_backend_t_len,
-		[ACTION_LOGICALLEN]  = (f_data_func)&data_backend_t_len
+		[ACTION_FREE]        = (f_data_func)&data_backend_t_free,
 	}
 };

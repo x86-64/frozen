@@ -53,7 +53,7 @@ static void                      rewrite_free_thing(rewrite_thing_t *thing);
 %token <string>   NAME STRING
 %token REQUEST VAR
 %type  <thing>    action_block
-%type  <thing>    action statement neg_statement define
+%type  <thing>    action statement define
 %type  <thing>    array_key
 %type  <thing>    label
 %type  <thing>    constant args_list function
@@ -86,7 +86,6 @@ statements: /* empty */
 
 statement: 
 	  '(' statement ')' { $$ = $2; }
-	| neg_statement
 	| define
 	| action
 	;
@@ -100,7 +99,7 @@ action :
 	dst_target '=' any_target /* set or unset */ {
 		/* make new action */
 		rewrite_action_t *action = rewrite_new_action(script);
-		action->action  = VALUE_SET;
+		action->action  = LANG_SET;
 		action->params  = rewrite_copy_list(&$1, &$3, NULL);
 	}
      | function
@@ -108,22 +107,10 @@ action :
      | IF statement '{' action_block '}' {
 		/* make new action */
 		rewrite_action_t *action = rewrite_new_action(script);
-		action->action  = VALUE_CMP;
+		action->action  = LANG_IF;
 		action->params  = rewrite_copy_list(&$2, &$4, NULL);
      }
      ;
-
-neg_statement : '!' statement {
-	$$.type = THING_VARIABLE;
-	$$.id   = rewrite_new_variable(script);
-	$$.next = NULL;
-	
-	/* make new action */
-	rewrite_action_t *action = rewrite_new_action(script);
-	action->action     = VALUE_NEG;
-	action->params     = rewrite_copy_list(&$$, &$2, NULL);
-	action->ret        = rewrite_copy_thing(&$$);
-};
 
 dst_target : array_key | label;
 src_target : constant | function | label;
@@ -172,8 +159,8 @@ constant : '(' NAME ')' STRING {
 
 array_key : NAME '[' STRING ']' {
 	rewrite_name_t *curr;
-	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_ARRAY_REQUEST){
-		$$.type      = THING_ARRAY_REQUEST_KEY;
+	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_HASHT){
+		$$.type      = THING_HASH_ELEMENT;
 		$$.array_key = hash_string_to_key($3);
 		$$.id        = curr->id;
 		
@@ -247,15 +234,9 @@ args_list : /* empty args */ {
 %%
 
 static rewrite_actions   rewrite_get_function(char *string){
-	if(strcasecmp(string, "length")         == 0) return VALUE_LENGTH;
-	if(strcasecmp(string, "backend")        == 0) return CALL_BACKEND;
-	if(strcasecmp(string, "pass")           == 0) return CALL_PASS;
-	if(strcasecmp(string, "data_length")    == 0) return DATA_LENGTH;
-	if(strcasecmp(string, "data_arith")     == 0) return DATA_ARITH;
-	if(strcasecmp(string, "data_convert")   == 0) return DATA_CONVERT;
-	if(strcasecmp(string, "data_cmp")       == 0) return DATA_CMP;
-	if(strcasecmp(string, "data_alloca")    == 0) return DATA_ALLOCA;
-	if(strcasecmp(string, "data_free")      == 0) return DATA_FREE;
+	if(strcasecmp(string, "query")          == 0) return BACKEND_QUERY;
+	if(strcasecmp(string, "pass")           == 0) return BACKEND_PASS;
+	if(strcasecmp(string, "data_query")     == 0) return DATA_QUERY;
 #ifdef DEBUG
 	if(strcasecmp(string, "hash_dump")      == 0) return HASH_DUMP;
 #endif
@@ -343,7 +324,7 @@ static unsigned int         rewrite_new_named_variable (rewrite_script_t *script
 /* requests {{{ */
 static unsigned int         rewrite_new_request (rewrite_script_t *script, char *req_name){ // {{{
 	rewrite_name_t *name = rewrite_new_name(script, req_name);
-	name->type = THING_ARRAY_REQUEST;
+	name->type = THING_HASHT;
 	name->id   = script->requests_count++;
 	return name->id;
 } // }}}

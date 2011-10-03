@@ -146,6 +146,10 @@ static ssize_t data_[]NAME()_transfer(data_t *src, fastcall_transfer *fargs){ //
 	
 	return 0;
 } // }}}
+static ssize_t data_[]NAME()_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
+	fargs->is_null = (data->ptr == NULL || *(TYPE *)data->ptr == 0) ? 1 : 0;
+	return 0;
+} // }}}
 
 data_proto_t NAME()_proto = {
 	.type                   = TYPE_[]DEF(),
@@ -164,6 +168,7 @@ data_proto_t NAME()_proto = {
 		[[ACTION_DECREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
 		[[ACTION_CONVERT]]        = (f_data_func)&data_[]NAME()_convert,
 		[[ACTION_TRANSFER]]       = (f_data_func)&data_[]NAME()_transfer,
+		[[ACTION_IS_NULL]]        = (f_data_func)&data_[]NAME()_is_null,
 	}
 };
 /* vim: set filetype=m4: */

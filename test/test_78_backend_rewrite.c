@@ -44,8 +44,8 @@ START_TEST (test_backend_rewrite){
 	
 	hash_t  req_create[] = {
 		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
-		{ HK(size),       DATA_SIZET(10)                 },
-		{ HK(offset_out), DATA_PTR_OFFT(&buffer)         },
+		{ HK(size),       DATA_SIZET(10)                   },
+		{ HK(offset_out), DATA_PTR_OFFT(&buffer)           },
 		hash_end
 	};
 	
@@ -75,27 +75,6 @@ START_TEST (test_backend_rewrite){
 	ret = test_diff_rewrite(rules_set_key_from_config, req_create);
 		fail_unless(ret == 20, "backend rewrite rules set_key_from_config failed\n");
 	// }}}
-	// calc length of key {{{
-	char rules_length_key[] =
-		"request['size'] = length((size_t)'30');"
-		"ret = pass(request);";
-	ret = test_diff_rewrite(rules_length_key, req_create);
-		fail_unless(ret == 4 || ret == 8, "backend rewrite rules rules_length_key failed\n");
-	// }}}
-	// calc data length of key {{{
-	char rules_data_length_key[] =
-		"request['size'] = data_length((size_t)'30');"
-		"ret = pass(request);";
-	ret = test_diff_rewrite(rules_data_length_key, req_create);
-		fail_unless(ret == 4 || ret == 8, "backend rewrite rules rules_data_length_key failed\n");
-	// }}}
-	// do arith of key {{{
-	char rules_arith_key[] =
-		"data_arith((string_t)'+', request['size'], (size_t)'30');"
-		"ret = pass(request);";
-	ret = test_diff_rewrite(rules_arith_key, req_create);
-		fail_unless(ret == 40, "backend rewrite rules rules_arith_key failed\n");
-	// }}}
 	// do backend call {{{
 	hash_t  rewrite_be_test_conf[] = {
 		{ 0, DATA_HASHT(
@@ -114,10 +93,10 @@ START_TEST (test_backend_rewrite){
 		"subr['action']  = create; "
 		"subr['size']    = (size_t)'35'; "
 		
-		"subr['offset_out'] = data_alloca((string_t)'size_t', (size_t)'8'); "
+		"subr['offset_out'] = (size_t)'0'; "
 		
-		"backend((string_t)'rewrite_be_test', subr); " // returns 0
-		"backend((string_t)'rewrite_be_test', subr); " // returns 35
+		"query((backend_t)'rewrite_be_test', subr); " // returns 0
+		"query((backend_t)'rewrite_be_test', subr); " // returns 35
 		
 		"request['size'] = subr['offset_out']; "
 		

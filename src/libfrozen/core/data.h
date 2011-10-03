@@ -21,7 +21,8 @@ typedef enum data_functions {
 	ACTION_CONVERT,
 	ACTION_TRANSFER,
 	ACTION_COPY,
-	
+	ACTION_IS_NULL,
+
 	ACTION_GETDATAPTR,
 
 	ACTION_LAST
@@ -119,6 +120,11 @@ typedef struct fastcall_getdataptr {
 	void                  *ptr;
 } fastcall_getdataptr;
 
+typedef struct fastcall_is_null {
+	fastcall_header        header;
+	uintmax_t              is_null;
+} fastcall_is_null;
+
 #ifdef DATA_C
 uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_READ] = 5,
@@ -138,6 +144,7 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_DECREMENT] = 2,
 	[ACTION_TRANSFER]  = 3,
 	[ACTION_GETDATAPTR] = 3,
+	[ACTION_IS_NULL] = 3,
 };
 #endif
 

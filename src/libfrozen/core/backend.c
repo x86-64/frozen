@@ -302,6 +302,8 @@ backend_t *     backend_find         (char *name){ // {{{
 	
 	list_rdlock(&backends_names);
 		while( (backend = list_iter_next(&backends_names, &list_status)) != NULL){
+			if(backend->name == NULL)
+				continue;
 			if(strcmp(backend->name, name) == 0)
 				goto exit;
 		}
