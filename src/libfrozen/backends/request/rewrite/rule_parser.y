@@ -48,7 +48,7 @@ static void                      rewrite_free_thing(rewrite_thing_t *thing);
 	char            *string;
 	rewrite_thing_t  thing;
 }
-%token IF ELSE
+%token IF IFNOT ELSE
 %token <value>    DIGITS
 %token <string>   NAME STRING
 %token REQUEST VAR
@@ -108,6 +108,12 @@ action :
 		/* make new action */
 		rewrite_action_t *action = rewrite_new_action(script);
 		action->action  = LANG_IF;
+		action->params  = rewrite_copy_list(&$2, &$4, NULL);
+     }
+     | IFNOT statement '{' action_block '}' {
+		/* make new action */
+		rewrite_action_t *action = rewrite_new_action(script);
+		action->action  = LANG_IFNOT;
 		action->params  = rewrite_copy_list(&$2, &$4, NULL);
      }
      ;

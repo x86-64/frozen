@@ -3,6 +3,7 @@
 typedef enum rewrite_actions {
 	LANG_SET,
 	LANG_IF,
+	LANG_IFNOT,
 	BACKEND_QUERY,
 	BACKEND_PASS,
 	DATA_QUERY,

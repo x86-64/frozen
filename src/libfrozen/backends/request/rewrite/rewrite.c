@@ -34,33 +34,23 @@
  * 	- assignment:  'something = something;'
  * 	- function call: 'something = somefunc(param1, param2, param3);'
  * 	- if 'if(statement){};' NOTE ; after closing bracket
- * 	- negotiation 'if(!statement){};'
+ * 	- ifnot 'ifnot(statement){};' NOTE ; after closing bracket
  *
  * User defined constants: (type)'string', where 'type' is data type, and 'string'
  * 	any string that can be converted to desired type (data_convert must exist)
  *  
  * Functions list:
- * 	- "backend((string)'backend_name', request)" - call backend
+ * 	- "query((backend_t)'backend_name', request)" - call backend
  * 		@param[in]  backend_name    Backend to call
  * 		@param[in]  request         Any request
  *      
  *      - "pass(request)" - pass request to underlying backend
  *      	@param[in]  request         Any request
  *
- * 	- "length(target)" - get length (data->data_size)
- * 		@param[in]  target   Target to measure
- *
- * 	- "data_length(target)"   - calc length of data_t. Output type is TYPE_SIZET
- * 		@param[in]  target   Target to measure
- *
- * 	- "data_arith((string)'+', dst, src)" - do arithmetic with targets. [ Dst = Dst (operation) Src ]
- * 		@param[in]  operation  Operation to do: '+' '-' '*' '/' [TYPE_STRINGT]
- * 		@param      dst_*      Destination target
- * 		@param[in]  src_*      Source target
- *
- * 	- "data_alloca((string)'type', (size_t)'100')" - allocate new data
- * 		@param[in]  type       Data type to alloc
- * 		@param[in]  size       Size in units to alloc
+ * 	- "data_query(data, action, ... )" - call action on data
+ * 		@param[in]  data     Data to run action on
+ * 		@param[in]  action   Action to run. Currently only useful COMPARE, COPY and similar with (data_t *)'s in parameters
+ * 		@param[in]  ...      Parameters for action. Variables and constants passed only as (data_t *)'s.
  *
  */
 
@@ -162,7 +152,8 @@ ablock_continue:
 		size_t           action_ret;
 		data_t           action_ret_data = DATA_PTR_SIZET(&action_ret);
 		data_t           temp_any;
-		
+		uintmax_t        use_if       = 1;
+
 		switch(action->action){
 			case LANG_SET:
 				to     = action->params->list;
@@ -171,27 +162,38 @@ ablock_continue:
 				from   = rewrite_thing_get_data(env, param1);
 				break;
 			
-			case LANG_IF:
-				param1 = action->params->list;
-				param2 = action->params->list->next;
+			case LANG_IFNOT:
+				use_if = 0;
+				// fall
+			case LANG_IF:;
+				uintmax_t is_not_null;
 				
+				param1 = action->params->list;
 				if(param1 == NULL){                                       ret = -EINVAL; goto exit; }
+				
+				param2 = action->params->list->next;
 				if(param2 == NULL || param2->type != THING_ACTION_BLOCK){ ret = -EINVAL; goto exit; }
 				
 				from = rewrite_thing_get_data(env, param1);
 				
 				fastcall_is_null r_isnull = { { 3, ACTION_IS_NULL } };
-				if(data_query(from, &r_isnull) == 0 && r_isnull.is_null == 0){
+				is_not_null = ( data_query(from, &r_isnull) == 0 && r_isnull.is_null == 0 ) ? 1 : 0;
+				
+				if(
+					(is_not_null == 1 && use_if == 1) ||
+					(is_not_null == 0 && use_if == 0)
+				){
 					ablock_call(param2->block);
 				}
 				break;
 			
 			case BACKEND_QUERY:
 				to     = action->ret;
-				param1 = action->params->list;
-				param2 = action->params->list->next;
 				
-				if(param1 == NULL || param1->type != THING_CONST){ ret = -EINVAL; goto exit; }
+				param1 = action->params->list;
+				if(param1 == NULL){                                ret = -EINVAL; goto exit; }
+				
+				param2 = action->params->list->next;
 				if(param2 == NULL || param2->type != THING_HASHT){ ret = -EINVAL; goto exit; }
 				
 				from = rewrite_thing_get_data(env, param1);
@@ -205,8 +207,8 @@ ablock_continue:
 				
 			case BACKEND_PASS:
 				to     = action->ret;
-				param1 = action->params->list;
 				
+				param1 = action->params->list;
 				if(param1 == NULL || param1->type != THING_HASHT){ ret = error("pass failed"); goto exit; }
 				
 				action_ret = ( (action_ret = backend_pass(env->backend, env->requests[param1->id])) < 0) ? action_ret : -EEXIST;
@@ -214,19 +216,53 @@ ablock_continue:
 				from   = &action_ret_data;
 				break;
 			
-			case DATA_QUERY:
+			case DATA_QUERY:;
+				ssize_t           ret;
+				uintmax_t         n;
+				rewrite_thing_t  *thing;
+				fastcall_header  *data_request;
+				void            **data_request_params;
+				data_t           *data, *data_action;
+
+				param1 = action->params->list;       // data
+				if(param1 == NULL){                                ret = -EINVAL; goto exit; }
+				
+				param2 = action->params->list->next; // action
+				if(param2 == NULL){                                ret = -EINVAL; goto exit; }
+				
+				data        = rewrite_thing_get_data(env, param1);
+				data_action = rewrite_thing_get_data(env, param2);
+
+				for(n = 0, thing = param2->next; thing != NULL; thing = thing->next, n++); 
+				
+				data_request            = alloca( sizeof(fastcall_header) + n * sizeof(void *));
+				data_request->nargs     = n + 2;
+				data_get(ret, TYPE_UINTT, data_request->action, data_action);
+				if(ret != 0){ ret = -EINVAL; goto exit; }
+				
+				data_request_params = (void **)(data_request + 1);
+				for(n = 0, thing = param2->next; thing != NULL; thing = thing->next, n++){
+					data_request_params[n] = (void *)rewrite_thing_get_data(env, thing);
+				}
+				
+				action_ret = data_query(data, data_request);
+				
+				to   = action->ret;
+				from = &action_ret_data;
 				break;
 			default:
 				ret = -ENOSYS;
 				goto exit;
 		};
+		if(to == NULL)
+			continue;
 		
 		if(from == NULL){
 			temp_any.type = TYPE_VOIDT;
 			temp_any.ptr  = NULL;
 			from          = &temp_any;
 		}
-		
+
 		switch(to->type){
 			case THING_HASH_ELEMENT:;
 				request_t **request = &env->requests[to->id];

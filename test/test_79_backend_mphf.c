@@ -1,4 +1,6 @@
 START_TEST (test_backend_mphf){
+	char rebuild_buff[1024];
+	
 	hash_t config[] = {
                 { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("file")                          },
@@ -100,9 +102,9 @@ START_TEST (test_backend_mphf){
 		{ 0, DATA_HASHT(
 			{ HK(class),        DATA_STRING("rewrite")                      },
 			{ HK(script),       DATA_STRING(
-			"request['offset_out'] = data_alloca((string_t)'uint_t', (size_t)'8');"
-			"if(!data_cmp(request['action'], create )){ ret = pass(request); };"
-			"if(!data_cmp(request['action'], read )){ ret = backend((string_t)'mphf_no_fill', request); };") },
+			"request['offset_out'] = (uint_t)'0';"
+			"ifnot(data_query(request['action'], compare, create )){ ret = pass(request); };"
+			"ifnot(data_query(request['action'], compare, read )){   ret = query((backend_t)'mphf_no_fill', request); };") },
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
@@ -117,7 +119,7 @@ START_TEST (test_backend_mphf){
 			{ HK(class),        DATA_STRING("backend/rebuild")              },
 			{ HK(enum_method),  DATA_STRING("iterate")                      },
 			{ HK(req_read),     DATA_HASHT(
-				{ HK(buffer), DATA_STRING("                                                              ")   },
+				{ HK(buffer), DATA_RAW(rebuild_buff, 1024)   },
 				hash_end
 			)},
 			hash_end
@@ -166,12 +168,15 @@ START_TEST (test_backend_mphf){
 	
 	// check
 	char data_read[1024];
+	char *key;
 	for(i=0; i < sizeof(data_array) / sizeof(char *); i++){
 		memset(data_read, 0, 1024);
 		
+		key = strdup(data_array[i]); // BAD BAD BAD
+
 		request_t r_read[] = {
 			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                            },
-			{ HK(key),    DATA_PTR_STRING (data_array[i])                           },
+			{ HK(key),    DATA_PTR_STRING (key)                                     },
 			{ HK(buffer), DATA_RAW (&data_read, 1024)                               },
                         { HK(ret),    DATA_PTR_SIZET(&ret)                                      },
 			hash_end
@@ -182,6 +187,7 @@ START_TEST (test_backend_mphf){
 			fail("backend backend_mphf: read array data failed");
                 	printf("mphf_read: %s %s\n", &data_read[8], data_array[i]);
 		}
+		free(key);
 	}
 	
 	backend_destroy(b_dat);

@@ -671,5 +671,6 @@ request_actions request_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "move")   == 0) return ACTION_CRWD_MOVE;
 	if(strcasecmp(string, "count")  == 0) return ACTION_CRWD_COUNT;
 	if(strcasecmp(string, "custom") == 0) return ACTION_CRWD_CUSTOM;
+	if(strcasecmp(string, "compare") == 0) return ACTION_COMPARE;
 	return REQUEST_INVALID;
 } // }}}

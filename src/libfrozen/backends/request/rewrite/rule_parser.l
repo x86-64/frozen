@@ -12,6 +12,7 @@
 request request_t
 var     var_t
 if      if
+ifnot   ifnot
 else    else
 name    [a-z][a-z0-9_]*
 string1 \'[^\n\r\']*\'
@@ -25,6 +26,7 @@ blank   [ \n\r\t]+
 {request}       { return REQUEST; }
 {var}           { return VAR;     }
 {if}            { return IF;      }
+{ifnot}         { return IFNOT;   }
 {else}          { return ELSE;    }
 {name}          { yylval->string = strdup(yytext); return NAME;  }
 {string}        {
