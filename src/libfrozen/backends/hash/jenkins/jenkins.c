@@ -40,7 +40,7 @@ static int jenkins_configure(backend_t *backend, hash_t *config){ // {{{
 
 static ssize_t jenkins_32_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
-	uint32_t               hash              = 0;
+	uint32_t               hash;
 	data_t                *key               = NULL;
 	jenkins_userdata      *userdata          = (jenkins_userdata *)backend->userdata;
 	
@@ -51,8 +51,7 @@ static ssize_t jenkins_32_handler(backend_t *backend, request_t *request){ // {{
 		return error("input key not supplied");
 	}
 	
-	// BAD BAD BAD
-	//jenkins32_hash(0, key->ptr, data_value_len(key), (uint32_t *)&hash, 1); // TODO remove data_value_*
+	hash = jenkins32_hash(0, key);
 	
 	request_t r_next[] = {
 		{ userdata->output, DATA_PTR_UINT32T(&hash) },
@@ -63,7 +62,7 @@ static ssize_t jenkins_32_handler(backend_t *backend, request_t *request){ // {{
 
 static ssize_t jenkins_64_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
-	uint64_t               hash              = 0;
+	uint64_t               hash;
 	data_t                *key               = NULL;
 	jenkins_userdata      *userdata          = (jenkins_userdata *)backend->userdata;
 	
@@ -73,8 +72,8 @@ static ssize_t jenkins_64_handler(backend_t *backend, request_t *request){ // {{
 			return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 		return error("input key not supplied");
 	}
-	// BAD BAD BAD
-	//jenkins64_hash(0, data_value_ptr(key), data_value_len(key), (uint64_t *)&hash, 1); // TODO remove data_value_*
+
+	hash = jenkins64_hash(0, key);
 	
 	request_t r_next[] = {
 		{ userdata->output, DATA_PTR_UINT64T(&hash) },

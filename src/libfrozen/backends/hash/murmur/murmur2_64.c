@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <murmur2.h>
 //-----------------------------------------------------------------------------
 // MurmurHash2, 64-bit versions, by Austin Appleby
 
@@ -9,39 +10,54 @@
 
 // 64-bit hash for 64-bit platforms
 
-uint64_t MurmurHash64A ( const void * key, int len, unsigned int seed )
-{
-	const uint64_t m = 0xc6a4a7935bd1e995;
-	const int r = 47;
+uint64_t MurmurHash64A ( data_t *data, unsigned int seed ){
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	if( data_query(data, &r_len) != 0 )
+		return 0;
+	
+	char                   buffer[8*BUFFER_ROUNDS];
+	uintmax_t              offset            = 0;
+	const uint64_t        *p;
+	const uint64_t        *p_end;
+	const uint64_t         m                 = 0xc6a4a7935bd1e995;
+	const int              r                 = 47;
+	uint64_t               h                 = seed ^ (r_len.length * m);
 
-	uint64_t h = seed ^ (len * m);
-
-	const uint64_t * data = (const uint64_t *)key;
-	const uint64_t * end = data + (len/8);
-
-	while(data != end)
-	{
-		uint64_t k = *data++;
-
-		k *= m; 
-		k ^= k >> r; 
-		k *= m; 
+	while(1){ 
+		fastcall_read r_read = { { 5, ACTION_READ }, offset, &buffer, sizeof(buffer) };
+		if(data_query(data, &r_read) != 0)
+			return 0;
 		
-		h ^= k;
-		h *= m; 
+		p       = (const uint64_t *)buffer;
+		p_end   = p + (r_read.buffer_size / 8);
+		offset += r_read.buffer_size;
+	
+		while(p != p_end)
+		{
+			uint64_t k = *p++;
+
+			k *= m; 
+			k ^= k >> r; 
+			k *= m; 
+			
+			h ^= k;
+			h *= m; 
+		}
+		if(r_read.buffer_size != sizeof(buffer))
+			break;
 	}
+	
+	const unsigned char * p2 = (const unsigned char*)p;
 
-	const unsigned char * data2 = (const unsigned char*)data;
-
-	switch(len & 7)
+	switch(r_len.length & 7)
 	{
-	case 7: h ^= (uint64_t)data2[6] << 48;
-	case 6: h ^= (uint64_t)data2[5] << 40;
-	case 5: h ^= (uint64_t)data2[4] << 32;
-	case 4: h ^= (uint64_t)data2[3] << 24;
-	case 3: h ^= (uint64_t)data2[2] << 16;
-	case 2: h ^= (uint64_t)data2[1] << 8;
-	case 1: h ^= (uint64_t)data2[0];
+	case 7: h ^= (uint64_t)p2[6] << 48;
+	case 6: h ^= (uint64_t)p2[5] << 40;
+	case 5: h ^= (uint64_t)p2[4] << 32;
+	case 4: h ^= (uint64_t)p2[3] << 24;
+	case 3: h ^= (uint64_t)p2[2] << 16;
+	case 2: h ^= (uint64_t)p2[1] << 8;
+	case 1: h ^= (uint64_t)p2[0];
 	        h *= m;
 	};
  
@@ -52,56 +68,3 @@ uint64_t MurmurHash64A ( const void * key, int len, unsigned int seed )
 	return h;
 } 
 
-
-// 64-bit hash for 32-bit platforms
-
-uint64_t MurmurHash64B ( const void * key, int len, unsigned int seed )
-{
-	const unsigned int m = 0x5bd1e995;
-	const int r = 24;
-
-	unsigned int h1 = seed ^ len;
-	unsigned int h2 = 0;
-
-	const unsigned int * data = (const unsigned int *)key;
-
-	while(len >= 8)
-	{
-		unsigned int k1 = *data++;
-		k1 *= m; k1 ^= k1 >> r; k1 *= m;
-		h1 *= m; h1 ^= k1;
-		len -= 4;
-
-		unsigned int k2 = *data++;
-		k2 *= m; k2 ^= k2 >> r; k2 *= m;
-		h2 *= m; h2 ^= k2;
-		len -= 4;
-	}
-
-	if(len >= 4)
-	{
-		unsigned int k1 = *data++;
-		k1 *= m; k1 ^= k1 >> r; k1 *= m;
-		h1 *= m; h1 ^= k1;
-		len -= 4;
-	}
-
-	switch(len)
-	{
-	case 3: h2 ^= ((unsigned char*)data)[2] << 16;
-	case 2: h2 ^= ((unsigned char*)data)[1] << 8;
-	case 1: h2 ^= ((unsigned char*)data)[0];
-			h2 *= m;
-	};
-
-	h1 ^= h2 >> 18; h1 *= m;
-	h2 ^= h1 >> 22; h2 *= m;
-	h1 ^= h2 >> 17; h1 *= m;
-	h2 ^= h1 >> 19; h2 *= m;
-
-	uint64_t h = h1;
-
-	h = (h << 32) | h2;
-
-	return h;
-} 

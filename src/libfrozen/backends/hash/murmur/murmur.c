@@ -51,8 +51,7 @@ static ssize_t murmur2_32_handler(backend_t *backend, request_t *request){ // {{
 		return error("input key not supplied");
 	}
 	
-	// BAD BAD BAD
-	//hash = MurmurHash2(data_value_ptr(key), data_value_len(key), 0); // TODO remove data_value_*
+	hash = MurmurHash2(key, 0);
 	
 	request_t r_next[] = {
 		{ userdata->output, DATA_PTR_UINT32T(&hash) },
@@ -73,30 +72,7 @@ static ssize_t murmur2_64_handler(backend_t *backend, request_t *request){ // {{
 		return error("input key not supplied");
 	}
 	
-	// BAD BAD BAD
-	//hash = MurmurHash64A(data_value_ptr(key), data_value_len(key), 0); // TODO remove data_value_*
-	
-	request_t r_next[] = {
-		{ userdata->output, DATA_PTR_UINT64T(&hash) },
-		hash_next(request)
-	};
-	return ( (ret = backend_pass(backend, r_next)) < 0) ? ret : -EEXIST;
-} // }}}
-static ssize_t murmur2_64_on_32_handler(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
-	uint64_t               hash              = 0;
-	data_t                *key               = NULL;
-	murmur_userdata       *userdata          = (murmur_userdata *)backend->userdata;
-	
-	key = hash_data_find(request, userdata->input);
-	if(key == NULL){
-		if(userdata->fatal == 0)
-			return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-		return error("input key not supplied");
-	}
-	
-	// BAD BAD BAD
-	//hash = MurmurHash64B(data_value_ptr(key), data_value_len(key), 0); // TODO remove data_value_*
+	hash = MurmurHash64A(key, 0);
 	
 	request_t r_next[] = {
 		{ userdata->output, DATA_PTR_UINT64T(&hash) },
@@ -124,17 +100,6 @@ backend_t murmur2_64_proto = {
 	.func_configure = &murmur_configure,
 	.backend_type_hash = {
 		.func_handler  = &murmur2_64_handler
-	}
-};
-
-backend_t murmur2_64_on_32_proto = {
-	.class          = "hash/murmur2_64_on_32",
-	.supported_api  = API_HASH,
-	.func_init      = &murmur_init,
-	.func_destroy   = &murmur_destroy,
-	.func_configure = &murmur_configure,
-	.backend_type_hash = {
-		.func_handler  = &murmur2_64_on_32_handler
 	}
 };
 

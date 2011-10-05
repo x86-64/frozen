@@ -220,10 +220,10 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 					str = "./";
 				str_size = strlen(str);
 				break;
-			case HK(random):
-				//if( (str_size = data_value_len(curr_data)) <= 1)
-					str_size = 2;
-				str_size--;
+			case HK(random):;
+				fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN }, 0 };
+				data_query(curr_data, &r_len);
+				str_size = r_len.length;
 				break;
 			default:
 				goto error;

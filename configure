@@ -826,7 +826,6 @@ enable_backendjenkins32
 enable_backendjenkins64
 enable_backendmurmur2_32
 enable_backendmurmur2_64
-enable_backendmurmur2_64_on_32
 enable_backendfill
 enable_backendlookup
 enable_backendmphf
@@ -1551,8 +1550,6 @@ Optional Features:
                           disable backend murmur2-32
   --disable-backend-murmur2-64
                           disable backend murmur2-64
-  --disable-backend-murmur2-64-on-32
-                          disable backend murmur2-64-on-32
   --disable-backend-fill  disable backend fill
   --disable-backend-lookup
                           disable backend lookup
@@ -19082,42 +19079,6 @@ fi
 		BACKEND_DIR_murmur2_64="hash/murmur"
 		BACKEND_DEP_murmur2_64=""
 				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_64"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
-
-		BACKEND_MAKEFILE_hash_murmur=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendmurmur2_64_on_32 was given.
-if test "${enable_backendmurmur2_64_on_32+set}" = set; then :
-  enableval=$enable_backendmurmur2_64_on_32;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmurmur2_64_on_32}" = "yes"; then
-			enable_backendmurmur2_64_on_32="no"
-		else
-			enable_backendmurmur2_64_on_32="yes"
-		fi
-	fi
-
-	if test "${enable_backendmurmur2_64_on_32}" = "yes"; then
-		BACKEND_DIR_murmur2_64_on_32="hash/murmur"
-		BACKEND_DEP_murmur2_64_on_32=""
-				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_64_on_32"
 
 			fi
 

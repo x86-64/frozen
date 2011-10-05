@@ -6,6 +6,8 @@
 #define hashsize64(n) ((uint64_t)1<<(n))
 #define hashmask64(n) (hashsize64(n)-1)
 
+#define BUFFER_ROUNDS 10
+
 /*
    --------------------------------------------------------------------
    mix -- mix 3 32-bit values reversibly.
@@ -89,23 +91,40 @@ acceptable.  Do NOT use for cryptographic purposes.
 --------------------------------------------------------------------
  */
 
-uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen, uint32_t hashes[], size_t nhashes){
+uint32_t     jenkins32_hash(uint32_t seed, data_t *data){
 	register uint32_t len;
 	register uint32_t a,b,c;
-	
+	uint32_t          keylen;
+	uintmax_t         offset = 0;
+	char              buffer[12*BUFFER_ROUNDS];
+	char             *k;
+
 	/* Set up the internal state */
-	len = keylen;
 	a = b = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
 	c = seed;   /* the previous hash value - seed in our case */
 	
-	/*---------------------------------------- handle most of the key */
-	while (len >= 12)
-	{
-		a += ((uint32_t)k[0] +((uint32_t)k[1]<<8) +((uint32_t)k[2]<<16) +((uint32_t)k[3]<<24));
-		b += ((uint32_t)k[4] +((uint32_t)k[5]<<8) +((uint32_t)k[6]<<16) +((uint32_t)k[7]<<24));
-		c += ((uint32_t)k[8] +((uint32_t)k[9]<<8) +((uint32_t)k[10]<<16)+((uint32_t)k[11]<<24));
-		mix(a,b,c);
-		k += 12; len -= 12;
+	while(1){ 
+		fastcall_read r_read = { { 5, ACTION_READ }, offset, &buffer, sizeof(buffer) };
+		if(data_query(data, &r_read) != 0)
+			return c;
+		
+		k       = buffer;
+		len     = r_read.buffer_size;
+		offset += len;
+		keylen += len;
+		
+		/*---------------------------------------- handle most of the key */
+		while (len >= 12)
+		{
+			a += ((uint32_t)k[0] +((uint32_t)k[1]<<8) +((uint32_t)k[2]<<16) +((uint32_t)k[3]<<24));
+			b += ((uint32_t)k[4] +((uint32_t)k[5]<<8) +((uint32_t)k[6]<<16) +((uint32_t)k[7]<<24));
+			c += ((uint32_t)k[8] +((uint32_t)k[9]<<8) +((uint32_t)k[10]<<16)+((uint32_t)k[11]<<24));
+			mix(a,b,c);
+			k   += 12;
+			len -= 12;
+		}
+		if(len != 0)    // last cycle
+			break;
 	}
 	
 	/*------------------------------------- handle the last 11 bytes */
@@ -139,33 +158,43 @@ uint32_t     jenkins32_hash(uint32_t seed, char *k, size_t keylen, uint32_t hash
 	}
 	mix(a,b,c);
 	
-	switch(nhashes){
-		default:
-		case 3: hashes[2] = c;
-		case 2: hashes[1] = b;
-		case 1: hashes[0] = a;
-	};
-	return MIN(nhashes, 3);
+	return c;
 }
 
-uint64_t     jenkins64_hash(uint64_t seed, char *k, size_t keylen, uint64_t hashes[], size_t nhashes){
+uint64_t     jenkins64_hash(uint64_t seed, data_t *data){
 	register uint64_t a, b, c, len;
+	uint64_t          keylen;
+	uintmax_t         offset = 0;
+	char              buffer[24*BUFFER_ROUNDS];
+	char             *k;
 
 	/* Set up the internal state */
-	len = keylen;
 	a = b = seed;                         /* the previous hash value */
 	c = 0x9e3779b97f4a7c13LL; /* the golden ratio; an arbitrary value */
+	
+	while(1){ 
+		fastcall_read r_read = { { 5, ACTION_READ }, offset, &buffer, sizeof(buffer) };
+		if(data_query(data, &r_read) != 0)
+			return c;
+		
+		k       = buffer;
+		len     = r_read.buffer_size;
+		offset += len;
+		keylen += len;
 
-	/*---------------------------------------- handle most of the key */
-	while (len >= 24){
-		a += (k[0]        +((uint64_t)k[ 1]<< 8)+((uint64_t)k[ 2]<<16)+((uint64_t)k[ 3]<<24)
-		+((uint64_t)k[4 ]<<32)+((uint64_t)k[ 5]<<40)+((uint64_t)k[ 6]<<48)+((uint64_t)k[ 7]<<56));
-		b += (k[8]        +((uint64_t)k[ 9]<< 8)+((uint64_t)k[10]<<16)+((uint64_t)k[11]<<24)
-		+((uint64_t)k[12]<<32)+((uint64_t)k[13]<<40)+((uint64_t)k[14]<<48)+((uint64_t)k[15]<<56));
-		c += (k[16]       +((uint64_t)k[17]<< 8)+((uint64_t)k[18]<<16)+((uint64_t)k[19]<<24)
-		+((uint64_t)k[20]<<32)+((uint64_t)k[21]<<40)+((uint64_t)k[22]<<48)+((uint64_t)k[23]<<56));
-		mix64(a,b,c);
-		k += 24; len -= 24;
+		/*---------------------------------------- handle most of the key */
+		while (len >= 24){
+			a += (k[0]        +((uint64_t)k[ 1]<< 8)+((uint64_t)k[ 2]<<16)+((uint64_t)k[ 3]<<24)
+			+((uint64_t)k[4 ]<<32)+((uint64_t)k[ 5]<<40)+((uint64_t)k[ 6]<<48)+((uint64_t)k[ 7]<<56));
+			b += (k[8]        +((uint64_t)k[ 9]<< 8)+((uint64_t)k[10]<<16)+((uint64_t)k[11]<<24)
+			+((uint64_t)k[12]<<32)+((uint64_t)k[13]<<40)+((uint64_t)k[14]<<48)+((uint64_t)k[15]<<56));
+			c += (k[16]       +((uint64_t)k[17]<< 8)+((uint64_t)k[18]<<16)+((uint64_t)k[19]<<24)
+			+((uint64_t)k[20]<<32)+((uint64_t)k[21]<<40)+((uint64_t)k[22]<<48)+((uint64_t)k[23]<<56));
+			mix64(a,b,c);
+			k += 24; len -= 24;
+		}
+		if(len != 0)    // last cycle
+			break;
 	}
 
 	/*------------------------------------- handle the last 23 bytes */
@@ -199,12 +228,6 @@ uint64_t     jenkins64_hash(uint64_t seed, char *k, size_t keylen, uint64_t hash
 	}
 	mix64(a,b,c);
 	
-	switch(nhashes){
-		default:
-		case 3: hashes[2] = c;
-		case 2: hashes[1] = b;
-		case 1: hashes[0] = a;
-	};
-	return MIN(nhashes, 3);
+	return c;
 }
 
