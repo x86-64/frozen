@@ -194,25 +194,22 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 } // }}}
 
 static ssize_t rebuild_handler(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret1, ret2;
+	ssize_t                ret;
 	rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
 
 retry:;
-	request_t  r_ret[] = {
-		{ HK(ret), DATA_PTR_SIZET(&ret2) },
-		hash_next(request)
-	};
-	
-	if( (ret1 = backend_pass(backend, r_ret)) < 0 ){
-		return ret1;
-	}else{
-		if(ret2 == -EBADF){
-			rebuild_rebuild(backend);
-			if(userdata->retry_request != 0)
-				goto retry;
-		}
-		return ret2;
+	ret = backend_pass(backend, request);
+	if(ret == -EBADF){
+		rebuild_rebuild(backend);
+		if(userdata->retry_request != 0)
+			goto retry;
+		
+		return -EEXIST;
 	}
+	if(ret < 0)
+		return ret;
+	
+	return -EEXIST;
 } // }}}
 
 backend_t rebuild_proto = {
