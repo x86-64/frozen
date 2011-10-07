@@ -1,3 +1,25 @@
+- void_t convert function
+- remove old fast api
+- rename CRWD's to normal
+- autocollecting actions, like HK()
+- backend switch
+- backend linear_hash
+- working web
+  - backend go_session
+- hash recursive item instead of hash_next
+- ipc (buff <=> hash)
+- TODO + BUG hunt
+- documentation for data, hash, backend
+- release to github
+- multi-threading
+  - backend lock
+  - backend thread_pool
+  - backend queue
+  - backend multi_request
+- fix insert_sort
+- data 'random_t' for file and testing\benchmarking suite
+- new test suite, as benchmarks
+- backend tcp\udp
+- m4 exec for configs
 - add checks to configure.ac (malloc, headers, using functions)
 - add flags to configure.ac (--with-libconfig, --with-check)
-
