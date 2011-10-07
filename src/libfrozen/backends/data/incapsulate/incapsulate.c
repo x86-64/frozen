@@ -8,10 +8,8 @@ typedef struct incap_userdata {
 	hash_key_t     key_from;
 	hash_key_t     count;
 	hash_key_t     size;
-	size_t         multiply_as_sizet;
-	off_t          multiply_as_offt;
-	data_t         multiply_as_sizet_data;
-	data_t         multiply_as_offt_data;
+	off_t          multiply;
+	data_t         multiply_data;
 } incap_userdata;
 
 static int incap_init(backend_t *backend){ // {{{
@@ -43,12 +41,10 @@ static int incap_configure(backend_t *backend, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_STRINGT, key_from_str,  config, HK(key_from));
 	hash_data_copy(ret, TYPE_STRINGT, count_str,     config, HK(count));
 	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
-	hash_data_copy(ret, TYPE_OFFT,   multiply,      config, HK(multiply));
+	hash_data_copy(ret, TYPE_OFFT,    multiply,      config, HK(multiply));
 	
-	data_t multiply_as_offt_data = DATA_PTR_OFFT(&userdata->multiply_as_offt);
-	memcpy(&userdata->multiply_as_offt_data, &multiply_as_offt_data, sizeof(multiply_as_offt_data));
-	data_t multiply_as_sizet_data = DATA_PTR_SIZET(&userdata->multiply_as_sizet);
-	memcpy(&userdata->multiply_as_sizet_data, &multiply_as_sizet_data, sizeof(multiply_as_sizet_data));
+	data_t multiply_data = DATA_PTR_OFFT(&userdata->multiply);
+	memcpy(&userdata->multiply_data, &multiply_data, sizeof(multiply_data));
 	
 	userdata->key      = hash_string_to_key(key_str);
 	userdata->key_out  = hash_string_to_key(key_out_str);
@@ -56,126 +52,62 @@ static int incap_configure(backend_t *backend, hash_t *config){ // {{{
 	userdata->key_from = hash_string_to_key(key_from_str);
 	userdata->count    = hash_string_to_key(count_str);
 	userdata->size     = hash_string_to_key(size_str);
-	userdata->multiply_as_sizet = multiply;
-	userdata->multiply_as_offt  = multiply;
+	userdata->multiply = multiply;
 	
 	if(multiply == 0)
 		return error("backend incapsulate parameter multiply invalid");
 	
 	return 0;
 } // }}}
-/*
-static ssize_t incap_backend_createwrite(backend_t *backend, request_t *request){
-	ssize_t          ret;
-	size_t           size, new_size;
-	data_t          *offset;
-	data_ctx_t      *offset_ctx;
-	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
-	
-	hash_data_find(request, userdata->size, &offset, &offset_ctx);
-	if(offset != NULL){
-		// round size
-		size     = GET_TYPE_SIZET(offset);
-		new_size =     size / userdata->multiply_as_sizet;
-		new_size = new_size * userdata->multiply_as_sizet;
-		if( (size % userdata->multiply_as_sizet) != 0)
-			new_size += userdata->multiply_as_sizet;
+
+static ssize_t incap_handler(backend_t *backend, request_t *request){
+	ssize_t                ret;
+	uintmax_t              size, new_size;
+	data_t                *data;
+	incap_userdata        *userdata = (incap_userdata *)backend->userdata;
+
+	if( (data = hash_data_find(request, userdata->size)) != NULL){
+		data_get(ret, TYPE_UINTT, size, data);
 		
-		data_write(offset, offset_ctx, 0, &new_size, sizeof(new_size));
+		// round size
+		new_size =     size / userdata->multiply;
+		new_size = new_size * userdata->multiply;
+		if( (size % userdata->multiply) != 0)
+			new_size += userdata->multiply;
+		
+		fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &new_size, sizeof(new_size) };
+		data_query(data, &r_write);
 	}
 	
-	hash_data_find(request, userdata->key, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
+	fastcall_mul r_mul = { { 3, ACTION_MULTIPLY }, &userdata->multiply_data };
+	
+	if( (data = hash_data_find(request, userdata->key)) != NULL)
+		data_query(data, &r_mul);
+	if( (data = hash_data_find(request, userdata->key_to)) != NULL)
+		data_query(data, &r_mul);
+	if( (data = hash_data_find(request, userdata->key_from)) != NULL)
+		data_query(data, &r_mul);
 	
 	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
 	
-	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
+	fastcall_div r_div = { { 3, ACTION_DIVIDE }, &userdata->multiply_data };
+	
+	if( (data = hash_data_find(request, userdata->key_out)) != NULL)
+		data_query(data, &r_div);
+	if( (data = hash_data_find(request, userdata->count)) != NULL)
+		data_query(data, &r_div);
 	
 	return ret;
 }
 
-static ssize_t incap_backend_read(backend_t *backend, request_t *request){
-	ssize_t          ret;
-	data_t          *offset;
-	data_ctx_t      *offset_ctx;
-	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
-	
-	hash_data_find(request, userdata->key, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-}
-
-static ssize_t incap_backend_move(backend_t *backend, request_t *request){
-	ssize_t          ret;
-	data_t          *offset;
-	data_ctx_t      *offset_ctx;
-	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
-	
-	hash_data_find(request, userdata->key_to, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	hash_data_find(request, userdata->key_from, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-}
-
-static ssize_t incap_backend_count(backend_t *backend, request_t *request){
-	ssize_t          ret;
-	data_t          *offset;
-	data_ctx_t      *offset_ctx;
-	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
-	
-	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
-	
-	hash_data_find(request, userdata->count, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	return ret;
-}
-
-static ssize_t incap_backend_custom(backend_t *backend, request_t *request){
-	ssize_t          ret;
-	data_t          *offset;
-	data_ctx_t      *offset_ctx;
-	incap_userdata  *userdata = (incap_userdata *)backend->userdata;
-	
-	hash_data_find(request, userdata->key, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('*', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	ret = (ret = backend_pass(backend, request) < 0) ? ret : -EEXIST;
-	
-	hash_data_find(request, userdata->key_out, &offset, &offset_ctx);
-	if(offset != NULL)
-		data_arithmetic('/', offset, offset_ctx, &userdata->multiply_as_offt_data, NULL);
-	
-	return ret;
-	
-}
-*/
 backend_t incapsulate_proto = {
 	.class          = "data/incapsulate",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &incap_init,
 	.func_configure = &incap_configure,
 	.func_destroy   = &incap_destroy,
-	{
-//		.func_create = &incap_backend_createwrite,
-//		.func_set    = &incap_backend_createwrite,
-//		.func_get    = &incap_backend_read,
-//		.func_delete = &incap_backend_read,
-//		.func_move   = &incap_backend_move,
-//		.func_count  = &incap_backend_count,
-//		.func_custom = &incap_backend_custom
+	.backend_type_hash = {
+		.func_handler = &incap_handler,
 	}
 };
 

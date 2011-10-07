@@ -262,12 +262,12 @@ ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer
 		if(buffer_seek(buffer, data_off, &chunk, &ptr, &size) < 0)
 			goto error;
 		
-		data_size = data_value_len(&curr->data);
+		data_size = curr->data.len;
 		
 		if(data_size > size)
 			goto error;
 		
-		curr->data->type = data_value_type(&curr->data);
+		curr->data->type = curr->data.ptr;
 		curr->data->ptr  = ptr;
 		
 		data_off += data_size;
@@ -329,7 +329,7 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 		if(curr->key == hash_ptr_null)
 			continue;
 		
-		data_size = curr->data.data_size; //data_value_len(&curr->data);
+		data_size = curr->data.data_size;
 		
 		if(data_size > memory_size)
 			goto error;
@@ -337,7 +337,7 @@ ssize_t            hash_from_memory             (hash_t **hash, void *memory, si
 		curr->data.ptr = memory + data_off;
 		//data_assign_raw(
 		//	&curr->data,
-		//	data_value_type(&curr->data),
+		//	curr->data.type,
 		//	memory + data_off,
 		//	data_size
 		//);

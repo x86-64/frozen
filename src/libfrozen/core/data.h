@@ -171,6 +171,7 @@ API ssize_t              data_query             (data_t *data, void *args);
 			_ret = -EINVAL;                                        \
 		}                                                              \
 	}                                                                      \
+	(void)_ret;                                                            \
 }
 
 #define data_convert(_ret, _type, _dst, _src) {                                \
@@ -178,6 +179,7 @@ API ssize_t              data_query             (data_t *data, void *args);
 	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, _src };         \
 	_ret = data_query(&__data_dst, &_r_convert);                           \
 	_dst = DEREF_##_type(&__data_dst);                                     \
+	(void)_ret;                                                            \
 };
 
 #endif // DATA_H

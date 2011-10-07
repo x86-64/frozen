@@ -64,14 +64,19 @@ typedef enum enum_method {
 	ENUM_DEFAULT = ENUM_COUNT_AND_READ_ITERATE
 } enum_method;
 
-typedef struct rebuild_userdata {
-	enum_method            enum_method;
+typedef struct rebuildmon_userdata {
+	backend_t             *rebuild_reader;
 	uintmax_t              retry_request;
+} rebuildmon_userdata;
+
+typedef struct rebuildread_userdata {
+	enum_method            enum_method;
 	hash_t                *req_rebuild;
 	hash_t                *req_count;
 	hash_t                *req_read;
 	hash_key_t             hk_offset;
-} rebuild_userdata;
+	backend_t             *writer;
+} rebuildread_userdata;
 
 static enum_method  rebuild_string_to_method(char *str){ // {{{
 	if(str != NULL){
@@ -82,16 +87,23 @@ static enum_method  rebuild_string_to_method(char *str){ // {{{
 } // }}}
 static ssize_t rebuild_rebuild(backend_t *backend){ // {{{
 	ssize_t                ret, rret;
-	rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
+	rebuildread_userdata  *userdata          = (rebuildread_userdata *)backend->userdata;
 	//uintmax_t              rebuild_num = 0;
 	
 redo:
 	//if(rebuild_num++ >= userdata->max_rebuilds)
 	//	return error("rebuild max rebuilds reached");
-	
+	printf("rebuild\n");
+
 	if(userdata->req_rebuild != NULL){
-		if( (ret = backend_pass(backend, userdata->req_rebuild)) != -EBADF) // NOTE rebuild request must return -EBADF as good result
-			return ret;
+		// NOTE rebuild request must return -EBADF as good result
+		if(userdata->writer){
+			if( (ret = backend_query(userdata->writer, userdata->req_rebuild)) != -EBADF)
+				return ret;
+		}else{
+			if( (ret = backend_pass(backend, userdata->req_rebuild)) != -EBADF)
+				return ret;
+		}
 	}
 	
 	switch(userdata->enum_method){
@@ -114,15 +126,26 @@ redo:
 				request_t r_read[] = {
 					{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ)          },
 					{ userdata->hk_offset, DATA_UINTT(i)                           }, // copy of i, not ptr
-					{ HK(ret),             DATA_PTR_SIZET(&rret)                   },
 					hash_next(userdata->req_read)
 				};
-				if( (ret = backend_pass(backend, r_read)) < 0 )
-					return ret;
-				if( rret == -EBADF )
+				ret = backend_pass(backend, r_read);
+				if( ret == -EBADF )
 					goto redo;   // start from beginning
-				if( rret < 0 )
-					return rret;
+				if( ret < 0 )
+					return ret;
+
+				if(userdata->writer){
+					request_t r_write[] = {
+						{ HK(action),          DATA_UINT32T(ACTION_CRWD_CREATE)        },
+						{ userdata->hk_offset, DATA_UINTT(i)                           }, // r_read could change offset during request, so, new copy
+						hash_next(r_read)
+					};
+					ret = backend_query(userdata->writer, r_write);
+					if( ret == -EBADF )
+						goto redo;
+					if(ret < 0)
+						return ret;
+				}
 			}
 			break;
 		case ENUM_CURSOR_ITERATE:
@@ -132,19 +155,22 @@ redo:
 	return 0;
 } // }}}
 
-static int rebuild_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(rebuild_userdata))) == NULL)
+static int rebuildread_init(backend_t *backend){ // {{{
+	if((backend->userdata = calloc(1, sizeof(rebuildread_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int rebuild_destroy(backend_t *backend){ // {{{
-	rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
+static int rebuildread_destroy(backend_t *backend){ // {{{
+	rebuildread_userdata  *userdata          = (rebuildread_userdata *)backend->userdata;
+	
+	if(userdata->writer)
+		backend_destroy(userdata->writer);
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
+static int rebuildread_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
 	uintmax_t              req_rebuild_enable= 1;
 	char                  *req_rebuild_dest  = NULL;
@@ -152,12 +178,9 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 	hash_t                *req_count         = NULL;
 	hash_t                *req_read          = NULL;
 	char                  *enum_method_str   = NULL;
-	char                  *hk_offset_str     = NULL;
-	rebuild_userdata      *userdata          = (rebuild_userdata *)backend->userdata;
+	char                  *hk_offset_str     = "offset";
+	rebuildread_userdata  *userdata          = (rebuildread_userdata *)backend->userdata;
 	
-	userdata->retry_request = 1;
-	
-	hash_data_copy(ret, TYPE_UINTT,   userdata->retry_request,         config, HK(retry_request));
 	hash_data_copy(ret, TYPE_STRINGT, enum_method_str,                 config, HK(enum_method));
 	hash_data_copy(ret, TYPE_STRINGT, hk_offset_str,                   config, HK(offset_key));
 	hash_data_copy(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
@@ -165,6 +188,7 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 	hash_data_copy(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
 	hash_data_copy(ret, TYPE_UINTT,   req_rebuild_enable,              config, HK(req_rebuild_enable));
 	hash_data_copy(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
+	hash_data_copy(ret, TYPE_BACKENDT,  userdata->writer,              config, HK(writer));
 	
 	if(req_rebuild_enable != 0){                         // emit allowed, prepare signal
 		hash_t r_signal_orig[] = {
@@ -193,14 +217,53 @@ static int rebuild_configure(backend_t *backend, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t rebuild_handler(backend_t *backend, request_t *request){ // {{{
+backend_t rebuild_reader_proto = {
+	.class          = "backend/rebuild_reader",
+	.supported_api  = API_HASH,
+	.func_init      = &rebuildread_init,
+	.func_destroy   = &rebuildread_destroy,
+	.func_configure = &rebuildread_configure,
+};
+
+static int rebuildmon_init(backend_t *backend){ // {{{
+	if((backend->userdata = calloc(1, sizeof(rebuildmon_userdata))) == NULL)
+		return error("calloc failed");
+	
+	return 0;
+} // }}}
+static int rebuildmon_destroy(backend_t *backend){ // {{{
+	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)backend->userdata;
+	
+	if(userdata->rebuild_reader)
+		backend_destroy(userdata->rebuild_reader);
+	
+	free(userdata);
+	return 0;
+} // }}}
+static int rebuildmon_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	rebuild_userdata      *userdata = (rebuild_userdata *)backend->userdata;
+	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)backend->userdata;
+	
+	userdata->retry_request = 1;
+	
+	hash_data_copy(ret, TYPE_UINTT,     userdata->retry_request,       config, HK(retry_request));
+	hash_data_copy(ret, TYPE_BACKENDT,  userdata->rebuild_reader,      config, HK(reader));
+	if(ret != 0)
+		return error("no reader supplied");
+	
+	if(strcmp(userdata->rebuild_reader->class, "backend/rebuild_reader") != 0)
+		return error("not reader supplied");
+
+	return 0;
+} // }}}
+static ssize_t rebuildmon_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret;
+	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)backend->userdata;
 
 retry:;
 	ret = backend_pass(backend, request);
 	if(ret == -EBADF){
-		rebuild_rebuild(backend);
+		rebuild_rebuild(userdata->rebuild_reader);
 		if(userdata->retry_request != 0)
 			goto retry;
 		
@@ -212,14 +275,14 @@ retry:;
 	return -EEXIST;
 } // }}}
 
-backend_t rebuild_proto = {
-	.class          = "backend/rebuild",
+backend_t rebuild_monitor_proto = {
+	.class          = "backend/rebuild_monitor",
 	.supported_api  = API_HASH,
-	.func_init      = &rebuild_init,
-	.func_destroy   = &rebuild_destroy,
-	.func_configure = &rebuild_configure,
+	.func_init      = &rebuildmon_init,
+	.func_destroy   = &rebuildmon_destroy,
+	.func_configure = &rebuildmon_configure,
 	.backend_type_hash = {
-		.func_handler = &rebuild_handler
+		.func_handler = &rebuildmon_handler
 	}
 };
 

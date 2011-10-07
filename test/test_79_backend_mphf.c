@@ -45,8 +45,8 @@ START_TEST (test_backend_mphf){
 			{ HK(backend_g),    DATA_STRING("backend_mphf_g")               },
 			{ HK(backend_e),    DATA_STRING("backend_mphf_e")               },
 			{ HK(backend_v),    DATA_STRING("backend_mphf_v")               },
-			{ HK(nelements_min),DATA_UINT64T(100)                           },
-			{ HK(nelements_step),DATA_UINT64T(2)                            },
+			{ HK(nelements_min),DATA_UINT64T(10)                            },
+			{ HK(nelements_step),DATA_UINT64T(10)                           },
 			{ HK(value_bits),   DATA_UINT32T(32)                            },
 			{ HK(input),        DATA_STRING("keyid")                        },
 			hash_end
@@ -93,6 +93,17 @@ START_TEST (test_backend_mphf){
                         )},
                         hash_end
                 )},
+		{ 0, DATA_HASHT(
+			{ HK(name),         DATA_STRING("mphf_rebuild_reader")          },
+			{ HK(class),        DATA_STRING("backend/rebuild_reader")       },
+			{ HK(writer),       DATA_STRING("mphf_test")                    },
+			{ HK(req_read),     DATA_HASHT(
+				{ HK(keyid),  DATA_UINTT(0)                             },
+				{ HK(buffer), DATA_RAW(rebuild_buff, 1024)              },
+				hash_end
+			)},
+			hash_end
+		)},
                 { 0, DATA_HASHT(
 			{ HK(class),        DATA_STRING("index/fill")                   },
 			{ HK(action),       DATA_STRING("write")                        },
@@ -116,12 +127,8 @@ START_TEST (test_backend_mphf){
                         hash_end
                 )},
 		{ 0, DATA_HASHT(
-			{ HK(class),        DATA_STRING("backend/rebuild")              },
-			{ HK(enum_method),  DATA_STRING("iterate")                      },
-			{ HK(req_read),     DATA_HASHT(
-				{ HK(buffer), DATA_RAW(rebuild_buff, 1024)   },
-				hash_end
-			)},
+			{ HK(class),        DATA_STRING("backend/rebuild_monitor")      },
+			{ HK(reader),       DATA_STRING("mphf_rebuild_reader")          },
 			hash_end
 		)},
 		{ 0, DATA_HASHT(

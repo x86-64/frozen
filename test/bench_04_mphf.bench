@@ -25,16 +25,14 @@
 	key_from = "keyid",
 	nelements_min = (uint64_t)'1000000',
 	nelements_step = (uint64_t)'10000',
-	value_bits = (uint32_t)'32',
-	max_rebuilds = (uint_t)'20'
+	value_bits = (uint32_t)'32'
 },
 {
 	class = "structs",
 	size = "size",
 	structure = {
 		keyid = (uint32_t)'0'
-	},
-	copy = (uint_t)'1'
+	}
 },
 {
 	class = "incapsulate",
@@ -61,7 +59,7 @@ NULL,
 	filename = {
 		string = ".dat",
 		string = "data_bench_mphf_g_",
-		homedir = (void_t)''
+		homedir = ''
 	}
 },
 NULL,
@@ -75,7 +73,7 @@ NULL,
 	filename = {
 		string = ".dat",
 		string = "data_bench_mphf_v_",
-		homedir = (void_t)''
+		homedir = ''
 	}
 },
 NULL,
@@ -89,7 +87,7 @@ NULL,
 	filename = {
 		string = ".dat",
 		string = "data_bench_mphf_e_",
-		homedir = (void_t)''
+		homedir = ''
 	}
 }
 

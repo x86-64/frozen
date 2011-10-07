@@ -21,6 +21,26 @@ static ssize_t data_raw_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
 	
 	return 0;
 } // }}}
+static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
+	raw_t                 *dst_data;
+	raw_t                 *src_data = ((raw_t *)src->ptr);
+	
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	if( (dst_data = fargs->dest->ptr = malloc(sizeof(raw_t))) == NULL)
+		return -ENOMEM;
+	
+	if( (dst_data->ptr = malloc(src_data->size) ) == NULL){
+		free(dst_data);
+		return -ENOMEM;
+	}
+	memcpy(dst_data->ptr, src_data->ptr, src_data->size);
+	
+	dst_data->size    = src_data->size;
+	fargs->dest->type = src->type;
+	return 0;
+} // }}}
 // TODO compare
 
 data_proto_t raw_t_proto = {
@@ -32,6 +52,7 @@ data_proto_t raw_t_proto = {
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_raw_len,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
 		[ACTION_TRANSFER]    = (f_data_func)&data_raw_transfer,
+		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
 	}
 };
 

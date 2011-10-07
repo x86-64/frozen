@@ -260,8 +260,9 @@ void _backend_setuserdata(backend_t *backend, void *data){
 void *_backend_getuserdata(backend_t *backend){
 	return backend->userdata;
 }
-void data_assign(data_t *data, data_type type, void *ptr, size_t ptr_size){
-	data_assign_raw(data, type, ptr, ptr_size);
+void data_assign(data_t *data, data_type type, void *ptr){
+	data->type = type;
+	data->ptr  = ptr;
 }
 
 %}

@@ -812,7 +812,8 @@ enable_backendcall
 enable_backendfactory
 enable_backendfork
 enable_backendpool
-enable_backendrebuild
+enable_backendrebuild_monitor
+enable_backendrebuild_reader
 enable_backendcache
 enable_backendcache_append
 enable_backendipc
@@ -1526,8 +1527,10 @@ Optional Features:
                           disable backend factory
   --disable-backend-fork  disable backend fork
   --disable-backend-pool  disable backend pool
-  --disable-backend-rebuild
-                          disable backend rebuild
+  --disable-backend-rebuild-monitor
+                          disable backend rebuild-monitor
+  --disable-backend-rebuild-reader
+                          disable backend rebuild-reader
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
@@ -18582,24 +18585,60 @@ fi
 
 
 
-	# Check whether --enable-backendrebuild was given.
-if test "${enable_backendrebuild+set}" = set; then :
-  enableval=$enable_backendrebuild;
+	# Check whether --enable-backendrebuild_monitor was given.
+if test "${enable_backendrebuild_monitor+set}" = set; then :
+  enableval=$enable_backendrebuild_monitor;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_backendrebuild}" = "yes"; then
-			enable_backendrebuild="no"
+		if test "${enable_backendrebuild_monitor}" = "yes"; then
+			enable_backendrebuild_monitor="no"
 		else
-			enable_backendrebuild="yes"
+			enable_backendrebuild_monitor="yes"
 		fi
 	fi
 
-	if test "${enable_backendrebuild}" = "yes"; then
-		BACKEND_DIR_rebuild="backend/rebuild"
-		BACKEND_DEP_rebuild=""
-				BACKEND_SELECTED="$BACKEND_SELECTED rebuild"
+	if test "${enable_backendrebuild_monitor}" = "yes"; then
+		BACKEND_DIR_rebuild_monitor="backend/rebuild"
+		BACKEND_DEP_rebuild_monitor=""
+				BACKEND_SELECTED="$BACKEND_SELECTED rebuild_monitor"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_rebuild" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/rebuild/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/rebuild"
+
+		BACKEND_MAKEFILE_backend_rebuild=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/rebuild/libfrozen_backend_rebuild.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendrebuild_reader was given.
+if test "${enable_backendrebuild_reader+set}" = set; then :
+  enableval=$enable_backendrebuild_reader;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendrebuild_reader}" = "yes"; then
+			enable_backendrebuild_reader="no"
+		else
+			enable_backendrebuild_reader="yes"
+		fi
+	fi
+
+	if test "${enable_backendrebuild_reader}" = "yes"; then
+		BACKEND_DIR_rebuild_reader="backend/rebuild"
+		BACKEND_DEP_rebuild_reader=""
+				BACKEND_SELECTED="$BACKEND_SELECTED rebuild_reader"
 
 			fi
 

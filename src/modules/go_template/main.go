@@ -95,7 +95,7 @@ func templateLoad_handler(backend uintptr, request uintptr) int {
 		return -1
 	}
 
-	f.Data_assign(data, f.TYPE_GOINTERFACET, f.ObjToPtr(tpl), 0)
+	f.Data_assign(data, f.TYPE_GOINTERFACET, f.ObjToPtr(tpl))
 	return 0
 }
 

@@ -466,27 +466,6 @@ void            backend_destroy_all  (void){ // {{{
 	list_destroy(&backends_top);
 	list_destroy(&backends_names);
 } // }}}
-/*backend_t *     backend_from_data  (data_t *data){ // {{{
-	ssize_t                ret;
-	hash_t                *backend_config    = NULL;
-	char                  *backend_name      = NULL;
-
-	switch( data_value_type(data) ){
-		case TYPE_HASHT:
-			data_to_dt(ret, TYPE_HASHT,   backend_config, data, NULL);
-			if(ret == 0)
-				return backend_new(backend_config);
-			break;
-		case TYPE_STRINGT:
-			data_to_dt(ret, TYPE_STRINGT, backend_name, data, NULL);
-			if(ret == 0)
-				return backend_find(backend_name);
-			break;
-		default:
-			return NULL;
-	}
-	return NULL;
-} */
 
 ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
 	if( (backend->supported_api & API_FAST) != 0){
