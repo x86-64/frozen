@@ -21,7 +21,7 @@ typedef struct blocks_userdata {
 
 static ssize_t   map_new            (blocks_userdata *data, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)  },
+		{ HK(action),     DATA_UINT32T(ACTION_WRITE)  },
 		{ HK(block_off),  DATA_PTR_UINT32T(&b_off)         },
 		{ HK(block_size), DATA_PTR_UINT32T(&b_size)        },
 		hash_end
@@ -30,7 +30,7 @@ static ssize_t   map_new            (blocks_userdata *data, unsigned int b_off, 
 } // }}}
 static ssize_t   map_insert         (blocks_userdata *data, unsigned int b_vid, unsigned int b_off, unsigned int b_size){ // {{{
 	hash_t  req_write[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)  },
+		{ HK(action),     DATA_UINT32T(ACTION_WRITE)  },
 		{ HK(block_vid),  DATA_PTR_UINT32T(&b_vid)         },
 		{ HK(block_off),  DATA_PTR_UINT32T(&b_off)         },
 		{ HK(block_size), DATA_PTR_UINT32T(&b_size)        },
@@ -40,7 +40,7 @@ static ssize_t   map_insert         (blocks_userdata *data, unsigned int b_vid, 
 } // }}}
 static ssize_t   map_resize         (blocks_userdata *data, unsigned int b_vid, unsigned int new_size){ // {{{
 	hash_t  req_write[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)  },
+		{ HK(action),     DATA_UINT32T(ACTION_WRITE)  },
 		{ HK(block_vid),  DATA_PTR_UINT32T(&b_vid)         },
 		{ HK(block_size), DATA_PTR_UINT32T(&new_size)      },
 		hash_end
@@ -49,7 +49,7 @@ static ssize_t   map_resize         (blocks_userdata *data, unsigned int b_vid, 
 } // }}}
 /*static ssize_t   map_delete         (blocks_userdata *data, unsigned int b_vid){ // {{{
 	hash_t  req_delete[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_DELETE) },
+		{ HK(action),     DATA_UINT32T(ACTION_DELETE) },
 		{ HK(block_vid),  DATA_PTR_UINT32T(&b_vid)         },
 		hash_end
 	};
@@ -57,7 +57,7 @@ static ssize_t   map_resize         (blocks_userdata *data, unsigned int b_vid, 
 } // }}}*/
 static ssize_t   map_off            (blocks_userdata *data, off_t virt_off, unsigned int *block_vid, off_t *real_off){ // {{{
 	hash_t    req_read[] = {
-		{ HK(action),       DATA_UINT32T(ACTION_CRWD_READ) },
+		{ HK(action),       DATA_UINT32T(ACTION_READ) },
 		{ HK(offset),       DATA_PTR_OFFT(&virt_off)     },
 		{ HK(real_offset),  DATA_PTR_OFFT(real_off)      },
 		{ HK(block_vid),    DATA_PTR_UINT32T(block_vid)    },
@@ -68,7 +68,7 @@ static ssize_t   map_off            (blocks_userdata *data, off_t virt_off, unsi
 } // }}}
 static ssize_t   map_get_block      (blocks_userdata *data, unsigned int block_vid, off_t *real_off, size_t *block_size){ // {{{
 	hash_t    req_read[] = {
-		{ HK(action),      DATA_UINT32T(ACTION_CRWD_READ) },
+		{ HK(action),      DATA_UINT32T(ACTION_READ) },
 		{ HK(blocks),      DATA_UINT32T(1)                },
 		{ HK(block_vid),   DATA_PTR_UINT32T(&block_vid)   },
 		{ HK(block_size),  DATA_PTR_UINT32T(block_size)   },
@@ -87,7 +87,7 @@ static ssize_t   map_blocks         (blocks_userdata *data){ // {{{
 	data->blocks_count = 0;
 	
 	hash_t  req_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
+		{ HK(action), DATA_UINT32T(ACTION_COUNT) },
 		{ HK(blocks), DATA_UINT32T(1)                 },
 		{ HK(buffer), DATA_BUFFERT(&req_buffer)     },
 		hash_end
@@ -103,7 +103,7 @@ static ssize_t   real_new           (blocks_userdata *data, off_t *real_block_of
 	buffer_init_from_bare(&req_buffer, real_block_off, sizeof(off_t));
 	
 	hash_t    req_create[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_CREATE ) },
+		{ HK(action), DATA_UINT32T(ACTION_CREATE ) },
 		{ HK(size)  , DATA_SIZET(data->block_size   ) },
 		{ HK(buffer), DATA_BUFFERT(&req_buffer)       },
 		hash_end
@@ -118,7 +118,7 @@ static ssize_t   real_move          (blocks_userdata *data, off_t from, off_t to
 		return 0;
 	
 	hash_t    req_move[] = {
-		{ HK(action),   DATA_UINT32T(ACTION_CRWD_MOVE) },
+		{ HK(action),   DATA_UINT32T(ACTION_MOVE) },
 		{ HK(offset_from), DATA_PTR_OFFT(&from)         },
 		{ HK(offset_to),   DATA_PTR_OFFT(&to)           },
 		{ HK(size)  ,   DATA_SIZET(size)             },
@@ -353,7 +353,7 @@ static ssize_t blocks_create(backend_t *chain, request_t *request){ // {{{
 	
 	/* calc virt_ptr */
 	hash_t  req_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
+		{ HK(action), DATA_UINT32T(ACTION_COUNT) },
 		hash_next(request)
 	};
 	ret = backend_query(data->bk_map, req_count); 

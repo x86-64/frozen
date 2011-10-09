@@ -75,7 +75,8 @@ static uintmax_t log_any(uintmax_t x, uintmax_t power){ // {{{
 static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	if(backend_stdcall_read  (data->be_g, 0, &data->params, sizeof(data->params)) < 0){
+	fastcall_read r_read = { { 5, ACTION_READ }, 0, &data->params, sizeof(data->params) };
+	if(backend_fast_query(data->be_g, &r_read) < 0){
 		memset(&data->params, 0, sizeof(data->params));
 		return -EFAULT;
 	}
@@ -85,66 +86,81 @@ static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
 static ssize_t chm_imp_param_write(mphf_t *mphf){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	if(backend_stdcall_write (data->be_g, 0, &data->params, sizeof(data->params)) < 0)
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &data->params, sizeof(data->params) };
+	if(backend_fast_query(data->be_g, &r_write) < 0)
 		return error("params write failed");
 	
 	return 0;
 } // }}}
 static ssize_t chm_imp_file_wipe  (mphf_t *mphf){ // {{{
-	size_t                 count;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
+	fastcall_count r_count = { { 3, ACTION_COUNT } };
+	
 	// kill g
-	count = 0;
-	backend_stdcall_count(data->be_g, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_g, 0, count) < 0)
+	r_count.nelements = 0;
+	backend_fast_query(data->be_g, &r_count);
+	if(r_count.nelements != 0){
+		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
+		if(backend_fast_query(data->be_g, &r_delete) < 0)
 			return error("g array delete failed");
 	}
 	
 	// kill e
-	count = 0;
-	backend_stdcall_count(data->be_e, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_e, 0, count) < 0)
-			return error("e array delete failed");
+	r_count.nelements = 0;
+	backend_fast_query(data->be_e, &r_count);
+	if(r_count.nelements != 0){
+		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
+		if(backend_fast_query(data->be_e, &r_delete) < 0)
+			return error("g array delete failed");
 	}
 	
 	// kill v
-	count = 0;
-	backend_stdcall_count(data->be_v, &count);
-	if(count != 0){
-		if(backend_stdcall_delete(data->be_v, 0, count) < 0)
-			return error("v array delete failed");
+	r_count.nelements = 0;
+	backend_fast_query(data->be_v, &r_count);
+	if(r_count.nelements != 0){
+		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
+		if(backend_fast_query(data->be_v, &r_delete) < 0)
+			return error("g array delete failed");
 	}
+	return 0;
+} // }}}
+static ssize_t chm_imp_file_one_init(backend_t *backend, uintmax_t size){ // {{{
+	uintmax_t              fill_size;
+	
+	fastcall_create r_create = { { 4, ACTION_CREATE }, size };
+	if(backend_fast_query(backend, &r_create) < 0)
+		return -1;
+	
+	if(r_create.offset != 0)                                 // TODO remove this
+		return -1;
+	
+	do{
+		fill_size = MIN(size, sizeof(clean));
+		
+		fastcall_write r_write = { { 5, ACTION_WRITE }, r_create.offset, &clean, fill_size };
+		if(backend_fast_query(backend, &r_write) != 0)
+			return -1;
+		
+		r_create.offset  += r_write.buffer_size;
+		size             -= r_write.buffer_size;
+	}while(size > 0);
 	return 0;
 } // }}}
 static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
 	ssize_t                ret;
-	off_t                  t;
-	size_t                 size;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	if( (ret = chm_imp_file_wipe(mphf)) < 0)
 		return ret;
 	
 	// fill g
-	size = sizeof(data->params) + data->nvertex * data->bt_value;
-	if(backend_stdcall_create(data->be_g, &t, size) < 0)
-		return error("g array create failed");
-	if(t != 0)
-		return error("g array file not empty");
-	if(backend_stdcall_fill  (data->be_g, t, &clean, sizeof(clean), size) < 0)
-		return error("g array fill failed");
+	if(chm_imp_file_one_init(data->be_g, sizeof(data->params) + data->nvertex * data->bt_value) != 0)
+		return error("g array init failed");
 	
 	// fill v
-	size = data->nvertex * data->bt_vertex; 
-	if(backend_stdcall_create(data->be_v, &t, size) < 0)
-		return error("v array create failed");
-	if(t != 0)
-		return error("v array file not empty");
-	if(backend_stdcall_fill  (data->be_v, t, &clean, sizeof(clean), size) < 0)
-		return error("v array fill failed");
+	if(chm_imp_file_one_init(data->be_v, data->nvertex * data->bt_vertex) != 0)
+		return error("v array init failed");
 	
 	// fill e
 	// empty
@@ -291,15 +307,15 @@ static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 } // }}}
 
 static ssize_t graph_new_edge_id(chm_imp_t *data, uintmax_t *id){ // {{{
-	off_t                  offset;
 	uintmax_t              sizeof_edge;
 	
 	sizeof_edge = 4 * data->bt_vertex;
 	
-	if(backend_stdcall_create(data->be_e, &offset, sizeof_edge) < 0)
+	fastcall_create r_create = { { 4, ACTION_CREATE }, sizeof_edge };
+	if(backend_fast_query(data->be_e, &r_create) < 0)
 		return error("new_edge_id failed");
 	
-	*id = (offset / sizeof_edge) + 1;
+	*id = (r_create.offset / sizeof_edge) + 1;
 	return 0;
 } // }}}
 static ssize_t graph_get_first(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *edge_id){ // {{{
@@ -308,12 +324,13 @@ static ssize_t graph_get_first(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 	for(i=0; i<nvertex; i++){
 		edge_id[i] = 0;
 		
-		if(backend_stdcall_read(
-			data->be_v,
+		fastcall_read r_read = {
+			{ 5, ACTION_READ },
 			vertex[i] * data->bt_vertex,
 			&edge_id[i],
 			data->bt_vertex
-		) < 0)
+		};
+		if(backend_fast_query(data->be_v, &r_read) < 0)
 			return error("get_first failed");
 	}
 	return 0;
@@ -322,12 +339,13 @@ static ssize_t graph_set_first(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 	size_t                 i;
 	
 	for(i=0; i<nvertex; i++){
-		if(backend_stdcall_write(
-			data->be_v,
+		fastcall_write r_write = {
+			{ 5, ACTION_WRITE },
 			vertex[i] * data->bt_vertex,
 			&edge_id[i],
 			data->bt_vertex
-		) < 0)
+		};
+		if(backend_fast_query(data->be_v, &r_write)< 0)
 			return error("set first failed");
 	}
 	return 0;
@@ -339,12 +357,13 @@ static ssize_t graph_get_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 	sizeof_edge  = 4 * data->bt_vertex;
 	vertex_mask  = ( (uintmax_t)1 << (data->bt_vertex << 3) ) - 1;
 	
-	if(backend_stdcall_read(
-		data->be_e,
+	fastcall_read r_read = {
+		{ 5, ACTION_READ },
 		(id - 1) * sizeof_edge,
 		&buffer,
 		sizeof_edge
-	) < 0)
+	};
+	if(backend_fast_query(data->be_e, &r_read) < 0)
 		return -ENOENT; //error("get_edge failed");
 	
 	edge->vertex[0] = (*(uintmax_t *)(buffer                                           )) & vertex_mask;
@@ -365,12 +384,13 @@ static ssize_t graph_set_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 	*(uintmax_t *)(buffer + (data->bt_vertex << 1)                  ) = edge->next[0];
 	*(uintmax_t *)(buffer + (data->bt_vertex << 1) + data->bt_vertex) = edge->next[1];
 	
-	if(backend_stdcall_write(
-		data->be_e,
+	fastcall_write r_write = {
+		{ 5, ACTION_WRITE },
 		(id - 1) * edge_size,
 		&buffer,
 		edge_size
-	) < 0)
+	};
+	if(backend_fast_query(data->be_e, &r_write) < 0)
 		return error("set_edge failed");
 	
 	return 0;
@@ -409,12 +429,13 @@ static ssize_t graph_getg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, ui
 	for(i=0; i<nvertex; i++){
 		g[i] = 0;
 		
-		if(backend_stdcall_read(
-			data->be_g,
+		fastcall_read r_read = {
+			{ 5, ACTION_READ },
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&g[i],
 			data->bt_value
-		) < 0)
+		};
+		if(backend_fast_query(data->be_g, &r_read) < 0)
 			return error("get_g failed");
 	}
 	return 0;
@@ -424,12 +445,13 @@ static ssize_t graph_setg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, ui
 	size_t                 i;
 	
 	for(i=0; i<nvertex; i++){
-		if(backend_stdcall_write(
-			data->be_g,
+		fastcall_write r_write = {
+			{ 5, ACTION_WRITE },
 			sizeof(data->params) + vertex[i] * data->bt_value,
 			&new_g[i],
 			data->bt_value
-		) < 0)
+		};
+		if(backend_fast_query(data->be_g, &r_write) < 0)
 			return error("set_g failed");
 	}
 	return 0;

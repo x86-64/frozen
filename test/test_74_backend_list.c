@@ -34,7 +34,7 @@ START_TEST (test_backend_list){
 	
 	// insert key
 	hash_t  hash_insert[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE) },
+		{ HK(action), DATA_UINT32T(ACTION_WRITE) },
 		{ HK(offset), DATA_OFFT(key_off + 2)        },
 		{ HK(insert), DATA_UINT32T(1)                 },
 		{ HK(size),   DATA_SIZET(1)                 },
@@ -48,7 +48,7 @@ START_TEST (test_backend_list){
 	// check
 	memset(temp, 0, 1024);
 	hash_t  hash_read[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)  },
+		{ HK(action), DATA_UINT32T(ACTION_READ)  },
 		{ HK(offset), DATA_OFFT(key_off)            },
 		{ HK(size),   DATA_SIZET(11)                },
 		{ HK(buffer), DATA_RAW(temp, 1024)          },
@@ -64,7 +64,7 @@ START_TEST (test_backend_list){
 	
 	// delete key
 	hash_t  hash_delete[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_DELETE)   },
+		{ HK(action), DATA_UINT32T(ACTION_DELETE)   },
 		{ HK(offset),    DATA_OFFT(key_off + 3)           },
 		{ HK(size),   DATA_SIZET(1)                    },
 		{ HK(ret),    DATA_PTR_SIZET(&ssize)           },
@@ -75,7 +75,7 @@ START_TEST (test_backend_list){
 	
 	// check
 	hash_t  hash_read2[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)     },
+		{ HK(action), DATA_UINT32T(ACTION_READ)     },
 		{ HK(offset), DATA_OFFT(key_off)               },
 		{ HK(size),   DATA_SIZET(10)                   },
 		{ HK(buffer), DATA_RAW(temp, 1024)             },

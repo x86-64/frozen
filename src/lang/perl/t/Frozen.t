@@ -20,7 +20,7 @@ my ($ret, $config, $r_create, $backend, $string);
 
 # test creates
         $ret = Frozen::query($backend, {
-		action => { uint32_t => $Frozen::ACTION_CRWD_CREATE                },
+		action => { uint32_t => $Frozen::ACTION_CREATE                },
 		buffer => { string_t => "Hello, world!"                            },
 		size   => { size_t   => 100                                        }
 	});
@@ -28,7 +28,7 @@ my ($ret, $config, $r_create, $backend, $string);
 
 # test reads
 	$ret = Frozen::query($backend, {
-		action => { uint32_t => $Frozen::ACTION_CRWD_READ                 },
+		action => { uint32_t => $Frozen::ACTION_READ                 },
 		offset => { off_t    => 0                                         },
 		buffer => { string_t => " " x 100                                 },
 		size   => { size_t   => 100                                       }

@@ -1,3 +1,102 @@
+ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
+               ssize_t q_ret = 0, b_ret;
+
+               request_t  r_create[] = {
+                       { HK(action),     DATA_UINT32T(ACTION_CREATE)   },
+                       { HK(size),       DATA_PTR_SIZET(&size)              },
+                       { HK(offset_out), DATA_PTR_OFFT(offset)              },
+                       { HK(ret),        DATA_PTR_SIZET(&q_ret)             },
+                       hash_end
+               };
+               if( (b_ret = backend_query(backend, r_create)) < 0)
+                       return b_ret;
+
+               return q_ret;
+} // }}}
+ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+               ssize_t q_ret = 0, b_ret;
+
+               request_t  r_read[] = {
+                       { HK(action),     DATA_UINT32T(ACTION_READ)    },
+                       { HK(offset),     DATA_PTR_OFFT(&offset)            },
+                       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+                       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+                       { HK(ret),        DATA_PTR_SIZET(&q_ret)            },
+                       hash_end
+               };
+
+               if( (b_ret = backend_query(backend, r_read)) < 0)
+                       return b_ret;
+
+               return q_ret;
+} // }}}
+ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
+               ssize_t q_ret = 0, b_ret;
+
+               request_t  r_write[] = {
+                       { HK(action),     DATA_UINT32T(ACTION_WRITE)   },
+                       { HK(offset),     DATA_PTR_OFFT(&offset)            },
+                       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+                       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+                       { HK(ret),        DATA_PTR_SIZET(&q_ret)            },
+                       hash_end
+               };
+
+               if( (b_ret = backend_query(backend, r_write)) < 0)
+                       return b_ret;
+ 
+               return q_ret;
+} // }}}
+ssize_t         backend_stdcall_move  (backend_t *backend, off_t  from, off_t to, size_t size){ // {{{
+       ssize_t q_ret = 0, b_ret;
+
+       request_t  r_move[] = {
+               { HK(action),      DATA_UINT32T(ACTION_MOVE)       },
+               { HK(offset_from), DATA_PTR_OFFT(&from)                 },
+               { HK(offset_to),   DATA_PTR_OFFT(&to)                   },
+               { HK(size),        DATA_PTR_SIZET(&size)                },
+               { HK(ret),         DATA_PTR_SIZET(&q_ret)               },
+               hash_end
+       };
+ 
+       if( (b_ret = backend_query(backend, r_move)) < 0)
+               return b_ret;
+ 
+       return q_ret;
+} // }}}
+ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size){ // {{{
+               ssize_t q_ret = 0, b_ret;
+
+               request_t  r_delete[] = {
+                       { HK(action),     DATA_UINT32T(ACTION_DELETE)     },
+                       { HK(offset),     DATA_PTR_OFFT(&offset)               },
+                       { HK(size),       DATA_PTR_SIZET(&size)                },
+                       { HK(ret),        DATA_PTR_SIZET(&q_ret)               },
+                       hash_end
+               };
+
+               if( (b_ret = backend_query(backend, r_delete)) < 0)
+                       return b_ret;
+
+               return q_ret;
+} // }}}
+ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{{
+       ssize_t q_ret = 0, b_ret;
+
+       request_t r_count[] = {
+               { HK(action),     DATA_UINT32T(ACTION_COUNT)      },
+               { HK(buffer),     DATA_PTR_SIZET(count)                },
+               { HK(ret),        DATA_PTR_SIZET(&q_ret)               },
+               hash_end
+       };
+
+       if( (b_ret = backend_query(backend, r_count)) < 0)
+               return b_ret;
+
+       return q_ret;
+} // }}}
+
+
 START_TEST (test_backend_file){
 	size_t                 count;
 	ssize_t                ssize;

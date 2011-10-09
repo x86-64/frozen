@@ -35,7 +35,7 @@ START_TEST(test_backend_ipc){
 	
 	// create new
 	request_t  r_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CREATE) },
 		{ HK(size),       DATA_SIZET(sizeof(str))          },
 		{ HK(buffer),     DATA_RAW(str, sizeof(str))       },
 		{ HK(ret),        DATA_PTR_SIZET(&ret)             },
@@ -46,7 +46,7 @@ START_TEST(test_backend_ipc){
 	
         ret = -1;
 	request_t  r_read[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ) },
+		{ HK(action),     DATA_UINT32T(ACTION_READ) },
 		{ HK(offset),     DATA_OFFT(0)                   },
 		{ HK(size),       DATA_SIZET(sizeof(test))       },
 		{ HK(buffer),     DATA_RAW(test, sizeof(test))   },
@@ -122,7 +122,7 @@ START_TEST(test_backend_ipc_speed){
 	
 	// create new
 	request_t  r_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CREATE) },
 		{ HK(size),       DATA_SIZET(0x0000BEEF)         },
 		{ HK(buffer),     DATA_RAW(str, sizeof(str))     },
 		hash_end

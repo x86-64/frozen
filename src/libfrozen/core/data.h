@@ -4,6 +4,13 @@
 #define DEF_BUFFER_SIZE 1024
 
 typedef enum data_functions {
+	ACTION_CREATE,
+	ACTION_DELETE,
+	ACTION_MOVE,
+	ACTION_COUNT,
+	ACTION_CUSTOM,
+	ACTION_REBUILD,
+
 	ACTION_ALLOC,
 	ACTION_FREE,
 	ACTION_PHYSICALLEN,
@@ -25,7 +32,7 @@ typedef enum data_functions {
 
 	ACTION_GETDATAPTR,
 
-	ACTION_LAST
+	ACTION_INVALID
 } data_functions;
 
 typedef enum data_api_type {
@@ -46,9 +53,8 @@ struct data_proto_t {
 	data_api_type   api_type;
 	
 	f_data_func     handler_default;
-	f_data_func     handlers[ACTION_LAST];
+	f_data_func     handlers[ACTION_INVALID];
 };
-
 
 typedef struct fastcall_header {
 	uintmax_t              nargs;
@@ -125,8 +131,32 @@ typedef struct fastcall_is_null {
 	uintmax_t              is_null;
 } fastcall_is_null;
 
+typedef struct fastcall_create {
+	fastcall_header        header;
+	uintmax_t              size;
+	uintmax_t              offset;
+} fastcall_create;
+
+typedef struct fastcall_delete {
+	fastcall_header        header;
+	uintmax_t              offset;
+	uintmax_t              size;
+} fastcall_delete;
+
+typedef struct fastcall_move {
+	fastcall_header        header;
+	uintmax_t              offset_from;
+	uintmax_t              offset_to;
+	uintmax_t              size;
+} fastcall_move;
+
+typedef struct fastcall_count {
+	fastcall_header        header;
+	uintmax_t              nelements;
+} fastcall_count;
+
 #ifdef DATA_C
-uintmax_t fastcall_nargs[ACTION_LAST] = {
+uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_READ] = 5,
 	[ACTION_WRITE] = 5,
 	[ACTION_PHYSICALLEN] = 3,
@@ -145,6 +175,10 @@ uintmax_t fastcall_nargs[ACTION_LAST] = {
 	[ACTION_TRANSFER]  = 3,
 	[ACTION_GETDATAPTR] = 3,
 	[ACTION_IS_NULL] = 3,
+	[ACTION_CREATE] = 4,
+	[ACTION_DELETE] = 4,
+	[ACTION_MOVE] = 5,
+	[ACTION_COUNT] = 3,
 };
 #endif
 

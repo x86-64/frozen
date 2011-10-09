@@ -43,7 +43,7 @@ START_TEST (test_backend_rewrite){
 	ssize_t   ret;
 	
 	hash_t  req_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CREATE) },
 		{ HK(size),       DATA_SIZET(10)                   },
 		{ HK(offset_out), DATA_PTR_OFFT(&buffer)           },
 		hash_end

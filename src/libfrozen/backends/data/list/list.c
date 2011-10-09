@@ -20,7 +20,7 @@ static ssize_t lists_set(backend_t *backend, request_t *request){
 		to = from + 1;
 		
 		hash_t  new_request[] = {
-			{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
+			{ HK(action),      DATA_UINT32T(ACTION_MOVE)             },
 			{ HK(offset_from), DATA_PTR_OFFT(&from)                       },
 			{ HK(offset_to),   DATA_PTR_OFFT(&to)                         },
 			{ HK(size),        DATA_VOID                                  },
@@ -46,7 +46,7 @@ static ssize_t lists_delete(backend_t *backend, request_t *request){
 	from += size;
 	
 	hash_t  new_request[] = {
-		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)             },
+		{ HK(action),      DATA_UINT32T(ACTION_MOVE)             },
 		{ HK(offset_from), DATA_PTR_OFFT(&from)                       },
 		{ HK(offset_to),   DATA_PTR_OFFT(&to)                         },
 		{ HK(size),        DATA_VOID                                  },

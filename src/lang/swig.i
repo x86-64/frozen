@@ -22,17 +22,38 @@
 //%typemap(gotype) data_t *,    const void * & "uintptr"
 #endif
 
-enum request_actions {
-	ACTION_CRWD_CREATE = 1,
-	ACTION_CRWD_READ = 2,
-	ACTION_CRWD_WRITE = 4,
-	ACTION_CRWD_DELETE = 8,
-	ACTION_CRWD_MOVE = 16,
-	ACTION_CRWD_COUNT = 32,
-	ACTION_CRWD_CUSTOM = 64,
-	
-	REQUEST_INVALID = 0
-};
+typedef enum data_functions {
+	ACTION_CREATE,
+	ACTION_DELETE,
+	ACTION_MOVE,
+	ACTION_COUNT,
+	ACTION_CUSTOM,
+	ACTION_REBUILD,
+
+	ACTION_ALLOC,
+	ACTION_FREE,
+	ACTION_PHYSICALLEN,
+	ACTION_LOGICALLEN,
+	ACTION_CONVERTLEN,
+	ACTION_COMPARE,
+	ACTION_INCREMENT,
+	ACTION_DECREMENT,
+	ACTION_ADD,
+	ACTION_SUB,
+	ACTION_MULTIPLY,
+	ACTION_DIVIDE,
+	ACTION_READ,
+	ACTION_WRITE,
+	ACTION_CONVERT,
+	ACTION_TRANSFER,
+	ACTION_COPY,
+	ACTION_IS_NULL,
+
+	ACTION_GETDATAPTR,
+
+	ACTION_INVALID
+} data_functions;
+
 typedef enum api_types {
 	API_HASH = 1,
 	API_CRWD = 2,
@@ -307,7 +328,7 @@ func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
 			case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
 			case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
 			case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
-			case Enum_SS_request_actions: 
+			case Enum_SS_data_functions: 
 				     data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
 			default: fmt.Printf("Hitem: unexpected type %T\n", v)
 		}

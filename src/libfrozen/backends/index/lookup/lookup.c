@@ -103,7 +103,7 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 			return -ENOMEM;
 		
 		request_t r_query[] = {
-			{ HK(action),          DATA_UINT32T(ACTION_CRWD_READ) },
+			{ HK(action),          DATA_UINT32T(ACTION_READ) },
 			{ userdata->output,    d_output                       },
 			hash_next(request)
 		};

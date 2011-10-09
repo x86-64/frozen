@@ -1,11 +1,8 @@
-- void_t convert function
-- remove old fast api
-- rename CRWD's to normal
-- autocollecting actions, like HK()
 - backend switch
 - backend linear_hash
 - working web
   - backend go_session
+- autocollecting actions, like HK()
 - hash recursive item instead of hash_next
 - ipc (buff <=> hash)
 - TODO + BUG hunt

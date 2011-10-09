@@ -39,7 +39,7 @@ func template_load(backend uintptr, request uintptr) (tpl *template.Template, er
 
 	// request size
 	q_count := f.Hash([]f.Hskel {
-		f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_COUNT),
+		f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_COUNT),
 		f.Hitem(f.HK_buffer, f.TYPE_SIZET,   0),
 		f.Hnext(request) })
 	f.Backend_pass(backend, q_count)
@@ -52,7 +52,7 @@ func template_load(backend uintptr, request uintptr) (tpl *template.Template, er
 
 		// read all
 		q_read := f.Hash([]f.Hskel {
-			f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_CRWD_READ),
+			f.Hitem(f.HK_action, f.TYPE_UINT32T, f.ACTION_READ),
 			f.Hitem(f.HK_buffer, f.TYPE_RAWT,    tpl_str),
 			f.Hnext(request) })
 

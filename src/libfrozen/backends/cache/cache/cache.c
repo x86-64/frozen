@@ -51,28 +51,6 @@ static size_t  cache_fast_create (backend_t *backend, off_t *offset, size_t size
 	pthread_rwlock_unlock(&userdata->lock);
 	return ret;
 } // }}}
-static size_t  cache_fast_read   (backend_t *backend, off_t offset, void *buffer, size_t size){ // {{{
-	size_t                 ret;
-	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
-	
-	pthread_rwlock_rdlock(&userdata->lock);
-		
-		ret = memory_read( &userdata->memory, offset, buffer, size);
-	
-	pthread_rwlock_unlock(&userdata->lock);
-	return ret;
-} // }}}
-static size_t  cache_fast_write  (backend_t *backend, off_t offset, void *buffer, size_t size){ // {{{
-	size_t                 ret;
-	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
-	
-	pthread_rwlock_rdlock(&userdata->lock);
-		
-		ret = memory_write( &userdata->memory, offset, buffer, size);
-	
-	pthread_rwlock_unlock(&userdata->lock);
-	return ret;
-} // }}}
 static size_t  cache_fast_delete (backend_t *backend, off_t offset, size_t size){ // {{{
 	uintmax_t              mem_size;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
@@ -95,6 +73,31 @@ error:
 	pthread_rwlock_unlock(&userdata->lock);
 	return 0;
 } // }}}
+/*
+static size_t  cache_fast_read   (backend_t *backend, off_t offset, void *buffer, size_t size){ // {{{
+	size_t                 ret;
+	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
+	
+	pthread_rwlock_rdlock(&userdata->lock);
+		
+		ret = memory_read( &userdata->memory, offset, buffer, size);
+	
+	pthread_rwlock_unlock(&userdata->lock);
+	return ret;
+} // }}}
+static size_t  cache_fast_write  (backend_t *backend, off_t offset, void *buffer, size_t size){ // {{{
+	size_t                 ret;
+	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
+	
+	pthread_rwlock_rdlock(&userdata->lock);
+		
+		ret = memory_write( &userdata->memory, offset, buffer, size);
+	
+	pthread_rwlock_unlock(&userdata->lock);
+	return ret;
+} // }}}
+*/
+
 static ssize_t cache_backend_read(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              offset            = 0;
@@ -208,7 +211,7 @@ static uintmax_t cache_get_filesize(backend_t *backend){ // {{{
 	
 	/* get file size */
 	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)   },
+		{ HK(action), DATA_UINT32T(ACTION_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINTT(&file_size)        },
 		{ HK(ret),    DATA_PTR_SIZET(&ret)              },
 		hash_end
@@ -250,10 +253,6 @@ static void      cache_enable(backend_t *backend){ // {{{
 		backend->backend_type_crwd.func_set         = &cache_backend_write;
 		backend->backend_type_crwd.func_delete      = &cache_backend_delete;
 		backend->backend_type_crwd.func_count       = &cache_backend_count;
-		backend->backend_type_fast.func_fast_create = &cache_fast_create; 
-		backend->backend_type_fast.func_fast_read   = &cache_fast_read; 
-		backend->backend_type_fast.func_fast_write  = &cache_fast_write; 
-		backend->backend_type_fast.func_fast_delete = &cache_fast_delete; 
 		
 exit:
 	pthread_rwlock_unlock(&userdata->lock);
@@ -290,10 +289,6 @@ static void      cache_disable(backend_t *backend){ // {{{
 		backend->backend_type_crwd.func_set         = NULL;
 		backend->backend_type_crwd.func_delete      = NULL;
 		backend->backend_type_crwd.func_count       = NULL;
-		backend->backend_type_fast.func_fast_create = &backend_pass_fast_create; 
-		backend->backend_type_fast.func_fast_read   = &backend_pass_fast_read; 
-		backend->backend_type_fast.func_fast_write  = &backend_pass_fast_write; 
-		backend->backend_type_fast.func_fast_delete = &backend_pass_fast_delete; 
 		
 exit:
 	pthread_rwlock_unlock(&userdata->lock);
@@ -326,7 +321,7 @@ static int cache_configure(backend_t *backend, config_t *config){ // {{{
 
 backend_t cache_proto = {
 	.class          = "cache/cache",
-	.supported_api  = API_CRWD | API_FAST,
+	.supported_api  = API_CRWD,
 	.func_init      = &cache_init,
 	.func_configure = &cache_configure,
 	.func_destroy   = &cache_destroy,
@@ -336,12 +331,6 @@ backend_t cache_proto = {
 		.func_set         = NULL,
 		.func_delete      = NULL,
 		.func_count       = NULL
-	},
-	{
-		.func_fast_create = &backend_pass_fast_create,
-		.func_fast_read   = &backend_pass_fast_read,
-		.func_fast_write  = &backend_pass_fast_write,
-		.func_fast_delete = &backend_pass_fast_delete
 	}
 };
 

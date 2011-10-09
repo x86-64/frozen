@@ -21,7 +21,7 @@ START_TEST (test_real_store_nums){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)    },
+			{ HK(action),     DATA_UINT32T(ACTION_CREATE)    },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])        },
 			{ HK(buffer),     DATA_PTR_UINT32T(&data_array[i])    },
 			{ HK(size),       DATA_UINT32T(sizeof(data_array[i])) },
@@ -36,7 +36,7 @@ START_TEST (test_real_store_nums){
 	int data_read;
 	for(i=0; i < sizeof(data_array) / sizeof(int); i++){
 		request_t r_read[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)     },
+			{ HK(action), DATA_UINT32T(ACTION_READ)     },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])            },
 			{ HK(buffer), DATA_PTR_UINT32T(&data_read)       },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)               },

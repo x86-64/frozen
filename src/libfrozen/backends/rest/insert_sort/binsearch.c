@@ -9,7 +9,7 @@ ssize_t sorts_binsearch_find (sorts_userdata *data, data_t *buffer1, data_t *key
 	range_start = range_end = 0;
 	
 	hash_t  req_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT) },
+		{ HK(action), DATA_UINT32T(ACTION_COUNT) },
 		{ HK(buffer), DATA_PTR_OFFT(&range_end)       },
 		{ HK(ret),    DATA_PTR_SIZET(&q_ret)          },
 		hash_end

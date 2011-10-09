@@ -29,7 +29,7 @@ static ssize_t allocator_backend_delete(backend_t *backend, request_t *request){
 		memset(fill_buffer, curr_size, curr_size);
 		
 		request_t r_delete[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_WRITE)   },
+			{ HK(action), DATA_UINT32T(ACTION_WRITE)   },
 			{ HK(offset), DATA_PTR_OFFT(&offset)	        },
 			{ HK(buffer), DATA_RAW(&fill_buffer, curr_size) },
 			{ HK(size),   DATA_PTR_SIZET(&curr_size)	},
@@ -66,7 +66,7 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 		// create new chunk
 		rec_new_offset = 0; // TODO remove all inits
 		request_t r_create[] = {
-			{ HK(action),      DATA_UINT32T(ACTION_CRWD_CREATE) },
+			{ HK(action),      DATA_UINT32T(ACTION_CREATE) },
 			{ HK(offset_out),  DATA_PTR_OFFT(&rec_new_offset)   }, // TODO pass out new offset
 			{ HK(ret),         DATA_PTR_SIZET(&q_ret)           },
 			hash_next(request)
@@ -76,7 +76,7 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 		
 		// move info from old to new one
 		request_t r_move[] = {
-			{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)   },
+			{ HK(action),      DATA_UINT32T(ACTION_MOVE)   },
 			{ HK(offset_from), DATA_PTR_OFFT(&rec_old_offset)   },
 			{ HK(offset_to),   DATA_PTR_OFFT(&rec_new_offset)   },
 			{ HK(size),        DATA_PTR_SIZET(&rec_old_size)    },
@@ -88,7 +88,7 @@ static ssize_t allocator_backend_custom(backend_t *backend, request_t *request){
 		
 		// delete old
 		request_t r_delete[] = {
-			{ HK(action),      DATA_UINT32T(ACTION_CRWD_DELETE) },
+			{ HK(action),      DATA_UINT32T(ACTION_DELETE) },
 			{ HK(size),        DATA_PTR_SIZET(&rec_old_size)    },
 			{ HK(ret),         DATA_PTR_SIZET(&q_ret)           },
 			hash_next(request)

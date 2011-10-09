@@ -3,38 +3,12 @@
 #include <string/string_t.h>
 #include <hash/hash_t.h>
 
-static ssize_t data_backend_t_read  (data_t *data, fastcall_read *fargs){ // {{{
+static ssize_t data_backend_t_io  (data_t *data, fastcall_io *fargs){ // {{{
 	ssize_t                ret;
 	
-	if(fargs->buffer == NULL)
-		return -EINVAL;
-	
-	if( (ret = backend_stdcall_read(
-		(backend_t *)data->ptr,
-		fargs->offset,
-		fargs->buffer,
-		fargs->buffer_size
-	)) < 0)
+	if( (ret = backend_fast_query((backend_t *)data->ptr, fargs)) < 0)
 		return ret;
-	if(ret == 0)
-		return -1; // EOF
-	
-	fargs->buffer_size = ret;
-	return 0;
-} // }}}
-static ssize_t data_backend_t_write (data_t *data, fastcall_read *fargs){ // {{{
-	ssize_t                ret;
-	
-	if(fargs->buffer == NULL)
-		return -EINVAL;
-	
-	if( (ret = backend_stdcall_write(
-		(backend_t *)data->ptr,
-		fargs->offset,
-		fargs->buffer,
-		fargs->buffer_size
-	)) < 0)
-		return ret;
+
 	if(ret == 0)
 		return -1; // EOF
 	
@@ -72,8 +46,8 @@ data_proto_t backend_t_proto = {
 	.handlers = {
 		[ACTION_PHYSICALLEN] = (f_data_func)&data_backend_t_len,
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_backend_t_len,
-		[ACTION_READ]        = (f_data_func)&data_backend_t_read,
-		[ACTION_WRITE]       = (f_data_func)&data_backend_t_write,
+		[ACTION_READ]        = (f_data_func)&data_backend_t_io,
+		[ACTION_WRITE]       = (f_data_func)&data_backend_t_io,
 		[ACTION_CONVERT]     = (f_data_func)&data_backend_t_convert,
 		[ACTION_FREE]        = (f_data_func)&data_backend_t_free,
 	}

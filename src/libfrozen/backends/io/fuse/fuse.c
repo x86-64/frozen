@@ -290,7 +290,7 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 	if(item->type == VFS_FILE){
 		// updating size
 		request_t r_count[] = {
-			{ HK(action),  DATA_UINT32T(ACTION_CRWD_COUNT)       },
+			{ HK(action),  DATA_UINT32T(ACTION_COUNT)       },
 			{ HK(buffer),  DATA_PTR_OFFT(&size)                  },
 			hash_end
 		};
@@ -324,7 +324,7 @@ static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struc
 	vfs_item              *item              = (vfs_item *)(uintptr_t)fi->fh;
 	
 	request_t r_read[] = {
-		{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                  },
+		{ HK(action), DATA_UINT32T(ACTION_READ)                  },
 		{ HK(offset), DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer), DATA_RAW(buf, size)                             },
 		{ HK(path),   DATA_PTR_STRING((char *)path)                   },
@@ -342,7 +342,7 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 	vfs_item              *item              = (vfs_item *)(uintptr_t)fi->fh;
 	
 	request_t r_write[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_WRITE)                 },
+		{ HK(action),  DATA_UINT32T(ACTION_WRITE)                 },
 		{ HK(offset),  DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },
 		{ HK(path),    DATA_PTR_STRING((char *)path)                   },

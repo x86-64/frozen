@@ -45,7 +45,7 @@
 typedef struct fill_userdata {
 	uintmax_t              fatal;
 	uintmax_t              before;
-	request_actions        action;
+	data_functions         action;
 	backend_t             *backend_index;
 } fill_userdata;
 
@@ -77,7 +77,7 @@ static int fill_configure(backend_t *backend, config_t *config){ // {{{
 	
 	userdata->action = request_str_to_action(action_str);
 	
-	if(userdata->action == ACTION_CRWD_DELETE)
+	if(userdata->action == ACTION_DELETE)
 		userdata->before = 1; // set default value
 	
 	hash_data_copy(ret, TYPE_UINTT,    userdata->before,        config, HK(before));

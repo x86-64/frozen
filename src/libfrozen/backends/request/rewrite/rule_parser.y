@@ -188,8 +188,8 @@ label : NAME {
 		break;
 	}
 	
-	request_actions action;
-	if((action = request_str_to_action($1)) != REQUEST_INVALID){
+	data_functions action;
+	if((action = request_str_to_action($1)) != ACTION_INVALID){
 		rewrite_variable_t *constant = rewrite_new_constant(script);
 		data_t              d_act    = DATA_UINT32T(action);
 		

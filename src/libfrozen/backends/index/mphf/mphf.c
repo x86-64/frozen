@@ -120,7 +120,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 	d_output = data_output->ptr;
 	
 	switch(action){
-		case ACTION_CRWD_CREATE:
+		case ACTION_CREATE:
 			if( (ret = userdata->mphf_proto->func_insert(
 				&userdata->mphf, 
 				d_input,
@@ -131,7 +131,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 				return ret;
 			}
 			break;
-		case ACTION_CRWD_WRITE:
+		case ACTION_WRITE:
 			if( (ret = userdata->mphf_proto->func_update(
 				&userdata->mphf, 
 				d_input,
@@ -142,7 +142,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 				return ret;
 			}
 			break;
-		case ACTION_CRWD_READ:
+		case ACTION_READ:
 			switch( (ret = userdata->mphf_proto->func_query(
 				&userdata->mphf,
 				d_input,
@@ -153,7 +153,7 @@ static ssize_t mphf_handler(backend_t *backend, request_t *request){ // {{{
 				default:                  return ret;
 			};
 			break;
-		case ACTION_CRWD_DELETE:
+		case ACTION_DELETE:
 			if( (ret = userdata->mphf_proto->func_delete(
 				&userdata->mphf, 
 				d_input

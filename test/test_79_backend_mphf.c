@@ -163,7 +163,7 @@ START_TEST (test_backend_mphf){
 		memset(buffer, 0, sizeof(buffer));
 		
 		request_t r_write[] = {
-			{ HK(action),  DATA_UINT32T (ACTION_CRWD_CREATE)                        },
+			{ HK(action),  DATA_UINT32T (ACTION_CREATE)                        },
 			{ HK(key),     DATA_PTR_STRING (data_array[i])                          },
 			{ HK(buffer),  DATA_RAW (buffer, 30)                                    },
                         { HK(ret),     DATA_PTR_SIZET(&ret)                                     },
@@ -182,7 +182,7 @@ START_TEST (test_backend_mphf){
 		key = strdup(data_array[i]); // BAD BAD BAD
 
 		request_t r_read[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)                            },
+			{ HK(action), DATA_UINT32T(ACTION_READ)                            },
 			{ HK(key),    DATA_PTR_STRING (key)                                     },
 			{ HK(buffer), DATA_RAW (&data_read, 1024)                               },
                         { HK(ret),    DATA_PTR_SIZET(&ret)                                      },
@@ -344,7 +344,7 @@ START_TEST (test_backend_mphf_speed){
 	char     test[8], test2[8];
 	
 	request_t r_write[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE) },
+		{ HK(action),  DATA_UINT32T(ACTION_CREATE) },
 		{ HK(buffer),  DATA_RAW(test2, sizeof(test2))   },
 		
 		{ HK(key),     DATA_PTR_STRING(test, 8)         },
@@ -393,7 +393,7 @@ START_TEST (test_backend_mphf_speed){
 		}
 		
 		request_t r_read[] = {
-			{ HK(action),  DATA_UINT32T(ACTION_CRWD_READ) },
+			{ HK(action),  DATA_UINT32T(ACTION_READ) },
 			{ HK(key),     DATA_RAW(test,  sizeof(test))  },
 			{ HK(buffer),  DATA_RAW(test2, sizeof(test2)) },
 			{ HK(size),    DATA_SIZET(sizeof(test2))      },

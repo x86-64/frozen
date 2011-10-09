@@ -289,6 +289,63 @@ error_init:
 error_inval:
 	return NULL;
 } // }}}
+static ssize_t     backend_downgrade_request(backend_t *backend, fastcall_header *hargs){ // {{{
+	ssize_t q_ret = 0, b_ret;
+	
+	switch(hargs->action){
+		case ACTION_CREATE:;
+			request_t  r_create[] = {
+				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                    },
+				{ HK(size),       DATA_PTR_UINTT( &((fastcall_create *)hargs)->size   ) },
+				{ HK(offset_out), DATA_PTR_UINTT( &((fastcall_create *)hargs)->offset ) },
+				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                },
+				hash_end
+			};
+			if( (b_ret = backend_query(backend, r_create)) < 0)
+				return b_ret;
+			break;
+
+		case ACTION_READ:
+		case ACTION_WRITE:;
+			request_t  r_io[] = {
+				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                       },
+				{ HK(offset),     DATA_PTR_UINTT( &((fastcall_io *)hargs)->offset        ) },
+				{ HK(buffer),     DATA_RAW( ((fastcall_io *)hargs)->buffer, ((fastcall_io *)hargs)->buffer_size ) },
+				{ HK(size),       DATA_PTR_UINTT( &((fastcall_io *)hargs)->buffer_size   ) },
+				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                   },
+				hash_end
+			};
+			if( (b_ret = backend_query(backend, r_io)) < 0)
+				return b_ret;
+			break;
+		
+		case ACTION_DELETE:;
+			request_t  r_delete[] = {
+				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                    },
+				{ HK(offset),     DATA_PTR_UINTT( &((fastcall_delete *)hargs)->offset ) },
+				{ HK(size),       DATA_PTR_UINTT( &((fastcall_delete *)hargs)->size   ) },
+				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                },
+				hash_end
+			};
+			if( (b_ret = backend_query(backend, r_delete)) < 0)
+				return b_ret;
+			break;
+		
+		case ACTION_COUNT:;
+			request_t  r_count[] = {
+				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                      },
+				{ HK(buffer),     DATA_PTR_UINTT( &((fastcall_count *)hargs)->nelements ) },
+				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                  },
+				hash_end
+			};
+			if( (b_ret = backend_query(backend, r_count)) < 0)
+				return b_ret;
+			break;
+		default:
+			return -ENOSYS;
+	};
+	return q_ret;
+} // }}}
 
 backend_t *     backend_new          (hash_t *config){ // {{{
 	return backend_new_rec(config, LIST_FREE_ITEM);
@@ -345,6 +402,48 @@ backend_t *     backend_clone        (backend_t *backend){ // {{{
 	
 	return clone;
 } // }}}
+void            backend_destroy      (backend_t *backend){ // {{{
+	backend_t             *curr;
+	
+	if(backend == NULL || backend_ref_dec(backend) != 0)
+		return;
+	
+	// call destroy
+	if(backend->func_destroy != NULL)
+		backend->func_destroy(backend);
+	
+	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
+		backend_destroy(curr);
+	
+	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
+		backend_disconnect(curr, backend);
+	
+	backend_untop(backend);
+	
+	// free memory
+	if(backend->name){
+		list_delete(&backends_names, backend);
+		free(backend->name);
+	}
+	
+	hash_free(backend->config);
+	
+	list_destroy(&backend->parents);
+	list_destroy(&backend->childs);
+	
+	pthread_mutex_destroy(&backend->refs_mtx);
+	free(backend);
+} // }}}
+void            backend_destroy_all  (void){ // {{{
+	backend_t             *backend;
+	
+	while( (backend = list_pop(&backends_top)) != NULL)
+		backend_destroy(backend);
+	
+	list_destroy(&backends_top);
+	list_destroy(&backends_names);
+} // }}}
+
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
 	f_crwd                 func              = NULL;
 	ssize_t                ret;
@@ -366,13 +465,13 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 			hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
 			
 			switch(r_action){
-				case ACTION_CRWD_CREATE: func = backend->backend_type_crwd.func_create; break;
-				case ACTION_CRWD_READ:   func = backend->backend_type_crwd.func_get   ; break;
-				case ACTION_CRWD_WRITE:  func = backend->backend_type_crwd.func_set   ; break;
-				case ACTION_CRWD_DELETE: func = backend->backend_type_crwd.func_delete; break;
-				case ACTION_CRWD_MOVE:   func = backend->backend_type_crwd.func_move  ; break;
-				case ACTION_CRWD_COUNT:  func = backend->backend_type_crwd.func_count ; break;
-				case ACTION_CRWD_CUSTOM: func = backend->backend_type_crwd.func_custom; break;
+				case ACTION_CREATE: func = backend->backend_type_crwd.func_create; break;
+				case ACTION_READ:   func = backend->backend_type_crwd.func_get   ; break;
+				case ACTION_WRITE:  func = backend->backend_type_crwd.func_set   ; break;
+				case ACTION_DELETE: func = backend->backend_type_crwd.func_delete; break;
+				case ACTION_MOVE:   func = backend->backend_type_crwd.func_move  ; break;
+				case ACTION_COUNT:  func = backend->backend_type_crwd.func_count ; break;
+				case ACTION_CUSTOM: func = backend->backend_type_crwd.func_custom; break;
 				default:
 					return -EINVAL;
 			};
@@ -425,231 +524,60 @@ ssize_t         backend_pass         (backend_t *backend, request_t *request){ /
 	}
 	return 0;
 } // }}}
-void            backend_destroy      (backend_t *backend){ // {{{
-	backend_t             *curr;
+ssize_t         backend_fast_query   (backend_t *backend, void *fargs){ // {{{
+	f_fast_func            func              = NULL;
 	
-	if(backend == NULL || backend_ref_dec(backend) != 0)
-		return;
+	if(backend == NULL || fargs == NULL)
+		return -ENOSYS;
 	
-	// call destroy
-	if(backend->func_destroy != NULL)
-		backend->func_destroy(backend);
+	do {
+		if( (backend->supported_api & API_FAST) != 0){
+			func = backend->backend_type_fast.func_handler;
+			break;
+		}
+		// TODO API_FAST_TABLE
+		
+		// if fast api not supported by backend - downgrade fast request to hash request and do query
+		return backend_downgrade_request(backend, fargs);
+	}while(0);
 	
-	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
-		backend_destroy(curr);
+	if(func == NULL)
+		return backend_fast_pass(backend, fargs);
 	
-	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
-		backend_disconnect(curr, backend);
+	return func(backend, fargs);
+} // }}}
+ssize_t         backend_fast_pass    (backend_t *backend, void *fargs){ // {{{
+	ssize_t                ret = 0;
+	uintmax_t              lsz, i;
+	void                 **childs_list;
 	
-	backend_untop(backend);
+	list_rdlock(&backend->childs);
+		
+		if( (lsz = list_count(&backend->childs)) != 0){
+			childs_list = (void **)alloca( sizeof(void *) * lsz );
+			list_flatten(&backend->childs, childs_list, lsz);
+		}
+		
+	list_unlock(&backend->childs);
 	
-	// free memory
-	if(backend->name){
-		list_delete(&backends_names, backend);
-		free(backend->name);
+	if(lsz == 0)
+		return -ENOSYS;
+	
+	for(i=0; i<lsz; i++){
+		if( (ret = backend_fast_query((backend_t *)childs_list[i], fargs)) < 0)
+			return ret;
 	}
-	
-	hash_free(backend->config);
-	
-	list_destroy(&backend->parents);
-	list_destroy(&backend->childs);
-	
-	pthread_mutex_destroy(&backend->refs_mtx);
-	free(backend);
-} // }}}
-void            backend_destroy_all  (void){ // {{{
-	backend_t             *backend;
-	
-	while( (backend = list_pop(&backends_top)) != NULL)
-		backend_destroy(backend);
-	
-	list_destroy(&backends_top);
-	list_destroy(&backends_names);
-} // }}}
-
-ssize_t         backend_stdcall_create(backend_t *backend, off_t *offset, size_t size){ // {{{
-	if( (backend->supported_api & API_FAST) != 0){
-		return backend->backend_type_fast.func_fast_create(backend, offset, size);
-	}else{
-		ssize_t q_ret = 0, b_ret;
-		
-		request_t  r_create[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)   },
-			{ HK(size),       DATA_PTR_SIZET(&size)              },
-			{ HK(offset_out), DATA_PTR_OFFT(offset)              },
-			{ HK(ret),        DATA_PTR_SIZET(&q_ret)             },
-			hash_end
-		};
-		if( (b_ret = backend_query(backend, r_create)) < 0)
-			return b_ret;
-		
-		return q_ret;
-	}
-} // }}}
-ssize_t         backend_stdcall_read  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-	if( (backend->supported_api & API_FAST) != 0){
-		return backend->backend_type_fast.func_fast_read(backend, offset, buffer, buffer_size);
-	}else{
-		ssize_t q_ret = 0, b_ret;
-		
-		request_t  r_read[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_READ)    },
-			{ HK(offset),     DATA_PTR_OFFT(&offset)            },
-			{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-			{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-			{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-			hash_end
-		};
-		
-		if( (b_ret = backend_query(backend, r_read)) < 0)
-			return b_ret;
-		
-		return q_ret;
-	}
-} // }}}
-ssize_t         backend_stdcall_write (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-	if( (backend->supported_api & API_FAST) != 0){
-		return backend->backend_type_fast.func_fast_write(backend, offset, buffer, buffer_size);
-	}else{
-		ssize_t q_ret = 0, b_ret;
-		
-		request_t  r_write[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_WRITE)   },
-			{ HK(offset),     DATA_PTR_OFFT(&offset)            },
-			{ HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-			{ HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-			{ HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-			hash_end
-		};
-		
-		if( (b_ret = backend_query(backend, r_write)) < 0)
-			return b_ret;
-		
-		return q_ret;
-	}
-} // }}}
-ssize_t         backend_stdcall_fill  (backend_t *backend, off_t  offset, void *buffer, size_t buffer_size, size_t fill_size){ // {{{
-	size_t size;
-	
-	do{
-		size = MIN(fill_size, buffer_size);
-		backend_stdcall_write(backend, offset, buffer, size);
-		
-		offset    += size;
-		fill_size -= size;
-	}while(fill_size > 0);
 	return 0;
 } // }}}
-ssize_t         backend_stdcall_move  (backend_t *backend, off_t  from, off_t to, size_t size){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t  r_move[] = {
-		{ HK(action),      DATA_UINT32T(ACTION_CRWD_MOVE)       },
-		{ HK(offset_from), DATA_PTR_OFFT(&from)                 },
-		{ HK(offset_to),   DATA_PTR_OFFT(&to)                   },
-		{ HK(size),        DATA_PTR_SIZET(&size)                },
-		{ HK(ret),         DATA_PTR_SIZET(&q_ret)               },
-		hash_end
-	};
-	
-	if( (b_ret = backend_query(backend, r_move)) < 0)
-		return b_ret;
-	
-	return q_ret;
-} // }}}
-ssize_t         backend_stdcall_delete(backend_t *backend, off_t  offset, size_t size){ // {{{
-	if( (backend->supported_api & API_FAST) != 0){
-		return backend->backend_type_fast.func_fast_delete(backend, offset, size);
-	}else{
-		ssize_t q_ret = 0, b_ret;
-		
-		request_t  r_delete[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_DELETE)     },
-			{ HK(offset),     DATA_PTR_OFFT(&offset)               },
-			{ HK(size),       DATA_PTR_SIZET(&size)                },
-			{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
-			hash_end
-		};
-		
-		if( (b_ret = backend_query(backend, r_delete)) < 0)
-			return b_ret;
-		
-		return q_ret;
-	}
-} // }}}
-ssize_t         backend_stdcall_count (backend_t *backend, size_t *count){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	request_t r_count[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CRWD_COUNT)      },
-		{ HK(buffer),     DATA_PTR_SIZET(count)                },
-		{ HK(ret),        DATA_PTR_SIZET(&q_ret)               },
-		hash_end
-	};
-	
-	if( (b_ret = backend_query(backend, r_count)) < 0)
-		return b_ret;
-	
-	return q_ret;
-} // }}}
 
-// BACKEND_FAST_PASS {{{
-#define BACKEND_FAST_PASS(_backend, _action) {                                   \
-	ssize_t                ret = 0;                                          \
-	uintmax_t              lsz, i;                                           \
-	void                 **childs_list;                                      \
-	backend_t             *child;                                            \
-	                                                                         \
-	list_rdlock(&(_backend)->childs);                                        \
-		                                                                 \
-		if( (lsz = list_count(&(_backend)->childs)) != 0){               \
-			childs_list = (void **)alloca( sizeof(void *) * lsz );   \
-			list_flatten(&(_backend)->childs, childs_list, lsz);     \
-		}                                                                \
-		                                                                 \
-	list_unlock(&(_backend)->childs);                                        \
-	                                                                         \
-	if(lsz == 0)                                                             \
-		return 0;                                                        \
-	                                                                         \
-	for(i=0; i<lsz; i++){                                                    \
-	        child = (backend_t *)childs_list[i];                             \
-		ret   = _action;                                                 \
-		if( ret == 0 )                                                   \
-			break;                                                   \
-	}                                                                        \
-	return ret;                                                              \
-}
-// }}}
-size_t          backend_pass_fast_create(backend_t *backend, off_t *offset, size_t size){ // {{{
-	BACKEND_FAST_PASS(backend,
-		backend_stdcall_create(child, offset, size)
-	);
-} // }}} 
-size_t          backend_pass_fast_read(backend_t *backend, off_t offset, void *buffer, size_t buffer_size){ // {{{
-	BACKEND_FAST_PASS(backend,
-		backend_stdcall_read(child, offset, buffer, buffer_size)
-	);
-} // }}} 
-size_t          backend_pass_fast_write(backend_t *backend, off_t offset, void *buffer, size_t buffer_size){ // {{{
-	BACKEND_FAST_PASS(backend,
-		backend_stdcall_write(child, offset, buffer, buffer_size)
-	);
-} // }}} 
-size_t          backend_pass_fast_delete(backend_t *backend, off_t offset, size_t size){ // {{{
-	BACKEND_FAST_PASS(backend,
-		backend_stdcall_delete(child, offset, size)
-	);
-} // }}} 
-
-request_actions request_str_to_action(char *string){ // {{{
-	if(strcasecmp(string, "create") == 0) return ACTION_CRWD_CREATE;
-	if(strcasecmp(string, "write")  == 0) return ACTION_CRWD_WRITE;
-	if(strcasecmp(string, "read")   == 0) return ACTION_CRWD_READ;
-	if(strcasecmp(string, "delete") == 0) return ACTION_CRWD_DELETE;
-	if(strcasecmp(string, "move")   == 0) return ACTION_CRWD_MOVE;
-	if(strcasecmp(string, "count")  == 0) return ACTION_CRWD_COUNT;
-	if(strcasecmp(string, "custom") == 0) return ACTION_CRWD_CUSTOM;
+data_functions request_str_to_action(char *string){ // {{{
+	if(strcasecmp(string, "create") == 0) return ACTION_CREATE;
+	if(strcasecmp(string, "write")  == 0) return ACTION_WRITE;
+	if(strcasecmp(string, "read")   == 0) return ACTION_READ;
+	if(strcasecmp(string, "delete") == 0) return ACTION_DELETE;
+	if(strcasecmp(string, "move")   == 0) return ACTION_MOVE;
+	if(strcasecmp(string, "count")  == 0) return ACTION_COUNT;
+	if(strcasecmp(string, "custom") == 0) return ACTION_CUSTOM;
 	if(strcasecmp(string, "compare") == 0) return ACTION_COMPARE;
-	return REQUEST_INVALID;
+	return ACTION_INVALID;
 } // }}}

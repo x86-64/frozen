@@ -48,7 +48,7 @@ START_TEST(test_backend_structs){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CRWD_CREATE)                        },
+			{ HK(action),     DATA_UINT32T(ACTION_CREATE)                        },
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                            },
 			{ HK(buffer),     DATA_RAW(test, 100)                                     },
 			
@@ -64,7 +64,7 @@ START_TEST(test_backend_structs){
 	// check
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_read[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_READ)      },
+			{ HK(action), DATA_UINT32T(ACTION_READ)      },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])             },
 			{ HK(buffer), DATA_RAW(test, 100)                 },
 			

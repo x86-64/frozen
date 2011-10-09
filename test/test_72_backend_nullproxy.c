@@ -20,7 +20,7 @@ START_TEST (test_backends_two_backends){
 	/* test read/writes */
 	ssize_t         ssize;
 	hash_t          request[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_CRWD_CREATE)  },
+		{ HK(action),  DATA_UINT32T(ACTION_CREATE)  },
 		{ HK(size),    DATA_SIZET( 0xBEEF )              },
 		{ HK(ret),     DATA_PTR_SIZET(&ssize)            },
                 hash_end

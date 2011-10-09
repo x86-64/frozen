@@ -84,7 +84,7 @@ static int emitter_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
 	char                  *cfg_on_start      = NULL;
 	char                  *cfg_on_end        = NULL;
-	hash_t                 req_default[]     = { { HK(action), DATA_UINT32T(ACTION_CRWD_CREATE) }, hash_end };
+	hash_t                 req_default[]     = { { HK(action), DATA_UINT32T(ACTION_CREATE) }, hash_end };
 	hash_t                *cfg_prereq        = NULL;
 	hash_t                *cfg_req           = req_default;
 	hash_t                *cfg_postreq       = NULL;

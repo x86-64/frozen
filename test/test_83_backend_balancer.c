@@ -32,7 +32,7 @@ START_TEST (test_backend_balancer_counting){
 	
 	for(i=0; i<10; i++){
 		request_t r_create[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_CREATE) },
+			{ HK(action), DATA_UINT32T(ACTION_CREATE) },
 			{ HK(size),   DATA_SIZET(10)                   },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)             },
 			hash_end
@@ -42,7 +42,7 @@ START_TEST (test_backend_balancer_counting){
 	};
 	for(i=0; i<5; i++){
 		request_t r_count[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)  },
+			{ HK(action), DATA_UINT32T(ACTION_COUNT)  },
 			{ HK(buffer), DATA_PTR_SIZET(&size)            },
 			hash_end
 		};
@@ -92,7 +92,7 @@ START_TEST (test_backend_balancer_linear){
 		buf[0] = 'a' + (i % 10);
 		
 		request_t r_create[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_CREATE) },
+			{ HK(action), DATA_UINT32T(ACTION_CREATE) },
 			{ HK(buffer), DATA_PTR_STRING(buf)             },
 			{ HK(size),   DATA_SIZET(10)                   },
 			{ HK(ret),    DATA_PTR_SIZET(&ret)             },
@@ -105,7 +105,7 @@ START_TEST (test_backend_balancer_linear){
 		*((char *)&size) = 'a' + i;
 		
 		request_t r_count[] = {
-			{ HK(action), DATA_UINT32T(ACTION_CRWD_COUNT)  },
+			{ HK(action), DATA_UINT32T(ACTION_COUNT)  },
 			{ HK(buffer), DATA_PTR_SIZET(&size)            },
 			hash_end
 		};

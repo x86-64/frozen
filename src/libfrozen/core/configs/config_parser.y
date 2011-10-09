@@ -92,8 +92,8 @@ hash_value :
 		free($4);
 	}
 	| NAME {
-		request_actions action;
-		if((action = request_str_to_action($1)) != REQUEST_INVALID){
+		data_functions action;
+		if((action = request_str_to_action($1)) != ACTION_INVALID){
 			data_t d_act = DATA_UINT32T(action);
 			
 			fastcall_copy r_copy = { { 3, ACTION_COPY }, &$$ };
