@@ -835,6 +835,7 @@ enable_backendbalancer
 enable_backenddebug
 enable_backendemitter
 enable_backendrewrite
+enable_backendswitch
 enable_backendinsert_sort
 enable_backendfile
 enable_coverage
@@ -1565,6 +1566,8 @@ Optional Features:
                           disable backend emitter
   --disable-backend-rewrite
                           disable backend rewrite
+  --disable-backend-switch
+                          disable backend switch
   --disable-backend-insert-sort
                           disable backend insert-sort
   --disable-backend-file  disable backend file
@@ -19424,6 +19427,43 @@ fi
 		BACKEND_MAKEFILE_request_rewrite=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/rewrite/libfrozen_backend_rewrite.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendswitch was given.
+if test "${enable_backendswitch+set}" = set; then :
+  enableval=$enable_backendswitch;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendswitch}" = "yes"; then
+			enable_backendswitch="no"
+		else
+			enable_backendswitch="yes"
+		fi
+	fi
+
+	if test "${enable_backendswitch}" = "yes"; then
+		BACKEND_DIR_switch="request/switch"
+		BACKEND_DEP_switch=""
+				BACKEND_SELECTED="$BACKEND_SELECTED switch"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_request_switch" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/switch/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/switch"
+
+		BACKEND_MAKEFILE_request_switch=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/switch/libfrozen_backend_switch.la"
 
 	fi
 

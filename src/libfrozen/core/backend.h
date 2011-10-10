@@ -72,6 +72,7 @@ API ssize_t         backend_fast_pass       (backend_t *backend, void *args);
 API void            backend_connect         (backend_t *parent, backend_t *child);
 API void            backend_disconnect      (backend_t *parent, backend_t *child);
 API void            backend_insert          (backend_t *parent, backend_t *new_child);
+API void            backend_add_terminators (backend_t *backend, list *terminators);
 
      void           backend_destroy_all     (void);
 

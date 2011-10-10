@@ -15,26 +15,18 @@ static int factory_init(backend_t *backend){ // {{{
 } // }}}
 static int factory_destroy(backend_t *backend){ // {{{
 	factory_userdata      *userdata = (factory_userdata *)backend->userdata;
-	
-	if(userdata->backend_config != NULL)
-		hash_free(userdata->backend_config);
-
 	free(userdata);
 	return 0;
 } // }}}
 static int factory_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	config_t              *c_backend_config  = NULL;
 	factory_userdata      *userdata          = (factory_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT, c_backend_config, config, HK(config));
+	hash_data_copy(ret, TYPE_HASHT, userdata->backend_config, config, HK(config));
 	if(ret != 0)
 		return error("HK(config) not supplied");
 	
-	userdata->running = 0;
-	if( (userdata->backend_config = hash_copy(c_backend_config)) == NULL)
-		return error("not enough memory");
-	
+	//userdata->running = 0; // calloc in init already set it
 	return 0;
 } // }}}
 

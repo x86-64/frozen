@@ -103,7 +103,7 @@ void               backend_disconnect(backend_t *parent, backend_t *child){ // {
 	list_delete(&child->parents, parent);
 	backend_top(child);
 } // }}}
-void               backend_insert_rec(backend_t *backend, list *new_childs){ // {{{
+void               backend_add_terminators(backend_t *backend, list *new_childs){ // {{{
 	uintmax_t              lsz;
 	backend_t             *child;
 	void                  *childs_iter = NULL;
@@ -113,7 +113,7 @@ void               backend_insert_rec(backend_t *backend, list *new_childs){ // 
 		if( (lsz = list_count(&backend->childs)) != 0){
 			// go recurse
 			while( (child = list_iter_next(&backend->childs, &childs_iter)) != NULL)
-				backend_insert_rec(child, new_childs);
+				backend_add_terminators(child, new_childs);
 		}
 	
 	list_unlock(&backend->childs);
@@ -127,7 +127,7 @@ void               backend_insert_rec(backend_t *backend, list *new_childs){ // 
 void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
 	backend_t             *child;
 	
-	backend_insert_rec(new_child, &parent->childs);
+	backend_add_terminators(new_child, &parent->childs);
 	
 	while( (child = list_pop(&parent->childs)) != NULL)
 		backend_disconnect(parent, child);
