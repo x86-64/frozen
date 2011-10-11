@@ -4,6 +4,8 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -131072, "src/libfrozen/backends/index/hashtable/hashtable.c: calloc failed" },
+ { -126977, "src/libfrozen/backends/request/switch/switch.c: failed to configure switch" },
  { -126976, "src/libfrozen/backends/request/switch/switch.c: calloc returns null" },
  { -122881, "src/libfrozen/backends/index/fill/fill.c: supplied index backend not valid, or not found" },
  { -122880, "src/libfrozen/backends/index/fill/fill.c: calloc failed" },

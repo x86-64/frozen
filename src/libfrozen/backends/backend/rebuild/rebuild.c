@@ -165,7 +165,9 @@ static int rebuildread_destroy(backend_t *backend){ // {{{
 	
 	if(userdata->writer)
 		backend_destroy(userdata->writer);
-	
+	if(userdata->req_rebuild)
+		hash_free(userdata->req_rebuild);
+
 	free(userdata);
 	return 0;
 } // }}}
@@ -210,8 +212,8 @@ static int rebuildread_configure(backend_t *backend, config_t *config){ // {{{
 	
 	userdata->enum_method = rebuild_string_to_method(enum_method_str);
 	userdata->hk_offset   = hash_string_to_key(hk_offset_str);
-	userdata->req_count   = hash_copy(req_count);
-	userdata->req_read    = hash_copy(req_read);
+	userdata->req_count   = req_count;
+	userdata->req_read    = req_read;
 
 	return 0;
 } // }}}

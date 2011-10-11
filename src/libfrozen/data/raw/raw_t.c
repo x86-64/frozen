@@ -41,6 +41,15 @@ static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	fargs->dest->type = src->type;
 	return 0;
 } // }}}
+static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
+	raw_t                 *raw_data = ((raw_t *)data->ptr);
+	
+	if(raw_data->ptr)
+		free(raw_data->ptr);
+	
+	free(raw_data);
+	return 0;
+} // }}}
 // TODO compare
 
 data_proto_t raw_t_proto = {
@@ -53,6 +62,7 @@ data_proto_t raw_t_proto = {
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
 		[ACTION_TRANSFER]    = (f_data_func)&data_raw_transfer,
 		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
+		[ACTION_FREE]        = (f_data_func)&data_raw_free,
 	}
 };
 

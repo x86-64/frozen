@@ -110,7 +110,7 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 		switch( (ret = backend_query(userdata->backend_index, r_query)) ){
 			case 0:        d = &d_output; break;
 			case -ENOENT:  d = &d_void;   break;
-			default:       return ret;
+			default:       goto free;
 		};
 		
 		request_t r_next[] = {
@@ -119,6 +119,7 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 		};
 		ret = backend_pass(backend, r_next);
 		
+	free:;
 		fastcall_alloc r_free = { { 2, ACTION_FREE } };
 		data_query(&d_output, &r_free);
 		

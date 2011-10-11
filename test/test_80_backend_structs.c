@@ -42,7 +42,7 @@ START_TEST(test_backend_structs){
 	// write array to file
 	int        i;
 	ssize_t    ret;
-	char       test[100];
+	char       test[100] = { 0 };
 	uint32_t   test1;
 	char       test2[100];
 	

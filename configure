@@ -828,6 +828,7 @@ enable_backendjenkins64
 enable_backendmurmur2_32
 enable_backendmurmur2_64
 enable_backendfill
+enable_backendhashtable
 enable_backendlookup
 enable_backendmphf
 enable_backendfuse
@@ -1555,6 +1556,8 @@ Optional Features:
   --disable-backend-murmur2-64
                           disable backend murmur2-64
   --disable-backend-fill  disable backend fill
+  --disable-backend-hashtable
+                          disable backend hashtable
   --disable-backend-lookup
                           disable backend lookup
   --disable-backend-mphf  disable backend mphf
@@ -19168,6 +19171,43 @@ fi
 		BACKEND_MAKEFILE_index_fill=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/fill/libfrozen_backend_fill.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendhashtable was given.
+if test "${enable_backendhashtable+set}" = set; then :
+  enableval=$enable_backendhashtable;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendhashtable}" = "yes"; then
+			enable_backendhashtable="no"
+		else
+			enable_backendhashtable="yes"
+		fi
+	fi
+
+	if test "${enable_backendhashtable}" = "yes"; then
+		BACKEND_DIR_hashtable="index/hashtable"
+		BACKEND_DEP_hashtable=""
+				BACKEND_SELECTED="$BACKEND_SELECTED hashtable"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_index_hashtable" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/hashtable/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/hashtable"
+
+		BACKEND_MAKEFILE_index_hashtable=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/hashtable/libfrozen_backend_hashtable.la"
 
 	fi
 
