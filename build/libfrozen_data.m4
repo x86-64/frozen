@@ -85,4 +85,5 @@ AC_DEFUN([FROZEN_DATA_END],[
 	done;
 	echo "} data_type;" >> $data_enum_file
 	echo "#endif" >> $data_enum_file
+	cp $data_enum_file $data_enum_swig_file
 ])

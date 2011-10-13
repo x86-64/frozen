@@ -23,18 +23,13 @@ static int murmur_destroy(backend_t *backend){ // {{{
 } // }}}
 static int murmur_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t                ret;
-	uintmax_t              fatal             = 0;
-	char                  *input_str         = NULL;
-	char                  *output_str        = NULL;
 	murmur_userdata       *userdata          = (murmur_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, input_str,      config, HK(input));
-	hash_data_copy(ret, TYPE_STRINGT, output_str,     config, HK(output));
-	hash_data_copy(ret, TYPE_UINTT,   fatal,          config, HK(fatal));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,    config, HK(input));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output,   config, HK(output));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->fatal,    config, HK(fatal));
 	
-	userdata->input   = hash_string_to_key(input_str);
-	userdata->output  = hash_string_to_key(output_str);
-	userdata->fatal   = ( fatal == 0 ) ? 0 : 1;
+	userdata->fatal   = ( userdata->fatal == 0 ) ? 0 : 1;
 	return 0;
 } // }}}
 

@@ -66,11 +66,10 @@ static int lookup_destroy(backend_t *backend){ // {{{
 } // }}}
 static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *output_str        = NULL;
 	char                  *output_type_str   = NULL;
 	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT,  output_str,              config, HK(output));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output,        config, HK(output));
 	hash_data_copy(ret, TYPE_STRINGT,  output_type_str,         config, HK(output_type));
 	if(ret != 0)
 		return error("HK(output_type) not supplied");
@@ -80,7 +79,6 @@ static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	if(ret != 0)
 		return error("supplied index backend not valid, or not found");
 	
-	userdata->output      = hash_string_to_key(output_str);
 	userdata->output_type = data_type_from_string(output_type_str);
 	return 0;
 } // }}}

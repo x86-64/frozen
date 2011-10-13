@@ -1,5 +1,12 @@
 #include <libfrozen.h>
 #include <string_t.h>
+#include <hashkeys_int.h>
+
+static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
+	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
+	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
+	return (mi1->key_val - mi2->key_val);
+} // }}}
 
 static ssize_t data_string_t_physlen(data_t *data, fastcall_physicallen *fargs){ // {{{
 	fargs->length = strlen((char *)data->ptr) + 1;
@@ -10,11 +17,31 @@ static ssize_t data_string_t_loglen(data_t *data, fastcall_logicallen *fargs){ /
 	return 0;
 } // }}}
 static ssize_t data_string_t_convert(data_t *dst, fastcall_convert *fargs){ // {{{
+	hash_keypair_t  key, *ret;
+	char           *string;
+
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
 	switch( fargs->src->type ){
 		case TYPE_STRINGT: dst->ptr = strdup((char *)fargs->src->ptr); return 0;
+		case TYPE_HASHKEYT:
+			
+			key.key_val = *(hash_key_t *)(fargs->src->ptr);
+			string      = "(unknown)";
+
+			if(key.key_val != 0){
+				if((ret = bsearch(&key, hash_keys,
+					hash_keys_nelements, hash_keys_size,
+					&hash_bsearch_int)) != NULL
+				)
+					string = ret->key_str;
+			}else{
+				string = "(null)";
+			}
+			dst->ptr = strdup(string);
+			return 0;
+		
 		default: break;
 	};
 	return -ENOSYS;

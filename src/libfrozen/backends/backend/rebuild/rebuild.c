@@ -155,9 +155,12 @@ redo:
 } // }}}
 
 static int rebuildread_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(rebuildread_userdata))) == NULL)
+	rebuildread_userdata  *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(rebuildread_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->hk_offset = HK(offset);
 	return 0;
 } // }}}
 static int rebuildread_destroy(backend_t *backend){ // {{{
@@ -179,11 +182,10 @@ static int rebuildread_configure(backend_t *backend, config_t *config){ // {{{
 	hash_t                *req_count         = NULL;
 	hash_t                *req_read          = NULL;
 	char                  *enum_method_str   = NULL;
-	char                  *hk_offset_str     = "offset";
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_STRINGT, enum_method_str,                 config, HK(enum_method));
-	hash_data_copy(ret, TYPE_STRINGT, hk_offset_str,                   config, HK(offset_key));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->hk_offset,            config, HK(offset_key));
 	hash_data_copy(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
 	hash_data_copy(ret, TYPE_HASHT,   req_read,                        config, HK(req_read));
 	hash_data_copy(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
@@ -211,7 +213,6 @@ static int rebuildread_configure(backend_t *backend, config_t *config){ // {{{
 	}
 	
 	userdata->enum_method = rebuild_string_to_method(enum_method_str);
-	userdata->hk_offset   = hash_string_to_key(hk_offset_str);
 	userdata->req_count   = req_count;
 	userdata->req_read    = req_read;
 

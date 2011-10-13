@@ -26,15 +26,13 @@ static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
 static ssize_t          mphf_configure_any(backend_t *backend, config_t *config, request_t *fork_req){ // {{{
 	ssize_t          ret;
 	uintmax_t        fork_only       = 0;
-	char            *input_str       = "key";
-	char            *output_str      = "offset";
 	char            *mphf_type_str   = NULL;
 	mphf_userdata   *userdata        = (mphf_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, mphf_type_str,   config, HK(type));
-	hash_data_copy(ret, TYPE_STRINGT, input_str,       config, HK(input));
-	hash_data_copy(ret, TYPE_STRINGT, output_str,      config, HK(output));
-	hash_data_copy(ret, TYPE_UINTT,   fork_only,       config, HK(fork_only));
+	hash_data_copy(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
+	hash_data_copy(ret, TYPE_UINTT,    fork_only,        config, HK(fork_only));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
        
 	if(fork_only == 1 && fork_req == NULL)
 		return 0;
@@ -45,8 +43,6 @@ static ssize_t          mphf_configure_any(backend_t *backend, config_t *config,
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	
 	userdata->mphf.config     = config;
-	userdata->input           = hash_string_to_key(input_str);
-	userdata->output          = hash_string_to_key(output_str);
 	userdata->broken          = 0;
 
 	if(fork_req == NULL){
@@ -64,6 +60,8 @@ static int mphf_init(backend_t *backend){ // {{{
 	if(userdata == NULL)
 		return error("calloc failed");
 	
+	userdata->input  = HK(key);
+	userdata->output = HK(offset);
 	return 0;
 } // }}}
 static int mphf_destroy(backend_t *backend){ // {{{

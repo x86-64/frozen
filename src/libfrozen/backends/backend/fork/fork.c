@@ -8,9 +8,12 @@ typedef struct fork_userdata {
 } fork_userdata;
 
 static int fork_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(fork_userdata))) == NULL)
+	fork_userdata         *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(fork_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->hk_backend = HK(backend);
 	return 0;
 } // }}}
 static int fork_destroy(backend_t *backend){ // {{{
@@ -24,19 +27,17 @@ static int fork_destroy(backend_t *backend){ // {{{
 } // }}}
 static int fork_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *hk_backend_str    = "backend";
 	config_t              *backend_config    = NULL;
 	fork_userdata         *userdata          = (fork_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, hk_backend_str, config, HK(input));
-	hash_data_copy(ret, TYPE_HASHT,   backend_config, config, HK(config));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->hk_backend, config, HK(input));
+	hash_data_copy(ret, TYPE_HASHT,    backend_config, config, HK(config));
 	if(ret != 0)
 		return error("HK(config) not supplied");
 	
 	if( (userdata->backend_config = hash_copy(backend_config)) == NULL)
 		return error("not enough memory");
 	
-	userdata->hk_backend = hash_string_to_key(hk_backend_str);
 	return 0;
 } // }}}
 

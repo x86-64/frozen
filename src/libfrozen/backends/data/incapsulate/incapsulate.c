@@ -13,8 +13,21 @@ typedef struct incap_userdata {
 } incap_userdata;
 
 static int incap_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(incap_userdata))) == NULL)
+	incap_userdata        *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(incap_userdata))) == NULL)
 		return error("calloc failed");
+	
+	userdata->key      = HK(offset);
+	userdata->key_out  = HK(offset_out);
+	userdata->key_to   = HK(offset_to);
+	userdata->key_from = HK(offset_from);
+	userdata->count    = HK(buffer);
+	userdata->size     = HK(size);
+	userdata->multiply = 1;
+	
+	data_t multiply_data = DATA_PTR_OFFT(&userdata->multiply);
+	memcpy(&userdata->multiply_data, &multiply_data, sizeof(multiply_data));
 	
 	return 0;
 } // }}}
@@ -26,35 +39,17 @@ static int incap_destroy(backend_t *backend){ // {{{
 } // }}}
 static int incap_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t                ret;
-	char                  *key_str       = "offset";
-	char                  *key_out_str   = "offset_out";
-	char                  *key_to_str    = "offset_to";
-	char                  *key_from_str  = "offset_from";
-	char                  *count_str     = "buffer";
-	char                  *size_str      = "size";
-	off_t                  multiply      = 1;
 	incap_userdata        *userdata      = (incap_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
-	hash_data_copy(ret, TYPE_STRINGT, key_out_str,   config, HK(key_out));
-	hash_data_copy(ret, TYPE_STRINGT, key_to_str,    config, HK(key_to));
-	hash_data_copy(ret, TYPE_STRINGT, key_from_str,  config, HK(key_from));
-	hash_data_copy(ret, TYPE_STRINGT, count_str,     config, HK(count));
-	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
-	hash_data_copy(ret, TYPE_OFFT,    multiply,      config, HK(multiply));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,       config, HK(key));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_out,   config, HK(key_out));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_to,    config, HK(key_to));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_from,  config, HK(key_from));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->count,     config, HK(count));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,      config, HK(size));
+	hash_data_copy(ret, TYPE_OFFT,     userdata->multiply,  config, HK(multiply));
 	
-	data_t multiply_data = DATA_PTR_OFFT(&userdata->multiply);
-	memcpy(&userdata->multiply_data, &multiply_data, sizeof(multiply_data));
-	
-	userdata->key      = hash_string_to_key(key_str);
-	userdata->key_out  = hash_string_to_key(key_out_str);
-	userdata->key_to   = hash_string_to_key(key_to_str);
-	userdata->key_from = hash_string_to_key(key_from_str);
-	userdata->count    = hash_string_to_key(count_str);
-	userdata->size     = hash_string_to_key(size_str);
-	userdata->multiply = multiply;
-	
-	if(multiply == 0)
+	if(userdata->multiply == 0)
 		return error("backend incapsulate parameter multiply invalid");
 	
 	return 0;

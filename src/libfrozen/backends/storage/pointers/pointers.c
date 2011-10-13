@@ -49,15 +49,10 @@ static int pointers_destroy(backend_t *backend){ // {{{
 } // }}}
 static int pointers_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *hk_input_str      = NULL;
-	char                  *hk_offset_str     = NULL;
 	pointers_userdata     *userdata          = (pointers_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, hk_input_str,  config, HK(input));
-	hash_data_copy(ret, TYPE_STRINGT, hk_offset_str, config, HK(offset));
-	
-	userdata->input  = hash_string_to_key(hk_input_str);
-	userdata->offset = hash_string_to_key(hk_offset_str);
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->offset, config, HK(offset));
 	return 0;
 } // }}}
 

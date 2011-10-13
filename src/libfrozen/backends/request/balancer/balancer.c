@@ -181,7 +181,6 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 	hash_t                *cfg_fork_req      = cfg_fork_def;
 	char                  *cfg_mode          = NULL;
 	char                  *cfg_pool          = NULL;
-	char                  *cfg_field         = NULL;
 	size_t                 cfg_clone         = 1;
 	size_t                 cfg_pool_size     = 1;
 	size_t                 cfg_linear_len    = 1;
@@ -192,8 +191,8 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 	hash_data_copy(ret, TYPE_SIZET,   cfg_linear_len, config, HK(linear_len));
 	hash_data_copy(ret, TYPE_STRINGT, cfg_mode,       config, HK(mode));
 	hash_data_copy(ret, TYPE_STRINGT, cfg_pool,       config, HK(pool));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_field,      config, HK(field));
 	hash_data_copy(ret, TYPE_HASHT,   cfg_fork_req,   config, HK(fork_request));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->field, config, HK(field));
 	
 	if(
 		cfg_linear_len > MAX_LINEAR_LEN           ||
@@ -203,7 +202,6 @@ static int balancer_configure(backend_t *backend, config_t *config){ // {{{
 		return error("invalid linear_len supplied");
 	
 	userdata->mode       = balancer_string_to_mode(cfg_mode);
-	userdata->field      = hash_string_to_key(cfg_field);
 	userdata->fork_req   = hash_copy(cfg_fork_req);
 	userdata->counter    = 0;
 	userdata->clone      = cfg_clone;

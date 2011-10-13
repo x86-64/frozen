@@ -629,6 +629,7 @@ DATA_OBJECTS_slice
 DATA_OBJECTS_raw
 DATA_OBJECTS_memory
 DATA_OBJECTS_io
+DATA_OBJECTS_hash_key
 DATA_OBJECTS_hash
 DATA_OBJECTS_go_interface
 DATA_OBJECTS_default
@@ -788,6 +789,7 @@ enable_buffer_t
 enable_default_t
 enable_go_interface_t
 enable_hash_t
+enable_hash_key_t
 enable_io_t
 enable_memory_t
 enable_raw_t
@@ -1504,6 +1506,8 @@ Optional Features:
   --disable-data-go-interface-t
                           disable data go-interface-t
   --disable-data-hash-t   disable data hash-t
+  --disable-data-hash-key-t
+                          disable data hash-key-t
   --disable-data-io-t     disable data io-t
   --disable-data-memory-t disable data memory-t
   --disable-data-raw-t    disable data raw-t
@@ -17677,6 +17681,45 @@ fi
 
 
 
+	# Check whether --enable-hash_key_t was given.
+if test "${enable_hash_key_t+set}" = set; then :
+  enableval=$enable_hash_key_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_hash_key_t}" = "yes"; then
+			enable_hash_key_t="no"
+		else
+			enable_hash_key_t="yes"
+		fi
+	fi
+
+	if test "${enable_hash_key_t}" = "yes"; then
+		DATA_DIR_hash_key_t="hash_key"
+		DATA_DEP_hash_key_t=""
+		DATA_ID_hash_key_t="25"
+		DATA_OBJECTS_hash_key="$DATA_OBJECTS_hash_key libfrozen_data_hash_key_la-hash_key_t.lo"
+		DATA_SELECTED="$DATA_SELECTED hash_key_t"
+		DATA_HEADERS="$DATA_HEADERS hash_key/hash_key_t.h"
+
+
+	fi
+
+	if test "$DATA_MAKEFILE_hash_key" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/hash_key/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS hash_key"
+
+		DATA_MAKEFILE_hash_key=yes
+
+		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED hash_key/libfrozen_data_hash_key.la"
+
+	fi
+
+
+
+
+
 	# Check whether --enable-io_t was given.
 if test "${enable_io_t+set}" = set; then :
   enableval=$enable_io_t;
@@ -19711,6 +19754,7 @@ fi
 	done;
 	echo "} data_type;" >> $data_enum_file
 	echo "#endif" >> $data_enum_file
+	cp $data_enum_file $data_enum_swig_file
 
 
 	MODULE_SELECTED_DEPS=$MODULE_SELECTED

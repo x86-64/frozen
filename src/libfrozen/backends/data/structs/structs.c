@@ -15,8 +15,12 @@ typedef struct struct_userdata {
 } struct_userdata;
 
 static int struct_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(struct_userdata))) == NULL)
+	struct_userdata       *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(struct_userdata))) == NULL)
 		return error("calloc failed");
+	
+	userdata->key = HK(buffer);
 	
 	return 0;
 } // }}}
@@ -28,20 +32,14 @@ static int struct_destroy(backend_t *backend){ // {{{
 } // }}}
 static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t                ret;
-	char                  *key_str       = "buffer";
-	char                  *key_value_str = NULL;
-	char                  *size_str      = NULL;
 	hash_t                *struct_hash   = NULL;
 	struct_userdata       *userdata      = (struct_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT,   struct_hash,   config, HK(structure));
-	hash_data_copy(ret, TYPE_STRINGT, key_str,       config, HK(key));
-	hash_data_copy(ret, TYPE_STRINGT, key_value_str, config, HK(values));
-	hash_data_copy(ret, TYPE_STRINGT, size_str,      config, HK(size));
+	hash_data_copy(ret, TYPE_HASHT,    struct_hash,          config, HK(structure));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,        config, HK(key));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
 	
-	userdata->key        = hash_string_to_key(key_str);
-	userdata->key_values = hash_string_to_key(key_value_str);
-	userdata->size       = hash_string_to_key(size_str);
 	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	

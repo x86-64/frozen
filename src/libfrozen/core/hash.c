@@ -1,6 +1,5 @@
 #define HASH_C
 #include <libfrozen.h>
-#include <hashkeys_int.h>
 
 // TODO recursive hashes in to\from_memory
 
@@ -20,17 +19,8 @@
 	memory_size -= _size; \
 }
 // }}}
-static int hash_bsearch_string(const void *m1, const void *m2){ // {{{
-	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
-	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
-	return strcmp(mi1->key_str, mi2->key_str);
-} // }}}
-static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
-	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
-	hash_keypair_t *mi2 = (hash_keypair_t *) m2;
-	return (mi1->key_val - mi2->key_val);
-} // }}}
-/*static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
+/*
+static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
 	void     *data_ptr;
 	
 	data_ptr  = hash->data.ptr;
@@ -46,46 +36,6 @@ static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
 	return ITER_CONTINUE;
 } // }}}
 */
-hash_key_t         hash_string_to_key           (char *string){ // {{{
-	hash_keypair_t  key, *ret;
-	key.key_str = string;
-	
-	if(string == NULL)
-		return 0;
-	
-	/*
-	// get valid ordering
-	qsort(hash_keys, hash_keys_nelements, hash_keys_size, &hash_bsearch_string);
-	int i;
-	for(i=0; i<hash_keys_nelements; i++){
-		printf("REGISTER_KEY(%s)\n", hash_keys[i].key_str);
-	}
-	exit(0);
-	*/
-
-	if((ret = bsearch(&key, hash_keys,
-		hash_keys_nelements, hash_keys_size,
-		&hash_bsearch_string)) == NULL)
-		return 0;
-	
-	return ret->key_val;
-} // }}}
-char *             hash_key_to_string           (hash_key_t key_val){ // {{{
-	hash_keypair_t  key, *ret;
-	key.key_val = key_val;
-	
-	if(key_val == 0)
-		goto ret_null;
-	
-	if((ret = bsearch(&key, hash_keys,
-		hash_keys_nelements, hash_keys_size,
-		&hash_bsearch_int)) == NULL)
-		goto ret_null;
-	
-	return ret->key_str;
-ret_null:
-	return "(null)";
-} // }}}
 
 hash_t *           hash_new                     (size_t nelements){ // {{{
 	size_t  i;
@@ -365,7 +315,8 @@ inline data_t *           hash_data_find               (hash_t *hash, hash_key_t
 #ifdef DEBUG
 void hash_dump(hash_t *hash){ // {{{
 	unsigned int  k;
-	hash_t       *element = hash;
+	hash_t       *element  = hash;
+	data_t        d_string = DATA_STRING(NULL);
 
 	printf("hash: %p\n", hash);
 start:
@@ -375,8 +326,15 @@ start:
 			goto next_item;
 		}
 		
-		printf(" - %s [%s] -> %p", hash_key_to_string(element->key), data_string_from_type(element->data.type), element->data.ptr);
+		data_t           d_key     = DATA_HASHKEYT(element->key);
+		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_key };
+		data_query(&d_string, &r_convert);
+
+		printf(" - %s [%s] -> %p", (char *)d_string.ptr, data_string_from_type(element->data.type), element->data.ptr);
 		
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&d_string, &r_free);
+
 		fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
 		data_query(&element->data, &r_len);
 

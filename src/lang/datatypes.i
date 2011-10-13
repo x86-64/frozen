@@ -9,6 +9,7 @@ typedef enum data_type {
    TYPE_DEFAULTT = 0,
    TYPE_GOINTERFACET = 23,
    TYPE_HASHT = 17,
+   TYPE_HASHKEYT = 25,
    TYPE_IOT = 3,
    TYPE_MEMORYT = 18,
    TYPE_RAWT = 19,

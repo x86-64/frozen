@@ -15,21 +15,21 @@ type templateExec_userdata struct {
 	k_input                uint64
 }
 	func templateExec_configure(backend uintptr, config uintptr) int{
-		d_input, ok := f.Hget(config, f.HK_input).(string)
+		d_input, ok := f.Hget(config, f.HK_input).(uint)
 		if !ok {
 			log.Print("template_configure: no HK(input) supplied")
 			return -1
 		}
 
-		d_output, ok := f.Hget(config, f.HK_output).(string)
+		d_output, ok := f.Hget(config, f.HK_output).(uint)
 		if !ok {
 			log.Print("template_configure: no HK(output) supplied")
 			return -1
 		}
 
 		userdata := &templateExec_userdata{
-			k_input: f.Hash_string_to_key(d_input),
-			k_output:  f.Hash_string_to_key(d_output) }
+			k_input:   uint64(d_input),
+			k_output:  uint64(d_output) }
 		f.Backend_SetUserdata(backend, userdata)
 		return 0
 	}

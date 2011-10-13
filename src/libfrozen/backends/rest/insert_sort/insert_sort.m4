@@ -41,7 +41,8 @@ static int sorts_init(backend_t *backend){ // {{{
 		return error("calloc failed");
 	
 	backend->userdata = userdata;
-	
+	userdata->sort_field = HK(buffer);
+
 	return 0;
 } // }}}
 static int sorts_destroy(backend_t *backend){ // {{{
@@ -56,13 +57,12 @@ static int sorts_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t          ret;
 	unsigned int     i;
 	char            *sort_engine_str;
-	char            *sort_field_str = "buffer";
 	sorts_userdata  *data = (sorts_userdata *)backend->userdata;
 	
 	data->backend = backend;
 	
 	/* get engine info */
-	hash_data_copy(ret, TYPE_STRINGT, sort_field_str,  config, HK(field));
+	hash_data_copy(ret, TYPE_HASHKEYT, data->sort_field,  config, HK(field));
 	hash_data_copy(ret, TYPE_STRINGT, sort_engine_str, config, HK(engine));
 	if(ret != 0)
 		return error("backend insert-sort parameter engine not supplied");
@@ -75,8 +75,6 @@ static int sorts_configure(backend_t *backend, hash_t *config){ // {{{
 	}
 	if(data->engine == NULL)
 		return error("backend insert-sort engine not found");
-	
-	data->sort_field = hash_string_to_key(sort_field_str);
 	
 	return 0;
 } // }}}

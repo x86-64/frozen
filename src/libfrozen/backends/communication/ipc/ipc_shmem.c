@@ -140,16 +140,15 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	uintmax_t              f_async           = 0;
 	uintmax_t              f_sync            = 0;
 	char                  *role_str;
-	char                  *buffer_str        = NULL;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
 	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
-	hash_data_copy(ret, TYPE_STRINGT, buffer_str, config, HK(buffer));
 	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
 	hash_data_copy(ret, TYPE_SIZET,   nitems,     config, HK(size));
 	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
 	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer, config, HK(buffer));
 
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -169,7 +168,6 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	userdata->shmdata   = (void *)           ((void *)userdata->shmblocks + nitems * sizeof(ipc_shmem_block));
 	userdata->inited    = 1;
 	
-	userdata->buffer       = hash_string_to_key(buffer_str);
 	userdata->forced_state = FORCE_NONE;
 	if(f_async != 0) userdata->forced_state = FORCE_ASYNC;
 	if(f_sync  != 0) userdata->forced_state = FORCE_SYNC;

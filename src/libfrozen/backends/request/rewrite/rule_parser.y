@@ -166,8 +166,14 @@ constant : '(' NAME ')' STRING {
 array_key : NAME '[' STRING ']' {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_HASHT){
+		ssize_t     ret;
+		hash_key_t  key;
+		data_t      d_string = DATA_STRING($3);
+
+		data_convert(ret, TYPE_HASHKEYT, key, &d_string);
+	
 		$$.type      = THING_HASH_ELEMENT;
-		$$.array_key = hash_string_to_key($3);
+		$$.array_key = key;
 		$$.id        = curr->id;
 		
 		free($1);

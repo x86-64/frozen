@@ -13,6 +13,7 @@
   - backend queue
   - backend multi_request
 - fix insert_sort
+- data 'action_t', 'data_type_t'
 - data 'random_t' for file and testing\benchmarking suite
 - new test suite, as benchmarks
 - backend tcp\udp

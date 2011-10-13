@@ -7,9 +7,12 @@ typedef struct call_userdata {
 } call_userdata;
 
 static int call_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(call_userdata))) == NULL)
+	call_userdata         *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(call_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->hk_backend = HK(backend);
 	return 0;
 } // }}}
 static int call_destroy(backend_t *backend){ // {{{
@@ -20,11 +23,9 @@ static int call_destroy(backend_t *backend){ // {{{
 } // }}}
 static int call_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *hk_backend_str    = "backend";
 	call_userdata         *userdata          = (call_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, hk_backend_str, config, HK(input));
-	userdata->hk_backend = hash_string_to_key(hk_backend_str);
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->hk_backend, config, HK(input));
 	return 0;
 } // }}}
 

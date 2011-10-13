@@ -199,10 +199,7 @@ static char *            file_gen_filepath_from_hasht(config_t *config, config_t
 				
 				if(fork_req == NULL) break;
 				
-				// BAD
-				str = (char *)(curr_data->ptr);
-				
-				if( (key = hash_string_to_key(str)) == 0) break;
+				data_get(ret, TYPE_HASHKEYT, key, curr_data);
 				
 				hash_data_copy(ret, TYPE_STRINGT, str, fork_req, key);
 				if(ret != 0)

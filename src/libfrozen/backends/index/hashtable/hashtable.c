@@ -12,6 +12,7 @@ static int hashtable_init(backend_t *backend){ // {{{
 	if(userdata == NULL)
 		return error("calloc failed");
 	
+	userdata->input = HK(key);
 	return 0;
 } // }}}
 static int hashtable_destroy(backend_t *backend){ // {{{
@@ -22,13 +23,10 @@ static int hashtable_destroy(backend_t *backend){ // {{{
 } // }}}
 static int hashtable_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *input_str       = "key";
 	hashtable_userdata    *userdata        = (hashtable_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, input_str,                config, HK(input));
-       	hash_data_copy(ret, TYPE_UINTT,   userdata->hashtable_size, config, HK(nelements));
-
-	userdata->input           = hash_string_to_key(input_str);
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,          config, HK(input));
+       	hash_data_copy(ret, TYPE_UINTT,    userdata->hashtable_size, config, HK(nelements));
 	return 0;
 } // }}}
 

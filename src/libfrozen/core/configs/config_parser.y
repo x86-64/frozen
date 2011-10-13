@@ -67,7 +67,13 @@ hash_name :
           /* empty */  { $$ = 0; }
 	| TNULL ASSIGN { $$ = 0; }
 	| NAME  ASSIGN {
-		if( ($$ = hash_string_to_key($1)) == 0){
+		ssize_t      ret;
+		hash_key_t   key;
+		data_t       d_string = DATA_STRING($1);
+		
+		data_convert(ret, TYPE_HASHKEYT, key, &d_string);
+		
+		if( ($$ = key) == 0){
 			printf("unknown key: %s\n", $1); YYERROR;
 		}
 		free($1);

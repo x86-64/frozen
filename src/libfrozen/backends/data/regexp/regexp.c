@@ -72,16 +72,16 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 	uintmax_t              flag_newline      = 0;
 	uintmax_t              flag_notbol       = 0;
 	uintmax_t              flag_noteol       = 0;
-	char                  *hk_input_str      = "buffer";
 	char                  *regexp_str;
 	regexp_userdata       *userdata          = (regexp_userdata *)backend->userdata;
 	
+	userdata->hk_input = HK(buffer);
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->hk_input,  config, HK(input));
 	hash_data_copy(ret, TYPE_UINTT,   flag_extended, config, HK(reg_extended));
 	hash_data_copy(ret, TYPE_UINTT,   flag_icase,    config, HK(reg_icase));
 	hash_data_copy(ret, TYPE_UINTT,   flag_newline,  config, HK(reg_newline));
 	hash_data_copy(ret, TYPE_UINTT,   flag_notbol,   config, HK(reg_notbol));
 	hash_data_copy(ret, TYPE_UINTT,   flag_noteol,   config, HK(reg_noteol));
-	hash_data_copy(ret, TYPE_STRINGT, hk_input_str,  config, HK(input));
 	hash_data_copy(ret, TYPE_STRINGT, regexp_str,    config, HK(regexp));
 	if(ret != 0 || regexp_str == NULL)
 		return error("HK(regexp) not supplied");
@@ -101,7 +101,6 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 		return error("invalid regexp supplied - compilation error");
 	
 	userdata->compiled   = 1;
-	userdata->hk_input   = hash_string_to_key(hk_input_str);
 	userdata->eflags     = 
 		((flag_notbol   != 0) ? REG_NOTBOL   : 0) |
 		((flag_noteol   != 0) ? REG_NOTEOL   : 0);

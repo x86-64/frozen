@@ -133,9 +133,6 @@ size_t             hash_nelements               (hash_t *hash);
 void               hash_dump                    (hash_t *hash);
 #endif
 
-hash_key_t         hash_string_to_key           (char *string);
-char *             hash_key_to_string           (hash_key_t key);
-
 hash_key_t         hash_item_key                (hash_t *hash);
 data_t *           hash_item_data               (hash_t *hash);
 hash_t *           hash_item_next               (hash_t *hash);
@@ -203,14 +200,14 @@ ssize_t            hash_set                     (hash_t *hash, char *key, char *
         if( (hash = hash_find(hash, hash_ptr_null)) == NULL)
                 return -EINVAL;
         
-        hash->key = hash_string_to_key(key);
+        hash->key = OLDOLDOLDhash_string_to_key(key);
         return data_from_string(hash_item_data(hash), type, string);
 }
 
 void               hash_get                     (hash_t *hash, char *key, char **string, size_t *len){
         data_t     *data;
         
-        data = hash_data_find(hash, hash_string_to_key(key));
+        data = hash_data_find(hash, OLDOLDOLDhash_string_to_key(key));
         if(data == NULL)
                 return;
         
@@ -346,6 +343,7 @@ func Hget(hash uintptr, skey uint64) interface {} {
 		case TYPE_GOINTERFACET: return ObjFromPtr( data.GetPtr() )
 		case TYPE_INTT:         return  int(Go_data_to_uint(data))
 		case TYPE_SIZET:        return uint(Go_data_to_uint(data))
+		case TYPE_HASHKEYT:     return uint(Go_data_to_uint(data))
 		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
 		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s); return s[0]
 		case TYPE_STRINGT:      s := []string{""}; Go_data_to_raw(data, s); return s[0]

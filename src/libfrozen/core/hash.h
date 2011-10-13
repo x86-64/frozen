@@ -39,10 +39,6 @@ API size_t             hash_nelements               (hash_t *hash);
 //API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
 //API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
 
-// hash keys routines
-API hash_key_t         hash_string_to_key           (char *string);
-API char *             hash_key_to_string           (hash_key_t key);
-
 _inline
 API hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
 _inline
