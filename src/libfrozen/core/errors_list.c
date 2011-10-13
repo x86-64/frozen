@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -135168, "src/libfrozen/backends/storage/pointers/pointers.c: calloc returns null" },
  { -131072, "src/libfrozen/backends/index/hashtable/hashtable.c: calloc failed" },
  { -126977, "src/libfrozen/backends/request/switch/switch.c: failed to configure switch" },
  { -126976, "src/libfrozen/backends/request/switch/switch.c: calloc returns null" },

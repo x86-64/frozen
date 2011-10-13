@@ -1,8 +1,8 @@
-- backend 'data_storage'
 - working web
   - backend go_session
 - autocollecting actions, like HK()
 - hash recursive item instead of hash_next
+  - deprecate hash_item_next
 - ipc (buff <=> hash)
 - TODO + BUG hunt
 - documentation for data, hash, backend
