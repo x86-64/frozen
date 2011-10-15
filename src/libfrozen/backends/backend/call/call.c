@@ -36,9 +36,9 @@ static ssize_t call_handler(backend_t *backend, request_t *request){ // {{{
 	
 	hash_data_copy(ret, TYPE_BACKENDT, call_to, request, userdata->hk_backend);
 	if(ret == 0 && call_to != NULL)
-		return ( (ret = backend_pass(call_to, request)) < 0 ) ? ret : -EEXIST;
+		return ( (ret = backend_query(call_to, request)) < 0 ) ? ret : -EEXIST;
 	
-	return error("backend to call not supplied in request");
+	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;
 } // }}}
 
 backend_t call_proto = {

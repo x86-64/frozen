@@ -27,6 +27,9 @@ static int hashtable_configure(backend_t *backend, config_t *config){ // {{{
 	
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,          config, HK(input));
        	hash_data_copy(ret, TYPE_UINTT,    userdata->hashtable_size, config, HK(nelements));
+	
+	if(userdata->hashtable_size == 0)
+		return error("invalid hashtable size");
 	return 0;
 } // }}}
 

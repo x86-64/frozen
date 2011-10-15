@@ -28,7 +28,7 @@
  *                                        { ... },            # new index configuration
  *              fatal                   = (uint_t)'1',        # don't ignore errors from index, default 0
  *              before                  = (uint_t)'1'         # query index before passing request, default 1 for action=="delete", 0 for others
- *                                                            # this value override any default
+ *                                                            # this value override defaults
  * }
  * @endcode
  */

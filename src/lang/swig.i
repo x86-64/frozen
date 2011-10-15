@@ -304,33 +304,31 @@ type Hskel struct {
 	Key           uint64
 	Data_type     Enum_SS_data_type
 	Data_ptr      unsafe.Pointer
-	Data_length   uint64
 }; 
 
 func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_ptr  unsafe.Pointer
-        var data_len  uint64
 
         if(sdata_type == TYPE_GOINTERFACET){
-		data_ptr, data_len = unsafe.Pointer(ObjToPtr(s)), 0
+		data_ptr = unsafe.Pointer(ObjToPtr(s))
 	}else{
 		switch v := s.(type) {
-			case  int:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case uint:   data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case  int16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case uint16: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case  int32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case uint32: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case  int64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case uint64: data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
-			case string: data_ptr, data_len = unsafe.Pointer(&([]byte( v )[0])), uint64(len(v))
-			case []byte: data_ptr, data_len = unsafe.Pointer(&v[0]), uint64(len(v))
+			case  int:   data_ptr = unsafe.Pointer(&v)
+			case uint:   data_ptr = unsafe.Pointer(&v)
+			case  int16: data_ptr = unsafe.Pointer(&v)
+			case uint16: data_ptr = unsafe.Pointer(&v)
+			case  int32: data_ptr = unsafe.Pointer(&v)
+			case uint32: data_ptr = unsafe.Pointer(&v)
+			case  int64: data_ptr = unsafe.Pointer(&v)
+			case uint64: data_ptr = unsafe.Pointer(&v)
+			case string: data_ptr = unsafe.Pointer(&([]byte( v )[0]))
+			case []byte: data_ptr = unsafe.Pointer(&v[0])
 			case Enum_SS_data_functions: 
-				     data_ptr, data_len = unsafe.Pointer(&v), uint64(unsafe.Sizeof(v))
+				     data_ptr = unsafe.Pointer(&v)
 			default: fmt.Printf("Hitem: unexpected type %T\n", v)
 		}
 	}
-	return Hskel{ skey, sdata_type, data_ptr, data_len }
+	return Hskel{ skey, sdata_type, data_ptr }
 }
 
 func Hget(hash uintptr, skey uint64) interface {} {
@@ -353,13 +351,13 @@ func Hget(hash uintptr, skey uint64) interface {} {
 }
 
 func Hnext(hash uintptr) Hskel {
-	return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(hash), 0 }
+	return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(hash) }
 }
 func Hnull() Hskel {
-        return Hskel{ (^uint64(0)), 0, unsafe.Pointer(nil), 0 }
+        return Hskel{ (^uint64(0)), 0, unsafe.Pointer(nil) }
 }
 func Hend() Hskel {
-        return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil), 0 }
+        return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil) }
 }
 func Hash(hk []Hskel) uintptr {
         return uintptr(unsafe.Pointer(&hk[0]))

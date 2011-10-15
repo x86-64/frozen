@@ -20,7 +20,6 @@ static err_item errs_list[] = {
  { -110594, "src/libfrozen/backends/backend/fork/fork.c: not enough memory" },
  { -110593, "src/libfrozen/backends/backend/fork/fork.c: HK(config) not supplied" },
  { -110592, "src/libfrozen/backends/backend/fork/fork.c: calloc failed" },
- { -106497, "src/libfrozen/backends/backend/call/call.c: backend to call not supplied in request" },
  { -106496, "src/libfrozen/backends/backend/call/call.c: calloc failed" },
  { -102404, "src/libfrozen/backends/backend/rebuild/rebuild.c: not reader supplied" },
  { -102403, "src/libfrozen/backends/backend/rebuild/rebuild.c: no reader supplied" },

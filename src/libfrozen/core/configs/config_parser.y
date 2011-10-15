@@ -80,8 +80,8 @@ hash_name :
 	};
 
 hash_value :
-	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }  // fucking macro nesting
-	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }  // no DATA_PTR_HASHT_FREE here
+	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
+	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
 		data_t              d_src    = DATA_PTR_STRING($4);
 		

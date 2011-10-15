@@ -1,3 +1,4 @@
+- new backend 'factory'. old 'factory' rename to 'morph'
 - working web
   - backend go_session
 - autocollecting actions, like HK()
