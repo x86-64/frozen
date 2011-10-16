@@ -106,8 +106,8 @@ static ssize_t lookup_handler(backend_t *backend, request_t *request){ // {{{
 			hash_next(request)
 		};
 		switch( (ret = backend_query(userdata->backend_index, r_query)) ){
-			case 0:        d = &d_output; break;
-			case -ENOENT:  d = &d_void;   break;
+			case 0:        d = hash_data_find(r_query, userdata->output); break;
+			case -ENOENT:  d = &d_void;                                   break;
 			default:       goto free;
 		};
 		

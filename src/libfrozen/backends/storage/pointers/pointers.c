@@ -39,6 +39,8 @@ static int pointers_init(backend_t *backend){ // {{{
 	
 	backend->userdata = userdata;
 	
+	userdata->input = HK(buffer);
+	userdata->offset = HK(offset);
 	return 0;
 } // }}}
 static int pointers_destroy(backend_t *backend){ // {{{

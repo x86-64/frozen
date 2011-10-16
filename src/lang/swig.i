@@ -259,10 +259,13 @@ func ObjFromPtr(ptr uintptr) interface {} {
 void __morestack(void){}
 
 void go_data_to_raw(data_t *data, char **string, size_t *string_len){
+	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
+	data_query(data, &r_ptr);
+	
 	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
 	data_query(data, &r_len);
 	
-	*string     = data->ptr;
+	*string     = r_ptr.ptr;
 	*string_len = r_len.length;
 }
 uintmax_t  go_data_to_uint(data_t *data){
@@ -306,27 +309,64 @@ type Hskel struct {
 	Data_ptr      unsafe.Pointer
 }; 
 
+type Traw_t struct {
+	Ptr           unsafe.Pointer
+	Size          uint
+};
+
+func hitem_getptr(s interface {}) unsafe.Pointer {
+        var data_ptr  unsafe.Pointer
+	
+	switch v := s.(type) {
+		case  int:   data_ptr = unsafe.Pointer(&v)
+		case uint:   data_ptr = unsafe.Pointer(&v)
+		case  int16: data_ptr = unsafe.Pointer(&v)
+		case uint16: data_ptr = unsafe.Pointer(&v)
+		case  int32: data_ptr = unsafe.Pointer(&v)
+		case uint32: data_ptr = unsafe.Pointer(&v)
+		case  int64: data_ptr = unsafe.Pointer(&v)
+		case uint64: data_ptr = unsafe.Pointer(&v)
+		case string: data_ptr = unsafe.Pointer(&([]byte( v )[0]))
+		case []byte: data_ptr = unsafe.Pointer(&v[0])
+		case Enum_SS_data_functions: 
+			     data_ptr = unsafe.Pointer(&v)
+		default: fmt.Printf("Hitem: unexpected type %T\n", v)
+	}
+	return data_ptr
+}
+
+func hitem_getlen(s interface {}) uint {
+	switch v := s.(type) {
+	       case  int:   return uint(unsafe.Sizeof(v))
+	       case uint:   return uint(unsafe.Sizeof(v))
+	       case  int16: return uint(unsafe.Sizeof(v))
+	       case uint16: return uint(unsafe.Sizeof(v))
+	       case  int32: return uint(unsafe.Sizeof(v))
+	       case uint32: return uint(unsafe.Sizeof(v))
+	       case  int64: return uint(unsafe.Sizeof(v))
+	       case uint64: return uint(unsafe.Sizeof(v))
+	       case string: return uint(len(v))
+	       case []byte: return uint(len(v))
+	       case Enum_SS_data_functions: 
+			    return uint(unsafe.Sizeof(v))
+	       default: fmt.Printf("Hitem: unexpected type %T\n", v)
+        }
+	return 0
+}
+
 func Hitem(skey uint64, sdata_type Enum_SS_data_type, s interface {}) Hskel {
         var data_ptr  unsafe.Pointer
+	
+        switch sdata_type {
+		case TYPE_GOINTERFACET: data_ptr = unsafe.Pointer(ObjToPtr(s))
+		case TYPE_RAWT:
+			data_ptr  = hitem_getptr(s)
+			data_len := hitem_getlen(s)
 
-        if(sdata_type == TYPE_GOINTERFACET){
-		data_ptr = unsafe.Pointer(ObjToPtr(s))
-	}else{
-		switch v := s.(type) {
-			case  int:   data_ptr = unsafe.Pointer(&v)
-			case uint:   data_ptr = unsafe.Pointer(&v)
-			case  int16: data_ptr = unsafe.Pointer(&v)
-			case uint16: data_ptr = unsafe.Pointer(&v)
-			case  int32: data_ptr = unsafe.Pointer(&v)
-			case uint32: data_ptr = unsafe.Pointer(&v)
-			case  int64: data_ptr = unsafe.Pointer(&v)
-			case uint64: data_ptr = unsafe.Pointer(&v)
-			case string: data_ptr = unsafe.Pointer(&([]byte( v )[0]))
-			case []byte: data_ptr = unsafe.Pointer(&v[0])
-			case Enum_SS_data_functions: 
-				     data_ptr = unsafe.Pointer(&v)
-			default: fmt.Printf("Hitem: unexpected type %T\n", v)
-		}
+			d := Traw_t{ data_ptr, data_len }
+			data_ptr = unsafe.Pointer( &d )
+		default:
+			data_ptr = hitem_getptr(s)
 	}
 	return Hskel{ skey, sdata_type, data_ptr }
 }

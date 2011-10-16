@@ -58,6 +58,7 @@ typedef struct file_userdata {
 	pthread_mutex_t  create_lock;
 	
 	data_t           file_io;
+	hash_key_t       buffer;
 } file_userdata;
 
 // IO's
@@ -292,6 +293,7 @@ static int               file_configure_any(backend_t *backend, config_t *config
 	size_t                 cfg_mode          = S_IRUSR | S_IWUSR;
 	file_userdata         *userdata          = (file_userdata *)backend->userdata;
 	
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer, config, HK(buffer));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_buffsize, config, HK(buffer_size));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_rdonly,   config, HK(readonly));
 	hash_data_copy(ret, TYPE_SIZET,   cfg_excl,     config, HK(exclusive));
@@ -350,6 +352,7 @@ static int file_init(backend_t *backend){ // {{{
 	
 	backend->userdata = userdata;
 	
+	userdata->buffer = HK(buffer);
 	return 0;
 } // }}}
 static int file_destroy(backend_t *backend){ // {{{
@@ -391,7 +394,7 @@ static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
 	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
 	
-	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
 		return -EINVAL;
 	
 	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
@@ -414,7 +417,7 @@ static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
 	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
 	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
 	
-	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
 		return -EINVAL;
 	
 	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
@@ -584,7 +587,7 @@ static ssize_t file_count(backend_t *backend, request_t *request){ // {{{
 	if( (ret = file_prepare(data)) < 0)
 		return ret;
 	
-	if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+	if( (buffer = hash_data_find(request, data->buffer)) == NULL)
 		return warning("no buffer supplied");
 	
 	if(file_update_count(data) == STAT_ERROR)
@@ -620,7 +623,7 @@ static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 		uintmax_t              answer            = (userdata->handle == -1) ? 0 : 1;
 		data_t                 answer_data       = DATA_PTR_UINTT(&answer);
 		
-		if( (buffer = hash_data_find(request, HK(buffer))) == NULL)
+		if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
 			return warning("no buffer supplied");
 		
 		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };

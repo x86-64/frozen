@@ -1,7 +1,4 @@
-- new backend 'factory'. old 'factory' rename to 'morph'
-- working web
-  - backend go_session
-- autocollecting actions, like HK()
+- data 'dataptr_t'
 - hash recursive item instead of hash_next
   - deprecate hash_item_next
 - ipc (buff <=> hash)
@@ -16,9 +13,11 @@
 - fix insert_sort
 - data 'action_t', 'data_type_t'
 - data 'random_t' for file and testing\benchmarking suite
+- autocollecting actions, like HK()
 - new test suite, as benchmarks
 - backend tcp\udp
 - m4 exec for configs
+- backend go_session for http
 - add checks to configure.ac (malloc, headers, using functions)
 - add flags to configure.ac (--with-libconfig, --with-check)
 - data 'range_t', 'multiselect_t' and matching routines
