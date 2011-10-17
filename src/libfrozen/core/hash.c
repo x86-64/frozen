@@ -305,7 +305,6 @@ error:
 inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
 inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
 inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
-inline hash_t *           hash_item_next               (hash_t *hash){ return ((hash+1)->key == hash_ptr_end) ? NULL : hash + 1; }
 inline data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
 	hash_t *temp;
 	return ((temp = hash_find(hash, key)) == NULL) ?

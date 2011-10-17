@@ -1,9 +1,9 @@
-- hash recursive item instead of hash_next
-  - deprecate hash_item_next
 - ipc (buff <=> hash)
 - TODO + BUG hunt
 - documentation for data, hash, backend
 - release to github
+- hash recursive item instead of hash_next
+  - deprecate hash_item_next
 - multi-threading
   - backend lock
   - backend thread_pool

@@ -135,7 +135,6 @@ void               hash_dump                    (hash_t *hash);
 
 hash_key_t         hash_item_key                (hash_t *hash);
 data_t *           hash_item_data               (hash_t *hash);
-hash_t *           hash_item_next               (hash_t *hash);
 data_t *           hash_data_find               (hash_t *hash, hash_key_t key);
 
 data_type          data_type_from_string        (char *string);

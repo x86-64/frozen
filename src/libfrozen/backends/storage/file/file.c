@@ -180,79 +180,91 @@ static ssize_t           file_prepare(file_userdata *userdata){ // {{{
 
 	return ret;
 } // }}}
-static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
+
+typedef struct file_gen_context {
+	char                  *buffer;
+	size_t                 buffer_size;
+	hash_t                *fork_req;
+} file_gen_context;
+
+static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx, void *null){ // {{{
 	size_t                 ret;
 	char                  *str;
 	size_t                 str_size;
 	char                  *p;
-	char                  *buffer            = NULL;
-	size_t                 buffer_size       = 0;
 	data_t                *curr_data;
 	
-	do{
-		curr_data = hash_item_data(config);
+	curr_data = hash_item_data(config);
+	
+	switch( hash_item_key(config) ){
+		case HK(fork):;
+			hash_key_t      key;
+			
+			str_size = 0;
+			
+			if(ctx->fork_req == NULL) break;
+			
+			data_get(ret, TYPE_HASHKEYT, key, curr_data);
+			
+			hash_data_copy(ret, TYPE_STRINGT, str, ctx->fork_req, key);
+			if(ret != 0)
+				break;
+			
+			str_size = strlen(str);
+			break;
+		case HK(string):
+			str      = (char *)curr_data->ptr; // TODO rewrite to data_read  BAD
+			str_size = strlen(str); //GET_TYPE_STRINGT_LEN(curr_data);
+			break;
+		case HK(homedir):
+			hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
+			if(ret != 0)
+				str = "./";
+			str_size = strlen(str);
+			break;
+		case HK(random):;
+			fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN }, 0 };
+			data_query(curr_data, &r_len);
+			str_size = r_len.length;
+			break;
+		default:
+			goto error;
+	};
+	
+	if(str_size > 0){
+		if( (ctx->buffer = realloc(ctx->buffer, ctx->buffer_size + str_size + 1)) == NULL)
+			break;
+		p = ctx->buffer + ctx->buffer_size;
 		
 		switch( hash_item_key(config) ){
-			case HK(fork):;
-				hash_key_t      key;
-				
-				str_size = 0;
-				
-				if(fork_req == NULL) break;
-				
-				data_get(ret, TYPE_HASHKEYT, key, curr_data);
-				
-				hash_data_copy(ret, TYPE_STRINGT, str, fork_req, key);
-				if(ret != 0)
-					break;
-				
-				str_size = strlen(str);
-				break;
-			case HK(string):
-				str      = (char *)curr_data->ptr; // TODO rewrite to data_read  BAD
-				str_size = strlen(str); //GET_TYPE_STRINGT_LEN(curr_data);
-				break;
-			case HK(homedir):
-				hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
-				if(ret != 0)
-					str = "./";
-				str_size = strlen(str);
-				break;
 			case HK(random):;
-				fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN }, 0 };
-				data_query(curr_data, &r_len);
-				str_size = r_len.length;
+				intmax_t           i;
+				static const char  abc[] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDGHJKLZXCVBNM1234567890";
+				
+				for(i = 1; i <= str_size; i++, p++)
+					*p = abc[ random() % (sizeof(abc) - 1) ];
+				
 				break;
-			default:
-				goto error;
+			default: memcpy(p, str, str_size); break;
 		};
-		
-		if(str_size > 0){
-			if( (buffer = realloc(buffer, buffer_size + str_size + 1)) == NULL)
-				break;
-			p = buffer + buffer_size;
-			
-			switch( hash_item_key(config) ){
-				case HK(random):;
-					intmax_t           i;
-					static const char  abc[] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDGHJKLZXCVBNM1234567890";
-					
-					for(i = 1; i <= str_size; i++, p++)
-						*p = abc[ random() % (sizeof(abc) - 1) ];
-					
-					break;
-				default: memcpy(p, str, str_size); break;
-			};
-			buffer_size += str_size;
-			buffer[buffer_size] = '\0';
-		}
-	}while( (config = hash_item_next(config)) != NULL);
+		ctx->buffer_size         += str_size;
+		ctx->buffer[buffer_size]  = '\0';
+	}
 	
-	return buffer;
+	return ITER_CONTINUE;
 error:
-	if(buffer)
-		free(buffer);
-	return NULL;
+	return ITER_BREAK;
+} // }}}
+static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
+	file_gen_context       ctx               = { NULL, 0, fork_req };
+	
+	if(hash_iter(config, (hash_iterator)&file_gen_iterator, &ctx, NULL) != ITER_OK){
+		if(ctx.buffer)
+			free(ctx.buffer);
+		
+		return NULL;
+	}
+	return ctx.buffer;
 } // }}}
 static char *            file_gen_filepath(config_t *config, config_t *fork_req){ // {{{
 	hash_t                *filename_hash;
@@ -376,7 +388,6 @@ static int file_fork(backend_t *backend, backend_t *parent, config_t *request){ 
 static int file_configure(backend_t *backend, config_t *config){ // {{{
 	return file_configure_any(backend, config, NULL);
 } // }}}
-
 
 // Requests
 static ssize_t file_write(backend_t *backend, request_t *request){ // {{{

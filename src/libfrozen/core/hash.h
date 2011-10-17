@@ -46,8 +46,6 @@ API size_t             hash_item_is_null            (hash_t *hash){ return (hash
 _inline
 API data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
 _inline
-API hash_t *           hash_item_next               (hash_t *hash){ return ((hash + 1)->key == hash_ptr_end) ? NULL : hash + 1; }
-_inline
 API data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
 	hash_t *temp;
 	return ((temp = hash_find(hash, key)) == NULL) ?
