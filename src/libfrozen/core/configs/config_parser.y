@@ -83,14 +83,12 @@ hash_value :
 	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
-		data_t              d_src    = DATA_PTR_STRING($4);
-		
 		$$.type = data_type_from_string($2);
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_src }; 
-		if(data_query(&$$, &r_convert) != 0){
+		fastcall_init r_init = { { 3, ACTION_INIT }, $4 }; 
+		if(data_query(&$$, &r_init) != 0){
 			yyerror(hash, "failed convert data\n"); YYERROR;
 		}
 		

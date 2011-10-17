@@ -4,7 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -139266, "src/libfrozen/backends/backend/factory/factory.c: child creation error" },
+ { -139265, "src/libfrozen/backends/backend/factory/factory.c: HK(config) not supplied" },
+ { -139264, "src/libfrozen/backends/backend/factory/factory.c: calloc failed" },
  { -135168, "src/libfrozen/backends/storage/pointers/pointers.c: calloc returns null" },
+ { -131073, "src/libfrozen/backends/index/hashtable/hashtable.c: invalid hashtable size" },
  { -131072, "src/libfrozen/backends/index/hashtable/hashtable.c: calloc failed" },
  { -126977, "src/libfrozen/backends/request/switch/switch.c: failed to configure switch" },
  { -126976, "src/libfrozen/backends/request/switch/switch.c: calloc returns null" },
@@ -35,9 +39,9 @@ static err_item errs_list[] = {
  { -90114, "src/libfrozen/backends/index/lookup/lookup.c: supplied index backend not valid, or not found" },
  { -90113, "src/libfrozen/backends/index/lookup/lookup.c: HK(output_type) not supplied" },
  { -90112, "src/libfrozen/backends/index/lookup/lookup.c: calloc failed" },
- { -86018, "src/libfrozen/backends/backend/factory/factory.c: child creation error" },
- { -86017, "src/libfrozen/backends/backend/factory/factory.c: HK(config) not supplied" },
- { -86016, "src/libfrozen/backends/backend/factory/factory.c: calloc failed" },
+ { -86018, "src/libfrozen/backends/backend/morph/morph.c: child creation error" },
+ { -86017, "src/libfrozen/backends/backend/morph/morph.c: HK(config) not supplied" },
+ { -86016, "src/libfrozen/backends/backend/morph/morph.c: calloc failed" },
  { -77825, "src/libfrozen/backends/request/emitter/emitter.c: pthread_create failed" },
  { -77824, "src/libfrozen/backends/request/emitter/emitter.c: calloc failed" },
  { -73728, "src/libfrozen/backends/backend/benchmark/benchmark.c: calloc failed" },

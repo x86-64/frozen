@@ -633,6 +633,7 @@ DATA_OBJECTS_hash_key
 DATA_OBJECTS_hash
 DATA_OBJECTS_go_interface
 DATA_OBJECTS_default
+DATA_OBJECTS_dataptr
 DATA_OBJECTS_buffer
 DATA_OBJECTS_binary
 DATA_LIBS_SELECTED
@@ -786,6 +787,7 @@ enable_modulego_template
 enable_backend_t
 enable_binary_t
 enable_buffer_t
+enable_dataptr_t
 enable_default_t
 enable_go_interface_t
 enable_hash_t
@@ -813,6 +815,7 @@ enable_backendbenchmark
 enable_backendcall
 enable_backendfactory
 enable_backendfork
+enable_backendmorph
 enable_backendpool
 enable_backendrebuild_monitor
 enable_backendrebuild_reader
@@ -1501,6 +1504,8 @@ Optional Features:
                           disable data backend-t
   --disable-data-binary-t disable data binary-t
   --disable-data-buffer-t disable data buffer-t
+  --disable-data-dataptr-t
+                          disable data dataptr-t
   --disable-data-default-t
                           disable data default-t
   --disable-data-go-interface-t
@@ -1533,6 +1538,7 @@ Optional Features:
   --disable-backend-factory
                           disable backend factory
   --disable-backend-fork  disable backend fork
+  --disable-backend-morph disable backend morph
   --disable-backend-pool  disable backend pool
   --disable-backend-rebuild-monitor
                           disable backend rebuild-monitor
@@ -17564,6 +17570,45 @@ fi
 
 
 
+	# Check whether --enable-dataptr_t was given.
+if test "${enable_dataptr_t+set}" = set; then :
+  enableval=$enable_dataptr_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_dataptr_t}" = "yes"; then
+			enable_dataptr_t="no"
+		else
+			enable_dataptr_t="yes"
+		fi
+	fi
+
+	if test "${enable_dataptr_t}" = "yes"; then
+		DATA_DIR_dataptr_t="dataptr"
+		DATA_DEP_dataptr_t=""
+		DATA_ID_dataptr_t="26"
+		DATA_OBJECTS_dataptr="$DATA_OBJECTS_dataptr libfrozen_data_dataptr_la-dataptr_t.lo"
+		DATA_SELECTED="$DATA_SELECTED dataptr_t"
+		DATA_HEADERS="$DATA_HEADERS dataptr/dataptr_t.h"
+
+
+	fi
+
+	if test "$DATA_MAKEFILE_dataptr" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/dataptr/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS dataptr"
+
+		DATA_MAKEFILE_dataptr=yes
+
+		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED dataptr/libfrozen_data_dataptr.la"
+
+	fi
+
+
+
+
+
 	# Check whether --enable-default_t was given.
 if test "${enable_default_t+set}" = set; then :
   enableval=$enable_default_t;
@@ -18591,6 +18636,43 @@ fi
 		BACKEND_MAKEFILE_backend_fork=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/fork/libfrozen_backend_fork.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendmorph was given.
+if test "${enable_backendmorph+set}" = set; then :
+  enableval=$enable_backendmorph;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendmorph}" = "yes"; then
+			enable_backendmorph="no"
+		else
+			enable_backendmorph="yes"
+		fi
+	fi
+
+	if test "${enable_backendmorph}" = "yes"; then
+		BACKEND_DIR_morph="backend/morph"
+		BACKEND_DEP_morph=""
+				BACKEND_SELECTED="$BACKEND_SELECTED morph"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_morph" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/morph/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/morph"
+
+		BACKEND_MAKEFILE_backend_morph=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/morph/libfrozen_backend_morph.la"
 
 	fi
 

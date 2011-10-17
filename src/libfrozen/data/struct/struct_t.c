@@ -76,13 +76,14 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
 	
 	// prepare data
 	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL){
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data }; 
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data };          // default values
 		if(data_query(&element->data, &r_copy) != 0)
 			return ITER_BREAK;
 		
 		curr_data      = &need_data;
 		need_data_free = 1;
 	}
+	// TODO convert user-supplied buffer to struct type. For dataptr_t it will work, but not for uint_t ans simmilar
 	
 	// read data from buffer
 	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, curr_data };

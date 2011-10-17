@@ -143,15 +143,14 @@ function : NAME '(' args_list ')' {
 };
 
 constant : '(' NAME ')' STRING {
-	data_t              d_src    = DATA_PTR_STRING($4);
 	rewrite_variable_t *constant = rewrite_new_constant(script);
 	
 	constant->data.type = data_type_from_string($2);
 	constant->data.ptr  = NULL;
 	
 	/* convert string to needed data */
-	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_src }; 
-	if(data_query(&constant->data, &r_convert) != 0){
+	fastcall_init r_init = { { 3, ACTION_INIT }, $4 }; 
+	if(data_query(&constant->data, &r_init) != 0){
 		yyerror(script, "failed convert data\n"); YYERROR;
 	}
 

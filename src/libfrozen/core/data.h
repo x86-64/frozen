@@ -13,6 +13,7 @@ typedef enum data_functions {
 
 	ACTION_ALLOC,
 	ACTION_FREE,
+	ACTION_INIT,
 	ACTION_PHYSICALLEN,
 	ACTION_LOGICALLEN,
 	ACTION_CONVERTLEN,
@@ -85,6 +86,11 @@ typedef struct fastcall_alloc {
 typedef struct fastcall_free {
 	fastcall_header        header;
 } fastcall_free;
+
+typedef struct fastcall_init {
+	fastcall_header        header;
+	char                  *string;
+} fastcall_init;
 
 typedef struct fastcall_copy {
 	fastcall_header        header;
@@ -179,6 +185,7 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_DELETE] = 4,
 	[ACTION_MOVE] = 5,
 	[ACTION_COUNT] = 3,
+	[ACTION_INIT] = 3,
 };
 #endif
 

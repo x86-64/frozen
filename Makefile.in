@@ -52,6 +52,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/go_interface/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
@@ -68,6 +69,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/fork/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
@@ -186,6 +188,7 @@ DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
 DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
 DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
+DATA_OBJECTS_dataptr = @DATA_OBJECTS_dataptr@
 DATA_OBJECTS_default = @DATA_OBJECTS_default@
 DATA_OBJECTS_go_interface = @DATA_OBJECTS_go_interface@
 DATA_OBJECTS_hash = @DATA_OBJECTS_hash@

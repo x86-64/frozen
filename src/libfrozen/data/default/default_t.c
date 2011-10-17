@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 #include <default_t.h>
+#include <string/string_t.h>
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
 	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
@@ -194,9 +195,15 @@ static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdatap
 	fargs->ptr = data->ptr;
 	return 0;
 } // }}}
-static ssize_t       data_default_is_null    (data_t *data, fastcall_is_null *fargs){ // {{{
+static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
+} // }}}
+static ssize_t       data_default_init          (data_t *dst, fastcall_init *fargs){ // {{{
+	data_t                 d_initstr         = DATA_STRING(fargs->string);
+	
+	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_initstr };
+	return data_query(dst, &r_convert);
 } // }}}
 
 data_proto_t default_t_proto = {
@@ -212,6 +219,7 @@ data_proto_t default_t_proto = {
 		[ACTION_FREE]        = (f_data_func)&data_default_free,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
+		[ACTION_INIT]        = (f_data_func)&data_default_init,
 	}
 };
 
