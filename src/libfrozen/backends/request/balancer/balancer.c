@@ -23,7 +23,6 @@
  * 	        mode       =               # balancer mode:
  * 	                     "random",     #   - pass request to random backend, this is default
  * 	                     "counting",   #   - first request go to first backend, second to second, and so on
- * 	            TODO     "hash",       #   - hash <field> in request and pass. Note, no rebuilding on pool change
  * 	                     "linear"      #   - get first <linear_len> bytes and pass to backend forked with same bytes
  *              pool       =               # pool creation:
  *                           "manual",     #   - i'll setup pool manually, this is default
@@ -43,7 +42,6 @@
 typedef enum balancer_mode {
 	MODE_RANDOM,
 	MODE_COUNTING,
-	MODE_HASH,
 	MODE_LINEAR,
 	MODE_DEFAULT = MODE_RANDOM
 } balancer_mode;
@@ -74,7 +72,6 @@ static balancer_mode    balancer_string_to_mode(char *string){ // {{{
 	if(string != NULL){
 		if(strcmp(string, "random")   == 0) return MODE_RANDOM;
 		if(strcmp(string, "counting") == 0) return MODE_COUNTING;
-		if(strcmp(string, "hash")     == 0) return MODE_HASH;
 		if(strcmp(string, "linear")   == 0) return MODE_LINEAR;
 	}
 	return MODE_DEFAULT;

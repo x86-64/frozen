@@ -37,7 +37,8 @@ typedef struct ipc_shmem_block {
 	volatile size_t        status;
 	volatile size_t        return_result;
 	unsigned int           data_rel_ptr;
-	
+	uintmax_t              size;
+
 	sem_t                  sem_done;
 } ipc_shmem_block;
 
@@ -46,7 +47,8 @@ typedef struct ipc_shmem_userdata {
 	ipc_role               role;
 	forced_states          forced_state;
 	hash_key_t             buffer;
-	
+	uintmax_t              noreread;
+
 	ipc_shmem_header      *shmaddr;
 	ipc_shmem_block       *shmblocks;
 	void                  *shmdata;
@@ -114,9 +116,8 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 			break;
 		
 		// run request
-		// TODO pass real size
 		request_t req[] = {
-			{ userdata->buffer, DATA_RAW( userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size ) },
+			{ userdata->buffer, DATA_RAW( userdata->shmdata + block->data_rel_ptr, block->size ) },
 			hash_end
 		};
 		backend_pass(((ipc_t *)ipc)->backend, req);
@@ -148,7 +149,8 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	hash_data_copy(ret, TYPE_SIZET,   nitems,     config, HK(size));
 	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
 	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer, config, HK(buffer));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,   config, HK(buffer));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->noreread, config, HK(noreread));
 
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -229,7 +231,8 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	// write data to ipc memory
 	fastcall_read r_read = { { 5, ACTION_READ }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
 	data_query(buffer, &r_read);
-
+	
+	block->size          = r_read.buffer_size;
 	block->return_result = (f_async == 0) ? 1 : 0;
 	
 	if( (ret = shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN)) < 0)
@@ -239,9 +242,11 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		// wait for answer
 		sem_wait(&block->sem_done);
 		
-		// read request back // TODO make it optional?
-		fastcall_read r_write = { { 5, ACTION_WRITE }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
-		data_query(buffer, &r_write);
+		// read request back
+		if(userdata->noreread == 0){
+			fastcall_read r_write = { { 5, ACTION_WRITE }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
+			data_query(buffer, &r_write);
+		}
 		ret = -EEXIST;
 		
 		if(shmem_block_status(userdata, block, STATUS_EXEC_DONE, STATUS_FREE) < 0)

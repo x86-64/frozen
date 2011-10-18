@@ -43,15 +43,15 @@ static ssize_t factory_handler(backend_t *backend, request_t *request){ // {{{
 	if( output->type != TYPE_BACKENDT )
 		return -EINVAL;
 
-	hash_chain(request, userdata->backend_config);  // request overrides all initial configure values
-	
 	config_t  child_config[] = {
-		{ 0, DATA_PTR_HASHT(request) },
+		{ 0, DATA_HASHT(
+			hash_inline(request),
+			hash_inline(userdata->backend_config),
+			hash_end
+		)},
 		hash_end
 	};
-
 	child = backend_new(child_config);
-	hash_unchain(request, userdata->backend_config); // TODO SECURITY need swap it, but it will cause multithreading problems
 	
 	if(child == NULL)
 		return error("child creation error");

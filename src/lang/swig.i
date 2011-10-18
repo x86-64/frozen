@@ -126,8 +126,6 @@ hash_t *           hash_copy                    (hash_t *hash);
 void               hash_free                    (hash_t *hash);
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
-void               hash_chain                   (hash_t *hash, hash_t *hash_next);
-void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain);
 size_t             hash_nelements               (hash_t *hash);
 #ifdef DEBUG
 void               hash_dump                    (hash_t *hash);
@@ -273,7 +271,6 @@ uintmax_t  go_data_to_uint(data_t *data){
 	return ret;
 }
 
-// TODO remove this
 void _backend_setuserdata(backend_t *backend, void *data){
 	backend->userdata = data;
 }

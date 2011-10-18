@@ -10,13 +10,15 @@ struct hash_t {
 
 typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
 
-#define hash_ptr_null  (hash_key_t)-1
-#define hash_ptr_end   (hash_key_t)-2 
+#define hash_ptr_null     (hash_key_t)-1
+#define hash_ptr_end      (hash_key_t)-2 
+#define hash_ptr_inline   (hash_key_t)-3
 
-#define hash_null       {hash_ptr_null, {0, NULL}}
-#define hash_next(hash) {hash_ptr_end,  {0, (void *)hash}}
-#define hash_end        hash_next(NULL)
-#define HK(value) HASH_KEY_##value
+#define hash_null         {hash_ptr_null,    {0, NULL}}
+#define hash_inline(hash) {hash_ptr_inline,  DATA_PTR_HASHT(hash)}
+#define hash_next(hash)   {hash_ptr_end,     {0, (void *)hash}} // TODO deprecate
+#define hash_end          hash_next(NULL)
+#define HK(value)         HASH_KEY_##value
 
 // allocated hash functions
 API hash_t *           hash_new                     (size_t nelements);
@@ -26,8 +28,6 @@ API void               hash_free                    (hash_t *hash);
 // general functions
 API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
 API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
-API void               hash_chain                   (hash_t *hash, hash_t *hash_next);
-API void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain);
 API size_t             hash_nelements               (hash_t *hash);
 
 // hash <=> buffer
@@ -76,8 +76,7 @@ API data_t *           hash_data_find               (hash_t *hash, hash_key_t ke
 
 
 #ifdef DEBUG
-
 API void               hash_dump                    (hash_t *hash);
-
 #endif
+
 #endif // HASH_H

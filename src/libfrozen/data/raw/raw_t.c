@@ -50,7 +50,6 @@ static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	free(raw_data);
 	return 0;
 } // }}}
-// TODO compare
 
 data_proto_t raw_t_proto = {
 	.type          = TYPE_RAWT,

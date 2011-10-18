@@ -233,7 +233,8 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 	
 	if(str_size > 0){
 		if( (ctx->buffer = realloc(ctx->buffer, ctx->buffer_size + str_size + 1)) == NULL)
-			break;
+			return ITER_BREAK;
+		
 		p = ctx->buffer + ctx->buffer_size;
 		
 		switch( hash_item_key(config) ){
@@ -247,8 +248,8 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 				break;
 			default: memcpy(p, str, str_size); break;
 		};
-		ctx->buffer_size         += str_size;
-		ctx->buffer[buffer_size]  = '\0';
+		ctx->buffer_size              += str_size;
+		ctx->buffer[ctx->buffer_size]  = '\0';
 	}
 	
 	return ITER_CONTINUE;

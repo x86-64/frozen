@@ -102,7 +102,6 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 		return -EINVAL;
 	
 	if(data1->type != data2->type){
-		// TODO call convert
 		
 		goffset1     = goffset2     = 0;
 		buffer1_size = buffer2_size = 0;

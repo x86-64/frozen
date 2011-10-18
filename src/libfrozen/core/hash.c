@@ -1,41 +1,4 @@
-#define HASH_C
 #include <libfrozen.h>
-
-// TODO recursive hashes in to\from_memory
-
-// macros {{{
-#define _hash_to_memory_cpy(_ptr,_size) { \
-	if(_size > memory_size) \
-		return -ENOMEM; \
-	memcpy(memory, _ptr, _size); \
-	memory      += _size; \
-	memory_size -= _size; \
-}
-#define _hash_from_memory_cpy(_ptr,_size) { \
-	if(_size > memory_size) \
-		return -ENOMEM; \
-	memcpy(_ptr, memory, _size); \
-	memory      += _size; \
-	memory_size -= _size; \
-}
-// }}}
-/*
-static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
-	void     *data_ptr;
-	
-	data_ptr  = hash->data.ptr;
-	
-	if(data_ptr == NULL)
-		return ITER_CONTINUE;
-	
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	if(data_query(&hash->data, &r_len) < 0)
-		return ITER_BREAK;
-	
-	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, r_len.length);
-	return ITER_CONTINUE;
-} // }}}
-*/
 
 hash_t *           hash_new                     (size_t nelements){ // {{{
 	size_t  i;
@@ -73,7 +36,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 	for(el = hash, el_new = new_hash; el->key != hash_ptr_end; el++){
 		if(el->key == hash_ptr_null)
 			continue;
-		
+
 		el_new->key = el->key;
 		
 		fastcall_copy r_copy = { { 3, ACTION_COPY }, &el_new->data };
@@ -105,6 +68,8 @@ void               hash_free                    (hash_t *hash){ // {{{
 } // }}}
 
 hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ // {{{
+	register hash_t       *inline_hash;
+	
 	for(; hash != NULL; hash = (hash_t *)hash->data.ptr){
 		goto loop_start;
 		do{
@@ -113,6 +78,11 @@ hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ 
 		loop_start:
 			if(hash->key == key)
 				return hash;
+			
+			if(hash->key == hash_ptr_inline){
+				if( (inline_hash = hash_find((hash_t *)hash->data.ptr, key)) != NULL)
+					return inline_hash;
+			}
 		}while(hash->key != hash_ptr_end);
 	}
 	return NULL;
@@ -125,11 +95,23 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 		return ITER_BREAK;
 	
 	while(value->key != hash_ptr_end){
+		// null items
 		if( value->key == hash_ptr_null )
 			goto next;
 		
-		ret = func(value, arg1, arg2);
-		if(ret != ITER_CONTINUE)
+		// inline items
+		if( value->key == hash_ptr_inline ){
+			if(value->data.ptr == NULL) // empty inline item
+				goto next;
+			
+			if( (ret = hash_iter((hash_t *)value->data.ptr, func, arg1, arg2)) != ITER_OK)
+				return ret;
+			
+			goto next;
+		}
+		
+		// regular items
+		if( (ret = func(value, arg1, arg2)) != ITER_CONTINUE)
 			return ret;
 	
 	next:	
@@ -139,20 +121,6 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 		return hash_iter((hash_t *)value->data.ptr, func, arg1, arg2);
 	
 	return ITER_OK;
-} // }}}
-void               hash_chain                   (hash_t *hash, hash_t *hash_next){ // {{{
-	hash_t *hend;
-	do{
-		hend = hash_find(hash, hash_ptr_end);
-	}while( (hash = hend->data.ptr) != NULL );
-	hend->data.ptr = hash_next;
-} // }}}
-void               hash_unchain                 (hash_t *hash, hash_t *hash_unchain){ // {{{
-	hash_t *hend;
-	do{
-		hend = hash_find(hash, hash_ptr_end);
-	}while( (hash = hend->data.ptr) != hash_unchain );
-	hend->data.ptr = NULL;
 } // }}}
 size_t             hash_nelements               (hash_t *hash){ // {{{
 	hash_t       *el;
@@ -168,6 +136,37 @@ size_t             hash_nelements               (hash_t *hash){ // {{{
 } // }}}
 
 /*
+// macros {{{
+#define _hash_to_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(memory, _ptr, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+#define _hash_from_memory_cpy(_ptr,_size) { \
+	if(_size > memory_size) \
+		return -ENOMEM; \
+	memcpy(_ptr, memory, _size); \
+	memory      += _size; \
+	memory_size -= _size; \
+}
+// }}}
+static ssize_t hash_to_buffer_one(hash_t *hash, void *p_buffer, void *p_null){ // {{{
+	void     *data_ptr;
+	
+	data_ptr  = hash->data.ptr;
+	
+	if(data_ptr == NULL)
+		return ITER_CONTINUE;
+	
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	if(data_query(&hash->data, &r_len) < 0)
+		return ITER_BREAK;
+	
+	buffer_add_tail_raw((buffer_t *)p_buffer, data_ptr, r_len.length);
+	return ITER_CONTINUE;
+} // }}}
 ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer){ // {{{
 	size_t  nelements;
 	
@@ -189,9 +188,6 @@ ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer
 	void      *memory, *chunk, *ptr;
 	size_t     size, data_size;
 	off_t      data_off = 0;
-	
-	// TODO remake in streaming style (read)
-	// TODO SEC validate
 	
 	if(buffer_seek(buffer, 0, &chunk, &memory, &size) < 0)
 		goto error;

@@ -8,7 +8,6 @@
 
 #ifndef __COUNTER__
 #error Counter macro not defined       
-// TODO handle this (stick to __LINE__?)
 #else
 #define ECOUNTER __COUNTER__
 #endif

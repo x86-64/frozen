@@ -7,6 +7,11 @@ static list                    classes        = LIST_INITIALIZER; // dynamic cla
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
 
+typedef struct backend_new_ctx {
+	list                   backends;
+	backend_t             *backend_prev;
+} backend_new_ctx;
+
 static int         class_strcmp            (char *class_str1, char *class_str2){ // {{{
 	char                  *class_str1_name;
 	char                  *class_str2_name;
@@ -74,6 +79,7 @@ static uintmax_t   backend_ref_dec(backend_t *backend){ // {{{
 	pthread_mutex_unlock(&backend->refs_mtx);
 	return ret;
 } // }}}
+
 static void        backend_top(backend_t *backend){ // {{{
 	if(list_is_empty(&backend->parents)){
 		list_delete (&backends_top, backend);
@@ -83,58 +89,8 @@ static void        backend_top(backend_t *backend){ // {{{
 static void        backend_untop(backend_t *backend){ // {{{
 	list_delete(&backends_top, backend);
 } // }}}
-void               backend_connect(backend_t *parent, backend_t *child){ // {{{
-	list_add(&parent->childs, child);
-	backend_top(parent);
-	
-	if(child == LIST_FREE_ITEM)
-		return;
-	
-	backend_untop(child);
-	list_add(&child->parents, parent);
-} // }}}
-void               backend_disconnect(backend_t *parent, backend_t *child){ // {{{
-	backend_untop(parent);
-	list_delete(&parent->childs, child);
-	
-	if(child == LIST_FREE_ITEM)
-		return;
-	
-	list_delete(&child->parents, parent);
-	backend_top(child);
-} // }}}
-void               backend_add_terminators(backend_t *backend, list *new_childs){ // {{{
-	uintmax_t              lsz;
-	backend_t             *child;
-	void                  *childs_iter = NULL;
-	
-	list_rdlock(&backend->childs); // TODO loop chains bugs
-		
-		if( (lsz = list_count(&backend->childs)) != 0){
-			// go recurse
-			while( (child = list_iter_next(&backend->childs, &childs_iter)) != NULL)
-				backend_add_terminators(child, new_childs);
-		}
-	
-	list_unlock(&backend->childs);
-		
-	if(lsz == 0){
-		// add new childs to terminating backends without childs
-		while( (child = list_iter_next(new_childs, &childs_iter)) != NULL)
-			backend_connect(backend, child);
-	}
-} // }}}
-void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
-	backend_t             *child;
-	
-	backend_add_terminators(new_child, &parent->childs);
-	
-	while( (child = list_pop(&parent->childs)) != NULL)
-		backend_disconnect(parent, child);
-	
-	backend_connect(parent, new_child);
-} // }}}
-static void        backend_free_from_proto(backend_t *backend_curr){ // {{{
+
+static void        backend_free_skeleton(backend_t *backend_curr){ // {{{
 	hash_free(backend_curr->config);
 	
 	if(backend_curr->name){
@@ -148,24 +104,54 @@ static void        backend_free_from_proto(backend_t *backend_curr){ // {{{
 	
 	free(backend_curr);
 } // }}}
-static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // {{{
+static backend_t * backend_new_skeleton(char *backend_name, char *backend_class, hash_t *config){ // {{{
+	backend_t             *backend;
+	backend_t             *class;
+	
+	if( (class = class_find(backend_class)) == NULL)
+		goto error;
+	
+	if( (backend = backend_clone(class)) == NULL)
+		goto error;
+	
+	if(backend_name){
+		if( (backend->name = strdup(backend_name)) == NULL)
+			goto error_mem;
+		
+		list_add(&backends_names, backend);
+	}else{
+		backend->name = NULL;
+	}
+	
+	if( (backend->config = hash_copy(config)) == NULL)
+		goto error_mem;
+	
+	backend->userdata   = NULL;
+	return backend;
+	
+error_mem:
+	backend_free_skeleton(backend);
+error:
+	return NULL;
+} // }}}
+
+static ssize_t     backend_new_iterator(hash_t *item, backend_new_ctx *ctx, void *null){ // {{{
 	ssize_t                ret;
-	backend_t             *backend_curr, *backend_last, *class;
+	backend_t             *backend;
 	hash_t                *backend_cfg;
 	data_t                *backend_cfg_data;
 	char                  *backend_name;
 	char                  *backend_class;
 	
-	if(hash_item_is_null(config)){
-		backend_curr = LIST_FREE_ITEM;
-		backend_prev = LIST_FREE_ITEM;
-		goto recurse;
+	if(hash_item_is_null(item)){
+		ctx->backend_prev = LIST_FREE_ITEM;
+		return ITER_CONTINUE;
 	}
 		
-	backend_cfg_data = hash_item_data(config);
+	backend_cfg_data = hash_item_data(item);
 	
 	if(backend_cfg_data->type != TYPE_HASHT)
-		goto error_inval;
+		return ITER_CONTINUE;
 	
 	backend_cfg = (hash_t *)backend_cfg_data->ptr;
 	
@@ -176,56 +162,37 @@ static backend_t * backend_new_rec(hash_t *config, backend_t *backend_prev){ // 
 		goto error_inval;
 	
 	if(backend_class == NULL){
-		if( (backend_curr = backend_find(backend_name)) == NULL)
+		if( (backend = backend_find(backend_name)) == NULL)
 			goto error_inval;
 		
-		backend_connect(backend_curr, backend_prev);
+		backend_connect(backend, ctx->backend_prev);
 	}else{
-		if( (class = class_find(backend_class)) == NULL)
+		if( (backend = backend_new_skeleton(backend_name, backend_class, backend_cfg)) == NULL)
 			goto error_inval;
+
+		backend_connect(backend, ctx->backend_prev);
 		
-		if( (backend_curr = backend_clone(class)) == NULL)
-			goto error_inval;
-	
-		if(backend_name){
-			backend_curr->name = strdup(backend_name);
-			list_add(&backends_names, backend_curr);
-		}else{
-			backend_curr->name = NULL;
-		}
-		
-		backend_curr->config     = hash_copy(backend_cfg);
-		backend_curr->userdata   = NULL;
-		backend_connect(backend_curr, backend_prev);
-		
-		if(backend_curr->func_init != NULL && backend_curr->func_init(backend_curr) != 0)
+		if(backend->func_init != NULL && backend->func_init(backend) != 0)
 			goto error_init;
 		
-		if(backend_curr->func_configure != NULL && backend_curr->func_configure(backend_curr, backend_curr->config) != 0)
+		if(backend->func_configure != NULL && backend->func_configure(backend, backend->config) != 0)
 			goto error_configure;
 	}
-
-recurse:
-	if( (config = hash_item_next(config)) == NULL)
-		return backend_curr;
 	
-	if( (backend_last = backend_new_rec(config, backend_curr)) != NULL)
-		return backend_last;
-	
-	if( backend_curr == LIST_FREE_ITEM)
-		return NULL;
+	ctx->backend_prev = backend;
+	list_add(&ctx->backends, backend);
+	return ITER_CONTINUE;
 	
 error_configure:
-	if(backend_curr->func_destroy != NULL)
-		backend_curr->func_destroy(backend_curr);
+	if(backend->func_destroy != NULL)
+		backend->func_destroy(backend);
 	
 error_init:
-	backend_disconnect(backend_curr, backend_prev);
-	
-	backend_free_from_proto(backend_curr);
+	backend_disconnect(backend, ctx->backend_prev);
+	backend_free_skeleton(backend);
 
 error_inval:
-	return NULL;
+	return ITER_BREAK;
 } // }}}
 static backend_t * backend_fork_rec(backend_t *backend, request_t *request){ // {{{
 	uintmax_t              lsz, i;
@@ -284,7 +251,7 @@ error_init:
 	for(i=0; i<lsz; i++)
 		backend_disconnect(backend_curr, childs_list[i]);
 	
-	backend_free_from_proto(backend_curr);
+	backend_free_skeleton(backend_curr);
 	
 error_inval:
 	return NULL;
@@ -347,8 +314,80 @@ static ssize_t     backend_downgrade_request(backend_t *backend, fastcall_header
 	return q_ret;
 } // }}}
 
+void               backend_connect(backend_t *parent, backend_t *child){ // {{{
+	list_add(&parent->childs, child);
+	backend_top(parent);
+	
+	if(child == LIST_FREE_ITEM)
+		return;
+	
+	backend_untop(child);
+	list_add(&child->parents, parent);
+} // }}}
+void               backend_disconnect(backend_t *parent, backend_t *child){ // {{{
+	backend_untop(parent);
+	list_delete(&parent->childs, child);
+	
+	if(child == LIST_FREE_ITEM)
+		return;
+	
+	list_delete(&child->parents, parent);
+	backend_top(child);
+} // }}}
+void               backend_add_terminators(backend_t *backend, list *new_childs){ // {{{
+	uintmax_t              lsz;
+	backend_t             *child;
+	void                  *childs_iter = NULL;
+	
+	list_rdlock(&backend->childs); // TODO loop chains bugs
+		
+		if( (lsz = list_count(&backend->childs)) != 0){
+			// go recurse
+			while( (child = list_iter_next(&backend->childs, &childs_iter)) != NULL)
+				backend_add_terminators(child, new_childs);
+		}
+	
+	list_unlock(&backend->childs);
+		
+	if(lsz == 0){
+		// add new childs to terminating backends without childs
+		while( (child = list_iter_next(new_childs, &childs_iter)) != NULL)
+			backend_connect(backend, child);
+	}
+} // }}}
+void               backend_insert(backend_t *parent, backend_t *new_child){ // {{{
+	backend_t             *child;
+	
+	backend_add_terminators(new_child, &parent->childs);
+	
+	while( (child = list_pop(&parent->childs)) != NULL)
+		backend_disconnect(parent, child);
+	
+	backend_connect(parent, new_child);
+} // }}}
+
 backend_t *     backend_new          (hash_t *config){ // {{{
-	return backend_new_rec(config, LIST_FREE_ITEM);
+	backend_t             *backend;
+	backend_t             *child;
+	backend_new_ctx        ctx               = { LIST_INITIALIZER, LIST_FREE_ITEM };
+	
+	if(hash_iter(config, (hash_iterator)&backend_new_iterator, &ctx, NULL) == ITER_OK){
+		if(ctx.backend_prev == LIST_FREE_ITEM)
+			return NULL;
+		
+		return ctx.backend_prev;
+	}
+	
+	while( (backend = list_pop(&ctx.backends)) != NULL){
+		if(backend->func_destroy != NULL)
+			backend->func_destroy(backend);
+		
+		while( (child = list_pop(&backend->childs)) != NULL)
+			backend_disconnect(backend, child);
+
+		backend_free_skeleton(backend);
+	}
+	return NULL;
 } // }}}
 backend_t *     backend_find         (char *name){ // {{{
 	backend_t             *backend;

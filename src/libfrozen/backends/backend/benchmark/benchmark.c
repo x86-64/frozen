@@ -56,7 +56,6 @@ static int  benchmark_control_query_long(backend_t *backend, char *string, size_
 	backend_name = backend->name;
 	backend_name = backend_name ? backend_name : "(undefined)";
 	if(ticks != 0){
-		// TODO rewrite math
 		speed  = tv_diff.tv_usec / 1000 + tv_diff.tv_sec * 1000;
 		speed  = (speed != 0) ? speed : 1;
 		speed  = ticks * 1000 / speed;

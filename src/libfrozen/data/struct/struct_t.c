@@ -24,7 +24,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 	
 	// find value for current key
 	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL)
-		return ITER_BREAK; // TODO alloc empty value and free it after transferring
+		return ITER_BREAK; // alloc empty value and free it after transferring
 	
 	// convert if need
 	if(curr_data->type != element->data.type){
