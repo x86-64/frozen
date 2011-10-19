@@ -625,6 +625,7 @@ DATA_OBJECTS_void
 DATA_OBJECTS_uint
 DATA_OBJECTS_struct
 DATA_OBJECTS_string
+DATA_OBJECTS_slider
 DATA_OBJECTS_slice
 DATA_OBJECTS_raw
 DATA_OBJECTS_memory
@@ -796,6 +797,7 @@ enable_io_t
 enable_memory_t
 enable_raw_t
 enable_slice_t
+enable_slider_t
 enable_string_t
 enable_struct_t
 enable_off_t
@@ -1517,6 +1519,7 @@ Optional Features:
   --disable-data-memory-t disable data memory-t
   --disable-data-raw-t    disable data raw-t
   --disable-data-slice-t  disable data slice-t
+  --disable-data-slider-t disable data slider-t
   --disable-data-string-t disable data string-t
   --disable-data-struct-t disable data struct-t
   --disable-data-off-t    disable data off-t
@@ -17914,6 +17917,45 @@ fi
 		DATA_MAKEFILE_slice=yes
 
 		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED slice/libfrozen_data_slice.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-slider_t was given.
+if test "${enable_slider_t+set}" = set; then :
+  enableval=$enable_slider_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_slider_t}" = "yes"; then
+			enable_slider_t="no"
+		else
+			enable_slider_t="yes"
+		fi
+	fi
+
+	if test "${enable_slider_t}" = "yes"; then
+		DATA_DIR_slider_t="slider"
+		DATA_DEP_slider_t=""
+		DATA_ID_slider_t="27"
+		DATA_OBJECTS_slider="$DATA_OBJECTS_slider libfrozen_data_slider_la-slider_t.lo"
+		DATA_SELECTED="$DATA_SELECTED slider_t"
+		DATA_HEADERS="$DATA_HEADERS slider/slider_t.h"
+
+
+	fi
+
+	if test "$DATA_MAKEFILE_slider" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/slider/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS slider"
+
+		DATA_MAKEFILE_slider=yes
+
+		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED slider/libfrozen_data_slider.la"
 
 	fi
 

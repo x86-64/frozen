@@ -56,6 +56,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/slice/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/slider/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/string/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
@@ -179,6 +180,7 @@ DATA_OBJECTS_io = @DATA_OBJECTS_io@
 DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
 DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
 DATA_OBJECTS_slice = @DATA_OBJECTS_slice@
+DATA_OBJECTS_slider = @DATA_OBJECTS_slider@
 DATA_OBJECTS_string = @DATA_OBJECTS_string@
 DATA_OBJECTS_struct = @DATA_OBJECTS_struct@
 DATA_OBJECTS_uint = @DATA_OBJECTS_uint@

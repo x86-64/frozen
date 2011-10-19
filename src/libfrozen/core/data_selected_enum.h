@@ -15,6 +15,7 @@ typedef enum data_type {
    TYPE_MEMORYT = 18,
    TYPE_RAWT = 19,
    TYPE_SLICET = 24,
+   TYPE_SLIDERT = 27,
    TYPE_STRINGT = 16,
    TYPE_STRUCTT = 2,
    TYPE_OFFT = 13,

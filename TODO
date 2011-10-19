@@ -1,4 +1,6 @@
-- ipc (buff <=> hash)
+- backend implode/explode requests
+- data 'hash_t' convert functions
+- forward/reverse convert functions
 - documentation for data, hash, backend
 - release to github
 - multi-threading
