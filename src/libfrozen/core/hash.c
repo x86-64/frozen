@@ -87,38 +87,48 @@ hash_t *           hash_find                    (hash_t *hash, hash_key_t key){ 
 	}
 	return NULL;
 } // }}}
-ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2){ // {{{
-	hash_t      *value = hash;
-	ssize_t      ret;
+ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg, hash_iter_flags flags){ // {{{
+	ssize_t                ret;
+	hash_t                *curr              = hash;
 	
 	if(hash == NULL)
 		return ITER_BREAK;
 	
-	while(value->key != hash_ptr_end){
+	do{
 		// null items
-		if( value->key == hash_ptr_null )
+		if( curr->key == hash_ptr_null && ( (flags & HASH_ITER_NULL) == 0 ) )
 			goto next;
 		
 		// inline items
-		if( value->key == hash_ptr_inline ){
-			if(value->data.ptr == NULL) // empty inline item
+		if( curr->key == hash_ptr_inline ){
+			if(curr->data.ptr == NULL) // empty inline item
 				goto next;
 			
-			if( (ret = hash_iter((hash_t *)value->data.ptr, func, arg1, arg2)) != ITER_OK)
+			if( (ret = hash_iter((hash_t *)curr->data.ptr, func, arg, flags)) != ITER_OK)
 				return ret;
 			
 			goto next;
 		}
 		
+		if(curr->key == hash_ptr_end)
+			break;
+
 		// regular items
-		if( (ret = func(value, arg1, arg2)) != ITER_CONTINUE)
+		if( (ret = func(curr, arg)) != ITER_CONTINUE)
 			return ret;
-	
+		
 	next:	
-		value++;
+		curr++;
+	}while(1);
+	
+	// hash_next
+	if(curr->data.ptr != NULL)
+		return hash_iter((hash_t *)curr->data.ptr, func, arg, flags);
+	
+	if((flags & HASH_ITER_END) != 0){
+		if( (ret = func(curr, arg)) != ITER_CONTINUE)
+			return ret;
 	}
-	if(value->data.ptr != NULL)
-		return hash_iter((hash_t *)value->data.ptr, func, arg1, arg2);
 	
 	return ITER_OK;
 } // }}}

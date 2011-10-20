@@ -513,7 +513,7 @@ struct fuse_operations fuse_operations = { // {{{
 	.release = fuseh_release,
 }; // }}}
 
-static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root, void *null){ // {{{
+static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root){ // {{{
 	ssize_t                ret;
 	data_t                *data;
 	hash_t                *item_config;
@@ -538,7 +538,7 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root, void *null){ /
 	}
 	return ITER_CONTINUE;
 } // }}}
-static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root, void *null){ // {{{
+static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	ssize_t                ret;
 	data_t                *data;
 	vfs_item              *vfs_item;
@@ -571,7 +571,7 @@ static int fuseb_destroy(backend_t *backend){ // {{{
 	if( (root = vfs_find(mountpoint)) == NULL)
 		return 0;
 	
-	hash_iter(items, (hash_iterator)&fuseb_item_destroy, (void *)root, NULL);
+	hash_iter(items, (hash_iterator)&fuseb_item_destroy, (void *)root, 0);
 	
 	if(root->childs == NULL)
 		vfs_destroy(root);
@@ -592,7 +592,7 @@ static int fuseb_configure(backend_t *backend, config_t *config){ // {{{
 		if( (root = vfs_create(mountpoint, multithreaded)) == NULL)
 			return error("fuse fs creation failed");
 	
-	hash_iter(items, (hash_iterator)&fuseb_item_configure, (void *)root, NULL);
+	hash_iter(items, (hash_iterator)&fuseb_item_configure, (void *)root, 0);
 	return 0;
 } // }}}
 

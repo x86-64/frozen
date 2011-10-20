@@ -3,13 +3,14 @@
 #include <raw/raw_t.h>
 #include <slider/slider_t.h>
 
-typedef struct data_hash_t_items_iter {
-	fastcall_transfer     *fargs;
+#define HASH_INITIAL_SIZE 8
+
+typedef struct hash_t_ctx {
 	uintmax_t              step;
 	uintmax_t              buffer_data_offset;
 	data_t                *sl_holder;
 	data_t                *sl_data;
-} data_hash_t_items_iter;
+} hash_t_ctx;
 
 static ssize_t data_hash_t_compare_iter(hash_t *hash1_item, hash_t *hash2, void *null){ // {{{
 	hash_t                *hash2_item;
@@ -23,7 +24,7 @@ static ssize_t data_hash_t_compare_iter(hash_t *hash1_item, hash_t *hash2, void 
 	
 	return ITER_CONTINUE;
 } // }}}
-static ssize_t data_hash_t_transfer_iter(hash_t *hash_item, data_hash_t_items_iter *ctx, void *null){ // {{{
+static ssize_t data_hash_t_transfer_iter(hash_t *hash_item, hash_t_ctx *ctx, void *null){ // {{{
 	switch(ctx->step){
 		case 0:; // step one: count all elements
 			ctx->buffer_data_offset += sizeof(hash_t);
@@ -43,6 +44,13 @@ static ssize_t data_hash_t_transfer_iter(hash_t *hash_item, data_hash_t_items_it
 			
 			break;
 	};
+	return ITER_CONTINUE;
+} // }}}
+static ssize_t data_hash_t_convert_iter(hash_t *hash_item, hash_t_ctx *ctx, void *null){ // {{{
+	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, ctx->sl_data };
+	if(data_query(&hash_item->data, &r_convert) < 0)
+		return ITER_BREAK;
+	
 	return ITER_CONTINUE;
 } // }}}
 
@@ -69,15 +77,15 @@ static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 	hash1 = data1->ptr;
 	hash2 = fargs->data2->ptr;
 
-	if(hash_iter(hash1, (hash_iterator)&data_hash_t_compare_iter, hash2, NULL) == ITER_OK){
+	if(hash_iter(hash1, (hash_iterator)&data_hash_t_compare_iter, hash2, 0) == ITER_OK){
 		return 0;
 	}
 	return 2;
 } // }}}
 static ssize_t data_hash_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
-	data_hash_t_items_iter ctx               = { fargs };
+	hash_t_ctx             ctx               = {};
 	
-	if(hash_iter((hash_t *)data->ptr, (hash_iterator)&data_hash_t_transfer_iter, &ctx, NULL) != ITER_OK)
+	if(hash_iter((hash_t *)data->ptr, (hash_iterator)&data_hash_t_transfer_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
 		return -EFAULT;
 	
 	data_t                 d_sl_holder       = DATA_SLIDERT(fargs->dest, 0);
@@ -87,7 +95,7 @@ static ssize_t data_hash_t_transfer(data_t *data, fastcall_transfer *fargs){ // 
 	ctx.sl_holder = &d_sl_holder;
 	ctx.sl_data   = &d_sl_data;
 	
-	if(hash_iter((hash_t *)data->ptr, (hash_iterator)&data_hash_t_transfer_iter, &ctx, NULL) != ITER_OK)
+	if(hash_iter((hash_t *)data->ptr, (hash_iterator)&data_hash_t_transfer_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
 		return -EFAULT;
 	
 	return 0;
@@ -100,6 +108,56 @@ static ssize_t data_hash_t_read(data_t *data, fastcall_read *fargs){ // {{{
 	
 	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_buffer };
 	return data_hash_t_transfer(data, &r_transfer);
+} // }}}
+static ssize_t data_hash_t_convert(data_t *data, fastcall_convert *fargs){ // {{{
+	hash_t                *hash;
+	hash_t                *curr;
+	uintmax_t              nelements         = 0;
+	uintmax_t              hash_nelements    = 0;
+	data_t                 sl_src            = DATA_SLIDERT(fargs->src, 0);
+	
+	hash_nelements = HASH_INITIAL_SIZE;
+	hash           = hash_new(hash_nelements);
+	
+	for(curr = hash;; curr++){ 
+		fastcall_read r_read = {
+			{ 5, ACTION_READ },
+			0,
+			curr,
+			sizeof(hash_t)
+		};
+		if(data_query(&sl_src, &r_read) < 0)
+			return -EFAULT;
+		
+		curr->data.ptr  = NULL;
+		
+		nelements++;
+		if(nelements + 1 == hash_nelements){
+			// expand hash
+			hash_t             *new_hash;
+			
+			hash_nelements *= 2;
+			new_hash = hash_new(hash_nelements);
+			memcpy(new_hash, hash, nelements * sizeof(hash_t));
+			free(hash); // !!! free, not hash_free
+			
+			hash = new_hash;
+			curr = new_hash + (curr - hash);
+		}
+
+		if(curr->key == hash_ptr_end)
+			break;
+	}
+
+	hash_t_ctx ctx = { .sl_data = &sl_src };
+	
+	if(hash_iter(hash, (hash_iterator)&data_hash_t_convert_iter, &ctx, 0) != ITER_OK){
+		hash_free(hash);
+		return -EFAULT;
+	}
+	
+	data->ptr = hash;
+	return 0;
 } // }}}
 
 /*
@@ -275,5 +333,6 @@ data_proto_t hash_t_proto = {
 		[ACTION_COMPARE]  = (f_data_func)&data_hash_t_compare,
 		[ACTION_TRANSFER] = (f_data_func)&data_hash_t_transfer,
 		[ACTION_READ]     = (f_data_func)&data_hash_t_read,
+		[ACTION_CONVERT]  = (f_data_func)&data_hash_t_convert,
 	}
 };

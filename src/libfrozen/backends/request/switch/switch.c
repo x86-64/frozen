@@ -53,11 +53,13 @@ typedef struct switch_context {
 	ssize_t                ret;
 } switch_context;
 
-static ssize_t switch_config_iterator(hash_t *rule_item, list *childs, switch_userdata *userdata){ // {{{
+static ssize_t switch_config_iterator(hash_t *rule_item, backend_t *backend){ // {{{
 	ssize_t                ret;
 	hash_t                *rule;
 	switch_rule           *new_rule;
-	
+	switch_userdata       *userdata          = (switch_userdata *)backend->userdata;
+	list                  *childs            = &backend->childs;
+
 	if( (new_rule = calloc(sizeof(switch_rule), 1)) == NULL)
 		return ITER_BREAK;
 	
@@ -120,12 +122,11 @@ static int switch_destroy(backend_t *backend){ // {{{
 } // }}}
 static int switch_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	hash_t                *rules;
-	switch_userdata       *userdata          = (switch_userdata *)backend->userdata;
+	hash_t                *rules             = NULL;
 	
 	hash_data_copy(ret, TYPE_HASHT, rules, config, HK(rules));
 	
-	if(hash_iter(rules, (hash_iterator)&switch_config_iterator, &backend->childs, userdata) != ITER_OK)
+	if(hash_iter(rules, (hash_iterator)&switch_config_iterator, backend, 0) != ITER_OK)
 		return error("failed to configure switch");
 	
 	return 0;

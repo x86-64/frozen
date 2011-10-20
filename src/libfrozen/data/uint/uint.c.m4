@@ -102,35 +102,30 @@ static ssize_t data_[]NAME()_convert(data_t *dst, fastcall_convert *fargs){ // {
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
-	fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) };
-	if(data_query(fargs->src, &r_read) != 0)
-		return -EFAULT;
-	
 	if(dst->ptr == NULL){ // no buffer, alloc new
 		if(data_[]NAME()_alloc(dst, NULL) != 0)
 			return -ENOMEM;
 	}
 
 	switch( fargs->src->type ){
-		case TYPE_STRINGT:; 
+		case TYPE_STRINGT:; // TODO fix it for slider_t 
+			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) };
+			if(data_query(fargs->src, &r_read_str) != 0){
+				// TODO memleak
+				return -EFAULT;
+			}
+			
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
 			return 0;
-		case TYPE_UINT8T: 
-		case TYPE_UINT16T: 
-		case TYPE_UINT32T: 
-		case TYPE_UINT64T: 
-		case TYPE_INT8T: 
-		case TYPE_INT16T: 
-		case TYPE_INT32T: 
-		case TYPE_INT64T: 
-		case TYPE_OFFT:
-		case TYPE_SIZET: 
-		case TYPE_INTT: 
-		case TYPE_UINTT:
+		default:;
+			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
+			if(data_query(fargs->src, &r_read) != 0){
+				// TODO memleak
+				return -EFAULT;
+			}
+			
 			*(TYPE *)(dst->ptr) = *((TYPE *)buffer);
 			return 0;
-		default:
-			break;
 	};
 	return -ENOSYS;
 } // }}}

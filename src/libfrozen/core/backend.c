@@ -135,7 +135,7 @@ error:
 	return NULL;
 } // }}}
 
-static ssize_t     backend_new_iterator(hash_t *item, backend_new_ctx *ctx, void *null){ // {{{
+static ssize_t     backend_new_iterator(hash_t *item, backend_new_ctx *ctx){ // {{{
 	ssize_t                ret;
 	backend_t             *backend;
 	hash_t                *backend_cfg;
@@ -371,7 +371,7 @@ backend_t *     backend_new          (hash_t *config){ // {{{
 	backend_t             *child;
 	backend_new_ctx        ctx               = { LIST_INITIALIZER, LIST_FREE_ITEM };
 	
-	if(hash_iter(config, (hash_iterator)&backend_new_iterator, &ctx, NULL) == ITER_OK){
+	if(hash_iter(config, (hash_iterator)&backend_new_iterator, &ctx, HASH_ITER_NULL) == ITER_OK){
 		if(ctx.backend_prev == LIST_FREE_ITEM)
 			return NULL;
 		

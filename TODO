@@ -1,4 +1,5 @@
-- data 'hash_t' convert functions
+- pack\unpack ?
+- data 'raw' convert functions
 - forward/reverse convert functions
 - documentation for data, hash, backend
 - release to github

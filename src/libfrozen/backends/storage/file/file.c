@@ -187,7 +187,7 @@ typedef struct file_gen_context {
 	hash_t                *fork_req;
 } file_gen_context;
 
-static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx, void *null){ // {{{
+static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx){ // {{{
 	size_t                 ret;
 	char                  *str;
 	size_t                 str_size;
@@ -259,7 +259,7 @@ error:
 static char *            file_gen_filepath_from_hasht(config_t *config, config_t *fork_req){ // {{{
 	file_gen_context       ctx               = { NULL, 0, fork_req };
 	
-	if(hash_iter(config, (hash_iterator)&file_gen_iterator, &ctx, NULL) != ITER_OK){
+	if(hash_iter(config, (hash_iterator)&file_gen_iterator, &ctx, 0) != ITER_OK){
 		if(ctx.buffer)
 			free(ctx.buffer);
 		

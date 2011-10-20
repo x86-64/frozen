@@ -44,10 +44,12 @@ static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
 static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	raw_t                 *raw_data = ((raw_t *)data->ptr);
 	
-	if(raw_data->ptr)
-		free(raw_data->ptr);
-	
-	free(raw_data);
+	if(raw_data){
+		if(raw_data->ptr)
+			free(raw_data->ptr);
+		
+		free(raw_data);
+	}
 	return 0;
 } // }}}
 

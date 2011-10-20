@@ -14,14 +14,13 @@ static ipc_proto_t *   ipc_string_to_proto(char *string){ // {{{
 	}
 	return NULL;
 } // }}}
-ipc_role  ipc_string_to_role(char *string){ // {{{
+       ipc_role        ipc_string_to_role(char *string){ // {{{
 	if(string != NULL){
 		if( strcmp(string, "server") == 0) return ROLE_SERVER;
 		if( strcmp(string, "client") == 0) return ROLE_CLIENT;
 	}
 	return ROLE_INVALID;
 } // }}}
-
 
 static int ipc_init(backend_t *backend){ // {{{
 	if((backend->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
@@ -63,18 +62,12 @@ static ssize_t ipc_backend_query(backend_t *backend, request_t *request){ // {{{
 
 backend_t ipc_proto = {
 	.class          = "communication/ipc",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &ipc_init,
 	.func_configure = &ipc_configure,
 	.func_destroy   = &ipc_destroy,
-	{
-		.func_create = &ipc_backend_query,
-		.func_set    = &ipc_backend_query,
-		.func_get    = &ipc_backend_query,
-		.func_delete = &ipc_backend_query,
-		.func_move   = &ipc_backend_query,
-		.func_count  = &ipc_backend_query,
-		.func_custom = &ipc_backend_query
+	.backend_type_hash = {
+		.func_handler = &ipc_backend_query,
 	}
 };
 

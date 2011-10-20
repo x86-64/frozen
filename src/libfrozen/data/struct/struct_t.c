@@ -16,7 +16,7 @@ typedef struct struct_iter_ctx {
 	uintmax_t              buffer_size;
 } struct_iter_ctx;
 
-static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
+static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 	data_t                *curr_data;
 	data_t                 need_data;
 	uintmax_t              need_data_free    = 0;
@@ -62,7 +62,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx, void *null){
 	return ITER_CONTINUE;
 }
 
-static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx, void *null){
+static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 	data_t                *curr_data;
 	data_t                 need_data;
 	uintmax_t              need_data_free          = 0;
@@ -113,7 +113,7 @@ size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buff
 	iter_ctx.buffer      = buffer;
 	iter_ctx.curr_offset = 0;
 	
-	if(hash_iter(structure, &struct_iter_pack, &iter_ctx, NULL) == ITER_BREAK)
+	if(hash_iter(structure, &struct_iter_pack, &iter_ctx, 0) == ITER_BREAK)
 		return 0;
 	
 	return (size_t)iter_ctx.curr_offset;
@@ -132,7 +132,7 @@ size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buff
 	iter_ctx.buffer_size = r_len.length;
 	iter_ctx.curr_offset = 0;
 	
-	if(hash_iter(structure, &struct_iter_unpack, &iter_ctx, NULL) == ITER_BREAK)
+	if(hash_iter(structure, &struct_iter_unpack, &iter_ctx, 0) == ITER_BREAK)
 		return 0;
 	
 	return (size_t)iter_ctx.curr_offset;

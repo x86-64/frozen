@@ -143,6 +143,8 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	char                  *role_str;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
+	userdata->buffer = HK(buffer);
+
 	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
 	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));

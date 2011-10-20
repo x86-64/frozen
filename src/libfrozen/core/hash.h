@@ -8,7 +8,12 @@ struct hash_t {
 	data_t          data;
 };
 
-typedef ssize_t  (*hash_iterator)(hash_t *, void *, void *);
+typedef enum hash_iter_flags {
+	HASH_ITER_NULL = 1,
+	HASH_ITER_END  = 2
+} hash_iter_flags;
+
+typedef ssize_t  (*hash_iterator)(hash_t *, void *);
 
 #define hash_ptr_null     (hash_key_t)-1
 #define hash_ptr_end      (hash_key_t)-2 
@@ -27,17 +32,8 @@ API void               hash_free                    (hash_t *hash);
 
 // general functions
 API hash_t *           hash_find                    (hash_t *hash, hash_key_t key);
-API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, void *arg2);
+API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, hash_iter_flags flags);
 API size_t             hash_nelements               (hash_t *hash);
-
-// hash <=> buffer
-//API ssize_t            hash_to_buffer               (hash_t  *hash, buffer_t *buffer);
-//API ssize_t            hash_from_buffer             (hash_t **hash, buffer_t *buffer);
-
-// hash <=> raw memory
-//API ssize_t            hash_to_memory               (hash_t  *hash, void *memory, size_t memory_size);
-//API ssize_t            hash_reread_from_memory      (hash_t  *hash, void *memory, size_t memory_size);
-//API ssize_t            hash_from_memory             (hash_t **hash, void *memory, size_t memory_size);
 
 _inline
 API hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
