@@ -9,20 +9,29 @@ START_TEST(test_backend_ipc){
                         hash_end
                 )},
                 { 0, DATA_HASHT(
+			{ HK(class),       DATA_STRING("request/explode")             },
+			hash_end
+		)},
+                { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("ipc")                         },
                         { HK(type),        DATA_STRING("shmem")                       },
                         { HK(role),        DATA_STRING("server")                      },
                         { HK(key),         DATA_UINT32T(1000)                         },
                         hash_end
                 )},
-                { 0, DATA_HASHT(
+                // link ....
+		{ 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("ipc")                         },
                         { HK(type),        DATA_STRING("shmem")                       },
                         { HK(role),        DATA_STRING("client")                      },
                         { HK(key),         DATA_UINT32T(1000)                         },
                         hash_end
                 )},
-                hash_end
+                { 0, DATA_HASHT(
+			{ HK(class),       DATA_STRING("request/implode")             },
+			hash_end
+		)},
+		hash_end
 	};
 	
 	backend = backend_new(settings);

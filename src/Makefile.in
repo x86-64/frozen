@@ -87,6 +87,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/implode/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/rewrite/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \

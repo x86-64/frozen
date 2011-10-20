@@ -842,6 +842,8 @@ enable_backendfuse
 enable_backendbalancer
 enable_backenddebug
 enable_backendemitter
+enable_backendimplode
+enable_backendexplode
 enable_backendrewrite
 enable_backendswitch
 enable_backendinsert_sort
@@ -1581,6 +1583,10 @@ Optional Features:
   --disable-backend-debug disable backend debug
   --disable-backend-emitter
                           disable backend emitter
+  --disable-backend-implode
+                          disable backend implode
+  --disable-backend-explode
+                          disable backend explode
   --disable-backend-rewrite
                           disable backend rewrite
   --disable-backend-switch
@@ -19600,6 +19606,79 @@ fi
 		BACKEND_MAKEFILE_request_emitter=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/emitter/libfrozen_backend_emitter.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendimplode was given.
+if test "${enable_backendimplode+set}" = set; then :
+  enableval=$enable_backendimplode;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendimplode}" = "yes"; then
+			enable_backendimplode="no"
+		else
+			enable_backendimplode="yes"
+		fi
+	fi
+
+	if test "${enable_backendimplode}" = "yes"; then
+		BACKEND_DIR_implode="request/implode"
+		BACKEND_DEP_implode=""
+				BACKEND_SELECTED="$BACKEND_SELECTED implode"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_request_implode" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/implode/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/implode"
+
+		BACKEND_MAKEFILE_request_implode=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/implode/libfrozen_backend_implode.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendexplode was given.
+if test "${enable_backendexplode+set}" = set; then :
+  enableval=$enable_backendexplode;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendexplode}" = "yes"; then
+			enable_backendexplode="no"
+		else
+			enable_backendexplode="yes"
+		fi
+	fi
+
+	if test "${enable_backendexplode}" = "yes"; then
+		BACKEND_DIR_explode="request/implode"
+		BACKEND_DEP_explode=""
+				BACKEND_SELECTED="$BACKEND_SELECTED explode"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_request_implode" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/implode/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/implode"
+
+		BACKEND_MAKEFILE_request_implode=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/implode/libfrozen_backend_implode.la"
 
 	fi
 

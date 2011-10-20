@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -143360, "src/libfrozen/backends/request/implode/implode.c: calloc failed" },
  { -139266, "src/libfrozen/backends/backend/factory/factory.c: child creation error" },
  { -139265, "src/libfrozen/backends/backend/factory/factory.c: HK(config) not supplied" },
  { -139264, "src/libfrozen/backends/backend/factory/factory.c: calloc failed" },
@@ -60,10 +61,15 @@ static err_item errs_list[] = {
  { -61441, "src/libfrozen/backends/request/balancer/balancer.c: invalid linear_len supplied" },
  { -61440, "src/libfrozen/backends/request/balancer/balancer.c: calloc returns null" },
  { -57348, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no key_out supplied" },
+ { -57348, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no key_out supplied" },
  { -57347, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no buffer supplied" },
+ { -57347, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no buffer supplied" },
  { -57346, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: backend insert-sort engine not found" },
+ { -57346, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort engine not found" },
  { -57345, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: backend insert-sort parameter engine not supplied" },
+ { -57345, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort parameter engine not supplied" },
  { -57344, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: calloc failed" },
+ { -57344, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: calloc failed" },
  { -53251, "src/libfrozen/backends/request/rewrite/rewrite.c: pass failed" },
  { -53250, "src/libfrozen/backends/request/rewrite/rewrite.c: script parse failed" },
  { -53249, "src/libfrozen/backends/request/rewrite/rewrite.c: script not supplied" },
