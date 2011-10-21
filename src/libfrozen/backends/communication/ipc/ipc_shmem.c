@@ -37,7 +37,6 @@ typedef struct ipc_shmem_block {
 	volatile size_t        status;
 	volatile size_t        return_result;
 	unsigned int           data_rel_ptr;
-	uintmax_t              size;
 
 	sem_t                  sem_done;
 } ipc_shmem_block;
@@ -117,7 +116,7 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 		
 		// run request
 		request_t req[] = {
-			{ userdata->buffer, DATA_RAW( userdata->shmdata + block->data_rel_ptr, block->size ) },
+			{ userdata->buffer, DATA_RAW( userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size ) },
 			hash_end
 		};
 		backend_pass(((ipc_t *)ipc)->backend, req);
@@ -231,10 +230,12 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		return error("strange error");
 	
 	// write data to ipc memory
-	fastcall_read r_read = { { 5, ACTION_READ }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
-	data_query(buffer, &r_read);
+	data_t               d_ipcmem  = DATA_RAW(userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
+	fastcall_convert_to  r_convert = { { 4, ACTION_CONVERT_TO }, &d_ipcmem, FORMAT_BINARY };
+	if( (ret = data_query(buffer, &r_convert)) < 0)
+		return error("cant write buffer to ipc memory");
 	
-	block->size          = r_read.buffer_size;
+	//block->size          = r_read.buffer_size;
 	block->return_result = (f_async == 0) ? 1 : 0;
 	
 	if( (ret = shmem_block_status(userdata, block, STATUS_WRITING, STATUS_WRITTEN)) < 0)

@@ -41,19 +41,23 @@ static ssize_t implode_request(backend_t *backend, request_t *request){ // {{{
 static ssize_t explode_request(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                *buffer;
-	hash_t                *r_next            = NULL;
+	data_t                 r_hash            = DATA_PTR_HASHT(NULL);
 	plode_userdata        *userdata          = (plode_userdata *)backend->userdata;
 	
 	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
 		return -EINVAL;
 	
-	data_convert(ret, TYPE_HASHT, r_next, buffer);
-	if(ret != 0 || r_next == NULL)
+	fastcall_convert  r_convert = { { 4, ACTION_CONVERT }, &r_hash, FORMAT_BINARY };
+	if( (ret = data_query(buffer, &r_convert)) < 0)
 		return -EFAULT;
 	
-	ret = ( (ret = backend_pass(backend, r_next)) < 0) ? ret : -EEXIST;
+	if(r_hash.ptr == NULL)
+		return -EFAULT;
 	
-	hash_free(r_next);
+	ret = ( (ret = backend_pass(backend, r_hash.ptr)) < 0) ? ret : -EEXIST;
+	
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&r_hash, &r_free);
 	
 	return ret;
 } // }}}

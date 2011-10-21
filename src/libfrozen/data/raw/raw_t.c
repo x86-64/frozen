@@ -41,6 +41,20 @@ static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	fargs->dest->type = src->type;
 	return 0;
 } // }}}
+static ssize_t data_raw_alloc(data_t *dst, fastcall_alloc *fargs){ // {{{
+	raw_t                 *dst_data;
+
+	if( (dst_data = dst->ptr = calloc(sizeof(raw_t), 1)) == NULL)
+		return -ENOMEM;
+	
+	if( (dst_data->ptr = malloc(fargs->length)) == NULL){
+		free(dst_data);
+		dst->ptr = NULL;
+		return -ENOMEM;
+	}
+	dst_data->size = fargs->length;
+	return 0;
+} // }}}
 static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	raw_t                 *raw_data = ((raw_t *)data->ptr);
 	
@@ -51,6 +65,64 @@ static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 		free(raw_data);
 	}
 	return 0;
+} // }}}
+static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
+	raw_t                 *src_data = ((raw_t *)src->ptr);
+	
+	if(fargs->header.nargs < 4)
+		return -ENOSYS;
+	
+	switch(fargs->format){
+		case FORMAT_BINARY:;
+			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0,                     &src_data->size, sizeof(src_data->size) };
+			if( (ret = data_query(fargs->dest, &r_write1)) < 0)
+				return ret;
+	
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, sizeof(src_data->size), src_data->ptr,  src_data->size };
+			if( (ret = data_query(fargs->dest, &r_write2)) < 0)
+				return ret;
+			
+			return 0;
+		default: break;
+	};
+	return -ENOSYS;
+} // }}}
+static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	raw_t                  new_data;
+	raw_t                 *dst_data = ((raw_t *)dst->ptr);
+	
+	if(fargs->header.nargs < 4)
+		return -ENOSYS;
+
+	switch(fargs->format){
+		case FORMAT_BINARY:;
+			fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &new_data.size, sizeof(new_data.size) };
+			if( (ret = data_query(fargs->src, &r_read1)) < 0)
+				return ret;
+			
+			if(dst_data == NULL){
+				fastcall_alloc r_alloc = { { 3, ACTION_ALLOC }, new_data.size };
+				if( (ret = data_query(dst, &r_alloc)) < 0)
+					return ret;
+
+				dst_data = (raw_t *)dst->ptr;
+			}else{
+				if(dst_data->size < new_data.size || dst_data->ptr == NULL){
+					if( (dst_data->ptr = realloc(dst_data->ptr, new_data.size)) == NULL)
+						return -ENOMEM;
+				}
+			}
+			
+			fastcall_read r_read2 = { { 5, ACTION_READ }, sizeof(new_data.size), dst_data->ptr, dst_data->size };
+			if( (ret = data_query(fargs->src, &r_read2)) < 0)
+				return ret;
+			
+			return 0;
+		default: break;
+	};
+	return -ENOSYS;
 } // }}}
 
 data_proto_t raw_t_proto = {
@@ -63,7 +135,10 @@ data_proto_t raw_t_proto = {
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
 		[ACTION_TRANSFER]    = (f_data_func)&data_raw_transfer,
 		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
+		[ACTION_ALLOC]       = (f_data_func)&data_raw_alloc,
 		[ACTION_FREE]        = (f_data_func)&data_raw_free,
+		[ACTION_CONVERT_TO]  = (f_data_func)&data_raw_convert_to,
+		[ACTION_CONVERT_FROM]= (f_data_func)&data_raw_convert_from,
 	}
 };
 

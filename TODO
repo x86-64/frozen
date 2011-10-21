@@ -1,6 +1,4 @@
-- pack\unpack ?
-- data 'raw' convert functions
-- forward/reverse convert functions
+- convert bugs
 - documentation for data, hash, backend
 - release to github
 - multi-threading

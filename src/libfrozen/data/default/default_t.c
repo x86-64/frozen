@@ -201,8 +201,18 @@ static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null 
 static ssize_t       data_default_init          (data_t *dst, fastcall_init *fargs){ // {{{
 	data_t                 d_initstr         = DATA_STRING(fargs->string);
 	
-	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_initstr };
-	return data_query(dst, &r_convert);
+	fastcall_convert r_convert = { { 3, ACTION_CONVERT }, dst };
+	return data_query(&d_initstr, &r_convert);
+} // }}}
+static ssize_t       data_default_convert       (data_t *src, fastcall_convert *fargs){ // {{{
+	ssize_t                ret;
+	
+	fastcall_convert_from r_convert_from = { { fargs->header.nargs, ACTION_CONVERT_FROM }, src, fargs->format };
+	if( (ret = data_query(fargs->dest, &r_convert_from)) != -ENOSYS )
+		return ret;
+	
+	fastcall_convert_to   r_convert_to   = { { fargs->header.nargs, ACTION_CONVERT_TO }, fargs->dest, fargs->format };
+	return data_query(src, &r_convert_to);
 } // }}}
 
 data_proto_t default_t_proto = {
@@ -219,6 +229,7 @@ data_proto_t default_t_proto = {
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
 		[ACTION_INIT]        = (f_data_func)&data_default_init,
+		[ACTION_CONVERT]     = (f_data_func)&data_default_convert,
 	}
 };
 

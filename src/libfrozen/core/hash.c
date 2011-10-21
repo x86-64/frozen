@@ -169,8 +169,8 @@ start:
 		}
 		
 		data_t           d_key     = DATA_HASHKEYT(element->key);
-		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_key };
-		data_query(&d_string, &r_convert);
+		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_string };
+		data_query(&d_key, &r_convert);
 
 		printf(" - %s [%s] -> %p", (char *)d_string.ptr, data_string_from_type(element->data.type), element->data.ptr);
 		

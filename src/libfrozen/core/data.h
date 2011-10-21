@@ -16,7 +16,6 @@ typedef enum data_functions {
 	ACTION_INIT,
 	ACTION_PHYSICALLEN,
 	ACTION_LOGICALLEN,
-	ACTION_CONVERTLEN,
 	ACTION_COMPARE,
 	ACTION_INCREMENT,
 	ACTION_DECREMENT,
@@ -27,6 +26,8 @@ typedef enum data_functions {
 	ACTION_READ,
 	ACTION_WRITE,
 	ACTION_CONVERT,
+	ACTION_CONVERT_TO,
+	ACTION_CONVERT_FROM,
 	ACTION_TRANSFER,
 	ACTION_COPY,
 	ACTION_IS_NULL,
@@ -35,6 +36,11 @@ typedef enum data_functions {
 
 	ACTION_INVALID
 } data_functions;
+
+typedef enum data_formats {
+	FORMAT_BINARY,
+	FORMAT_HUMANREADABLE
+} data_formats;
 
 typedef enum data_api_type {
 	API_DEFAULT_HANDLER,
@@ -102,10 +108,19 @@ typedef struct fastcall_transfer {
 	data_t                *dest;
 } fastcall_transfer;
 
-typedef struct fastcall_convert {
+struct fastcall_convert_from {
 	fastcall_header        header;
 	data_t                *src;
-} fastcall_convert;
+	uintmax_t              format;
+};
+struct fastcall_convert_to {
+	fastcall_header        header;
+	data_t                *dest;
+	uintmax_t              format;
+};
+typedef struct fastcall_convert_to    fastcall_convert;
+typedef struct fastcall_convert_to    fastcall_convert_to;
+typedef struct fastcall_convert_from  fastcall_convert_from;
 
 typedef struct fastcall_compare {
 	fastcall_header        header;
@@ -169,6 +184,8 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_LOGICALLEN] = 3,
 	[ACTION_COPY] = 3,
 	[ACTION_CONVERT] = 3,
+	[ACTION_CONVERT_TO] = 3,
+	[ACTION_CONVERT_FROM] = 3,
 	[ACTION_COMPARE] = 3,
 	[ACTION_ALLOC] = 3,
 	[ACTION_FREE] = 2,
@@ -217,8 +234,8 @@ API ssize_t              data_query             (data_t *data, void *args);
 
 #define data_convert(_ret, _type, _dst, _src) {                                \
 	data_t __data_dst = { _type, REF_##_type(_dst) };                      \
-	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, _src };         \
-	_ret = data_query(&__data_dst, &_r_convert);                           \
+	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
+	_ret = data_query(_src, &_r_convert);                                  \
 	_dst = DEREF_##_type(&__data_dst);                                     \
 	(void)_ret;                                                            \
 };

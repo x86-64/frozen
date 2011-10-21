@@ -96,7 +96,21 @@ static ssize_t data_[]NAME()_arith_no_arg(data_t *data1, fastcall_arith_no_arg *
 	*(TYPE *)(data1->ptr) = result;
 	return ret;
 } // }}}
-static ssize_t data_[]NAME()_convert(data_t *dst, fastcall_convert *fargs){ // {{{
+static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	switch( src->type ){
+		default:;
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &src->ptr, sizeof(TYPE) };
+			if(data_query(fargs->dest, &r_write) != 0)
+				return -EFAULT;
+			
+			return 0;
+	};
+	return -ENOSYS;
+} // }}}
+static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	char                   buffer[[DEF_BUFFER_SIZE]] = { 0 };
 	
 	if(fargs->src == NULL)
@@ -161,7 +175,8 @@ data_proto_t NAME()_proto = {
 		[[ACTION_DIVIDE]]         = (f_data_func)&data_[]NAME()_arith,
 		[[ACTION_INCREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
 		[[ACTION_DECREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
-		[[ACTION_CONVERT]]        = (f_data_func)&data_[]NAME()_convert,
+		[[ACTION_CONVERT_TO]]     = (f_data_func)&data_[]NAME()_convert_to,
+		[[ACTION_CONVERT_FROM]]   = (f_data_func)&data_[]NAME()_convert_from,
 		[[ACTION_TRANSFER]]       = (f_data_func)&data_[]NAME()_transfer,
 		[[ACTION_IS_NULL]]        = (f_data_func)&data_[]NAME()_is_null,
 	}

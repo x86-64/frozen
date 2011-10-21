@@ -5,7 +5,7 @@
 #define DATA_C
 #include <libfrozen.h>
 
-ssize_t              data_validate(data_t *data){ // {{{
+ssize_t              data_validate          (data_t *data){ // {{{
 	if(data == NULL || data->type == TYPE_INVALID || (unsigned)data->type >= data_protos_size)
 		return 0;
 	

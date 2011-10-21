@@ -17,8 +17,13 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			return ret;
 		
 		case ACTION_TRANSFER:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_TRANSFER ](data, fargs);
-		
+		case ACTION_CONVERT:
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ fargs->action ](data, fargs);
+
+		case ACTION_CONVERT_TO:
+		case ACTION_CONVERT_FROM:
+			return -ENOSYS;
+
 		default:
 			break;
 	};

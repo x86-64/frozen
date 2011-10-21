@@ -32,9 +32,9 @@ typedef enum data_functions {
 
 	ACTION_ALLOC,
 	ACTION_FREE,
+	ACTION_INIT,
 	ACTION_PHYSICALLEN,
 	ACTION_LOGICALLEN,
-	ACTION_CONVERTLEN,
 	ACTION_COMPARE,
 	ACTION_INCREMENT,
 	ACTION_DECREMENT,
@@ -45,6 +45,8 @@ typedef enum data_functions {
 	ACTION_READ,
 	ACTION_WRITE,
 	ACTION_CONVERT,
+	ACTION_CONVERT_TO,
+	ACTION_CONVERT_FROM,
 	ACTION_TRANSFER,
 	ACTION_COPY,
 	ACTION_IS_NULL,
@@ -53,6 +55,11 @@ typedef enum data_functions {
 
 	ACTION_INVALID
 } data_functions;
+
+typedef enum data_formats {
+	FORMAT_BINARY,
+	FORMAT_HUMANREADABLE
+} data_formats;
 
 typedef enum api_types {
 	API_HASH = 1,
