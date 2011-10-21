@@ -17,7 +17,6 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			return ret;
 		
 		case ACTION_TRANSFER:
-		case ACTION_CONVERT:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ fargs->action ](data, fargs);
 
 		case ACTION_CONVERT_TO:

@@ -46,7 +46,7 @@ typedef struct ipc_shmem_userdata {
 	ipc_role               role;
 	forced_states          forced_state;
 	hash_key_t             buffer;
-	uintmax_t              noreread;
+	uintmax_t              return_result;
 
 	ipc_shmem_header      *shmaddr;
 	ipc_shmem_block       *shmblocks;
@@ -142,8 +142,9 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	char                  *role_str;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
-	userdata->buffer = HK(buffer);
-
+	userdata->buffer        = HK(buffer);
+	userdata->return_result = 1;
+	
 	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
 	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
 	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
@@ -151,7 +152,7 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
 	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,   config, HK(buffer));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->noreread, config, HK(noreread));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->return_result, config, HK(return_result));
 
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -246,9 +247,9 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		sem_wait(&block->sem_done);
 		
 		// read request back
-		if(userdata->noreread == 0){
-			fastcall_read r_write = { { 5, ACTION_WRITE }, 0, userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size };
-			data_query(buffer, &r_write);
+		if(userdata->return_result != 0){
+			fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT_BINARY };
+			data_query(buffer, &r_convert_from);
 		}
 		ret = -EEXIST;
 		

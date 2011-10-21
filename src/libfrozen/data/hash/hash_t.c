@@ -32,14 +32,13 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 		case 1:; // step two: write to buffer
 			
 			// write holder
-			data_t            d_holder   = DATA_RAW(hash_item, sizeof(hash_t));
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, ctx->sl_holder };
-			if(data_query(&d_holder, &r_transfer) < 0)
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, hash_item, sizeof(hash_t) };
+			if(data_query(ctx->sl_holder, &r_write) < 0)
 				return ITER_BREAK;
 			
 			if(hash_item->key != hash_ptr_end && hash_item->key != hash_ptr_null){
 				// write data
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT_BINARY }; // TODO too bad _TO
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT_BINARY };
 				if(data_query(&hash_item->data, &r_convert) < 0)
 					return ITER_BREAK;
 			}
@@ -48,8 +47,8 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	return ITER_CONTINUE;
 } // }}}
 static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
-	fastcall_convert r_convert = { { 4, ACTION_CONVERT }, &hash_item->data, FORMAT_BINARY };
-	if(data_query(ctx->sl_data, &r_convert) < 0)
+	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT_BINARY };
+	if(data_query(&hash_item->data, &r_convert) < 0)
 		return ITER_BREAK;
 	
 	return ITER_CONTINUE;

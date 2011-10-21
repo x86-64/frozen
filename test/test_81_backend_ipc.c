@@ -44,9 +44,9 @@ START_TEST(test_backend_ipc){
 	
 	// create new
 	request_t  r_create[] = {
-		{ HK(action),     DATA_UINT32T(ACTION_CREATE) },
+		{ HK(action),     DATA_UINT32T(ACTION_CREATE)      },
 		{ HK(size),       DATA_SIZET(sizeof(str))          },
-		//{ HK(buffer),     DATA_RAW(str, sizeof(str))       },
+		{ HK(buffer),     DATA_RAW(str, sizeof(str))       },
 		//{ HK(ret),        DATA_PTR_SIZET(&ret)             },
 		hash_end
 	};

@@ -168,8 +168,8 @@ start:
 			goto next_item;
 		}
 		
-		data_t           d_key     = DATA_HASHKEYT(element->key);
-		fastcall_convert r_convert = { { 3, ACTION_CONVERT }, &d_string };
+		data_t              d_key     = DATA_HASHKEYT(element->key);
+		fastcall_convert_to r_convert = { { 3, ACTION_CONVERT_TO }, &d_string };
 		data_query(&d_key, &r_convert);
 
 		printf(" - %s [%s] -> %p", (char *)d_string.ptr, data_string_from_type(element->data.type), element->data.ptr);
@@ -177,6 +177,8 @@ start:
 		fastcall_free r_free = { { 2, ACTION_FREE } };
 		data_query(&d_string, &r_free);
 
+		fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
+		data_query(&element->data, &r_ptr);
 		fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
 		data_query(&element->data, &r_len);
 
@@ -184,7 +186,7 @@ start:
 			if((k % 32) == 0)
 				printf("\n   0x%.5x: ", k);
 			
-			printf("%.2hhx ", (unsigned int)(*((char *)element->data.ptr + k)));
+			printf("%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
 		}
 		printf("\n");
 	

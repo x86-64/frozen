@@ -25,7 +25,6 @@ typedef enum data_functions {
 	ACTION_DIVIDE,
 	ACTION_READ,
 	ACTION_WRITE,
-	ACTION_CONVERT,
 	ACTION_CONVERT_TO,
 	ACTION_CONVERT_FROM,
 	ACTION_TRANSFER,
@@ -118,7 +117,6 @@ struct fastcall_convert_to {
 	data_t                *dest;
 	uintmax_t              format;
 };
-typedef struct fastcall_convert_to    fastcall_convert;
 typedef struct fastcall_convert_to    fastcall_convert_to;
 typedef struct fastcall_convert_from  fastcall_convert_from;
 
@@ -183,7 +181,6 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_PHYSICALLEN] = 3,
 	[ACTION_LOGICALLEN] = 3,
 	[ACTION_COPY] = 3,
-	[ACTION_CONVERT] = 3,
 	[ACTION_CONVERT_TO] = 3,
 	[ACTION_CONVERT_FROM] = 3,
 	[ACTION_COMPARE] = 3,
@@ -232,12 +229,12 @@ API ssize_t              data_query             (data_t *data, void *args);
 	(void)_ret;                                                            \
 }
 
-#define data_convert(_ret, _type, _dst, _src) {                                \
-	data_t __data_dst = { _type, REF_##_type(_dst) };                      \
-	fastcall_convert _r_convert = { { 3, ACTION_CONVERT }, &__data_dst };  \
-	_ret = data_query(_src, &_r_convert);                                  \
-	_dst = DEREF_##_type(&__data_dst);                                     \
-	(void)_ret;                                                            \
+#define data_convert(_ret, _type, _dst, _src) {                                          \
+	data_t __data_dst = { _type, REF_##_type(_dst) };                                \
+	fastcall_convert_from _r_convert = { { 3, ACTION_CONVERT_FROM }, _src };         \
+	_ret = data_query(&__data_dst, &_r_convert);                                     \
+	_dst = DEREF_##_type(&__data_dst);                                               \
+	(void)_ret;                                                                      \
 };
 
 #endif // DATA_H

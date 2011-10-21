@@ -102,7 +102,7 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	switch( src->type ){
 		default:;
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &src->ptr, sizeof(TYPE) };
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(TYPE) };
 			if(data_query(fargs->dest, &r_write) != 0)
 				return -EFAULT;
 			
