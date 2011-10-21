@@ -104,10 +104,12 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	hash_t                *hash;
 	hash_t                *curr;
+	data_t                *old_data;
 	uintmax_t              nelements         = 0;
 	uintmax_t              hash_nelements    = 0;
 	data_t                 sl_src            = DATA_SLIDERT(fargs->src, 0);
-	
+	list                   new_data          = LIST_INITIALIZER;
+
 	hash_nelements = HASH_INITIAL_SIZE;
 	hash           = hash_new(hash_nelements);
 	
@@ -121,8 +123,18 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		if(data_query(&sl_src, &r_read) < 0)
 			return -EFAULT;
 		
-		curr->data.ptr  = NULL;
-		
+		// restore data holders if any
+		if(dst->ptr != NULL){
+			if( (old_data = hash_data_find((hash_t *)dst->ptr, curr->key)) != NULL){
+				curr->data.ptr  = old_data->ptr;
+			}else{
+				curr->data.ptr  = NULL;
+				list_add(&new_data, &curr->data);
+			}
+		}else{
+			curr->data.ptr  = NULL;
+		}
+
 		nelements++;
 		if(nelements + 1 == hash_nelements){
 			// expand hash
@@ -140,15 +152,23 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		if(curr->key == hash_ptr_end)
 			break;
 	}
-
-	hash_t_ctx ctx = { .sl_data = &sl_src };
 	
+	// restore data
+	hash_t_ctx ctx = { .sl_data = &sl_src };
 	if(hash_iter(hash, (hash_iterator)&data_hash_t_convert_from_iter, &ctx, 0) != ITER_OK){
 		hash_free(hash);
 		return -EFAULT;
 	}
 	
-	dst->ptr = hash;
+	if(dst->ptr == NULL){
+		dst->ptr = hash; // return hash
+	}else{
+		fastcall_free r_free = { { 3, ACTION_FREE } };
+		while( (old_data = list_pop(&new_data)) != NULL)
+			data_query(old_data, &r_free);
+		
+		free(hash);      // no need for this hash - we restore data in old one
+	}
 	return 0;
 } // }}}
 

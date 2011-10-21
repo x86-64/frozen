@@ -63,7 +63,7 @@ START_TEST(test_backend_ipc){
                 hash_end
 	};
 	ret = backend_query(backend, r_read);
-		fail_unless(ret > 0,                "read failed");
+		fail_unless(ret >= 0,               "read failed");
 		fail_unless(strcmp(test, str) == 0, "read data failed");
 	
 	backend_destroy(backend);

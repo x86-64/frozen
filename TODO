@@ -1,4 +1,3 @@
-- restore hash in ipc_shmem
 - documentation for data, hash, backend
 - release to github
 - multi-threading
