@@ -11,6 +11,4 @@ typedef struct slider_t {
 	uintmax_t              off;
 } slider_t;
 
-extern data_proto_t slider_t_proto;
-
 #endif

@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <slice_t.h>
 
 static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {{{

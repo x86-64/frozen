@@ -6,6 +6,4 @@
 #define REF_TYPE_HASHKEYT(_dt) (&(_dt))
 #define HAVEBUFF_TYPE_HASHKEYT 1
 
-extern data_proto_t hash_key_t_proto;
-
 #endif

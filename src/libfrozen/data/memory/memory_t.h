@@ -43,6 +43,4 @@ API ssize_t  memory_translate(memory_t *memory, off_t pointer, uintmax_t size, v
 API size_t   memory_read   (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
 API size_t   memory_write  (memory_t *memory, off_t offset, void *buffer, size_t buffer_size);
 
-extern data_proto_t memory_t_proto;
-
 #endif

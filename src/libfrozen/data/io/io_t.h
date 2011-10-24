@@ -13,6 +13,4 @@ typedef struct io_t {
 	f_io_func              handler;
 } io_t;
 
-extern data_proto_t io_t_proto;
-
 #endif

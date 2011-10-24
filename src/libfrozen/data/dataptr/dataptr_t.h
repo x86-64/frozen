@@ -6,6 +6,4 @@
 #define REF_TYPE_DATAPTRT(_dt) _dt
 #define HAVEBUFF_TYPE_DATAPTRT 0
 
-extern data_proto_t dataptr_t_proto;
-
 #endif

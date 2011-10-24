@@ -143,9 +143,15 @@ function : NAME '(' args_list ')' {
 };
 
 constant : '(' NAME ')' STRING {
+	ssize_t     ret;
+	datatype_t  type;
+	data_t      d_s_type = DATA_STRING($2);
+	
+	data_convert(ret, TYPE_DATATYPET, type, &d_s_type);
+	
 	rewrite_variable_t *constant = rewrite_new_constant(script);
 	
-	constant->data.type = data_type_from_string($2);
+	constant->data.type = type;
 	constant->data.ptr  = NULL;
 	
 	/* convert string to needed data */

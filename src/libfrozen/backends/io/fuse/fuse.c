@@ -521,7 +521,7 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root){ // {{{
 	char                  *item_path         = NULL;
 	backend_t             *item_backend      = NULL;
 	
-	data = hash_item_data(hash);
+	data = &hash->data;
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		
@@ -545,7 +545,7 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	hash_t                *item_config;
 	char                  *item_path         = NULL;
 	
-	data = hash_item_data(hash);
+	data = &hash->data;
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		

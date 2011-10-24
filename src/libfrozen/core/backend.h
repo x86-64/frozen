@@ -1,21 +1,10 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-#include <pthread.h>
-
-typedef enum api_types {
-	API_HASH = 1,
-	API_CRWD = 2,
-	API_FAST = 4
-} api_types;
-
 typedef int     (*f_init)      (backend_t *);
 typedef int     (*f_fork)      (backend_t *, backend_t *, hash_t *);
 typedef int     (*f_configure) (backend_t *, hash_t *);
 typedef int     (*f_destroy)   (backend_t *);
-typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
-
-typedef ssize_t (*f_fast_func) (backend_t *, void *);
 
 struct backend_t {
 	char                  *name;
@@ -27,14 +16,14 @@ struct backend_t {
 	f_fork                 func_fork;
 	f_destroy              func_destroy;
 	
-	struct {
-		f_crwd  func_create;
-		f_crwd  func_set;
-		f_crwd  func_get;
-		f_crwd  func_delete;
-		f_crwd  func_move;
-		f_crwd  func_count;
-		f_crwd  func_custom;
+	struct {      // TODO deprecate this
+		f_crwd         func_create;
+		f_crwd         func_set;
+		f_crwd         func_get;
+		f_crwd         func_delete;
+		f_crwd         func_move;
+		f_crwd         func_count;
+		f_crwd         func_custom;
 	} backend_type_crwd;
 	struct {
 		f_crwd         func_handler;
@@ -46,7 +35,6 @@ struct backend_t {
 	void *                 userdata;
 	
 	uintmax_t              refs;
-	pthread_mutex_t        refs_mtx;
 	config_t              *config;
 	
 	list                   parents; // parent backends including private _acquires

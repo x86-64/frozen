@@ -145,20 +145,18 @@ size_t             hash_nelements               (hash_t *hash){ // {{{
 	return i + 1;
 } // }}}
 
-inline hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
-inline size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
-inline data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
-inline data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
+data_t *           hash_data_find               (hash_t *hash, hash_key_t key){ // {{{
 	hash_t *temp;
 	return ((temp = hash_find(hash, key)) == NULL) ?
-		NULL : hash_item_data(temp);
-}
+		NULL : &temp->data;
+} // }}}
 
 #ifdef DEBUG
 void hash_dump(hash_t *hash){ // {{{
 	unsigned int  k;
 	hash_t       *element  = hash;
-	data_t        d_string = DATA_STRING(NULL);
+	data_t        d_s_key  = DATA_STRING(NULL);
+	data_t        d_s_type = DATA_STRING(NULL);
 
 	printf("hash: %p\n", hash);
 start:
@@ -169,13 +167,18 @@ start:
 		}
 		
 		data_t              d_key     = DATA_HASHKEYT(element->key);
-		fastcall_convert_to r_convert = { { 3, ACTION_CONVERT_TO }, &d_string };
-		data_query(&d_key, &r_convert);
+		fastcall_convert_to r_convert1 = { { 3, ACTION_CONVERT_TO }, &d_s_key };
+		data_query(&d_key, &r_convert1);
+		
+		data_t              d_type    = DATA_DATATYPET(element->data.type);
+		fastcall_convert_to r_convert2 = { { 3, ACTION_CONVERT_TO }, &d_s_type };
+		data_query(&d_type, &r_convert2);
 
-		printf(" - %s [%s] -> %p", (char *)d_string.ptr, data_string_from_type(element->data.type), element->data.ptr);
+		printf(" - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
 		
 		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(&d_string, &r_free);
+		data_query(&d_s_key,  &r_free);
+		data_query(&d_s_type, &r_free);
 
 		fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
 		data_query(&element->data, &r_ptr);

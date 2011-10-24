@@ -1,5 +1,7 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <backend_t.h>
+
 #include <string/string_t.h>
 #include <hash/hash_t.h>
 

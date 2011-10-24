@@ -12,6 +12,4 @@ typedef struct slice_t {
 	uintmax_t              size;
 } slice_t;
 
-extern data_proto_t slice_t_proto;
-
 #endif

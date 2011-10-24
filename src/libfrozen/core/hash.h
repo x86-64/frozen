@@ -35,18 +35,7 @@ API hash_t *           hash_find                    (hash_t *hash, hash_key_t ke
 API ssize_t            hash_iter                    (hash_t *hash, hash_iterator func, void *arg1, hash_iter_flags flags);
 API size_t             hash_nelements               (hash_t *hash);
 
-_inline
-API hash_key_t         hash_item_key                (hash_t *hash){ return hash->key; }
-_inline
-API size_t             hash_item_is_null            (hash_t *hash){ return (hash->key == hash_ptr_null); }
-_inline
-API data_t *           hash_item_data               (hash_t *hash){ return &(hash->data); }
-_inline
-API data_t *           hash_data_find               (hash_t *hash, hash_key_t key){
-	hash_t *temp;
-	return ((temp = hash_find(hash, key)) == NULL) ?
-		NULL : hash_item_data(temp);
-}
+API data_t *           hash_data_find               (hash_t *hash, hash_key_t key);
 
 #define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
 	data_get(_ret,                                              \
@@ -69,7 +58,6 @@ API data_t *           hash_data_find               (hash_t *hash, hash_key_t ke
 	(_dst)->key = hash_ptr_end;   \
 	(_dst)->data.ptr = NULL;      \
 }
-
 
 #ifdef DEBUG
 API void               hash_dump                    (hash_t *hash);

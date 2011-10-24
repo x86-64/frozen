@@ -9,7 +9,5 @@ m4_include(uint_init.m4)
 [#define REF_TYPE_]DEF()[(_dt) (&(_dt)) ]
 [#define HAVEBUFF_TYPE_]DEF() 1
 
-extern data_proto_t NAME()_proto;
-
 [#endif]
 /* vim: set filetype=m4: */

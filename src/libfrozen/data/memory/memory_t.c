@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <memory_t.h>
 
 memory_t_type  memory_string_to_type(char *string){ // {{{

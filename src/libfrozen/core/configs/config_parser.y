@@ -83,7 +83,13 @@ hash_value :
 	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
-		$$.type = data_type_from_string($2);
+		ssize_t     ret;
+		datatype_t  type;
+		data_t      d_s_type = DATA_STRING($2);
+		
+		data_convert(ret, TYPE_DATATYPET, type, &d_s_type);
+		
+		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */

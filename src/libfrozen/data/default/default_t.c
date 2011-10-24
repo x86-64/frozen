@@ -1,5 +1,6 @@
 #include <libfrozen.h>
-#include <default_t.h>
+#include <dataproto.h>
+
 #include <string/string_t.h>
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{

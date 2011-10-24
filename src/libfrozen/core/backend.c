@@ -1,11 +1,14 @@
 #define BACKEND_C
 #include <libfrozen.h>
-#include <alloca.h>
 #include <backend_selected.h>
+
+#include <alloca.h>
+#include <pthread.h>
 
 static list                    classes        = LIST_INITIALIZER; // dynamic classes passed from modules
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
+pthread_mutex_t                refs_mtx       = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct backend_new_ctx {
 	list                   backends;
@@ -68,15 +71,15 @@ void               class_unregister        (backend_t *proto){ // {{{
 } // }}}
 
 static void        backend_ref_inc(backend_t *backend){ // {{{
-	pthread_mutex_lock(&backend->refs_mtx);
+	pthread_mutex_lock(&refs_mtx);
 		backend->refs++;
-	pthread_mutex_unlock(&backend->refs_mtx);
+	pthread_mutex_unlock(&refs_mtx);
 } // }}}
 static uintmax_t   backend_ref_dec(backend_t *backend){ // {{{
 	uintmax_t              ret;
-	pthread_mutex_lock(&backend->refs_mtx);
+	pthread_mutex_lock(&refs_mtx);
 		ret = --backend->refs;
-	pthread_mutex_unlock(&backend->refs_mtx);
+	pthread_mutex_unlock(&refs_mtx);
 	return ret;
 } // }}}
 
@@ -98,7 +101,6 @@ static void        backend_free_skeleton(backend_t *backend_curr){ // {{{
 		free(backend_curr->name);
 	}
 	
-	pthread_mutex_destroy(&backend_curr->refs_mtx);
 	list_destroy(&backend_curr->childs);
 	list_destroy(&backend_curr->parents);
 	
@@ -143,12 +145,12 @@ static ssize_t     backend_new_iterator(hash_t *item, backend_new_ctx *ctx){ // 
 	char                  *backend_name;
 	char                  *backend_class;
 	
-	if(hash_item_is_null(item)){
+	if(item->key == hash_ptr_null){
 		ctx->backend_prev = LIST_FREE_ITEM;
 		return ITER_CONTINUE;
 	}
 		
-	backend_cfg_data = hash_item_data(item);
+	backend_cfg_data = &item->data;
 	
 	if(backend_cfg_data->type != TYPE_HASHT)
 		return ITER_CONTINUE;
@@ -434,7 +436,6 @@ backend_t *     backend_clone        (backend_t *backend){ // {{{
 	
 	list_init(&clone->parents);
 	list_init(&clone->childs);
-	pthread_mutex_init(&clone->refs_mtx, NULL);
 	
 	clone->refs     = 1;
 	clone->config   = hash_copy(backend->config);
@@ -470,7 +471,6 @@ void            backend_destroy      (backend_t *backend){ // {{{
 	list_destroy(&backend->parents);
 	list_destroy(&backend->childs);
 	
-	pthread_mutex_destroy(&backend->refs_mtx);
 	free(backend);
 } // }}}
 void            backend_destroy_all  (void){ // {{{

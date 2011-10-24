@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <slider_t.h>
 
 static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // {{{

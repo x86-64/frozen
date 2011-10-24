@@ -6,6 +6,4 @@
 #define REF_TYPE_BACKENDT(_dt) _dt
 #define HAVEBUFF_TYPE_BACKENDT 1
 
-extern data_proto_t backend_t_proto;
-
 #endif

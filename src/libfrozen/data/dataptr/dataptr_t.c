@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <dataptr_t.h>
 
 static ssize_t data_dataptr_t_len(data_t *data, fastcall_len *fargs){ // {{{

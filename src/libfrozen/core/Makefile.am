@@ -9,13 +9,14 @@ EXTRA_DIST=                                     \
 noinst_LTLIBRARIES=libfrozen_core.la
 libfrozen_core_la_SOURCES=  \
                         libfrozen.h     libfrozen.c                          \
-                        errors.h        errors.c                             \
-			data.h          data.c                               \
+                        api.h           api.c                                \
+			errors.h        errors.c                             \
+			data.h          data.c         data_protos.c         \
                         hash.h          hash.c                               \
                         hashkeys.c      hashkeys.h                           \
 			list.h          list.c                               \
                         buffer.h        buffer.c                             \
-                        backend.c           backend.h           \
+                        backend.h       backend.c                            \
                         configs/config.h                        \
                         configs/config_parser.tab.h             \
                         configs/config_parser.tab.c             \

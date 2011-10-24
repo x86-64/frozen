@@ -6,6 +6,4 @@
 #define REF_TYPE_VOIDT(_dt) _dt
 #define HAVEBUFF_TYPE_VOIDT 0
 
-extern data_proto_t void_t_proto;
-
 #endif

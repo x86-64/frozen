@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <string_t.h>
 
 static ssize_t data_string_t_physlen(data_t *data, fastcall_physicallen *fargs){ // {{{

@@ -1,7 +1,5 @@
 
 START_TEST (test_data){
-	fail_unless( data_type_from_string("void_t") == TYPE_VOIDT, "data types invalid");
-	
 	// test data_convert
 	ssize_t                ret;
 	uint32_t               d_to;

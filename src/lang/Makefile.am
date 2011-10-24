@@ -3,7 +3,7 @@ PERLOUTDIR=perl/
 GODIR=go
 
 $(PERLMAKEFILE):
-	swig -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
+	swig -I@top_srcdir@/src/libfrozen/core/ -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
 	cd $(PERLOUTDIR) && $(PERL) Makefile.PL
 
 all-local: $(PERLMAKEFILE)

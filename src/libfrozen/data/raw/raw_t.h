@@ -11,6 +11,4 @@ typedef struct raw_t {
 	uintmax_t              size;
 } raw_t;
 
-extern data_proto_t raw_t_proto;
-
 #endif

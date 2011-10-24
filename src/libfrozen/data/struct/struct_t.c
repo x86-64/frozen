@@ -1,5 +1,7 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <struct_t.h>
+
 #include <slice/slice_t.h>
 
 static ssize_t   data_struct_t_read  (data_t *data, fastcall_read *fargs){

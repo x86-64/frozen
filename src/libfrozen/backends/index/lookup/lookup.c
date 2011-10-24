@@ -46,7 +46,7 @@ typedef struct lookup_userdata {
 	uintmax_t              force_query;
 	backend_t             *backend_index;
 	hash_key_t             output;
-	data_type              output_type;
+	datatype_t             output_type;
 } lookup_userdata;
 
 static int lookup_init(backend_t *backend){ // {{{
@@ -66,20 +66,16 @@ static int lookup_destroy(backend_t *backend){ // {{{
 } // }}}
 static int lookup_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *output_type_str   = NULL;
 	lookup_userdata       *userdata          = (lookup_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output,        config, HK(output));
-	hash_data_copy(ret, TYPE_STRINGT,  output_type_str,         config, HK(output_type));
-	if(ret != 0)
-		return error("HK(output_type) not supplied");
-	hash_data_copy(ret, TYPE_UINTT,    userdata->fatal,         config, HK(fatal));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->force_query,   config, HK(force_query));
-	hash_data_copy(ret, TYPE_BACKENDT, userdata->backend_index, config, HK(index));
+	hash_data_copy(ret, TYPE_HASHKEYT,  userdata->output,        config, HK(output));
+	hash_data_copy(ret, TYPE_DATATYPET, userdata->output_type,   config, HK(output_type));
+	hash_data_copy(ret, TYPE_UINTT,     userdata->fatal,         config, HK(fatal));
+	hash_data_copy(ret, TYPE_UINTT,     userdata->force_query,   config, HK(force_query));
+	hash_data_copy(ret, TYPE_BACKENDT,  userdata->backend_index, config, HK(index));
 	if(ret != 0)
 		return error("supplied index backend not valid, or not found");
 	
-	userdata->output_type = data_type_from_string(output_type_str);
 	return 0;
 } // }}}
 

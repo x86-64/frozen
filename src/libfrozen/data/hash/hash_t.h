@@ -7,6 +7,4 @@
 #define REF_TYPE_HASHT(_dt) _dt
 #define HAVEBUFF_TYPE_HASHT 0
 
-extern data_proto_t hash_t_proto;
-
 #endif

@@ -6,6 +6,4 @@
 #define REF_TYPE_BUFFERT(_dt) _dt
 #define HAVEBUFF_TYPE_BUFFERT 0
 
-extern data_proto_t buffer_t_proto;
-
 #endif

@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 
 /**
  * @file file.c
@@ -194,9 +195,9 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 	char                  *p;
 	data_t                *curr_data;
 	
-	curr_data = hash_item_data(config);
+	curr_data = &config->data;
 	
-	switch( hash_item_key(config) ){
+	switch( config->key ){
 		case HK(fork):;
 			hash_key_t      key;
 			
@@ -237,7 +238,7 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 		
 		p = ctx->buffer + ctx->buffer_size;
 		
-		switch( hash_item_key(config) ){
+		switch( config->key ){
 			case HK(random):;
 				intmax_t           i;
 				static const char  abc[] = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDGHJKLZXCVBNM1234567890";
@@ -274,7 +275,7 @@ static char *            file_gen_filepath(config_t *config, config_t *fork_req)
 	if( (filename_hash = hash_find(config, HK(filename))) == NULL)
 		return NULL;
 	
-	filename_data = hash_item_data(filename_hash);
+	filename_data = &filename_hash->data;
 	switch(filename_data->type){
 		case TYPE_STRINGT:;
 			config_t r_gen[] = {

@@ -1,5 +1,7 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <hash_t.h>
+
 #include <raw/raw_t.h>
 #include <slider/slider_t.h>
 

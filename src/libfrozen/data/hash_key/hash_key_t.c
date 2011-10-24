@@ -1,5 +1,7 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <hash_key_t.h>
+
 #include <hashkeys_int.h>
 
 static int hash_bsearch_string(const void *m1, const void *m2){ // {{{

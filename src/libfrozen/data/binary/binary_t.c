@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 #include <binary_t.h>
 
 typedef struct data_binary_t {
