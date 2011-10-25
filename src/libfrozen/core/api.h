@@ -1,6 +1,8 @@
 #ifndef API_H
 #define API_H
 
+/** @file api.h */
+
 typedef enum api_types {
 	API_HASH = 1,
 	API_CRWD = 2,

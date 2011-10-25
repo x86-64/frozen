@@ -1,7 +1,3 @@
-/**
- * @file data.c
- * @brief Data manipulations
- */
 #define DATA_C
 #include <libfrozen.h>
 #include <dataproto.h>
