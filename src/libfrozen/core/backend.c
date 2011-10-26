@@ -542,6 +542,7 @@ exit:
 } // }}}
 ssize_t         backend_pass         (backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret = 0;
+	ssize_t                ret2;
 	uintmax_t              lsz, i;
 	void                 **childs_list;
 	
@@ -558,10 +559,11 @@ ssize_t         backend_pass         (backend_t *backend, request_t *request){ /
 		return -ENOSYS;
 	
 	for(i=0; i<lsz; i++){
-		if( (ret = backend_query((backend_t *)childs_list[i], request)) < 0)
-			return ret;
+		if( (ret2 = backend_query((backend_t *)childs_list[i], request)) < 0){
+			ret = ret2;
+		}
 	}
-	return 0;
+	return ret;
 } // }}}
 ssize_t         backend_fast_query   (backend_t *backend, void *fargs){ // {{{
 	f_fast_func            func              = NULL;

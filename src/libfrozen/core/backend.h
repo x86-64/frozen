@@ -3,6 +3,77 @@
 
 /** @file backend.h */
 
+/** @ingroup backend
+ *  @page backend_overview Backends overview
+ *  
+ *  Every user request processed by one backend, or by backend chain. Backend can perform
+ *  various actions:
+ *    @li interact with external things, such as files, sockets, etc
+ *    @li interact with internal things, with another backends, data
+ *    @li can read, write and modify request's values
+ *
+ *  If user request is too complex for one backend, it can be processed with chain of backends.
+ *  Chain of backends process user request step by step. One backend in such chain can modify
+ *  request in way another backend can understand it. Another backends can do, as we already know,
+ *  external things, for example write user data to file.
+ *  
+ *  There is several types of requests and corresponding apis. Details described in api section.
+ *  
+ */
+/** @ingroup backend
+ *  @page backend_creation Creation and configuration
+ *  
+ *  To create new backend you have to know it's "class name". For example - "storage/file". It
+ *  consist of category name (storage) and backend name (file). Categories introduced to group
+ *  identical backends to one place. There is serveral important categories: request, storage,
+ *  data, io. These categories represent most common used operations with user requests.
+ *    @li request - modify, print, user request; change request path
+ *    @li storage - save and load user data from external storage
+ *    @li data - modify, pack/unpack, regexp user data from request
+ *    @li io - input and output from/to frozen, for example, fuse as filesystem for io
+ *  There is more categories which is not listed.
+ *
+ *  Almost every backend need some configuration variables to control it's behavior. They can 
+ *  be passed on new backend creation.
+ *  
+ *  Currently you can't change configuration passed on step of creation, but after rewriting
+ *  some of backends it can be possible. Example of correct configuration routines is backend "backend/factory".
+ *  So, if func_configure of backend is reentrant and updates taken in account - you can change configuration
+ *  in any time.
+ */
+/** @ingroup backend
+ *  @page backend_requests Requests
+ *  
+ *  Then user request arrived, backend's handler is called. Backend can:
+ *    @li return error or success code
+ *    @li read user request, check inputs, do something with it
+ *    @li pass user request to next backend(s) in chain
+ *    @li pass any request to next backend(s) in chain
+ *    @li etc...
+ *  
+ *  All of these actions is optional, even returning error or success. There is special error code -EEXIST, which indicates
+ *  that backend don't want to modify current error code.
+ *  
+ *  Internally all requests flow into some kind of recursive processing there each step is next backend. So,
+ *  there is no such thing as async requests. Request considered finished then first backend return control to caller. But,
+ *  async requests is too good to discard them, so you can use queue to save all requests and process them later, returning
+ *  control almost immediatly. Of course, in such case, you should keep all data used in this request until this request
+ *  will be really finished.
+ */
+/** @ingroup backend
+ *  @page backend_childs Parents and childs
+ *  
+ *  Every backend, if this is not standalone backend, can have their parent(s) and child(s). Parent backend can pass to your backend
+ *  requests. Childs is backends to which your backend can pass request. If backend have more than one child, request passed to every
+ *  child repeatedly. If this is not that you want - you can solve it with any of path rewriting backend. Such approach is useful,
+ *  because you can add child to any backend and monitor requests passed by. This can be used in logging.
+ *  
+ *  You can connect backends in any way you want, but there is one limit - if your configuration produce infinity loops they will not
+ *  be terminated or avoided. However this is doesn't mean that you can't send requests to parent backends. Just make sure it will work.
+ * 
+ */
+
+
 typedef int     (*f_init)      (backend_t *);                         ///< Init function for backend. Allocate userdata and init default values here.
 typedef int     (*f_fork)      (backend_t *, backend_t *, hash_t *);  ///< Fork function for backend. Make fork of current backend here.
 typedef int     (*f_configure) (backend_t *, hash_t *);               ///< Configure function for backend. Try to make it reentrant. Assign configuration values and validate it here.
