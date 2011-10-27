@@ -3,6 +3,123 @@
 
 /** @file api.h */
 
+/** @ingroup api
+ *  @page api_overview Api overview
+ *  
+ *  Frozen currently have several api. One of the most important is API_HASH and API_FAST.
+ *  They represent two different approaches to sending requests.
+ *
+ *  Then user want api he expect that api would be customizable and very fast. Both of these
+ *  characteristics hardly can be implemented in one api set. So, in frozen, we introduce two
+ *  api sets: API_HASH - for custom requests, and API_FAST for very fast requests.
+ *
+ *  Despite of kind of api used, every api deals with requests. Request is a set of key-value pairs.
+ *
+ *  Each request have "action" key to tell backend what to do with data. Some backends don't require
+ *  action for request, so initial user request can have no action, but for further processing one of backends
+ *  have to define it.
+ */
+/** @ingroup api
+ *  @page api_hash API_HASH
+ *  
+ *  Hash api deals with specially structured key-value pairs. From the C point of view they are arrays
+ *  of hash_t structure. To declare new hash you could write:
+ *  @code
+ *      hash_t new_hash[] = {
+ *         { HK(key), DATA_UINTT(100) },
+ *         hash_end
+ *      };
+ *      backend_query(backend, new_hash);
+ *  @endcode
+ *  This hash declare one parameter named "key" with value of 100.
+ *
+ *  Such structures used to describe user request and process it. It can hold any amount of parameters with
+ *  any data type and any value. Also, data value isn't copied to hash, hash only hold pointer to data. So,
+ *  unnessesary copying form place to place avoided.
+ *
+ *  If hash defined within function such declaration converted to several "mov" and "lea" assembly command,
+ *  which write hash in current stack frame. This can be processed very fast, because of lack of chained
+ *  computation and hopefuly with help of caches.
+ *
+ *  Staticly declared hashes already stored in usable form, so no overhead here.
+ *
+ *  Hash can contain inline hashes, can contain embeded hashes and so on. @see hashes
+ *
+ *  In conclusion, advantages of this api type:
+ *  @li Any number and order of parameters
+ *  @li Any number of optional and required parameters, again, in any order
+ *  @li Data not copied from user's buffer
+ *  @li Fast "allocation" and assignment
+ *
+ *  Disadvantages:
+ *  @li Very greedy to stack space. (However stack space is already allocated and used, so why not?)
+ *  @li Key find is slow. This done by incremental search througth all parameters.
+ *
+ */
+/** @ingroup api
+ *  @page api_fast API_FAST
+ *  
+ *  As opposite to API_HASH, API_FAST was introduced. Main reason is speed - hash api is too slow
+ *  for key find. Then some "index" backends deals with "memory" each user request produce hundreds of
+ *  requests to "memory" backend, and every request to "memory" have at least 3 parameters
+ *  (offset, size, buffer). So, hash_find api gets very busy and callgrind isn't very happy with that.
+ *
+ *  However, this situation is simple to solve. We know how many parameters we want to pass, and we have no
+ *  optional parameters. Simpliest solution is pack all parameters in order known to both backends. In C world
+ *  this can be perfectly done by defining a struct. So, we use them for fast api.
+ *  
+ *  Each action have own structure, where data defined in specified order. As bonus, you can have own
+ *  optional paramenters by redefining structure.
+ *
+ *  Example:
+ *  @code
+ *       fastcall_read r_read = {
+ *          { 5, ACTION_READ },         // { number of all arguments, action }
+ *          0,                          // .offset
+ *          &buffer,                    // .buffer
+ *          100                         // .buffer_size
+ *       };
+ *       backend_fast_query(backend, &r_read);
+ *  @endcode
+ *
+ *  Advantages:
+ *  @li It is very likely that whole structure can fit in processor cache, so:
+ *  @li Incredibly fast parameter search
+ *  @li Still can have some optional parameters
+ *
+ *  Disadvantages:
+ *  @li If you want change request action, you should copy old values and fill new structure
+ *  @li If you want to change value of request and keep old value, you should keep value, or make new structure and fill it
+ *  @li No freedom in parameter defines
+ */
+/** @ingroup api
+ *  @page api_crwd API_CRWD
+ *  
+ *  Api crwd is same as api hash, but all requests splitted to flow into different handlers. This api would be transformed in
+ *  same api as used in data processing. Don't use it for a while.
+ */
+/** @ingroup api
+ *  @page api_downgrade Downgrading
+ *  
+ *  Currenly backend code have support for so called "request downgrading". This process occurs then some API_FAST-capable
+ *  backend pass request to API_FAST-notcapable backend. So, this code creates new hash request and fill it with parameters from
+ *  fast request.
+ *
+ *  This is very painful process. At first, all optional parameters is lost. Second, this is overhead in any case. Third,
+ *  all further processing is done by hash apis. There is no such process as "upgrading" and never be.
+ *
+ *  As developer, try avoid this. As end user, you can ignore it.
+ */
+/** @ingroup api
+ *  @page api_newbackend Recomendations for new backends
+ *  
+ *  If you write new backend you have to choose which api to implement.
+ *
+ *  If backend provide access to very fast things, such as memory - API_FAST is top priority.
+ *  Common things, such as files, directories have to implement both API_HASH and API_FAST.
+ *  Unusual things, and data processing can implement only API_HASH. 
+ */
+
 typedef enum api_types {
 	API_HASH = 1,
 	API_CRWD = 2,

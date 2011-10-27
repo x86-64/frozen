@@ -1,2 +1,4 @@
+/** @defgroup api Api */
 /** @defgroup backend Backends */
-/** @defgroup modules Modules */
+/** @defgroup data Data */
+

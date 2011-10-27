@@ -3,17 +3,16 @@
 #include <pthread.h>
 
 /**
- * @file pool.c
- * @ingroup modules
- * @brief Pool module
+ * @ingroup backend
+ * @brief Pool backend
  *
  * Pool module inserted in forkable backend chain can track any property of backend (like memory usage)
  * and limit it. Underlying modules can be destroyed or call special function.
  *
  */
 /**
- * @ingroup modules
- * @addtogroup mod_pool Module 'pool'
+ * @ingroup backend
+ * @addtogroup mod_pool Backend 'backend/pool'
  */
 /**
  * @ingroup mod_pool
