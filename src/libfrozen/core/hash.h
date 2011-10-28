@@ -3,6 +3,68 @@
 
 /** @file hash.h */
 
+/** @ingroup data
+ *  @addtogroup hash_t Hash_t
+ */
+/** @ingroup hash_t
+ *  @page hash_t_overview Hash overview
+ *  
+ *  Hashes used to store key-value pairs. This is not crypto nor fast-lookup hashes.
+ *  From C point of view, hash is array of hash_t structure. Example of hash:
+ *  @code
+ *     hash_t somehash[] = {
+ *          { HK(key1), DATA_UINTT(100) },      // (1)
+ *          { HK(key2), DATA_UINTT(200) },
+ *          hash_inline(inlinehash),            // (2)
+ *          { HK(key4), DATA_UINTT(400) },
+ *          hash_null,                          // (3)
+ *          hash_end                            // (4)
+ *     };
+ *  @endcode
+ *  On line marked with (1) we see simple assignment, key1 equals data with type uint_t and value equals to 100.
+ *  On line (2) there is inline hash declaration. See @ref hash_t_inline.
+ *  Line (3) contain hash_null statement, this declares empty key-value pair and will be ignored on key finds.
+ *  This thing is some cases useful for space reservation for further use.
+ *  On line (4) there is hash_end keyword indicating hash end. Every hash must end with this statement.
+ */ 
+/** @ingroup hash_t
+ *  @page hash_t_reassign Reassignment
+ *  
+ *  Because of linear hash_find routine one can define key-value pair earlier than another key-value pair with same key in
+ *  hash, this process can be called "reassignment".
+ *
+ *  This is very useful process, because of:
+ *  @li you save old value
+ *  @li don't mess with api calls, all process done in current function and very fast.
+ *  @li you don't copy data itself from place to place: only pointer.
+ *  
+ *  Example:
+ *  @code
+ *      uintmax_t  somenewvalue = 100;
+ *
+ *      hash_t new_values[] = {
+ *         { HK(buffer), DATA_PTR_UINTT(&somenewvalue) },
+ *         hash_inline(old_hash),
+ *         hash_end
+ *      };
+ *  @endcode
+ */
+/** @ingroup hash_t
+ *  @page hash_t_inline Inline hashes
+ *  
+ *  Any hash can have inline hash. This is the way to merge two hashes together and define which hash redefine another's
+ *  keys. Example is same as in @ref hash_t_reassign. new_values hash redefine all key-value pairs with key "buffer" in
+ *  old_hash. You can have as many levels of inlining as you want, but remember access times and, of course, stack consumption.
+ */
+/** @ingroup hash_t
+ *  @page hash_t_recomendations Recomendations
+ *  
+ *  @li Don't mess with clear assignment, just redefine. It is cheap and fast.
+ *  @li Keep old request inlined in new requests. Hash can contain some keys you can't know about, and some backend is waiting them.
+ *  @li To lower access time to hash keep keys than would be accessed many times as top as possible. That's why
+ *  action key is at top in most of requests.
+ */
+
 #include <hashkeys.h>
 
 /// Hash item

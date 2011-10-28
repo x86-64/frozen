@@ -6,7 +6,51 @@
 /** @ingroup data
  *  @page data_overview Data overview
  *  
+ *  Frozen tries to use native C data representation where it possible. Native types is
+ *  uintmax_t (TYPE_UINTT), char * (TYPE_STRING), own structures such as hash_t, backend_t, datatype_t and so on.
+ *
+ *  To keep data type consistensy and generalize data processing "data holder" was introduced. This is
+ *  simple structure data_t which consist of data type field and pointer to data. Data api accept only
+ *  data wrapped in such holder. Wrapping can be achieved directly in user function, without unnessesery calls, so
+ *  this have low overhead.
+ *
+ *  Data api, as backend api, receive data holder and request with specified action inside. If this data have
+ *  correct handlers for action api performs it. There are many standard actions defined, for example, ACTION_READ, _WRITE,
+ *  _COPY, _ALLOC, _FREE, _COMPARE, _CONVERT_TO, _CONVERT_FROM and so on.
+ *
+ *  Data api use same structures and actions as API_FAST, so it will be easy to pass request, arrived to backend, to
+ *  data. See @ref api_fast
+ */
+/** @ingroup data
+ *  @page data_default Default data type (default_t)
  *  
+ *  This data type is special. Then you create new data type it can inherit some common functions. For example,
+ *  data type TYPE_RAWT internally consist of simple structure with pointer to actual data. There is no reasons
+ *  to copy-and-paste such code as _READ, _WRITE routines. Also, this problem can be solved with complex inheritance support,
+ *  which in turn rise complexity of whole program and can introduce more problems in future than help. So, default_t was introduced.
+ *  It consist of safe functions to work with memory chunks.
+ *  
+ *  To use this data type in your data handlers, you need to supply several helper routines. This includes ACTION_PHYSICALLEN,
+ *  ACTION_LOGICALLEN and ACTION_GETDATAPTR. They describe properties of memory chunk you want to process. Default_t itself
+ *  know nothing about data it process. You also can't create clean default_t data, routines will return errors.
+ */
+/** @ingroup data
+ *  @page data_memorymanagment Memory managment
+ *  
+ *  Almost every data can exist in three variations: within data section, within stack and within heap. Data api itself should not
+ *  resist any of this representation. However, it is worth to mention, than some of data actions can produce only
+ *  allocated data. This includes: ACTION_COPY, ACTION_ALLOC, ACTION_CONVERT_FROM and can be more. After calling this actions user
+ *  is responsible to free allocated data.
+ *
+ *  Policy of data action handler should be following:
+ *  @li if user supply empty data handler (i.e. with NULL pointer to data) api should silently allocate data and return result
+ *  @li if user supply non-empty data - try to write to it, if this fails - return error.
+ *
+ *  Data handler should be ready to any: sectioned, stacked and heaped data. Never realloc or free data if you not 100% sure it was
+ *  allocated (keep flag or something).
+ *
+ *  Same policy applied to data created and processed by backends: backend responsible to free allocated data, supply valid or empty
+ *  data for request.
  */
 
 #define DEF_BUFFER_SIZE 1024
