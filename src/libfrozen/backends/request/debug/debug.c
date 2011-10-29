@@ -1,5 +1,30 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_debug Backend 'request/debug'
+ */
+/**
+ * @ingroup mod_backend_debug
+ * @page page_debug_info Description
+ *
+ * This backend prints to stdout request passed to it in human readable form
+ */
+/**
+ * @ingroup mod_backend_debug
+ * @page page_debug_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "request/debug",
+ *              after                   = (uint_t)'0',        # print request after passing to underlying backend, default 0
+ *              before                  = (uint_t)'1',        # print request before passing to underlying backend, default 1
+ *              verbose                 = (uint_t)'1',        # show hash content, default 1
+ * }
+ * @endcode
+ */
+
 #define EMODULE 16
 
 typedef enum debug_flags {

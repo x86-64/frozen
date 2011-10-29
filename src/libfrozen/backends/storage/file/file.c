@@ -2,15 +2,10 @@
 #include <dataproto.h>
 
 /**
- * @file file.c
- * @ingroup modules
- * @brief File module
+ * @ingroup backend
+ * @addtogroup mod_file Backend 'storage/file'
  *
  * File module can read and write to file
- */
-/**
- * @ingroup modules
- * @addtogroup mod_file Module 'file'
  */
 /**
  * @ingroup mod_file

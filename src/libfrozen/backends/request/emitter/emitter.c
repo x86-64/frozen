@@ -4,6 +4,37 @@
 #include <sys/time.h>
 #include <signal.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_emitter Backend 'request/emitter'
+ */
+/**
+ * @ingroup mod_backend_emitter
+ * @page page_emitter_info Description
+ *
+ * This backend send user defined queries in any amounts
+ */
+/**
+ * @ingroup mod_backend_emitter
+ * @page page_emitter_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "request/emitter",
+ *              on_start                = <see actions>,      # action performed at the beginning of emission
+ *              on_end                  = <see actions>,      # action performed at the end of emission
+ *              pre_request             = { ... },            # optional request emitted at the beginning of emission
+ *              post_request            = { ... },            # optional request emitted at the end of emission
+ *              request                 = { ... },            # actual request, that would be emitted
+ *              count                   = (uint_t)'1000',     # number of emits
+ * }
+ * @endcode
+ *
+ * Possible actions:
+ *   @li "destroy" - full shutdown of application via kill(SIGTERM)
+ */
+
 #define EMODULE 18
 #define N_REQUESTS_DEFAULT __MAX(uintmax_t)
 
@@ -21,6 +52,7 @@ typedef struct emitter_userdata {
 	hash_t                *postreq;
 	uintmax_t              nreq;
 	
+	uintmax_t              emitter_started;
 	pthread_t              emitter_thread;
 } emitter_userdata;
 
@@ -47,8 +79,10 @@ static void *            emitter_thread  (void *backend){ // {{{
 	if(userdata->prereq)
 		backend_pass(backend, userdata->prereq);
 	
-	for(i = 0; i < userdata->nreq; i++)
-		backend_pass(backend, userdata->req);
+	if(userdata->req){
+		for(i = 0; i < userdata->nreq; i++)
+			backend_pass(backend, userdata->req);
+	}
 	
 	if(userdata->postreq)
 		backend_pass(backend, userdata->postreq);
@@ -61,59 +95,53 @@ static int emitter_init(backend_t *backend){ // {{{
 	emitter_userdata    *userdata          = backend->userdata = calloc(1, sizeof(emitter_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
+	
+	userdata->nreq = N_REQUESTS_DEFAULT;
 	return 0;
 } // }}}
 static int emitter_destroy(backend_t *backend){ // {{{
 	void                  *res;
 	emitter_userdata      *userdata          = (emitter_userdata *)backend->userdata;
 	
-	pthread_cancel(userdata->emitter_thread);
-	pthread_join(userdata->emitter_thread, &res);
-	
-	if(userdata->prereq)
-		hash_free(userdata->prereq);
-	if(userdata->req)
-		hash_free(userdata->req);
-	if(userdata->postreq)
-		hash_free(userdata->postreq);
+	if(userdata->emitter_started != 0){
+		pthread_cancel(userdata->emitter_thread);
+		pthread_join(userdata->emitter_thread, &res);
+	}
 	
 	free(userdata);
 	return 0;
 } // }}}
 static int emitter_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *cfg_on_start      = NULL;
-	char                  *cfg_on_end        = NULL;
-	hash_t                 req_default[]     = { { HK(action), DATA_UINT32T(ACTION_CREATE) }, hash_end };
-	hash_t                *cfg_prereq        = NULL;
-	hash_t                *cfg_req           = req_default;
-	hash_t                *cfg_postreq       = NULL;
-	uintmax_t              cfg_nreq          = N_REQUESTS_DEFAULT;
+	char                  *cfg_on_start;
+	char                  *cfg_on_end;
 	emitter_userdata      *userdata          = (emitter_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, cfg_on_start,   config, HK(on_start));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_on_end,     config, HK(on_end));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_prereq,     config, HK(pre_request));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_req,        config, HK(request));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_postreq,    config, HK(post_request));
-	hash_data_copy(ret, TYPE_UINTT,   cfg_nreq,       config, HK(count));
+	hash_data_copy(ret, TYPE_HASHT,   userdata->prereq,     config, HK(pre_request));
+	hash_data_copy(ret, TYPE_HASHT,   userdata->req,        config, HK(request));
+	hash_data_copy(ret, TYPE_HASHT,   userdata->postreq,    config, HK(post_request));
+	hash_data_copy(ret, TYPE_UINTT,   userdata->nreq,       config, HK(count));
 	
-	userdata->on_start = emitter_action_from_string(cfg_on_start);
-	userdata->on_end   = emitter_action_from_string(cfg_on_end);
-	userdata->prereq   = cfg_prereq  ? hash_copy(cfg_prereq)  : NULL;
-	userdata->req      = hash_copy(cfg_req);
-	userdata->postreq  = cfg_postreq ? hash_copy(cfg_postreq) : NULL;
-	userdata->nreq     = cfg_nreq;
+	hash_data_copy(ret, TYPE_STRINGT, cfg_on_start,         config, HK(on_start));
+	if(ret == 0)
+		userdata->on_start = emitter_action_from_string(cfg_on_start);
+		
+	hash_data_copy(ret, TYPE_STRINGT, cfg_on_end,           config, HK(on_end));
+	if(ret == 0)
+		userdata->on_end   = emitter_action_from_string(cfg_on_end);
 			
-	if(pthread_create(&userdata->emitter_thread, NULL, &emitter_thread, backend) != 0)
-		return error("pthread_create failed");
-			
+	if(userdata->emitter_started == 0){
+		if(pthread_create(&userdata->emitter_thread, NULL, &emitter_thread, backend) != 0)
+			return error("pthread_create failed");
+		
+		userdata->emitter_started = 1;
+	}
 	return 0;
 } // }}}
 
 backend_t emitter_proto = {
 	.class          = "request/emitter",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &emitter_init,
 	.func_configure = &emitter_configure,
 	.func_destroy   = &emitter_destroy,

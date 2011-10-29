@@ -1,3 +1,4 @@
+- string_t convert from and to
 - documentation for data, hash, backend
 - release to github
 - multi-threading

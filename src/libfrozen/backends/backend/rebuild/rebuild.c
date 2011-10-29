@@ -1,8 +1,8 @@
 #include <libfrozen.h>
 
 /**
- * @ingroup modules
- * @addtogroup mod_backend_rebuild Module 'backend/rebuild'
+ * @ingroup backend
+ * @addtogroup mod_backend_rebuild Backend 'backend/rebuild'
  */
 /**
  * @ingroup mod_backend_rebuild

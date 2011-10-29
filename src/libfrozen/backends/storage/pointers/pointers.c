@@ -1,15 +1,10 @@
 #include <libfrozen.h>
 
 /**
- * @pointers pointers.c
- * @ingroup modules
- * @brief Pointers module
+ * @ingroup backend
+ * @addtogroup mod_pointers Backend 'pointers'
  *
  * Pointers module store pointers to data instead of actual data
- */
-/**
- * @ingroup modules
- * @addtogroup mod_pointers Module 'pointers'
  */
 /**
  * @ingroup mod_pointers

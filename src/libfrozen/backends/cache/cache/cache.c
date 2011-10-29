@@ -3,15 +3,14 @@
 #include <pthread.h>
 
 /**
- * @file cache.c
- * @ingroup modules
+ * @ingroup backend
  * @brief Cache module
  *
  * Cache module hold data in memory, instead of underlying backend
  */
 /**
- * @ingroup modules
- * @addtogroup mod_cache Module 'cache'
+ * @ingroup backend
+ * @addtogroup mod_cache Backend 'cache/cache'
  */
 /**
  * @ingroup mod_cache

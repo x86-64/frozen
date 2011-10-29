@@ -1,15 +1,10 @@
 #include <libfrozen.h>
 
 /**
- * @switch switch.c
- * @ingroup modules
- * @brief Switch module
+ * @ingroup backend
+ * @addtogroup mod_switch Backend 'request/switch'
  *
  * Switch module can pass requests to different backends according rules for incoming requests
- */
-/**
- * @ingroup modules
- * @addtogroup mod_switch Module 'switch'
  */
 /**
  * @ingroup mod_switch

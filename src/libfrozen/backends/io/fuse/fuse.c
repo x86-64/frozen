@@ -7,6 +7,38 @@
 #include <time.h>
 #include <pthread.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_fuse Backend 'io/fuse'
+ */
+/**
+ * @ingroup mod_backend_fuse
+ * @page page_fuse_info Description
+ *
+ * This backend add fuse filesystem support for frozen. You can use it as input and output for any backend.
+ */
+/**
+ * @ingroup mod_backend_fuse
+ * @page page_fuse_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "io/fuse",
+ *              mountpoint              = "/mnt/somepoint/",  # mountpoint for fuse fs
+ *              multithread             = (uint_t)'1',        # enable multithreaded fuse operations, default 0 // NOTE don't use it until all backends would be multithread-capable
+ *              items                   = {                   # define files and folders to create in fs
+ *                   {                                        # - first example item
+ *                       path           = "/onefile",         #     full relative path to file/folder starting with /
+ *                       folder         = (uint_t)'1',        #     is it folder?, default 0
+ *                       backend        = (backend_t)"bname"  #     backend for request sending
+ *                   },
+ *                   ...
+ *              }
+ * }
+ * @endcode
+ */
+
 #define EMODULE 28
 
 typedef enum vfs_item_type {

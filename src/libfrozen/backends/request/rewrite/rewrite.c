@@ -1,14 +1,8 @@
 /**
- * @file rewrite.c
- * @ingroup modules
- * @brief Rewrite module
+ * @ingroup backend
+ * @addtogroup mod_rewrite Backend 'request/rewrite'
  *
  * Rewrite module can modify requests and buffers with given set of rules
- */
-
-/**
- * @ingroup modules
- * @addtogroup mod_rewrite Module 'rewrite'
  */
 
 /**
@@ -29,25 +23,25 @@
  * 
  * Rewrite script consist of statements. All statements must end with ';'.
  * Possible statements:
- *      - variable define: 'var_t      variable_name;'
- *      - request define:  'request_t  subrequest;' 
- * 	- assignment:  'something = something;'
- * 	- function call: 'something = somefunc(param1, param2, param3);'
- * 	- if 'if(statement){};' NOTE ; after closing bracket
- * 	- ifnot 'ifnot(statement){};' NOTE ; after closing bracket
+ *      @li variable define: 'var_t      variable_name;'
+ *      @li request define: 'request_t  subrequest;'
+ * 	@li assignment:  'something = something;'
+ * 	@li function call: 'something = somefunc(param1, param2, param3);'
+ * 	@li if 'if(statement){};' NOTE ';' after closing bracket
+ * 	@li ifnot 'ifnot(statement){};' NOTE ';' after closing bracket
  *
  * User defined constants: (type)'string', where 'type' is data type, and 'string'
- * 	any string that can be converted to desired type (data_convert must exist)
+ * 	any string that can be converted to desired type (_CONVERT_FROM for this data type must exist)
  *  
  * Functions list:
- * 	- "query((backend_t)'backend_name', request)" - call backend
+ * 	@li "query((backend_t)'backend_name', request)" - call backend
  * 		@param[in]  backend_name    Backend to call
  * 		@param[in]  request         Any request
  *      
- *      - "pass(request)" - pass request to underlying backend
+ *      @li "pass(request)" - pass request to underlying backend
  *      	@param[in]  request         Any request
  *
- * 	- "data_query(data, action, ... )" - call action on data
+ * 	@li "data_query(data, action, ... )" - call action on data
  * 		@param[in]  data     Data to run action on
  * 		@param[in]  action   Action to run. Currently only useful COMPARE, COPY and similar with (data_t *)'s in parameters
  * 		@param[in]  ...      Parameters for action. Variables and constants passed only as (data_t *)'s.

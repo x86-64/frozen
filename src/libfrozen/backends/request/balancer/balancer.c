@@ -2,15 +2,10 @@
 #include <alloca.h>
 
 /**
- * @balancer balancer.c
- * @ingroup modules
- * @brief Balancer module
+ * @ingroup backend
+ * @addtogroup mod_balancer Backend 'request/balancer'
  *
- * Balancer module can pass requests to different backends according defined rules
- */
-/**
- * @ingroup modules
- * @addtogroup mod_balancer Module 'balancer'
+ * Balancer backend can pass requests to different backends according defined rules
  */
 /**
  * @ingroup mod_balancer

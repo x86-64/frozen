@@ -1,8 +1,8 @@
 #include <libfrozen.h>
 
 /**
- * @ingroup modules
- * @addtogroup mod_backend_fill Module 'index/fill'
+ * @ingroup backend
+ * @addtogroup mod_backend_fill Backend 'index/fill'
  */
 /**
  * @ingroup mod_backend_fill

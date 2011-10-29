@@ -1,3 +1,3 @@
-{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy" },
+{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy", request = { action => create } },
 { class => "benchmark", name => "null"                                },
 { class => "null"                                                     }

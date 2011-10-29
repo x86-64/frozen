@@ -1,5 +1,59 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_implode Backend 'request/implode'
+ */
+/**
+ * @ingroup mod_backend_implode
+ * @page page_implode_info Description
+ *
+ * This backend pack current request into one key-value pair in new request for underlying backend. Useful for ipcs, or
+ * for request storage. See @ref mod_backend_explode for unpacking.
+ *
+ * This backend actually do nothing with request, just wrapping. Underlying backend must do all job with converting to packed
+ * state. "communication/ipc" already does it.
+ */
+/**
+ * @ingroup mod_backend_implode
+ * @page page_implode_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "request/implode",
+ *              buffer                  = (hashkey_t)'buffer',  # key name in new request
+ * }
+ * @endcode
+ */
+
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_explode Backend 'request/explode'
+ */
+/**
+ * @ingroup mod_backend_explode
+ * @page page_explode_info Description
+ *
+ * This backend unpack new request from current request. Useful for ipc. See @ref mod_backend_implode for packing.
+ *
+ * Unpacking process use data _CONVERT_FROM functions, and _CONVERT_TO for result returning. All data types used in request
+ * have to support them.
+ */
+/**
+ * @ingroup mod_backend_explode
+ * @page page_explode_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "request/explode",
+ *              buffer                  = (hashkey_t)'buffer',  # key name in new request
+ *              return_result           = (uint_t)'0',          # pack changed, during further processing, request back to old one, default 1
+ * }
+ * @endcode
+ */
+
 #define EMODULE 34
 
 typedef struct plode_userdata {

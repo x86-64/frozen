@@ -3,9 +3,40 @@
 #include <libfrozen.h>
 #include <mphf.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_mphf Backend 'index/mphf'
+ */
+/**
+ * @ingroup mod_backend_mphf
+ * @page page_mphf_info Description
+ *
+ * Minimal Perfect Hash Function. This module can be used to create perfect hash tables for given set. As drawback -
+ * table in most cases need to be rebuilded frequently. Can be used in enviroment critical to space and execution time.
+ * Also, reads are more preferable than writes (actually, not write, but new item creation). 
+ */
+/**
+ * @ingroup mod_backend_mphf
+ * @page page_mphf_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "index/mphf",
+ *              type                    = <see algo>,          # algorithm to use in index
+ *              input                   = (hashkey_t)'key',    # input key for index
+ *              output                  = (hashkey_t)'offset', # output key name for index
+ *              <algo specific parameters>
+ * }
+ * @endcode
+ *
+ * Algorithms avaliable:
+ * @li chm_imp - rewritten from scratch CHM algorithm described in 
+ *               "An optimal algorithm for generating minimal perfect hash functions.", Z.J. Czech, G. Havas, and B.S. Majewski.
+ *               http://cmph.sourceforge.net/papers/chm92.pdf
+ */ 
+
 #define EMODULE              10
-#define BUFFER_SIZE_DEFAULT  1000
-#define MAX_REBUILDS_DEFAULT 1000
 
 typedef struct mphf_userdata {
 	mphf_t               mphf;

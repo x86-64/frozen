@@ -2,8 +2,8 @@
 #include <regex.h>
 
 /**
- * @ingroup modules
- * @addtogroup mod_backend_regexp Module 'data/regexp'
+ * @ingroup backend
+ * @addtogroup mod_backend_regexp Backend 'data/regexp'
  */
 /**
  * @ingroup mod_backend_regexp

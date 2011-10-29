@@ -1,5 +1,32 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_hashtable Backend 'index/hashtable'
+ */
+/**
+ * @ingroup mod_backend_hashtable
+ * @page page_hashtable_info Description
+ *
+ * This is simpliest index avaliable. For given value (i.e. from data hasher backend) it calculate
+ * offset in fixed size table and pass request. No chaining, nor collision detection. It more 
+ * alike bloom filter, but for bigger than bit values.
+ *
+ */
+/**
+ * @ingroup mod_backend_hashtable
+ * @page page_hashtable_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "index/hashtable",
+ *              input                   = (hashkey_t)'keyid', # key for input, default "key"
+ *              nelements               = (uint_t)'100',      # size of hash table
+ * }
+ * @endcode
+ */
+
 #define EMODULE              31
 
 typedef struct hashtable_userdata {

@@ -1,8 +1,8 @@
 #include <libfrozen.h>
 
 /**
- * @ingroup modules
- * @addtogroup mod_backend_lookup Module 'index/lookup'
+ * @ingroup backend
+ * @addtogroup mod_backend_lookup Backend 'index/lookup'
  */
 /**
  * @ingroup mod_backend_lookup
