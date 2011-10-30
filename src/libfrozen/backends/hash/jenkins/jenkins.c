@@ -1,6 +1,33 @@
 #include <libfrozen.h>
 #include <hash_jenkins.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_jenkins Backend 'hash/jenkins'
+ */
+/**
+ * @ingroup mod_backend_jenkins
+ * @page page_jenkins_info Description
+ *
+ * This is implementation of jenkins hash. It hash input data and add resulting hash to request.
+ */
+/**
+ * @ingroup mod_backend_jenkins
+ * @page page_jenkins_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = 
+ *                                        "hash/jenkins_32",
+ *                                        "hash/jenkins_64",
+ *              input                   = (hashkey_t)'buffer', # input key name
+ *              output                  = (hashkey_t)'keyid',  # output key name
+ *              fatal                   = (uint_t)'1',         # interrupt request if input not present, default 0
+ * }
+ * @endcode
+ */
+
 #define EMODULE 23
 
 typedef struct jenkins_userdata {

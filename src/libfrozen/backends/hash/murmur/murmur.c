@@ -1,6 +1,33 @@
 #include <libfrozen.h>
 #include <murmur2.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_murmur Backend 'hash/murmur'
+ */
+/**
+ * @ingroup mod_backend_murmur
+ * @page page_murmur_info Description
+ *
+ * This is implementation of murmur2 hash. It hash input data and add resulting hash to request.
+ */
+/**
+ * @ingroup mod_backend_murmur
+ * @page page_murmur_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = 
+ *                                        "hash/murmur2_32",
+ *                                        "hash/murmur2_64",
+ *              input                   = (hashkey_t)'buffer', # input key name
+ *              output                  = (hashkey_t)'keyid',  # output key name
+ *              fatal                   = (uint_t)'1',         # interrupt request if input not present, default 0
+ * }
+ * @endcode
+ */
+
 #define EMODULE 22
 
 typedef struct murmur_userdata {

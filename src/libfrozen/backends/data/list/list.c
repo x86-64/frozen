@@ -1,5 +1,33 @@
 #include <libfrozen.h>
-#include <alloca.h>
+
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_list Backend 'data/list'
+ */
+/**
+ * @ingroup mod_backend_list
+ * @page page_list_info Description
+ *
+ * This backend simulate list of values. On writing item to <offset> it move all values from <offset> to <offset>+1.
+ * On delete it do reverse operation.
+ *
+ * User request must have HK(insert) set for this.
+ *
+ * This module works in pair with "insert_sort" to provide clean inserts to file. This module move data on 1 (one) unit - use
+ * "incapsulate" to move for valid length.
+ */
+/**
+ * @ingroup mod_backend_list
+ * @page page_list_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "data/list",
+ * }
+ * @endcode
+ */
+
 #define EMODULE 2
 
 // 'list' backend provide insert capability using underlying backends.

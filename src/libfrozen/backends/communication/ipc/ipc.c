@@ -1,6 +1,29 @@
 #define IPC_C
 #include <libfrozen.h>
 #include <ipc.h>
+
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_ipc Backend 'communication/ipc'
+ */
+/**
+ * @ingroup mod_backend_ipc
+ * @page page_ipc_info Description
+ *
+ * This backend pass request to another local process.
+ */
+/**
+ * @ingroup mod_backend_ipc
+ * @page page_ipc_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "communication/ipc",
+ *              type                    = <see types>              # mechanism to use for transport
+ * }
+ * @endcode
+ */
 #define EMODULE 8
 
 typedef struct ipc_userdata {

@@ -7,6 +7,30 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+/**
+ * @ingroup mod_backend_ipc
+ * @page page_ipc_shmem_config Shared memory configuration
+ * 
+ * Shared memory used to transfer buffers from one process to another.
+ *
+ * Note, client and server must have identical configuration parameters, except "role". Accepted configuration:
+ * @code
+ * {
+ *              key                     = (uint_t)'1000',         # shared memory key (see man)
+ *              role                    = 
+ *                                        "client",               # act as client
+ *                                        "server",               # act as server
+ *              buffer                  = (hashkey_t)'buffer',    # buffer to transfer, default buffer
+ *              
+ *              item_size               = (uint_t)'1000',         # maximum transfered item size, default 1000
+ *              size                    = (uint_t)'10',           # send\receive queue size, default 100
+ *              force_async             = (uint_t)'0',            # force all request to be async (don't want for answer), default 0
+ *              force_sync              = (uint_t)'0',            # force all request to be sync (wait for answers), default 0
+ *              return_result           = (uint_t)'0',            # re-read buffer after request done on other side, default 1
+ * }
+ * @endcode
+ */
+
 #define EMODULE           9
 #define NITEMS_DEFAULT    100
 #define ITEM_SIZE_DEFAULT 1000

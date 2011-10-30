@@ -1,4 +1,35 @@
 #include <libfrozen.h>
+
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_structs Backend 'data/structs'
+ */
+/**
+ * @ingroup mod_backend_structs
+ * @page page_structs_info Description
+ *
+ * This backend pack and unpack user requests accoring defined structure.
+ */
+/**
+ * @ingroup mod_backend_structs
+ * @page page_structs_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "data/structs",
+ *              buffer                  = (hashkey_t)'buffer', # input/output request key name, default "buffer"
+ *              values                  = (hashkey_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
+ *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
+ *              structure               = {                    # structure to pack/unpack to/from
+ *                     keyname = (uint_t)'10',                 # - first field is keyname with default value of 10
+ *                     key2    = (string_t)'',                 # - second field is string
+ *                     ...
+ *              }
+ * }
+ * @endcode
+ */
+
 #define EMODULE 5
 
 typedef enum struct_values {
@@ -8,7 +39,7 @@ typedef enum struct_values {
 
 typedef struct struct_userdata {
 	struct_t      *structure;
-	hash_key_t     key;
+	hash_key_t     buffer;
 	hash_key_t     key_values;
 	hash_key_t     size;
 	struct_values  values;
@@ -20,7 +51,7 @@ static int struct_init(backend_t *backend){ // {{{
 	if((userdata = backend->userdata = calloc(1, sizeof(struct_userdata))) == NULL)
 		return error("calloc failed");
 	
-	userdata->key = HK(buffer);
+	userdata->buffer = HK(buffer);
 	
 	return 0;
 } // }}}
@@ -36,15 +67,15 @@ static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	struct_userdata       *userdata      = (struct_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_HASHT,    struct_hash,          config, HK(structure));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,        config, HK(key));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
 	
 	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	
-	if(userdata->key == 0)
-		return error("backend struct parameter key invalid");
+	if(userdata->buffer == 0)
+		return error("backend struct parameter buffer invalid");
 	if(userdata->structure == NULL)
 		return error("backend struct parameter structure invalid");
 	
@@ -58,7 +89,7 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
 	
-	buffer = hash_data_find(request, userdata->key);
+	buffer = hash_data_find(request, userdata->buffer);
 	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
@@ -91,7 +122,7 @@ static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 	
 	ret = (ret = backend_pass(backend, request)) < 0 ? ret : -EEXIST;
 	
-	buffer = hash_data_find(request, userdata->key);
+	buffer = hash_data_find(request, userdata->buffer);
 	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;

@@ -4,6 +4,50 @@
 #include <sys/time.h>
 #include <signal.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_benchmark Backend 'backend/benchmark'
+ */
+/**
+ * @ingroup mod_backend_benchmark
+ * @page page_benchmark_info Description
+ *
+ * This backend count requests and measure time from backend creation to backend destory. Useful in pair with emitter and it's "destroy"
+ * option.
+ */
+/**
+ * @ingroup mod_backend_benchmark
+ * @page page_benchmark_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "backend/benchmark",
+ *              on_destroy              =                     # action to do on backend destory event
+ *                                        "printf",           # - write stats to stdout, this is default
+ * }
+ * @endcode
+ */
+/**
+ * @ingroup mod_backend_benchmark
+ * @page page_benchmark_control Control
+ * 
+ * ACTION_CUSTOM used to control this backend. Possible requests:
+ * @code
+ * {
+ *              action                 = ACTION_CUSTOM,
+ *              function               =
+ *                                       "benchmark_restart",   # restart clocks and counter
+ *                                       "benchmark_short",     # write short stats to buffer HK(string)
+ *                                       "benchmark_long",      # write long stats to buffer HK(string)
+ *                                       "benchmark_ticks",     # write number of requests passed by to HK(value)
+ *                                       "benchmark_us",        # write number of nanoseconds passed from restart to HK(value)
+ *                                       "benchmark_ms",        # write number of miliseconds passed from restart to HK(value)
+ *
+ * }
+ * @endcode
+ */
+
 #define EMODULE 17
 #define N_REQUESTS_DEFAULT 10000
 

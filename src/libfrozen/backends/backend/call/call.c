@@ -1,5 +1,32 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_call Backend 'backend/call'
+ */
+/**
+ * @ingroup mod_backend_call
+ * @page page_call_info Description
+ *
+ * This backend call user-supplied backend with current request. If user give empty backend value, then
+ * request passed to underlying backend, and then "call" make one more attempt.
+ *
+ * Underlying backend is expected to be backend-creating, but this is optional.
+ */
+/**
+ * @ingroup mod_backend_call
+ * @page page_call_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "backend/call",
+ *              backend                 = (hashkey_t)'name',  # key with backend in request, default "backend"
+ *              retry                   = (uint_t)'1',        # rerun request after failed call, default 1
+ * }
+ * @endcode
+ */
+
 #define EMODULE 25
 
 typedef struct call_userdata {

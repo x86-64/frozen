@@ -1,16 +1,46 @@
 #include <libfrozen.h>
 
+/**
+ * @ingroup backend
+ * @addtogroup mod_backend_morph Backend 'backend/morph'
+ */
+/**
+ * @ingroup mod_backend_morph
+ * @page page_morph_info Description
+ *
+ * This backend wait for first request, combine it with configuration supplied by user and transform itself to resulting backend.
+ * All further requests processed as there was no morph at all. First request override same parameters from user supplied configuration.
+ *
+ */
+/**
+ * @ingroup mod_backend_morph
+ * @page page_morph_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "backend/morph",
+ *              config                  = { ... },            # backend configuration
+ *              pass_first              = (uint_t)'0',        # pass also first request to new backend, default 1
+ * }
+ * @endcode
+ */
+
 #define EMODULE 20
 
 typedef struct morph_userdata {
 	uintmax_t              running;
+	uintmax_t              pass_first;
 	config_t              *backend_config;
 } morph_userdata;
 
 static int morph_init(backend_t *backend){ // {{{
-	if((backend->userdata = calloc(1, sizeof(morph_userdata))) == NULL)
+	morph_userdata      *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(morph_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->pass_first = 1;
 	return 0;
 } // }}}
 static int morph_destroy(backend_t *backend){ // {{{
@@ -22,6 +52,7 @@ static int morph_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
 	morph_userdata      *userdata          = (morph_userdata *)backend->userdata;
 	
+	hash_data_copy(ret, TYPE_UINTT, userdata->pass_first,     config, HK(pass_first));
 	hash_data_copy(ret, TYPE_HASHT, userdata->backend_config, config, HK(config));
 	if(ret != 0)
 		return error("HK(config) not supplied");
@@ -51,6 +82,9 @@ static ssize_t morph_handler(backend_t *backend, request_t *request){ // {{{
 
 		backend_connect(backend, child); // on destroy - no need to disconnect or call _destory, core will automatically do it
 		userdata->running = 1;
+
+		if(userdata->pass_first == 0)
+			return 0;
 	}
 
 	return ( (ret = backend_pass(backend, request)) < 0 ) ? ret : -EEXIST;

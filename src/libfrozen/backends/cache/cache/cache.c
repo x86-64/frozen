@@ -4,13 +4,9 @@
 
 /**
  * @ingroup backend
- * @brief Cache module
+ * @addtogroup mod_cache Backend 'cache/cache'
  *
  * Cache module hold data in memory, instead of underlying backend
- */
-/**
- * @ingroup backend
- * @addtogroup mod_cache Backend 'cache/cache'
  */
 /**
  * @ingroup mod_cache

@@ -66,7 +66,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/fork/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \

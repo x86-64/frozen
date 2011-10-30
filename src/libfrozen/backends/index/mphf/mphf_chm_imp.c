@@ -2,6 +2,25 @@
 #include <mphf.h>
 #include <mphf_chm_imp.h>
 
+/**
+ * @ingroup mod_backend_mphf
+ * @page page_mphf_algo_chm CHM algorithm configuration parameters
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              nelements_min           = (uint_t)'1000',    # starting index size, default 256
+ *              nelements_step          = (uint_t)'500',     # index expanding step size, default 256
+ *              nelements_mul           = (uint_t)'2',       # index expanding multiply coefficient, default 1
+ *              value_bits              = (uint_t)'32',      # value size in bits
+ *              readonly                = (uint_t)'0',       # index in read-only mode
+ *              backend_g               = (backend_t)'name', # backend for storing g-array
+ *              backend_v               = (backend_t)'name', # backend for storing v-array
+ *              backend_e               = (backend_t)'name'  # backend for storing e-array
+ * }
+ * @endcode
+ */
+
 typedef enum chm_imp_fill_flags {
 	FILLED                 = 1,
 	WRITEABLE              = 2
