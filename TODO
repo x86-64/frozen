@@ -1,5 +1,5 @@
+- pcre
 - string_t convert from and to
-- documentation for data, hash, backend
 - release to github
 - multi-threading
   - backend lock
@@ -18,3 +18,4 @@
 - add flags to configure.ac (--with-libconfig, --with-check)
 - data 'range_t', 'multiselect_t' and matching routines
 - mphf nelements_step with percents + remove from mphf to another backend
+- regexp to match any data, not only strings
