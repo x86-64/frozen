@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_pointers Backend 'pointers'
+ * @addtogroup mod_pointers Backend 'storage/pointers'
  *
  * Pointers module store pointers to data instead of actual data
  */
@@ -13,7 +13,7 @@
  * Accepted configuration:
  * @code
  * 	{
- * 	        class    = "pointers",
+ * 	        class    = "storage/pointers",
  *              input    = "buffer",             # input data HK
  *              offset   = "offset",             # offset HK
  * 	}

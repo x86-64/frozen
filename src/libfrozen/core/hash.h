@@ -4,7 +4,7 @@
 /** @file hash.h */
 
 /** @ingroup data
- *  @addtogroup hash_t Hash_t
+ *  @addtogroup hash_t hash_t
  */
 /** @ingroup hash_t
  *  @page hash_t_overview Hash overview

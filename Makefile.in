@@ -50,7 +50,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/datatype/config.m4 \
@@ -188,7 +187,6 @@ DATA_DIRS = @DATA_DIRS@
 DATA_DIST_DIRS = @DATA_DIST_DIRS@
 DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
-DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
 DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
 DATA_OBJECTS_dataptr = @DATA_OBJECTS_dataptr@
 DATA_OBJECTS_datatype = @DATA_OBJECTS_datatype@
