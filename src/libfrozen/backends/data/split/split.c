@@ -19,7 +19,8 @@
  * @code
  * {
  *              class                   = "data/split",
- *              split                   = "aaa.*",            # split for matching, default ".*"
+ *              split                   = "Z",             # string to split on, default "\n"
+ *              buffer_size             = (uint_t)'1024'   # size of internal buffer, default 1024
  * }
  * @endcode
  */
