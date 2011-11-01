@@ -19,8 +19,9 @@
  * @code
  * {
  *              class                   = "data/split",
- *              split                   = "Z",             # string to split on, default "\n"
- *              buffer_size             = (uint_t)'1024'   # size of internal buffer, default 1024
+ *              input                   = (hashkey_t)'buffer',  # input buffer key name
+ *              split                   = "Z",                  # string to split on, default "\n"
+ *              buffer_size             = (uint_t)'1024'        # size of internal buffer, default 1024
  * }
  * @endcode
  */
