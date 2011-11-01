@@ -78,8 +78,9 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 	char                  *match;
 	char                  *tmp;
 	uintmax_t              buffer_left;
-	uintmax_t              split_offset      = 0;
-	uintmax_t              split_length      = 0;
+	uintmax_t              lmatch_offset     = 0;
+	uintmax_t              original_offset   = 0;
+	uintmax_t              original_eoffset;
 	split_userdata        *userdata          = (split_userdata *)backend->userdata;
 	
 	tmp = alloca(userdata->buffer_size);
@@ -94,8 +95,9 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 		if(data_query(&hslider, &r_read) != 0)
 			break;
 		
-		buffer         = tmp;
-		buffer_left    = r_read.buffer_size;
+		buffer            = tmp;
+		buffer_left       = r_read.buffer_size;
+		original_eoffset  = original_offset + r_read.buffer_size;
 
 		while(1){
 			if( (match = memchr(buffer, (int)userdata->split_str[0], buffer_left)) == NULL)
@@ -104,23 +106,22 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 			buffer_left -= (match - buffer);
 			
 			if(buffer_left < userdata->split_len){
-				split_length += (match - tmp);
-				
-			readmore:
 				memcpy(tmp, match, buffer_left);
 				
 				fastcall_read r_read = { { 5, ACTION_READ }, 0, tmp + buffer_left, userdata->buffer_size - buffer_left };
 				if(data_query(&hslider, &r_read) != 0)
 					break;
 				
-				buffer        = tmp;
-				buffer_left  += r_read.buffer_size;
+				buffer            = tmp;
+				buffer_left      += r_read.buffer_size;
+				original_offset  += (match - tmp);
+				original_eoffset  = original_offset + r_read.buffer_size;
 				continue;
 			}
 			
 			if(memcmp(match, userdata->split_str, userdata->split_len) == 0){
-				uintmax_t       newsplit_length  = split_length + (match - tmp) + userdata->split_len;
-				data_t          hslice           = DATA_SLICET(input, split_offset, newsplit_length);
+				uintmax_t       match_offset     = original_offset + (match - tmp) + userdata->split_len;
+				data_t          hslice           = DATA_SLICET(input, lmatch_offset, match_offset - lmatch_offset);
 				
 				request_t r_next[] = {
 					{ userdata->input, hslice },
@@ -130,18 +131,25 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 				if( (ret = backend_pass(backend, r_next)) < 0)
 					return ret;
 				
-				split_offset += newsplit_length;
-				split_length  = 0;
-				match        += userdata->split_len;
-				buffer_left  -= userdata->split_len;
-				goto readmore;
+				lmatch_offset = match_offset;
 			}
 
 			buffer         = match + 1;
 			buffer_left   -= 1;
 		}
-		split_length  += r_read.buffer_size;
+		
+		original_offset = original_eoffset;
 	}
+	
+	data_t    hslice           = DATA_SLICET(input, lmatch_offset, ~0);
+	request_t r_next[] = {
+		{ userdata->input, hslice },
+		hash_inline(request),
+		hash_end
+	};
+	if( (ret = backend_pass(backend, r_next)) < 0)
+		return ret;
+	
 	return 0;
 } // }}}
 
