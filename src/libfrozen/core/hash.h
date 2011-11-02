@@ -130,6 +130,11 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
 #define hash_assign_hash_t(_dst, _src) {        \
 	memcpy((_dst), (_src), sizeof(hash_t)); \
 }
+#define hash_assign_hash_inline(_dst, _hash) {  \
+	(_dst)->key = hash_ptr_inline;   \
+	(_dst)->data.type = TYPE_HASHT;  \
+	(_dst)->data.ptr = _hash;        \
+}
 #define hash_assign_hash_null(_dst) {  \
 	(_dst)->key = hash_ptr_null;   \
 	(_dst)->data.type = TYPE_VOIDT;\

@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -151552, "src/libfrozen/backends/data/convert/convert.c: calloc failed" },
  { -147457, "src/libfrozen/backends/data/split/split.c: no input string in request" },
  { -147456, "src/libfrozen/backends/data/split/split.c: calloc failed" },
  { -143360, "src/libfrozen/backends/request/implode/implode.c: calloc failed" },

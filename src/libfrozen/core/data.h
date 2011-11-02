@@ -72,8 +72,8 @@
 #define DEF_BUFFER_SIZE 1024
 
 typedef enum data_formats {
-	FORMAT_BINARY,
-	FORMAT_HUMANREADABLE
+	FORMAT_BINARY         = 1,
+	FORMAT_HUMANREADABLE  = 2
 } data_formats;
 
 /// Data holder

@@ -374,6 +374,8 @@ backend_t *     backend_new          (hash_t *config){ // {{{
 	backend_new_ctx        ctx               = { LIST_INITIALIZER, LIST_FREE_ITEM };
 	
 	if(hash_iter(config, (hash_iterator)&backend_new_iterator, &ctx, HASH_ITER_NULL) == ITER_OK){
+		list_destroy(&ctx.backends);
+		
 		if(ctx.backend_prev == LIST_FREE_ITEM)
 			return NULL;
 		

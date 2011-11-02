@@ -1,5 +1,3 @@
-- new hash_dump
-- backend 'data/convert'
 - string_t convert from and to
 - release to github
 - multi-threading

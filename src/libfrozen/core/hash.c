@@ -176,7 +176,8 @@ static ssize_t hash_dump_iter(hash_t *element, uintmax_t *reclevel){
 		hash_dump_pad(*reclevel);
 		printf(" - hash_end\n");
 		
-		*reclevel -= 1;
+		if(*reclevel > 0)
+			*reclevel -= 1;
 		return ITER_CONTINUE;
 	}
 	if(element->key == hash_ptr_inline){

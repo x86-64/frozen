@@ -824,6 +824,7 @@ enable_backendcache
 enable_backendcache_append
 enable_backendipc
 enable_backendallocator
+enable_backendconvert
 enable_backendincapsulate
 enable_backendlist
 enable_backendregexp
@@ -1555,6 +1556,8 @@ Optional Features:
   --disable-backend-ipc   disable backend ipc
   --disable-backend-allocator
                           disable backend allocator
+  --disable-backend-convert
+                          disable backend convert
   --disable-backend-incapsulate
                           disable backend incapsulate
   --disable-backend-list  disable backend list
@@ -18943,6 +18946,43 @@ fi
 		BACKEND_MAKEFILE_data_allocator=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/allocator/libfrozen_backend_allocator.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendconvert was given.
+if test "${enable_backendconvert+set}" = set; then :
+  enableval=$enable_backendconvert;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendconvert}" = "yes"; then
+			enable_backendconvert="no"
+		else
+			enable_backendconvert="yes"
+		fi
+	fi
+
+	if test "${enable_backendconvert}" = "yes"; then
+		BACKEND_DIR_convert="data/convert"
+		BACKEND_DEP_convert=""
+				BACKEND_SELECTED="$BACKEND_SELECTED convert"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_data_convert" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/convert/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/convert"
+
+		BACKEND_MAKEFILE_data_convert=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/convert/libfrozen_backend_convert.la"
 
 	fi
 
