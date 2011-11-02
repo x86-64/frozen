@@ -1,4 +1,5 @@
-- pcre
+- new hash_dump
+- backend 'data/convert'
 - string_t convert from and to
 - release to github
 - multi-threading
@@ -9,6 +10,7 @@
 - fix insert_sort (data_default_cmp)
 - data 'action_t' + convert array from\to string
 - data 'random_t' for file and testing\benchmarking suite
+- pcre
 - autocollecting actions, like HK()
 - new test suite, as benchmarks
 - backend tcp\udp

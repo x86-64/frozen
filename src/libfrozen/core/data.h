@@ -52,6 +52,22 @@
  *  Same policy applied to data created and processed by backends: backend responsible to free allocated data, supply valid or empty
  *  data for request.
  */
+/** @ingroup data
+ *  @page data_conversion Data conversion
+ *  
+ *  Some of frozen api, for example hash_data_copy, can convert values from hash to desired type. It possible if data represent
+ *  plain value (like integers), or plain pointer (as backend). For rest of data types, which require allocation, this process
+ *  can't be automated, as requires free of allocated resources. For those data types you should manually call data_convert macro, or
+ *  plain data_query with proper request.
+ *
+ *  All integer data can be converted in any other integer type. Buffer or string, containing human representation of integer, can also
+ *  be converted in clean integer type. String with backend name can be converted to this backend pointer, hash with backend config
+ *  can also be converted to new backend, and so on.
+ *
+ *  This ability also useful to avoid unnesessery data copying from place to place. For example, ipc_shmem backend use shared memory to
+ *  send data to another process. If there was no conversion, it would require buffer with already packed data, which would be copied to
+ *  shared memory. And, of course, special packing backend. Instead of that, ipc_shmem take any input and convert it directly to shared memory.
+ */
 
 #define DEF_BUFFER_SIZE 1024
 

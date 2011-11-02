@@ -74,8 +74,9 @@ struct hash_t {
 };
 
 typedef enum hash_iter_flags {
-	HASH_ITER_NULL = 1,         ///< Exec callback with hash_null items also
-	HASH_ITER_END  = 2          ///< Exec callback with hash_end items also
+	HASH_ITER_NULL   = 1,         ///< Exec callback with hash_null items also
+	HASH_ITER_END    = 2,         ///< Exec callback with hash_end items also
+	HASH_ITER_INLINE = 4,         ///< Exec callback with hash_inline items also
 } hash_iter_flags;
 
 typedef ssize_t  (*hash_iterator)(hash_t *hash, void *arg); ///< Callback routine for hash_iter

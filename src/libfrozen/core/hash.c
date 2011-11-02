@@ -104,6 +104,11 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 			if(curr->data.ptr == NULL) // empty inline item
 				goto next;
 			
+			if( (flags & HASH_ITER_INLINE) != 0 ){
+				if( (ret = func(curr, arg)) != ITER_CONTINUE)
+					return ret;
+			}
+
 			if( (ret = hash_iter((hash_t *)curr->data.ptr, func, arg, flags)) != ITER_OK)
 				return ret;
 			
@@ -152,56 +157,73 @@ data_t *           hash_data_find               (hash_t *hash, hash_key_t key){ 
 } // }}}
 
 #ifdef DEBUG
-void hash_dump(hash_t *hash){ // {{{
-	unsigned int  k;
-	hash_t       *element  = hash;
-	data_t        d_s_key  = DATA_STRING(NULL);
-	data_t        d_s_type = DATA_STRING(NULL);
+static void hash_dump_pad(uintmax_t reclevel){
+	for(;reclevel > 0; reclevel--)
+		printf("\t");
+}
 
-	printf("hash: %p\n", hash);
-start:
-	while(element->key != hash_ptr_end){
-		if(element->key == hash_ptr_null){
-			printf(" - hash_null\n");
-			goto next_item;
-		}
-		
-		data_t              d_key     = DATA_HASHKEYT(element->key);
-		fastcall_convert_to r_convert1 = { { 3, ACTION_CONVERT_TO }, &d_s_key };
-		data_query(&d_key, &r_convert1);
-		
-		data_t              d_type    = DATA_DATATYPET(element->data.type);
-		fastcall_convert_to r_convert2 = { { 3, ACTION_CONVERT_TO }, &d_s_type };
-		data_query(&d_type, &r_convert2);
-
-		printf(" - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
-		
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(&d_s_key,  &r_free);
-		data_query(&d_s_type, &r_free);
-
-		fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-		data_query(&element->data, &r_ptr);
-		fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-		data_query(&element->data, &r_len);
-
-		for(k = 0; k < r_len.length; k++){
-			if((k % 32) == 0)
-				printf("\n   0x%.5x: ", k);
-			
-			printf("%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
-		}
-		printf("\n");
+static ssize_t hash_dump_iter(hash_t *element, uintmax_t *reclevel){
+	unsigned int           k;
+	data_t                 d_s_key  = DATA_STRING(NULL);
+	data_t                 d_s_type = DATA_STRING(NULL);
 	
-	next_item:
-		element++;
+	if(element->key == hash_ptr_null){
+		hash_dump_pad(*reclevel);
+		printf(" - hash_null\n");
+		return ITER_CONTINUE;
 	}
-	printf("end_hash\n");
-	if(element->data.ptr != NULL){
-		printf("recursive hash: %p\n", element->data.ptr);
-		element = element->data.ptr;
-		goto start;
+	if(element->key == hash_ptr_end){
+		hash_dump_pad(*reclevel);
+		printf(" - hash_end\n");
+		
+		*reclevel -= 1;
+		return ITER_CONTINUE;
 	}
+	if(element->key == hash_ptr_inline){
+		hash_dump_pad(*reclevel);
+		printf(" - hash_inline:\n");
+		
+		*reclevel += 1;
+		return ITER_CONTINUE;
+	}
+
+	data_t              d_key     = DATA_HASHKEYT(element->key);
+	fastcall_convert_to r_convert1 = { { 3, ACTION_CONVERT_TO }, &d_s_key };
+	data_query(&d_key, &r_convert1);
+	
+	data_t              d_type    = DATA_DATATYPET(element->data.type);
+	fastcall_convert_to r_convert2 = { { 3, ACTION_CONVERT_TO }, &d_s_type };
+	data_query(&d_type, &r_convert2);
+
+	hash_dump_pad(*reclevel);
+	printf(" - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
+	
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&d_s_key,  &r_free);
+	data_query(&d_s_type, &r_free);
+
+	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
+	data_query(&element->data, &r_ptr);
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	data_query(&element->data, &r_len);
+
+	for(k = 0; k < r_len.length; k++){
+		if((k % 32) == 0){
+			printf("\n");
+			hash_dump_pad(*reclevel);
+			printf("   0x%.5x: ", k);
+		}
+		
+		printf("%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
+	}
+	printf("\n");
+	return ITER_CONTINUE;
+}
+
+void hash_dump(hash_t *hash){ // {{{
+	uintmax_t              reclevel = 0;
+	
+	hash_iter(hash, (hash_iterator)&hash_dump_iter, &reclevel, HASH_ITER_NULL | HASH_ITER_INLINE | HASH_ITER_END);
 } // }}}
 #endif
 
