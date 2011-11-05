@@ -19,11 +19,11 @@ static int         class_strcmp            (char *class_str1, char *class_str2){
 	char                  *class_str2_name;
 	uintmax_t              only_names        = 0;
 	
-	                                  class_str1_name = index(class_str1, '/') + 1;
-	if(class_str1_name == (char *)1)  class_str1_name = index(class_str1, '.') + 1;
+	                                  class_str1_name = strchr(class_str1, '/') + 1;
+	if(class_str1_name == (char *)1)  class_str1_name = strchr(class_str1, '.') + 1;
 	if(class_str1_name == (char *)1){ class_str1_name = class_str1; only_names = 1; } 
-	                                  class_str2_name = index(class_str2, '/') + 1;
-	if(class_str2_name == (char *)1)  class_str2_name = index(class_str2, '.') + 1;
+	                                  class_str2_name = strchr(class_str2, '/') + 1;
+	if(class_str2_name == (char *)1)  class_str2_name = strchr(class_str2, '.') + 1;
 	if(class_str2_name == (char *)1){ class_str2_name = class_str2; only_names = 1; } 
 	
 	if(only_names == 1){

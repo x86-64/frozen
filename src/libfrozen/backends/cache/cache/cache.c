@@ -218,6 +218,8 @@ static uintmax_t cache_get_filesize(backend_t *backend){ // {{{
 } // }}}
 static void      cache_enable(backend_t *backend){ // {{{
 	uintmax_t              file_size;
+	backend_t             *child;
+	void                  *iter              = NULL;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
 	pthread_rwlock_wrlock(&userdata->lock);
@@ -234,11 +236,13 @@ static void      cache_enable(backend_t *backend){ // {{{
 		
 		// read data from backend to new memory
 		data_t d_memory   = DATA_MEMORYT(&userdata->memory);
-		data_t d_backend  = DATA_BACKENDT(backend);
-		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_memory };
-		if(data_query(&d_backend, &r_transfer) < 0)
-			goto failed;
-		
+		while( (child = list_iter_next(&backend->childs, &iter)) != NULL){
+			data_t d_backend  = DATA_BACKENDT(backend);
+			
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_memory };
+			if(data_query(&d_backend, &r_transfer) < 0)
+				goto failed;
+		}
 		userdata->d_memory = d_memory;
 		
 		// enable caching
@@ -258,6 +262,8 @@ failed:
 } // }}}
 static void      cache_disable(backend_t *backend){ // {{{
 	uintmax_t              file_size;
+	backend_t             *child;
+	void                  *iter              = NULL;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
 	pthread_rwlock_wrlock(&userdata->lock);
@@ -270,10 +276,13 @@ static void      cache_disable(backend_t *backend){ // {{{
 		
 		// flush data from memory to backend
 		data_t d_memory  = DATA_MEMORYT(&userdata->memory);
-		data_t d_backend = DATA_BACKENDT(backend);
-		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_backend };
-		data_query(&d_memory, &r_transfer);
-		
+		while( (child = list_iter_next(&backend->childs, &iter)) != NULL){
+			data_t d_backend = DATA_BACKENDT(child);
+			
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_backend };
+			data_query(&d_memory, &r_transfer);
+		}
+
 		// free used memory
 		memory_free(&userdata->memory);
 		

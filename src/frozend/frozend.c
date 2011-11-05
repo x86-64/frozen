@@ -70,7 +70,7 @@ void daemonize(void){ // {{{
 	if (i>0) exit(0); /* parent exits */
 	/* child (daemon) continues */
 	setsid(); /* obtain a new process group */
-	for (i=getdtablesize();i>=0;--i) close(i); /* close all descriptors */
+	for (i=65535;i>=0;--i) close(i); /* close all descriptors */
 	i=open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standart I/O */
 	signal(SIGCHLD,SIG_IGN); /* ignore child */
 	signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
@@ -285,7 +285,7 @@ void modules_load(void){ // {{{
 		return;
 	
 	while( (dir = readdir(modules_dir)) != NULL){
-		if((ext = rindex(dir->d_name, '.')) == NULL)
+		if((ext = strrchr(dir->d_name, '.')) == NULL)
 			continue;
 		
 		if(strcasecmp(ext, ".so") != 0)

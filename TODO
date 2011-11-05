@@ -14,8 +14,6 @@
 - backend tcp\udp
 - m4 exec for configs
 - backend go_session for http
-- add checks to configure.ac (malloc, headers, using functions)
-- add flags to configure.ac (--with-libconfig, --with-check)
 - data 'range_t', 'multiselect_t' and matching routines
 - mphf nelements_step with percents + remove from mphf to another backend
 - regexp to match any data, not only strings

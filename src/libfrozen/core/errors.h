@@ -1,17 +1,11 @@
 #define EBASE 4096
 #define ESTEP 4096
+#define ECOUNTER __LINE__
 
 #define EFLAG_DEBUG   1
 #define EFLAG_NOTICE  2
 #define EFLAG_WARNING 3
 #define EFLAG_ERROR   4
-
-#ifndef __COUNTER__
-#warning Counter macro not defined       
-#define ECOUNTER __LINE__
-#else
-#define ECOUNTER __COUNTER__
-#endif
 
 #define debug(...)   handle_error(EFLAG_DEBUG,   -(EBASE + EMODULE * ESTEP + ECOUNTER))
 #define notice(...)  handle_error(EFLAG_NOTICE,  -(EBASE + EMODULE * ESTEP + ECOUNTER))

@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT([frozen], [0.1.0], [x86mail@gmail.com])
+AC_INIT([frozen], [1.0.0], [x86mail@gmail.com])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])

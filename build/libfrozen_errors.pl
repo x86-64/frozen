@@ -25,6 +25,7 @@ find(
 foreach my $file (@files_list){
         my ($emod, $errnum, $errmsg);
         my $ecount = 0;
+	my $linen = 1;
         
         open FH, "<$file";
         while(my $line = <FH>){
@@ -33,11 +34,12 @@ foreach my $file (@files_list){
                 if($line =~ /(?:debug|notice|warning|error)\s*\("([^"]+)"\)/){
                         $errmsg = $1;
                         $errmsg =~ s/\\n//g;
-			$errnum = -($ebase + $estep * $emod + $ecount);
+			$errnum = -($ebase + $estep * $emod + $linen);
                         
                         push @allerrs, { errnum => $errnum, errmsg => $errmsg, errfile => $file };
                         $ecount++;
                 }
+		$linen++;
         }
         close FH;
 }

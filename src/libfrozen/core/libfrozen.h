@@ -11,18 +11,6 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
-#ifndef __USE_GNU
-#define __USE_GNU
-#endif
-
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500 
-#endif
-
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE
-#endif
-
 #ifndef _WITH_DPRINTF
 #define _WITH_DPRINTF // for snprintf on FreeBSD
 #endif
