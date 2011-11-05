@@ -107,7 +107,9 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_frozend_OBJECTS = frozend-frozend.$(OBJEXT)
 frozend_OBJECTS = $(am_frozend_OBJECTS)
-frozend_DEPENDENCIES = $(top_srcdir)/src/libfrozen/libfrozen.la
+am__DEPENDENCIES_1 =
+frozend_DEPENDENCIES = $(top_srcdir)/src/libfrozen/libfrozen.la \
+	$(am__DEPENDENCIES_1)
 frozend_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(frozend_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -290,9 +292,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-frozend_SOURCES = frozend.c paths.h
+@HAVE_DL_TRUE@OPTIONAL = -ldl
+frozend_SOURCES = frozend.c paths.h paths.h.in
 frozend_CFLAGS = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
-frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la -ldl
+frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la $(OPTIONAL)
 CLEANFILES = paths.h
 all: all-am
 

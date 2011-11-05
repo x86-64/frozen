@@ -725,7 +725,7 @@ uninstall-am:
 configs/config_parser.tab.c:
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
 configs/config_parser.lex.c:
-	${FLEX}  -P config_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
+	${FLEX}  -Pconfig_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

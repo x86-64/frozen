@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <alloca.h>
 
 /**
  * @ingroup backend

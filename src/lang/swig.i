@@ -22,13 +22,13 @@
 
 %include hashkeys.i
 
-%include core/api.h
-%include core/data.h
-%include core/data_selected.h
-%include core/backend.h
-%include core/hash.h
-%include core/errors.h
-%include core/configs/config.h
+%include ../../libfrozen/core/api.h
+%include ../../libfrozen/core/data.h
+%include ../../libfrozen/core/data_selected.h
+%include ../../libfrozen/core/backend.h
+%include ../../libfrozen/core/hash.h
+%include ../../libfrozen/core/errors.h
+%include ../../libfrozen/core/configs/config.h
 
 typedef hash_t                   request_t;
 typedef signed int               ssize_t;

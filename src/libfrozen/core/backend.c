@@ -2,7 +2,6 @@
 #include <libfrozen.h>
 #include <backend_selected.h>
 
-#include <alloca.h>
 #include <pthread.h>
 
 static list                    classes        = LIST_INITIALIZER; // dynamic classes passed from modules

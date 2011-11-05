@@ -49,7 +49,6 @@
  */
 
 #include <libfrozen.h>
-#include <alloca.h>
 #include <rewrite.h>
 
 #define EMODULE 12

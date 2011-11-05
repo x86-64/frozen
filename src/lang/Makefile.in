@@ -117,7 +117,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = . go gogcc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -308,13 +308,16 @@ top_srcdir = @top_srcdir@
 PERLMAKEFILE = perl/Makefile
 PERLOUTDIR = perl/
 GODIR = go
+GOGCCDIR = gogcc
 CLEANFILES = 
 EXTRA_DIST = \
-	swig.i datatypes.i hashkeys.i \
+	swig.i hashkeys.i \
 	$(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t \
-	$(GODIR)/datatypes.i $(GODIR)/frozen.swig $(GODIR)/hashkeys.i
+	$(GODIR)/frozen.swig $(GODIR)/hashkeys.i \
+	$(GOGCCDIR)/frozen.swig $(GOGCCDIR)/hashkeys.i
 
-SUBDIRS = . go gogcc
+@HAVE_GCCGO_TRUE@OPTIONAL = gogcc
+SUBDIRS = . go $(OPTIONAL)
 all: all-recursive
 
 .SUFFIXES:
@@ -666,7 +669,7 @@ uninstall-am:
 
 
 $(PERLMAKEFILE):
-	swig -I@top_srcdir@/src/libfrozen/core/ -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
+	swig -I$(PERLOUTDIR) -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
 	cd $(PERLOUTDIR) && $(PERL) Makefile.PL
 
 all-local: $(PERLMAKEFILE)

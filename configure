@@ -641,9 +641,13 @@ DATA_LIBS_SELECTED
 DATA_DIST_DIRS
 DATA_OBJECTS_backend
 MODULE_DIST_DIRS
+HAVE_SWIG_FALSE
+HAVE_SWIG_TRUE
+SWIG
+HAVE_GCCGO_FALSE
+HAVE_GCCGO_TRUE
 GCCGO
 PERL
-SWIG
 FLEX
 BISON
 LS
@@ -655,6 +659,8 @@ CHECK_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
+HAVE_DL_FALSE
+HAVE_DL_TRUE
 CXXCPP
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -783,6 +789,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_fuse
 enable_modulego_http
 enable_modulego_template
 enable_backend_t
@@ -1612,6 +1619,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
+  --with-fuse             support fuse filesystem [default=check]
 
 Some influential environment variables:
   CC          C compiler command
@@ -11992,6 +12000,17 @@ _ACEOF
 fi
 done
 
+for ac_func in snprintf
+do :
+  ac_fn_c_check_func "$LINENO" "snprintf" "ac_cv_func_snprintf"
+if test "x$ac_cv_func_snprintf" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SNPRINTF 1
+_ACEOF
+
+fi
+done
+
 for ac_header in fcntl.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "fcntl.h" "ac_cv_header_fcntl_h" "$ac_includes_default"
@@ -16533,7 +16552,6 @@ _ACEOF
   esac
 
 
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthreads" >&5
 $as_echo_n "checking for pthread_create in -lpthreads... " >&6; }
 if ${ac_cv_lib_pthreads_pthread_create+:} false; then :
@@ -16623,6 +16641,57 @@ _ACEOF
 
 fi
 
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
+$as_echo_n "checking for dlopen in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlopen+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_dl_dlopen=yes
+else
+  ac_cv_lib_dl_dlopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
+$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
+if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
+  DL=1
+else
+  DL=0
+fi
+
+ if test "$DL" = 1; then
+  HAVE_DL_TRUE=
+  HAVE_DL_FALSE='#'
+else
+  HAVE_DL_TRUE='#'
+  HAVE_DL_FALSE=
 fi
 
 
@@ -16835,6 +16904,17 @@ $as_echo "yes" >&6; }
 
 fi
 
+
+# Check whether --with-fuse was given.
+if test "${with_fuse+set}" = set; then :
+  withval=$with_fuse;
+else
+  with_fuse=check
+fi
+
+case "$with_fuse" in #(
+  yes) :
+
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for FUSE" >&5
 $as_echo_n "checking for FUSE... " >&6; }
@@ -16891,38 +16971,92 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$FUSE_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (fuse >= 2.6.0) were not met:
-
-$FUSE_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables FUSE_CFLAGS
-and FUSE_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
+	HAVE_FUSE=0
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables FUSE_CFLAGS
-and FUSE_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
+	HAVE_FUSE=0
 else
 	FUSE_CFLAGS=$pkg_cv_FUSE_CFLAGS
 	FUSE_LIBS=$pkg_cv_FUSE_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+	HAVE_FUSE=1
+fi ;; #(
+  no) :
+    HAVE_FUSE=0 ;; #(
+  *) :
 
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for FUSE" >&5
+$as_echo_n "checking for FUSE... " >&6; }
+
+if test -n "$FUSE_CFLAGS"; then
+    pkg_cv_FUSE_CFLAGS="$FUSE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"fuse >= 2.6.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "fuse >= 2.6.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FUSE_CFLAGS=`$PKG_CONFIG --cflags "fuse >= 2.6.0" 2>/dev/null`
+else
+  pkg_failed=yes
 fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$FUSE_LIBS"; then
+    pkg_cv_FUSE_LIBS="$FUSE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"fuse >= 2.6.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "fuse >= 2.6.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FUSE_LIBS=`$PKG_CONFIG --libs "fuse >= 2.6.0" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "fuse >= 2.6.0" 2>&1`
+        else
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors "fuse >= 2.6.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$FUSE_PKG_ERRORS" >&5
+
+	HAVE_FUSE=0
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	HAVE_FUSE=0
+else
+	FUSE_CFLAGS=$pkg_cv_FUSE_CFLAGS
+	FUSE_LIBS=$pkg_cv_FUSE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	HAVE_FUSE=1
+fi
+ ;;
+esac
 
 for ac_prog in gm4 m4
 do
@@ -17200,52 +17334,6 @@ fi
 done
 test -n "$FLEX" || FLEX="no"
 
-for ac_prog in swig
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_SWIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $SWIG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_SWIG="$SWIG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_SWIG="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-SWIG=$ac_cv_path_SWIG
-if test -n "$SWIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG" >&5
-$as_echo "$SWIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$SWIG" && break
-done
-test -n "$SWIG" || SWIG="no"
-
 for ac_prog in perl perl5
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -17291,6 +17379,7 @@ fi
   test -n "$PERL" && break
 done
 test -n "$PERL" || PERL="no"
+
 
 for ac_prog in gccgo
 do
@@ -17338,18 +17427,27 @@ fi
 done
 test -n "$GCCGO" || GCCGO="no"
 
-for ac_prog in ar
+ if test "$GCCGO" != "no"; then
+  HAVE_GCCGO_TRUE=
+  HAVE_GCCGO_FALSE='#'
+else
+  HAVE_GCCGO_TRUE='#'
+  HAVE_GCCGO_FALSE=
+fi
+
+
+for ac_prog in swig
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_AR+:} false; then :
+if ${ac_cv_path_SWIG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  case $AR in
+  case $SWIG in
   [\\/]* | ?:[\\/]*)
-  ac_cv_path_AR="$AR" # Let the user override the test with a path.
+  ac_cv_path_SWIG="$SWIG" # Let the user override the test with a path.
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
@@ -17359,7 +17457,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_AR="$as_dir/$ac_word$ac_exec_ext"
+    ac_cv_path_SWIG="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -17370,19 +17468,27 @@ IFS=$as_save_IFS
   ;;
 esac
 fi
-AR=$ac_cv_path_AR
-if test -n "$AR"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $AR" >&5
-$as_echo "$AR" >&6; }
+SWIG=$ac_cv_path_SWIG
+if test -n "$SWIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG" >&5
+$as_echo "$SWIG" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$AR" && break
+  test -n "$SWIG" && break
 done
-test -n "$AR" || AR="no"
+test -n "$SWIG" || SWIG="no"
+
+ if test "$SWIG" != "no"; then
+  HAVE_SWIG_TRUE=
+  HAVE_SWIG_FALSE='#'
+else
+  HAVE_SWIG_TRUE='#'
+  HAVE_SWIG_FALSE=
+fi
 
 
 
@@ -17433,7 +17539,6 @@ fi
 
 
 
-
 	# Check whether --enable-modulego_template was given.
 if test "${enable_modulego_template+set}" = set; then :
   enableval=$enable_modulego_template;
@@ -17460,7 +17565,6 @@ fi
 
 		MODULE_MAKEFILE_go_template=yes
 	fi
-
 
 
 
@@ -19503,6 +19607,8 @@ fi
 	fi
 
 
+if test "x$HAVE_FUSE" = "x1"; then :
+
 
 
 
@@ -19539,6 +19645,8 @@ fi
 
 	fi
 
+
+fi
 
 
 
@@ -20188,6 +20296,18 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_DL_TRUE}" && test -z "${HAVE_DL_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_DL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_GCCGO_TRUE}" && test -z "${HAVE_GCCGO_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_GCCGO\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_SWIG_TRUE}" && test -z "${HAVE_SWIG_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_SWIG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

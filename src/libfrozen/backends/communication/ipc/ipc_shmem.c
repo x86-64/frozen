@@ -85,7 +85,8 @@ static ssize_t shmem_init(ipc_shmem_userdata *userdata){ // {{{
 	sem_init(&userdata->shmaddr->sem_written, 1, 0);
 	sem_init(&userdata->shmaddr->sem_free,    1, userdata->shmaddr->nitems);
 	for(i=0; i<userdata->shmaddr->nitems; i++){
-		sem_init(&userdata->shmblocks[i].sem_done, 1, 0);
+		if(sem_init(&userdata->shmblocks[i].sem_done, 1, 0) != 0)
+			return -EFAULT;
 		userdata->shmblocks[i].data_rel_ptr = i * userdata->shmaddr->item_size;
 	}
 	return 0;
@@ -204,7 +205,8 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 		userdata->shmaddr->item_size = item_size;
 		userdata->shmaddr->nitems    = nitems;
 		
-		shmem_init(userdata);
+		if(shmem_init(userdata) != 0)
+			return error("shmem_init failed");
 		
 		// start threads
 		if(pthread_create(&userdata->server_thr, NULL, &ipc_shmem_listen, ipc) != 0)

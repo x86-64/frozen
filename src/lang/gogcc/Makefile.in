@@ -19,7 +19,6 @@ libgofrozen_wrap.so: frozen_wrap.c
 
 libgofrozen.so: Frozen.go
 	$(GCCGO) -c -o libgofrozen.so Frozen.go -shared $(CFLAGS) -L.
-	#$(AR) cru libgofrozen.a gofrozen.o
 
 install:
 	cp $(OBJECTS) $(libdir)
@@ -32,3 +31,6 @@ check:
 
 clean:
 	rm Frozen.go frozen_wrap.c *.so *.[ao] || echo
+
+distdir:
+	echo

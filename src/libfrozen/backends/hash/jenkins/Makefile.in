@@ -46,38 +46,55 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/binary/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/dataptr/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/datatype/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/go_interface/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/hash_key/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/slice/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/slider/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/string/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/convert/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/fill/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/index/hashtable/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/implode/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/rewrite/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/storage/pointers/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -142,13 +159,18 @@ DATA_DIRS = @DATA_DIRS@
 DATA_DIST_DIRS = @DATA_DIST_DIRS@
 DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
-DATA_OBJECTS_binary = @DATA_OBJECTS_binary@
 DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
+DATA_OBJECTS_dataptr = @DATA_OBJECTS_dataptr@
+DATA_OBJECTS_datatype = @DATA_OBJECTS_datatype@
+DATA_OBJECTS_default = @DATA_OBJECTS_default@
 DATA_OBJECTS_go_interface = @DATA_OBJECTS_go_interface@
 DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
+DATA_OBJECTS_hash_key = @DATA_OBJECTS_hash_key@
 DATA_OBJECTS_io = @DATA_OBJECTS_io@
 DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
 DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
+DATA_OBJECTS_slice = @DATA_OBJECTS_slice@
+DATA_OBJECTS_slider = @DATA_OBJECTS_slider@
 DATA_OBJECTS_string = @DATA_OBJECTS_string@
 DATA_OBJECTS_struct = @DATA_OBJECTS_struct@
 DATA_OBJECTS_uint = @DATA_OBJECTS_uint@
@@ -271,7 +293,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libfrozen_backend_jenkins.la
-libfrozen_backend_jenkins_la_SOURCES = jenkins.c hash_jenkins.c
+libfrozen_backend_jenkins_la_SOURCES = jenkins.c hash_jenkins.c hash_jenkins.h
 libfrozen_backend_jenkins_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 

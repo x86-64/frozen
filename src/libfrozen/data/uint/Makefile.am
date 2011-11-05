@@ -13,6 +13,6 @@ EXTRA_DIST = uint.c.m4 uint.h.m4
 $(uint_src): $(uint_hdr) uint.c.m4
 	${M4} -sP -DNAME=$@ uint.c.m4 > $@
 $(uint_hdr): uint.h.m4
-	${M4} -sP -DNAME=$@ $< > $@
+	${M4} -sP -DNAME=$@ uint.h.m4 > $@
 
 CLEANFILES = $(uint_src) $(uint_hdr)

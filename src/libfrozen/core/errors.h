@@ -7,7 +7,8 @@
 #define EFLAG_ERROR   4
 
 #ifndef __COUNTER__
-#warn Counter macro not defined       
+#warning Counter macro not defined       
+#define ECOUNTER __LINE__
 #else
 #define ECOUNTER __COUNTER__
 #endif

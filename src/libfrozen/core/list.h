@@ -1,11 +1,6 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <errno.h>
-#include <pthread.h>
-#include <malloc.h>
-#include <stdint.h>
-
 typedef struct list {
 	pthread_rwlock_t       lock;
 	void                 **items;

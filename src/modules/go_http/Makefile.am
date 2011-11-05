@@ -1,8 +1,14 @@
 MYLDFLAGS= -lgofrozen -lgofrozen_wrap -L@top_srcdir@/src/lang/gogcc/
 
-EXTRA_DIST = main.go
-CLEANFILES = module_go_http.so
-modules_DATA = module_go_http.so
+if HAVE_SWIG
+if HAVE_GCCGO
+MODULES = module_go_http.so
+endif
+endif
 
-module_go_http.so: main.go
+modules_DATA = $(MODULES)
+CLEANFILES = $(MODULES)
+EXTRA_DIST = main.go
+
+$(MODULES): main.go
 	$(GCCGO) -shared -fPIC $(CFLAGS) $(MYLDFLAGS) -o $@ $< 

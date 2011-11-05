@@ -321,7 +321,9 @@ retry:
 	flags |= cfg_rdonly == 1 ? O_RDONLY : O_RDWR;
 	flags |= cfg_excl   == 1 ? O_EXCL   : 0;
 	flags |= cfg_creat  == 1 ? O_CREAT  : 0;
+	#ifdef O_LARGEFILE
 	flags |= O_LARGEFILE;
+	#endif
 	
 	if( (handle = open(filepath, flags, cfg_mode)) == -1){
 		if(cfg_retry == 1){

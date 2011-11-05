@@ -1,9 +1,10 @@
 PERLMAKEFILE=perl/Makefile
 PERLOUTDIR=perl/
 GODIR=go
+GOGCCDIR=gogcc
 
 $(PERLMAKEFILE):
-	swig -I@top_srcdir@/src/libfrozen/core/ -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
+	swig -I$(PERLOUTDIR) -perl5 -outdir $(PERLOUTDIR) -o $(PERLOUTDIR)swig_wrap.c @HAVE_DEBUG@ swig.i
 	cd $(PERLOUTDIR) && $(PERL) Makefile.PL
 
 all-local: $(PERLMAKEFILE)
@@ -21,8 +22,13 @@ install-exec-local: $(PERLMAKEFILE)
 
 CLEANFILES = 
 EXTRA_DIST = \
-	swig.i datatypes.i hashkeys.i \
+	swig.i hashkeys.i \
 	$(PERLOUTDIR)/Frozen.pm $(PERLOUTDIR)/swig_wrap.c $(PERLOUTDIR)/Makefile.PL $(PERLOUTDIR)/t/*.t \
-	$(GODIR)/datatypes.i $(GODIR)/frozen.swig $(GODIR)/hashkeys.i
+	$(GODIR)/frozen.swig $(GODIR)/hashkeys.i \
+	$(GOGCCDIR)/frozen.swig $(GOGCCDIR)/hashkeys.i
 
-SUBDIRS = . go gogcc
+if HAVE_GCCGO
+OPTIONAL = gogcc
+endif
+
+SUBDIRS = . go $(OPTIONAL)
