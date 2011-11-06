@@ -1,4 +1,3 @@
-- string_t convert to
 - release to github
 - multi-threading
   - backend lock

@@ -3,8 +3,6 @@
 #include <datatype_t.h>
 
 static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	datatype_t             result            = TYPE_INVALID;
-
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
@@ -23,13 +21,12 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 					continue;
 				
 				if(strcasecmp(proto->type_str, (char *)fargs->src->ptr) == 0){
-					result = proto->type;
-					break;
+					*(datatype_t *)(dst->ptr) = proto->type;
+					return 0;
 				}
 			}
-			
-			*(datatype_t *)(dst->ptr) = result;
-			return 0;
+			return -EINVAL;
+
 		default:
 			// TODO from any type
 			break;

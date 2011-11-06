@@ -85,6 +85,33 @@ clean_read:;
 		
 	return 0;
 } // }}}
+static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	uintmax_t              buffer_size;
+	uintmax_t              format            = FORMAT_CLEAN;
+	
+	if(fargs->dest == NULL || !src->ptr)
+		return -EINVAL;
+	
+	if(fargs->header.nargs > 3)
+		format = fargs->format;
+	
+	buffer_size = strlen(src->ptr);
+	
+	switch(format){
+		case FORMAT_BINARY:;
+			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size + 1 };
+			return data_query(fargs->dest, &r_write1);
+		
+		case FORMAT_CLEAN:;
+		case FORMAT_HUMANREADABLE:;
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size };
+			return data_query(fargs->dest, &r_write2);
+		
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
 static ssize_t data_string_t_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
 	ssize_t                ret;
 
@@ -105,6 +132,7 @@ data_proto_t string_t_proto = {
 	.handlers      = {
 		[ACTION_PHYSICALLEN]  = (f_data_func)&data_string_t_physlen,
 		[ACTION_LOGICALLEN]   = (f_data_func)&data_string_t_loglen,
+		[ACTION_CONVERT_TO]   = (f_data_func)&data_string_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_string_t_convert_from,
 		[ACTION_TRANSFER]     = (f_data_func)&data_string_t_transfer,
 	}
