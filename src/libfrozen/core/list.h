@@ -25,6 +25,7 @@ void       list_rdlock        (list *clist);
 void       list_wrlock        (list *clist);
 void       list_unlock        (list *clist);
 void *     list_iter_next     (list *clist, void **iter);
+void       list_push          (list *clist, void *item);
 void *     list_pop           (list *clist);
 
 #endif // LIST_H

@@ -35,6 +35,30 @@ found:
 	
 	pthread_rwlock_unlock(&clist->lock);
 } // }}}
+void       list_push   (list *clist, void *item){ // {{{
+	void                 **list;
+	void                  *curr;
+	size_t                 lsz      = 0;
+	
+	pthread_rwlock_wrlock(&clist->lock);
+	
+	if( (list = clist->items) != NULL){
+		while( (curr = list[lsz]) != LIST_END){
+			if(curr == LIST_FREE_ITEM)
+				goto found;
+			
+			lsz++;
+		}
+	}
+	list = clist->items = realloc(list, sizeof(void *) * (lsz + 2));
+	memmove(list + 1, list, sizeof(void *) * (lsz + 1));
+	list[lsz + 1] = LIST_END;
+	lsz = 0;
+found:
+	list[lsz + 0] = item;
+	
+	pthread_rwlock_unlock(&clist->lock);
+} // }}}
 void       list_delete (list *clist, void *item){ // {{{
 	void                 **list;
 	void                  *curr;

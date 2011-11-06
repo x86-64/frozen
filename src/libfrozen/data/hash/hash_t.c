@@ -78,7 +78,10 @@ static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 	
 	hash1 = data1->ptr;
 	hash2 = fargs->data2->ptr;
-
+	
+	if(hash1 == NULL) // null and empty hash equals to any hash
+		return 0;
+	
 	if(hash_iter(hash1, (hash_iterator)&data_hash_t_compare_iter, hash2, 0) == ITER_OK){
 		return 0;
 	}

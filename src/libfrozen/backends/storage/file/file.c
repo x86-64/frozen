@@ -446,7 +446,19 @@ static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("size not supplied");
+	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size));
+	if(ret != 0){
+		data_t           *buffer;
+		
+		if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
+			return warning("size not supplied");
+		
+		fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+		if(data_query(buffer, &r_len) != 0)
+			return warning("size not supplied");
+		
+		size = r_len.length;
+	}
 	
 	if( file_new_offset(backend, &offset, size) != 0)
 		return error("file expand error");

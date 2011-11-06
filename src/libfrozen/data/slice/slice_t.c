@@ -11,13 +11,21 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 		case ACTION_WRITE:;
 			fastcall_io         *ioargs     = (fastcall_io *)fargs;
 			
+			if(ioargs->offset > fdata->size)
+				return -EINVAL;
+			
+			ioargs->buffer_size  = MIN(ioargs->buffer_size, fdata->size - ioargs->offset);
+			
+			if(ioargs->buffer_size == 0)
+				return -1;
+			
 			ioargs->offset      += fdata->off;
-			ioargs->buffer_size  = MIN(ioargs->buffer_size, fdata->size);
 			return data_query(fdata->data, fargs);
 		
 		case ACTION_TRANSFER:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_TRANSFER ](data, fargs);
 		
+		/*
 		case ACTION_GETDATAPTR:
 			if( (ret = data_query(fdata->data, fargs)) != 0)
 				return ret;
@@ -31,7 +39,8 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 			
 			((fastcall_getdataptr *)fargs)->ptr += fdata->off;
 			return 0;
-		
+		*/
+
 		case ACTION_LOGICALLEN:
 		case ACTION_PHYSICALLEN:;
 			fastcall_len         *largs     = (fastcall_len *)fargs;

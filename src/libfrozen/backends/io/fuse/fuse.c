@@ -374,7 +374,7 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 	vfs_item              *item              = (vfs_item *)(uintptr_t)fi->fh;
 	
 	request_t r_write[] = {
-		{ HK(action),  DATA_UINT32T(ACTION_WRITE)                 },
+		{ HK(action),  DATA_UINT32T(ACTION_WRITE)                      },
 		{ HK(offset),  DATA_PTR_OFFT(&off)                             },
 		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },
 		{ HK(path),    DATA_PTR_STRING((char *)path)                   },
@@ -384,9 +384,7 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 	
 	//printf("write: %x bytes from %x. ret: %x\n", (int)size, (int)off, (int)ret);
 	
-	return (ret < 0) ?
-		0 :
-		((ret > (ssize_t)size) ? size : (int)ret);
+	return (ret < 0) ? 0 : size;
 } // }}}
 static int fuseh_release(const char *path, struct fuse_file_info *fi){ // {{{
 	// TODO unlock item

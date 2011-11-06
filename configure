@@ -822,6 +822,7 @@ enable_uint64_t
 enable_void_t
 enable_backendbenchmark
 enable_backendcall
+enable_backendend
 enable_backendfactory
 enable_backendmorph
 enable_backendpool
@@ -1549,6 +1550,7 @@ Optional Features:
   --disable-backend-benchmark
                           disable backend benchmark
   --disable-backend-call  disable backend call
+  --disable-backend-end   disable backend end
   --disable-backend-factory
                           disable backend factory
   --disable-backend-morph disable backend morph
@@ -18718,6 +18720,43 @@ fi
 		BACKEND_MAKEFILE_backend_call=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/call/libfrozen_backend_call.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendend was given.
+if test "${enable_backendend+set}" = set; then :
+  enableval=$enable_backendend;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendend}" = "yes"; then
+			enable_backendend="no"
+		else
+			enable_backendend="yes"
+		fi
+	fi
+
+	if test "${enable_backendend}" = "yes"; then
+		BACKEND_DIR_end="backend/end"
+		BACKEND_DEP_end=""
+				BACKEND_SELECTED="$BACKEND_SELECTED end"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_end" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/end/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/end"
+
+		BACKEND_MAKEFILE_backend_end=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/end/libfrozen_backend_end.la"
 
 	fi
 

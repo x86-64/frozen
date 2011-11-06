@@ -68,7 +68,7 @@ static ssize_t switch_config_iterator(hash_t *rule_item, backend_t *backend){ //
 	if(new_rule->backend != NULL)
 		backend_add_terminators(new_rule->backend, childs);
 	
-	list_add(&userdata->rules, new_rule);
+	list_push(&userdata->rules, new_rule);
 	return ITER_CONTINUE;
 } // }}}
 static ssize_t switch_iterator(switch_rule *rule, switch_context *context){ // {{{

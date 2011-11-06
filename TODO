@@ -1,4 +1,4 @@
-- string_t convert from and to
+- string_t convert to
 - release to github
 - multi-threading
   - backend lock
@@ -16,4 +16,3 @@
 - backend go_session for http
 - data 'range_t', 'multiselect_t' and matching routines
 - mphf nelements_step with percents + remove from mphf to another backend
-- regexp to match any data, not only strings

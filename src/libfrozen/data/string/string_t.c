@@ -11,14 +11,79 @@ static ssize_t data_string_t_loglen(data_t *data, fastcall_logicallen *fargs){ /
 	return 0;
 } // }}}
 static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	char                  *buffer            = NULL;
+	uintmax_t              buffer_size       = 0;
+	uintmax_t              malloc_size;
+	uintmax_t              format            = FORMAT_CLEAN;
+	
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
-	switch( fargs->src->type ){
-		case TYPE_STRINGT: dst->ptr = strdup((char *)fargs->src->ptr); return 0;
-		default: break;
+	if(fargs->header.nargs > 3)
+		format = fargs->format;
+	
+	// fast convert from string (string can only contain FORMAT_CLEAN)
+	if(fargs->src->type == TYPE_STRINGT){
+		dst->ptr = strdup((char *)fargs->src->ptr);
+		return 0;
+	}
+	
+	// get our buffer buffer
+	buffer = dst->ptr;
+	if(buffer){
+		buffer_size = strlen(buffer); // existing buffer - hell know where is it, so, no reallocs
+		goto clean_read;
+	}
+	
+	// get external buffer size
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	if(data_query(fargs->src, &r_len) != 0)
+		goto unknown_size;
+	
+	// alloc new buffer
+	switch(format){
+		case FORMAT_CLEAN:         buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
+		case FORMAT_HUMANREADABLE: buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
+		case FORMAT_BINARY:        if(r_len.length == 0)
+						return -EINVAL;   
+					   buffer_size = r_len.length - 1; malloc_size = r_len.length;     break;
+		default:
+			return -ENOSYS;
 	};
+	
+	if( (buffer = malloc(malloc_size)) == NULL)
+		return -ENOMEM;
+	
+	buffer[buffer_size] = '\0';
+	
+	dst->ptr = buffer;
+	goto clean_read;
+
+unknown_size:
+	
+	/*
+	buffer_size = DEF_BUFFER_SIZE;
+	
+	while(1){
+		buffer = realloc(buffer, buffer_size);
+		
+		fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, buffer_size };
+		if( (ret = data_query(fargs->src, &r_read)) < 0)
+			return ret;
+		
+
+		buffer_size += DEF_BUFFER_SIZE;
+	}
+	*/
 	return -ENOSYS;
+
+clean_read:;
+	fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, buffer_size };
+	if( (ret = data_query(fargs->src, &r_read)) < 0)
+		return ret;
+		
+	return 0;
 } // }}}
 static ssize_t data_string_t_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
 	ssize_t                ret;
