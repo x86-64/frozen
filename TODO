@@ -1,4 +1,3 @@
-- release to github
 - multi-threading
   - backend lock
   - backend thread_pool
