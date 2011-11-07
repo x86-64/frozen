@@ -1,0 +1,195 @@
+.TH "api.h" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+api.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBfastcall_header\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_io\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_len\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_alloc\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_free\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_init\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_copy\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_transfer\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_convert_from\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_convert_to\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_compare\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_arith\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_arith_no_arg\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_getdataptr\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_is_null\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_create\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_delete\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_move\fP"
+.br
+.ti -1c
+.RI "struct \fBfastcall_count\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef enum api_types \fBapi_types\fP"
+.br
+.ti -1c
+.RI "typedef ssize_t(* \fBf_crwd\fP )(\fBbackend_t\fP *, \fBrequest_t\fP *)"
+.br
+.ti -1c
+.RI "typedef ssize_t(* \fBf_fast_func\fP )(\fBbackend_t\fP *, void *)"
+.br
+.ti -1c
+.RI "typedef enum data_functions \fBdata_functions\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_header\fP \fBfastcall_header\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_io\fP \fBfastcall_io\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_io\fP \fBfastcall_read\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_io\fP \fBfastcall_write\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_len\fP \fBfastcall_len\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_len\fP \fBfastcall_physicallen\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_len\fP \fBfastcall_logicallen\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_alloc\fP \fBfastcall_alloc\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_free\fP \fBfastcall_free\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_init\fP \fBfastcall_init\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_copy\fP \fBfastcall_copy\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_transfer\fP \fBfastcall_transfer\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_convert_to\fP \fBfastcall_convert_to\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_convert_from\fP \fBfastcall_convert_from\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_compare\fP \fBfastcall_compare\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith\fP \fBfastcall_arith\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith\fP \fBfastcall_add\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith\fP \fBfastcall_sub\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith\fP \fBfastcall_mul\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith\fP \fBfastcall_div\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith_no_arg\fP \fBfastcall_arith_no_arg\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith_no_arg\fP \fBfastcall_increment\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_arith_no_arg\fP \fBfastcall_decrement\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_getdataptr\fP \fBfastcall_getdataptr\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_is_null\fP \fBfastcall_is_null\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_create\fP \fBfastcall_create\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_delete\fP \fBfastcall_delete\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_move\fP \fBfastcall_move\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfastcall_count\fP \fBfastcall_count\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBapi_types\fP { \fBAPI_HASH\fP =  1, \fBAPI_CRWD\fP =  2, \fBAPI_FAST\fP =  4 }"
+.br
+.ti -1c
+.RI "enum \fBdata_functions\fP { \fBACTION_CREATE\fP, \fBACTION_DELETE\fP, \fBACTION_MOVE\fP, \fBACTION_COUNT\fP, \fBACTION_CUSTOM\fP, \fBACTION_REBUILD\fP, \fBACTION_ALLOC\fP, \fBACTION_FREE\fP, \fBACTION_INIT\fP, \fBACTION_PHYSICALLEN\fP, \fBACTION_LOGICALLEN\fP, \fBACTION_COMPARE\fP, \fBACTION_INCREMENT\fP, \fBACTION_DECREMENT\fP, \fBACTION_ADD\fP, \fBACTION_SUB\fP, \fBACTION_MULTIPLY\fP, \fBACTION_DIVIDE\fP, \fBACTION_READ\fP, \fBACTION_WRITE\fP, \fBACTION_CONVERT_TO\fP, \fBACTION_CONVERT_FROM\fP, \fBACTION_TRANSFER\fP, \fBACTION_COPY\fP, \fBACTION_IS_NULL\fP, \fBACTION_GETDATAPTR\fP, \fBACTION_INVALID\fP }"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "uintmax_t \fBfastcall_nargs\fP []"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

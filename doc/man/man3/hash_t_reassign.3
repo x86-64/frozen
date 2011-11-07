@@ -1,0 +1,31 @@
+.TH "hash_t_reassign" 3 "Fri Oct 28 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+hash_t_reassign \- Reassignment 
+Because of linear hash_find routines one can define key-value pair earlier than another key-value pair in hash, this process can be called 'reassignment'.
+.PP
+This is very useful process, because of: 
+.PD 0
+
+.IP "\(bu" 2
+you save old value 
+.IP "\(bu" 2
+don't mess with api calls, all process done in current function and very fast. 
+.IP "\(bu" 2
+you don't copy data itself from place to place: only pointer.
+.PP
+Example: 
+.PP
+.nf
+      uintmax_t  somenewvalue = 100;
+
+      hash_t new_values[] = {
+         { HK(key), DATA_PTR_UINTT(&somenewvalue) },
+         hash_inline(old_hash),
+         hash_end
+      };
+
+.fi
+.PP
+ 

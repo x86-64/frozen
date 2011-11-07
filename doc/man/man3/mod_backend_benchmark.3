@@ -1,0 +1,41 @@
+.TH "Backend 'backend/benchmark'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'backend/benchmark' \- Description
+This backend count requests and measure time from backend creation to backend destory. Useful in pair with emitter and it's 'destroy' option. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'backend/benchmark',
+              on_destroy              =                     # action to do on backend destory event
+                                        'printf',           # - write stats to stdout, this is default
+ }
+
+.fi
+.PP
+ 
+.SS "Control"
+ACTION_CUSTOM used to control this backend. Possible requests: 
+.PP
+.nf
+ {
+              action                 = ACTION_CUSTOM,
+              function               =
+                                       'benchmark_restart',   # restart clocks and counter
+                                       'benchmark_short',     # write short stats to buffer HK(string)
+                                       'benchmark_long',      # write long stats to buffer HK(string)
+                                       'benchmark_ticks',     # write number of requests passed by to HK(value)
+                                       'benchmark_us',        # write number of nanoseconds passed from restart to HK(value)
+                                       'benchmark_ms',        # write number of miliseconds passed from restart to HK(value)
+
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

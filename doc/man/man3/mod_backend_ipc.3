@@ -1,0 +1,44 @@
+.TH "Backend 'communication/ipc'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'communication/ipc' \- Description
+This backend pass request to another local process. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'communication/ipc',
+              type                    = <see types>              # mechanism to use for transport
+ }
+
+.fi
+.PP
+ 
+.SS "Shared memory configuration"
+Shared memory used to transfer buffers from one process to another.
+.PP
+Note, client and server must have identical configuration parameters, except 'role'. Accepted configuration: 
+.PP
+.nf
+ {
+              key                     = (uint_t)'1000',         # shared memory key (see man)
+              role                    = 
+                                        'client',               # act as client
+                                        'server',               # act as server
+              buffer                  = (hashkey_t)'buffer',    # buffer to transfer, default buffer
+              
+              item_size               = (uint_t)'1000',         # maximum transfered item size, default 1000
+              size                    = (uint_t)'10',           # send\receive queue size, default 100
+              force_async             = (uint_t)'0',            # force all request to be async (don't want for answer), default 0
+              force_sync              = (uint_t)'0',            # force all request to be sync (wait for answers), default 0
+              return_result           = (uint_t)'0',            # re-read buffer after request done on other side, default 1
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

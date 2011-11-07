@@ -1,0 +1,150 @@
+.TH "Backends" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backends \- 
+.SS "Modules"
+
+.in +1c
+.ti -1c
+.RI "\fBBackend 'backend/benchmark'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'backend/call'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'backend/morph'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'backend/pool'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'backend/rebuild'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'cache/cache'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'communication/ipc'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/convert'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/incapsulate'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/list'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/regexp'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/split'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'data/structs'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'hash/jenkins'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'hash/murmur'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'index/fill'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'index/hashtable'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'index/lookup'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'index/mphf'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'io/fuse'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/balancer'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/debug'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/emitter'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/implode'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/explode'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/rewrite'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'request/switch'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'storage/file'\fP"
+.br
+.ti -1c
+.RI "\fBBackend 'storage/pointers'\fP"
+.br
+.in -1cBackends overview
+Every user request processed by one backend, or by backend chain. Backend can perform various actions: 
+.PD 0
+
+.IP "\(bu" 2
+interact with external things, such as files, sockets, etc 
+.IP "\(bu" 2
+interact with internal things, with another backends, data 
+.IP "\(bu" 2
+can read, write and modify request's values
+.PP
+If user request is too complex for one backend, it can be processed with chain of backends. Chain of backends process user request step by step. One backend in such chain can modify request in way another backend can understand it. Another backends can do, as we already know, external things, for example write user data to file.
+.PP
+There is several types of requests and corresponding apis. Details described in api section. 
+.SS "Creation and configuration"
+To create new backend you have to know it's 'class name'. For example - 'storage/file'. It consist of category name (storage) and backend name (file). Categories introduced to group identical backends to one place. There is serveral important categories: request, storage, data, io. These categories represent most common used operations with user requests. 
+.PD 0
+
+.IP "\(bu" 2
+request - modify, print, user request; change request path 
+.IP "\(bu" 2
+storage - save and load user data from external storage 
+.IP "\(bu" 2
+data - modify, pack/unpack, regexp user data from request 
+.IP "\(bu" 2
+io - input and output from/to frozen, for example, fuse as filesystem for io There is more categories which is not listed.
+.PP
+Almost every backend need some configuration variables to control it's behavior. They can be passed on new backend creation.
+.PP
+Currently you can't change configuration passed on step of creation, but after rewriting some of backends it can be possible. Example of correct configuration routines is backend 'backend/factory'. So, if func_configure of backend is reentrant and updates taken in account - you can change configuration in any time. 
+.SS "Requests"
+Then user request arrived, backend's handler is called. Backend can: 
+.PD 0
+
+.IP "\(bu" 2
+return error or success code 
+.IP "\(bu" 2
+read user request, check inputs, do something with it 
+.IP "\(bu" 2
+pass user request to next backend(s) in chain 
+.IP "\(bu" 2
+pass any request to next backend(s) in chain 
+.IP "\(bu" 2
+etc...
+.PP
+All of these actions is optional, even returning error or success. There is special error code -EEXIST, which indicates that backend don't want to modify current error code.
+.PP
+Internally all requests flow into some kind of recursive processing there each step is next backend. So, there is no such thing as async requests. Request considered finished then first backend return control to caller. But, async requests is too good to discard them, so you can use queue to save all requests and process them later, returning control almost immediatly. Of course, in such case, you should keep all data used in this request until this request will be really finished. 
+.SS "Parents and childs"
+Every backend, if this is not standalone backend, can have their parent(s) and child(s). Parent backend can pass to your backend requests. Childs is backends to which your backend can pass request. If backend have more than one child, request passed to every child repeatedly. If this is not that you want - you can solve it with any of path rewriting backend. Such approach is useful, because you can add child to any backend and monitor requests passed by. This can be used in logging.
+.PP
+You can connect backends in any way you want, but there is one limit - if your configuration produce infinity loops they will not be terminated or avoided. However this is doesn't mean that you can't send requests to parent backends. Just make sure it will work. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

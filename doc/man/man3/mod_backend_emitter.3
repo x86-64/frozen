@@ -1,0 +1,33 @@
+.TH "Backend 'request/emitter'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'request/emitter' \- Description
+This backend send user defined queries in any amounts 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'request/emitter',
+              on_start                = <see actions>,      # action performed at the beginning of emission
+              on_end                  = <see actions>,      # action performed at the end of emission
+              pre_request             = { ... },            # optional request emitted at the beginning of emission
+              post_request            = { ... },            # optional request emitted at the end of emission
+              request                 = { ... },            # actual request, that would be emitted
+              count                   = (uint_t)'1000',     # number of emits
+ }
+
+.fi
+.PP
+.PP
+Possible actions: 
+.PD 0
+
+.IP "\(bu" 2
+'destroy' - full shutdown of application via kill(SIGTERM) 
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

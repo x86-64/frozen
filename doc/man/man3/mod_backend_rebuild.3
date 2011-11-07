@@ -1,0 +1,73 @@
+.TH "Backend 'backend/rebuild'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'backend/rebuild' \- Description
+This module rebuild chain when underlying backend turns out unconsistent and return special error code 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'backend/rebuild',
+              enum_method             = 
+                                        'iterate'           # count elements and read all of them from 0 to <count>
+                                        'cursor'            # create cursor at starting position and start iterate
+              retry_request           = (uint_t)'1'         # rerun request with triggered rebuild after rebuild, default 1
+              req_rebuild             = { ... }             # custom rebuild request
+              req_rebuild_enable      = (uint_t)'1'         # enable\disable rebuild request at all, default 1
+              req_rebuild_destination = 'far_index'         # set rebuild request destination backend
+              
+              # options for 'iterate' method
+                 offset_key  = 'offset',                    # key with with would be current index requested
+                 req_count   = { ... }                      # additional parameters for count request
+                 req_read    = { ... }                      # additional parameters for read request (eg. buffer)
+ }
+
+.fi
+.PP
+ 
+.SS "Input and output"
+Module by default pass all requests to underlying backend unchanged. If return code equal -EBADF, rebuild started.
+.PP
+.PD 0
+.IP "\(bu" 2
+Enum 'iterate' count request 
+.PP
+\fBReturns:\fP
+.RS 4
+0: request ok 
+.PP
+-<ANY> request failed
+.RE
+.PP
+
+.IP "\(bu" 2
+Enum 'iterate' read request 
+.PP
+\fBReturns:\fP
+.RS 4
+0: request ok 
+.PP
+-EBADF: request failed, chain is again in unconsistend state, starting rebuild again 
+.PP
+-<ANY> request failed
+.RE
+.PP
+
+.IP "\(bu" 2
+Rebuild request 
+.PP
+\fBReturns:\fP
+.RS 4
+-EBADF: request ok 
+.PP
+-<ANY>: request failed 
+.RE
+.PP
+
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

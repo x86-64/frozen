@@ -1,0 +1,27 @@
+.TH "Backend 'data/incapsulate'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'data/incapsulate' \- Description
+This backend represent fixed size records as one unit items for upper backends 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'data/incapsulate',
+              multiply                = (uint_t)'10',       # item size
+              key                     = (hashkey_t)'name',  # key to change value (multiply), default offset
+              key_out                 = (hashkey_t)'name',  # key to change value (multiply), default offset_out
+              key_to                  = (hashkey_t)'name',  # key to change value (multiply), default offset_to
+              key_from                = (hashkey_t)'name',  # key to change value (multiply), default offset_from
+              count                   = (hashkey_t)'name',  # key to change value (divide), default buffer
+              size                    = (hashkey_t)'name',  # key to change value (divide), default size
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

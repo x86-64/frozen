@@ -1,0 +1,25 @@
+.TH "Backend 'hash/murmur'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'hash/murmur' \- Description
+This is implementation of murmur2 hash. It hash input data and add resulting hash to request. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 
+                                        'hash/murmur2_32',
+                                        'hash/murmur2_64',
+              input                   = (hashkey_t)'buffer', # input key name
+              output                  = (hashkey_t)'keyid',  # output key name
+              fatal                   = (uint_t)'1',         # interrupt request if input not present, default 0
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

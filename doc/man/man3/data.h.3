@@ -1,0 +1,155 @@
+.TH "data.h" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+data.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBdata_t\fP"
+.br
+.RI "\fIData holder. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBDEF_BUFFER_SIZE\fP   1024"
+.br
+.ti -1c
+.RI "#define \fBdata_get\fP(_ret, _type, _dt, _src)"
+.br
+.ti -1c
+.RI "#define \fBdata_convert\fP(_ret, _type, _dst, _src)"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef enum data_formats \fBdata_formats\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBdata_t\fP \fBdata_t\fP"
+.br
+.RI "\fIData holder. \fP"
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBdata_formats\fP { \fBFORMAT_BINARY\fP =  1, \fBFORMAT_HUMANREADABLE\fP =  2 }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "API ssize_t \fBdata_query\fP (\fBdata_t\fP *data, void *args)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SH "Define Documentation"
+.PP 
+.SS "#define data_convert(_ret, _type, _dst, _src)"\fBValue:\fP
+.PP
+.nf
+{                                          \
+        data_t __data_dst = { _type, REF_##_type(_dst) };                                \
+        fastcall_convert_from _r_convert = { { 3, ACTION_CONVERT_FROM }, _src };         \
+        _ret = data_query(&__data_dst, &_r_convert);                                     \
+        _dst = DEREF_##_type(&__data_dst);                                               \
+        (void)_ret;                                                                      \
+};
+.fi
+Convert value from holder to buffer. If destination data 
+.PP
+\fBParameters:\fP
+.RS 4
+\fI_ret\fP Return value (ssize_t) 
+.br
+\fI_type\fP Destination data type. Only constants allowed. 
+.br
+\fI_dst\fP Destination data. 
+.br
+\fI_src\fP Source data holder. 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI0\fP Convertation successfull. 
+.br
+\fI<0\fP Convertation failed. 
+.RE
+.PP
+
+.SS "#define data_get(_ret, _type, _dt, _src)"\fBValue:\fP
+.PP
+.nf
+{                                         \
+        if((_src) != NULL && (_src)->type == _type){                           \
+                _dt  = DEREF_##_type(_src);                                    \
+                _ret = 0;                                                      \
+        }else{                                                                 \
+                if( HAVEBUFF_##_type == 1 ){                                   \
+                        data_convert(_ret, _type, _dt, _src);                  \
+                }else{                                                         \
+                        _ret = -EINVAL;                                        \
+                }                                                              \
+        }                                                                      \
+        (void)_ret;                                                            \
+}
+.fi
+Read value from holder to supplied buffer 
+.PP
+\fBParameters:\fP
+.RS 4
+\fI_ret\fP Return value (ssize_t) 
+.br
+\fI_type\fP Destination data type: one of TYPE_*. Only constants allowed 
+.br
+\fI_dt\fP Destination data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc) 
+.br
+\fI_src\fP Source data holder (\fBdata_t\fP *) 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI-EINVAL\fP Invalid source, or convertation error 
+.br
+\fI0\fP Operation successfull 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "API ssize_t data_query (\fBdata_t\fP *data, void *args)"Call action on data 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdata\fP Data to process 
+.br
+\fIargs\fP One of fastcall_* structs, with parameters to data 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI-ENOSYS\fP No such function 
+.br
+\fI-EINVAL\fP Invalid data passed, or arguments count 
+.br
+\fI<0\fP Another error related to data implementation 
+.br
+\fI0\fP Call successfull 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

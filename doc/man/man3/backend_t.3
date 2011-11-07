@@ -1,0 +1,121 @@
+.TH "backend_t" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+backend_t \- 
+.PP
+Backend structure.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <backend.h>\fP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char * \fBname\fP"
+.br
+.RI "\fICurrent instance name. Must be unique. Optional. \fP"
+.ti -1c
+.RI "char * \fBclass\fP"
+.br
+.RI "\fIBackend class. Format: 'category/classname', for example 'storage/file'. Required. \fP"
+.ti -1c
+.RI "api_types \fBsupported_api\fP"
+.br
+.RI "\fISupported apis. For example (API_HASH | API_FAST). Required. \fP"
+.ti -1c
+.RI "\fBf_init\fP \fBfunc_init\fP"
+.br
+.RI "\fIBackend init function. Optional. \fP"
+.ti -1c
+.RI "\fBf_configure\fP \fBfunc_configure\fP"
+.br
+.RI "\fIBackend configure function. Optional. \fP"
+.ti -1c
+.RI "\fBf_fork\fP \fBfunc_fork\fP"
+.br
+.RI "\fIBackend fork function. Optional. \fP"
+.ti -1c
+.RI "\fBf_destroy\fP \fBfunc_destroy\fP"
+.br
+.RI "\fIBackend destroy function. Optional. \fP"
+.ti -1c
+.RI "struct {"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_create\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_set\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_get\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_delete\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_move\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_count\fP"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_custom\fP"
+.br
+.ti -1c
+.RI "} \fBbackend_type_crwd\fP"
+.br
+.ti -1c
+.RI "struct {"
+.br
+.ti -1c
+.RI "   f_crwd \fBfunc_handler\fP"
+.br
+.RI "\fIHandler for API_HASH. \fP"
+.ti -1c
+.RI "} \fBbackend_type_hash\fP"
+.br
+.ti -1c
+.RI "struct {"
+.br
+.ti -1c
+.RI "   f_fast_func \fBfunc_handler\fP"
+.br
+.RI "\fIHandler for API_FAST. \fP"
+.ti -1c
+.RI "} \fBbackend_type_fast\fP"
+.br
+.ti -1c
+.RI "void * \fBuserdata\fP"
+.br
+.RI "\fIPointer to userdata for backend. \fP"
+.ti -1c
+.RI "\fBconfig_t\fP * \fBconfig\fP"
+.br
+.RI "\fICurrent instance configuraion. (Copy of passed to backend_new) \fP"
+.ti -1c
+.RI "uintmax_t \fBrefs\fP"
+.br
+.RI "\fIInternal. \fP"
+.ti -1c
+.RI "\fBlist\fP \fBparents\fP"
+.br
+.RI "\fIparent backends including private _acquires. Internal. \fP"
+.ti -1c
+.RI "\fBlist\fP \fBchilds\fP"
+.br
+.RI "\fIchild backends. Internal. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Backend structure. 
+
+Used in class descriptions and as structure for real backends 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

@@ -1,0 +1,76 @@
+.TH "rebuild.c" 3 "Fri Sep 2 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+rebuild.c \- 
+.PP
+Backend/rebuild module.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <libfrozen.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBrebuild_userdata\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBEMODULE\fP   24"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef enum enum_method \fBenum_method\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBrebuild_userdata\fP \fBrebuild_userdata\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBenum_method\fP { \fBENUM_COUNT_AND_READ_ITERATE\fP, \fBENUM_CURSOR_ITERATE\fP, \fBENUM_DEFAULT\fP =  ENUM_COUNT_AND_READ_ITERATE }"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBbackend_t\fP \fBrebuild_proto\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Backend/rebuild module. 
+
+This module rebuild chain when underlying backend turns out unconsistent and return special error code 
+.SH "Variable Documentation"
+.PP 
+.SS "\fBbackend_t\fP rebuild_proto"\fBInitial value:\fP
+.PP
+.nf
+ {
+        .class          = 'backend/rebuild',
+        .supported_api  = API_HASH,
+        .func_init      = &rebuild_init,
+        .func_destroy   = &rebuild_destroy,
+        .func_configure = &rebuild_configure,
+        .backend_type_hash = {
+                .func_handler = &rebuild_handler
+        }
+}
+.fi
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

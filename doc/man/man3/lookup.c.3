@@ -1,0 +1,66 @@
+.TH "lookup.c" 3 "Fri Sep 2 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+lookup.c \- 
+.PP
+Index/lookup module.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <libfrozen.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBlookup_userdata\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBEMODULE\fP   21"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct \fBlookup_userdata\fP \fBlookup_userdata\fP"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBbackend_t\fP \fBlookup_proto\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Index/lookup module. 
+
+This module query supplied index for key, and pass request to underlying backends with returned value 
+.SH "Variable Documentation"
+.PP 
+.SS "\fBbackend_t\fP lookup_proto"\fBInitial value:\fP
+.PP
+.nf
+ {
+        .class          = 'index/lookup',
+        .supported_api  = API_HASH,
+        .func_init      = &lookup_init,
+        .func_destroy   = &lookup_destroy,
+        .func_configure = &lookup_configure,
+        .backend_type_hash = {
+                .func_handler = &lookup_handler
+        }
+}
+.fi
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

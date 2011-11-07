@@ -1,0 +1,23 @@
+.TH "Backend 'request/debug'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'request/debug' \- Description
+This backend prints to stdout request passed to it in human readable form 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'request/debug',
+              after                   = (uint_t)'0',        # print request after passing to underlying backend, default 0
+              before                  = (uint_t)'1',        # print request before passing to underlying backend, default 1
+              verbose                 = (uint_t)'1',        # show hash content, default 1
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

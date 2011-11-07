@@ -1,0 +1,37 @@
+.TH "Backend 'index/lookup'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'index/lookup' \- Description
+This module query supplied index for key, and pass request to underlying backends with returned value 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'index/lookup',
+              output                  = 'offset',           # output key for value
+              output_type             = 'uint_t',           # output data type 
+              fatal                   = (uint_t)'1',        # queried entry in index must exist, default 0
+              force_query             = (uint_t)'1',        # force query to index, even if HK( userdata->output ) already defined, default 0
+              index                   = 
+                                        'index_name',       # existing index
+                                        { ... },            # new index configuration
+ }
+
+.fi
+.PP
+ 
+.SS "Input and output"
+First, query index with request. Next, pass request to underlying backends with returned value
+.PP
+.PD 0
+.IP "\(bu" 2
+If index return error - request stopped. 
+.IP "\(bu" 2
+If index return empty result (no item found) - request passed with void data. (\fBHK(fatal)\fP can override it) 
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

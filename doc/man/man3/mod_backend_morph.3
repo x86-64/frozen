@@ -1,0 +1,22 @@
+.TH "Backend 'backend/morph'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'backend/morph' \- Description
+This backend wait for first request, combine it with configuration supplied by user and transform itself to resulting backend. All further requests processed as there was no morph at all. First request override same parameters from user supplied configuration. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'backend/morph',
+              config                  = { ... },            # backend configuration
+              pass_first              = (uint_t)'0',        # pass also first request to new backend, default 1
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

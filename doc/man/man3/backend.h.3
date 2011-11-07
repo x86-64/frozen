@@ -1,0 +1,197 @@
+.TH "backend.h" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+backend.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBbackend_t\fP"
+.br
+.RI "\fIBackend structure. \fP"
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef int(* \fBf_init\fP )(\fBbackend_t\fP *)"
+.br
+.RI "\fIInit function for backend. Allocate userdata and init default values here. \fP"
+.ti -1c
+.RI "typedef int(* \fBf_fork\fP )(\fBbackend_t\fP *, \fBbackend_t\fP *, \fBhash_t\fP *)"
+.br
+.RI "\fIFork function for backend. Make fork of current backend here. \fP"
+.ti -1c
+.RI "typedef int(* \fBf_configure\fP )(\fBbackend_t\fP *, \fBhash_t\fP *)"
+.br
+.RI "\fIConfigure function for backend. Try to make it reentrant. Assign configuration values and validate it here. \fP"
+.ti -1c
+.RI "typedef int(* \fBf_destroy\fP )(\fBbackend_t\fP *)"
+.br
+.RI "\fIDestroy function for backend. Free all allocated resources here. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "API ssize_t \fBclass_register\fP (\fBbackend_t\fP *proto)"
+.br
+.RI "\fIRegister new dynamic class. \fP"
+.ti -1c
+.RI "API void \fBclass_unregister\fP (\fBbackend_t\fP *proto)"
+.br
+.RI "\fIUnregister dynamic class. \fP"
+.ti -1c
+.RI "API \fBbackend_t\fP * \fBbackend_new\fP (\fBhash_t\fP *config)"
+.br
+.RI "\fICreate new backend. \fP"
+.ti -1c
+.RI "API \fBbackend_t\fP * \fBbackend_acquire\fP (char *name)"
+.br
+.RI "\fIFind backend by name and increment ref counter. Use backend_destroy to free. \fP"
+.ti -1c
+.RI "API \fBbackend_t\fP * \fBbackend_find\fP (char *name)"
+.br
+.RI "\fIFind backend by name. \fP"
+.ti -1c
+.RI "API void \fBbackend_destroy\fP (\fBbackend_t\fP *backend)"
+.br
+.RI "\fIDestroy backend. \fP"
+.ti -1c
+.RI "API \fBbackend_t\fP * \fBbackend_clone\fP (\fBbackend_t\fP *backend)"
+.br
+.RI "\fIClone backend. \fP"
+.ti -1c
+.RI "API \fBbackend_t\fP * \fBbackend_fork\fP (\fBbackend_t\fP *backend, \fBrequest_t\fP *request)"
+.br
+.RI "\fIFork whole chain of backends. \fP"
+.ti -1c
+.RI "API ssize_t \fBbackend_query\fP (\fBbackend_t\fP *backend, \fBrequest_t\fP *request)"
+.br
+.RI "\fIQuery backend with hash request. \fP"
+.ti -1c
+.RI "API ssize_t \fBbackend_fast_query\fP (\fBbackend_t\fP *backend, void *args)"
+.br
+.RI "\fIQuery backend with fast request. \fP"
+.ti -1c
+.RI "API ssize_t \fBbackend_pass\fP (\fBbackend_t\fP *backend, \fBrequest_t\fP *request)"
+.br
+.RI "\fIPass hash request to next backends in chain. \fP"
+.ti -1c
+.RI "API ssize_t \fBbackend_fast_pass\fP (\fBbackend_t\fP *backend, void *args)"
+.br
+.RI "\fIPass fast request to next backends in chain. \fP"
+.ti -1c
+.RI "API void \fBbackend_connect\fP (\fBbackend_t\fP *parent, \fBbackend_t\fP *child)"
+.br
+.RI "\fICreate link between parent and child. \fP"
+.ti -1c
+.RI "API void \fBbackend_disconnect\fP (\fBbackend_t\fP *parent, \fBbackend_t\fP *child)"
+.br
+.RI "\fIRemove link between parent and child. \fP"
+.ti -1c
+.RI "API void \fBbackend_insert\fP (\fBbackend_t\fP *parent, \fBbackend_t\fP *new_child)"
+.br
+.RI "\fIInsert new_child in between of backend and it's childs. \fP"
+.ti -1c
+.RI "API void \fBbackend_add_terminators\fP (\fBbackend_t\fP *backend, \fBlist\fP *terminators)"
+.br
+.RI "\fIWrap backend with terminators. \fP"
+.ti -1c
+.RI "void \fBbackend_destroy_all\fP (void)"
+.br
+.ti -1c
+.RI "data_functions \fBrequest_str_to_action\fP (char *string)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SH "Function Documentation"
+.PP 
+.SS "API \fBbackend_t\fP* backend_clone (\fBbackend_t\fP *backend)"
+.PP
+Clone backend. This function will create clone of supplied backend. Clone will not have links with any of backends. But it will have same pointer to userdata. No func_* functions will be called for it.
+.PP
+.PD 0
+.IP "\(bu" 2
+Can be useful to make dummy backends, without full implementation with registration and classes. 
+.PP
+
+.SS "API ssize_t backend_fast_pass (\fBbackend_t\fP *backend, void *args)"
+.PP
+Pass fast request to next backends in chain. \fBParameters:\fP
+.RS 4
+\fIbackend\fP Current backend 
+.RE
+.PP
+
+.SS "API \fBbackend_t\fP* backend_fork (\fBbackend_t\fP *backend, \fBrequest_t\fP *request)"
+.PP
+Fork whole chain of backends. This function forks backends starting from suppliend backend. For each forked backend special function func_fork called, if supplied, or used ordinary configure.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbackend\fP Backend to fork 
+.br
+\fIrequest\fP Fork request. Useful for passing some real-time configurations, like part of filename to open 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fINULL\fP Fork failed 
+.br
+\fInon-NULL\fP Fork successfull 
+.RE
+.PP
+
+.SS "API \fBbackend_t\fP* backend_new (\fBhash_t\fP *config)"
+.PP
+Create new backend. Configuration is hash with items in reverse order. For example: 
+.PP
+.nf
+       hash_t example_cfg[] = {
+             { 0, DATA_HASHT(
+                   { HK(class), DATA_STRING('storage/file') },
+                   hash_end
+             )},
+             { 0, DATA_HASHT(
+                   { HK(class), DATA_STRING('request/debug') },
+                   hash_end
+             )},
+             hash_end
+       };
+
+.fi
+.PP
+ This config produce two backends: debug and file. Debug will have one child - file and will pass all requests to it. backend_new will return pointer to last created backend. In this case - this is debug.
+.PP
+.PD 0
+.IP "\(bu" 2
+Use hash_null to avoid linkage between backend. 
+.PP
+\fBReturn values:\fP
+.RS 4
+\fINULL\fP Creation failed 
+.br
+\fInon-NULL\fP Creation success 
+.RE
+.PP
+
+.PP
+
+.SS "API ssize_t backend_pass (\fBbackend_t\fP *backend, \fBrequest_t\fP *request)"
+.PP
+Pass hash request to next backends in chain. \fBParameters:\fP
+.RS 4
+\fIbackend\fP Current backend 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

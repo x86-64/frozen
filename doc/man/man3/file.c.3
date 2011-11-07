@@ -1,0 +1,94 @@
+.TH "file.c" 3 "Sat Oct 29 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+file.c \- 
+.PP
+File module.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <libfrozen.h>\fP
+.br
+\fC#include <dataproto.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBfile_userdata\fP"
+.br
+.ti -1c
+.RI "struct \fBfile_gen_context\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBEMODULE\fP   1"
+.br
+.ti -1c
+.RI "#define \fBDEF_BUFFER_SIZE\fP   1024"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef enum file_stat_status \fBfile_stat_status\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfile_userdata\fP \fBfile_userdata\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBfile_gen_context\fP \fBfile_gen_context\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBfile_stat_status\fP { \fBSTAT_NEED_UPDATE\fP, \fBSTAT_UPDATED\fP, \fBSTAT_ERROR\fP }"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBbackend_t\fP \fBfile_proto\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+File module. 
+
+File module can read and write to file 
+.SH "Variable Documentation"
+.PP 
+.SS "\fBbackend_t\fP file_proto"\fBInitial value:\fP
+.PP
+.nf
+ {
+        .class          = 'storage/file',
+        .supported_api  = API_CRWD,
+        .func_init      = &file_init,
+        .func_fork      = &file_fork,
+        .func_configure = &file_configure,
+        .func_destroy   = &file_destroy,
+        {
+                .func_create = &file_create,
+                .func_set    = &file_write,
+                .func_get    = &file_read,
+                .func_delete = &file_delete,
+                .func_move   = &file_move,
+                .func_count  = &file_count,
+                .func_custom = &file_custom
+        }
+}
+.fi
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

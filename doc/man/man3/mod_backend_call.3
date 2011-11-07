@@ -1,0 +1,24 @@
+.TH "Backend 'backend/call'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'backend/call' \- Description
+This backend call user-supplied backend with current request. If user give empty backend value, then request passed to underlying backend, and then 'call' make one more attempt.
+.PP
+Underlying backend is expected to be backend-creating, but this is optional. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'backend/call',
+              backend                 = (hashkey_t)'name',  # key with backend in request, default 'backend'
+              retry                   = (uint_t)'1',        # rerun request after failed call, default 1
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

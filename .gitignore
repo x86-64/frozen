@@ -7,7 +7,6 @@
 Makefile
 .libs
 stamp-h1
-doc/*
 autom4te.cache/*
 libtool
 callgrind.out

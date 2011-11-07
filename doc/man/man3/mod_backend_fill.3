@@ -1,0 +1,33 @@
+.TH "Backend 'index/fill'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'index/fill' \- Description
+This module fill index with data, or delete it 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'index/fill',
+              action                  =                     # action for index request
+                                        'create'            #  - create new item in index
+                                        'write'             #  - update item value, or create new item with this value (!)
+                                        'delete'            #  - delete item from index (need parent module with action == DELETE check for ex.)
+                                        ...
+              index                   = 
+                                        'index_name',       # existing index
+                                        { ... },            # new index configuration
+              fatal                   = (uint_t)'1',        # don't ignore errors from index, default 0
+              before                  = (uint_t)'1'         # query index before passing request, default 1 for action=='delete', 0 for others
+                                                            # this value override defaults
+ }
+
+.fi
+.PP
+ 
+.SS "Input and output"
+Send every request to index with defined action after passing it to underlying backend. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

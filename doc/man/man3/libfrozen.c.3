@@ -1,0 +1,73 @@
+.TH "libfrozen.c" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+libfrozen.c \- 
+.PP
+Library main functions.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'libfrozen.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBfrozen_init\fP (void)"
+.br
+.RI "\fIInitialize library. \fP"
+.ti -1c
+.RI "int \fBfrozen_destroy\fP (void)"
+.br
+.RI "\fIDestroy library. \fP"
+.ti -1c
+.RI "intmax_t \fBsafe_pow\fP (uintmax_t *res, uintmax_t x, uintmax_t y)"
+.br
+.ti -1c
+.RI "intmax_t \fBsafe_mul\fP (uintmax_t *res, uintmax_t x, uintmax_t y)"
+.br
+.ti -1c
+.RI "intmax_t \fBsafe_div\fP (uintmax_t *res, uintmax_t x, uintmax_t y)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBhash_t\fP * \fBglobal_settings\fP = NULL"
+.br
+.RI "\fIGlobal settings. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Library main functions. 
+
+
+.SH "Function Documentation"
+.PP 
+.SS "int frozen_destroy (void)"
+.PP
+Destroy library. \fBReturns:\fP
+.RS 4
+0 on success 
+.PP
+-1 on error 
+.RE
+.PP
+
+.SS "int frozen_init (void)"
+.PP
+Initialize library. \fBReturns:\fP
+.RS 4
+0 on success 
+.PP
+-1 on error 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

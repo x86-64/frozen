@@ -1,0 +1,75 @@
+.TH "Backend 'request/rewrite'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'request/rewrite' \- Rewrite module can modify requests and buffers with given set of rules Rewrite configuration
+Accepted configuration: 
+.PP
+.nf
+   settings = {
+                script = DATA_STRING(' <some script> ');
+        }
+
+.fi
+.PP
+ 
+.SS "Rewrite script"
+Rewrite script consist of statements. All statements must end with ';'. Possible statements: 
+.PD 0
+
+.IP "\(bu" 2
+variable define: 'var_t variable_name;' 
+.IP "\(bu" 2
+request define: 'request_t subrequest;' 
+.IP "\(bu" 2
+assignment: 'something = something;' 
+.IP "\(bu" 2
+function call: 'something = somefunc(param1, param2, param3);' 
+.IP "\(bu" 2
+if 'if(statement){};' NOTE ';' after closing bracket 
+.IP "\(bu" 2
+ifnot 'ifnot(statement){};' NOTE ';' after closing bracket
+.PP
+User defined constants: (type)'string', where 'type' is data type, and 'string' any string that can be converted to desired type (_CONVERT_FROM for this data type must exist)
+.PP
+Functions list: 
+.PD 0
+
+.IP "\(bu" 2
+'query((backend_t)'backend_name', request)' - call backend 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbackend_name\fP Backend to call 
+.br
+\fIrequest\fP Any request
+.RE
+.PP
+
+.IP "\(bu" 2
+'pass(request)' - pass request to underlying backend 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrequest\fP Any request
+.RE
+.PP
+
+.IP "\(bu" 2
+'data_query(data, action, ... )' - call action on data 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIdata\fP Data to run action on 
+.br
+\fIaction\fP Action to run. Currently only useful COMPARE, COPY and similar with (\fBdata_t\fP *)'s in parameters 
+.br
+\fI...\fP Parameters for action. Variables and constants passed only as (\fBdata_t\fP *)'s. 
+.RE
+.PP
+
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

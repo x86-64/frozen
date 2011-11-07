@@ -1,0 +1,20 @@
+.TH "hash_t_overview" 3 "Fri Oct 28 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+hash_t_overview \- Hash overview 
+Hashes used to store key-value pairs. This is not crypto nor fast-lookup hashes. From C point of view, hash is array of \fBhash_t\fP structure. Example of hash: 
+.PP
+.nf
+     hash_t somehash[] = {
+          { HK(key1), DATA_UINTT(100) },      // (1)
+          { HK(key2), DATA_UINTT(200) },
+          hash_inline(inlinehash),            // (2)
+          { HK(key4), DATA_UINTT(400) },
+          hash_null,                          // (3)
+          hash_end                            // (4)
+     };
+
+.fi
+.PP
+ On line marked with (1) we see simple assignment, key1 equals data with type uint_t and value equals to 100. On line (2) there is inline hash declaration. See \fBInline hashes\fP. Line (3) contain hash_null statement, this declares empty key-value pair and will be ignored on key finds. This thing is some cases useful for space reservation for further use. On line (4) there is hash_end key word indicating hash end. Every hash must end with this statement. 

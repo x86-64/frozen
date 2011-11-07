@@ -1,0 +1,23 @@
+.TH "Backend 'data/split'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'data/split' \- Description
+This module split incoming buffer using supplied separator and call underlying backend with every chunk. 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'data/split',
+              input                   = (hashkey_t)'buffer',  # input buffer key name
+              split                   = 'Z',                  # string to split on, default '\n'
+              buffer_size             = (uint_t)'1024'        # size of internal buffer, default 1024
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

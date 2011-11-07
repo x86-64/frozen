@@ -1,0 +1,31 @@
+.TH "Backend 'data/regexp'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'data/regexp' \- Description
+This module use POSIX regular expressions to match data.
+.PP
+Currently only TYPE_STRINGT as input supported 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'data/regexp',
+              regexp                  = 'aaa.*',            # regexp for matching, default '.*'
+              input                   = 'url',              # input key for string to match, default 'buffer'
+              reg_extended            = (uint_t)'0',        # 1 - use extended regexp, 0 - basic, default 0
+              reg_icase               = (uint_t)'0',        # 1 - no case matching, 0 - case matching, default 0
+              reg_newline             = (uint_t)'0',        # see 'man regcomp', default 0
+              reg_notbol              = (uint_t)'0',        # see 'man regcomp', default 0
+              reg_noteol              = (uint_t)'0',        # see 'man regcomp', default 0
+              marker                  = (hashkey_t)'marker',# on match - pass request with this key set
+              marker_value            = (uint_t)'1',        # value for marker
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

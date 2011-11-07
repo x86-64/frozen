@@ -1,0 +1,79 @@
+.TH "rewrite.c" 3 "Sat Oct 29 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+rewrite.c \- 
+.PP
+Rewrite module.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <libfrozen.h>\fP
+.br
+\fC#include <alloca.h>\fP
+.br
+\fC#include <rewrite.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBrewrite_userdata\fP"
+.br
+.ti -1c
+.RI "struct \fBrewrite_stack_frame_t\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBEMODULE\fP   12"
+.br
+.ti -1c
+.RI "#define \fBablock_call\fP(block)   do { frame->action = action + 1; frame->action_id = action_id + 1; ablock = block; goto ablock_enter; }while(0);"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct \fBrewrite_userdata\fP \fBrewrite_userdata\fP"
+.br
+.ti -1c
+.RI "typedef struct \fBrewrite_stack_frame_t\fP \fBrewrite_stack_frame_t\fP"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBbackend_t\fP \fBrewrite_proto\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Rewrite module. 
+
+Rewrite module can modify requests and buffers with given set of rules 
+.SH "Variable Documentation"
+.PP 
+.SS "\fBbackend_t\fP rewrite_proto"\fBInitial value:\fP
+.PP
+.nf
+ {
+        .class          = 'request/rewrite',
+        .supported_api  = API_HASH,
+        .func_init      = &rewrite_init,
+        .func_configure = &rewrite_configure,
+        .func_destroy   = &rewrite_destroy,
+        .backend_type_hash = {
+                .func_handler = &rewrite_func,
+        }
+}
+.fi
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

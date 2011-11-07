@@ -1,0 +1,36 @@
+.TH "Backend 'request/switch'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'request/switch' \- Switch module can pass requests to different backends according rules for incoming requests Configuration
+Accepted configuration: 
+.PP
+.nf
+     {
+                class      = 'switch',
+                rules      = {
+                    { backend = (backend_t)'some1', request = { action = (action_t)'create'                    } },
+                    { backend = (backend_t)'some2', request = { action = (action_t)'read', debug = (uint_t)'1' } },
+                    { request = { test = (uint_t)'1' } }
+                    { backend = (backend_t)'default' },
+                }
+        }
+
+.fi
+.PP
+ This config have 4 rules: 
+.PD 0
+
+.IP "\(bu" 2
+call 'some1' backend on all ACTION_CREATE requests 
+.IP "\(bu" 2
+call 'some2' on ACTION_READ requests with debug == '1' 
+.IP "\(bu" 2
+pass request to underlying backend then test == '1' 
+.IP "\(bu" 2
+call 'default' backend on any non matched request Last action is always - pass to underlying backend 
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.

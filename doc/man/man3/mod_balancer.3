@@ -1,0 +1,30 @@
+.TH "Backend 'request/balancer'" 3 "Sat Nov 5 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'request/balancer' \- Balancer backend can pass requests to different backends according defined rules Balancer configuration
+Accepted configuration: 
+.PP
+.nf
+  {
+                class      = 'balancer',
+                mode       =               # balancer mode:
+                             'random',     #   - pass request to random backend, this is default
+                             'counting',   #   - first request go to first backend, second to second, and so on
+                             'linear'      #   - get first <linear_len> bytes and pass to backend forked with same bytes
+              pool       =               # pool creation:
+                           'manual',     #   - i'll setup pool manually, this is default
+                           'fork',       #   - fork each child on moment of creation <pool_size> times
+                           'childs',     #   - use existing childs as current pool
+              pool_size  = (size_t)'1',  # number of backends to fork, default 1
+              field      = 'keyname',    # request field to parse in data mode
+              linear_len = (size_t)'1',  # length of bytes in linear mode. This use sizeof(void *)*(256 ^ <linear_len>) bytes of memory min.
+              clone      = (size_t)'1',  # clone request and pass to <number> of backends using current mode,
+        }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.
