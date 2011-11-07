@@ -38,6 +38,7 @@ Rational
  No way your current database can do so.
      
 * Configure every aspect
+  
   Big configs filled with comments to every "max_recv_buffer_size" and alike drives people crazy. There is no image of how the hell this thing working,
   and which parameter belong to which part of software. And this lead to bad configuration and resource wasting.
          
