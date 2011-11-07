@@ -1,15 +1,6 @@
 #!/bin/sh
 
-keys=`grep "HK([a-z0-9_]*)" -roha ./ | awk '
-	{ gsub("[()]"," ") }
-	{ arr[$2] = $2 }
-	END {
-		e=asort(arr);
-		for(i=1;i<=e;i++){
-			print arr[i]
-		}
-	}
-'`
+keys=`grep "HK([a-z0-9_]*)" -roha ./ | sed "s/HK(//g" | sed "s/)//g"  | LC_ALL=C sort -u`
 hashkeys_c=src/libfrozen/core/hashkeys.c
 hashkeys_h=src/libfrozen/core/hashkeys.h
 hashkeys_int_h=src/libfrozen/core/hashkeys_int.h
