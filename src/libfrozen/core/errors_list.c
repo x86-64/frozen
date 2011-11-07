@@ -19,7 +19,7 @@ static err_item errs_list[] = {
  { -127075, "src/libfrozen/backends/request/switch/switch.c: calloc returns null" },
  { -122956, "src/libfrozen/backends/index/fill/fill.c: supplied index backend not valid, or not found" },
  { -122934, "src/libfrozen/backends/index/fill/fill.c: calloc failed" },
- { -119409, "src/libfrozen/backends/io/fuse/fuse.c: fuse fs creation failed" },
+ { -119407, "src/libfrozen/backends/io/fuse/fuse.c: fuse fs creation failed" },
  { -114854, "src/libfrozen/backends/data/regexp/regexp.c: no input string in request" },
  { -114795, "src/libfrozen/backends/data/regexp/regexp.c: calloc failed" },
  { -114776, "src/libfrozen/backends/data/regexp/regexp.c: can not copy marker data" },

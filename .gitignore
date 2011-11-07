@@ -3,7 +3,9 @@
 *.sw[po]
 *.lo
 *.o
+*.la
 *.dat
+*.so
 Makefile
 .libs
 stamp-h1
@@ -16,3 +18,7 @@ data_selected.h
 hashkeys*
 config.log
 config.status
+frozend
+paths.h
+src/lang/*
+test/test*
