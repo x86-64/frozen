@@ -1,8 +1,4 @@
 #include <libfrozen.h>
-#include <strings.h>
-#include <pthread.h>
-#include <sys/time.h>
-#include <signal.h>
 
 /**
  * @ingroup backend

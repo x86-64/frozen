@@ -847,6 +847,9 @@ enable_backendfill
 enable_backendhashtable
 enable_backendlookup
 enable_backendmphf
+enable_backendstdin
+enable_backendstdout
+enable_backendstderr
 enable_backendfuse
 enable_backendbalancer
 enable_backenddebug
@@ -1590,6 +1593,11 @@ Optional Features:
   --disable-backend-lookup
                           disable backend lookup
   --disable-backend-mphf  disable backend mphf
+  --disable-backend-stdin disable backend stdin
+  --disable-backend-stdout
+                          disable backend stdout
+  --disable-backend-stderr
+                          disable backend stderr
   --disable-backend-fuse  disable backend fuse
   --disable-backend-balancer
                           disable backend balancer
@@ -19642,6 +19650,115 @@ fi
 		BACKEND_MAKEFILE_index_mphf=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/mphf/libfrozen_backend_mphf.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendstdin was given.
+if test "${enable_backendstdin+set}" = set; then :
+  enableval=$enable_backendstdin;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendstdin}" = "yes"; then
+			enable_backendstdin="no"
+		else
+			enable_backendstdin="yes"
+		fi
+	fi
+
+	if test "${enable_backendstdin}" = "yes"; then
+		BACKEND_DIR_stdin="io/console"
+		BACKEND_DEP_stdin=""
+				BACKEND_SELECTED="$BACKEND_SELECTED stdin"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
+
+		BACKEND_MAKEFILE_io_console=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendstdout was given.
+if test "${enable_backendstdout+set}" = set; then :
+  enableval=$enable_backendstdout;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendstdout}" = "yes"; then
+			enable_backendstdout="no"
+		else
+			enable_backendstdout="yes"
+		fi
+	fi
+
+	if test "${enable_backendstdout}" = "yes"; then
+		BACKEND_DIR_stdout="io/console"
+		BACKEND_DEP_stdout=""
+				BACKEND_SELECTED="$BACKEND_SELECTED stdout"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
+
+		BACKEND_MAKEFILE_io_console=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendstderr was given.
+if test "${enable_backendstderr+set}" = set; then :
+  enableval=$enable_backendstderr;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendstderr}" = "yes"; then
+			enable_backendstderr="no"
+		else
+			enable_backendstderr="yes"
+		fi
+	fi
+
+	if test "${enable_backendstderr}" = "yes"; then
+		BACKEND_DIR_stderr="io/console"
+		BACKEND_DEP_stderr=""
+				BACKEND_SELECTED="$BACKEND_SELECTED stderr"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
+
+		BACKEND_MAKEFILE_io_console=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
 
 	fi
 

@@ -30,6 +30,7 @@
 #include <sys/param.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 
 #ifdef STDC_HEADERS
 # include <stdlib.h>

@@ -4,6 +4,13 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -160003, "src/libfrozen/backends/io/console/console.c: input key not supplied" },
+ { -159993, "src/libfrozen/backends/io/console/console.c: input key not supplied" },
+ { -159971, "src/libfrozen/backends/io/console/console.c: calloc failed" },
+ { -159957, "src/libfrozen/backends/io/console/console.c: pthread_create failed" },
+ { -159926, "src/libfrozen/backends/io/console/console.c: pthread_join failed" },
+ { -159923, "src/libfrozen/backends/io/console/console.c: pthread_cancel failed" },
+ { -159905, "src/libfrozen/backends/io/console/console.c: calloc failed" },
  { -155684, "src/libfrozen/backends/backend/end/end.c: calloc failed" },
  { -151599, "src/libfrozen/backends/data/convert/convert.c: calloc failed" },
  { -147546, "src/libfrozen/backends/data/split/split.c: no input string in request" },
