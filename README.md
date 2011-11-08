@@ -4,7 +4,7 @@ Frozen
 Introduction
 -------------
 
-Frozen is data processing daemon driven by configuration files. It contain several modules for input and output as well as data processing.
+Frozen is data processing daemon driven by configuration files. It contain several modules for input, output and data processing.
 It can be used to construct your own database, simple web server, data collector, logger and so on.
 
 Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
@@ -26,6 +26,16 @@ Capabilities
 
 Rational
 --------
+
+* Model-oriented programming
+
+ There is a lot of frameworks and different api, and all of them require lot of learning and code writing to decribe what you really want to do. Despite of
+ incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
+ Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art
+ in this field - it is model oriented design. Enginer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
+ it is easy to make changes, maintain and test things. Why not use this in general programming?
+ So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram
+ which in realtime show load to every computer in your claster and you could change any parameter on fly, add some more workers and so on.
 
 * Configuration driven software
  

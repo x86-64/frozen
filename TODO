@@ -1,16 +1,20 @@
+- backend 'io/stdin', 'io/stdout', 'io/stderr'
+- backend 'data/snprintf'
+- backend 'data/data'
+- fix insert_sort (data_default_cmp)
+- data 'action_t' + convert array from\to string
+- data 'random_t' for file and testing\benchmarking suite
+- data 'range_t', 'multiselect_t' and matching routines
+- move hash_dump code to hash_t convert, and remove DEBUG condition
+- pcre
+- backend tcp\udp
 - multi-threading
   - backend lock
   - backend thread_pool
   - backend queue
   - backend multi_request
-- fix insert_sort (data_default_cmp)
-- data 'action_t' + convert array from\to string
-- data 'random_t' for file and testing\benchmarking suite
-- pcre
 - autocollecting actions, like HK()
 - new test suite, as benchmarks
-- backend tcp\udp
-- m4 exec for configs
 - backend go_session for http
-- data 'range_t', 'multiselect_t' and matching routines
+- m4 exec for configs
 - mphf nelements_step with percents + remove from mphf to another backend
