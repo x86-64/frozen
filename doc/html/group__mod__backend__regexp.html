@@ -39,7 +39,7 @@
 
 
 <h3><a class="anchor" id="page_regexp_info"></a>Description</h3><div class="textblock"><p>This module use POSIX regular expressions to match data.</p>
-<p>Currently only TYPE_STRINGT as input supported </p>
+<p>Any non-TYPE_STRINGT data converted, so it is not so fast as can be. </p>
 </div>
 
 <h3><a class="anchor" id="page_regexp_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
@@ -47,16 +47,16 @@
               <span class="keyword">class                   </span>= &quot;data/regexp&quot;,
               regexp                  = <span class="stringliteral">&quot;aaa.*&quot;</span>,            # regexp <span class="keywordflow">for</span> matching, <span class="keywordflow">default</span> <span class="stringliteral">&quot;.*&quot;</span>
               input                   = <span class="stringliteral">&quot;url&quot;</span>,              # input key <span class="keywordflow">for</span> <span class="keywordtype">string</span> to match, <span class="keywordflow">default</span> <span class="stringliteral">&quot;buffer&quot;</span>
-              reg_extended            = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # 1 - use extended regexp, 0 - basic, <span class="keywordflow">default</span> 0
-              reg_icase               = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # 1 - no <span class="keywordflow">case</span> matching, 0 - <span class="keywordflow">case</span> matching, <span class="keywordflow">default</span> 0
-              reg_newline             = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
-              reg_notbol              = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
-              reg_noteol              = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
+              extended                = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # 1 - use extended regexp, 0 - basic, <span class="keywordflow">default</span> 0
+              icase                   = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # 1 - no <span class="keywordflow">case</span> matching, 0 - <span class="keywordflow">case</span> matching, <span class="keywordflow">default</span> 0
+              newline                 = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
+              notbol                  = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
+              noteol                  = (uint_t)<span class="charliteral">&#39;0&#39;</span>,        # see <span class="stringliteral">&quot;man regcomp&quot;</span>, <span class="keywordflow">default</span> 0
               marker                  = (hashkey_t)<span class="stringliteral">&#39;marker&#39;</span>,# on match - pass request with <span class="keyword">this</span> key <span class="keyword">set</span>
               marker_value            = (uint_t)<span class="charliteral">&#39;1&#39;</span>,        # value <span class="keywordflow">for</span> marker
  }
 </pre></div> </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Sat Nov 5 2011 21:07:36 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 8 2011 16:21:17 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

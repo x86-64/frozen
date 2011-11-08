@@ -1,0 +1,21 @@
+.TH "Backend 'backend/end'" 3 "Tue Nov 8 2011" "Version 1.0" "frozen" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Backend 'backend/end' \- Description
+This backend terminate request with given error code. Can be useful in 'switch' rules 
+.SS "Configuration"
+Accepted configuration: 
+.PP
+.nf
+ {
+              class                   = 'backend/end',
+              return                  = (uint_t)'0'          # return this error code, default 0 (no error)
+ }
+
+.fi
+.PP
+ 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for frozen from the source code.
