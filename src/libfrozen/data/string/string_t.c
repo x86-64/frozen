@@ -80,7 +80,7 @@ unknown_size:
 
 clean_read:;
 	fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, buffer_size };
-	if( (ret = data_query(fargs->src, &r_read)) < 0)
+	if( (ret = data_query(fargs->src, &r_read)) < -1)
 		return ret;
 		
 	return 0;

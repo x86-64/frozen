@@ -11,7 +11,7 @@
  *
  * This module use POSIX regular expressions to match data.
  *
- * Currently only TYPE_STRINGT as input supported
+ * Any non-TYPE_STRINGT data converted, so it is not so fast as can be.
  */
 /**
  * @ingroup mod_backend_regexp
@@ -23,11 +23,11 @@
  *              class                   = "data/regexp",
  *              regexp                  = "aaa.*",            # regexp for matching, default ".*"
  *              input                   = "url",              # input key for string to match, default "buffer"
- *              reg_extended            = (uint_t)'0',        # 1 - use extended regexp, 0 - basic, default 0
- *              reg_icase               = (uint_t)'0',        # 1 - no case matching, 0 - case matching, default 0
- *              reg_newline             = (uint_t)'0',        # see "man regcomp", default 0
- *              reg_notbol              = (uint_t)'0',        # see "man regcomp", default 0
- *              reg_noteol              = (uint_t)'0',        # see "man regcomp", default 0
+ *              extended                = (uint_t)'0',        # 1 - use extended regexp, 0 - basic, default 0
+ *              icase                   = (uint_t)'0',        # 1 - no case matching, 0 - case matching, default 0
+ *              newline                 = (uint_t)'0',        # see "man regcomp", default 0
+ *              notbol                  = (uint_t)'0',        # see "man regcomp", default 0
+ *              noteol                  = (uint_t)'0',        # see "man regcomp", default 0
  *              marker                  = (hashkey_t)'marker',# on match - pass request with this key set
  *              marker_value            = (uint_t)'1',        # value for marker
  * }
@@ -128,12 +128,12 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 	char                  *regexp_str;
 	regexp_userdata       *userdata          = (regexp_userdata *)backend->userdata;
 	
-	config_updateflag(config, HK(reg_extended), REG_EXTENDED, &userdata->cflags);
-	config_updateflag(config, HK(reg_icase),    REG_ICASE,    &userdata->cflags);
-	config_updateflag(config, HK(reg_newline),  REG_NEWLINE,  &userdata->cflags);
+	config_updateflag(config, HK(extended), REG_EXTENDED, &userdata->cflags);
+	config_updateflag(config, HK(icase),    REG_ICASE,    &userdata->cflags);
+	config_updateflag(config, HK(newline),  REG_NEWLINE,  &userdata->cflags);
 	
-	config_updateflag(config, HK(reg_notbol),   REG_NOTBOL,   &userdata->eflags);
-	config_updateflag(config, HK(reg_noteol),   REG_NOTEOL,   &userdata->eflags);
+	config_updateflag(config, HK(notbol),   REG_NOTBOL,   &userdata->eflags);
+	config_updateflag(config, HK(noteol),   REG_NOTEOL,   &userdata->eflags);
 	
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->marker, config, HK(marker));
@@ -158,14 +158,33 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 
 static ssize_t regexp_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
+	data_t                *input;
 	char                  *input_str         = NULL;
+	uintmax_t              freeme            = 0;
 	regexp_userdata       *userdata          = (regexp_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, input_str, request, userdata->input);
-	if(ret != 0 || input_str == NULL)
+	if( (input = hash_data_find(request, userdata->input)) == NULL)
 		return error("no input string in request");
 	
-	if(regexec(&userdata->regex, input_str, 0, NULL, userdata->eflags) == 0){
+	if(input->type != TYPE_STRINGT){
+		data_convert(ret, TYPE_STRINGT, input_str, input);
+		if(ret != 0)
+			return error("can not convert data to string");
+			
+		freeme = 1;
+	}else{
+		input_str = (char *)input->ptr;
+	}
+	
+	ret = regexec(&userdata->regex, input_str, 0, NULL, userdata->eflags);
+	
+	if(freeme == 1){
+		data_t d_string = DATA_PTR_STRING(input_str);
+		static fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&d_string, &r_free);
+	}
+	
+	if(ret == 0){
 		request_t r_next[] = {
 			{ userdata->marker, *userdata->marker_data },
 			hash_inline(request),
