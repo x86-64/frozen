@@ -1,12 +1,18 @@
+- data/transfer
+- backend_t transfers, non-fast io
+- simplify console backend
 - data/structs specify format
 - fix insert_sort (data_default_cmp)
 - c module example
+- move hash_dump code to hash_t convert, and remove DEBUG condition
 - data 'action_t' + convert array from\to string
 - data 'format_t' + convert array from\to string
 - data 'random_t' for file and testing\benchmarking suite
 - data 'counter_t'
 - data 'range_t', 'multiselect_t' and matching routines
-- move hash_dump code to hash_t convert, and remove DEBUG condition
+- delete ACTION_MOVE
+- add ACTION_GETID or something
+- rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
 - backend tcp\udp
 - multi-threading
   - backend lock
@@ -14,6 +20,7 @@
   - backend queue
   - backend multi_request
 - autocollecting actions, like HK()
+- hashes instead of incrementing
 - new test suite, as benchmarks
 - pcre
 - backend go_session for http
