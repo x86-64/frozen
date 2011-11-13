@@ -66,3 +66,8 @@ Requirments
  * gccgo (for Go modules)
 
 
+Links
+-----
+[Project page](http://x86-64.github.com/frozen/)
+[Documentation](http://x86-64.github.com/frozen/html/)
+
