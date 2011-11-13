@@ -68,6 +68,6 @@ Requirments
 
 Links
 -----
-[Project page](http://x86-64.github.com/frozen/)
-[Documentation](http://x86-64.github.com/frozen/html/)
+ * [Project page](http://x86-64.github.com/frozen/)
+ * [Documentation](http://x86-64.github.com/frozen/html/)
 
