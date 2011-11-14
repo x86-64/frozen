@@ -37,7 +37,7 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure $(top_srcdir)/src/lang/go/Makefile.in \
-	$(top_srcdir)/src/lang/gogcc/Makefile.in TODO \
+	$(top_srcdir)/src/lang/gogcc/Makefile.in COPYING TODO \
 	build/config.guess build/config.sub build/depcomp \
 	build/install-sh build/ltmain.sh build/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -83,6 +83,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/data/transfer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \

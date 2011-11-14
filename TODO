@@ -1,5 +1,4 @@
-- data/transfer
-- backend_t transfers, non-fast io
+- backend_t transfers
 - simplify console backend
 - data/structs specify format
 - fix insert_sort (data_default_cmp)

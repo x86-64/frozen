@@ -138,15 +138,16 @@ typedef uintmax_t hash_key_t;
 #define HASH_KEY_script 132
 #define HASH_KEY_size 133
 #define HASH_KEY_size_old 134
-#define HASH_KEY_split 135
-#define HASH_KEY_string 136
-#define HASH_KEY_structure 137
-#define HASH_KEY_tick_interval 138
-#define HASH_KEY_type 139
-#define HASH_KEY_url 140
-#define HASH_KEY_value 141
-#define HASH_KEY_value_bits 142
-#define HASH_KEY_values 143
-#define HASH_KEY_verbose 144
-#define HASH_KEY_writer 145
+#define HASH_KEY_source 135
+#define HASH_KEY_split 136
+#define HASH_KEY_string 137
+#define HASH_KEY_structure 138
+#define HASH_KEY_tick_interval 139
+#define HASH_KEY_type 140
+#define HASH_KEY_url 141
+#define HASH_KEY_value 142
+#define HASH_KEY_value_bits 143
+#define HASH_KEY_values 144
+#define HASH_KEY_verbose 145
+#define HASH_KEY_writer 146
 #endif
