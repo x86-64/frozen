@@ -1,0 +1,69 @@
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_basics Tutorial: overview, basic i/o
+ */
+/**
+ * @ingroup tutorial_basics
+ * @page tutorial_basics_overview Overview
+ *
+ * To construct nessesary tool frozen have many different building blocks, called backends. Backends can connect to each other and form
+ * nearly any configuration, like a graph. To describe which backends would be used and where connection must exist user fill configuration
+ * file. Because of "one-dimensional" property of files this is not so trivial as it could be done in GUI. So, configuration written in
+ * form of "chains" - list of blocks with connections first to second, second to third and so on. Configuration file can contain any number of
+ * chain with any length. To separate different chains special keyword NULL used.
+ *
+ * @include tutorial_example.conf 
+ *
+ * @note Note different string quotes and assignment marks.
+ *
+ * Next, if you want to one backend have many childs, you need supply two chains: both of them would contain this backend
+ * and each of them would contain one of child backends. But this backend should be named. To name backend you need to write "name"
+ * parameter and unique name for it.
+ *
+ * Following example demonstrate "debug" backend named "mynamehere" with two childs both "stdout":
+ * @include tutorial_example_twochilds.conf
+ *
+ * Configuration file parsed from top to bottom, so, every named objects must be already created to be used properly. Some
+ * of backends can be defined at top of file separately, and lately used in chains. Active backends, for example cache, can't be used
+ * such way because on start it is trying fill cache with underlying backend's data.
+ */
+/**
+ * @ingroup tutorial_basics
+ * @page tutorial_basics_input Input
+ * 
+ * @b Stdin
+ *
+ * To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console.
+ * @ref mod_backend_stdin used to get data from stdin. And because stdin module is passive, @ref mod_backend_transfer used to activly transfer
+ * data from one backend chain to another. In this case destination is @ref mod_backend_stdout used. For more about outputs read next chapter.
+ * 
+ * @include tutorial_in_stdin.conf 
+ *
+ * More likely that destination chain have much more backends, and @ref mod_backend_transfer can pass request instead of querying, so
+ * we can simplify configuration into following:
+ *
+ * @include tutorial_in_stdin_simple.conf 
+ *
+ * @b Fuse
+ * 
+ * Next way is @ref mod_backend_fuse backend. It create filesystem using fuse and pass all read and writes to user defined backends.
+ * Sample configuration can look like so:
+ *
+ * @include tutorial_in_fuse.conf
+ * 
+ * This creates file system in /home/test folder, which contain file named "one" and every write request to this file will result in 
+ * console output. Use "echo 'hello' >> /home/test/one" or similar to test it.
+ * 
+ * @b Emitter
+ *
+ * One more way to input is describe backend which send requests you want. One of such backends is @ref mod_backend_emitter. Example:
+ * @include tutorial_in_emitter.conf
+ * 
+ * @note "on_end" with "destroy" value kills frozen daemon after request passed. It is way flush stdout buffers and exit.
+ * 
+ * @b HTTP
+ *
+ * Another way is different modules, for example go_http. It create simple web server and pass request to user's backends.
+ * @include tutorial_in_http.conf
+ *
+ */

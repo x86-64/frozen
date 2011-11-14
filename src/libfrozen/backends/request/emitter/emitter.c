@@ -23,7 +23,7 @@
  *              pre_request             = { ... },            # optional request emitted at the beginning of emission
  *              post_request            = { ... },            # optional request emitted at the end of emission
  *              request                 = { ... },            # actual request, that would be emitted
- *              count                   = (uint_t)'1000',     # number of emits
+ *              count                   = (uint_t)'1000',     # number of emits, default 1
  * }
  * @endcode
  *
@@ -32,7 +32,7 @@
  */
 
 #define EMODULE 18
-#define N_REQUESTS_DEFAULT __MAX(uintmax_t)
+#define N_REQUESTS_DEFAULT 1
 
 typedef enum emitter_action {
 	ACTION_NONE,

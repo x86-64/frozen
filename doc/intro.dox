@@ -1,6 +1,7 @@
 /** @defgroup api Api */
 /** @defgroup backend Backends */
 /** @defgroup data Data */
+/** @defgroup tutorial Tutorials */
 
 /** @mainpage Frozen
  *
