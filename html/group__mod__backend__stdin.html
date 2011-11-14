@@ -38,18 +38,16 @@
 </table>
 
 
-<h3><a class="anchor" id="page_stdin_info"></a>Description</h3><div class="textblock"><p>This backend read from console </p>
+<h3><a class="anchor" id="page_stdin_info"></a>Description</h3><div class="textblock"><p>This backend read from console. It is passive module, use <a class="el" href="group__mod__backend__transfer.html">Backend 'data/transfer'</a> to read and pass input to another module. </p>
 </div>
 
 <h3><a class="anchor" id="page_stdin_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> {
               <span class="keyword">class                   </span>= &quot;io/stdin&quot;,
-              action                  = (action_t)<span class="stringliteral">&#39;write&#39;</span>,       # action to emit, <span class="keywordflow">default</span> <span class="stringliteral">&quot;write&quot;</span>
-              output                  = (hashkey_t)<span class="stringliteral">&#39;buffer&#39;</span>,     # output buffer key, <span class="keywordflow">default</span> <span class="stringliteral">&quot;buffer&quot;</span>
-              destroy                 = (uint_t)<span class="charliteral">&#39;1&#39;</span>              # send SEGTERM on stdin eof, <span class="keywordflow">default</span> 0
+              output                  = (hashkey_t)<span class="stringliteral">&#39;buffer&#39;</span>     # output buffer key, <span class="keywordflow">default</span> <span class="stringliteral">&quot;buffer&quot;</span>
  }
 </pre></div> </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 14 2011 15:44:11 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 14 2011 16:05:15 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
