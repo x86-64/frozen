@@ -53,6 +53,7 @@ Modules</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__regexp.html">Backend 'data/regexp'</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__split.html">Backend 'data/split'</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__structs.html">Backend 'data/structs'</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__transfer.html">Backend 'data/transfer'</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__jenkins.html">Backend 'hash/jenkins'</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__murmur.html">Backend 'hash/murmur'</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__backend__fill.html">Backend 'index/fill'</a></td></tr>
@@ -111,7 +112,7 @@ Modules</h2></td></tr>
 <h3><a class="anchor" id="backend_childs"></a>Parents and childs</h3><div class="textblock"><p>Every backend, if this is not standalone backend, can have their parent(s) and child(s). Parent backend can pass to your backend requests. Childs is backends to which your backend can pass request. If backend have more than one child, request passed to every child repeatedly. If this is not that you want - you can solve it with any of path rewriting backend. Such approach is useful, because you can add child to any backend and monitor requests passed by. This can be used in logging.</p>
 <p>You can connect backends in any way you want, but there is one limit - if your configuration produce infinity loops they will not be terminated or avoided. However this is doesn't mean that you can't send requests to parent backends. Just make sure it will work. </p>
 </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 13 2011 20:35:57 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 14 2011 15:44:11 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

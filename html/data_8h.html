@@ -58,6 +58,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab945901d008f6641e11b33e8d45723a5"></a><!-- doxytag: member="data.h::DEF_BUFFER_SIZE" ref="ab945901d008f6641e11b33e8d45723a5" args="" -->
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DEF_BUFFER_SIZE</b>&#160;&#160;&#160;1024</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">data_get</a>(_ret, _type, _dt, _src)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#ae840456f64f9045e3b9748dcdf74efd5">data_set</a>(_ret, _type, _dt, _dst)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">data_convert</a>(_ret, _type, _dst, _src)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -210,6 +211,68 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae840456f64f9045e3b9748dcdf74efd5"></a><!-- doxytag: member="data.h::data_set" ref="ae840456f64f9045e3b9748dcdf74efd5" args="(_ret, _type, _dt, _dst)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define data_set</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_ret, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_type, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_dt, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_dst&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment">{                                                   \
+        <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> __data_src = { _type, REF_##_type(_dt) };                                 \
+        <a class="code" href="structfastcall__transfer.html">fastcall_transfer</a> _r_transfer = { { 3, ACTION_TRANSFER }, _dst };                \
+        _ret = data_query(&amp;__data_src, &amp;_r_transfer);                                    \
+        (void)_ret;                                                                      \
+}
+</pre></div><p>Write value from holder to supplied buffer. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_ret</td><td>Return value (ssize_t) </td></tr>
+    <tr><td class="paramname">_type</td><td>Source data type: one of TYPE_*. Only constants allowed </td></tr>
+    <tr><td class="paramname">_dt</td><td>Source data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc) </td></tr>
+    <tr><td class="paramname">_dst</td><td>Destination data holder (<a class="el" href="structdata__t.html" title="Data holder.">data_t</a> *) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl><dt><b>Return values:</b></dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">-EINVAL</td><td>Invalid source, or convertation error </td></tr>
+    <tr><td class="paramname">0</td><td>Operation successfull </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/><h2>Function Documentation</h2>
 <a class="anchor" id="a7a428cd48115cf6fcb1f1679fe34960c"></a><!-- doxytag: member="data.h::data_query" ref="a7a428cd48115cf6fcb1f1679fe34960c" args="(data_t *data, void *args)" -->
 <div class="memitem">
@@ -256,7 +319,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 13 2011 20:35:57 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 14 2011 15:44:11 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

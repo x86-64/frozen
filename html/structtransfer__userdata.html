@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>frozen: fastcall_arith Struct Reference</title>
+<title>frozen: transfer_userdata Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -39,19 +39,23 @@
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">fastcall_arith Struct Reference</div>  </div>
+<div class="title">transfer_userdata Struct Reference</div>  </div>
 </div>
 <div class="contents">
-<!-- doxytag: class="fastcall_arith" --><table class="memberdecls">
+<!-- doxytag: class="transfer_userdata" --><table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6a8b9efa5e2fe1325bb71077a0452bfb"></a><!-- doxytag: member="fastcall_arith::header" ref="a6a8b9efa5e2fe1325bb71077a0452bfb" args="" -->
-<a class="el" href="structfastcall__header.html">fastcall_header</a>&#160;</td><td class="memItemRight" valign="bottom"><b>header</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2f60a6c2c8387cd1825fe702a154d19"></a><!-- doxytag: member="fastcall_arith::data2" ref="ac2f60a6c2c8387cd1825fe702a154d19" args="" -->
-<a class="el" href="structdata__t.html">data_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>data2</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a15fd6533fbbf0c3cd037aa71344c646a"></a><!-- doxytag: member="transfer_userdata::source" ref="a15fd6533fbbf0c3cd037aa71344c646a" args="" -->
+<a class="el" href="structbackend__t.html">backend_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>source</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adb72b77ebbf3ea9b94d4fef166b08992"></a><!-- doxytag: member="transfer_userdata::destination" ref="adb72b77ebbf3ea9b94d4fef166b08992" args="" -->
+<a class="el" href="structbackend__t.html">backend_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>destination</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a22ed2968e3b0c1526a3679b0608d92b2"></a><!-- doxytag: member="transfer_userdata::running" ref="a22ed2968e3b0c1526a3679b0608d92b2" args="" -->
+uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>running</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a03219bbe47c31879baf1809518746730"></a><!-- doxytag: member="transfer_userdata::tranfser_thread" ref="a03219bbe47c31879baf1809518746730" args="" -->
+pthread_t&#160;</td><td class="memItemRight" valign="bottom"><b>tranfser_thread</b></td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="api_8h_source.html">api.h</a></li>
+<li>transfer.c</li>
 </ul>
 </div>
 <hr class="footer"/><address class="footer"><small>Generated on Mon Nov 14 2011 15:44:11 for frozen by&#160;
