@@ -9,7 +9,7 @@
  * @ingroup mod_backend_stdin
  * @page page_stdin_info Description
  *
- * This backend read from console
+ * This backend read from console. It is passive module, use @ref mod_backend_transfer to read and pass input to another module.
  */
 /**
  * @ingroup mod_backend_stdin
@@ -19,9 +19,7 @@
  * @code
  * {
  *              class                   = "io/stdin",
- *              action                  = (action_t)'write',       # action to emit, default "write"
- *              output                  = (hashkey_t)'buffer',     # output buffer key, default "buffer"
- *              destroy                 = (uint_t)'1'              # send SEGTERM on stdin eof, default 0
+ *              output                  = (hashkey_t)'buffer'     # output buffer key, default "buffer"
  * }
  * @endcode
  */
