@@ -1,5 +1,3 @@
-- backend_t transfers
-- simplify console backend
 - data/structs specify format
 - fix insert_sort (data_default_cmp)
 - c module example
@@ -23,5 +21,6 @@
 - new test suite, as benchmarks
 - pcre
 - backend go_session for http
+- backend_t transfers
 - m4 exec for configs
 - mphf nelements_step with percents + remove from mphf to another backend

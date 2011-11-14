@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <dataproto.h>
 
 /**
  * @ingroup backend
@@ -73,23 +74,30 @@
 
 #define EMODULE 38
 
-typedef struct stdin_userdata {
-	data_functions         action;
-	hash_key_t             output;
-	uintmax_t              running;
-	uintmax_t              kill_on_eof;
-} stdin_userdata;
+typedef struct std_userdata {
+	hash_key_t             key;
+} std_userdata;
 
-typedef struct stdout_userdata {
-	hash_key_t             input;
-} stdout_userdata;
+static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs){ // {{{
+	switch(hargs->action){
+		case ACTION_READ:;
+			fastcall_read *rargs = (fastcall_read *)hargs;
+			
+			if(feof(*fd))
+				return -1;
+			
+			rargs->buffer_size = fread(rargs->buffer, 1, rargs->buffer_size, *fd);
+			return 0;
+		
+		case ACTION_TRANSFER:
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_TRANSFER ](data, hargs);
 
-static pthread_t               stdin_thread;
-static uintmax_t               stdin_backends    = 0;
-static pthread_mutex_t         stdin_backend_mtx = PTHREAD_MUTEX_INITIALIZER;
-static list                    stdin_childs;
-
-static ssize_t stdout_io_handler(FILE **fd, fastcall_header *hargs){ // {{{
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
+static ssize_t stdout_io_handler(data_t *data, FILE **fd, fastcall_header *hargs){ // {{{
 	switch(hargs->action){
 		case ACTION_WRITE:;
 			fastcall_write *wargs = (fastcall_write *)hargs;
@@ -103,172 +111,101 @@ static ssize_t stdout_io_handler(FILE **fd, fastcall_header *hargs){ // {{{
 	return -ENOSYS;
 } // }}}
 
+static data_t stdin_io  = DATA_IOT(&stdin,  (f_io_func)&stdin_io_handler);
 static data_t stdout_io = DATA_IOT(&stdout, (f_io_func)&stdout_io_handler);
 static data_t stderr_io = DATA_IOT(&stderr, (f_io_func)&stdout_io_handler);
 
-static void * stdin_thread_handler(void *null){ // {{{
-	uintmax_t              ret;
-	backend_t             *child;
-	void                  *iter;
-	char                   buffer[DEF_BUFFER_SIZE];
-	
-	while(!feof(stdin)){
-		ret = fread(buffer, 1, sizeof(buffer), stdin);
-		if(ret == 0)
-			goto exit;
-		
-		list_rdlock(&stdin_childs);
-			iter = NULL;
-			
-			while( (child = list_iter_next(&stdin_childs, &iter)) != NULL){
-				stdin_userdata *userdata = (stdin_userdata *)child->userdata;
-				
-				request_t request[] = {
-					{ HK(action),       DATA_UINT32T(userdata->action)  },
-					{ userdata->output, DATA_RAW(buffer, ret)           },
-					hash_end
-				};
-				backend_pass(child, request);
-			}
-		list_unlock(&stdin_childs);
-	}
-exit:
-	
-	list_rdlock(&stdin_childs);
-		iter = NULL;
-		
-		while( (child = list_iter_next(&stdin_childs, &iter)) != NULL){
-			stdin_userdata *userdata = (stdin_userdata *)child->userdata;
-			
-			if(userdata->kill_on_eof != 0)
-				kill(getpid(), SIGTERM);
-		}
-	list_unlock(&stdin_childs);
-	return NULL;
-} // }}}
+static int std_init(backend_t *backend){ // {{{
+	std_userdata        *userdata;
 
-static int stdin_init(backend_t *backend){ // {{{
-	stdin_userdata        *userdata;
-
-	if((userdata = backend->userdata = calloc(1, sizeof(stdin_userdata))) == NULL)
+	if((userdata = backend->userdata = calloc(1, sizeof(std_userdata))) == NULL)
 		return error("calloc failed");
 	
-	userdata->action       = ACTION_WRITE;
-	userdata->output       = HK(buffer);
-	userdata->kill_on_eof  = 0;
+	userdata->key       = HK(buffer);
 	return 0;
 } // }}}
-static int stdin_destroy(backend_t *backend){ // {{{
-	void                  *res;
-	ssize_t                ret               = 0;
-	stdin_userdata        *userdata          = (stdin_userdata *)backend->userdata;
+static int std_destroy(backend_t *backend){ // {{{
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
 
-	list_delete (&stdin_childs, backend);
-	pthread_mutex_lock(&stdin_backend_mtx);
-		if(--stdin_backends == 0){
-			switch(pthread_cancel(stdin_thread)){
-				case ESRCH: goto no_thread;
-				case 0:     break;
-				default:    ret = error("pthread_cancel failed"); goto exit;
-			}
-			if(pthread_join(stdin_thread, &res) != 0){
-				ret = error("pthread_join failed");
-				goto exit;
-			}
-			
-		no_thread:
-			list_destroy(&stdin_childs);
-		}
-exit:
-	pthread_mutex_unlock(&stdin_backend_mtx);
-	
 	free(userdata);
-	return ret;
+	return 0;
 } // }}}
+
 static int stdin_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t                ret;
-	char                  *action_str        = NULL;
-	stdin_userdata        *userdata          = (stdin_userdata *)backend->userdata;
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_UINTT,    userdata->kill_on_eof, config, HK(destroy));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output,      config, HK(output));
-	hash_data_copy(ret, TYPE_STRINGT,  action_str,            config, HK(action));
-	if(ret == 0)
-		userdata->action = request_str_to_action(action_str);
-	
-	ret = 0;
-	if(userdata->running == 0){
-		pthread_mutex_lock(&stdin_backend_mtx);
-			if(stdin_backends++ == 0){
-				list_init(&stdin_childs);
-				
-				if(pthread_create(&stdin_thread, NULL, &stdin_thread_handler, NULL) != 0)
-					ret = error("pthread_create failed");
-			}
-		pthread_mutex_unlock(&stdin_backend_mtx);
-		list_add(&stdin_childs, backend);
-		
-		userdata->running = 1;
-	}
-	return ret;
-} // }}}
-
-static int stdout_init(backend_t *backend){ // {{{
-	stdout_userdata       *userdata;
-
-	if((userdata = backend->userdata = calloc(1, sizeof(stdout_userdata))) == NULL)
-		return error("calloc failed");
-	
-	userdata->input       = HK(buffer);
-	return 0;
-} // }}}
-static int stdout_destroy(backend_t *backend){ // {{{
-	free(backend->userdata);
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,      config, HK(output));
 	return 0;
 } // }}}
 static int stdout_configure(backend_t *backend, hash_t *config){ // {{{
 	ssize_t                ret;
-	stdout_userdata       *userdata          = (stdout_userdata *)backend->userdata;
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,      config, HK(input));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,      config, HK(input));
 	return 0;
 } // }}}
 
-static ssize_t stdout_handler(backend_t *backend, request_t *request){ // {{{
-	data_t                *input;
-	stdout_userdata       *userdata          = (stdout_userdata *)backend->userdata;
+static ssize_t stdin_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret, retd;
+	data_t                *output;
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
 	
-	if( (input = hash_data_find(request, userdata->input)) == NULL)
+	if( (output = hash_data_find(request, userdata->key)) == NULL)
+		return error("output key not supplied");
+	
+	fastcall_transfer r_transfer = { { 4, ACTION_TRANSFER }, output };
+	ret = data_query(&stdin_io, &r_transfer);
+	
+	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	return ret;
+} // }}}
+static ssize_t stdout_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret, retd;
+	data_t                *input;
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
+	
+	if( (input = hash_data_find(request, userdata->key)) == NULL)
 		return error("input key not supplied");
 	
 	static fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &stdout_io };
-	return data_query(input, &r_transfer);
+	ret = data_query(input, &r_transfer);
+	
+	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	return ret;
 } // }}}
 static ssize_t stderr_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret, retd;
 	data_t                *input;
-	stdout_userdata       *userdata          = (stdout_userdata *)backend->userdata;
+	std_userdata          *userdata          = (std_userdata *)backend->userdata;
 	
-	if( (input = hash_data_find(request, userdata->input)) == NULL)
+	if( (input = hash_data_find(request, userdata->key)) == NULL)
 		return error("input key not supplied");
 	
 	static fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &stderr_io };
-	return data_query(input, &r_transfer);
+	ret = data_query(input, &r_transfer);
+	
+	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	return ret;
 } // }}}
 
 backend_t stdin_proto = {
 	.class          = "io/stdin",
 	.supported_api  = API_HASH,
-	.func_init      = &stdin_init,
+	.func_init      = &std_init,
 	.func_configure = &stdin_configure,
-	.func_destroy   = &stdin_destroy
+	.func_destroy   = &std_destroy,
+	.backend_type_hash = {
+		.func_handler  = &stdin_handler
+	}
 };
 
 backend_t stdout_proto = {
 	.class          = "io/stdout",
 	.supported_api  = API_HASH,
-	.func_init      = &stdout_init,
+	.func_init      = &std_init,
 	.func_configure = &stdout_configure,
-	.func_destroy   = &stdout_destroy,
+	.func_destroy   = &std_destroy,
 	.backend_type_hash = {
 		.func_handler  = &stdout_handler
 	}
@@ -277,9 +214,9 @@ backend_t stdout_proto = {
 backend_t stderr_proto = {
 	.class          = "io/stderr",
 	.supported_api  = API_HASH,
-	.func_init      = &stdout_init,
+	.func_init      = &std_init,
 	.func_configure = &stdout_configure,
-	.func_destroy   = &stdout_destroy,
+	.func_destroy   = &std_destroy,
 	.backend_type_hash = {
 		.func_handler  = &stderr_handler
 	}

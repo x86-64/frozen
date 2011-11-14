@@ -165,6 +165,9 @@ static ssize_t data_int32_t_transfer(data_t *src, fastcall_transfer *fargs){ // 
 	if( (ret = data_query(fargs->dest, &r_write)) < -1)
 		return ret;
 	
+	if(fargs->header.nargs >= 4)
+		fargs->transfered = r_write.buffer_size;
+
 	return 0;
 } // }}}
 static ssize_t data_int32_t_is_null(data_t *data, fastcall_is_null *fargs){ // {{{

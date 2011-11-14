@@ -156,12 +156,23 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
 	char            buffer[DEF_BUFFER_SIZE];
 	ssize_t         rret, wret;
-	uintmax_t       roffset, woffset;
-	
+	uintmax_t       roffset, woffset, transfered;
+	uintmax_t       read;
+
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	roffset = woffset = 0;
+	roffset = woffset = transfered = 0;
+	
+	// first read
+	fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, sizeof(buffer) };
+	if( (rret = data_query(src, &r_read)) < 0) // EOF return too
+		return rret;
+	
+	read     = r_read.buffer_size;
+	roffset += r_read.buffer_size;
+	
+	goto start;
 	do {
 		fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, sizeof(buffer) };
 		if( (rret = data_query(src, &r_read)) < -1)
@@ -170,16 +181,23 @@ static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer 
 		if(rret == -1) // EOF from read side
 			break;
 		
-		fastcall_write r_write = { { 5, ACTION_WRITE }, woffset, &buffer, r_read.buffer_size };
+		read     = r_read.buffer_size;
+		roffset += r_read.buffer_size;
+
+	start:;
+		fastcall_write r_write = { { 5, ACTION_WRITE }, woffset, &buffer, read };
 		if( (wret = data_query(fargs->dest, &r_write)) < -1)
 			return wret;
 		
-		roffset += r_read.buffer_size;
-		woffset += r_write.buffer_size;
-		
 		if(wret == -1) // EOF from write side
 			break;
+		
+		transfered += r_write.buffer_size;
+		woffset    += r_write.buffer_size;
 	}while(1);
+	
+	if(fargs->header.nargs >= 4)
+		fargs->transfered = transfered;
 	return 0;
 } // }}}
 static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{

@@ -115,6 +115,21 @@ API ssize_t              data_query             (data_t *data, void *args);
 	(void)_ret;                                                            \
 }
 
+/** Write value from holder to supplied buffer.
+ * @param _ret  Return value (ssize_t)
+ * @param _type Source data type: one of TYPE_*. Only constants allowed
+ * @param _dt   Source data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc)
+ * @param _dst  Destination data holder (data_t *)
+ * @retval -EINVAL Invalid source, or convertation error
+ * @retval 0       Operation successfull
+ */
+#define data_set(_ret,_type,_dt,_dst){                                                   \
+	data_t __data_src = { _type, REF_##_type(_dt) };                                 \
+	fastcall_transfer _r_transfer = { { 3, ACTION_TRANSFER }, _dst };                \
+	_ret = data_query(&__data_src, &_r_transfer);                                    \
+	(void)_ret;                                                                      \
+}
+
 /** Convert value from holder to buffer.
  * If destination data 
  * @param _ret   Return value (ssize_t)

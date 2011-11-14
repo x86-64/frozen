@@ -58,7 +58,7 @@ typedef struct file_userdata {
 } file_userdata;
 
 // IO's
-static ssize_t file_io_handler(file_userdata *userdata, fastcall_header *hargs){ // {{{
+static ssize_t file_io_handler(data_t *data, file_userdata *userdata, fastcall_header *hargs){ // {{{
 	ssize_t      ret;
 	
 	switch(hargs->action){
@@ -101,7 +101,7 @@ static ssize_t file_io_handler(file_userdata *userdata, fastcall_header *hargs){
 			return 0;
 
 		case ACTION_TRANSFER:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](&userdata->file_io, hargs);
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
 
 		default:
 			break;
@@ -390,10 +390,12 @@ static int file_configure(backend_t *backend, config_t *config){ // {{{
 
 // Requests
 static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
-	ssize_t           ret;
+	ssize_t           ret, retd;
 	uintmax_t         offset                 = 0;
 	uintmax_t         size                   = ~0;
-	data_t           *buffer;
+	data_t           *r_buffer;
+	data_t           *r_offset;
+	data_t           *r_size;
 	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
 	if( (ret = file_prepare(userdata)) < 0)
@@ -401,39 +403,55 @@ static ssize_t file_write(backend_t *backend, request_t *request){ // {{{
 	
 	userdata->file_stat_status = STAT_NEED_UPDATE;
 	
-	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
-	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
+	r_offset = hash_data_find(request, HK(offset));
+	r_size   = hash_data_find(request, HK(size));
+	r_buffer = hash_data_find(request, userdata->buffer);
 	
-	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
+	data_get(retd, TYPE_UINTT, size,   r_size);
+	data_get(retd, TYPE_UINTT, offset, r_offset);
+	
+	if(r_buffer == NULL)
 		return -EINVAL;
 	
 	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
 	
-	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_slice };
-	return data_query(buffer, &r_transfer);
+	fastcall_transfer r_transfer = { { 4, ACTION_TRANSFER }, &d_slice };
+	ret = data_query(r_buffer, &r_transfer);
+	
+	data_set(retd, TYPE_UINTT, r_transfer.transfered, r_size);
+	
+	return ret;
 } // }}}
 static ssize_t file_read(backend_t *backend, request_t *request){ // {{{
-	ssize_t           ret;
+	ssize_t           ret, retd;
 	uintmax_t         offset                 = 0;
 	uintmax_t         size                   = ~0;
-	data_t           *buffer;
+	data_t           *r_buffer;
+	data_t           *r_offset;
+	data_t           *r_size;
 	file_userdata    *userdata               = ((file_userdata *)backend->userdata);
 	
 	if( (ret = file_prepare(userdata)) < 0)
 		return ret;
 	
-	//userdata->file_stat_status = STAT_NEED_UPDATE;
+	r_offset = hash_data_find(request, HK(offset));
+	r_size   = hash_data_find(request, HK(size));
+	r_buffer = hash_data_find(request, userdata->buffer);
 	
-	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
-	hash_data_copy(ret, TYPE_UINTT, size,   request, HK(size));
+	data_get(retd, TYPE_UINTT, size,   r_size);
+	data_get(retd, TYPE_UINTT, offset, r_offset);
 	
-	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
+	if(r_buffer == NULL)
 		return -EINVAL;
 	
 	data_t d_slice = DATA_SLICET(&userdata->file_io, offset, size);
 	
-	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
-	return data_query(&d_slice, &r_transfer);
+	fastcall_transfer r_transfer = { { 4, ACTION_TRANSFER }, r_buffer };
+	ret = data_query(&d_slice, &r_transfer);
+	
+	data_set(retd, TYPE_UINTT, r_transfer.transfered, r_size);
+	
+	return ret;
 } // }}}
 static ssize_t file_create(backend_t *backend, request_t *request){ // {{{
 	size_t            size;

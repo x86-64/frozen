@@ -6,16 +6,7 @@
 #include <hash/hash_t.h>
 
 static ssize_t data_backend_t_io  (data_t *data, fastcall_io *fargs){ // {{{
-	ssize_t                ret;
-	
-	if( (ret = backend_fast_query((backend_t *)data->ptr, fargs)) < 0)
-		return ret;
-
-	if(ret == 0)
-		return -1; // EOF
-	
-	fargs->buffer_size = ret;
-	return 0;
+	return backend_fast_query((backend_t *)data->ptr, fargs);
 } // }}}
 static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	if(fargs->src == NULL)

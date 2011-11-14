@@ -26,7 +26,7 @@ static ssize_t data_io_t_handler (data_t *data, fastcall_header *hargs){ // {{{
 				free(data->ptr);
 			return 0;
 		default:
-			return fdata->handler(fdata->ud, hargs);
+			return fdata->handler(data, fdata->ud, hargs);
 	};
 	return -ENOSYS;
 } // }}}

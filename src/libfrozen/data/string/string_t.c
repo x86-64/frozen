@@ -122,6 +122,9 @@ static ssize_t data_string_t_transfer(data_t *src, fastcall_transfer *fargs){ //
 	if( (ret = data_query(fargs->dest, &r_write)) < -1)
 		return ret;
 	
+	if(fargs->header.nargs >= 4)
+		fargs->transfered = r_write.buffer_size;
+	
 	return 0;
 } // }}}
 

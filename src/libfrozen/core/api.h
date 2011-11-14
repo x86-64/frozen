@@ -205,6 +205,7 @@ typedef struct fastcall_copy {
 typedef struct fastcall_transfer {
 	fastcall_header        header;
 	data_t                *dest;
+	uintmax_t              transfered;
 } fastcall_transfer;
 
 struct fastcall_convert_from {

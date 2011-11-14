@@ -24,7 +24,7 @@
 #define REF_TYPE_IOT(_dt) _dt
 #define HAVEBUFF_TYPE_IOT 0
 
-typedef ssize_t (*f_io_func) (void *userdata, void *args); ///< Io_t callback
+typedef ssize_t (*f_io_func) (data_t *data, void *userdata, void *args); ///< Io_t callback
 
 typedef struct io_t {
 	void *                 ud;

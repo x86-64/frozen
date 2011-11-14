@@ -20,6 +20,9 @@ static ssize_t data_raw_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
 	if( (ret = data_query(fargs->dest, &r_write)) < -1)
 		return ret;
 	
+	if(fargs->header.nargs >= 4)
+		fargs->transfered = r_write.buffer_size;
+	
 	return 0;
 } // }}}
 static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{

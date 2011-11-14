@@ -94,49 +94,65 @@ static size_t  cache_fast_write  (backend_t *backend, off_t offset, void *buffer
 */
 
 static ssize_t cache_backend_read(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
+	ssize_t                ret, retd;
 	uintmax_t              offset            = 0;
 	uintmax_t              size              = ~0;
-	data_t                *buffer;
+	data_t                *r_offset;
+	data_t                *r_size;
+	data_t                *r_buffer;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_OFFT,  offset, request, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));
+	r_offset = hash_data_find(request, HK(offset));
+	r_size   = hash_data_find(request, HK(size));
+	r_buffer = hash_data_find(request, HK(buffer));
 	
-	buffer = hash_data_find(request, HK(buffer));
+	data_get(retd, TYPE_UINTT, size,   r_size);
+	data_get(retd, TYPE_UINTT, offset, r_offset);
+	
+	if(r_buffer == NULL)
+		return -EINVAL;
 	
 	pthread_rwlock_rdlock(&userdata->lock);
 	
 		data_t d_slice = DATA_SLICET(&userdata->d_memory, offset, size);
 		
-		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, buffer };
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, r_buffer };
 		ret = data_query(&d_slice, &r_transfer);
 	
 	pthread_rwlock_unlock(&userdata->lock);
 	
+	data_set(retd, TYPE_UINTT, r_transfer.transfered, r_size);
 	return ret;
 } // }}}
 static ssize_t cache_backend_write(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
+	ssize_t                ret, retd;
 	uintmax_t              offset            = 0;
 	uintmax_t              size              = ~0;
-	data_t                *buffer;
+	data_t                *r_offset;
+	data_t                *r_size;
+	data_t                *r_buffer;
 	cache_userdata        *userdata          = (cache_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_OFFT,  offset, request, HK(offset));
-	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));
+	r_offset = hash_data_find(request, HK(offset));
+	r_size   = hash_data_find(request, HK(size));
+	r_buffer = hash_data_find(request, HK(buffer));
 	
-	buffer = hash_data_find(request, HK(buffer));
+	data_get(retd, TYPE_UINTT, size,   r_size);
+	data_get(retd, TYPE_UINTT, offset, r_offset);
+	
+	if(r_buffer == NULL)
+		return -EINVAL;
 	
 	pthread_rwlock_rdlock(&userdata->lock); // read lock, many requests allowed
 		
 		data_t d_slice = DATA_SLICET(&userdata->d_memory, offset, size);
 		
-		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_slice };
-		ret = data_query(buffer, &r_transfer);
+		fastcall_transfer r_transfer = { { 4, ACTION_TRANSFER }, &d_slice };
+		ret = data_query(r_buffer, &r_transfer);
 	
 	pthread_rwlock_unlock(&userdata->lock);
 	
+	data_set(retd, TYPE_UINTT, r_transfer.transfered, r_size);
 	return ret;
 } // }}}
 static ssize_t cache_backend_create(backend_t *backend, request_t *request){ // {{{
