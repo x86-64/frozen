@@ -57,7 +57,11 @@ Executing configuration</h2>
 <p>To actually execute some configuration you should write it to configuration file and type in your shell following: </p>
 <div class="fragment"><pre class="fragment">   $ frozend -c configuration_file.conf
 </pre></div><p> <b>frozend</b> here is frozen daemon which parse configration file and create backends. <b>frozend --help</b> for more daemon options.</p>
-<h2><a class="anchor" id="tutorial_basics_input"></a>
+<p>If you use <a class="el" href="group__mod__backend__stdin.html">io/stdin</a> in configuration, pass input as usual. Same for <a class="el" href="group__mod__backend__stdout.html">io/stdout</a>, <a class="el" href="group__mod__backend__stderr.html">io/stderr</a>. </p>
+<div class="fragment"><pre class="fragment">   $ cat file | frozend -c configuration_file.conf
+   $ cat file | frozend -c configuration_file.conf  &gt;log_stdout
+   $ cat file | frozend -c configuration_file.conf 2&gt;log_stderr
+</pre></div><h2><a class="anchor" id="tutorial_basics_input"></a>
 Input</h2>
 <p><em>Stdin</em> </p>
 <p>To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console. <a class="el" href="group__mod__backend__stdin.html">io/stdin</a> used to get data from stdin. And because stdin module is passive, <a class="el" href="group__mod__backend__transfer.html">data/transfer</a> used to activly transfer data from one backend chain to another. In this case destination is <a class="el" href="group__mod__backend__stdout.html">io/stdout</a> used. For more about outputs read next chapter.</p>
@@ -193,7 +197,7 @@ Combining all together</h2>
 </pre></div><p> Because <a class="el" href="group__mod__backend__switch.html">request/switch</a> don't care what in your rule's request you could first check for such AND condition, if it not matches check for only one marker, or for another, or for both. And for each rule you can supply different backend with any action.</p>
 <p>You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file. If you pick up <a class="el" href="group__mod__backend__fuse.html">io/fuse</a> for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. </p>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 18:34:35 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 18:37:55 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
