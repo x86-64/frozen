@@ -21,8 +21,8 @@
  * Following example demonstrate "debug" backend named "mynamehere" with two childs both "stdout":
  * @include tutorial_example_twochilds.conf
  *
- * Configuration file parsed from top to bottom, so, every named objects must be already created to be used properly. Some
- * of backends can be defined at top of file separately, and lately used in chains. Active backends, for example cache, can't be used
+ * Configuration file parsed from bottom to top, so, every named objects must be already created at bottom to be used properly. Some
+ * of backends can be defined at bottom of file separately, and lately used in chains. Active backends, for example cache, can't be used
  * such way because on start it is trying fill cache with underlying backend's data.
  *
  * @section tutorial_basics_exec Executing configuration
