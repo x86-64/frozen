@@ -11,12 +11,34 @@
 	}
 },
 { class => "benchmark", name => "mphf"                                   },
+
+{ class = "hash/murmur2_64", input = "key", output = "keyid"             },
 {
-	class = "hash/murmur2_64",
-	input = "keyid",
-	output = "keyid"
+	class = "request/switch",
+	rules = {
+		{
+			request = { action = create },
+		  	backend = { { class = "index/fill", index = "mymphf" } }
+		},
+		{
+			request = { action = read },
+			backend = { { class = "index/lookup", index = "mymphf", output = "offset", output_type = "uint_t" } }
+		}
+	}
 },
 {
+	class = "structs",
+	size = "size",
+	structure = {
+		keyid = (uint64_t)'0'
+	}
+},
+{ class = "incapsulate", multiply = (off_t)'8'      },
+{ class = "allocator"                               },
+{ class = "file",  filename = "data_bench_mphf.dat" },
+NULL,
+{
+	name = "mymphf",
 	class = "mphf",
 	type = "chm_imp",
 	backend_g = "test_mphf_g",
@@ -27,67 +49,13 @@
 	nelements_step = (uint64_t)'10000',
 	value_bits = (uint32_t)'32'
 },
-{
-	class = "structs",
-	size = "size",
-	structure = {
-		keyid = (uint32_t)'0'
-	}
-},
-{
-	class = "incapsulate",
-	multiply = (off_t)'8'
-},
-{
-	class = "allocator"
-},
-{
-	class = "cache-append"
-},
-{
-	class = "file",
-	filename = "data_bench_mphf.dat"
-},
 NULL,
 
-{
-	name = "test_mphf_g",
-	class = "cache"
-},
-{
-	class = "file",
-	filename = {
-		string = ".dat",
-		string = "data_bench_mphf_g_",
-		homedir = ''
-	}
-},
+{ class = "cache", name = "test_mphf_g" },
+{ class = "file",  filename = "data_bench_mphf_g.dat" },
 NULL,
-
-{
-	name = "test_mphf_v",
-	class = "cache"
-},
-{
-	class = "file",
-	filename = {
-		string = ".dat",
-		string = "data_bench_mphf_v_",
-		homedir = ''
-	}
-},
+{ class = "cache", name = "test_mphf_v" },
+{ class = "file",  filename = "data_bench_mphf_v.dat" },
 NULL,
-
-{
-	name = "test_mphf_e",
-	class = "cache"
-},
-{
-	class = "file",
-	filename = {
-		string = ".dat",
-		string = "data_bench_mphf_e_",
-		homedir = ''
-	}
-}
-
+{ class = "cache", name = "test_mphf_e" },
+{ class = "file",  filename = "data_bench_mphf_e.dat" }
