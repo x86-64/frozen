@@ -14,6 +14,13 @@
  *
  * Note different string quotes and assignment marks.
  *
+ * To actually execute some configuration you should write it to configuration file and type in your shell following:
+ * @code
+ *   $ frozend -c configuration_file.conf
+ * @endcode
+ * @b frozend here is frozen daemon which parse configration file and create backends. <b>frozend --help</b> for more daemon options.
+ *
+ * 
  * Next, if you want to one backend have many childs, you need supply two chains: both of them would contain this backend
  * and each of them would contain one of child backends. But this backend should be named. To name backend you need to write "name"
  * parameter and unique name for it.
