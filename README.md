@@ -69,5 +69,6 @@ Requirments
 Links
 -----
  * [Project page](http://x86-64.github.com/frozen/)
+ * [Tutorials](http://x86-64.github.com/frozen/html/group__tutorial.html)
  * [Documentation](http://x86-64.github.com/frozen/html/)
 

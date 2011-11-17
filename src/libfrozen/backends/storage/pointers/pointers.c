@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_pointers Backend 'storage/pointers'
+ * @addtogroup mod_pointers storage/pointers
  *
  * Pointers module store pointers to data instead of actual data
  */

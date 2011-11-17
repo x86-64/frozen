@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_rebuild Backend 'backend/rebuild'
+ * @addtogroup mod_backend_rebuild backend/rebuild
  */
 /**
  * @ingroup mod_backend_rebuild

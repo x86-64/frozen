@@ -5,7 +5,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_mphf Backend 'index/mphf'
+ * @addtogroup mod_backend_mphf index/mphf
  */
 /**
  * @ingroup mod_backend_mphf

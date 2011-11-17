@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_implode Backend 'request/implode'
+ * @addtogroup mod_backend_implode request/implode
  */
 /**
  * @ingroup mod_backend_implode
@@ -29,7 +29,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_explode Backend 'request/explode'
+ * @addtogroup mod_backend_explode request/explode
  */
 /**
  * @ingroup mod_backend_explode

@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_split Backend 'data/split'
+ * @addtogroup mod_backend_split data/split
  */
 /**
  * @ingroup mod_backend_split

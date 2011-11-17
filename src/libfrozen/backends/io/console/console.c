@@ -3,7 +3,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_stdin Backend 'io/stdin'
+ * @addtogroup mod_backend_stdin io/stdin
  */
 /**
  * @ingroup mod_backend_stdin
@@ -26,7 +26,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_stdout Backend 'io/stdout'
+ * @addtogroup mod_backend_stdout io/stdout
  */
 /**
  * @ingroup mod_backend_stdout
@@ -49,7 +49,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_stderr Backend 'io/stderr'
+ * @addtogroup mod_backend_stderr io/stderr
  */
 /**
  * @ingroup mod_backend_stderr

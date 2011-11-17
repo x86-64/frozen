@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_incapsulate Backend 'data/incapsulate'
+ * @addtogroup mod_backend_incapsulate data/incapsulate
  */
 /**
  * @ingroup mod_backend_incapsulate

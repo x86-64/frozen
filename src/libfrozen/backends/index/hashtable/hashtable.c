@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_hashtable Backend 'index/hashtable'
+ * @addtogroup mod_backend_hashtable index/hashtable
  */
 /**
  * @ingroup mod_backend_hashtable

@@ -9,7 +9,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_fuse Backend 'io/fuse'
+ * @addtogroup mod_backend_fuse io/fuse
  */
 /**
  * @ingroup mod_backend_fuse

@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_structs Backend 'data/structs'
+ * @addtogroup mod_backend_structs data/structs
  */
 /**
  * @ingroup mod_backend_structs

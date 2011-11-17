@@ -4,7 +4,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_ipc Backend 'communication/ipc'
+ * @addtogroup mod_backend_ipc communication/ipc
  */
 /**
  * @ingroup mod_backend_ipc

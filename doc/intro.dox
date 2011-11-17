@@ -57,6 +57,7 @@
  *
  *  @section links Further reading
  *  
+ *  Look at @ref tutorial section for first usage help.
  *  To understand architecture read @ref backend, @ref api, @ref data. 
  *  
  */

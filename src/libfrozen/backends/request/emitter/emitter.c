@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_emitter Backend 'request/emitter'
+ * @addtogroup mod_backend_emitter request/emitter
  */
 /**
  * @ingroup mod_backend_emitter

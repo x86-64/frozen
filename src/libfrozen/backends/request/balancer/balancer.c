@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_balancer Backend 'request/balancer'
+ * @addtogroup mod_balancer request/balancer
  *
  * Balancer backend can pass requests to different backends according defined rules
  */

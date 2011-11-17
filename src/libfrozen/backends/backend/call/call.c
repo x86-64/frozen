@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_call Backend 'backend/call'
+ * @addtogroup mod_backend_call backend/call
  */
 /**
  * @ingroup mod_backend_call

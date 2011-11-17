@@ -1,10 +1,8 @@
 /**
  * @ingroup tutorial
- * @addtogroup tutorial_basics Tutorial: overview, basic i/o
- */
-/**
- * @ingroup tutorial_basics
- * @page tutorial_basics_overview Overview
+ * @addtogroup tutorial_basics Tutorial: overview, basic i/o, processing
+ * 
+ * @section tutorial_basics_overview Overview
  *
  * To construct nessesary tool frozen have many different building blocks, called backends. Backends can connect to each other and form
  * nearly any configuration, like a graph. To describe which backends would be used and where connection must exist user fill configuration
@@ -14,7 +12,7 @@
  *
  * @include tutorial_example.conf 
  *
- * @note Note different string quotes and assignment marks.
+ * Note different string quotes and assignment marks.
  *
  * Next, if you want to one backend have many childs, you need supply two chains: both of them would contain this backend
  * and each of them would contain one of child backends. But this backend should be named. To name backend you need to write "name"
@@ -26,12 +24,9 @@
  * Configuration file parsed from top to bottom, so, every named objects must be already created to be used properly. Some
  * of backends can be defined at top of file separately, and lately used in chains. Active backends, for example cache, can't be used
  * such way because on start it is trying fill cache with underlying backend's data.
- */
-/**
- * @ingroup tutorial_basics
- * @page tutorial_basics_input Input
  * 
- * @b Stdin
+ * @section tutorial_basics_input Input
+ * @em Stdin
  *
  * To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console.
  * @ref mod_backend_stdin used to get data from stdin. And because stdin module is passive, @ref mod_backend_transfer used to activly transfer
@@ -44,7 +39,7 @@
  *
  * @include tutorial_in_stdin_simple.conf 
  *
- * @b Fuse
+ * @em Fuse
  * 
  * Next way is @ref mod_backend_fuse backend. It create filesystem using fuse and pass all read and writes to user defined backends.
  * Sample configuration can look like so:
@@ -54,16 +49,90 @@
  * This creates file system in /home/test folder, which contain file named "one" and every write request to this file will result in 
  * console output. Use "echo 'hello' >> /home/test/one" or similar to test it.
  * 
- * @b Emitter
+ * @em Emitter
  *
  * One more way to input is describe backend which send requests you want. One of such backends is @ref mod_backend_emitter. Example:
  * @include tutorial_in_emitter.conf
  * 
  * @note "on_end" with "destroy" value kills frozen daemon after request passed. It is way flush stdout buffers and exit.
  * 
- * @b HTTP
+ * @em HTTP
  *
  * Another way is different modules, for example go_http. It create simple web server and pass request to user's backends.
  * @include tutorial_in_http.conf
  *
+ * @em File
+ *
+ * You could read data from file and use it as input data. Construction is same as for stdin.
+ * @include tutorial_io_file.conf
+ *
+ * @section tutorial_basics_output Output
+ * 
+ * @em Debugging
+ * 
+ * To debug request flow you can use @ref mod_backend_debug backend. It print line in stderr on request arrival, and optionally on request end.
+ * Also it can show request content. Example:
+ * @include tutorial_out_debug.conf
+ *
+ * @em Stdout
+ * 
+ * This could be done by @ref mod_backend_stdout. It print buffer in console stdout. For stderr - use @ref mod_backend_stderr.
+ * @include tutorial_io_file.conf
+ *
+ * @em File
+ * 
+ * Write data to file with @ref mod_backend_file backend. Example:
+ * @include tutorial_out_file.conf
+ *
+ * @section tutorial_basics_processing Processing
+ *
+ * @em Split
+ * 
+ * It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split
+ * incoming data on lines. If you want lines you should use @ref mod_backend_split backend. By default it split input exactly by \n which mean
+ * end of line. 
+ * 
+ * @em Regexp
+ * 
+ * To match some input for pattern you can use @ref mod_backend_regexp. It add special marker to current request if data match defined pattern.
+ * 
+ * @em Conditions
+ * 
+ * As we have some markers, where got to be some condition. @ref mod_backend_switch control request flow using conditions. Because flow could be
+ * redirected in any other backend chain you could do anything with such request or enviroment, for example terminate request, return success or
+ * error, write this to logger, trigger some action and so on.
+ *
+ * @section tutorial_basics_combine Combining all together
+ *
+ * As we know some of processing and input\output backends we could combine it in something useful. For example, you want to know which users have /bin/false shell.
+ * Configuration will look like following:
+ * @include tutorial_proc_shell.conf
+ *
+ * @ref mod_backend_file open file for reading only (../ hack is ugly, will fix someday). @ref mod_backend_split split it in lines.
+ * @ref mod_backend_regexp matches /bin/false aganist input line and pass to @ref mod_backend_switch. It lookup for default marker value and if find - pass
+ * to @ref mod_backend_stdout. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem:
+ * @include tutorial_proc_shell2.conf
+ * 
+ * As regexp set same marker this construction works like OR. For AND use different markers and combine them in switch rule like so:
+ * @code
+ *      ...
+ *      { class => "data/regexp", regexp = "/bin",  marker = "key1"  }, 
+ *      { class => "data/regexp", regexp = "/home", marker = "key2"  }, 
+ *      { class => "request/switch", rules = {
+ *          {  
+ *              request = {
+ *                      key1 = (uint_t)'1',
+ *                      key2 = (uint_t)'1'
+ *              },
+ *      ...
+ *
+ *
+ * @endcode
+ * Because @ref mod_backend_switch don't care what in your rule's request you could first check for such AND condition, if it not matches check
+ * for only one marker, or for another, or for both. And for each rule you can supply different backend with any action. 
+ *
+ * You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions
+ * (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file.
+ * If you pick up fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. 
+ * 
  */

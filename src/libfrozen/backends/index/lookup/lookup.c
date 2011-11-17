@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_lookup Backend 'index/lookup'
+ * @addtogroup mod_backend_lookup index/lookup
  */
 /**
  * @ingroup mod_backend_lookup

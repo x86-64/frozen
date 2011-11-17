@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_transfer Backend 'data/transfer'
+ * @addtogroup mod_backend_transfer data/transfer
  */
 /**
  * @ingroup mod_backend_transfer

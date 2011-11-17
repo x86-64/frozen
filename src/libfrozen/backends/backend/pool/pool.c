@@ -4,7 +4,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_pool Backend 'backend/pool'
+ * @addtogroup mod_pool backend/pool
  *
  * Pool module inserted in forkable backend chain can track any property of backend (like memory usage)
  * and limit it. Underlying modules can be destroyed or call special function.

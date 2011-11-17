@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_convert Backend 'data/convert'
+ * @addtogroup mod_backend_convert data/convert
  */
 /**
  * @ingroup mod_backend_convert

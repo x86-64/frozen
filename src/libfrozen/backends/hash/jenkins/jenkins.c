@@ -3,7 +3,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_jenkins Backend 'hash/jenkins'
+ * @addtogroup mod_backend_jenkins hash/jenkins
  */
 /**
  * @ingroup mod_backend_jenkins

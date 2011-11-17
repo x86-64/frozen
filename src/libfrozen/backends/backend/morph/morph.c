@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_morph Backend 'backend/morph'
+ * @addtogroup mod_backend_morph backend/morph
  */
 /**
  * @ingroup mod_backend_morph

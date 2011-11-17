@@ -3,7 +3,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_murmur Backend 'hash/murmur'
+ * @addtogroup mod_backend_murmur hash/murmur
  */
 /**
  * @ingroup mod_backend_murmur

@@ -6,7 +6,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_benchmark Backend 'backend/benchmark'
+ * @addtogroup mod_backend_benchmark backend/benchmark
  */
 /**
  * @ingroup mod_backend_benchmark

@@ -3,7 +3,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_regexp Backend 'data/regexp'
+ * @addtogroup mod_backend_regexp data/regexp
  */
 /**
  * @ingroup mod_backend_regexp

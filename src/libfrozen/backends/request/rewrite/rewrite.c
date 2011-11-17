@@ -1,6 +1,6 @@
 /**
  * @ingroup backend
- * @addtogroup mod_rewrite Backend 'request/rewrite'
+ * @addtogroup mod_rewrite request/rewrite
  *
  * Rewrite module can modify requests and buffers with given set of rules
  */

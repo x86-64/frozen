@@ -3,19 +3,19 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_file Backend 'storage/file'
+ * @addtogroup mod_backend_file storage/file
  *
  * File module can read and write to file
  */
 /**
- * @ingroup mod_file
+ * @ingroup mod_backend_file
  * @page page_file_config Configuration
  * 
  * Accepted configuration:
  * @code
  * 	{
- * 	        class    = "file",
- * 		filename = "somefilename.dat",        # produce {homedir}{filename} file
+ *              class    = "file",
+ *              filename = "somefilename.dat",        # produce {homedir}{filename} file
  *              filename = {                          # produce concat'ed string from following components:
  *                           homedir => (void_t)'',   #  - {homedir}
  *                           string  => "somename",   #  - any string, any times

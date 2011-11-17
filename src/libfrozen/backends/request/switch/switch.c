@@ -2,12 +2,12 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_switch Backend 'request/switch'
+ * @addtogroup mod_backend_switch request/switch
  *
  * Switch module can pass requests to different backends according rules for incoming requests
  */
 /**
- * @ingroup mod_switch
+ * @ingroup mod_backend_switch
  * @page page_switch_config Configuration
  * 
  * Accepted configuration:

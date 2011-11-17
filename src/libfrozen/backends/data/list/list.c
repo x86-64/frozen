@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_list Backend 'data/list'
+ * @addtogroup mod_backend_list data/list
  */
 /**
  * @ingroup mod_backend_list

@@ -2,7 +2,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_backend_debug Backend 'request/debug'
+ * @addtogroup mod_backend_debug request/debug
  */
 /**
  * @ingroup mod_backend_debug

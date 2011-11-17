@@ -4,7 +4,7 @@
 
 /**
  * @ingroup backend
- * @addtogroup mod_cache Backend 'cache/cache'
+ * @addtogroup mod_cache cache/cache
  *
  * Cache module hold data in memory, instead of underlying backend
  */
