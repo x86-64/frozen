@@ -44,6 +44,9 @@ Overview</h2>
 NULL,
 { <span class="keyword">class </span>: &quot;io/stdout&quot; }
 </pre></div><p>Note different string quotes and assignment marks.</p>
+<p>To actually execute some configuration you should write it to configuration file and type in your shell following: </p>
+<div class="fragment"><pre class="fragment">   $ frozend -c configuration_file.conf
+</pre></div><p> <b>frozend</b> here is frozen daemon which parse configration file and create backends. <b>frozend --help</b> for more daemon options.</p>
 <p>Next, if you want to one backend have many childs, you need supply two chains: both of them would contain this backend and each of them would contain one of child backends. But this backend should be named. To name backend you need to write "name" parameter and unique name for it.</p>
 <p>Following example demonstrate "debug" backend named "mynamehere" with two childs both "stdout": </p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;request/debug&quot;, name =&gt; <span class="stringliteral">&quot;mynamehere&quot;</span> },
@@ -188,7 +191,7 @@ Combining all together</h2>
 </pre></div><p> Because <a class="el" href="group__mod__backend__switch.html">request/switch</a> don't care what in your rule's request you could first check for such AND condition, if it not matches check for only one marker, or for another, or for both. And for each rule you can supply different backend with any action.</p>
 <p>You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file. If you pick up fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. </p>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 17:26:51 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 18:26:10 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
