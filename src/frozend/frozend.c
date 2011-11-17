@@ -333,13 +333,12 @@ void main_rest(void){
 	
 	config_t *config = configs_file_parse(opt_config_file);
 	
-	if(config != NULL){
-		backend_new(config);
+	if(config != NULL && backend_new(config) != NULL){
 		
 		// TODO do normal wait()
 		while(1) sleep(100);
 	}else{
-		fprintf(stderr, "config file not exist or empty\n");
+		fprintf(stderr, "config file not exist, empty or invalid\n");
 	}
 }
 

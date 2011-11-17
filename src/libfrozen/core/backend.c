@@ -93,6 +93,8 @@ static void        backend_untop(backend_t *backend){ // {{{
 } // }}}
 
 static void        backend_free_skeleton(backend_t *backend_curr){ // {{{
+	backend_untop(backend_curr);
+		
 	hash_free(backend_curr->config);
 	
 	if(backend_curr->name){
@@ -178,10 +180,11 @@ static ssize_t     backend_new_iterator(hash_t *item, backend_new_ctx *ctx){ // 
 		
 		if(backend->func_configure != NULL && backend->func_configure(backend, backend->config) != 0)
 			goto error_configure;
+		
+		list_add(&ctx->backends, backend);
 	}
 	
 	ctx->backend_prev = backend;
-	list_add(&ctx->backends, backend);
 	return ITER_CONTINUE;
 	
 error_configure:
@@ -459,20 +462,7 @@ void            backend_destroy      (backend_t *backend){ // {{{
 	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
 		backend_disconnect(curr, backend);
 	
-	backend_untop(backend);
-	
-	// free memory
-	if(backend->name){
-		list_delete(&backends_names, backend);
-		free(backend->name);
-	}
-	
-	hash_free(backend->config);
-	
-	list_destroy(&backend->parents);
-	list_destroy(&backend->childs);
-	
-	free(backend);
+	backend_free_skeleton(backend);
 } // }}}
 void            backend_destroy_all  (void){ // {{{
 	backend_t             *backend;
