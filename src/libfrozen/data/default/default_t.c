@@ -68,90 +68,63 @@ static ssize_t       data_default_copy          (data_t *src, fastcall_copy *far
 	return 0;
 } // }}}
 static ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs){ // {{{
-	ssize_t                cret;
+	ssize_t                ret;
+	char                   buffer1[DEF_BUFFER_SIZE], buffer2[DEF_BUFFER_SIZE];
+	uintmax_t              buffer1_size, buffer2_size, cmp_size;
+	uintmax_t              offset1, offset2, goffset1, goffset2;
 	
 	if(fargs->data2 == NULL)
 		return -EINVAL;
 	
-	fastcall_physicallen r1_len = { { 3, ACTION_PHYSICALLEN } };
-	fastcall_getdataptr  r1_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(data1, &r1_len) != 0 || data_query(data1, &r1_ptr) != 0 || r1_ptr.ptr == NULL)
-		return -EFAULT;
-	
-	fastcall_physicallen r2_len = { { 3, ACTION_PHYSICALLEN } };
-	fastcall_getdataptr  r2_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(fargs->data2, &r2_len) != 0 || data_query(fargs->data2, &r2_ptr) != 0 || r2_ptr.ptr == NULL)
-		return -EFAULT;
-	
-	     if(r1_len.length > r2_len.length){ cret =  1; }
-	else if(r1_len.length < r2_len.length){ cret = -1; }
-	else {
-		cret = memcmp(r1_ptr.ptr, r2_ptr.ptr, r1_len.length);
-		if(cret > 0) cret =  1;
-		if(cret < 0) cret = -1;
-	}
-	return cret;
-/*int                  data_cmp               (data_t *data1, data_ctx_t *data1_ctx, data_t *data2, data_ctx_t *data2_ctx){
-	char            buffer1_local[DEF_BUFFER_SIZE], buffer2_local[DEF_BUFFER_SIZE];
-	void           *buffer1, *buffer2;
-	size_t          buffer1_size, buffer2_size, cmp_size;
-	ssize_t         ret;
-	off_t           offset1, offset2, goffset1, goffset2;
-	f_data_cmp      func_cmp;
-	
-	if(!data_validate(data1) || !data_validate(data2))
-		return -EINVAL;
-	
-	if(data1->type != data2->type){
-		
-		goffset1     = goffset2     = 0;
-		buffer1_size = buffer2_size = 0;
-		do {
-			if(buffer1_size == 0){
-				buffer1      = buffer1_local;
-				buffer1_size = DEF_BUFFER_SIZE;
-				
-				if( (ret = data_read_raw  (data1, data1_ctx, goffset1, &buffer1, &buffer1_size)) < -1)
-					return -EINVAL;
-				
-				if(ret == -1 && buffer2_size != 0)
-					return 1;
-				
-				goffset1 += buffer1_size;
-				offset1 = 0;
-			}
-			if(buffer2_size == 0){
-				buffer2      = buffer2_local;
-				buffer2_size = DEF_BUFFER_SIZE;
-				
-				if( (ret = data_read_raw  (data2, data2_ctx, goffset2, &buffer2, &buffer2_size)) < -1)
-					return -EINVAL;
-				
-				if(ret == -1)
-					return (buffer1_size == 0) ? 0 : -1;
-				
-				goffset2 += buffer2_size;
-				offset2   = 0;
-			}
-			
-			cmp_size = (buffer1_size < buffer2_size) ? buffer1_size : buffer2_size;
-			
-			ret = memcmp(buffer1 + offset1, buffer2 + offset2, cmp_size);
-			if(ret != 0)
+	goffset1     = goffset2     = 0;
+	buffer1_size = buffer2_size = 0;
+	do {
+		if(buffer1_size == 0){
+			fastcall_read r_read = { { 5, ACTION_READ }, goffset1, &buffer1, sizeof(buffer1) };
+			if( (ret = data_query(data1, &r_read)) < -1)
 				return ret;
 			
-			offset1      += cmp_size;
-			offset2      += cmp_size;
-			buffer1_size -= cmp_size;
-			buffer2_size -= cmp_size;
-		}while(1);
-	}
-	
-	if( (func_cmp = data_protos[data1->type]->func_cmp) == NULL)
-		return -ENOSYS;
-	
-	return func_cmp(data1, data1_ctx, data2, data2_ctx);
-} */
+			if(ret == -1 && buffer2_size != 0){
+				fargs->result = 1;
+				break;
+			}
+			
+			buffer1_size  = r_read.buffer_size;
+			goffset1     += r_read.buffer_size;
+			offset1       = 0;
+		}
+		if(buffer2_size == 0){
+			fastcall_read r_read = { { 5, ACTION_READ }, goffset2, &buffer2, sizeof(buffer2) };
+			if( (ret = data_query(fargs->data2, &r_read)) < -1)
+				return ret;
+			
+			if(ret == -1 && buffer1_size != 0){
+				fargs->result = 2;
+				break;
+			}
+			if(ret == -1){
+				fargs->result = 0;
+				break;
+			}
+			
+			buffer2_size  = r_read.buffer_size;
+			goffset2     += r_read.buffer_size;
+			offset2       = 0;
+		}
+		
+		cmp_size = MIN(buffer1_size, buffer2_size);
+		
+		if( (ret = memcmp(buffer1 + offset1, buffer2 + offset2, cmp_size)) != 0){
+			fargs->result = (ret < 0) ? 1 : 2;
+			break;
+		}
+		
+		offset1      += cmp_size;
+		offset2      += cmp_size;
+		buffer1_size -= cmp_size;
+		buffer2_size -= cmp_size;
+	}while(1);
+	return 0;
 } // }}}
 static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
 	char            buffer[DEF_BUFFER_SIZE];

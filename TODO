@@ -1,5 +1,4 @@
 - data/structs specify format
-- fix insert_sort (data_default_cmp)
 - c module example
 - move hash_dump code to hash_t convert, and remove DEBUG condition
 - data 'action_t' + convert array from\to string
@@ -10,6 +9,7 @@
 - delete ACTION_MOVE
 - add ACTION_GETID or something
 - rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
+- remove insert sort and write binary search instead
 - backend tcp\udp
 - multi-threading
   - backend lock

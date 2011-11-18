@@ -78,7 +78,7 @@ static ssize_t switch_iterator(switch_rule *rule, switch_context *context){ // {
 	data_t           d_ctx_request  = DATA_PTR_HASHT(context->request);
 	fastcall_compare r_compare = { { 3, ACTION_COMPARE }, &d_ctx_request };
 	
-	if(data_query(&d_rule_request, &r_compare) == 0)
+	if(data_query(&d_rule_request, &r_compare) == 0 && r_compare.result == 0)
 		goto query;
 	
 	return 1;

@@ -14,17 +14,26 @@ typedef struct hash_t_ctx {
 	data_t                *sl_data;
 } hash_t_ctx;
 
-static ssize_t data_hash_t_compare_iter(hash_t *hash1_item, hash_t *hash2){ // {{{
+static ssize_t data_hash_t_compare_iter(hash_t *hash1_item, fastcall_compare *fargs){ // {{{
 	hash_t                *hash2_item;
-
-	if( (hash2_item = hash_find(hash2, hash1_item->key)) == NULL)
-		return ITER_BREAK;
+	
+	if( (hash2_item = hash_find(fargs->data2->ptr, hash1_item->key)) == NULL)
+		goto not_equal;
 	
 	fastcall_compare r_compare = { { 4, ACTION_COMPARE }, &hash2_item->data };
 	if(data_query(&hash1_item->data, &r_compare) != 0)
+		goto not_equal;
+	
+	if(r_compare.result != 0){
+		fargs->result = r_compare.result;
 		return ITER_BREAK;
+	}
 	
 	return ITER_CONTINUE;
+
+not_equal:
+	fargs->result = 2;
+	return ITER_BREAK;
 } // }}}
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	switch(ctx->step){
@@ -71,21 +80,18 @@ static ssize_t data_hash_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	return 0;
 } // }}}
 static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
-	hash_t                *hash1, *hash2;
+	hash_t                *hash1;
 	
 	if(fargs->data2 == NULL || fargs->data2->type != TYPE_HASHT)
 		return -EINVAL;
 	
 	hash1 = data1->ptr;
-	hash2 = fargs->data2->ptr;
 	
-	if(hash1 == NULL) // null and empty hash equals to any hash
-		return 0;
+	// null and empty hash equals to any hash
+	if(hash1 == NULL || hash_iter(hash1, (hash_iterator)&data_hash_t_compare_iter, fargs, 0) == ITER_OK)
+		fargs->result = 0;
 	
-	if(hash_iter(hash1, (hash_iterator)&data_hash_t_compare_iter, hash2, 0) == ITER_OK){
-		return 0;
-	}
-	return 2;
+	return 0;
 } // }}}
 
 static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{

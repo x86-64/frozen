@@ -224,6 +224,7 @@ typedef struct fastcall_convert_from  fastcall_convert_from;
 typedef struct fastcall_compare {
 	fastcall_header        header;
 	data_t                *data2;
+	uintmax_t              result;
 } fastcall_compare;
 
 typedef struct fastcall_arith {
