@@ -271,7 +271,19 @@ int module_is_gomodule(void *module_handle){ // {{{
 	return (dlsym(module_handle, "main.main") != NULL);
 } // }}}
 // }}}
+// c modules {{{
+void module_load_c(void *module_handle){ // {{{
+	void (*cmain)(void);
+	
+	*(void **)(&cmain)              = dlsym(module_handle, "main");
+	(*cmain)();
 
+	return;
+} // }}}
+int module_is_cmodule(void *module_handle){ // {{{
+	return (dlsym(module_handle, "main") != NULL);
+} // }}}
+// }}}
 void modules_load(void){ // {{{
 	char                  *ext;
 	DIR                   *modules_dir;
@@ -303,8 +315,8 @@ void modules_load(void){ // {{{
 		if( module_is_gomodule(module_handle) )
 			module_load_go(module_handle);
 
-		//if( module_is_cmodule(module_handle) )
-		//      module_load_c(module_handle);
+		if( module_is_cmodule(module_handle) )
+		      module_load_c(module_handle);
 	}
 
 	closedir(modules_dir);

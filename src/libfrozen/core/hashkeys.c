@@ -140,14 +140,15 @@ hash_keypair_t hash_keys[] = {
 { "split", 135 }, 
 { "string", 136 }, 
 { "structure", 137 }, 
-{ "tick_interval", 138 }, 
-{ "type", 139 }, 
-{ "url", 140 }, 
-{ "value", 141 }, 
-{ "value_bits", 142 }, 
-{ "values", 143 }, 
-{ "verbose", 144 }, 
-{ "writer", 145 }, 
+{ "test", 138 }, 
+{ "tick_interval", 139 }, 
+{ "type", 140 }, 
+{ "url", 141 }, 
+{ "value", 142 }, 
+{ "value_bits", 143 }, 
+{ "values", 144 }, 
+{ "verbose", 145 }, 
+{ "writer", 146 }, 
 };
 size_t hash_keys_size       = sizeof(hash_keys[0]);
 size_t hash_keys_nelements  = (sizeof(hash_keys)/sizeof(hash_keys[0]));

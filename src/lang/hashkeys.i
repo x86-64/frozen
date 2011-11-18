@@ -136,12 +136,13 @@
 %constant uintmax_t HK_split = 135;
 %constant uintmax_t HK_string = 136;
 %constant uintmax_t HK_structure = 137;
-%constant uintmax_t HK_tick_interval = 138;
-%constant uintmax_t HK_type = 139;
-%constant uintmax_t HK_url = 140;
-%constant uintmax_t HK_value = 141;
-%constant uintmax_t HK_value_bits = 142;
-%constant uintmax_t HK_values = 143;
-%constant uintmax_t HK_verbose = 144;
-%constant uintmax_t HK_writer = 145;
+%constant uintmax_t HK_test = 138;
+%constant uintmax_t HK_tick_interval = 139;
+%constant uintmax_t HK_type = 140;
+%constant uintmax_t HK_url = 141;
+%constant uintmax_t HK_value = 142;
+%constant uintmax_t HK_value_bits = 143;
+%constant uintmax_t HK_values = 144;
+%constant uintmax_t HK_verbose = 145;
+%constant uintmax_t HK_writer = 146;
 
