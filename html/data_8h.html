@@ -117,7 +117,7 @@ Functions</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment">{                                          \
         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> __data_dst = { _type, REF_##_type(_dst) };                                \
-        <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a> _r_convert = { { 3, ACTION_CONVERT_FROM }, _src };         \
+        <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a> _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT_CLEAN };  \
         _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \
         _dst = DEREF_##_type(&amp;__data_dst);                                               \
         (void)_ret;                                                                      \
@@ -319,7 +319,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 19:02:04 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

@@ -80,7 +80,7 @@
 <a name="l00132"></a>00132 <span class="preprocessor"></span>
 <a name="l00142"></a><a class="code" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">00142</a> <span class="preprocessor">#define data_convert(_ret, _type, _dst, _src) {                                          \</span>
 <a name="l00143"></a>00143 <span class="preprocessor">        data_t __data_dst = { _type, REF_##_type(_dst) };                                \</span>
-<a name="l00144"></a>00144 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 3, ACTION_CONVERT_FROM }, _src };         \</span>
+<a name="l00144"></a>00144 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT_CLEAN };  \</span>
 <a name="l00145"></a>00145 <span class="preprocessor">        _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \</span>
 <a name="l00146"></a>00146 <span class="preprocessor">        _dst = DEREF_##_type(&amp;__data_dst);                                               \</span>
 <a name="l00147"></a>00147 <span class="preprocessor">        (void)_ret;                                                                      \</span>
@@ -89,7 +89,7 @@
 <a name="l00150"></a>00150 <span class="preprocessor">#endif // DATA_H</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 19:02:04 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

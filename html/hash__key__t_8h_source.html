@@ -43,14 +43,15 @@
 <a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_HASHKEY_T_H</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
 <a name="l00021"></a>00021 <span class="preprocessor">#define DATA_HASHKEYT(...)  { TYPE_HASHKEYT, (hash_key_t []){ __VA_ARGS__ } }</span>
-<a name="l00022"></a>00022 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_HASHKEYT(_data) *(hash_key_t *)((_data)-&gt;ptr)</span>
-<a name="l00023"></a>00023 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_HASHKEYT(_dt) (&amp;(_dt))</span>
-<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_HASHKEYT 1</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span>
-<a name="l00026"></a>00026 <span class="preprocessor">#endif</span>
+<a name="l00022"></a>00022 <span class="preprocessor"></span><span class="preprocessor">#define DATA_PTR_HASHKEYT(...)  { TYPE_HASHKEYT, __VA_ARGS__ }</span>
+<a name="l00023"></a>00023 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_HASHKEYT(_data) *(hash_key_t *)((_data)-&gt;ptr)</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_HASHKEYT(_dt) (&amp;(_dt))</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_HASHKEYT 1</span>
+<a name="l00026"></a>00026 <span class="preprocessor"></span>
+<a name="l00027"></a>00027 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Thu Nov 17 2011 19:02:04 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
