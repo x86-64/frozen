@@ -32,17 +32,16 @@
  * @ingroup mod_backend_benchmark
  * @page page_benchmark_control Control
  * 
- * ACTION_CUSTOM used to control this backend. Possible requests:
+ * Any request with HK(benchmark_function) used to control this backend. Possible requests:
  * @code
  * {
- *              action                 = ACTION_CUSTOM,
- *              function               =
- *                                       "benchmark_restart",   # restart clocks and counter
- *                                       "benchmark_short",     # write short stats to buffer HK(string)
- *                                       "benchmark_long",      # write long stats to buffer HK(string)
- *                                       "benchmark_ticks",     # write number of requests passed by to HK(value)
- *                                       "benchmark_us",        # write number of nanoseconds passed from restart to HK(value)
- *                                       "benchmark_ms",        # write number of miliseconds passed from restart to HK(value)
+ *              benchmark_function               =
+ *                                       "restart",   # restart clocks and counter
+ *                                       "short",     # write short stats to buffer HK(string)
+ *                                       "long",      # write long stats to buffer HK(string)
+ *                                       "ticks",     # write number of requests passed by to HK(value)
+ *                                       "us",        # write number of nanoseconds passed from restart to HK(value)
+ *                                       "ms",        # write number of miliseconds passed from restart to HK(value)
  *
  * }
  * @endcode
@@ -185,59 +184,56 @@ static int benchmark_configure(backend_t *backend, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t benchmark_handler_passive(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
-	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
-	
-	userdata->ticks++;
-	
-	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
-} // }}}
-static ssize_t benchmark_handler_custom(backend_t *backend, request_t *request){ // {{{
+static ssize_t benchmark_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	char                  *function;
 	data_t                *value;
 	data_t                *string;
 	char                   buffer[1024];
+	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT,  function,  request, HK(function));
-	if(ret != 0)
-		goto pass;
+	userdata->ticks++;
 	
+	hash_data_copy(ret, TYPE_STRINGT,  function,  request, HK(benchmark_function));
+	if(ret == 0)
+		goto custom;
+	
+	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
+	
+custom:	
 	value  = hash_data_find(request, HK(value));
 	string = hash_data_find(request, HK(string));
 	
-	if(strcmp(function, "benchmark_restart") == 0){
+	if(strcmp(function, "restart") == 0){
 		benchmark_control_restart(backend);
 		return 0;
 	}
 	
 	if(string != NULL){
-		if(strcmp(function, "benchmark_short") == 0){
+		if(strcmp(function, "short") == 0){
 			ret = benchmark_control_query_short (backend, buffer, sizeof(buffer) );
 			goto write;
 		}
-		if(strcmp(function, "benchmark_long") == 0){
+		if(strcmp(function, "long") == 0){
 			ret = benchmark_control_query_long  (backend, buffer, sizeof(buffer) );
 			goto write;
 		}
 	}
 	
 	if(value != NULL && value->type == TYPE_UINTT){
-		if(strcmp(function, "benchmark_ticks") == 0){
+		if(strcmp(function, "ticks") == 0){
 			benchmark_control_query_ticks(backend, value->ptr );
 			return 0;
 		}
-		if(strcmp(function, "benchmark_ms") == 0){
+		if(strcmp(function, "ms") == 0){
 			benchmark_control_query_ms(backend, value->ptr );
 			return 0;
 		}
-		if(strcmp(function, "benchmark_us") == 0){
+		if(strcmp(function, "us") == 0){
 			benchmark_control_query_us(backend, value->ptr );
 			return 0;
 		}
 	}
-pass:
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 write:;
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &buffer, sizeof(buffer) };	
@@ -247,18 +243,12 @@ write:;
 
 backend_t benchmark_proto = {
 	.class          = "backend/benchmark",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &benchmark_init,
 	.func_configure = &benchmark_configure,
 	.func_destroy   = &benchmark_destroy,
-	{
-		.func_create = &benchmark_handler_passive,
-		.func_get    = &benchmark_handler_passive,
-		.func_set    = &benchmark_handler_passive,
-		.func_delete = &benchmark_handler_passive,
-		.func_move   = &benchmark_handler_passive,
-		.func_count  = &benchmark_handler_passive,
-		.func_custom = &benchmark_handler_custom
+	.backend_type_hash = {
+		.func_handler = &benchmark_handler
 	}
 };
 
