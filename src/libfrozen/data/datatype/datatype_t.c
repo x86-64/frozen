@@ -11,8 +11,8 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			return -ENOMEM;
 	}
 	
-	switch(fargs->src->type){
-		case TYPE_STRINGT:;
+	switch(fargs->format){
+		case FORMAT_HUMANREADABLE:;
 			uintmax_t     i;
 			data_proto_t *proto;
 			

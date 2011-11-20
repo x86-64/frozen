@@ -20,7 +20,7 @@
  *              class                   = "data/convert",
  *              items                   = {
  *                      {
- *                           input         = (hashkey_t)'buffer',       # input key
+ *                           input         = (hash_key_t)'buffer',       # input key
  *                           type          = (datatype_t)'raw_t',       # desired type
  *                           format        = (uint_t)'0'                # format to convert
  *                      },
@@ -66,7 +66,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	ssize_t                ret;
 	hash_key_t             input;
 	datatype_t             type              = TYPE_INVALID;
-	uintmax_t              format            = 0;
+	uintmax_t              format            = FORMAT_CLEAN;
 	//uintmax_t              return_result     = 0;
 	data_t                *data;
 	hash_t                *new_hash;
@@ -93,7 +93,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	if( (data = hash_data_find(ctx->request, input)) == NULL)
 		goto error;
 	
-	fastcall_convert_from r_convert = { { (format == 0) ? 3 : 4, ACTION_CONVERT_FROM }, data, format };
+	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, data, format };
 	if(data_query(&(new_hash[0].data), &r_convert) != 0)
 		goto error;
 	

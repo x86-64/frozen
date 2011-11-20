@@ -24,8 +24,8 @@
  * {
  *              class                   = "index/mphf",
  *              type                    = <see algo>,          # algorithm to use in index
- *              input                   = (hashkey_t)'key',    # input key for index
- *              output                  = (hashkey_t)'offset', # output key name for index
+ *              input                   = (hash_key_t)'key',    # input key for index
+ *              output                  = (hash_key_t)'offset', # output key name for index
  *              <algo specific parameters>
  * }
  * @endcode

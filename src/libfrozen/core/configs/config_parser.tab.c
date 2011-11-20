@@ -445,7 +445,7 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    36,    36,    39,    43,    48,    57,    61,    67,    68,
-      69,    83,    84,    85,   104
+      69,    85,    86,    87,   108
 };
 #endif
 
@@ -1464,12 +1464,14 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 69 "configs/config_parser.y"
     {
-		ssize_t      ret;
 		hash_key_t   key;
-		data_t       d_string = DATA_STRING((yyvsp[(1) - (2)].name));
-		
-		data_convert(ret, TYPE_HASHKEYT, key, &d_string);
-		
+		data_t       d_key    = DATA_PTR_HASHKEYT(&key);
+	
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(1) - (2)].name) }; 
+		if(data_query(&d_key, &r_init1) != 0){
+			yyerror(hash, "failed convert hashkey\n"); YYERROR;
+		}
+
 		if( ((yyval.key) = key) == 0){
 			printf("unknown key: %s\n", (yyvsp[(1) - (2)].name)); YYERROR;
 		}
@@ -1480,34 +1482,36 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 83 "configs/config_parser.y"
+#line 85 "configs/config_parser.y"
     { (yyval.data).type = TYPE_STRINGT; (yyval.data).ptr = (yyvsp[(1) - (1)].name); }
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 84 "configs/config_parser.y"
+#line 86 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 85 "configs/config_parser.y"
+#line 87 "configs/config_parser.y"
     {
-		ssize_t     ret;
 		datatype_t  type;
-		data_t      d_s_type = DATA_STRING((yyvsp[(2) - (4)].name));
+		data_t      d_type   = DATA_PTR_DATATYPET(&type);
 		
-		data_convert(ret, TYPE_DATATYPET, type, &d_s_type);
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (4)].name) }; 
+		if(data_query(&d_type, &r_init1) != 0){
+			yyerror(hash, "failed convert datatype\n"); YYERROR;
+		}
 		
 		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_init r_init = { { 3, ACTION_INIT }, (yyvsp[(4) - (4)].name) }; 
-		if(data_query(&(yyval.data), &r_init) != 0){
+		fastcall_init r_init2 = { { 3, ACTION_INIT }, (yyvsp[(4) - (4)].name) }; 
+		if(data_query(&(yyval.data), &r_init2) != 0){
 			yyerror(hash, "failed convert data\n"); YYERROR;
 		}
 		
@@ -1519,7 +1523,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 104 "configs/config_parser.y"
+#line 108 "configs/config_parser.y"
     {
 		data_functions action;
 		if((action = request_str_to_action((yyvsp[(1) - (1)].name))) != ACTION_INVALID){
@@ -1538,7 +1542,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1542 "configs/config_parser.tab.c"
+#line 1546 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1769,7 +1773,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 118 "configs/config_parser.y"
+#line 122 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){

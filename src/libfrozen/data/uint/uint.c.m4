@@ -98,18 +98,27 @@ static ssize_t data_[]NAME()_arith_no_arg(data_t *data1, fastcall_arith_no_arg *
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              transfered        = 0;
+	
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	switch( src->type ){
-		default:;
+	switch( fargs->format ){
+		case FORMAT_CLEAN:;
+		case FORMAT_BINARY:;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(TYPE) };
-			if(data_query(fargs->dest, &r_write) != 0)
-				return -EFAULT;
-			
-			return 0;
+			ret        = data_query(fargs->dest, &r_write);
+			transfered = r_write.buffer_size;
+			break;
+		
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	char                   buffer[[DEF_BUFFER_SIZE]] = { 0 };
@@ -122,9 +131,9 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			return -ENOMEM;
 	}
 
-	switch( fargs->src->type ){
-		case TYPE_STRINGT:; // TODO fix it for slider_t 
-			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) };
+	switch( fargs->format ){
+		case FORMAT_HUMANREADABLE:; // TODO fix it for slider_t 
+			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0){
 				// TODO memleak
 				return -EFAULT;
@@ -132,7 +141,9 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
 			return 0;
-		default:;
+
+		case FORMAT_CLEAN:;
+		case FORMAT_BINARY:;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
 			if(data_query(fargs->src, &r_read) != 0){
 				// TODO memleak
@@ -141,23 +152,11 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			
 			*(TYPE *)(dst->ptr) = *((TYPE *)buffer);
 			return 0;
+
+		default:
+			break;
 	};
 	return -ENOSYS;
-} // }}}
-static ssize_t data_[]NAME()_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
-	ssize_t                ret;
-
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof([]TYPE()) };
-	if( (ret = data_query(fargs->dest, &r_write)) < -1)
-		return ret;
-	
-	if(fargs->header.nargs >= 4)
-		fargs->transfered = r_write.buffer_size;
-
-	return 0;
 } // }}}
 static ssize_t data_[]NAME()_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL || *(TYPE *)data->ptr == 0) ? 1 : 0;
@@ -181,7 +180,6 @@ data_proto_t NAME()_proto = {
 		[[ACTION_DECREMENT]]      = (f_data_func)&data_[]NAME()_arith_no_arg,
 		[[ACTION_CONVERT_TO]]     = (f_data_func)&data_[]NAME()_convert_to,
 		[[ACTION_CONVERT_FROM]]   = (f_data_func)&data_[]NAME()_convert_from,
-		[[ACTION_TRANSFER]]       = (f_data_func)&data_[]NAME()_transfer,
 		[[ACTION_IS_NULL]]        = (f_data_func)&data_[]NAME()_is_null,
 	}
 };

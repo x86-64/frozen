@@ -189,11 +189,11 @@ static ssize_t hash_dump_iter(hash_t *element, uintmax_t *reclevel){
 	}
 
 	data_t              d_key     = DATA_HASHKEYT(element->key);
-	fastcall_convert_to r_convert1 = { { 3, ACTION_CONVERT_TO }, &d_s_key };
+	fastcall_convert_to r_convert1 = { { 4, ACTION_CONVERT_TO }, &d_s_key,  FORMAT_CLEAN };
 	data_query(&d_key, &r_convert1);
 	
 	data_t              d_type    = DATA_DATATYPET(element->data.type);
-	fastcall_convert_to r_convert2 = { { 3, ACTION_CONVERT_TO }, &d_s_type };
+	fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, &d_s_type, FORMAT_CLEAN };
 	data_query(&d_type, &r_convert2);
 
 	hash_dump_pad(*reclevel);

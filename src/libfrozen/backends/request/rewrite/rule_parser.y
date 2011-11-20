@@ -143,20 +143,22 @@ function : NAME '(' args_list ')' {
 };
 
 constant : '(' NAME ')' STRING {
-	ssize_t     ret;
 	datatype_t  type;
-	data_t      d_s_type = DATA_STRING($2);
+	data_t      d_type   = DATA_PTR_DATATYPET(&type);
 	
-	data_convert(ret, TYPE_DATATYPET, type, &d_s_type);
-	
+	fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
+	if(data_query(&d_type, &r_init1) != 0){
+		yyerror(script, "failed convert datatype\n"); YYERROR;
+	}
+
 	rewrite_variable_t *constant = rewrite_new_constant(script);
 	
 	constant->data.type = type;
 	constant->data.ptr  = NULL;
 	
 	/* convert string to needed data */
-	fastcall_init r_init = { { 3, ACTION_INIT }, $4 }; 
-	if(data_query(&constant->data, &r_init) != 0){
+	fastcall_init r_init2 = { { 3, ACTION_INIT }, $4 }; 
+	if(data_query(&constant->data, &r_init2) != 0){
 		yyerror(script, "failed convert data\n"); YYERROR;
 	}
 
@@ -171,12 +173,14 @@ constant : '(' NAME ')' STRING {
 array_key : NAME '[' STRING ']' {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, $1)) != NULL && curr->type == THING_HASHT){
-		ssize_t     ret;
 		hash_key_t  key;
-		data_t      d_string = DATA_STRING($3);
-
-		data_convert(ret, TYPE_HASHKEYT, key, &d_string);
+		data_t      d_key    = DATA_PTR_HASHKEYT(&key);
 	
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, $3 }; 
+		if(data_query(&d_key, &r_init1) != 0){
+			yyerror(script, "failed convert hashkey\n"); YYERROR;
+		}
+		
 		$$.type      = THING_HASH_ELEMENT;
 		$$.array_key = key;
 		$$.id        = curr->id;

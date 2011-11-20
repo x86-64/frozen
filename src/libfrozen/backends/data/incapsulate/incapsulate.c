@@ -19,12 +19,12 @@
  * {
  *              class                   = "data/incapsulate",
  *              multiply                = (uint_t)'10',       # item size
- *              key                     = (hashkey_t)'name',  # key to change value (multiply), default offset
- *              key_out                 = (hashkey_t)'name',  # key to change value (multiply), default offset_out
- *              key_to                  = (hashkey_t)'name',  # key to change value (multiply), default offset_to
- *              key_from                = (hashkey_t)'name',  # key to change value (multiply), default offset_from
- *              count                   = (hashkey_t)'name',  # key to change value (divide), default buffer
- *              size                    = (hashkey_t)'name',  # key to change value (divide), default size
+ *              key                     = (hash_key_t)'name',  # key to change value (multiply), default offset
+ *              key_out                 = (hash_key_t)'name',  # key to change value (multiply), default offset_out
+ *              key_to                  = (hash_key_t)'name',  # key to change value (multiply), default offset_to
+ *              key_from                = (hash_key_t)'name',  # key to change value (multiply), default offset_from
+ *              count                   = (hash_key_t)'name',  # key to change value (divide), default buffer
+ *              size                    = (hash_key_t)'name',  # key to change value (divide), default size
  * }
  * @endcode
  */

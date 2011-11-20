@@ -16,8 +16,9 @@ static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
 } // }}}
 
 static ssize_t data_hash_key_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	hash_keypair_t  key, *ret;
-	hash_key_t      key_val                  = 0;
+	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	hash_keypair_t         key, *ret;
+	hash_key_t             key_val                  = 0;
 
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -27,9 +28,13 @@ static ssize_t data_hash_key_t_convert_from(data_t *dst, fastcall_convert_from *
 			return -ENOMEM;
 	}
 	
-	switch(fargs->src->type){
-		case TYPE_STRINGT:
-			if( (key.key_str = (char *)fargs->src->ptr) == NULL)
+	switch(fargs->format){
+		case FORMAT_HUMANREADABLE:;
+			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
+			if(data_query(fargs->src, &r_read) != 0)
+				return -EFAULT;
+			
+			if( (key.key_str = buffer) == NULL)
 				return -EINVAL;
 			
 			/*
@@ -50,6 +55,7 @@ static ssize_t data_hash_key_t_convert_from(data_t *dst, fastcall_convert_from *
 			
 			*(hash_key_t *)(dst->ptr) = key_val;
 			return 0;
+		
 		default:
 			break;
 	};

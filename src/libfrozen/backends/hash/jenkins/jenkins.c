@@ -21,8 +21,8 @@
  *              class                   = 
  *                                        "hash/jenkins_32",
  *                                        "hash/jenkins_64",
- *              input                   = (hashkey_t)'buffer', # input key name
- *              output                  = (hashkey_t)'keyid',  # output key name
+ *              input                   = (hash_key_t)'buffer', # input key name
+ *              output                  = (hash_key_t)'keyid',  # output key name
  *              fatal                   = (uint_t)'1',         # interrupt request if input not present, default 0
  * }
  * @endcode

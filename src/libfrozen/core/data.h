@@ -141,7 +141,7 @@ API ssize_t              data_query             (data_t *data, void *args);
  */
 #define data_convert(_ret, _type, _dst, _src) {                                          \
 	data_t __data_dst = { _type, REF_##_type(_dst) };                                \
-	fastcall_convert_from _r_convert = { { 3, ACTION_CONVERT_FROM }, _src };         \
+	fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT_CLEAN };  \
 	_ret = data_query(&__data_dst, &_r_convert);                                     \
 	_dst = DEREF_##_type(&__data_dst);                                               \
 	(void)_ret;                                                                      \

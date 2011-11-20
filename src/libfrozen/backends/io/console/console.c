@@ -19,7 +19,7 @@
  * @code
  * {
  *              class                   = "io/stdin",
- *              output                  = (hashkey_t)'buffer'     # output buffer key, default "buffer"
+ *              output                  = (hash_key_t)'buffer'     # output buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -42,7 +42,7 @@
  * @code
  * {
  *              class                   = "io/stdout",
- *              input                   = (hashkey_t)'buffer'     # input buffer key, default "buffer"
+ *              input                   = (hash_key_t)'buffer'     # input buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -65,7 +65,7 @@
  * @code
  * {
  *              class                   = "io/stderr",
- *              input                   = (hashkey_t)'buffer'     # input buffer key, default "buffer"
+ *              input                   = (hash_key_t)'buffer'     # input buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -88,7 +88,8 @@ static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs)
 			return 0;
 		
 		case ACTION_TRANSFER:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_TRANSFER ](data, hargs);
+		case ACTION_CONVERT_TO:
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
 
 		default:
 			break;

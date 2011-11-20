@@ -126,12 +126,47 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 	}while(1);
 	return 0;
 } // }}}
+static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
+	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	if( data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
+		return -EFAULT;
+	
+	if(r_ptr.ptr != NULL)
+		free(r_ptr.ptr);
+	return 0;
+} // }}}
+static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdataptr *fargs){ // {{{
+	fargs->ptr = data->ptr;
+	return 0;
+} // }}}
+static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
+	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
+	return 0;
+} // }}}
+static ssize_t       data_default_init          (data_t *dst, fastcall_init *fargs){ // {{{
+	data_t                 d_initstr         = DATA_STRING(fargs->string);
+	
+	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT_HUMANREADABLE };
+	return data_query(dst, &r_convert);
+} // }}}
 static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
+	ssize_t                ret;
+	
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT_CLEAN };
+	if( (ret = data_query(src, &r_convert)) != 0)
+		return ret;
+	
+	if(fargs->header.nargs >= 4)
+		fargs->transfered = r_convert.transfered;
+	
+	return 0;
+} // }}}
+static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	char            buffer[DEF_BUFFER_SIZE];
 	ssize_t         rret, wret;
 	uintmax_t       roffset, woffset, transfered;
 	uintmax_t       read;
-
+	
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
@@ -169,43 +204,10 @@ static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer 
 		woffset    += r_write.buffer_size;
 	}while(1);
 	
-	if(fargs->header.nargs >= 4)
+	if(fargs->header.nargs >= 5)
 		fargs->transfered = transfered;
 	return 0;
 } // }}}
-static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
-	
-	if(r_ptr.ptr != NULL)
-		free(r_ptr.ptr);
-	return 0;
-} // }}}
-static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdataptr *fargs){ // {{{
-	fargs->ptr = data->ptr;
-	return 0;
-} // }}}
-static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
-	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
-	return 0;
-} // }}}
-static ssize_t       data_default_init          (data_t *dst, fastcall_init *fargs){ // {{{
-	data_t                 d_initstr         = DATA_STRING(fargs->string);
-	
-	fastcall_convert_from r_convert = { { 3, ACTION_CONVERT_FROM }, &d_initstr };
-	return data_query(dst, &r_convert);
-} // }}}
-//static ssize_t       data_default_convert       (data_t *src, fastcall_convert *fargs){ // {{{
-//	ssize_t                ret;
-//	
-//	fastcall_convert_to   r_convert_to   = { { fargs->header.nargs, ACTION_CONVERT_TO   }, fargs->dest, fargs->format };
-//	if( (ret = data_query(src, &r_convert_to)) != -ENOSYS )
-//		return ret;
-//	
-//	fastcall_convert_from r_convert_from = { { fargs->header.nargs, ACTION_CONVERT_FROM }, src,         fargs->format };
-//	return data_query(fargs->dest, &r_convert_from);
-//} // }}}
 
 data_proto_t default_t_proto = {
 	.type            = TYPE_DEFAULTT,
@@ -217,6 +219,7 @@ data_proto_t default_t_proto = {
 		[ACTION_READ]        = (f_data_func)&data_default_read,
 		[ACTION_WRITE]       = (f_data_func)&data_default_write,
 		[ACTION_TRANSFER]    = (f_data_func)&data_default_transfer,
+		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
 		[ACTION_FREE]        = (f_data_func)&data_default_free,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,

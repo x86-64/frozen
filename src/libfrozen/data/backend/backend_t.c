@@ -9,15 +9,28 @@ static ssize_t data_backend_t_io  (data_t *data, fastcall_io *fargs){ // {{{
 	return backend_fast_query((backend_t *)data->ptr, fargs);
 } // }}}
 static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
 	switch( fargs->src->type ){
-		case TYPE_STRINGT: dst->ptr = backend_acquire( (char *)fargs->src->ptr );  break;
-		case TYPE_HASHT:   dst->ptr = backend_new( (hash_t *)fargs->src->ptr );    break;
+		case TYPE_HASHT: dst->ptr = backend_new( (hash_t *)fargs->src->ptr ); goto check;
 		default:
-			return -ENOSYS;
-	};
+			break;
+	}
+	switch(fargs->format){
+		case FORMAT_HUMANREADABLE:;      // TODO data_convert call with FORMAT_CLEAN :(
+		default:;
+			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
+			if(data_query(fargs->src, &r_read) != 0)
+				return -EFAULT;
+			
+			dst->ptr = backend_acquire(buffer);
+			goto check;
+	}
+
+check:
 	if(dst->ptr != NULL)
 		return 0;
 	

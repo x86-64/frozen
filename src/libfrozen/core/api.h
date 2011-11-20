@@ -217,6 +217,7 @@ struct fastcall_convert_to {
 	fastcall_header        header;
 	data_t                *dest;
 	uintmax_t              format;
+	uintmax_t              transfered;
 };
 typedef struct fastcall_convert_to    fastcall_convert_to;
 typedef struct fastcall_convert_from  fastcall_convert_from;

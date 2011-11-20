@@ -120,7 +120,10 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	uintmax_t              hash_nelements    = 0;
 	data_t                 sl_src            = DATA_SLIDERT(fargs->src, 0);
 	list                   new_data          = LIST_INITIALIZER;
-
+	
+	if(fargs->format != FORMAT_BINARY)
+		return -ENOSYS;
+	
 	hash_nelements = HASH_INITIAL_SIZE;
 	hash           = hash_new(hash_nelements);
 	

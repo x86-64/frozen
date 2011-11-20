@@ -48,7 +48,7 @@ START_TEST (test_backend_mphf){
 			{ HK(nelements_min),DATA_UINT64T(10)                            },
 			{ HK(nelements_step),DATA_UINT64T(10)                           },
 			{ HK(value_bits),   DATA_UINT32T(32)                            },
-			{ HK(input),        DATA_STRING("keyid")                        },
+			{ HK(input),        DATA_HASHKEYT(HK(keyid))                    },
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
@@ -132,8 +132,8 @@ START_TEST (test_backend_mphf){
 					{ HK(backend), DATA_HASHT(
 						{ 0, DATA_HASHT(
 							{ HK(class),        DATA_STRING("index/lookup")                 },
-							{ HK(output),       DATA_STRING("offset")                       },
-							{ HK(output_type),  DATA_STRING("uint_t")                       },
+							{ HK(output),       DATA_HASHKEYT(HK(offset))                   },
+							{ HK(output_type),  DATA_DATATYPET(TYPE_UINTT)                  },
 							{ HK(index),        DATA_STRING("mphf_test")                    },
 							{ HK(fatal),        DATA_UINTT(1)                               },
 							hash_end
@@ -159,8 +159,8 @@ START_TEST (test_backend_mphf){
 		{ 0, DATA_HASHT(
                         { HK(name),         DATA_STRING("backend_mphf")                 },
 			{ HK(class),        DATA_STRING("hash/murmur2_64")              },
-			{ HK(input),        DATA_STRING("key")                          },
-			{ HK(output),       DATA_STRING("keyid")                        },
+			{ HK(input),        DATA_HASHKEYT(HK(key))                      },
+			{ HK(output),       DATA_HASHKEYT(HK(keyid))                    },
 			hash_end
 		)},
 		hash_end

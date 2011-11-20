@@ -86,46 +86,36 @@ clean_read:;
 	return 0;
 } // }}}
 static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              transfered;
 	uintmax_t              buffer_size;
-	uintmax_t              format            = FORMAT_CLEAN;
 	
 	if(fargs->dest == NULL || !src->ptr)
 		return -EINVAL;
 	
-	if(fargs->header.nargs > 3)
-		format = fargs->format;
-	
 	buffer_size = strlen(src->ptr);
 	
-	switch(format){
+	switch(fargs->format){
 		case FORMAT_BINARY:;
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size + 1 };
-			return data_query(fargs->dest, &r_write1);
+			ret        = data_query(fargs->dest, &r_write1);
+			transfered = r_write1.buffer_size;
+			break;
 		
 		case FORMAT_CLEAN:;
 		case FORMAT_HUMANREADABLE:;
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size };
-			return data_query(fargs->dest, &r_write2);
+			ret        = data_query(fargs->dest, &r_write2);
+			transfered = r_write2.buffer_size;
+			break;
 		
 		default:
-			break;
+			return -ENOSYS;
 	}
-	return -ENOSYS;
-} // }}}
-static ssize_t data_string_t_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
-	ssize_t                ret;
-
-	if(fargs->dest == NULL)
-		return -EINVAL;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
 	
-	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, strlen(src->ptr) };
-	if( (ret = data_query(fargs->dest, &r_write)) < -1)
-		return ret;
-	
-	if(fargs->header.nargs >= 4)
-		fargs->transfered = r_write.buffer_size;
-	
-	return 0;
+	return ret;
 } // }}}
 
 data_proto_t string_t_proto = {
@@ -137,6 +127,5 @@ data_proto_t string_t_proto = {
 		[ACTION_LOGICALLEN]   = (f_data_func)&data_string_t_loglen,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_string_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_string_t_convert_from,
-		[ACTION_TRANSFER]     = (f_data_func)&data_string_t_transfer,
 	}
 };

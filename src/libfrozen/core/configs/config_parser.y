@@ -67,12 +67,14 @@ hash_name :
           /* empty */  { $$ = 0; }
 	| TNULL ASSIGN { $$ = 0; }
 	| NAME  ASSIGN {
-		ssize_t      ret;
 		hash_key_t   key;
-		data_t       d_string = DATA_STRING($1);
-		
-		data_convert(ret, TYPE_HASHKEYT, key, &d_string);
-		
+		data_t       d_key    = DATA_PTR_HASHKEYT(&key);
+	
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, $1 }; 
+		if(data_query(&d_key, &r_init1) != 0){
+			yyerror(hash, "failed convert hashkey\n"); YYERROR;
+		}
+
 		if( ($$ = key) == 0){
 			printf("unknown key: %s\n", $1); YYERROR;
 		}
@@ -83,18 +85,20 @@ hash_value :
 	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
-		ssize_t     ret;
 		datatype_t  type;
-		data_t      d_s_type = DATA_STRING($2);
+		data_t      d_type   = DATA_PTR_DATATYPET(&type);
 		
-		data_convert(ret, TYPE_DATATYPET, type, &d_s_type);
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
+		if(data_query(&d_type, &r_init1) != 0){
+			yyerror(hash, "failed convert datatype\n"); YYERROR;
+		}
 		
 		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_init r_init = { { 3, ACTION_INIT }, $4 }; 
-		if(data_query(&$$, &r_init) != 0){
+		fastcall_init r_init2 = { { 3, ACTION_INIT }, $4 }; 
+		if(data_query(&$$, &r_init2) != 0){
 			yyerror(hash, "failed convert data\n"); YYERROR;
 		}
 		

@@ -22,7 +22,7 @@
  * @code
  * {
  *              class                   = "request/implode",
- *              buffer                  = (hashkey_t)'buffer',  # key name in new request
+ *              buffer                  = (hash_key_t)'buffer',  # key name in new request
  * }
  * @endcode
  */
@@ -48,7 +48,7 @@
  * @code
  * {
  *              class                   = "request/explode",
- *              buffer                  = (hashkey_t)'buffer',  # key name in new request
+ *              buffer                  = (hash_key_t)'buffer',  # key name in new request
  *              return_result           = (uint_t)'0',          # pack changed, during further processing, request back to old one, default 1
  * }
  * @endcode

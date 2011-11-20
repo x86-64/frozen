@@ -20,7 +20,7 @@
  *              role                    = 
  *                                        "client",               # act as client
  *                                        "server",               # act as server
- *              buffer                  = (hashkey_t)'buffer',    # buffer to transfer, default buffer
+ *              buffer                  = (hash_key_t)'buffer',    # buffer to transfer, default buffer
  *              
  *              item_size               = (uint_t)'1000',         # maximum transfered item size, default 1000
  *              size                    = (uint_t)'10',           # send\receive queue size, default 100
@@ -260,7 +260,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	data_t               d_ipcmem  = DATA_RAW(userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
 	fastcall_convert_to  r_convert = { { 4, ACTION_CONVERT_TO }, &d_ipcmem, FORMAT_BINARY };
 	if( (ret = data_query(buffer, &r_convert)) < 0)
-		return error("cant write buffer to ipc memory");
+		return error("can not write buffer to ipc memory");
 	
 	//block->size          = r_read.buffer_size;
 	block->return_result = (f_async == 0) ? 1 : 0;

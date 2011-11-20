@@ -21,7 +21,7 @@
  * @code
  * {
  *              class                   = "index/hashtable",
- *              input                   = (hashkey_t)'keyid', # key for input, default "key"
+ *              input                   = (hash_key_t)'keyid', # key for input, default "key"
  *              nelements               = (uint_t)'100',      # size of hash table
  * }
  * @endcode

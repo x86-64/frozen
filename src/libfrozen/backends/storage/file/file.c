@@ -101,7 +101,9 @@ static ssize_t file_io_handler(data_t *data, file_userdata *userdata, fastcall_h
 			return 0;
 
 		case ACTION_TRANSFER:
+		case ACTION_CONVERT_TO:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
+			
 
 		default:
 			break;
@@ -524,7 +526,7 @@ static ssize_t file_delete(backend_t *backend, request_t *request){ // {{{
 			key + size != userdata->file_stat.st_size
 			&& forced == 0
 		){ // truncating only last elements
-			ret = warning("cant delete not last elements");
+			ret = warning("can not delete not last elements");
 			goto exit;
 		}
 		

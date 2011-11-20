@@ -21,7 +21,7 @@
  * @code
  * {
  *              class                   = "backend/call",
- *              backend                 = (hashkey_t)'name',  # key with backend in request, default "backend"
+ *              backend                 = (hash_key_t)'name',  # key with backend in request, default "backend"
  *              retry                   = (uint_t)'1',        # rerun request after failed call, default 1
  * }
  * @endcode

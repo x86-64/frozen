@@ -23,7 +23,8 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 			return data_query(fdata->data, fargs);
 		
 		case ACTION_TRANSFER:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_TRANSFER ](data, fargs);
+		case ACTION_CONVERT_TO:
+			return data_protos[ TYPE_DEFAULTT ]->handlers[ fargs->action ](data, fargs);
 		
 		/*
 		case ACTION_GETDATAPTR:

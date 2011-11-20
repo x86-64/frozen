@@ -28,7 +28,7 @@
  *              newline                 = (uint_t)'0',        # see "man regcomp", default 0
  *              notbol                  = (uint_t)'0',        # see "man regcomp", default 0
  *              noteol                  = (uint_t)'0',        # see "man regcomp", default 0
- *              marker                  = (hashkey_t)'marker',# on match - pass request with this key set
+ *              marker                  = (hash_key_t)'marker',# on match - pass request with this key set
  *              marker_value            = (uint_t)'1',        # value for marker
  * }
  * @endcode

@@ -18,9 +18,9 @@
  * @code
  * {
  *              class                   = "data/structs",
- *              buffer                  = (hashkey_t)'buffer', # input/output request key name, default "buffer"
- *              values                  = (hashkey_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
- *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
+ *              buffer                  = (hash_key_t)'buffer', # input/output request key name, default "buffer"
+ *              values                  = (hash_key_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
+ *              size                    = (hash_key_t)'size',   # if supplied - add size of packed structure to request with key
  *              structure               = {                    # structure to pack/unpack to/from
  *                     keyname = (uint_t)'10',                 # - first field is keyname with default value of 10
  *                     key2    = (string_t)'',                 # - second field is string

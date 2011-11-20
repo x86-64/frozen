@@ -64,7 +64,7 @@ START_TEST (test_backend_balancer_linear){
                         { HK(filename),    DATA_HASHT(
 				{ HK(homedir), DATA_VOID                               },
 				{ HK(string),  DATA_STRING("data_backend_bal_linear_") },
-				{ HK(fork),    DATA_STRING("buffer")                   },
+				{ HK(fork),    DATA_HASHKEYT(HK(buffer))               },
 				{ HK(string),  DATA_STRING(".dat")                     },
 				hash_end
 			)},
@@ -74,7 +74,7 @@ START_TEST (test_backend_balancer_linear){
                 { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("balancer")                     },
                         { HK(mode),        DATA_STRING("linear")                       },
-                        { HK(field),       DATA_STRING("buffer")                       },
+                        { HK(field),       DATA_HASHKEYT(HK(buffer))                   },
 			{ HK(linear_len),  DATA_SIZET(1)                               },
 			hash_end
                 )},

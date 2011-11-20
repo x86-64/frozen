@@ -33,7 +33,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 		need_data.type = element->data.type;
 		need_data.ptr  = NULL;
 		
-		fastcall_convert_to r_convert = { { 3, ACTION_CONVERT_TO }, &need_data }; 
+		fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &need_data, FORMAT_CLEAN }; 
 		if(data_query(curr_data, &r_convert) != 0)
 			return ITER_BREAK;
 		

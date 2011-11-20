@@ -10,21 +10,6 @@ static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ //
 	fargs->ptr = ((raw_t *)data->ptr)->ptr;
 	return 0;
 } // }}}
-static ssize_t data_raw_transfer(data_t *src, fastcall_transfer *fargs){ // {{{
-	ssize_t                ret;
-
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, ((raw_t *)src->ptr)->ptr, ((raw_t *)src->ptr)->size };
-	if( (ret = data_query(fargs->dest, &r_write)) < -1)
-		return ret;
-	
-	if(fargs->header.nargs >= 4)
-		fargs->transfered = r_write.buffer_size;
-	
-	return 0;
-} // }}}
 static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	raw_t                 *dst_data;
 	raw_t                 *src_data = ((raw_t *)src->ptr);
@@ -72,34 +57,48 @@ static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 } // }}}
 static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
-	raw_t                 *src_data = ((raw_t *)src->ptr);
+	uintmax_t              transfered        = 0;
+	raw_t                 *src_data          = ((raw_t *)src->ptr);
 	
-	if(fargs->header.nargs < 4)
-		return -ENOSYS;
+	if(fargs->dest == NULL || !src_data)
+		return -EINVAL;
 	
 	switch(fargs->format){
+		case FORMAT_CLEAN:;
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src_data->ptr, src_data->size };
+			ret = data_query(fargs->dest, &r_write);
+			
+			transfered = r_write.buffer_size;
+			
+			break;
+
 		case FORMAT_BINARY:;
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0,                     &src_data->size, sizeof(src_data->size) };
-			if( (ret = data_query(fargs->dest, &r_write1)) < 0)
-				return ret;
-	
-			fastcall_write r_write2 = { { 5, ACTION_WRITE }, sizeof(src_data->size), src_data->ptr,  src_data->size };
-			if( (ret = data_query(fargs->dest, &r_write2)) < 0)
-				return ret;
+			ret         = data_query(fargs->dest, &r_write1);
+			transfered += r_write1.buffer_size;
 			
-			return 0;
-		default: break;
+			if(ret < 0)
+				break;
+			
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, sizeof(src_data->size), src_data->ptr,  src_data->size };
+			ret         = data_query(fargs->dest, &r_write2);
+			transfered += r_write2.buffer_size;
+	
+			break;
+		
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return ret;
 } // }}}
 static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	raw_t                  new_data;
 	raw_t                 *dst_data = ((raw_t *)dst->ptr);
 	
-	if(fargs->header.nargs < 4)
-		return -ENOSYS;
-
 	switch(fargs->format){
 		case FORMAT_BINARY:;
 			fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &new_data.size, sizeof(new_data.size) };
@@ -124,7 +123,8 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 				return ret;
 			
 			return 0;
-		default: break;
+		default:
+			break;
 	};
 	return -ENOSYS;
 } // }}}
@@ -137,7 +137,6 @@ data_proto_t raw_t_proto = {
 		[ACTION_PHYSICALLEN] = (f_data_func)&data_raw_len,
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_raw_len,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
-		[ACTION_TRANSFER]    = (f_data_func)&data_raw_transfer,
 		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
 		[ACTION_ALLOC]       = (f_data_func)&data_raw_alloc,
 		[ACTION_FREE]        = (f_data_func)&data_raw_free,
