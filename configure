@@ -836,6 +836,7 @@ enable_backendrebuild_reader
 enable_backendcache
 enable_backendcache_append
 enable_backendipc
+enable_backendkill
 enable_backendallocator
 enable_backendconvert
 enable_backendincapsulate
@@ -1576,6 +1577,7 @@ Optional Features:
   --disable-backend-cache-append
                           disable backend cache-append
   --disable-backend-ipc   disable backend ipc
+  --disable-backend-kill  disable backend kill
   --disable-backend-allocator
                           disable backend allocator
   --disable-backend-convert
@@ -19181,6 +19183,43 @@ fi
 		BACKEND_MAKEFILE_communication_ipc=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED communication/ipc/libfrozen_backend_ipc.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendkill was given.
+if test "${enable_backendkill+set}" = set; then :
+  enableval=$enable_backendkill;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendkill}" = "yes"; then
+			enable_backendkill="no"
+		else
+			enable_backendkill="yes"
+		fi
+	fi
+
+	if test "${enable_backendkill}" = "yes"; then
+		BACKEND_DIR_kill="daemon/kill"
+		BACKEND_DEP_kill=""
+				BACKEND_SELECTED="$BACKEND_SELECTED kill"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_daemon_kill" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/daemon/kill/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS daemon/kill"
+
+		BACKEND_MAKEFILE_daemon_kill=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED daemon/kill/libfrozen_backend_kill.la"
 
 	fi
 
