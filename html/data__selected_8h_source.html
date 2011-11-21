@@ -48,65 +48,67 @@
 <a name="l00007"></a>00007 <span class="preprocessor">#include &lt;dataptr/dataptr_t.h&gt;</span>
 <a name="l00008"></a>00008 <span class="preprocessor">#include &lt;datatype/datatype_t.h&gt;</span>
 <a name="l00009"></a>00009 <span class="preprocessor">#include &lt;default/default_t.h&gt;</span>
-<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;go_interface/go_interface_t.h&gt;</span>
-<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;hash/hash_t.h&gt;</span>
-<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;hash_key/hash_key_t.h&gt;</span>
-<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;<a class="code" href="io__t_8h.html">io/io_t.h</a>&gt;</span>
-<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;memory/memory_t.h&gt;</span>
-<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;raw/raw_t.h&gt;</span>
-<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;slice/slice_t.h&gt;</span>
-<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;slider/slider_t.h&gt;</span>
-<a name="l00018"></a>00018 <span class="preprocessor">#include &lt;string/string_t.h&gt;</span>
-<a name="l00019"></a>00019 <span class="preprocessor">#include &lt;struct/struct_t.h&gt;</span>
-<a name="l00020"></a>00020 <span class="preprocessor">#include &lt;uint/off_t.h&gt;</span>
-<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;uint/size_t.h&gt;</span>
-<a name="l00022"></a>00022 <span class="preprocessor">#include &lt;uint/uint_t.h&gt;</span>
-<a name="l00023"></a>00023 <span class="preprocessor">#include &lt;uint/int_t.h&gt;</span>
-<a name="l00024"></a>00024 <span class="preprocessor">#include &lt;uint/int8_t.h&gt;</span>
-<a name="l00025"></a>00025 <span class="preprocessor">#include &lt;uint/int16_t.h&gt;</span>
-<a name="l00026"></a>00026 <span class="preprocessor">#include &lt;uint/int32_t.h&gt;</span>
-<a name="l00027"></a>00027 <span class="preprocessor">#include &lt;uint/int64_t.h&gt;</span>
-<a name="l00028"></a>00028 <span class="preprocessor">#include &lt;uint/uint8_t.h&gt;</span>
-<a name="l00029"></a>00029 <span class="preprocessor">#include &lt;uint/uint16_t.h&gt;</span>
-<a name="l00030"></a>00030 <span class="preprocessor">#include &lt;uint/uint32_t.h&gt;</span>
-<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;uint/uint64_t.h&gt;</span>
-<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;void/void_t.h&gt;</span>
-<a name="l00033"></a>00033 <span class="preprocessor">#endif</span>
-<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> datatype_t {
-<a name="l00035"></a>00035    TYPE_INVALID = 0,
-<a name="l00036"></a>00036    TYPE_BACKENDT = 1,
-<a name="l00037"></a>00037    TYPE_BUFFERT = 22,
-<a name="l00038"></a>00038    TYPE_DATAPTRT = 26,
-<a name="l00039"></a>00039    TYPE_DATATYPET = 28,
-<a name="l00040"></a>00040    TYPE_DEFAULTT = 0,
-<a name="l00041"></a>00041    TYPE_GOINTERFACET = 23,
-<a name="l00042"></a>00042    TYPE_HASHT = 17,
-<a name="l00043"></a>00043    TYPE_HASHKEYT = 25,
-<a name="l00044"></a>00044    TYPE_IOT = 3,
-<a name="l00045"></a>00045    TYPE_MEMORYT = 18,
-<a name="l00046"></a>00046    TYPE_RAWT = 19,
-<a name="l00047"></a>00047    TYPE_SLICET = 24,
-<a name="l00048"></a>00048    TYPE_SLIDERT = 27,
-<a name="l00049"></a>00049    TYPE_STRINGT = 16,
-<a name="l00050"></a>00050    TYPE_STRUCTT = 2,
-<a name="l00051"></a>00051    TYPE_OFFT = 13,
-<a name="l00052"></a>00052    TYPE_SIZET = 12,
-<a name="l00053"></a>00053    TYPE_UINTT = 14,
-<a name="l00054"></a>00054    TYPE_INTT = 15,
-<a name="l00055"></a>00055    TYPE_INT8T = 4,
-<a name="l00056"></a>00056    TYPE_INT16T = 5,
-<a name="l00057"></a>00057    TYPE_INT32T = 6,
-<a name="l00058"></a>00058    TYPE_INT64T = 7,
-<a name="l00059"></a>00059    TYPE_UINT8T = 8,
-<a name="l00060"></a>00060    TYPE_UINT16T = 9,
-<a name="l00061"></a>00061    TYPE_UINT32T = 10,
-<a name="l00062"></a>00062    TYPE_UINT64T = 11,
-<a name="l00063"></a>00063    TYPE_VOIDT = 20,
-<a name="l00064"></a>00064 } datatype_t;
-<a name="l00065"></a>00065 <span class="preprocessor">#endif</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;format/format_t.h&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;go_interface/go_interface_t.h&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;hash/hash_t.h&gt;</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;hash_key/hash_key_t.h&gt;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;<a class="code" href="io__t_8h.html">io/io_t.h</a>&gt;</span>
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;memory/memory_t.h&gt;</span>
+<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;raw/raw_t.h&gt;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;slice/slice_t.h&gt;</span>
+<a name="l00018"></a>00018 <span class="preprocessor">#include &lt;slider/slider_t.h&gt;</span>
+<a name="l00019"></a>00019 <span class="preprocessor">#include &lt;string/string_t.h&gt;</span>
+<a name="l00020"></a>00020 <span class="preprocessor">#include &lt;struct/struct_t.h&gt;</span>
+<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;uint/off_t.h&gt;</span>
+<a name="l00022"></a>00022 <span class="preprocessor">#include &lt;uint/size_t.h&gt;</span>
+<a name="l00023"></a>00023 <span class="preprocessor">#include &lt;uint/uint_t.h&gt;</span>
+<a name="l00024"></a>00024 <span class="preprocessor">#include &lt;uint/int_t.h&gt;</span>
+<a name="l00025"></a>00025 <span class="preprocessor">#include &lt;uint/int8_t.h&gt;</span>
+<a name="l00026"></a>00026 <span class="preprocessor">#include &lt;uint/int16_t.h&gt;</span>
+<a name="l00027"></a>00027 <span class="preprocessor">#include &lt;uint/int32_t.h&gt;</span>
+<a name="l00028"></a>00028 <span class="preprocessor">#include &lt;uint/int64_t.h&gt;</span>
+<a name="l00029"></a>00029 <span class="preprocessor">#include &lt;uint/uint8_t.h&gt;</span>
+<a name="l00030"></a>00030 <span class="preprocessor">#include &lt;uint/uint16_t.h&gt;</span>
+<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;uint/uint32_t.h&gt;</span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;uint/uint64_t.h&gt;</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;void/void_t.h&gt;</span>
+<a name="l00034"></a>00034 <span class="preprocessor">#endif</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> datatype_t {
+<a name="l00036"></a>00036    TYPE_INVALID = 0,
+<a name="l00037"></a>00037    TYPE_BACKENDT = 1,
+<a name="l00038"></a>00038    TYPE_BUFFERT = 22,
+<a name="l00039"></a>00039    TYPE_DATAPTRT = 26,
+<a name="l00040"></a>00040    TYPE_DATATYPET = 28,
+<a name="l00041"></a>00041    TYPE_DEFAULTT = 0,
+<a name="l00042"></a>00042    TYPE_FORMATT = 25,
+<a name="l00043"></a>00043    TYPE_GOINTERFACET = 23,
+<a name="l00044"></a>00044    TYPE_HASHT = 17,
+<a name="l00045"></a>00045    TYPE_HASHKEYT = 25,
+<a name="l00046"></a>00046    TYPE_IOT = 3,
+<a name="l00047"></a>00047    TYPE_MEMORYT = 18,
+<a name="l00048"></a>00048    TYPE_RAWT = 19,
+<a name="l00049"></a>00049    TYPE_SLICET = 24,
+<a name="l00050"></a>00050    TYPE_SLIDERT = 27,
+<a name="l00051"></a>00051    TYPE_STRINGT = 16,
+<a name="l00052"></a>00052    TYPE_STRUCTT = 2,
+<a name="l00053"></a>00053    TYPE_OFFT = 13,
+<a name="l00054"></a>00054    TYPE_SIZET = 12,
+<a name="l00055"></a>00055    TYPE_UINTT = 14,
+<a name="l00056"></a>00056    TYPE_INTT = 15,
+<a name="l00057"></a>00057    TYPE_INT8T = 4,
+<a name="l00058"></a>00058    TYPE_INT16T = 5,
+<a name="l00059"></a>00059    TYPE_INT32T = 6,
+<a name="l00060"></a>00060    TYPE_INT64T = 7,
+<a name="l00061"></a>00061    TYPE_UINT8T = 8,
+<a name="l00062"></a>00062    TYPE_UINT16T = 9,
+<a name="l00063"></a>00063    TYPE_UINT32T = 10,
+<a name="l00064"></a>00064    TYPE_UINT64T = 11,
+<a name="l00065"></a>00065    TYPE_VOIDT = 20,
+<a name="l00066"></a>00066 } datatype_t;
+<a name="l00067"></a>00067 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 15:40:01 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

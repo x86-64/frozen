@@ -38,7 +38,7 @@
 </table>
 
 
-<h3><a class="anchor" id="page_structs_info"></a>Description</h3><div class="textblock"><p>This backend pack and unpack user requests accoring defined structure. </p>
+<h3><a class="anchor" id="page_structs_info"></a>Description</h3><div class="textblock"><p>This backend pack and unpack user requests accoring defined structure. It pack values as it is, to convert use <a class="el" href="group__mod__backend__convert.html">data/convert</a>. </p>
 </div>
 
 <h3><a class="anchor" id="page_structs_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
@@ -47,14 +47,17 @@
               buffer                  = (hash_key_t)<span class="stringliteral">&#39;buffer&#39;</span>, # input/output request key name, <span class="keywordflow">default</span> <span class="stringliteral">&quot;buffer&quot;</span>
               values                  = (hash_key_t)<span class="stringliteral">&#39;some&#39;</span>,   # <span class="keywordflow">if</span> supplied - request key name to take/write values from/to, <span class="keywordflow">default</span> take from request
               size                    = (hash_key_t)<span class="stringliteral">&#39;size&#39;</span>,   # <span class="keywordflow">if</span> supplied - add size of packed structure to request with key
-              structure               = {                    # structure to pack/unpack to/from
-                     keyname = (uint_t)<span class="stringliteral">&#39;10&#39;</span>,                 # - first field is keyname with <span class="keywordflow">default</span> value of 10
-                     key2    = (string_t)<span class="stringliteral">&#39;&#39;</span>,                 # - second field is <span class="keywordtype">string</span>
+              structure               = {                     # structure to pack/unpack to/from
+                     keyname = {                              # - first field is keyname with <span class="keywordflow">default</span> value of 10 and FORMAT(clean)
+                                  default = (uint_t)&#39;10&#39;,
+                                  format  = (format_t)&#39;clean&#39;
+                               }
+                     key2    = { },                           # - second field is anything without <span class="keywordflow">default</span> value and FORMAT(binary)
                      ...
               }
  }
 </pre></div> </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 15:40:01 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

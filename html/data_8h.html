@@ -40,7 +40,6 @@
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Defines</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">data.h File Reference</div>  </div>
@@ -62,17 +61,9 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">data_convert</a>(_ret, _type, _dst, _src)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aee267aeb8e1adab268306533e2d4472c"></a><!-- doxytag: member="data.h::data_formats" ref="aee267aeb8e1adab268306533e2d4472c" args="" -->
-typedef enum data_formats&#160;</td><td class="memItemRight" valign="bottom"><b>data_formats</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9fa09f029cdd0fe4cec8af0a41fc8ecb"></a><!-- doxytag: member="data.h::data_t" ref="a9fa09f029cdd0fe4cec8af0a41fc8ecb" args="" -->
 typedef struct <a class="el" href="structdata__t.html">data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a9fa09f029cdd0fe4cec8af0a41fc8ecb">data_t</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Data holder. <br/></td></tr>
-<tr><td colspan="2"><h2><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>data_formats</b> { <b>FORMAT_CLEAN</b> =  0, 
-<b>FORMAT_BINARY</b> =  1, 
-<b>FORMAT_HUMANREADABLE</b> =  2
- }</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a7a428cd48115cf6fcb1f1679fe34960c">data_query</a> (<a class="el" href="structdata__t.html">data_t</a> *data, void *args)</td></tr>
@@ -117,7 +108,7 @@ Functions</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment">{                                          \
         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> __data_dst = { _type, REF_##_type(_dst) };                                \
-        <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a> _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT_CLEAN };  \
+        <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a> _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(clean) };  \
         _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \
         _dst = DEREF_##_type(&amp;__data_dst);                                               \
         (void)_ret;                                                                      \
@@ -319,7 +310,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Nov 20 2011 17:49:38 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 15:40:01 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
