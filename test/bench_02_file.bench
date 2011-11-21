@@ -15,6 +15,7 @@
 		buffer => "                         "
 	}
 }, count => (uint_t)'1000000' },
+{ class => "emitter", request = { backend = { { name  => "file" }        }, request = { benchmark_function = "print_long" } } },
 { class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
 { class => "end"                                              },
 NULL,

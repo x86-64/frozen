@@ -22,9 +22,7 @@
  * Accepted configuration:
  * @code
  * {
- *              class                   = "backend/benchmark",
- *              on_destroy              =                     # action to do on backend destory event
- *                                        "printf",           # - write stats to stdout, this is default
+ *              class                   = "backend/benchmark"
  * }
  * @endcode
  */
@@ -50,24 +48,10 @@
 #define EMODULE 17
 #define N_REQUESTS_DEFAULT 10000
 
-typedef enum bench_action {
-	ACTION_NONE,
-	ACTION_PRINTF,
-} bench_action;
-
 typedef struct benchmark_userdata {
-	bench_action           on_destroy;
-	
 	uintmax_t              ticks;
 	struct timeval         tv_start;
 } benchmark_userdata;
-
-static bench_action    benchmark_action_from_string(char *string){ // {{{
-	if(string != NULL){
-		if(strcasecmp(string, "printf")  == 0) return ACTION_PRINTF;
-	}
-	return ACTION_NONE;
-} // }}}
 
 static void benchmark_control_restart(backend_t *backend){ // {{{
 	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
@@ -141,19 +125,6 @@ static void benchmark_control_query_ticks(backend_t *backend, uintmax_t *value){
 	
 	*value = userdata->ticks;
 } // }}}
-static void benchmark_action(backend_t *backend, bench_action action){ // {{{
-	switch(action){
-		case ACTION_NONE:
-			break;
-		case ACTION_PRINTF:;
-			char buffer[1024];
-			
-			if(benchmark_control_query_long(backend, buffer, sizeof(buffer)) > 0){
-				printf("%s\n", buffer);
-			}
-			break;
-	};
-} // }}}
 
 static int benchmark_init(backend_t *backend){ // {{{
 	benchmark_userdata    *userdata          = backend->userdata = calloc(1, sizeof(benchmark_userdata));
@@ -164,23 +135,7 @@ static int benchmark_init(backend_t *backend){ // {{{
 static int benchmark_destroy(backend_t *backend){ // {{{
 	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
 	
-	benchmark_action(backend, userdata->on_destroy);
-	
 	free(userdata);
-	return 0;
-} // }}}
-static int benchmark_configure(backend_t *backend, config_t *config){ // {{{
-	ssize_t                ret;
-	char                  *cfg_ondestroy     = NULL;
-	benchmark_userdata    *userdata          = (benchmark_userdata *)backend->userdata;
-	
-	hash_data_copy(ret, TYPE_STRINGT, cfg_ondestroy,  config, HK(on_destroy)); (void)ret;
-	
-	userdata->on_destroy = benchmark_action_from_string(cfg_ondestroy);
-	if(userdata->on_destroy == ACTION_NONE) userdata->on_destroy = ACTION_PRINTF;
-	
-	benchmark_control_restart(backend);
-	
 	return 0;
 } // }}}
 
@@ -207,6 +162,11 @@ custom:
 	if(strcmp(function, "restart") == 0){
 		benchmark_control_restart(backend);
 		return 0;
+	}
+	if(strcmp(function, "print_long") == 0){
+		ret = benchmark_control_query_long  (backend, buffer, sizeof(buffer) );
+		printf("%s\n", buffer);
+		return ret;
 	}
 	
 	if(string != NULL){
@@ -245,7 +205,6 @@ backend_t benchmark_proto = {
 	.class          = "backend/benchmark",
 	.supported_api  = API_HASH,
 	.func_init      = &benchmark_init,
-	.func_configure = &benchmark_configure,
 	.func_destroy   = &benchmark_destroy,
 	.backend_type_hash = {
 		.func_handler = &benchmark_handler

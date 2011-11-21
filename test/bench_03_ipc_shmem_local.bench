@@ -8,10 +8,11 @@
 		buffer => "                         "
 	}
 }, count => (uint_t)'300000' },
-{ class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
-{ class => "end"                                                             },
+{ class => "emitter", request = { backend = { { name  => "shmem_lcl" }        }, request = { benchmark_function = "print_long" } } },
+{ class => "emitter", request = { backend = { { class => "daemon/kill" }      }, request = {} } },
+{ class => "end"                                                              },
 NULL,
-{ class => "benchmark", name => "shmem_lcl"                                  },
-{ class => "ipc", type => "shmem", role => "client", key => (uint32_t)'1011' },
-{ class => "ipc", type => "shmem", role => "server", key => (uint32_t)'1011' },
-{ class => "end"                                                             }
+{ class => "benchmark", name => "shmem_lcl"                                   },
+{ class => "ipc", type => "shmem", role => "client", key => (uint32_t)'1011'  },
+{ class => "ipc", type => "shmem", role => "server", key => (uint32_t)'1011'  },
+{ class => "end"                                                              }

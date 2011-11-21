@@ -1,6 +1,7 @@
 { class => "daemon/thread" },
 { class => "emitter", request = { backend = { { name  => "null" }        }, request = { benchmark_function = "restart" } } },
 { class => "emitter", request = { backend = { { name  => "null" }        }, request = { action => create } },  count => (uint_t)'8000000' },
+{ class => "emitter", request = { backend = { { name  => "null" }        }, request = { benchmark_function = "print_long" } } },
 { class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
 { class => "end"                                              },
 NULL,
