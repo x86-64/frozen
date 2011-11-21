@@ -1,6 +1,5 @@
 - move hash_dump code to hash_t convert, and remove DEBUG condition
 - data 'action_t' + convert array from\to string
-- data 'format_t' + convert array from\to string
 - data 'random_t' for file and testing\benchmarking suite
 - data 'counter_t'
 - data 'range_t', 'multiselect_t' and matching routines

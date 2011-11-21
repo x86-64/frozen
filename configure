@@ -634,6 +634,7 @@ DATA_OBJECTS_hash_key
 DATA_OBJECTS_hash
 DATA_OBJECTS_go_interface
 DATA_OBJECTS_format
+DATA_OBJECTS_emitter
 DATA_OBJECTS_default
 DATA_OBJECTS_datatype
 DATA_OBJECTS_dataptr
@@ -799,6 +800,7 @@ enable_buffer_t
 enable_dataptr_t
 enable_datatype_t
 enable_default_t
+enable_emitter_t
 enable_format_t
 enable_go_interface_t
 enable_hash_t
@@ -1530,6 +1532,8 @@ Optional Features:
                           disable data datatype-t
   --disable-data-default-t
                           disable data default-t
+  --disable-data-emitter-t
+                          disable data emitter-t
   --disable-data-format-t disable data format-t
   --disable-data-go-interface-t
                           disable data go-interface-t
@@ -17807,6 +17811,45 @@ fi
 		DATA_MAKEFILE_default=yes
 
 		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED default/libfrozen_data_default.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-emitter_t was given.
+if test "${enable_emitter_t+set}" = set; then :
+  enableval=$enable_emitter_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_emitter_t}" = "yes"; then
+			enable_emitter_t="no"
+		else
+			enable_emitter_t="yes"
+		fi
+	fi
+
+	if test "${enable_emitter_t}" = "yes"; then
+		DATA_DIR_emitter_t="emitter"
+		DATA_DEP_emitter_t=""
+		DATA_ID_emitter_t="29"
+		DATA_OBJECTS_emitter="$DATA_OBJECTS_emitter libfrozen_data_emitter_la-emitter_t.lo"
+		DATA_SELECTED="$DATA_SELECTED emitter_t"
+		DATA_HEADERS="$DATA_HEADERS emitter/emitter_t.h"
+
+
+	fi
+
+	if test "$DATA_MAKEFILE_emitter" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/emitter/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS emitter"
+
+		DATA_MAKEFILE_emitter=yes
+
+		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED emitter/libfrozen_data_emitter.la"
 
 	fi
 
