@@ -38,25 +38,17 @@
 </table>
 
 
-<h3><a class="anchor" id="page_emitter_info"></a>Description</h3><div class="textblock"><p>This backend send user defined queries in any amounts </p>
+<h3><a class="anchor" id="page_emitter_info"></a>Description</h3><div class="textblock"><p>This backend wait for input request and send user defined queries in any amounts. Input request passed to underlying backend, so this could be used to construct sequence of requests. </p>
 </div>
 
 <h3><a class="anchor" id="page_emitter_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> {
               <span class="keyword">class                   </span>= &quot;request/emitter&quot;,
-              on_start                = &lt;see actions&gt;,      # action performed at the beginning of emission
-              on_end                  = &lt;see actions&gt;,      # action performed at the end of emission
-              pre_request             = { ... },            # optional request emitted at the beginning of emission
-              post_request            = { ... },            # optional request emitted at the end of emission
-              request                 = { ... },            # actual request, that would be emitted
+              request                 = { ... },            # request to emit (see <a class="code" href="structemitter__t.html">emitter_t</a> data)
               count                   = (uint_t)<span class="stringliteral">&#39;1000&#39;</span>,     # number of emits, <span class="keywordflow">default</span> 1
  }
-</pre></div><p>Possible actions: </p>
-<ul>
-<li>"destroy" - full shutdown of application via kill(SIGTERM) </li>
-</ul>
-</div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 15:40:01 for frozen by&#160;
+</pre></div> </div></div>
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 23:10:58 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

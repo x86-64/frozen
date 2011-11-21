@@ -78,6 +78,7 @@ Defines</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="hash_8h.html#a3508d6e22c146f4b94847f285ea113f9">HK</a>(value)&#160;&#160;&#160;HASH_KEY_##value</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut for registed hash keys. Also used in key registration process. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="hash_8h.html#affda3d4a08457fa138c7942dc8a6c6de">hash_data_copy</a>(_ret, _type, _dt, _hash, _key)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="hash_8h.html#a71a81284fe4f97b860b60a5ad232327c">hash_data_convert</a>(_ret, _type, _dt, _hash, _key)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="hash_8h.html#a9e289873f120c0bcb0822f4fe5eb2a0c">hash_data_set</a>(_ret, _type, _dt, _hash, _key)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>hash_assign_hash_t</b>(_dst, _src)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>hash_assign_hash_inline</b>(_dst, _hash)</td></tr>
@@ -224,6 +225,71 @@ API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href
         memcpy((_dst), (_src), <span class="keyword">sizeof</span>(<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a>)); \
 }
 </pre></div>
+</div>
+</div>
+<a class="anchor" id="a71a81284fe4f97b860b60a5ad232327c"></a><!-- doxytag: member="hash.h::hash_data_convert" ref="a71a81284fe4f97b860b60a5ad232327c" args="(_ret, _type, _dt, _hash, _key)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define hash_data_convert</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_ret, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_type, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_dt, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_hash, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_key&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment">{               \
+        <a class="code" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">data_convert</a>(_ret,                                          \
+                _type,                                              \
+                _dt,                                                \
+                hash_data_find(_hash,_key)                          \
+        );                                                          \
+        (void)_ret;                                                 \
+};
+</pre></div><p>Convert value from hash. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_ret</td><td>Return value (ssize_t) </td></tr>
+    <tr><td class="paramname">_type</td><td>Destination data type. Only constants allowed. </td></tr>
+    <tr><td class="paramname">_dt</td><td>Destination data. </td></tr>
+    <tr><td class="paramname">_hash</td><td>Hash to get value from </td></tr>
+    <tr><td class="paramname">_key</td><td>Key to search for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">data_get</a> </dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="affda3d4a08457fa138c7942dc8a6c6de"></a><!-- doxytag: member="hash.h::hash_data_copy" ref="affda3d4a08457fa138c7942dc8a6c6de" args="(_ret, _type, _dt, _hash, _key)" -->
@@ -443,7 +509,7 @@ API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 15:40:01 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 21 2011 23:10:58 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
