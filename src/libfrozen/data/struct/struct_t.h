@@ -8,7 +8,7 @@
 
 typedef hash_t  struct_t;
 	
-API size_t    struct_pack         (struct_t *structure, request_t *values, data_t *buffer);
-API size_t    struct_unpack       (struct_t *structure, request_t *values, data_t *buffer);
+uintmax_t    struct_pack         (struct_t *structure, request_t *values, data_t *buffer);
+uintmax_t    struct_unpack       (struct_t *structure, request_t *values, data_t *buffer);
 
 #endif

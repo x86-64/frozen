@@ -30,7 +30,7 @@
 	class = "structs",
 	size = "size",
 	structure = {
-		keyid = (uint64_t)'0'
+		keyid = { default = (uint64_t)'0' }
 	}
 },
 { class = "incapsulate", multiply = (off_t)'8'      },

@@ -8,7 +8,7 @@
  * @ingroup mod_backend_structs
  * @page page_structs_info Description
  *
- * This backend pack and unpack user requests accoring defined structure.
+ * This backend pack and unpack user requests accoring defined structure. It pack values as it is, to convert use @ref mod_backend_convert.
  */
 /**
  * @ingroup mod_backend_structs
@@ -21,9 +21,12 @@
  *              buffer                  = (hash_key_t)'buffer', # input/output request key name, default "buffer"
  *              values                  = (hash_key_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
  *              size                    = (hash_key_t)'size',   # if supplied - add size of packed structure to request with key
- *              structure               = {                    # structure to pack/unpack to/from
- *                     keyname = (uint_t)'10',                 # - first field is keyname with default value of 10
- *                     key2    = (string_t)'',                 # - second field is string
+ *              structure               = {                     # structure to pack/unpack to/from
+ *                     keyname = {                              # - first field is keyname with default value of 10 and FORMAT(clean)
+ *                                  default = (uint_t)'10',
+ *                                  format  = (format_t)'clean'
+ *                               }
+ *                     key2    = { },                           # - second field is anything without default value and FORMAT(binary)
  *                     ...
  *              }
  * }

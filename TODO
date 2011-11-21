@@ -1,4 +1,3 @@
-- data/structs specify format
 - move hash_dump code to hash_t convert, and remove DEBUG condition
 - data 'action_t' + convert array from\to string
 - data 'format_t' + convert array from\to string

@@ -2,8 +2,10 @@
 #include <dataproto.h>
 #include <struct_t.h>
 
-#include <slice/slice_t.h>
 #include <format/format_t.h>
+#include <hash/hash_t.h>
+#include <slice/slice_t.h>
+#include <slider/slider_t.h>
 
 static ssize_t   data_struct_t_read  (data_t *data, fastcall_read *fargs){
 	return -1;
@@ -14,131 +16,110 @@ static ssize_t   data_struct_t_write (data_t *data, fastcall_write *fargs){
 
 typedef struct struct_iter_ctx {
 	request_t             *values;
-	off_t                  curr_offset;
 	data_t                *buffer;
-	uintmax_t              buffer_size;
 } struct_iter_ctx;
 
 static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
-	data_t                *curr_data;
-	data_t                 need_data;
-	uintmax_t              need_data_free    = 0;
+	ssize_t                ret;
+	format_t               format            = FORMAT(binary);
+	hash_t                *element_params;
+	data_t                *value;
 	struct_iter_ctx       *iter_ctx          = (struct_iter_ctx *)p_ctx;
 	
-	// find value for current key
-	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL)
-		return ITER_BREAK; // alloc empty value and free it after transferring
-	
-	// convert if need
-	if(curr_data->type != element->data.type){
-		need_data.type = element->data.type;
-		need_data.ptr  = NULL;
-		
-		fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &need_data, FORMAT(clean) }; 
-		if(data_query(curr_data, &r_convert) != 0)
-			return ITER_BREAK;
-		
-		curr_data      = &need_data;
-		need_data_free = 1;
-	}
-	
-	// get length ( + backroom check )
-	fastcall_physicallen r_len = { { 3, ACTION_PHYSICALLEN } };
-	if(data_query(curr_data, &r_len) != 0)
+	data_get(ret, TYPE_HASHT, element_params, &element->data);
+	if(ret != 0)
 		return ITER_BREAK;
 	
-	// make new slice from buffer
-	data_t d_slice = DATA_SLICET(iter_ctx->buffer, iter_ctx->curr_offset, ~0);
+	hash_data_copy(ret, TYPE_FORMATT, format, element_params, HK(format));
+	
+	if( (value = hash_data_find(iter_ctx->values, element->key)) == NULL){      // find value for current key
+		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // get default value
+			return ITER_BREAK;
+	}
+	
+	data_slider_t_freeze(iter_ctx->buffer);
 	
 	// write data to buffer
-	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_slice };
-	if(data_query(curr_data, &r_transfer) != 0)
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, iter_ctx->buffer, format };
+	if(data_query(value, &r_convert) != 0)
 		return ITER_BREAK;
 	
-	// update offset
-	iter_ctx->curr_offset += r_len.length;
+	data_slider_t_unfreeze(iter_ctx->buffer);
 	
-	if(need_data_free == 1){
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(curr_data, &r_free);
-	}
 	return ITER_CONTINUE;
 }
 
 static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
-	data_t                *curr_data;
+	ssize_t                ret;
+	format_t               format            = FORMAT(binary);
+	hash_t                *element_params;
+	data_t                *value;
 	data_t                 need_data;
-	uintmax_t              need_data_free          = 0;
-	struct_iter_ctx       *iter_ctx                = (struct_iter_ctx *)p_ctx;
+	uintmax_t              need_data_free    = 0;
+	struct_iter_ctx       *iter_ctx          = (struct_iter_ctx *)p_ctx;
 	
-	if(iter_ctx->curr_offset >= iter_ctx->buffer_size)
+	data_get(ret, TYPE_HASHT, element_params, &element->data);
+	if(ret != 0)
 		return ITER_BREAK;
 	
-	// make new slice from buffer
-	data_t d_slice = DATA_SLICET(iter_ctx->buffer, iter_ctx->curr_offset, ~0);
+	hash_data_copy(ret, TYPE_FORMATT, format, element_params, HK(format));
 	
 	// prepare data
-	if( (curr_data = hash_data_find(iter_ctx->values, element->key)) == NULL){
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data };          // default values
-		if(data_query(&element->data, &r_copy) != 0)
+	if( (value = hash_data_find(iter_ctx->values, element->key)) == NULL){      // find destination data for current key
+		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // if not - copy default value
 			return ITER_BREAK;
 		
-		curr_data      = &need_data;
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data };
+		if(data_query(value, &r_copy) != 0)
+			return ITER_BREAK;
+		
+		value          = &need_data;
 		need_data_free = 1;
 	}
-	// TODO convert user-supplied buffer to struct type. For dataptr_t it will work, but not for uint_t ans simmilar
 	
+	data_slider_t_freeze(iter_ctx->buffer);
+
 	// read data from buffer
-	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, curr_data };
-	if(data_query(&d_slice, &r_transfer) != 0)
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_FROM }, iter_ctx->buffer, format };
+	if(data_query(value, &r_convert) < 0)
 		return ITER_BREAK;
 	
-	// get length
-	fastcall_physicallen r_len = { { 3, ACTION_PHYSICALLEN } };
-	if(data_query(curr_data, &r_len) != 0)
-		return ITER_BREAK;
-	
-	iter_ctx->curr_offset += r_len.length;
+	data_slider_t_unfreeze(iter_ctx->buffer);
 	
 	if(need_data_free == 1){
 		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(curr_data, &r_free);
+		data_query(value, &r_free);
 	}
-
+	
 	return ITER_CONTINUE;
 }
 
 /** Pack hash with values, using structure into buffer */
-size_t    struct_pack      (struct_t *structure, request_t *values, data_t *buffer){
-	struct_iter_ctx  iter_ctx;
+uintmax_t  struct_pack      (struct_t *structure, request_t *values, data_t *buffer){
+	data_t                 sl_buffer         = DATA_SLIDERT(buffer, 0);
+	struct_iter_ctx        iter_ctx;
 	
 	iter_ctx.values      = values;
-	iter_ctx.buffer      = buffer;
-	iter_ctx.curr_offset = 0;
+	iter_ctx.buffer      = &sl_buffer;
 	
 	if(hash_iter(structure, &struct_iter_pack, &iter_ctx, 0) == ITER_BREAK)
 		return 0;
 	
-	return (size_t)iter_ctx.curr_offset;
+	return data_slider_t_get_offset(&sl_buffer);
 }
 
 /** Unpack buffer to values using structure */
-size_t    struct_unpack    (struct_t *structure, request_t *values, data_t *buffer){
-	struct_iter_ctx  iter_ctx;
-	
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	if(data_query(buffer, &r_len) != 0)
-		return -EINVAL;
+uintmax_t  struct_unpack    (struct_t *structure, request_t *values, data_t *buffer){
+	data_t                 sl_buffer         = DATA_SLIDERT(buffer, 0);
+	struct_iter_ctx        iter_ctx;
 	
 	iter_ctx.values      = values;
-	iter_ctx.buffer      = buffer;
-	iter_ctx.buffer_size = r_len.length;
-	iter_ctx.curr_offset = 0;
+	iter_ctx.buffer      = &sl_buffer;
 	
 	if(hash_iter(structure, &struct_iter_unpack, &iter_ctx, 0) == ITER_BREAK)
 		return 0;
 	
-	return (size_t)iter_ctx.curr_offset;
+	return data_slider_t_get_offset(&sl_buffer);
 }
 	
 data_proto_t struct_t_proto = {

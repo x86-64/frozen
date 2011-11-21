@@ -88,8 +88,14 @@ START_TEST (test_backend_mphf){
                         { HK(class),       DATA_STRING("structs")                       },
                         { HK(size),        DATA_STRING("size")                          },
                         { HK(structure),   DATA_HASHT(
-                                { HK(keyid), DATA_UINT64T(0)                            },
-                                { HK(key),   DATA_STRING("")                            },
+                                { HK(keyid), DATA_HASHT(
+					{ HK(default), DATA_UINT64T(0)                  },
+					hash_end
+				)},
+                                { HK(key),   DATA_HASHT(
+					{ HK(default), DATA_STRING("")                  },
+					hash_end
+				)},
                                 hash_end
                         )},
                         hash_end

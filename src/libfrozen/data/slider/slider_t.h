@@ -27,6 +27,11 @@
 typedef struct slider_t {
 	data_t                *data;
 	uintmax_t              off;
+	uintmax_t              frozen_off;
 } slider_t;
+
+uintmax_t data_slider_t_get_offset(data_t *data);
+void      data_slider_t_freeze(data_t *data);
+void      data_slider_t_unfreeze(data_t *data);
 
 #endif

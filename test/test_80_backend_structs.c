@@ -15,11 +15,17 @@ START_TEST(test_backend_structs){
                 { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("structs")                     },
                         { HK(structure),   DATA_HASHT(
-                                { HK(key1),  DATA_UINT32T(0)   },
-                                { HK(key2),  DATA_STRING("")   },
+                                { HK(key1),  DATA_HASHT(
+					{ HK(default), DATA_UINT32T(0)                },
+					hash_end
+				)},
+                                { HK(key2),  DATA_HASHT(
+					{ HK(default), DATA_STRING("")                },
+					hash_end
+				)},
                                 hash_end
                         )},
-                        { HK(size),        DATA_STRING("size")                        },
+                        { HK(size),        DATA_HASHKEYT(HK(size))                    },
                         hash_end
                 )},
                 hash_end
@@ -48,13 +54,13 @@ START_TEST(test_backend_structs){
 	
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_write[] = {
-			{ HK(action),     DATA_UINT32T(ACTION_CREATE)                        },
-			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                            },
-			{ HK(buffer),     DATA_RAW(test, 100)                                     },
+			{ HK(action),     DATA_UINT32T(ACTION_CREATE)                              },
+			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                             },
+			{ HK(buffer),     DATA_RAW(test, 100)                                      },
 			
-			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)             },
-			{ HK(key2),       DATA_PTR_STRING( data_array[i].key2)                    },
-			{ HK(ret),        DATA_PTR_SIZET(&ret)                                    },
+			{ HK(key1),       DATA_PTR_UINT32T      (&data_array[i].key1)                  },
+			{ HK(key2),       DATA_RAW(data_array[i].key2, strlen(data_array[i].key2) + 1) },
+			{ HK(ret),        DATA_PTR_SIZET(&ret)                                         },
                         hash_end
 		};
 		backend_query(backend, r_write);
@@ -64,7 +70,7 @@ START_TEST(test_backend_structs){
 	// check
 	for(i=0; i < sizeof(data_array) / sizeof(data_array[0]); i++){
 		request_t r_read[] = {
-			{ HK(action), DATA_UINT32T(ACTION_READ)      },
+			{ HK(action), DATA_UINT32T(ACTION_READ)           },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])             },
 			{ HK(buffer), DATA_RAW(test, 100)                 },
 			

@@ -113,10 +113,15 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 
 				dst_data = (raw_t *)dst->ptr;
 			}else{
-				if(dst_data->size < new_data.size || dst_data->ptr == NULL){
+				//if(dst_data->size < new_data.size || dst_data->ptr == NULL){
+				if(dst_data->ptr == NULL){
 					if( (dst_data->ptr = realloc(dst_data->ptr, new_data.size)) == NULL)
 						return -ENOMEM;
+					
+					dst_data->size = new_data.size;
 				}
+				if(dst_data->size < new_data.size)
+					return -ENOSPC;
 			}
 			
 			fastcall_read r_read2 = { { 5, ACTION_READ }, sizeof(new_data.size), dst_data->ptr, dst_data->size };

@@ -1,9 +1,12 @@
 START_TEST (test_structs){
 	struct_t structure[] = {
-		{ HK(key1), DATA_UINT32T(0)   },
-		{ HK(key2), DATA_OFFT(0)    },
-		{ HK(key3), DATA_UINT32T(0)   },
-		{ HK(key4), DATA_STRING("") },
+		{ HK(key1), DATA_HASHT(hash_end) },
+		{ HK(key2), DATA_HASHT(hash_end) },
+		{ HK(key3), DATA_HASHT(
+			{ HK(default), DATA_UINT32T(0) }, 
+			hash_end
+		)},
+		{ HK(key4), DATA_HASHT(hash_end) },
 		hash_end
 	};
 	
