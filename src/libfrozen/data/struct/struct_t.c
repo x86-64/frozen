@@ -3,6 +3,7 @@
 #include <struct_t.h>
 
 #include <slice/slice_t.h>
+#include <format/format_t.h>
 
 static ssize_t   data_struct_t_read  (data_t *data, fastcall_read *fargs){
 	return -1;
@@ -33,7 +34,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 		need_data.type = element->data.type;
 		need_data.ptr  = NULL;
 		
-		fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &need_data, FORMAT_CLEAN }; 
+		fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &need_data, FORMAT(clean) }; 
 		if(data_query(curr_data, &r_convert) != 0)
 			return ITER_BREAK;
 		

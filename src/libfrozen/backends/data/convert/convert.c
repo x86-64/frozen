@@ -66,7 +66,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	ssize_t                ret;
 	hash_key_t             input;
 	datatype_t             type              = TYPE_INVALID;
-	uintmax_t              format            = FORMAT_CLEAN;
+	uintmax_t              format            = FORMAT(clean);
 	//uintmax_t              return_result     = 0;
 	data_t                *data;
 	hash_t                *new_hash;

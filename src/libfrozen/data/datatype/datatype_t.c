@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <dataproto.h>
 #include <datatype_t.h>
+#include <format/format_t.h>
 
 static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	if(fargs->src == NULL)
@@ -12,7 +13,7 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 	}
 	
 	switch(fargs->format){
-		case FORMAT_HUMANREADABLE:;
+		case FORMAT(human):;
 			uintmax_t     i;
 			data_proto_t *proto;
 			

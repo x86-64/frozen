@@ -4,6 +4,7 @@
 
 #include <string/string_t.h>
 #include <hash/hash_t.h>
+#include <format/format_t.h>
 
 static ssize_t data_backend_t_io  (data_t *data, fastcall_io *fargs){ // {{{
 	return backend_fast_query((backend_t *)data->ptr, fargs);
@@ -20,7 +21,7 @@ static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *f
 			break;
 	}
 	switch(fargs->format){
-		case FORMAT_HUMANREADABLE:;      // TODO data_convert call with FORMAT_CLEAN :(
+		case FORMAT(human):;      // TODO data_convert call with FORMAT(clean) :(
 		default:;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) != 0)

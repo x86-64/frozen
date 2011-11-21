@@ -4,6 +4,7 @@
 m4_include(uint_init.m4)
 
 [#include <]NAME()[.h>]
+#include <format/format_t.h>
 
 static ssize_t data_[]NAME()_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = sizeof([]TYPE());
@@ -105,8 +106,8 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT_CLEAN:;
-		case FORMAT_BINARY:;
+		case FORMAT(clean):;
+		case FORMAT(binary):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(TYPE) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
@@ -132,7 +133,7 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 	}
 
 	switch( fargs->format ){
-		case FORMAT_HUMANREADABLE:; // TODO fix it for slider_t 
+		case FORMAT(human):; // TODO fix it for slider_t 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0){
 				// TODO memleak
@@ -142,8 +143,8 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
 			return 0;
 
-		case FORMAT_CLEAN:;
-		case FORMAT_BINARY:;
+		case FORMAT(clean):;
+		case FORMAT(binary):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
 			if(data_query(fargs->src, &r_read) != 0){
 				// TODO memleak

@@ -3,6 +3,7 @@
 #include <hash_key_t.h>
 
 #include <hashkeys_int.h>
+#include <format/format_t.h>
 
 static int hash_bsearch_string(const void *m1, const void *m2){ // {{{
 	hash_keypair_t *mi1 = (hash_keypair_t *) m1;
@@ -29,7 +30,7 @@ static ssize_t data_hash_key_t_convert_from(data_t *dst, fastcall_convert_from *
 	}
 	
 	switch(fargs->format){
-		case FORMAT_HUMANREADABLE:;
+		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;

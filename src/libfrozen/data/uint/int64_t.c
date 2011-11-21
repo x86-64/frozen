@@ -15,6 +15,7 @@
 
 
 #include <int64_t.h>
+#include <format/format_t.h>
 
 static ssize_t data_int64_t_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = sizeof(int64_t);
@@ -116,8 +117,8 @@ static ssize_t data_int64_t_convert_to(data_t *src, fastcall_convert_to *fargs){
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT_CLEAN:;
-		case FORMAT_BINARY:;
+		case FORMAT(clean):;
+		case FORMAT(binary):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(int64_t) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
@@ -143,7 +144,7 @@ static ssize_t data_int64_t_convert_from(data_t *dst, fastcall_convert_from *far
 	}
 
 	switch( fargs->format ){
-		case FORMAT_HUMANREADABLE:; // TODO fix it for slider_t 
+		case FORMAT(human):; // TODO fix it for slider_t 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0){
 				// TODO memleak
@@ -153,8 +154,8 @@ static ssize_t data_int64_t_convert_from(data_t *dst, fastcall_convert_from *far
 			*(int64_t *)(dst->ptr) = (int64_t )strtoul(buffer, NULL, 10);
 			return 0;
 
-		case FORMAT_CLEAN:;
-		case FORMAT_BINARY:;
+		case FORMAT(clean):;
+		case FORMAT(binary):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(int64_t) };
 			if(data_query(fargs->src, &r_read) != 0){
 				// TODO memleak

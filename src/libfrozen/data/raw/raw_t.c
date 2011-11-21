@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <dataproto.h>
 #include <raw_t.h>
+#include <format/format_t.h>
 
 static ssize_t data_raw_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
@@ -64,7 +65,7 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 		return -EINVAL;
 	
 	switch(fargs->format){
-		case FORMAT_CLEAN:;
+		case FORMAT(clean):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src_data->ptr, src_data->size };
 			ret = data_query(fargs->dest, &r_write);
 			
@@ -72,7 +73,7 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 			
 			break;
 
-		case FORMAT_BINARY:;
+		case FORMAT(binary):;
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0,                     &src_data->size, sizeof(src_data->size) };
 			ret         = data_query(fargs->dest, &r_write1);
 			transfered += r_write1.buffer_size;
@@ -100,7 +101,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 	raw_t                 *dst_data = ((raw_t *)dst->ptr);
 	
 	switch(fargs->format){
-		case FORMAT_BINARY:;
+		case FORMAT(binary):;
 			fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &new_data.size, sizeof(new_data.size) };
 			if( (ret = data_query(fargs->src, &r_read1)) < 0)
 				return ret;

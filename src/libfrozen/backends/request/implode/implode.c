@@ -104,7 +104,7 @@ static ssize_t explode_request(backend_t *backend, request_t *request){ // {{{
 	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
 		return -EINVAL;
 	
-	fastcall_convert_from  r_convert_from = { { 4, ACTION_CONVERT_FROM }, buffer, FORMAT_BINARY };
+	fastcall_convert_from  r_convert_from = { { 4, ACTION_CONVERT_FROM }, buffer, FORMAT(binary) };
 	if( (ret = data_query(&r_hash, &r_convert_from)) < 0)
 		return -EFAULT;
 	
@@ -114,7 +114,7 @@ static ssize_t explode_request(backend_t *backend, request_t *request){ // {{{
 	ret = ( (ret = backend_pass(backend, r_hash.ptr)) < 0) ? ret : -EEXIST;
 	
 	if(userdata->return_result != 0){
-		fastcall_convert_to    r_convert_to = { { 4, ACTION_CONVERT_TO }, buffer, FORMAT_BINARY };
+		fastcall_convert_to    r_convert_to = { { 4, ACTION_CONVERT_TO }, buffer, FORMAT(binary) };
 		if( (ret = data_query(&r_hash, &r_convert_to)) < 0)
 			return -EFAULT;
 	}

@@ -4,6 +4,7 @@
 
 #include <raw/raw_t.h>
 #include <slider/slider_t.h>
+#include <format/format_t.h>
 
 #define HASH_INITIAL_SIZE 8
 
@@ -49,7 +50,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			
 			if(hash_item->key != hash_ptr_end && hash_item->key != hash_ptr_null){
 				// write data
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT_BINARY };
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
 				if(data_query(&hash_item->data, &r_convert) < 0)
 					return ITER_BREAK;
 			}
@@ -58,7 +59,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	return ITER_CONTINUE;
 } // }}}
 static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
-	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT_BINARY };
+	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT(binary) };
 	if(data_query(&hash_item->data, &r_convert) < 0)
 		return ITER_BREAK;
 	
@@ -121,7 +122,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	data_t                 sl_src            = DATA_SLIDERT(fargs->src, 0);
 	list                   new_data          = LIST_INITIALIZER;
 	
-	if(fargs->format != FORMAT_BINARY)
+	if(fargs->format != FORMAT(binary))
 		return -ENOSYS;
 	
 	hash_nelements = HASH_INITIAL_SIZE;

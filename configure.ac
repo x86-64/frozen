@@ -90,6 +90,7 @@ FROZEN_MODULE_END
 
 esyscmd(./build/libfrozen_errors.pl)
 esyscmd(./build/libfrozen_hashkeys.sh)
+esyscmd(./build/libfrozen_formats.sh)
 
 AC_ARG_ENABLE(coverage, AS_HELP_STRING([--enable-coverage], [enable coverage testing]))
 if test "x${enable_coverage}" = "xyes"; then

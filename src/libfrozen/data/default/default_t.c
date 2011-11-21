@@ -2,6 +2,7 @@
 #include <dataproto.h>
 
 #include <string/string_t.h>
+#include <format/format_t.h>
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
 	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
@@ -146,13 +147,13 @@ static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null 
 static ssize_t       data_default_init          (data_t *dst, fastcall_init *fargs){ // {{{
 	data_t                 d_initstr         = DATA_STRING(fargs->string);
 	
-	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT_HUMANREADABLE };
+	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(human) };
 	return data_query(dst, &r_convert);
 } // }}}
 static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
 	ssize_t                ret;
 	
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT_CLEAN };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(clean) };
 	if( (ret = data_query(src, &r_convert)) != 0)
 		return ret;
 	

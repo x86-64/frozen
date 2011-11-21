@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <dataproto.h>
 #include <string_t.h>
+#include <format/format_t.h>
 
 static ssize_t data_string_t_physlen(data_t *data, fastcall_physicallen *fargs){ // {{{
 	fargs->length = strlen((char *)data->ptr) + 1;
@@ -15,7 +16,7 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	char                  *buffer            = NULL;
 	uintmax_t              buffer_size       = 0;
 	uintmax_t              malloc_size;
-	uintmax_t              format            = FORMAT_CLEAN;
+	uintmax_t              format            = FORMAT(clean);
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -23,7 +24,7 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	if(fargs->header.nargs > 3)
 		format = fargs->format;
 	
-	// fast convert from string (string can only contain FORMAT_CLEAN)
+	// fast convert from string (string can only contain FORMAT(clean))
 	if(fargs->src->type == TYPE_STRINGT){
 		dst->ptr = strdup((char *)fargs->src->ptr);
 		return 0;
@@ -43,9 +44,9 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	
 	// alloc new buffer
 	switch(format){
-		case FORMAT_CLEAN:         buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
-		case FORMAT_HUMANREADABLE: buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
-		case FORMAT_BINARY:        if(r_len.length == 0)
+		case FORMAT(clean):         buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
+		case FORMAT(human): buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
+		case FORMAT(binary):        if(r_len.length == 0)
 						return -EINVAL;   
 					   buffer_size = r_len.length - 1; malloc_size = r_len.length;     break;
 		default:
@@ -96,14 +97,14 @@ static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	buffer_size = strlen(src->ptr);
 	
 	switch(fargs->format){
-		case FORMAT_BINARY:;
+		case FORMAT(binary):;
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size + 1 };
 			ret        = data_query(fargs->dest, &r_write1);
 			transfered = r_write1.buffer_size;
 			break;
 		
-		case FORMAT_CLEAN:;
-		case FORMAT_HUMANREADABLE:;
+		case FORMAT(clean):;
+		case FORMAT(human):;
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size };
 			ret        = data_query(fargs->dest, &r_write2);
 			transfered = r_write2.buffer_size;
