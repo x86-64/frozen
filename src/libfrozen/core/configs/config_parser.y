@@ -99,11 +99,42 @@ hash_value :
 		/* convert string to needed data */
 		fastcall_init r_init2 = { { 3, ACTION_INIT }, $4 }; 
 		if(data_query(&$$, &r_init2) != 0){
-			yyerror(hash, "failed convert data\n"); YYERROR;
+			char buffer[DEF_BUFFER_SIZE];
+			
+			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)'%s'\n", $2, $4);
+
+			yyerror(hash, buffer); YYERROR;
 		}
 		
 		free($2);
 		free($4);
+	}
+	| '(' NAME ')' '{' hash_items '}' {
+		datatype_t  type;
+		data_t      d_type   = DATA_PTR_DATATYPET(&type);
+		data_t      d_hash   = DATA_PTR_HASHT($5);
+		
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
+		if(data_query(&d_type, &r_init1) != 0){
+			yyerror(hash, "failed convert datatype\n"); YYERROR;
+		}
+		
+		$$.type = type;
+		$$.ptr  = NULL;
+		
+		/* convert string to needed data */
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
+		if(data_query(&$$, &r_convert) != 0){
+			char buffer[DEF_BUFFER_SIZE];
+			
+			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)\n", $2);
+
+			yyerror(hash, buffer); YYERROR;
+		}
+		
+		free($2);
+		hash_free($5);
+
 	}
 	| NAME {
 		data_functions action;

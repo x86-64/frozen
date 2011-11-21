@@ -37,6 +37,9 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			fdata->request = NULL;
 			// fall
 		case ACTION_FREE:
+			if(fdata == NULL)
+				return -EFAULT;
+			
 			if(fdata->backend)
 				backend_destroy(fdata->backend);
 			if(fdata->request)

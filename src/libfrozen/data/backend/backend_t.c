@@ -21,6 +21,10 @@ static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *f
 			break;
 	}
 	switch(fargs->format){
+		case FORMAT(hash):
+			dst->ptr = backend_new( (hash_t *)fargs->src->ptr ); goto check;
+			goto check;
+
 		case FORMAT(human):;      // TODO data_convert call with FORMAT(clean) :(
 		default:;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };

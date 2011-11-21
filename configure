@@ -837,6 +837,7 @@ enable_backendcache
 enable_backendcache_append
 enable_backendipc
 enable_backendkill
+enable_backendthread
 enable_backendallocator
 enable_backendconvert
 enable_backendincapsulate
@@ -1578,6 +1579,8 @@ Optional Features:
                           disable backend cache-append
   --disable-backend-ipc   disable backend ipc
   --disable-backend-kill  disable backend kill
+  --disable-backend-thread
+                          disable backend thread
   --disable-backend-allocator
                           disable backend allocator
   --disable-backend-convert
@@ -19220,6 +19223,43 @@ fi
 		BACKEND_MAKEFILE_daemon_kill=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED daemon/kill/libfrozen_backend_kill.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendthread was given.
+if test "${enable_backendthread+set}" = set; then :
+  enableval=$enable_backendthread;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendthread}" = "yes"; then
+			enable_backendthread="no"
+		else
+			enable_backendthread="yes"
+		fi
+	fi
+
+	if test "${enable_backendthread}" = "yes"; then
+		BACKEND_DIR_thread="daemon/thread"
+		BACKEND_DEP_thread=""
+				BACKEND_SELECTED="$BACKEND_SELECTED thread"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_daemon_thread" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/daemon/thread/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS daemon/thread"
+
+		BACKEND_MAKEFILE_daemon_thread=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED daemon/thread/libfrozen_backend_thread.la"
 
 	fi
 

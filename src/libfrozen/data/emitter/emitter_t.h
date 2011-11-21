@@ -20,6 +20,7 @@
  */
 
 #define DATA_EMITTERT(_backend,_request)  {TYPE_EMITTERT, (emitter_t []){ { _backend, _request, 0 } }}
+#define DATA_PTR_EMITTERT(_ptr)  {TYPE_EMITTERT, _ptr }
 #define DEREF_TYPE_EMITTERT(_data) (emitter_t *)((_data)->ptr)
 #define REF_TYPE_EMITTERT(_dt) _dt
 #define HAVEBUFF_TYPE_EMITTERT 0

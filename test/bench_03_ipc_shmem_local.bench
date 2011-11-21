@@ -1,17 +1,17 @@
-{ class => "emitter", count => (uint_t)'100000', on_end => "destroy",
-	pre_request => {
-		action => create,
-		size   => (size_t)'100',
-		buffer => "abcdefghjklmnopqrstuvwxyz"
-	},
+{ class => "daemon/thread" },
+{ class => "emitter", request = { backend = { { name  => "shmem_lcl" }        }, request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { backend = { { name  => "shmem_lcl" }        },
 	request = {
 		action => read,
 		offset => (off_t)'0',
 		size   => (size_t)'26',
 		buffer => "                         "
 	}
-},
+}, count => (uint_t)'300000' },
+{ class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
+{ class => "end"                                                             },
+NULL,
 { class => "benchmark", name => "shmem_lcl"                                  },
-{ class => "ipc", type => "shmem", role => "client", key => (uint32_t)'1010' },
-{ class => "ipc", type => "shmem", role => "server", key => (uint32_t)'1010' },
-{ class => "null"                                                            }
+{ class => "ipc", type => "shmem", role => "client", key => (uint32_t)'1011' },
+{ class => "ipc", type => "shmem", role => "server", key => (uint32_t)'1011' },
+{ class => "end"                                                             }

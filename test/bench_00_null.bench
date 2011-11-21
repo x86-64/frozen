@@ -1,6 +1,8 @@
-{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy",
-	pre_request = { benchmark_function = "restart" },
-	request     = { action => create }
-},
-{ class => "benchmark", name => "null"                                },
-{ class => "end"                                                      }
+{ class => "daemon/thread" },
+{ class => "emitter", request = { backend = { { name  => "null" }        }, request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { backend = { { name  => "null" }        }, request = { action => create } },  count => (uint_t)'8000000' },
+{ class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
+{ class => "end"                                              },
+NULL,
+{ class => "benchmark", name => "null"                        },
+{ class => "end"                                              }

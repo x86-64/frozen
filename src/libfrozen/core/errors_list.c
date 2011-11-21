@@ -4,6 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -172112, "src/libfrozen/backends/daemon/thread/thread.c: pthread_create failed" },
+ { -172098, "src/libfrozen/backends/daemon/thread/thread.c: pthread_join failed" },
+ { -172095, "src/libfrozen/backends/daemon/thread/thread.c: pthread_cancel failed" },
+ { -172082, "src/libfrozen/backends/daemon/thread/thread.c: calloc failed" },
+ { -167975, "src/libfrozen/backends/request/emitter/emitter.c: calloc failed" },
  { -163934, "src/libfrozen/backends/data/transfer/transfer.c: pthread_create failed" },
  { -163912, "src/libfrozen/backends/data/transfer/transfer.c: pthread_join failed" },
  { -163909, "src/libfrozen/backends/data/transfer/transfer.c: pthread_cancel failed" },
@@ -50,8 +55,6 @@ static err_item errs_list[] = {
  { -86097, "src/libfrozen/backends/backend/morph/morph.c: child creation error" },
  { -86074, "src/libfrozen/backends/backend/morph/morph.c: HK(config) not supplied" },
  { -86057, "src/libfrozen/backends/backend/morph/morph.c: calloc failed" },
- { -77955, "src/libfrozen/backends/request/emitter/emitter.c: pthread_create failed" },
- { -77917, "src/libfrozen/backends/request/emitter/emitter.c: calloc failed" },
  { -73889, "src/libfrozen/backends/backend/benchmark/benchmark.c: calloc failed" },
  { -69692, "src/libfrozen/backends/request/debug/debug.c: calloc failed" },
  { -65907, "src/libfrozen/backends/backend/pool/pool.c: pthread_join failed" },

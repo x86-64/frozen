@@ -127,6 +127,23 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
 	(void)_ret;                                                 \
 };
 
+/** Convert value from hash.
+ * @param _ret  Return value (ssize_t)
+ * @param _type Destination data type. Only constants allowed.
+ * @param _dt   Destination data.
+ * @param _hash Hash to get value from
+ * @param _key  Key to search for
+ * @see data_get
+ */
+#define hash_data_convert(_ret,_type,_dt,_hash,_key){               \
+	data_convert(_ret,                                          \
+		_type,                                              \
+		_dt,                                                \
+		hash_data_find(_hash,_key)                          \
+	);                                                          \
+	(void)_ret;                                                 \
+};
+
 /** Set value to hash. Use this ONLY in emergency.
  * @param _ret  Return value (ssize_t)
  * @param _type Source data type. Only constants allowed.

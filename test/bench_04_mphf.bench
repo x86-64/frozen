@@ -1,15 +1,22 @@
-{ class => "emitter", count => (uint_t)'1000000', on_end => "destroy",
-	pre_request = {
+{ class => "daemon/thread" },
+{ class => "emitter", request = { backend = { { name  => "mphf" }        }, request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { backend = { { name  => "mphf" }        },
+	request = {
 		action => create,
 		key    => "moo",
 		buffer => "aaaaaaaaaaaaaaaaaaaaaaaaa"
-	},
+	}
+} },
+{ class => "emitter", request = { backend = { { name  => "mphf" }        },
 	request = {
 		action => write,
 		key    => "moo",
 		buffer => "bbbbbbbbbbbbbbbbbbbbbbbbb"
 	}
-},
+}, count => (uint_t)'1000000' },
+{ class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
+{ class => "end"                                                             },
+NULL,
 { class => "benchmark", name => "mphf"                                   },
 
 { class = "hash/murmur2_64", input = (hash_key_t)'key', output = (hash_key_t)'keyid'             },

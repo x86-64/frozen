@@ -373,16 +373,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   26
+#define YYLAST   29
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  12
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  14
+#define YYNRULES  15
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  22
+#define YYNSTATES  25
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -429,7 +429,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     5,     6,     8,    12,    15,    17,    18,
-      21,    24,    26,    30,    35
+      21,    24,    26,    30,    35,    42
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -438,14 +438,15 @@ static const yytype_int8 yyrhs[] =
       13,     0,    -1,    14,    -1,    -1,    15,    -1,    14,     7,
       15,    -1,    16,    17,    -1,     6,    -1,    -1,     6,     5,
       -1,     3,     5,    -1,     4,    -1,     8,    14,     9,    -1,
-      10,     3,    11,     4,    -1,     3,    -1
+      10,     3,    11,     4,    -1,    10,     3,    11,     8,    14,
+       9,    -1,     3,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
        0,    36,    36,    39,    43,    48,    57,    61,    67,    68,
-      69,    85,    86,    87,   108
+      69,    85,    86,    87,   112,   139
 };
 #endif
 
@@ -474,14 +475,14 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_uint8 yyr1[] =
 {
        0,    12,    13,    14,    14,    14,    15,    15,    16,    16,
-      16,    17,    17,    17,    17
+      16,    17,    17,    17,    17,    17
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     0,     1,     3,     2,     1,     0,     2,
-       2,     1,     3,     4,     1
+       2,     1,     3,     4,     6,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -490,8 +491,8 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        8,     0,     7,     0,     2,     4,     0,    10,     9,     1,
-       8,    14,    11,     8,     0,     6,     5,     0,     0,    12,
-       0,    13
+       8,    15,    11,     8,     0,     6,     5,     0,     0,    12,
+       0,    13,     8,     0,    14
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -502,18 +503,18 @@ static const yytype_int8 yydefgoto[] =
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -5
+#define YYPACT_NINF -14
 static const yytype_int8 yypact[] =
 {
-       0,    -4,    -3,     8,    11,    -5,     1,    -5,    -5,    -5,
-       9,    -5,    -5,     7,    17,    -5,    -5,    10,    12,    -5,
-      18,    -5
+       1,    -3,    -2,    13,    20,   -14,     2,   -14,   -14,   -14,
+      15,   -14,   -14,     8,    19,   -14,   -14,    16,    18,   -14,
+      12,   -14,     8,    17,   -14
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -5,    -5,    13,    14,    -5,    -5
+     -14,   -14,   -13,     9,   -14,   -14
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -522,22 +523,22 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -4
 static const yytype_int8 yytable[] =
 {
-      -3,     7,     8,     1,    11,    12,     2,    -3,     9,    13,
-       1,    14,     1,     2,    -3,     2,    -3,    10,    10,    19,
-      18,     0,    21,    20,    16,     0,    17
+      17,    -3,     7,     8,     1,    11,    12,     2,    -3,    23,
+      13,     1,    14,     9,     2,    -3,    21,    -3,     1,    16,
+      22,     2,    18,    10,    10,    19,    24,    10,     0,    20
 };
 
 #define yypact_value_is_default(yystate) \
-  ((yystate) == (-5))
+  ((yystate) == (-14))
 
 #define yytable_value_is_error(yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
 {
-       0,     5,     5,     3,     3,     4,     6,     7,     0,     8,
-       3,    10,     3,     6,     7,     6,     9,     7,     7,     9,
-       3,    -1,     4,    11,    10,    -1,    13
+      13,     0,     5,     5,     3,     3,     4,     6,     7,    22,
+       8,     3,    10,     0,     6,     7,     4,     9,     3,    10,
+       8,     6,     3,     7,     7,     9,     9,     7,    -1,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -546,7 +547,7 @@ static const yytype_uint8 yystos[] =
 {
        0,     3,     6,    13,    14,    15,    16,     5,     5,     0,
        7,     3,     4,     8,    10,    17,    15,    14,     3,     9,
-      11,     4
+      11,     4,     8,    14,     9
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1512,7 +1513,11 @@ yyreduce:
 		/* convert string to needed data */
 		fastcall_init r_init2 = { { 3, ACTION_INIT }, (yyvsp[(4) - (4)].name) }; 
 		if(data_query(&(yyval.data), &r_init2) != 0){
-			yyerror(hash, "failed convert data\n"); YYERROR;
+			char buffer[DEF_BUFFER_SIZE];
+			
+			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)'%s'\n", (yyvsp[(2) - (4)].name), (yyvsp[(4) - (4)].name));
+
+			yyerror(hash, buffer); YYERROR;
 		}
 		
 		free((yyvsp[(2) - (4)].name));
@@ -1523,7 +1528,40 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 108 "configs/config_parser.y"
+#line 112 "configs/config_parser.y"
+    {
+		datatype_t  type;
+		data_t      d_type   = DATA_PTR_DATATYPET(&type);
+		data_t      d_hash   = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
+		
+		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (6)].name) }; 
+		if(data_query(&d_type, &r_init1) != 0){
+			yyerror(hash, "failed convert datatype\n"); YYERROR;
+		}
+		
+		(yyval.data).type = type;
+		(yyval.data).ptr  = NULL;
+		
+		/* convert string to needed data */
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
+		if(data_query(&(yyval.data), &r_convert) != 0){
+			char buffer[DEF_BUFFER_SIZE];
+			
+			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)\n", (yyvsp[(2) - (6)].name));
+
+			yyerror(hash, buffer); YYERROR;
+		}
+		
+		free((yyvsp[(2) - (6)].name));
+		hash_free((yyvsp[(5) - (6)].hash_items));
+
+	}
+    break;
+
+  case 15:
+
+/* Line 1806 of yacc.c  */
+#line 139 "configs/config_parser.y"
     {
 		data_functions action;
 		if((action = request_str_to_action((yyvsp[(1) - (1)].name))) != ACTION_INVALID){
@@ -1542,7 +1580,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1546 "configs/config_parser.tab.c"
+#line 1584 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1773,7 +1811,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 122 "configs/config_parser.y"
+#line 153 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){
