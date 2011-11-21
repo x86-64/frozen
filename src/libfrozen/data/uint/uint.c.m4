@@ -24,8 +24,8 @@ static ssize_t data_[]NAME()_compare(data_t *data1, fastcall_compare *fargs){ //
 	data1_val = *(TYPE *)(data1->ptr);
 	data2_val = *(TYPE *)(fargs->data2->ptr); 
 	     if(data1_val == data2_val){ cret =  0; }
-	else if(data1_val <  data2_val){ cret = -1; }
-	else                           { cret =  1; }
+	else if(data1_val <  data2_val){ cret =  1; }
+	else                           { cret =  2; }
 	
 	return cret;
 } // }}}

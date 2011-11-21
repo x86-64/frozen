@@ -1,4 +1,3 @@
-- chech all compares to remove -1
 - data/structs specify format
 - move hash_dump code to hash_t convert, and remove DEBUG condition
 - data 'action_t' + convert array from\to string

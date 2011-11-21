@@ -35,8 +35,8 @@ static ssize_t data_uint32_t_compare(data_t *data1, fastcall_compare *fargs){ //
 	data1_val = *(uint32_t *)(data1->ptr);
 	data2_val = *(uint32_t *)(fargs->data2->ptr); 
 	     if(data1_val == data2_val){ cret =  0; }
-	else if(data1_val <  data2_val){ cret = -1; }
-	else                           { cret =  1; }
+	else if(data1_val <  data2_val){ cret =  1; }
+	else                           { cret =  2; }
 	
 	return cret;
 } // }}}
