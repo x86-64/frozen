@@ -16,17 +16,19 @@ typedef uintmax_t format_t;
 
 #define FORMAT_binary 1
 #define FORMAT_clean 2
-#define FORMAT_hash 3
-#define FORMAT_human 4
-#define FORMAT_value 5
+#define FORMAT_debug 3
+#define FORMAT_hash 4
+#define FORMAT_human 5
+#define FORMAT_value 6
 #endif
 #ifdef FORMAT_C
 keypair_t formats[] = {
 { "binary", 1 }, 
 { "clean", 2 }, 
-{ "hash", 3 }, 
-{ "human", 4 }, 
-{ "value", 5 }, 
+{ "debug", 3 }, 
+{ "hash", 4 }, 
+{ "human", 5 }, 
+{ "value", 6 }, 
 };
 size_t formats_size       = sizeof(formats[0]);
 size_t formats_nelements  = (sizeof(formats)/sizeof(formats[0]));

@@ -3,8 +3,11 @@
 #include <hash_t.h>
 
 #include <raw/raw_t.h>
+#include <string/string_t.h>
 #include <slider/slider_t.h>
 #include <format/format_t.h>
+#include <hash_key/hash_key_t.h>
+#include <datatype/datatype_t.h>
 
 #define HASH_INITIAL_SIZE 8
 
@@ -14,6 +17,15 @@ typedef struct hash_t_ctx {
 	data_t                *sl_holder;
 	data_t                *sl_data;
 } hash_t_ctx;
+
+static void data_hash_t_append_pad(hash_t_ctx *ctx){ // {{{
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", ctx->step };
+	data_query(ctx->sl_data, &r_write);
+} // }}}
+static void data_hash_t_append(hash_t_ctx *ctx, char *string){ // {{{
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
+	data_query(ctx->sl_data, &r_write);
+} // }}}
 
 static ssize_t data_hash_t_compare_iter(hash_t *hash1_item, fastcall_compare *fargs){ // {{{
 	hash_t                *hash2_item;
@@ -65,6 +77,70 @@ static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx)
 	
 	return ITER_CONTINUE;
 } // }}}
+static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ctx){ // {{{
+	unsigned int           k;
+	char                   buffer[DEF_BUFFER_SIZE];  
+	data_t                 d_s_key           = DATA_STRING(NULL);
+	data_t                 d_s_type          = DATA_STRING(NULL);
+	
+	if(element->key == hash_ptr_null){
+		data_hash_t_append_pad(ctx);
+		data_hash_t_append(ctx, " - hash_null\n");
+		return ITER_CONTINUE;
+	}
+	if(element->key == hash_ptr_end){
+		data_hash_t_append_pad(ctx);
+		data_hash_t_append(ctx, " - hash_end\n");
+		
+		if(ctx->step > 0)
+			ctx->step -= 1;
+		return ITER_CONTINUE;
+	}
+	if(element->key == hash_ptr_inline){
+		data_hash_t_append_pad(ctx);
+		data_hash_t_append(ctx, " - hash_inline:\n");
+		
+		ctx->step += 1;
+		return ITER_CONTINUE;
+	}
+
+	data_t              d_key     = DATA_HASHKEYT(element->key);
+	fastcall_convert_to r_convert1 = { { 4, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(clean) };
+	data_query(&d_key, &r_convert1);
+	
+	data_t              d_type    = DATA_DATATYPET(element->data.type);
+	fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, &d_s_type, FORMAT(clean) };
+	data_query(&d_type, &r_convert2);
+	
+	snprintf(buffer, sizeof(buffer), " - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
+	data_hash_t_append_pad(ctx);
+	data_hash_t_append(ctx, buffer);
+	
+	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
+	data_query(&element->data, &r_ptr);
+	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	data_query(&element->data, &r_len);
+
+	for(k = 0; k < r_len.length; k++){
+		if((k % 32) == 0){
+			snprintf(buffer, sizeof(buffer), "   0x%.5x: ", k);
+			
+			data_hash_t_append(ctx, "\n");
+			data_hash_t_append_pad(ctx);
+			data_hash_t_append(ctx, buffer);
+		}
+		
+		snprintf(buffer, sizeof(buffer), "%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
+		data_hash_t_append(ctx, buffer);
+	}
+	data_hash_t_append(ctx, "\n");
+	
+	
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&d_s_key,  &r_free);
+	data_query(&d_s_type, &r_free);
+	return ITER_CONTINUE;
+} // }}}
 
 static ssize_t data_hash_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	hash_t                *src_hash          = (hash_t *)src->ptr;
@@ -98,19 +174,35 @@ static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	hash_t_ctx             ctx               = {};
 	
-	if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
-		return -EFAULT;
-	
-	data_t                 d_sl_holder       = DATA_SLIDERT(fargs->dest, 0);
-	data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, ctx.buffer_data_offset);
-	
-	ctx.step++;
-	ctx.sl_holder = &d_sl_holder;
-	ctx.sl_data   = &d_sl_data;
-	
-	if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
-		return -EFAULT;
-	
+	switch(fargs->format){
+		case FORMAT(binary):
+			if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
+				return -EFAULT;
+			
+			data_t                 d_sl_holder       = DATA_SLIDERT(fargs->dest, 0);
+			data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, ctx.buffer_data_offset);
+			
+			ctx.step++;
+			ctx.sl_holder = &d_sl_holder;
+			ctx.sl_data   = &d_sl_data;
+			
+			if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
+				return -EFAULT;
+			break;
+			
+		case FORMAT(debug):;
+			data_t                 d_sl_data2        = DATA_SLIDERT(fargs->dest, 0);
+			
+			ctx.step      = 0;
+			ctx.sl_data   = &d_sl_data2;
+			
+			if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_debug_iter, &ctx, HASH_ITER_NULL | HASH_ITER_INLINE | HASH_ITER_END) != ITER_OK)
+				return -EFAULT;
+			break;
+			
+		default:
+			return -ENOSYS;
+	}
 	return 0;
 } // }}}
 static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
@@ -186,18 +278,6 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	}
 	return 0;
 } // }}}
-
-/*
-static ssize_t data_hash_t_read(data_t *data, fastcall_read *fargs){ // {{{
-	if(fargs->offset != 0) // TODO force read to respect offset
-		return -EINVAL;
-	
-	data_t d_buffer = DATA_RAW(fargs->buffer, fargs->buffer_size);
-	
-	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_buffer };
-	return data_hash_t_transfer(data, &r_transfer);
-} // }}}
-*/
 
 data_proto_t hash_t_proto = {
 	.type                   = TYPE_HASHT,

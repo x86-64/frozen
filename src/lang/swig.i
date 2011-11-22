@@ -7,8 +7,6 @@
 %}
 
 #ifdef SWIGGO
-#define DEBUG // for missing -DDEBUG from configure
-
 %typemap(gotype) f_init,      const void * & "func(uintptr) int"
 %typemap(gotype) f_fork,      const void * & "func(uintptr, uintptr, uintptr) int"
 %typemap(gotype) f_configure, const void * & "func(uintptr, uintptr) int"

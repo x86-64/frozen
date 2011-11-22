@@ -156,75 +156,15 @@ data_t *           hash_data_find               (hash_t *hash, hash_key_t key){ 
 		NULL : &temp->data;
 } // }}}
 
-#ifdef DEBUG
-static void hash_dump_pad(uintmax_t reclevel){
-	for(;reclevel > 0; reclevel--)
-		printf("\t");
-}
-
-static ssize_t hash_dump_iter(hash_t *element, uintmax_t *reclevel){
-	unsigned int           k;
-	data_t                 d_s_key  = DATA_STRING(NULL);
-	data_t                 d_s_type = DATA_STRING(NULL);
+void               hash_dump                    (hash_t *hash){ // {{{
+	char                   buffer[DEF_BUFFER_SIZE*20];
+	data_t                 d_hash            = DATA_PTR_HASHT(hash);
+	data_t                 d_buffer          = DATA_RAW(buffer, sizeof(buffer));
 	
-	if(element->key == hash_ptr_null){
-		hash_dump_pad(*reclevel);
-		printf(" - hash_null\n");
-		return ITER_CONTINUE;
-	}
-	if(element->key == hash_ptr_end){
-		hash_dump_pad(*reclevel);
-		printf(" - hash_end\n");
-		
-		if(*reclevel > 0)
-			*reclevel -= 1;
-		return ITER_CONTINUE;
-	}
-	if(element->key == hash_ptr_inline){
-		hash_dump_pad(*reclevel);
-		printf(" - hash_inline:\n");
-		
-		*reclevel += 1;
-		return ITER_CONTINUE;
-	}
-
-	data_t              d_key     = DATA_HASHKEYT(element->key);
-	fastcall_convert_to r_convert1 = { { 4, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(clean) };
-	data_query(&d_key, &r_convert1);
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_buffer, FORMAT(debug) };
+	if(data_query(&d_hash, &r_convert) < 0)
+		return;
 	
-	data_t              d_type    = DATA_DATATYPET(element->data.type);
-	fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, &d_s_type, FORMAT(clean) };
-	data_query(&d_type, &r_convert2);
-
-	hash_dump_pad(*reclevel);
-	printf(" - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
-	
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&d_s_key,  &r_free);
-	data_query(&d_s_type, &r_free);
-
-	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	data_query(&element->data, &r_ptr);
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	data_query(&element->data, &r_len);
-
-	for(k = 0; k < r_len.length; k++){
-		if((k % 32) == 0){
-			printf("\n");
-			hash_dump_pad(*reclevel);
-			printf("   0x%.5x: ", k);
-		}
-		
-		printf("%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
-	}
-	printf("\n");
-	return ITER_CONTINUE;
-}
-
-void hash_dump(hash_t *hash){ // {{{
-	uintmax_t              reclevel = 0;
-	
-	hash_iter(hash, (hash_iterator)&hash_dump_iter, &reclevel, HASH_ITER_NULL | HASH_ITER_INLINE | HASH_ITER_END);
+	fprintf(stderr, "%s", buffer);
 } // }}}
-#endif
 

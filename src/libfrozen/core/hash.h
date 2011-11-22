@@ -94,6 +94,7 @@ typedef ssize_t  (*hash_iterator)(hash_t *hash, void *arg); ///< Callback routin
 API hash_t *           hash_new                     (size_t nelements);  ///< Allocate new hash filled with hash_null
 API hash_t *           hash_copy                    (hash_t *hash);      ///< Make copy of supplied hash
 API void               hash_free                    (hash_t *hash);      ///< Free allocated, or copy of hash
+API void               hash_dump                    (hash_t *hash);      ///< Print human-readable version of hash
 
 API hash_t *           hash_find                    (hash_t *hash, hash_key_t key); ///< Find key in hash
 API data_t *           hash_data_find               (hash_t *hash, hash_key_t key); ///< Find key in hash and return pointer to data holder
@@ -179,8 +180,5 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
 	(_dst)->data.ptr = NULL;      \
 }
 
-#ifdef DEBUG
-API void               hash_dump                    (hash_t *hash); ///< Print human-readable version of hash
-#endif
 
 #endif // HASH_H
