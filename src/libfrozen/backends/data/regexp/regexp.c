@@ -30,6 +30,12 @@
  *              noteol                  = (uint_t)'0',        # see "man regcomp", default 0
  *              marker                  = (hash_key_t)'marker',# on match - pass request with this key set
  *              marker_value            = (uint_t)'1',        # value for marker
+ *              capture                 = {                   # capture key names 
+ *                       key_global     = (void_t)'',         # - key for whole match
+ *                       key1           = (void_t)'',         # - key for first capture braces
+ *                       key2           = (void_t)'',         # - key for second capture braces
+ *                       ....
+ *              }
  * }
  * @endcode
  */
