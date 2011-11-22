@@ -1,3 +1,4 @@
+- fix broken slice_t hash_dump's
 - regexp captures
 - data 'random_t' for file and testing\benchmarking suite
 - data 'counter_t'

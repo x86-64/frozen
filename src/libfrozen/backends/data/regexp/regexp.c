@@ -40,11 +40,14 @@ typedef struct regexp_userdata {
 	char                  *regexp_str;
 	uintmax_t              cflags;
 	uintmax_t              eflags;
+	regmatch_t            *regmatch;
+	hash_t                *capture;
 	hash_key_t             input;
 	hash_key_t             marker;
 	data_t                *marker_data;
-	
+
 	uintmax_t              compiled;
+	uintmax_t              ncaptures;
 	regex_t                regex;
 } regexp_userdata;
 
@@ -109,7 +112,6 @@ static int regexp_init(backend_t *backend){ // {{{
 	userdata->input       = HK(buffer);
 	userdata->marker      = HK(marker);
 	userdata->marker_data = &marker_default;
-	userdata->cflags      = REG_NOSUB;
 	userdata->regexp_str  = strdup(".*");
 	return 0;
 } // }}}
@@ -118,6 +120,9 @@ static int regexp_destroy(backend_t *backend){ // {{{
 	
 	config_freeregexp(userdata);
 	config_freemarkerdata(userdata);
+	
+	if(userdata->regmatch)
+		free(userdata->regmatch);
 	
 	free(userdata);
 	return 0;
@@ -135,10 +140,18 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 	config_updateflag(config, HK(notbol),   REG_NOTBOL,   &userdata->eflags);
 	config_updateflag(config, HK(noteol),   REG_NOTEOL,   &userdata->eflags);
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->marker, config, HK(marker));
+	hash_data_copy(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
+	userdata->ncaptures = hash_nelements(userdata->capture); // nelements return 0 on null hash, 1 on hash_end, 2 on element + hash_end, so on
+	if(userdata->ncaptures > 1){
+		userdata->ncaptures--;
+		if( (userdata->regmatch = malloc(sizeof(regmatch_t) * userdata->ncaptures)) == NULL)
+			return -ENOMEM;
+	}
 	
-	hash_data_copy(ret, TYPE_STRINGT,  regexp_str,       config, HK(regexp));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->marker,  config, HK(marker));
+	
+	hash_data_copy(ret, TYPE_STRINGT,  regexp_str,        config, HK(regexp));
 	if(ret == 0){
 		free(userdata->regexp_str);
 		userdata->regexp_str = strdup(regexp_str);
@@ -154,6 +167,32 @@ static int regexp_configure(backend_t *backend, hash_t *config){ // {{{
 			return ret;
 	}
 	return 0;
+} // }}}
+
+static ssize_t regexp_matched(backend_t *backend, request_t *request, data_t *input, uintmax_t capture_id){ // {{{
+	regexp_userdata       *userdata          = (regexp_userdata *)backend->userdata;
+	
+	if(capture_id == 0){
+		ssize_t             ret;
+
+		request_t r_next[] = {
+			{ userdata->marker, *userdata->marker_data },
+			hash_inline(request),
+			hash_end
+		};
+		return (ret = backend_pass(backend, r_next)) < 0 ? ret : -EEXIST;
+	}
+	
+	uintmax_t              sl_soffset        = MAX(userdata->regmatch[capture_id - 1].rm_so, 0);
+	uintmax_t              sl_eoffset        = MAX(userdata->regmatch[capture_id - 1].rm_eo, 0);
+	data_t                 sl_input          = DATA_SLICET(input, sl_soffset, sl_eoffset - sl_soffset);
+	
+	request_t r_next[] = {
+		{ userdata->capture[userdata->ncaptures - capture_id].key, sl_input },
+		hash_inline(request),
+		hash_end
+	};
+	return regexp_matched(backend, r_next, input, capture_id - 1);
 } // }}}
 
 static ssize_t regexp_handler(backend_t *backend, request_t *request){ // {{{
@@ -176,7 +215,7 @@ static ssize_t regexp_handler(backend_t *backend, request_t *request){ // {{{
 		input_str = (char *)input->ptr;
 	}
 	
-	ret = regexec(&userdata->regex, input_str, 0, NULL, userdata->eflags);
+	ret = regexec(&userdata->regex, input_str, userdata->ncaptures, userdata->regmatch, userdata->eflags);
 	
 	if(freeme == 1){
 		data_t d_string = DATA_PTR_STRING(input_str);
@@ -184,14 +223,9 @@ static ssize_t regexp_handler(backend_t *backend, request_t *request){ // {{{
 		data_query(&d_string, &r_free);
 	}
 	
-	if(ret == 0){
-		request_t r_next[] = {
-			{ userdata->marker, *userdata->marker_data },
-			hash_inline(request),
-			hash_end
-		};
-		return (ret = backend_pass(backend, r_next)) < 0 ? ret : -EEXIST;
-	}
+	if(ret == 0)
+		return regexp_matched(backend, request, input, userdata->ncaptures);
+	
 	return (ret = backend_pass(backend, request)) < 0 ? ret : -EEXIST;
 } // }}}
 
