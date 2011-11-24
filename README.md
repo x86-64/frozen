@@ -58,7 +58,7 @@ Rational
   must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why
   bother with it? Lets join all components to one process. Simple call within process is best avaliable to world communication channel, it is fast and simple.
  
-Requirments
+Requirements
 -----------
  * check (for tests)
  * fuse (for fuse filesystem)
