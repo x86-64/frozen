@@ -24,7 +24,7 @@ Capabilities
 * Benchmarks
 
 
-Rational
+Rationale
 --------
 
 * Model-oriented programming
