@@ -1,21 +1,21 @@
 - fix broken slice_t hash_dump's
-- data 'range_t', 'multiselect_t' and matching routines
+- backend tcp\udp
 - libev
 - try bind to nginx as module
-- delete ACTION_MOVE
-- add ACTION_GETID or something
-- rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
-- remove insert sort and write binary search instead
-- backend tcp\udp
 - multi-threading
   - backend lock
   - backend thread_pool
   - backend queue
   - backend multi_request
 - action definitions and documentation
+- delete ACTION_MOVE
+- add ACTION_GETID or something
+- rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
+- remove insert sort and write binary search instead
 - hashes instead of incrementing
 - new test suite, as benchmarks, deprecate check
 - pcre
+- data 'range_t', 'multiselect_t' and matching routines
 - backend go_session for http
 - backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
 - data 'action_t' + convert array from\to string
