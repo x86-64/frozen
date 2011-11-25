@@ -1,6 +1,4 @@
 - fix broken slice_t hash_dump's
-- data 'random_t' for file and testing\benchmarking suite
-- data 'counter_t'
 - data 'range_t', 'multiselect_t' and matching routines
 - libev
 - try bind to nginx as module

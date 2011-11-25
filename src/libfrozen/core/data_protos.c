@@ -3,6 +3,7 @@
 #include <dataproto.h>
 extern data_proto_t backend_t_proto;
 extern data_proto_t buffer_t_proto;
+extern data_proto_t counter_t_proto;
 extern data_proto_t dataptr_t_proto;
 extern data_proto_t datatype_t_proto;
 extern data_proto_t default_t_proto;
@@ -35,6 +36,7 @@ extern data_proto_t void_t_proto;
 data_proto_t * data_protos[] = {
    [TYPE_BACKENDT] = &backend_t_proto,
    [TYPE_BUFFERT] = &buffer_t_proto,
+   [TYPE_COUNTERT] = &counter_t_proto,
    [TYPE_DATAPTRT] = &dataptr_t_proto,
    [TYPE_DATATYPET] = &datatype_t_proto,
    [TYPE_DEFAULTT] = &default_t_proto,
