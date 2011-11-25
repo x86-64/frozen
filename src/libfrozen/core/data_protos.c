@@ -13,6 +13,7 @@ extern data_proto_t hash_t_proto;
 extern data_proto_t hash_key_t_proto;
 extern data_proto_t io_t_proto;
 extern data_proto_t memory_t_proto;
+extern data_proto_t random_t_proto;
 extern data_proto_t raw_t_proto;
 extern data_proto_t slice_t_proto;
 extern data_proto_t slider_t_proto;
@@ -44,6 +45,7 @@ data_proto_t * data_protos[] = {
    [TYPE_HASHKEYT] = &hash_key_t_proto,
    [TYPE_IOT] = &io_t_proto,
    [TYPE_MEMORYT] = &memory_t_proto,
+   [TYPE_RANDOMT] = &random_t_proto,
    [TYPE_RAWT] = &raw_t_proto,
    [TYPE_SLICET] = &slice_t_proto,
    [TYPE_SLIDERT] = &slider_t_proto,

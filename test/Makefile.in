@@ -59,6 +59,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/hash_key/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/random/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/slice/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/slider/config.m4 \
@@ -176,6 +177,7 @@ DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
 DATA_OBJECTS_hash_key = @DATA_OBJECTS_hash_key@
 DATA_OBJECTS_io = @DATA_OBJECTS_io@
 DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
+DATA_OBJECTS_random = @DATA_OBJECTS_random@
 DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
 DATA_OBJECTS_slice = @DATA_OBJECTS_slice@
 DATA_OBJECTS_slider = @DATA_OBJECTS_slider@
