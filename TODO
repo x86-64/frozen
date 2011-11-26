@@ -7,6 +7,9 @@
   - backend thread_pool
   - backend queue
   - backend multi_request
+- "magic" request_key_t data
+- split_t inits
+- simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 - action definitions and documentation
 - delete ACTION_MOVE
 - add ACTION_GETID or something

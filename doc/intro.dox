@@ -23,7 +23,7 @@
  *    @li Load balancing
  *    @li Benchmarks
  *
- *  @section rational Rational
+ *  @section rationale Rationale
  *    @li Model-oriented programming
  *
  *        There is a lot of frameworks and different api, and all of them require lot of learning and code writing to decribe what you really want to do. Despite of 
