@@ -4,15 +4,12 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -172112, "src/libfrozen/backends/daemon/thread/thread.c: pthread_create failed" },
- { -172098, "src/libfrozen/backends/daemon/thread/thread.c: pthread_join failed" },
- { -172095, "src/libfrozen/backends/daemon/thread/thread.c: pthread_cancel failed" },
- { -172082, "src/libfrozen/backends/daemon/thread/thread.c: calloc failed" },
+ { -172115, "src/libfrozen/backends/daemon/thread/thread.c: calloc failed" },
+ { -172103, "src/libfrozen/backends/daemon/thread/thread.c: pthread_join failed" },
+ { -172100, "src/libfrozen/backends/daemon/thread/thread.c: pthread_cancel failed" },
+ { -172085, "src/libfrozen/backends/daemon/thread/thread.c: pthread_create failed" },
  { -167975, "src/libfrozen/backends/request/emitter/emitter.c: calloc failed" },
- { -163934, "src/libfrozen/backends/data/transfer/transfer.c: pthread_create failed" },
- { -163912, "src/libfrozen/backends/data/transfer/transfer.c: pthread_join failed" },
- { -163909, "src/libfrozen/backends/data/transfer/transfer.c: pthread_cancel failed" },
- { -163896, "src/libfrozen/backends/data/transfer/transfer.c: calloc failed" },
+ { -163876, "src/libfrozen/backends/data/transfer/transfer.c: calloc failed" },
  { -159926, "src/libfrozen/backends/io/console/console.c: input key not supplied" },
  { -159912, "src/libfrozen/backends/io/console/console.c: input key not supplied" },
  { -159898, "src/libfrozen/backends/io/console/console.c: output key not supplied" },

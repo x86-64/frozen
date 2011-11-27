@@ -138,6 +138,8 @@ typedef enum data_functions {
 	ACTION_REBUILD,
 
 	ACTION_EXECUTE,
+	ACTION_START,
+	ACTION_STOP,
 	ACTION_ALLOC,
 	ACTION_FREE,
 	ACTION_INIT,
@@ -196,6 +198,12 @@ typedef struct fastcall_free {
 typedef struct fastcall_execute {
 	fastcall_header        header;
 } fastcall_execute;
+typedef struct fastcall_start {
+	fastcall_header        header;
+} fastcall_start;
+typedef struct fastcall_stop {
+	fastcall_header        header;
+} fastcall_stop;
 
 typedef struct fastcall_init {
 	fastcall_header        header;
