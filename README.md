@@ -29,7 +29,7 @@ Rationale
 
 * Model-oriented programming
 
- There is a lot of frameworks and different api, and all of them require lot of learning and code writing to decribe what you really want to do. Despite of
+ There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of
  incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
  Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art
  in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
