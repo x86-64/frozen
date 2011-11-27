@@ -27,10 +27,10 @@ typedef enum chm_imp_fill_flags {
 } chm_imp_fill_flags;
 
 typedef struct chm_imp_params_t {
-	uint64_t               capacity;  // current mphf capacity
-	uint64_t               nelements; // real items count. can be less than real
-	uint64_t               hash1;
-	uint64_t               hash2;
+	uintmax_t               capacity;  // current mphf capacity
+	uintmax_t               nelements; // real items count. can be less than real
+	uintmax_t               hash1;
+	uintmax_t               hash2;
 } chm_imp_params_t;
 
 typedef struct chm_imp_t {
@@ -272,7 +272,7 @@ static ssize_t chm_imp_configure_r(mphf_t *mphf, uintmax_t capacity){ // {{{
 	safe_div(&nvertex, nvertex, 100);
 	
 	data->nvertex            = nvertex;
-	data->params.capacity    = (uint64_t)capacity;
+	data->params.capacity    = capacity;
 	data->bi_vertex          = log_any(nvertex, 2);
 	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
 	return 0;
