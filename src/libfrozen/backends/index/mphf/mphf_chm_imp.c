@@ -256,7 +256,7 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	}
 	return 0;
 } // }}}
-static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t capacity){ // {{{
+static ssize_t chm_imp_configure_r(mphf_t *mphf, uintmax_t capacity){ // {{{
 	uintmax_t              nvertex;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
@@ -272,7 +272,7 @@ static ssize_t chm_imp_configure_r(mphf_t *mphf, uint64_t capacity){ // {{{
 	safe_div(&nvertex, nvertex, 100);
 	
 	data->nvertex            = nvertex;
-	data->params.capacity    = capacity;
+	data->params.capacity    = (uint64_t)capacity;
 	data->bi_vertex          = log_any(nvertex, 2);
 	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
 	return 0;
@@ -288,11 +288,11 @@ static ssize_t chm_imp_load       (mphf_t *mphf, request_t *fork_req){ // {{{
 	if( (ret = chm_imp_param_read(mphf)) < 0)
 		goto rebuild; // no params on disk found - rebuild array
 	
-	if( (ret = chm_imp_configure_r(mphf, data->params.capacity)) < 0)
+	if( (ret = chm_imp_configure_r(mphf, (uintmax_t)data->params.capacity)) < 0)
 		return ret;
 	
 	// check if array capacity match new _min requirements
-	if(data->params.capacity < data->nelements_min)
+	if((uintmax_t)data->params.capacity < data->nelements_min)
 		goto rebuild;
 	
 	return 0;
@@ -601,8 +601,8 @@ ssize_t mphf_chm_imp_fork        (mphf_t *mphf, request_t *request){ // {{{
 } // }}}
 ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 	ssize_t                ret;
-	uint64_t               nelements;
-	uint64_t               capacity_curr;
+	uintmax_t              nelements;
+	uintmax_t              capacity_curr;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
 	//                  |  empty array        |  existing array
@@ -611,18 +611,18 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 	// params.capacity  |  0                  |  array defined capacity
 	// -----------------+---------------------+--------------------------
 	
-	capacity_curr = data->params.capacity;
+	capacity_curr = (uintmax_t)data->params.capacity;
 	if(
 		safe_div(&capacity_curr, capacity_curr, 100) < 0 ||
 		safe_mul(&capacity_curr, capacity_curr, REBUILD_CONST) < 0
 	)
-		capacity_curr = data->params.capacity;
+		capacity_curr = (uintmax_t)data->params.capacity;
 	
-	nelements = data->params.nelements;
+	nelements = (uintmax_t)data->params.nelements;
 	
 	if(nelements >= capacity_curr){
 		// expand array
-		nelements  = MAX(MAX(data->params.capacity, data->nelements_min), nelements);
+		nelements  = MAX(MAX((uintmax_t)data->params.capacity, data->nelements_min), nelements);
 		nelements += data->nelements_step;
 		nelements *= data->nelements_mul;
 #ifdef MPHF_DEBUG
@@ -630,7 +630,7 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 #endif
 	}else{
 		// ordinary rebuild
-		nelements = data->params.capacity;
+		nelements = (uintmax_t)data->params.capacity;
 #ifdef MPHF_DEBUG
 	printf("mphf normal rebuild on %x (%d) elements\n", (int)nelements, (int)nelements);
 #endif
@@ -665,8 +665,8 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
 		return ret;
 	
-	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
-	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
+	vertex[0] = ((key ^ (uintmax_t)data->params.hash1) % data->nvertex);
+	vertex[1] = ((key ^ (uintmax_t)data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
 		return -EBADF;
@@ -687,8 +687,8 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
 		return ret;
 	
-	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
-	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
+	vertex[0] = ((key ^ (uintmax_t)data->params.hash1) % data->nvertex);
+	vertex[1] = ((key ^ (uintmax_t)data->params.hash2) % data->nvertex);
 
 #ifdef MPHF_DEBUG
 	printf("mphf: update: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
