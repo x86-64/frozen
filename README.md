@@ -14,7 +14,7 @@ library - it is very likely to work properly.
 Capabilities
 -------------
 
-* Fuse filesystem for input and ouput
+* Fuse filesystem for input and output
 * Storage in memory or file
 * Memory caches
 * Indexes, lookup tables
@@ -32,15 +32,15 @@ Rationale
  There is a lot of frameworks and different api, and all of them require lot of learning and code writing to decribe what you really want to do. Despite of
  incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
  Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art
- in this field - it is model oriented design. Enginer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
+ in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
  it is easy to make changes, maintain and test things. Why not use this in general programming?
  So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram
- which in realtime show load to every computer in your claster and you could change any parameter on fly, add some more workers and so on.
+ which in realtime show load to every computer in your cluster and you could change any parameter on fly, add some more workers and so on.
 
 * Configuration driven software
  
- Nowdays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for
- first time use, but then you start using it turns out it was pre-configured in source code to achive some goals, which in turn
+ Nowadays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for
+ first time use, but then you start using it turns out it was pre-configured in source code to achieve some goals, which in turn
  can not match with your's. Only you can know how to construct most optimal solution of your problem. Fancy software can't do this,
  For example, one ip address can be address of server in nearby rack, and other ip can be on the another side of earth, so what software could do?
  Measure latency of every ip it see? It will result in horrible, complex code with lot of bugs and overhead to each request. But if where was
