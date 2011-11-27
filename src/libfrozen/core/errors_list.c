@@ -4,6 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -176204, "src/libfrozen/backends/io/tcp/tcp.c: calloc failed" },
+ { -176194, "src/libfrozen/backends/io/tcp/tcp.c: listen error" },
+ { -176191, "src/libfrozen/backends/io/tcp/tcp.c: bind error" },
+ { -176183, "src/libfrozen/backends/io/tcp/tcp.c: socket error" },
  { -172115, "src/libfrozen/backends/daemon/thread/thread.c: calloc failed" },
  { -172103, "src/libfrozen/backends/daemon/thread/thread.c: pthread_join failed" },
  { -172100, "src/libfrozen/backends/daemon/thread/thread.c: pthread_cancel failed" },
