@@ -44,15 +44,10 @@
  * @em Stdin
  *
  * To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console.
- * @ref mod_backend_stdin used to get data from stdin. And because stdin module is passive, @ref mod_backend_transfer used to activly transfer
+ * @ref mod_backend_stdin used to get data from stdin. And because stdin module is passive, @ref mod_backend_transfer with @ref mod_backend_thread used to activly transfer
  * data from one backend chain to another. In this case destination is @ref mod_backend_stdout used. For more about outputs read next chapter.
  * 
  * @include tutorial_in_stdin.conf 
- *
- * More likely that destination chain have much more backends, and @ref mod_backend_transfer can pass request instead of querying, so
- * we can simplify configuration into following:
- *
- * @include tutorial_in_stdin_simple.conf 
  *
  * @em Fuse
  * 
