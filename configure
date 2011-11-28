@@ -864,6 +864,7 @@ enable_backendstdout
 enable_backendstderr
 enable_backendfuse
 enable_backendtcp
+enable_backendtcp_child
 enable_backendbalancer
 enable_backenddebug
 enable_backendemitter
@@ -1625,6 +1626,8 @@ Optional Features:
                           disable backend stderr
   --disable-backend-fuse  disable backend fuse
   --disable-backend-tcp   disable backend tcp
+  --disable-backend-tcp-child
+                          disable backend tcp-child
   --disable-backend-balancer
                           disable backend balancer
   --disable-backend-debug disable backend debug
@@ -20151,6 +20154,42 @@ fi
 		BACKEND_DIR_tcp="io/tcp"
 		BACKEND_DEP_tcp=""
 				BACKEND_SELECTED="$BACKEND_SELECTED tcp"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_tcp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/tcp/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/tcp"
+
+		BACKEND_MAKEFILE_io_tcp=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/tcp/libfrozen_backend_tcp.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendtcp_child was given.
+if test "${enable_backendtcp_child+set}" = set; then :
+  enableval=$enable_backendtcp_child;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendtcp_child}" = "yes"; then
+			enable_backendtcp_child="no"
+		else
+			enable_backendtcp_child="yes"
+		fi
+	fi
+
+	if test "${enable_backendtcp_child}" = "yes"; then
+		BACKEND_DIR_tcp_child="io/tcp"
+		BACKEND_DEP_tcp_child=""
+				BACKEND_SELECTED="$BACKEND_SELECTED tcp_child"
 
 			fi
 

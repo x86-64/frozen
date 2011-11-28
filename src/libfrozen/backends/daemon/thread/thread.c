@@ -18,7 +18,8 @@
  * @code
  * {
  *         class        = "daemon/thread",
- *         paused       = (uint_t)'0'                # do not start thread after configure
+ *         paused       = (uint_t)'0',               # do not start thread after configure
+ *         loop         = (uint_t)'1'                # run thread in infinity loop
  * }
  * @threadcode
  */
@@ -28,12 +29,16 @@
 typedef struct thread_userdata {
 	//api_t                apitype; // TODO api types
 	uintmax_t              paused;
-	
+	uintmax_t              loop;
+
 	uintmax_t              thread_running;
 	pthread_t              thread;
 } thread_userdata;
 
 static void *  thread_routine(backend_t *backend){ // {{{
+	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
+	
+	do{
 	//switch(apitype){
 	//     case API_HASH:;
 			request_t r_request[] = {
@@ -43,6 +48,7 @@ static void *  thread_routine(backend_t *backend){ // {{{
 	//		break;
 	//     case API_FAST:;
 	//}
+	}while(userdata->loop);
 	return NULL;
 } // }}}
 static ssize_t thread_control_start(backend_t *backend){ // {{{
@@ -98,6 +104,7 @@ static int thread_configure(backend_t *backend, config_t *config){ // {{{
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_UINTT, userdata->paused, config, HK(paused));
+	hash_data_copy(ret, TYPE_UINTT, userdata->loop,   config, HK(loop));
 	
 	if(userdata->paused == 0)
 		thread_control_start(backend);
