@@ -38,7 +38,7 @@
 </table>
 <h2><a class="anchor" id="tutorial_basics_overview"></a>
 Overview</h2>
-<p>To construct nessesary tool frozen have many different building blocks, called backends. Backends can connect to each other and form nearly any configuration, like a graph. To describe which backends would be used and where connection must exist user fill configuration file. Because of "one-dimensional" property of files this is not so trivial as it could be done in GUI. So, configuration written in form of "chains" - list of blocks with connections first to second, second to third and so on. Configuration file can contain any number of chain with any length. To separate different chains special keyword NULL used.</p>
+<p>To construct necessary tool frozen have many different building blocks, called backends. Backends can connect to each other and form nearly any configuration, like a graph. To describe which backends would be used and where connection must exist user fill configuration file. Because of "one-dimensional" property of files this is not so trivial as it could be done in GUI. So, configuration written in form of "chains" - list of blocks with connections first to second, second to third and so on. Configuration file can contain any number of chain with any length. To separate different chains special keyword NULL used.</p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &#39;request/debug&#39; },
 { <span class="keyword">class </span>=  &quot;io/stdout&quot; },
 NULL,
@@ -64,8 +64,9 @@ Executing configuration</h2>
 </pre></div><h2><a class="anchor" id="tutorial_basics_input"></a>
 Input</h2>
 <p><em>Stdin</em> </p>
-<p>To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console. <a class="el" href="group__mod__backend__stdin.html">io/stdin</a> used to get data from stdin. And because stdin module is passive, <a class="el" href="group__mod__backend__transfer.html">data/transfer</a> used to activly transfer data from one backend chain to another. In this case destination is <a class="el" href="group__mod__backend__stdout.html">io/stdout</a> used. For more about outputs read next chapter.</p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<p>To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console. <a class="el" href="group__mod__backend__stdin.html">io/stdin</a> used to get data from stdin. And because stdin module is passive, <a class="el" href="group__mod__backend__transfer.html">data/transfer</a> with <a class="el" href="group__mod__backend__thread.html">daemon/thread</a> used to activly transfer data from one backend chain to another. In this case destination is <a class="el" href="group__mod__backend__stdout.html">io/stdout</a> used. For more about outputs read next chapter.</p>
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot;                         }
         },
@@ -73,13 +74,6 @@ Input</h2>
                 { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot;                        }
         }
 }
-</pre></div><p>More likely that destination chain have much more backends, and <a class="el" href="group__mod__backend__transfer.html">data/transfer</a> can pass request instead of querying, so we can simplify configuration into following:</p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
-        source = {
-                { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot; }
-        }
-},
-{ <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
 </pre></div><p><em>Fuse</em> </p>
 <p>Next way is <a class="el" href="group__mod__backend__fuse.html">io/fuse</a> backend. It create filesystem using fuse and pass all read and writes to user defined backends. Sample configuration can look like so:</p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;fuse&quot;, mountpoint = <span class="stringliteral">&quot;/home/test/&quot;</span>, items = {
@@ -103,38 +97,50 @@ Input</h2>
 { <span class="keyword">class</span>=<span class="stringliteral">&quot;debug&quot;</span> }
 </pre></div><p><em>File</em> </p>
 <p>You could read data from file and use it as input data. Construction is same as for stdin. </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;file&quot;, filename = <span class="stringliteral">&quot;TODO&quot;</span> }
+        },
+        destination = {
+                { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
         }
-},
-{ <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
+}
 </pre></div><h2><a class="anchor" id="tutorial_basics_output"></a>
 Output</h2>
 <p><em>Debugging</em> </p>
 <p>To debug request flow you can use <a class="el" href="group__mod__backend__debug.html">request/debug</a> backend. It print line in stderr on request arrival, and optionally on request end. Also it can show request content. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot;  }
+        },
+        destination = {
+                { <span class="keyword">class </span>=&gt; &quot;request/debug&quot;  }
         }
-},
-{ <span class="keyword">class </span>=&gt; &quot;request/debug&quot;  }
+}
 </pre></div><p><em>Stdout</em> </p>
 <p>This could be done by <a class="el" href="group__mod__backend__stdout.html">io/stdout</a>. It print buffer in console stdout. For stderr - use <a class="el" href="group__mod__backend__stderr.html">io/stderr</a>. </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;file&quot;, filename = <span class="stringliteral">&quot;TODO&quot;</span> }
+        },
+        destination = {
+                { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
         }
-},
-{ <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
+}
 </pre></div><p><em>File</em> </p>
 <p>Write data to file with <a class="el" href="group__mod__backend__file.html">storage/file</a> backend. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot; }
+        },
+        destination = {
+                { <span class="keyword">class </span>=&gt; &quot;file&quot;, filename = <span class="stringliteral">&quot;example_out_file.dat&quot;</span> }
         }
-},
-{ <span class="keyword">class </span>=&gt; &quot;file&quot;, filename = <span class="stringliteral">&quot;example_out_file.dat&quot;</span> }
+}
 </pre></div><h2><a class="anchor" id="tutorial_basics_processing"></a>
 Processing</h2>
 <p><em>Split</em> </p>
@@ -165,24 +171,27 @@ Combining all together</h2>
         }
 }}
 </pre></div><p><a class="el" href="group__mod__backend__file.html">storage/file</a> open file for reading only (../ hack is ugly, will fix someday). <a class="el" href="group__mod__backend__split.html">data/split</a> split it in lines. <a class="el" href="group__mod__backend__regexp.html">data/regexp</a> matches /bin/false aganist input line and pass to <a class="el" href="group__mod__backend__switch.html">request/switch</a>. It lookup for default marker value and if find - pass to <a class="el" href="group__mod__backend__stdout.html">io/stdout</a>. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;data/transfer&quot;,
         source = {
                 { <span class="keyword">class </span>=&gt; &quot;file&quot;, filename = <span class="stringliteral">&quot;../../../../../../../../../../../etc/passwd&quot;</span>, readonly = (size_t)<span class="charliteral">&#39;1&#39;</span> }
+        },
+        destination = {
+                { <span class="keyword">class </span>=&gt; &quot;data/split&quot;                             },
+                { <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/bin/false&quot;</span>     },
+                { <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/sbin/nologin&quot;</span>  },
+                { <span class="keyword">class </span>=&gt; &quot;request/switch&quot;, rules = {
+                        {
+                                request = {
+                                        marker = (uint_t)<span class="charliteral">&#39;1&#39;</span>
+                                },
+                                backend = {
+                                        { <span class="keyword">class </span>= &quot;io/stdout&quot; }
+                                }
+                        }
+                }}
         }
-},
-{ <span class="keyword">class </span>=&gt; &quot;data/split&quot;                             },
-{ <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/bin/false&quot;</span>     },
-{ <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/sbin/nologin&quot;</span>  },
-{ <span class="keyword">class </span>=&gt; &quot;request/switch&quot;, rules = {
-        {
-                request = {
-                        marker = (uint_t)<span class="charliteral">&#39;1&#39;</span>
-                },
-                backend = {
-                        { <span class="keyword">class </span>= &quot;io/stdout&quot; }
-                }
-        }
-}}
+}
 </pre></div><p>As regexp set same marker this construction works like OR. For AND use different markers and combine them in switch rule like so: </p>
 <div class="fragment"><pre class="fragment">      ...
       { <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/bin&quot;</span>,  marker = <span class="stringliteral">&quot;key1&quot;</span>  }, 
@@ -197,7 +206,7 @@ Combining all together</h2>
 </pre></div><p> Because <a class="el" href="group__mod__backend__switch.html">request/switch</a> don't care what in your rule's request you could first check for such AND condition, if it not matches check for only one marker, or for another, or for both. And for each rule you can supply different backend with any action.</p>
 <p>You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file. If you pick up <a class="el" href="group__mod__backend__fuse.html">io/fuse</a> for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. </p>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 25 2011 16:39:29 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 29 2011 16:19:10 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

@@ -41,7 +41,7 @@ Introduction</h2>
 <h2><a class="anchor" id="caps"></a>
 Capabilities</h2>
 <ul>
-<li>Fuse filesystem for input and ouput </li>
+<li>Fuse filesystem for input and output </li>
 <li>Storage in memory or file </li>
 <li>Memory caches </li>
 <li>Indexes, lookup tables </li>
@@ -50,16 +50,16 @@ Capabilities</h2>
 <li>Load balancing </li>
 <li>Benchmarks</li>
 </ul>
-<h2><a class="anchor" id="rational"></a>
-Rational</h2>
+<h2><a class="anchor" id="rationale"></a>
+Rationale</h2>
 <ul>
 <li>Model-oriented programming</li>
 </ul>
-<p>There is a lot of frameworks and different api, and all of them require lot of learning and code writing to decribe what you really want to do. Despite of incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all. Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art in this field - it is model oriented design. Enginer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach it is easy to make changes, maintain and test things. Why not use this in general programming? So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram which in realtime show load to every computer in your claster and you could change any parameter on fly, add some more workers and so on.</p>
+<p>There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all. Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach it is easy to make changes, maintain and test things. Why not use this in general programming? So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram which in realtime show load to every computer in your cluster and you could change any parameter on fly, add some more workers and so on.</p>
 <ul>
 <li>Configuration driven software</li>
 </ul>
-<p>Nowdays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for first time use, but then you start using it turns out it was pre-configured in source code to achive some goals, which in turn can not match with your's. Only you can know how to construct most optimal solution of your problem. Fancy software can't do this, For example, one ip address can be address of server in nearby rack, and other ip can be on the another side of earth, so what software could do? Measure latency of every ip it see? It will result in horrible, complex code with lot of bugs and overhead to each request. But if where was the way to tell "hey, this link would be slow, let's set up a buffer or even compress data. But rest of links will keep send plain data". No way your current database can do so.</p>
+<p>Nowadays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for first time use, but then you start using it turns out it was pre-configured in source code to achieve some goals, which in turn can not match with your's. Only you can know how to construct most optimal solution of your problem. Fancy software can't do this, For example, one ip address can be address of server in nearby rack, and other ip can be on the another side of earth, so what software could do? Measure latency of every ip it see? It will result in horrible, complex code with lot of bugs and overhead to each request. But if where was the way to tell "hey, this link would be slow, let's set up a buffer or even compress data. But rest of links will keep send plain data". No way your current database can do so.</p>
 <ul>
 <li>Configure every aspect</li>
 </ul>
@@ -67,12 +67,12 @@ Rational</h2>
 <ul>
 <li>Reduce communication within single machine</li>
 </ul>
-<p>To setup a web server we need to install many different components: database, server, may be some cache, balancer, fastcgi handlers and so on. And every part must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why bother with it? Lets join all components to one process. Simple call within process is best avaliable to world communication channel, it is fast and simple.</p>
+<p>To setup a web server we need to install many different components: database, server, may be some cache, balancer, fastcgi handlers and so on. And every part must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why bother with it? Lets join all components to one process. Simple call within process is best available to world communication channel, it is fast and simple.</p>
 <h2><a class="anchor" id="links"></a>
 Further reading</h2>
 <p>Look at <a class="el" href="group__tutorial.html">Tutorials</a> section for first usage help. To understand architecture read <a class="el" href="group__backend.html">Backends</a>, <a class="el" href="group__api.html">Api</a>, <a class="el" href="group__data.html">Data</a>. </p>
 </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 25 2011 16:39:28 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 29 2011 16:19:10 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
