@@ -1,1 +1,1 @@
-FROZEN_DATA(counter_t, counter, yes,, 27)
+FROZEN_DATA(counter_t, counter, yes,, 30)

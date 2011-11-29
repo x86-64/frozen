@@ -176,37 +176,35 @@ static int tcp_child_destroy(backend_t *backend){ // {{{
 
 static ssize_t tcp_child_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
 	tcp_child_userdata    *userdata          = (tcp_child_userdata *)backend->userdata;
+	data_t                 fdt               = DATA_FDT(userdata->socket, 0);
 	
-	switch(hargs->action){
-		case ACTION_READ:;
-			fastcall_read *rargs = (fastcall_read *)hargs;
-			
-			if( (rargs->buffer_size = read(userdata->socket, rargs->buffer, rargs->buffer_size)) < 0){
-				rargs->buffer_size = 0;
-				return -errno;
-			}
-			return 0;
-			
-		case ACTION_WRITE:;
-			fastcall_write *wargs = (fastcall_write *)hargs;
-			
-			if( (wargs->buffer_size = write(userdata->socket, wargs->buffer, wargs->buffer_size)) < 0){
-				wargs->buffer_size = 0;
-				return -errno;
-			}
-			return 0;
-			
-		default:
-			break;
-	}
-	return -ENOSYS;
+	return data_query(&fdt, hargs);
 } // }}}
 static ssize_t tcp_child_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
+	data_t                *buffer;
+	tcp_child_userdata    *userdata          = (tcp_child_userdata *)backend->userdata;
+	data_t                 fdt               = DATA_FDT(userdata->socket, 0);
 	
 	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
+	if(ret != 0)
+		return -EINVAL;
 	
+	switch(action){
+		case ACTION_READ:;
+			buffer = hash_data_find(request, HK(buffer));
+			fastcall_transfer r_transfer1 = { { 3, ACTION_TRANSFER }, buffer };
+			return data_query(&fdt, &r_transfer1 );
+			
+		case ACTION_WRITE:;
+			buffer = hash_data_find(request, HK(buffer));
+			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &fdt };
+			return data_query(buffer, &r_transfer2 );
+			
+		default:
+			break;
+	}
 	return -ENOSYS;
 } // }}}
 

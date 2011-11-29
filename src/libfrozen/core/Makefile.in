@@ -53,6 +53,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/datatype/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/go_interface/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
@@ -181,6 +182,7 @@ DATA_OBJECTS_dataptr = @DATA_OBJECTS_dataptr@
 DATA_OBJECTS_datatype = @DATA_OBJECTS_datatype@
 DATA_OBJECTS_default = @DATA_OBJECTS_default@
 DATA_OBJECTS_emitter = @DATA_OBJECTS_emitter@
+DATA_OBJECTS_fd = @DATA_OBJECTS_fd@
 DATA_OBJECTS_format = @DATA_OBJECTS_format@
 DATA_OBJECTS_go_interface = @DATA_OBJECTS_go_interface@
 DATA_OBJECTS_hash = @DATA_OBJECTS_hash@

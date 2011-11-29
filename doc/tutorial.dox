@@ -146,3 +146,27 @@
  * If you pick up @ref mod_backend_fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. 
  * 
  */
+
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_tcpecho Tutorial: tcp echo server
+ * 
+ * Most simplest tcp server is one thread per one connection + one thread for accepting new connections. Let's create such server.
+ * @code
+ * { class=>"daemon/thread", loop = (uint_t)'1' },
+ * { class=>"io/tcp", addr = "0.0.0.0", port = (uint_t)'12345' }
+ * @endcode
+ * 
+ * As we can see there is one thread created using @ref mod_backend_thread in loop mode and @ref mod_backend_tcp which listen 0.0.0.0:12345 port.
+ * Such construction only accept new connections and try create new backend chain. Because we didn't specified one - there would be error. So, with
+ * specified backend it would look like this:
+ * @include tutorial_tcpecho.conf
+ *
+ * In beginning of new backend chain there is one @ref mod_backend_thread in loop mode in pair with @ref mod_backend_transfer, next comes two special "io/tcp_child" backends which
+ * represent newly connected socket. Backend chain can contain any number of such backends, and each of them represent same socket. Read request to
+ * this backend causes read from socket and write request - write to it.
+ *
+ * Note, @ref mod_backend_transfer first try fast api to transfer, if it possible, but if one of backends in chain don't have it - request downgraded
+ * and passed through hash api. This will cause performance decrease.
+ *
+ */

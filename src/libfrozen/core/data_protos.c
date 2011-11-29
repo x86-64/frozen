@@ -8,6 +8,7 @@ extern data_proto_t dataptr_t_proto;
 extern data_proto_t datatype_t_proto;
 extern data_proto_t default_t_proto;
 extern data_proto_t emitter_t_proto;
+extern data_proto_t fd_t_proto;
 extern data_proto_t format_t_proto;
 extern data_proto_t go_interface_t_proto;
 extern data_proto_t hash_t_proto;
@@ -41,6 +42,7 @@ data_proto_t * data_protos[] = {
    [TYPE_DATATYPET] = &datatype_t_proto,
    [TYPE_DEFAULTT] = &default_t_proto,
    [TYPE_EMITTERT] = &emitter_t_proto,
+   [TYPE_FDT] = &fd_t_proto,
    [TYPE_FORMATT] = &format_t_proto,
    [TYPE_GOINTERFACET] = &go_interface_t_proto,
    [TYPE_HASHT] = &hash_t_proto,
