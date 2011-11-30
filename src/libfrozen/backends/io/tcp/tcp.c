@@ -43,10 +43,12 @@ typedef struct tcp_userdata {
 
 typedef struct tcp_child_userdata {
 	int                    socket;
+	uintmax_t              primary;
 } tcp_child_userdata;
 
-uintmax_t                      global_inited     = 0;
-pthread_key_t                  tcp_childud_key;
+uintmax_t                      tcp_global_inited = 0;
+pthread_key_t                  tcp_socket_key;
+pthread_key_t                  tcp_primary_key;
 
 static ssize_t tcp_control_stop(backend_t *backend){ // {{{
 	tcp_userdata          *userdata          = (tcp_userdata *)backend->userdata;
@@ -83,11 +85,13 @@ static ssize_t tcp_control_start(backend_t *backend){ // {{{
 static int tcp_init(backend_t *backend){ // {{{
 	tcp_userdata        *userdata;
 	
-	if(global_inited == 0){
-		if(pthread_key_create(&tcp_childud_key, NULL) != 0)
+	if(tcp_global_inited == 0){
+		if(pthread_key_create(&tcp_socket_key, NULL) != 0)
+			return -EFAULT;
+		if(pthread_key_create(&tcp_primary_key, NULL) != 0)
 			return -EFAULT;
 		
-		global_inited = 1;
+		tcp_global_inited = 1;
 	}
 	
 	if((userdata = backend->userdata = calloc(1, sizeof(tcp_userdata))) == NULL)
@@ -115,19 +119,19 @@ static int tcp_configure(backend_t *backend, hash_t *config){ // {{{
 } // }}}
 
 static ssize_t tcp_fast_handler(backend_t *backend, void *hargs){ // {{{
-	tcp_child_userdata    *child_userdata;
+	int                    socket;
 	tcp_userdata          *userdata          = (tcp_userdata *)backend->userdata;
 	
 	if(userdata->tcp_running == 0)
 		return -EFAULT;
 	
-	if((child_userdata = calloc(1, sizeof(tcp_child_userdata))) == NULL)
-		return error("calloc failed");
-	
-	if( (child_userdata->socket = accept(userdata->socket, NULL, 0)) < 0)
+	if( (socket = accept(userdata->socket, NULL, 0)) < 0)
 		return error("accept error");
 	
-	if(pthread_setspecific(tcp_childud_key, child_userdata) != 0)
+	if(pthread_setspecific(tcp_socket_key, &socket) != 0)
+		return error("pthread_setspecific error");
+	
+	if(pthread_setspecific(tcp_primary_key, NULL) != 0)
 		return error("pthread_setspecific error");
 	
 	if(backend_new(userdata->backend) == NULL)
@@ -160,16 +164,31 @@ backend_t tcp_proto = {
 };
 
 static int tcp_child_init(backend_t *backend){ // {{{
+	int                   *socket;
 	tcp_child_userdata    *userdata;
 	
-	if( (userdata = backend->userdata = pthread_getspecific(tcp_childud_key)) == NULL)
+	if((userdata = backend->userdata = calloc(1, sizeof(tcp_child_userdata))) == NULL)
+		return error("calloc failed");
+	
+	if( (socket = pthread_getspecific(tcp_socket_key)) == NULL)
 		return -EFAULT;
 	
+	if(pthread_getspecific(tcp_primary_key) == NULL){
+		if(pthread_setspecific(tcp_primary_key, userdata) != 0)
+			return error("pthread_setspecific error");
+		
+		userdata->primary = 1;
+	}
+	
+	userdata->socket = *socket;
 	return 0;
 } // }}}
 static int tcp_child_destroy(backend_t *backend){ // {{{
 	tcp_child_userdata    *userdata          = (tcp_child_userdata *)backend->userdata;
-
+	
+	if(userdata->primary == 1){
+		close(userdata->socket);
+	}
 	free(userdata);
 	return 0;
 } // }}}

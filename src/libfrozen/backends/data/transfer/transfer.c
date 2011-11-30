@@ -54,19 +54,18 @@ static int transfer_configure(backend_t *backend, hash_t *config){ // {{{
 	
 	hash_data_copy(ret, TYPE_BACKENDT,   userdata->source,        config, HK(source));
 	hash_data_copy(ret, TYPE_BACKENDT,   userdata->destination,   config, HK(destination));
+	
+	if(userdata->source == NULL || userdata->destination == NULL)
+		return error("source or destination backend invalid");
+	
 	return 0;
 } // }}}
 
 static ssize_t transfer_handler(backend_t *backend, request_t *request){ // {{{
-	backend_t             *source;
-	backend_t             *destination;
 	transfer_userdata     *userdata          = (transfer_userdata *)backend->userdata;
 	
-	source      = userdata->source      ? userdata->source      : backend; // backend have no handlers, so it will pass to underlying
-	destination = userdata->destination ? userdata->destination : backend;
-	
-	data_t  d_source      = DATA_BACKENDT(source);
-	data_t  d_destination = DATA_BACKENDT(destination);
+	data_t  d_source      = DATA_BACKENDT(userdata->source);
+	data_t  d_destination = DATA_BACKENDT(userdata->destination);
 	
 	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_destination };
 	return data_query(&d_source, &r_transfer);

@@ -17,9 +17,11 @@
  * Accepted configuration:
  * @code
  * {
- *         class        = "daemon/thread",
- *         paused       = (uint_t)'0',               # do not start thread after configure
- *         loop         = (uint_t)'1'                # run thread in infinity loop
+ *         class            = "daemon/thread",
+ *         paused           = (uint_t)'0',               # do not start thread after configure
+ *         loop             = (uint_t)'1'                # run thread in infinity loop
+ *         ignore_errors    = (uint_t)'1'                # ignore errors and do not exit from loop, default 0
+ *         destroy          = (uint_t)'1'                # destroy backend chain on exit from loop, default 1
  * }
  * @threadcode
  */
@@ -30,56 +32,63 @@ typedef struct thread_userdata {
 	//api_t                apitype; // TODO api types
 	uintmax_t              paused;
 	uintmax_t              loop;
-
+	uintmax_t              ignore_errors;
+	uintmax_t              destroy_on_exit;
+	
+	uintmax_t              terminate;
 	uintmax_t              thread_running;
 	pthread_t              thread;
 } thread_userdata;
 
 static void *  thread_routine(backend_t *backend){ // {{{
+	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
 	do{
 	//switch(apitype){
 	//     case API_HASH:;
 			request_t r_request[] = {
+				{ HK(ret), DATA_PTR_SIZET(&ret) },
 				hash_end
 			};
-			backend_pass(backend, r_request);
+			if( (backend_pass(backend, r_request) < 0 || ret < 0) && userdata->ignore_errors == 0)
+				break;
 	//		break;
 	//     case API_FAST:;
 	//}
-	}while(userdata->loop);
+	}while(userdata->loop && userdata->terminate == 0);
+	
+	userdata->thread_running = 0;
+	
+	if(userdata->destroy_on_exit)
+		backend_destroy(backend);
+	
 	return NULL;
 } // }}}
 static ssize_t thread_control_start(backend_t *backend){ // {{{
+	ssize_t                ret               = 0;
+	pthread_attr_t         attr;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
 	if(userdata->thread_running == 0){
-		if(pthread_create(&userdata->thread, NULL, (void * (*)(void *))&thread_routine, backend) != 0)
-			return error("pthread_create failed");
-		
 		userdata->thread_running = 1;
-	}
-	return 0;
-} // }}}
-static ssize_t thread_control_stop(backend_t *backend){ // {{{
-	ssize_t                ret;
-	void                  *res;
-	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
-	
-	if(userdata->thread_running != 0){
-		switch(pthread_cancel(userdata->thread)){
-			case ESRCH: goto no_thread;
-			case 0:     break;
-			default:    ret = error("pthread_cancel failed"); goto no_thread;
-		}
-		if(pthread_join(userdata->thread, &res) != 0)
-			ret = error("pthread_join failed");
+		userdata->terminate      = 0;
 		
-		no_thread:
-		userdata->thread_running = 0;
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+		
+		if(pthread_create(&userdata->thread, &attr, (void * (*)(void *))&thread_routine, backend) != 0)
+			ret = error("pthread_create failed");
+		
+		pthread_attr_destroy(&attr);
 	}
 	return ret;
+} // }}}
+static ssize_t thread_control_stop(backend_t *backend){ // {{{
+	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
+	
+	userdata->terminate = 1;
+	return 0;
 } // }}}
 
 static int thread_init(backend_t *backend){ // {{{
@@ -88,6 +97,7 @@ static int thread_init(backend_t *backend){ // {{{
 	if((userdata = backend->userdata = calloc(1, sizeof(thread_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->destroy_on_exit = 1;
 	return 0;
 } // }}}
 static int thread_destroy(backend_t *backend){ // {{{
@@ -103,8 +113,10 @@ static int thread_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
-	hash_data_copy(ret, TYPE_UINTT, userdata->paused, config, HK(paused));
-	hash_data_copy(ret, TYPE_UINTT, userdata->loop,   config, HK(loop));
+	hash_data_copy(ret, TYPE_UINTT, userdata->paused,            config, HK(paused));
+	hash_data_copy(ret, TYPE_UINTT, userdata->loop,              config, HK(loop));
+	hash_data_copy(ret, TYPE_UINTT, userdata->ignore_errors,     config, HK(ignore_errors));
+	hash_data_copy(ret, TYPE_UINTT, userdata->destroy_on_exit,   config, HK(destroy));
 	
 	if(userdata->paused == 0)
 		thread_control_start(backend);
