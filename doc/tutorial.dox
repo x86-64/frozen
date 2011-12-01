@@ -64,8 +64,6 @@
  * One more way to input is describe backend which send requests you want. One of such backends is @ref mod_backend_emitter. Example:
  * @include tutorial_in_emitter.conf
  * 
- * @note "on_end" with "destroy" value kills frozen daemon after request passed. It is way flush stdout buffers and exit.
- * 
  * @em HTTP
  *
  * Another way is different modules, for example go_http. It create simple web server and pass request to user's backends.

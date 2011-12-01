@@ -42,6 +42,8 @@
 
 #define EMODULE 27
 
+// HK(global) - for global capture name
+
 typedef struct regexp_userdata {
 	char                  *regexp_str;
 	uintmax_t              cflags;

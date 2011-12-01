@@ -20,7 +20,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				return -EINVAL;
 			
 			if(fdata == NULL){
-				if( (data->ptr = fdata = malloc(sizeof(emitter_t))) == NULL)
+				if( (data->ptr = fdata = calloc(1, sizeof(emitter_t))) == NULL)
 					return -ENOMEM;
 
 				fdata->allocated = 1;
