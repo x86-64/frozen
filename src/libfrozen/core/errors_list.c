@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -180260, "src/libfrozen/backends/request/assign/assign.c: calloc returns null" },
  { -176306, "src/libfrozen/backends/io/tcp/tcp.c: pthread_setspecific error" },
  { -176299, "src/libfrozen/backends/io/tcp/tcp.c: calloc failed" },
  { -176266, "src/libfrozen/backends/io/tcp/tcp.c: backend_new error" },
