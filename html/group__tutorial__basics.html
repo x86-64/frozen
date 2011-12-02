@@ -84,14 +84,17 @@ Input</h2>
 </pre></div><p>This creates file system in /home/test folder, which contain file named "one" and every write request to this file will result in console output. Use "echo 'hello' &gt;&gt; /home/test/one" or similar to test it.</p>
 <p><em>Emitter</em> </p>
 <p>One more way to input is describe backend which send requests you want. One of such backends is <a class="el" href="group__mod__backend__emitter.html">request/emitter</a>. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;request/emitter&quot;, on_end = <span class="stringliteral">&quot;destroy&quot;</span>,
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+{ <span class="keyword">class </span>=&gt; &quot;request/emitter&quot;,
         request = {
-                buffer = <span class="stringliteral">&quot;Hello, world!&quot;</span>
+                request = { buffer = <span class="stringliteral">&quot;Hello, world!\n&quot;</span> },
+                backend = {
+                        { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
+                }
         }
 },
-{ <span class="keyword">class </span>=&gt; &quot;io/stdout&quot; }
-</pre></div><dl class="note"><dt><b>Note:</b></dt><dd>"on_end" with "destroy" value kills frozen daemon after request passed. It is way flush stdout buffers and exit.</dd></dl>
-<p><em>HTTP</em> </p>
+{ <span class="keyword">class </span>=&gt; &quot;daemon/kill&quot; }
+</pre></div><p><em>HTTP</em> </p>
 <p>Another way is different modules, for example go_http. It create simple web server and pass request to user's backends. </p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class</span>=<span class="stringliteral">&quot;go_http&quot;</span>, addr=<span class="stringliteral">&quot;127.0.0.1:12345&quot;</span> },
 { <span class="keyword">class</span>=<span class="stringliteral">&quot;debug&quot;</span> }
@@ -206,7 +209,7 @@ Combining all together</h2>
 </pre></div><p> Because <a class="el" href="group__mod__backend__switch.html">request/switch</a> don't care what in your rule's request you could first check for such AND condition, if it not matches check for only one marker, or for another, or for both. And for each rule you can supply different backend with any action.</p>
 <p>You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file. If you pick up <a class="el" href="group__mod__backend__fuse.html">io/fuse</a> for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. </p>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Tue Nov 29 2011 16:19:10 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Dec 2 2011 14:31:42 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

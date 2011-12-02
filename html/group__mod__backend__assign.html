@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>frozen: intmax_t</title>
+<title>frozen: request/assign</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -31,21 +31,27 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">intmax_t</div>  </div>
-<div class="ingroups"><a class="el" href="group__data.html">Data</a></div></div>
+<div class="title">request/assign</div>  </div>
+<div class="ingroups"><a class="el" href="group__backend.html">Backends</a></div></div>
 <div class="contents">
 <table class="memberdecls">
 </table>
+<p>Assign module set new request's keys. </p>
 
 
-<h3><a class="anchor" id="intmax_t_overview"></a>Overview</h3><div class="textblock"><p>This data used to hold integers of different size. </p>
-</div>
-
-<h3><a class="anchor" id="intmax_t_define"></a>Define</h3><div class="textblock"><p>Possible defines: </p>
-<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> hint  = DATA_INTT(100);
-        
-       intmax_t some  = 200;
-       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> hpint = DATA_PTR_INTT(&amp;some);
+<h3><a class="anchor" id="page_assign_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
+<div class="fragment"><pre class="fragment">        {
+                <span class="keyword">class      </span>= &quot;request/assign&quot;,
+                before     = {                            # <span class="keyword">this</span> key-values <span class="keyword">override</span> existing key-values with same key, optional
+                      buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
+                },
+                after      = {                            # <span class="keyword">this</span> key-values would be used <span class="keywordflow">if</span> there is no other with such key, optional
+                      buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
+                },
+                request    = {                            # <span class="keyword">override</span> whole request with <span class="keyword">this</span> one (before and after not taken in account), optional
+                      buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
+                }
+        }
 </pre></div> </div></div>
 <hr class="footer"/><address class="footer"><small>Generated on Fri Dec 2 2011 14:31:42 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
