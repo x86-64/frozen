@@ -1,16 +1,19 @@
 - fix broken slice_t hash_dump's
-- memcached alike protocol writing tutorial
-- libev
-- multi-threading
-  - backend lock
-  - backend thread_pool
-  - backend queue
-  - backend multi_request
+- backend 'request/iterate'
+- m4 exec for configs
+- categorize data types
+- dynamic data types + as .so module
+- backend 'storage/malloc'
+- review indexes and caches (+ data free routines)
 - "magic" request_key_t data
 - split_t inits
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
+- data 'ipv4_t', 'timestamp_t', 'timerange_t'
 - try bind to nginx as module
+- libev
 - action definitions and documentation
+- rewrite file to use fd_t
+- review code for multi-threading support, document backend's thread-safety capabilities
 - delete ACTION_MOVE
 - add ACTION_GETID or something
 - rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
@@ -20,8 +23,11 @@
 - pcre
 - backend udp
 - data 'range_t', 'multiselect_t' and matching routines
+- backend thread_pool
+- backend queue
+- backend multi_request
 - backend go_session for http
 - backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
 - data 'action_t' + convert array from\to string
-- m4 exec for configs, m4 macro collection
+- m4 macro collection
 - mphf nelements_step with percents + remove from mphf to another backend

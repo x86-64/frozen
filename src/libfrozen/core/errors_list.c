@@ -4,7 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -180260, "src/libfrozen/backends/request/assign/assign.c: calloc returns null" },
+ { -184365, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutex_init failed" },
+ { -184362, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutexattr_settype failed" },
+ { -184359, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutexattr_init failed" },
+ { -184356, "src/libfrozen/backends/sync/mutex/mutex.c: calloc failed" },
+ { -180264, "src/libfrozen/backends/request/assign/assign.c: calloc returns null" },
  { -176306, "src/libfrozen/backends/io/tcp/tcp.c: pthread_setspecific error" },
  { -176299, "src/libfrozen/backends/io/tcp/tcp.c: calloc failed" },
  { -176266, "src/libfrozen/backends/io/tcp/tcp.c: backend_new error" },

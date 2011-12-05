@@ -108,6 +108,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/storage/pointers/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/sync/mutex/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
