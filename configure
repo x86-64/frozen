@@ -873,6 +873,7 @@ enable_backenddebug
 enable_backendemitter
 enable_backendimplode
 enable_backendexplode
+enable_backenditerate
 enable_backendrewrite
 enable_backendswitch
 enable_backendinsert_sort
@@ -1644,6 +1645,8 @@ Optional Features:
                           disable backend implode
   --disable-backend-explode
                           disable backend explode
+  --disable-backend-iterate
+                          disable backend iterate
   --disable-backend-rewrite
                           disable backend rewrite
   --disable-backend-switch
@@ -20468,6 +20471,43 @@ fi
 		BACKEND_MAKEFILE_request_implode=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/implode/libfrozen_backend_implode.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backenditerate was given.
+if test "${enable_backenditerate+set}" = set; then :
+  enableval=$enable_backenditerate;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backenditerate}" = "yes"; then
+			enable_backenditerate="no"
+		else
+			enable_backenditerate="yes"
+		fi
+	fi
+
+	if test "${enable_backenditerate}" = "yes"; then
+		BACKEND_DIR_iterate="request/iterate"
+		BACKEND_DEP_iterate=""
+				BACKEND_SELECTED="$BACKEND_SELECTED iterate"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_request_iterate" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/iterate/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/iterate"
+
+		BACKEND_MAKEFILE_request_iterate=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/iterate/libfrozen_backend_iterate.la"
 
 	fi
 

@@ -4,6 +4,8 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -188481, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
+ { -188446, "src/libfrozen/backends/request/iterate/iterate.c: calloc returns null" },
  { -184365, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutex_init failed" },
  { -184362, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutexattr_settype failed" },
  { -184359, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutexattr_init failed" },

@@ -1,5 +1,4 @@
 - fix broken slice_t hash_dump's
-- backend 'request/iterate'
 - m4 exec for configs
 - categorize data types
 - dynamic data types + as .so module
