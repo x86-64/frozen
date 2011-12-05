@@ -1,3 +1,4 @@
 
 #define FROZEN_MODULESDIR "%modulesdir%"
+#define M4_PATH           "%m4path%"
 
