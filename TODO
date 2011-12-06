@@ -1,6 +1,4 @@
 - fix broken slice_t hash_dump's
-- m4 exec for configs
-- categorize data types
 - dynamic data types + as .so module
 - backend 'storage/malloc'
 - review indexes and caches (+ data free routines)

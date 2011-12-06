@@ -50,28 +50,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/c_null/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/backend/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/buffer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/counter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/dataptr/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/datatype/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/default/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/fd/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/format/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/go_interface/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/hash/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/hash_key/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/io/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/memory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/random/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/raw/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/slice/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/slider/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/string/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/struct/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/uint/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/void/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/end/config.m4 \
@@ -114,6 +92,28 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/storage/pointers/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/sync/mutex/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/backend/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/hash_key/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/slider/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/struct/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -203,28 +203,6 @@ CYGPATH_W = @CYGPATH_W@
 DATA_DIRS = @DATA_DIRS@
 DATA_DIST_DIRS = @DATA_DIST_DIRS@
 DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
-DATA_OBJECTS_backend = @DATA_OBJECTS_backend@
-DATA_OBJECTS_buffer = @DATA_OBJECTS_buffer@
-DATA_OBJECTS_counter = @DATA_OBJECTS_counter@
-DATA_OBJECTS_dataptr = @DATA_OBJECTS_dataptr@
-DATA_OBJECTS_datatype = @DATA_OBJECTS_datatype@
-DATA_OBJECTS_default = @DATA_OBJECTS_default@
-DATA_OBJECTS_emitter = @DATA_OBJECTS_emitter@
-DATA_OBJECTS_fd = @DATA_OBJECTS_fd@
-DATA_OBJECTS_format = @DATA_OBJECTS_format@
-DATA_OBJECTS_go_interface = @DATA_OBJECTS_go_interface@
-DATA_OBJECTS_hash = @DATA_OBJECTS_hash@
-DATA_OBJECTS_hash_key = @DATA_OBJECTS_hash_key@
-DATA_OBJECTS_io = @DATA_OBJECTS_io@
-DATA_OBJECTS_memory = @DATA_OBJECTS_memory@
-DATA_OBJECTS_random = @DATA_OBJECTS_random@
-DATA_OBJECTS_raw = @DATA_OBJECTS_raw@
-DATA_OBJECTS_slice = @DATA_OBJECTS_slice@
-DATA_OBJECTS_slider = @DATA_OBJECTS_slider@
-DATA_OBJECTS_string = @DATA_OBJECTS_string@
-DATA_OBJECTS_struct = @DATA_OBJECTS_struct@
-DATA_OBJECTS_uint = @DATA_OBJECTS_uint@
-DATA_OBJECTS_void = @DATA_OBJECTS_void@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@

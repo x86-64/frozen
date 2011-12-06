@@ -1,7 +1,7 @@
 #!/bin/sh
 
 keys=`grep "FORMAT([a-z0-9_]*)" -roha ./ | sed "s/FORMAT(//g" | sed "s/)//g"  | LC_ALL=C sort -u`
-format_h=src/libfrozen/data/format/format.h
+format_h=src/libfrozen/data/enum/format/format.h
 format_swig=src/lang/format.i
 
 i=0

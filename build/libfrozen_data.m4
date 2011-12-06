@@ -1,9 +1,10 @@
 AC_DEFUN([FROZEN_DATA],[
-	define([data_name],translit($1,_,-))
-	define([data_action],ifelse($3,yes,disable,enable))
+	define([data_name],translit($1,-,_))
+	define([data_dir],$2_$3)
+	define([data_action],ifelse($4,yes,disable,enable))
 	AC_ARG_ENABLE($1,AS_HELP_STRING([--]data_action()[-data-]data_name(),data_action()[ data ]data_name()))
 	
-	if test "$3" = "yes"; then
+	if test "$4" = "yes"; then
 		if test "${enable_$1}" = "yes"; then
 			enable_$1="no"
 		else
@@ -12,23 +13,20 @@ AC_DEFUN([FROZEN_DATA],[
 	fi
 	
 	if test "${enable_$1}" = "yes"; then
-		DATA_DIR_$1="$2"
-		DATA_DEP_$1="$4"
-		DATA_ID_$1="$5"
-		DATA_OBJECTS_$2="$DATA_OBJECTS_$2 libfrozen_data_$2_la-$1.lo"
+		DATA_DIR_$1="$2/$3"
+		DATA_DEP_$1="$5"
+		DATA_ID_$1="$6"
 		DATA_SELECTED="$DATA_SELECTED $1"
-		DATA_HEADERS="$DATA_HEADERS $2/$1.h"
-		
-		AC_SUBST([DATA_OBJECTS_$2])
+		DATA_HEADERS="$DATA_HEADERS $2/$3/$1.h"
 	fi
 	
-	if test "$DATA_MAKEFILE_$2" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/$2/Makefile"
-		DATA_DIST_DIRS="$DATA_DIST_DIRS $2"
+	if test "$DATA_MAKEFILE_[]data_dir()" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/$2/$3/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS $2/$3"
 		AC_SUBST([DATA_DIST_DIRS])
-		DATA_MAKEFILE_$2=yes
+		DATA_MAKEFILE_[]data_dir()=yes
 		
-		DATA_LIBS_SELECTED="$DATA_LIBS_SELECTED $2/libfrozen_data_$2.la"
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} $2/$3/libfrozen_data_$3.la"
 		AC_SUBST([DATA_LIBS_SELECTED])
 	fi
 ])
