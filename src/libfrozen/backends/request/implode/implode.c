@@ -22,7 +22,7 @@
  * @code
  * {
  *              class                   = "request/implode",
- *              buffer                  = (hash_key_t)'buffer',  # key name in new request
+ *              buffer                  = (hashkey_t)'buffer',  # key name in new request
  * }
  * @endcode
  */
@@ -48,7 +48,7 @@
  * @code
  * {
  *              class                   = "request/explode",
- *              buffer                  = (hash_key_t)'buffer',  # key name in new request
+ *              buffer                  = (hashkey_t)'buffer',  # key name in new request
  *              return_result           = (uint_t)'0',          # pack changed, during further processing, request back to old one, default 1
  * }
  * @endcode
@@ -57,7 +57,7 @@
 #define EMODULE 34
 
 typedef struct plode_userdata {
-	hash_key_t             buffer;
+	hashkey_t             buffer;
 	uintmax_t              return_result;
 } plode_userdata;
 

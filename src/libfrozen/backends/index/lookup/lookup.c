@@ -45,7 +45,7 @@ typedef struct lookup_userdata {
 	uintmax_t              fatal;
 	uintmax_t              force_query;
 	backend_t             *backend_index;
-	hash_key_t             output;
+	hashkey_t             output;
 	datatype_t             output_type;
 } lookup_userdata;
 

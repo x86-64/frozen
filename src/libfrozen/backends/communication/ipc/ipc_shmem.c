@@ -20,7 +20,7 @@
  *              role                    = 
  *                                        "client",               # act as client
  *                                        "server",               # act as server
- *              buffer                  = (hash_key_t)'buffer',    # buffer to transfer, default buffer
+ *              buffer                  = (hashkey_t)'buffer',    # buffer to transfer, default buffer
  *              
  *              item_size               = (uint_t)'1000',         # maximum transfered item size, default 1000
  *              size                    = (uint_t)'10',           # send\receive queue size, default 100
@@ -69,7 +69,7 @@ typedef struct ipc_shmem_userdata {
 	size_t                 inited;
 	ipc_role               role;
 	forced_states          forced_state;
-	hash_key_t             buffer;
+	hashkey_t             buffer;
 	uintmax_t              return_result;
 
 	ipc_shmem_header      *shmaddr;

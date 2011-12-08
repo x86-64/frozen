@@ -55,7 +55,7 @@ typedef union YYSTYPE
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
-	hash_key_t  key;
+	hashkey_t  key;
 	char       *name;
 	data_t      data;
 

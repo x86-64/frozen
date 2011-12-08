@@ -28,7 +28,7 @@
  *              newline                 = (uint_t)'0',        # see "man regcomp", default 0
  *              notbol                  = (uint_t)'0',        # see "man regcomp", default 0
  *              noteol                  = (uint_t)'0',        # see "man regcomp", default 0
- *              marker                  = (hash_key_t)'marker',# on match - pass request with this key set
+ *              marker                  = (hashkey_t)'marker',# on match - pass request with this key set
  *              marker_value            = (uint_t)'1',        # value for marker
  *              capture                 = {                   # capture key names 
  *                       key_global     = (void_t)'',         # - key for whole match
@@ -50,8 +50,8 @@ typedef struct regexp_userdata {
 	uintmax_t              eflags;
 	regmatch_t            *regmatch;
 	hash_t                *capture;
-	hash_key_t             input;
-	hash_key_t             marker;
+	hashkey_t             input;
+	hashkey_t             marker;
 	data_t                *marker_data;
 
 	uintmax_t              compiled;
@@ -61,7 +61,7 @@ typedef struct regexp_userdata {
 
 data_t                         marker_default    = DATA_UINTT(1);
 
-static void    config_updateflag(hash_t *config, hash_key_t key, uintmax_t value, uintmax_t *flag){ // {{{
+static void    config_updateflag(hash_t *config, hashkey_t key, uintmax_t value, uintmax_t *flag){ // {{{
 	ssize_t                ret;
 	uintmax_t              new_value;
 	

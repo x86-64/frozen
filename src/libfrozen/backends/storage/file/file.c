@@ -54,7 +54,7 @@ typedef struct file_userdata {
 	pthread_mutex_t  create_lock;
 	
 	data_t           file_io;
-	hash_key_t       buffer;
+	hashkey_t       buffer;
 } file_userdata;
 
 // IO's
@@ -196,7 +196,7 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 	
 	switch( config->key ){
 		case HK(fork):;
-			hash_key_t      key;
+			hashkey_t      key;
 			
 			str_size = 0;
 			

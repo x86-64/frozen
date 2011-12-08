@@ -21,7 +21,7 @@
  * @code
  * {
  *              class                   = "backend/call",
- *              backend                 = (hash_key_t)'name',  # key with backend in request, default "backend"
+ *              backend                 = (hashkey_t)'name',  # key with backend in request, default "backend"
  *              retry                   = (uint_t)'1',        # rerun request after failed call, default 1
  * }
  * @endcode
@@ -31,7 +31,7 @@
 
 typedef struct call_userdata {
 	uintmax_t              retry_request;
-	hash_key_t             hk_backend;
+	hashkey_t             hk_backend;
 } call_userdata;
 
 static int call_init(backend_t *backend){ // {{{

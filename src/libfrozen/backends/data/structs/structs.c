@@ -18,9 +18,9 @@
  * @code
  * {
  *              class                   = "data/structs",
- *              buffer                  = (hash_key_t)'buffer', # input/output request key name, default "buffer"
- *              values                  = (hash_key_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
- *              size                    = (hash_key_t)'size',   # if supplied - add size of packed structure to request with key
+ *              buffer                  = (hashkey_t)'buffer', # input/output request key name, default "buffer"
+ *              values                  = (hashkey_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
+ *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
  *              structure               = {                     # structure to pack/unpack to/from
  *                     keyname = {                              # - first field is keyname with default value of 10 and FORMAT(clean)
  *                                  default = (uint_t)'10',
@@ -42,9 +42,9 @@ typedef enum struct_values {
 
 typedef struct struct_userdata {
 	struct_t      *structure;
-	hash_key_t     buffer;
-	hash_key_t     key_values;
-	hash_key_t     size;
+	hashkey_t     buffer;
+	hashkey_t     key_values;
+	hashkey_t     size;
 	struct_values  values;
 } struct_userdata;
 

@@ -24,8 +24,8 @@
  * {
  *              class                   = "index/mphf",
  *              type                    = <see algo>,          # algorithm to use in index
- *              input                   = (hash_key_t)'key',    # input key for index
- *              output                  = (hash_key_t)'offset', # output key name for index
+ *              input                   = (hashkey_t)'key',    # input key for index
+ *              output                  = (hashkey_t)'offset', # output key name for index
  *              <algo specific parameters>
  * }
  * @endcode
@@ -43,8 +43,8 @@ typedef struct mphf_userdata {
 	mphf_proto_t        *mphf_proto;
 	uintmax_t            broken;
 
-	hash_key_t           input;
-	hash_key_t           output;
+	hashkey_t           input;
+	hashkey_t           output;
 
 } mphf_userdata;
 

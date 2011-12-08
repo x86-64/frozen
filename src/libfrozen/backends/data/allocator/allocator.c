@@ -2,12 +2,12 @@
 #define EMODULE 7
 	/*
 typedef struct allocator_userdata {
-	hash_key_t     key;
-	hash_key_t     key_out;
-	hash_key_t     key_to;
-	hash_key_t     key_from;
-	hash_key_t     count;
-	hash_key_t     size;
+	hashkey_t     key;
+	hashkey_t     key_out;
+	hashkey_t     key_to;
+	hashkey_t     key_from;
+	hashkey_t     count;
+	hashkey_t     size;
 	DT_SIZET       multiply_as_sizet;
 	DT_OFFT	multiply_as_offt;
 	data_t	 multiply_as_sizet_data;

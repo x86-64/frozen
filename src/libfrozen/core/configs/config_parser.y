@@ -20,7 +20,7 @@ extern int config_lex(YYSTYPE *);
 %union {
 	hash_t     *hash_items;
 	hash_t      hash_item;
-	hash_key_t  key;
+	hashkey_t  key;
 	char       *name;
 	data_t      data;
 }
@@ -67,7 +67,7 @@ hash_name :
           /* empty */  { $$ = 0; }
 	| TNULL ASSIGN { $$ = 0; }
 	| NAME  ASSIGN {
-		hash_key_t   key;
+		hashkey_t   key;
 		data_t       d_key    = DATA_PTR_HASHKEYT(&key);
 	
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, $1 }; 

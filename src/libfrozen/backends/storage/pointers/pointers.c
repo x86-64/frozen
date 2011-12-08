@@ -23,8 +23,8 @@
 #define EMODULE         32
 
 typedef struct pointers_userdata {
-	hash_key_t             input;
-	hash_key_t             offset;
+	hashkey_t             input;
+	hashkey_t             offset;
 } pointers_userdata;
 
 static int pointers_init(backend_t *backend){ // {{{

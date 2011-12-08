@@ -38,7 +38,7 @@ struct rewrite_thing_t {
 	union {
 		struct {
 			// THING_HASHT_KEY
-			hash_key_t               array_key;
+			hashkey_t               array_key;
 
 			// THING_HASHT or THING_CONST or THING_VARIABLE
 			unsigned int             id;

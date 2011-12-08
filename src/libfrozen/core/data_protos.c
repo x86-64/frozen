@@ -9,7 +9,7 @@ extern data_proto_t string_t_proto;
 extern data_proto_t void_t_proto;
 extern data_proto_t datatype_t_proto;
 extern data_proto_t format_t_proto;
-extern data_proto_t hash_key_t_proto;
+extern data_proto_t hashkey_t_proto;
 extern data_proto_t fd_t_proto;
 extern data_proto_t io_t_proto;
 extern data_proto_t go_interface_t_proto;
@@ -43,7 +43,7 @@ data_proto_t * data_protos[] = {
    [TYPE_VOIDT] = &void_t_proto,
    [TYPE_DATATYPET] = &datatype_t_proto,
    [TYPE_FORMATT] = &format_t_proto,
-   [TYPE_HASHKEYT] = &hash_key_t_proto,
+   [TYPE_HASHKEYT] = &hashkey_t_proto,
    [TYPE_FDT] = &fd_t_proto,
    [TYPE_IOT] = &io_t_proto,
    [TYPE_GOINTERFACET] = &go_interface_t_proto,

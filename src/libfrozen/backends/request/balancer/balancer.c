@@ -50,7 +50,7 @@ typedef enum balancer_pool {
 typedef struct balancer_userdata {
 	balancer_mode          mode;
 	hash_t                *fork_req;
-	hash_key_t             field;
+	hashkey_t             field;
 	size_t                 counter;
 	size_t                 clone;
 	size_t                 linear_len;

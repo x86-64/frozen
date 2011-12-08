@@ -18,7 +18,7 @@
  * @code
  * {
  *              class                   = "data/split",
- *              input                   = (hash_key_t)'buffer',  # input buffer key name
+ *              input                   = (hashkey_t)'buffer',  # input buffer key name
  *              split                   = "Z",                  # string to split on, default "\n"
  *              buffer_size             = (uint_t)'1024'        # size of internal buffer, default 1024
  * }
@@ -30,7 +30,7 @@
 typedef struct split_userdata {
 	char                  *split_str;
 	uintmax_t              split_len;
-	hash_key_t             input;
+	hashkey_t             input;
 	uintmax_t              buffer_size;
 } split_userdata;
 

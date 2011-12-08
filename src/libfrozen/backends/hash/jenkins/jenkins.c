@@ -21,8 +21,8 @@
  *              class                   = 
  *                                        "hash/jenkins_32",
  *                                        "hash/jenkins_64",
- *              input                   = (hash_key_t)'buffer', # input key name
- *              output                  = (hash_key_t)'keyid',  # output key name
+ *              input                   = (hashkey_t)'buffer', # input key name
+ *              output                  = (hashkey_t)'keyid',  # output key name
  *              fatal                   = (uint_t)'1',         # interrupt request if input not present, default 0
  * }
  * @endcode
@@ -31,8 +31,8 @@
 #define EMODULE 23
 
 typedef struct jenkins_userdata {
-	hash_key_t             input;
-	hash_key_t             output;
+	hashkey_t             input;
+	hashkey_t             output;
 	uintmax_t              fatal;
 } jenkins_userdata;
 

@@ -76,11 +76,11 @@ void *alloca (size_t);
 #include <errors.h>
 #include <public.h>
 
+#include <enums.h>
 #include <list.h>               // internal data storage
 #include <buffer.h>             //
 #include <data.h>               //
 #include <data_selected.h>      //
-#include <hash.h>               //
 
 #include <api.h>
 

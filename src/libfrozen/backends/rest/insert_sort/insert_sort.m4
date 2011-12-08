@@ -18,7 +18,7 @@ struct sort_proto_t {
 struct sorts_userdata {
 	backend_t         *backend;
 	sort_proto_t    *engine;
-	hash_key_t       sort_field;
+	hashkey_t       sort_field;
 };
 
 /* m4 {{{

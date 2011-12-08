@@ -1600,7 +1600,7 @@ yyreduce:
     {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, (yyvsp[(1) - (4)].string))) != NULL && curr->type == THING_HASHT){
-		hash_key_t  key;
+		hashkey_t  key;
 		data_t      d_key    = DATA_PTR_HASHKEYT(&key);
 	
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(3) - (4)].string) }; 

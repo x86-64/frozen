@@ -11,25 +11,25 @@ import (
 // HK(error) HK(input) HK(output) HK(go_template)
 
 type templateExec_userdata struct {
-	k_output               uint64
-	k_input                uint64
+	k_output               f.Enum_SS_hashkey_t
+	k_input                f.Enum_SS_hashkey_t
 }
 	func templateExec_configure(backend uintptr, config uintptr) int{
-		d_input, ok := f.Hget(config, f.HK_input).(uint)
+		d_input, ok := f.Hget(config, f.HK_input).(f.Enum_SS_hashkey_t)
 		if !ok {
 			log.Print("template_configure: no HK(input) supplied")
 			return -1
 		}
 
-		d_output, ok := f.Hget(config, f.HK_output).(uint)
+		d_output, ok := f.Hget(config, f.HK_output).(f.Enum_SS_hashkey_t)
 		if !ok {
 			log.Print("template_configure: no HK(output) supplied")
 			return -1
 		}
 
 		userdata := &templateExec_userdata{
-			k_input:   uint64(d_input),
-			k_output:  uint64(d_output) }
+			k_input:   d_input,
+			k_output:  d_output }
 		f.Backend_SetUserdata(backend, userdata)
 		return 0
 	}
@@ -67,7 +67,7 @@ func template_load(backend uintptr, request uintptr) (tpl *template.Template, er
 	return tpl, ""
 }
 
-func template_exec(tpl *template.Template, request uintptr, k_output uint64, k_input uint64) (err string) {
+func template_exec(tpl *template.Template, request uintptr, k_output f.Enum_SS_hashkey_t, k_input f.Enum_SS_hashkey_t)(err string) {
 	wr,   ok2 := f.Hget(request,  k_output).(io.Writer)
 	data      := f.Hget(request,  k_input)
 	if !ok2 {

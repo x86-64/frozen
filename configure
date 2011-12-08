@@ -833,7 +833,7 @@ enable_string_t
 enable_void_t
 enable_datatype_t
 enable_format_t
-enable_hash_key_t
+enable_hashkey_t
 enable_fd_t
 enable_io_t
 enable_go_interface_t
@@ -1606,8 +1606,8 @@ Optional Features:
   --disable-data-datatype_t
                           disable data datatype_t
   --disable-data-format_t disable data format_t
-  --disable-data-hash_key_t
-                          disable data hash_key_t
+  --disable-data-hashkey_t
+                          disable data hashkey_t
   --disable-data-fd_t     disable data fd_t
   --disable-data-io_t     disable data io_t
   --disable-data-go_interface_t
@@ -19736,35 +19736,35 @@ fi
 
 
 
-	# Check whether --enable-hash_key_t was given.
-if test "${enable_hash_key_t+set}" = set; then :
-  enableval=$enable_hash_key_t;
+	# Check whether --enable-hashkey_t was given.
+if test "${enable_hashkey_t+set}" = set; then :
+  enableval=$enable_hashkey_t;
 fi
 
 
 	if test "yes" = "yes"; then
-		if test "${enable_hash_key_t}" = "yes"; then
-			enable_hash_key_t="no"
+		if test "${enable_hashkey_t}" = "yes"; then
+			enable_hashkey_t="no"
 		else
-			enable_hash_key_t="yes"
+			enable_hashkey_t="yes"
 		fi
 	fi
 
-	if test "${enable_hash_key_t}" = "yes"; then
-		DATA_DIR_hash_key_t="enum/hash_key"
-		DATA_DEP_hash_key_t=""
-		DATA_ID_hash_key_t="25"
-		DATA_SELECTED="$DATA_SELECTED hash_key_t"
-		DATA_HEADERS="$DATA_HEADERS enum/hash_key/hash_key_t.h"
+	if test "${enable_hashkey_t}" = "yes"; then
+		DATA_DIR_hashkey_t="enum/hashkey"
+		DATA_DEP_hashkey_t=""
+		DATA_ID_hashkey_t="25"
+		DATA_SELECTED="$DATA_SELECTED hashkey_t"
+		DATA_HEADERS="$DATA_HEADERS enum/hashkey/hashkey_t.h"
 	fi
 
-	if test "$DATA_MAKEFILE_enum_hash_key" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/enum/hash_key/Makefile"
-		DATA_DIST_DIRS="$DATA_DIST_DIRS enum/hash_key"
+	if test "$DATA_MAKEFILE_enum_hashkey" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/enum/hashkey/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS enum/hashkey"
 
-		DATA_MAKEFILE_enum_hash_key=yes
+		DATA_MAKEFILE_enum_hashkey=yes
 
-		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} enum/hash_key/libfrozen_data_hash_key.la"
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} enum/hashkey/libfrozen_data_hashkey.la"
 
 	fi
 

@@ -74,7 +74,7 @@ typedef struct rebuildread_userdata {
 	hash_t                *req_rebuild;
 	hash_t                *req_count;
 	hash_t                *req_read;
-	hash_key_t             hk_offset;
+	hashkey_t             hk_offset;
 	backend_t             *writer;
 } rebuildread_userdata;
 

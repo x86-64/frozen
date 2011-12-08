@@ -96,7 +96,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/enum/hash_key/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
@@ -123,7 +123,6 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
 	libfrozen_core_la-api.lo libfrozen_core_la-errors.lo \
 	libfrozen_core_la-data.lo libfrozen_core_la-data_protos.lo \
-	libfrozen_core_la-hash.lo libfrozen_core_la-hashkeys.lo \
 	libfrozen_core_la-list.lo libfrozen_core_la-buffer.lo \
 	libfrozen_core_la-backend.lo \
 	configs/libfrozen_core_la-config_parser.tab.lo \
@@ -308,8 +307,6 @@ libfrozen_core_la_SOURCES = \
                         api.h           api.c                                \
 			errors.h        errors.c                             \
 			data.h          data.c         data_protos.c         \
-                        hash.h          hash.c                               \
-                        hashkeys.c      hashkeys.h                           \
 			list.h          list.c                               \
                         buffer.h        buffer.c                             \
                         backend.h       backend.c                            \
@@ -397,8 +394,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-data_protos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-errors.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-hash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-hashkeys.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-libfrozen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Plo@am__quote@
@@ -462,20 +457,6 @@ libfrozen_core_la-data_protos.lo: data_protos.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='data_protos.c' object='libfrozen_core_la-data_protos.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-data_protos.lo `test -f 'data_protos.c' || echo '$(srcdir)/'`data_protos.c
-
-libfrozen_core_la-hash.lo: hash.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-hash.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-hash.Tpo -c -o libfrozen_core_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-hash.Tpo $(DEPDIR)/libfrozen_core_la-hash.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash.c' object='libfrozen_core_la-hash.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
-
-libfrozen_core_la-hashkeys.lo: hashkeys.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-hashkeys.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-hashkeys.Tpo -c -o libfrozen_core_la-hashkeys.lo `test -f 'hashkeys.c' || echo '$(srcdir)/'`hashkeys.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-hashkeys.Tpo $(DEPDIR)/libfrozen_core_la-hashkeys.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hashkeys.c' object='libfrozen_core_la-hashkeys.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-hashkeys.lo `test -f 'hashkeys.c' || echo '$(srcdir)/'`hashkeys.c
 
 libfrozen_core_la-list.lo: list.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-list.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-list.Tpo -c -o libfrozen_core_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c

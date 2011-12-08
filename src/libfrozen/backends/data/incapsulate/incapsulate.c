@@ -19,12 +19,12 @@
  * {
  *              class                   = "data/incapsulate",
  *              multiply                = (uint_t)'10',       # item size
- *              key                     = (hash_key_t)'name',  # key to change value (multiply), default offset
- *              key_out                 = (hash_key_t)'name',  # key to change value (multiply), default offset_out
- *              key_to                  = (hash_key_t)'name',  # key to change value (multiply), default offset_to
- *              key_from                = (hash_key_t)'name',  # key to change value (multiply), default offset_from
- *              count                   = (hash_key_t)'name',  # key to change value (divide), default buffer
- *              size                    = (hash_key_t)'name',  # key to change value (divide), default size
+ *              key                     = (hashkey_t)'name',  # key to change value (multiply), default offset
+ *              key_out                 = (hashkey_t)'name',  # key to change value (multiply), default offset_out
+ *              key_to                  = (hashkey_t)'name',  # key to change value (multiply), default offset_to
+ *              key_from                = (hashkey_t)'name',  # key to change value (multiply), default offset_from
+ *              count                   = (hashkey_t)'name',  # key to change value (divide), default buffer
+ *              size                    = (hashkey_t)'name',  # key to change value (divide), default size
  * }
  * @endcode
  */
@@ -32,12 +32,12 @@
 #define EMODULE 6
 
 typedef struct incap_userdata {
-	hash_key_t     key;
-	hash_key_t     key_out;
-	hash_key_t     key_to;
-	hash_key_t     key_from;
-	hash_key_t     count;
-	hash_key_t     size;
+	hashkey_t     key;
+	hashkey_t     key_out;
+	hashkey_t     key_to;
+	hashkey_t     key_from;
+	hashkey_t     count;
+	hashkey_t     size;
 	off_t          multiply;
 	data_t         multiply_data;
 } incap_userdata;

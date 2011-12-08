@@ -20,7 +20,7 @@
  *              class                   = "data/convert",
  *              items                   = {
  *                      {
- *                           input         = (hash_key_t)'buffer',       # input key
+ *                           input         = (hashkey_t)'buffer',       # input key
  *                           type          = (datatype_t)'raw_t',       # desired type
  *                           format        = (uint_t)'0'                # format to convert
  *                      },
@@ -64,7 +64,7 @@ static int convert_configure(backend_t *backend, hash_t *config){ // {{{
 
 static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	ssize_t                ret;
-	hash_key_t             input;
+	hashkey_t             input;
 	datatype_t             type              = TYPE_INVALID;
 	uintmax_t              format            = FORMAT(clean);
 	//uintmax_t              return_result     = 0;

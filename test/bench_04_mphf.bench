@@ -20,7 +20,7 @@
 NULL,
 { class => "benchmark", name => "mphf"                                   },
 
-{ class = "hash/murmur2_64", input = (hash_key_t)'key', output = (hash_key_t)'keyid'             },
+{ class = "hash/murmur2_64", input = (hashkey_t)'key', output = (hashkey_t)'keyid'             },
 {
 	class = "request/switch",
 	rules = {
@@ -30,7 +30,7 @@ NULL,
 		},
 		{
 			request = { action = read },
-			backend = { { class = "index/lookup", index = "mymphf", output = (hash_key_t)'offset', output_type = (datatype_t)'uint_t' } }
+			backend = { { class = "index/lookup", index = "mymphf", output = (hashkey_t)'offset', output_type = (datatype_t)'uint_t' } }
 		}
 	}
 },
@@ -52,7 +52,7 @@ NULL,
 	backend_g = "test_mphf_g",
 	backend_e = "test_mphf_e",
 	backend_v = "test_mphf_v",
-	key_from = (hash_key_t)'keyid',
+	key_from = (hashkey_t)'keyid',
 	nelements_min = (uint64_t)'1000000',
 	nelements_step = (uint64_t)'10000',
 	value_bits = (uint32_t)'32'

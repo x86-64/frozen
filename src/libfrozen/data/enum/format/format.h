@@ -2,11 +2,6 @@
 #ifndef FORMAT_H
 #define FORMAT_H
 
-typedef struct keypair_t {
-    char *        key_str;
-    uintmax_t     key_val;
-} keypair_t;
-
 extern keypair_t formats[];
 extern size_t formats_size;
 extern size_t formats_nelements;

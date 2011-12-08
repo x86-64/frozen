@@ -18,22 +18,24 @@
 %typemap(gotype) request_t *, const void * & "uintptr"
 #endif
 
-%include hashkeys.i
-
 %include ../../libfrozen/core/api.h
+%include ../../libfrozen/core/enums.h
 %include ../../libfrozen/core/data.h
 %include ../../libfrozen/core/data_selected.h
 %include ../../libfrozen/core/backend.h
-%include ../../libfrozen/core/hash.h
 %include ../../libfrozen/core/errors.h
 %include ../../libfrozen/core/configs/config.h
+
+%include ../../libfrozen/data/core/hash/hash_t.h
+%include ../../libfrozen/data/enum/hashkey/hashkey_t.h
+%include ../../libfrozen/data/enum/hashkey/hashkeys.h
 
 typedef hash_t                   request_t;
 typedef signed int               ssize_t;
 typedef unsigned int             size_t;
 typedef signed long long int     intmax_t;
 typedef unsigned long long int   uintmax_t;
-typedef uintmax_t                hash_key_t;
+typedef uintmax_t                hashkey_t;
 
 int                frozen_init(void);
 int                frozen_destroy(void);
@@ -165,7 +167,7 @@ func Backend_GetUserdata(backend uintptr) interface {} {
 }
 
 type Hskel struct {
-	Key           uint64
+	Key           Enum_SS_hashkey_t
 	Data_type     Enum_SS_datatype_t
 	Data_ptr      unsafe.Pointer
 }; 
@@ -215,7 +217,7 @@ func hitem_getlen(s interface {}) uint {
 	return 0
 }
 
-func Hitem(skey uint64, sdata_type Enum_SS_datatype_t, s interface {}) Hskel {
+func Hitem(skey Enum_SS_hashkey_t, sdata_type Enum_SS_datatype_t, s interface {}) Hskel {
         var data_ptr  unsafe.Pointer
 	
         switch sdata_type {
@@ -232,7 +234,7 @@ func Hitem(skey uint64, sdata_type Enum_SS_datatype_t, s interface {}) Hskel {
 	return Hskel{ skey, sdata_type, data_ptr }
 }
 
-func Hget(hash uintptr, skey uint64) interface {} {
+func Hget(hash uintptr, skey Enum_SS_hashkey_t) interface {} {
 	item := Hash_find(hash, skey)
 	if item == 0 {
 		return nil
@@ -242,7 +244,7 @@ func Hget(hash uintptr, skey uint64) interface {} {
 		case TYPE_GOINTERFACET: return ObjFromPtr( data.GetPtr() )
 		case TYPE_INTT:         return  int(Go_data_to_uint(data))
 		case TYPE_SIZET:        return uint(Go_data_to_uint(data))
-		case TYPE_HASHKEYT:     return uint(Go_data_to_uint(data))
+		case TYPE_HASHKEYT:     return Enum_SS_hashkey_t(Go_data_to_uint(data))
 		case TYPE_UINTT:        return uint(Go_data_to_uint(data))
 		case TYPE_RAWT:         s := []string{""}; Go_data_to_raw(data, s); return s[0]
 		case TYPE_STRINGT:      s := []string{""}; Go_data_to_raw(data, s); return s[0]
@@ -252,13 +254,13 @@ func Hget(hash uintptr, skey uint64) interface {} {
 }
 
 func Hnext(hash uintptr) Hskel {
-	return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(hash) }
+	return Hskel{ HK_hash_ptr_end, 0, unsafe.Pointer(hash) }
 }
 func Hnull() Hskel {
-        return Hskel{ (^uint64(0)), 0, unsafe.Pointer(nil) }
+        return Hskel{ HK_hash_ptr_null, 0, unsafe.Pointer(nil) }
 }
 func Hend() Hskel {
-        return Hskel{ (^uint64(0))-1, 0, unsafe.Pointer(nil) }
+        return Hskel{ HK_hash_ptr_end, 0, unsafe.Pointer(nil) }
 }
 func Hash(hk []Hskel) uintptr {
         return uintptr(unsafe.Pointer(&hk[0]))

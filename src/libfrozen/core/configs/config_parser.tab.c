@@ -135,7 +135,7 @@ typedef union YYSTYPE
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
-	hash_key_t  key;
+	hashkey_t  key;
 	char       *name;
 	data_t      data;
 
@@ -1465,7 +1465,7 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 69 "configs/config_parser.y"
     {
-		hash_key_t   key;
+		hashkey_t   key;
 		data_t       d_key    = DATA_PTR_HASHKEYT(&key);
 	
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(1) - (2)].name) }; 

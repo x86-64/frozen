@@ -21,7 +21,7 @@
  * @code
  * {
  *              class                   = "index/hashtable",
- *              input                   = (hash_key_t)'keyid', # key for input, default "key"
+ *              input                   = (hashkey_t)'keyid', # key for input, default "key"
  *              nelements               = (uint_t)'100',      # size of hash table
  * }
  * @endcode
@@ -30,7 +30,7 @@
 #define EMODULE              31
 
 typedef struct hashtable_userdata {
-	hash_key_t           input;
+	hashkey_t           input;
 	uintmax_t            hashtable_size;
 } hashtable_userdata;
 

@@ -4,7 +4,7 @@
 
 typedef struct factory_userdata {
 	config_t              *backend_config;
-	hash_key_t             output;
+	hashkey_t             output;
 } factory_userdata;
 
 static int factory_init(backend_t *backend){ // {{{

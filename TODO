@@ -1,5 +1,7 @@
 - fix broken slice_t hash_dump's
-- dynamic data types + as .so module
+- variable length buffer inits (buffer_t and raw_t)
+- hashes instead of incrementing
+- unlimited and dynamic hash key names
 - backend 'storage/malloc'
 - review indexes and caches (+ data free routines)
 - "magic" request_key_t data
@@ -7,6 +9,7 @@
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 - data 'ipv4_t', 'timestamp_t', 'timerange_t'
 - try bind to nginx as module
+- dynamic data types + as .so module
 - libev
 - action definitions and documentation
 - rewrite file to use fd_t
@@ -15,7 +18,6 @@
 - add ACTION_GETID or something
 - rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
 - remove insert sort and write binary search instead
-- hashes instead of incrementing
 - new test suite, as benchmarks, deprecate check
 - pcre
 - backend udp
@@ -27,4 +29,5 @@
 - backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
 - data 'action_t' + convert array from\to string
 - m4 macro collection
+- dynamic data types + as .so module
 - mphf nelements_step with percents + remove from mphf to another backend

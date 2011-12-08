@@ -19,7 +19,7 @@
  * @code
  * {
  *              class                   = "io/stdin",
- *              output                  = (hash_key_t)'buffer'     # output buffer key, default "buffer"
+ *              output                  = (hashkey_t)'buffer'     # output buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -42,7 +42,7 @@
  * @code
  * {
  *              class                   = "io/stdout",
- *              input                   = (hash_key_t)'buffer'     # input buffer key, default "buffer"
+ *              input                   = (hashkey_t)'buffer'     # input buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -65,7 +65,7 @@
  * @code
  * {
  *              class                   = "io/stderr",
- *              input                   = (hash_key_t)'buffer'     # input buffer key, default "buffer"
+ *              input                   = (hashkey_t)'buffer'     # input buffer key, default "buffer"
  * }
  * @endcode
  */
@@ -73,7 +73,7 @@
 #define EMODULE 38
 
 typedef struct std_userdata {
-	hash_key_t             key;
+	hashkey_t             key;
 } std_userdata;
 
 static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs){ // {{{
