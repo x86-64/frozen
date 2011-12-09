@@ -861,6 +861,10 @@ enable_raw_t
 enable_coverage
 enable_debug
 enable_profile
+enable_resolve_dynamic_keys
+enable_collision_check
+enable_collision_stat_check
+enable_collision_dyn_check
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1638,6 +1642,17 @@ Optional Features:
   --enable-coverage       enable coverage testing
   --enable-debug          compile with debug symbols
   --enable-profile        enable code profiling
+  --disable-resolve-dynamic-keys
+                          disable dynamic hashkeys resolve (from value to
+                          name)
+  --disable-collision-check
+                          disable hashkeys collision checks (dangerous!)
+  --disable-collision-stat-check
+                          disable static hashkeys collision checks
+                          (dangerous!)
+  --disable-collision-dyn-check
+                          disable dynamic hashkeys collision checks
+                          (dangerous!)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -20792,6 +20807,47 @@ fi
 if test "x$enable_profile" == "xyes"; then
         CFLAGS="$CFLAGS -pg"
         LDFLAGS="$LDFLAGS -pg"
+fi
+
+# Check whether --enable-resolve-dynamic-keys was given.
+if test "${enable_resolve_dynamic_keys+set}" = set; then :
+  enableval=$enable_resolve_dynamic_keys;
+fi
+
+if test "x$enable_resolve-dynamic-keys" != "xyes"; then
+
+$as_echo "#define RESOLVE_DYNAMIC_KEYS 1" >>confdefs.h
+
+fi
+# Check whether --enable-collision-check was given.
+if test "${enable_collision_check+set}" = set; then :
+  enableval=$enable_collision_check;
+fi
+
+if test "x$enable_collision-check" != "xyes"; then
+
+$as_echo "#define COLLISION_CHECK 1" >>confdefs.h
+
+fi
+# Check whether --enable-collision-stat-check was given.
+if test "${enable_collision_stat_check+set}" = set; then :
+  enableval=$enable_collision_stat_check;
+fi
+
+if test "x$enable_collision-stat-check" != "xyes"; then
+
+$as_echo "#define STATIC_KEY_CHECK 1" >>confdefs.h
+
+fi
+# Check whether --enable-collision-dyn-check was given.
+if test "${enable_collision_dyn_check+set}" = set; then :
+  enableval=$enable_collision_dyn_check;
+fi
+
+if test "x$enable_collision-dyn-check" != "xyes"; then
+
+$as_echo "#define DYNAMIC_KEY_CHECK 1" >>confdefs.h
+
 fi
 
 modulesdir=${libexecdir}/frozen/

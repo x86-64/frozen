@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188483, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
  { -188448, "src/libfrozen/backends/request/iterate/iterate.c: calloc returns null" },
  { -184365, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutex_init failed" },
@@ -69,7 +70,7 @@ static err_item errs_list[] = {
  { -86074, "src/libfrozen/backends/backend/morph/morph.c: HK(config) not supplied" },
  { -86057, "src/libfrozen/backends/backend/morph/morph.c: calloc failed" },
  { -73860, "src/libfrozen/backends/backend/benchmark/benchmark.c: calloc failed" },
- { -69692, "src/libfrozen/backends/request/debug/debug.c: calloc failed" },
+ { -69690, "src/libfrozen/backends/request/debug/debug.c: calloc failed" },
  { -65907, "src/libfrozen/backends/backend/pool/pool.c: pthread_join failed" },
  { -65903, "src/libfrozen/backends/backend/pool/pool.c: pthread_cancel failed" },
  { -65874, "src/libfrozen/backends/backend/pool/pool.c: pthread_create failed" },

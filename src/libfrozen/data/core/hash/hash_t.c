@@ -79,8 +79,10 @@ static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx)
 } // }}}
 static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ctx){ // {{{
 	unsigned int           k;
-	char                   buffer[DEF_BUFFER_SIZE];  
-	data_t                 d_s_key           = DATA_STRING(NULL);
+	char                   buffer[DEF_BUFFER_SIZE];
+	char                   b_s_key[DEF_BUFFER_SIZE];
+	//char                   b_s_type[DEF_BUFFER_SIZE];
+	data_t                 d_s_key           = DATA_RAW(b_s_key, sizeof(b_s_key));
 	data_t                 d_s_type          = DATA_STRING(NULL);
 	
 	if(element->key == hash_ptr_null){
@@ -105,14 +107,19 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	}
 
 	data_t              d_key     = DATA_HASHKEYT(element->key);
-	fastcall_convert_to r_convert1 = { { 4, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(clean) };
+	fastcall_convert_to r_convert1 = { { 5, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(clean) };
 	data_query(&d_key, &r_convert1);
 	
 	data_t              d_type    = DATA_DATATYPET(element->data.type);
-	fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, &d_s_type, FORMAT(clean) };
+	fastcall_convert_to r_convert2 = { { 5, ACTION_CONVERT_TO }, &d_s_type, FORMAT(clean) };
 	data_query(&d_type, &r_convert2);
 	
-	snprintf(buffer, sizeof(buffer), " - %s [%s] -> %p", (char *)d_s_key.ptr, (char *)d_s_type.ptr, element->data.ptr);
+	snprintf(buffer, sizeof(buffer),
+		" - %.*s [%s] -> %p",
+		(int)r_convert1.transfered, (char *)b_s_key,
+		(char *)d_s_type.ptr,
+		element->data.ptr
+	);
 	data_hash_t_append_pad(ctx);
 	data_hash_t_append(ctx, buffer);
 	
@@ -135,9 +142,8 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	}
 	data_hash_t_append(ctx, "\n");
 	
-	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&d_s_key,  &r_free);
+	//data_query(&d_s_key,  &r_free);
 	data_query(&d_s_type, &r_free);
 	return ITER_CONTINUE;
 } // }}}

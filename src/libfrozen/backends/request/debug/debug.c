@@ -47,11 +47,9 @@ static void debug_do(backend_t *backend, request_t *request, debug_flags flag){ 
 		backend->name
 	);
 	
-#ifdef DEBUG
 	if(userdata->show_dump != 0){
 		hash_dump(request);
 	}
-#endif
 } // }}}
 
 static int debug_init(backend_t *backend){ // {{{

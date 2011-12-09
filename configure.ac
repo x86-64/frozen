@@ -110,6 +110,23 @@ if test "x$enable_profile" == "xyes"; then
         LDFLAGS="$LDFLAGS -pg"
 fi
 
+AC_ARG_ENABLE(resolve-dynamic-keys,   AS_HELP_STRING([--disable-resolve-dynamic-keys],  [disable dynamic hashkeys resolve (from value to name)] ))
+if test "x$enable_resolve-dynamic-keys" != "xyes"; then
+	AC_DEFINE([RESOLVE_DYNAMIC_KEYS], [1], [Define if dynamic resolve enabled])
+fi
+AC_ARG_ENABLE(collision-check,  AS_HELP_STRING([--disable-collision-check],  [disable hashkeys collision checks (dangerous!)]))
+if test "x$enable_collision-check" != "xyes"; then
+	AC_DEFINE([COLLISION_CHECK], [1], [Define if collision check enabled])
+fi
+AC_ARG_ENABLE(collision-stat-check,  AS_HELP_STRING([--disable-collision-stat-check],  [disable static hashkeys collision checks (dangerous!)]))
+if test "x$enable_collision-stat-check" != "xyes"; then
+	AC_DEFINE([STATIC_KEY_CHECK], [1], [Define if static collision check enabled])
+fi
+AC_ARG_ENABLE(collision-dyn-check,   AS_HELP_STRING([--disable-collision-dyn-check],  [disable dynamic hashkeys collision checks (dangerous!)]))
+if test "x$enable_collision-dyn-check" != "xyes"; then
+	AC_DEFINE([DYNAMIC_KEY_CHECK], [1], [Define if dynamic collision check enabled])
+fi
+
 modulesdir=${libexecdir}/frozen/
 AC_SUBST(modulesdir)
 

@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define if collision check enabled */
+#undef COLLISION_CHECK
+
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -7,6 +10,9 @@
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* Define if dynamic collision check enabled */
+#undef DYNAMIC_KEY_CHECK
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
@@ -159,6 +165,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define if dynamic resolve enabled */
+#undef RESOLVE_DYNAMIC_KEYS
+
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at runtime.
@@ -166,6 +175,9 @@
 	STACK_DIRECTION < 0 => grows toward lower addresses
 	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
+
+/* Define if static collision check enabled */
+#undef STATIC_KEY_CHECK
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
