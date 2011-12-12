@@ -335,7 +335,9 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		if(el->key == hash_ptr_null)
 			continue;
 
-		el_new->key = el->key;
+		el_new->key       = el->key;
+		el_new->data.type = el->data.type;
+		el_new->data.ptr  = NULL;
 		
 		fastcall_copy r_copy = { { 3, ACTION_COPY }, &el_new->data };
 		data_query(&el->data, &r_copy);

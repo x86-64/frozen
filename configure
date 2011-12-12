@@ -20644,7 +20644,7 @@ fi
 
 	if test "${enable_raw_t}" = "yes"; then
 		DATA_DIR_raw_t="storage/raw"
-		DATA_DEP_raw_t=""
+		DATA_DEP_raw_t="uint_t hash_t"
 		DATA_ID_raw_t="19"
 		DATA_SELECTED="$DATA_SELECTED raw_t"
 		DATA_HEADERS="$DATA_HEADERS storage/raw/raw_t.h"

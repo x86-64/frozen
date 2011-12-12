@@ -96,3 +96,9 @@
    fun:rewrite_func_ablock
 }
 
+{
+   suppress_hashkey_t
+   Memcheck:Leak
+   ...
+   fun:data_hashkey_t_convert_from
+}

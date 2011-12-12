@@ -1,7 +1,68 @@
 #include <libfrozen.h>
 #include <dataproto.h>
 #include <raw_t.h>
+
 #include <enum/format/format_t.h>
+#include <core/hash/hash_t.h>
+#include <numeric/uint/uint_t.h>
+
+static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
+	raw_t                 *raw_data;
+	
+	if(data == NULL || data->type != TYPE_RAWT)
+		return -EINVAL;
+	
+	if( (raw_data = data->ptr) == NULL){ // empty data
+		if( (raw_data = data->ptr = malloc(sizeof(raw_t))) == NULL)
+			return -ENOMEM;
+		
+		if( (raw_data->ptr = malloc(new_size)) == NULL){
+			free(raw_data);
+			data->ptr = NULL;
+			return -ENOMEM;
+		}
+		
+		raw_data->size = new_size;
+		return 0;
+	}
+	
+	if(raw_data->ptr == NULL){ // empty data holder
+		if( (raw_data->ptr = malloc(new_size)) == NULL)
+			return -ENOMEM;
+		
+		raw_data->size = new_size;
+		return 0;
+	}
+	
+	if(raw_data->size < new_size) // too less space?
+		return -ENOSPC;
+	
+	return 0;
+} // }}}
+static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t length){ // {{{
+	ssize_t                ret, ret2;
+	raw_t                 *dst_data;
+	
+	switch( (ret = raw_prepare(dst, length)) ){
+		case 0:       break;
+		case -ENOSPC: break;
+		default:      return ret;
+	}
+	dst_data = (raw_t *)(dst->ptr);
+	
+	if(src){
+		fastcall_read r_read = {
+			{ 5, ACTION_READ },
+			offset,
+			dst_data->ptr,
+			MIN(dst_data->size, length)
+		};
+		if( (ret2 = data_query(src, &r_read)) < 0)
+			return ret2;
+		
+	}
+	return ret;
+} // }}}
 
 static ssize_t data_raw_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
@@ -12,38 +73,31 @@ static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ //
 	return 0;
 } // }}}
 static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
+	ssize_t                ret;
 	raw_t                 *dst_data;
 	raw_t                 *src_data = ((raw_t *)src->ptr);
 	
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	if( (dst_data = fargs->dest->ptr = malloc(sizeof(raw_t))) == NULL)
-		return -ENOMEM;
+	fargs->dest->type = TYPE_RAWT;
 	
-	if( (dst_data->ptr = malloc(src_data->size) ) == NULL){
-		free(dst_data);
-		return -ENOMEM;
+	switch( (ret = raw_prepare(fargs->dest, src_data->size)) ){
+		case 0:       break;
+		case -ENOSPC: break;
+		default:      return ret;
 	}
-	memcpy(dst_data->ptr, src_data->ptr, src_data->size);
 	
-	dst_data->size    = src_data->size;
-	fargs->dest->type = src->type;
-	return 0;
+	dst_data = (raw_t *)(fargs->dest->ptr);
+	
+	memcpy(dst_data->ptr, src_data->ptr, MIN(dst_data->size, src_data->size));
+	return ret;
 } // }}}
 static ssize_t data_raw_alloc(data_t *dst, fastcall_alloc *fargs){ // {{{
-	raw_t                 *dst_data;
-
-	if( (dst_data = dst->ptr = calloc(sizeof(raw_t), 1)) == NULL)
-		return -ENOMEM;
+	if(dst->ptr != NULL)        // accept only empty data, in other case it could lead to memleak
+		return -EEXIST;
 	
-	if( (dst_data->ptr = malloc(fargs->length)) == NULL){
-		free(dst_data);
-		dst->ptr = NULL;
-		return -ENOMEM;
-	}
-	dst_data->size = fargs->length;
-	return 0;
+	return raw_prepare(dst, fargs->length);
 } // }}}
 static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	raw_t                 *raw_data = ((raw_t *)data->ptr);
@@ -53,6 +107,7 @@ static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 			free(raw_data->ptr);
 		
 		free(raw_data);
+		data->ptr = NULL;
 	}
 	return 0;
 } // }}}
@@ -97,38 +152,29 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 } // }}}
 static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	raw_t                  new_data;
-	raw_t                 *dst_data = ((raw_t *)dst->ptr);
+	uintmax_t              length;
 	
 	switch(fargs->format){
-		case FORMAT(binary):;
-			fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &new_data.size, sizeof(new_data.size) };
-			if( (ret = data_query(fargs->src, &r_read1)) < 0)
-				return ret;
+		case FORMAT(hash):;
+			hash_t                *config;
+			data_t                *buffer;
 			
-			if(dst_data == NULL){
-				fastcall_alloc r_alloc = { { 3, ACTION_ALLOC }, new_data.size };
-				if( (ret = data_query(dst, &r_alloc)) < 0)
-					return ret;
+			data_get(ret, TYPE_HASHT, config, fargs->src);
+			if(ret != 0)
+				return -EINVAL;
+			
+			buffer = hash_data_find(config, HK(buffer));
+			hash_data_copy(ret, TYPE_UINTT, length, config, HK(length)); if(ret != 0) return -EINVAL;
+			
+			return raw_read(dst, buffer, 0, length);
 
-				dst_data = (raw_t *)dst->ptr;
-			}else{
-				//if(dst_data->size < new_data.size || dst_data->ptr == NULL){
-				if(dst_data->ptr == NULL){
-					if( (dst_data->ptr = realloc(dst_data->ptr, new_data.size)) == NULL)
-						return -ENOMEM;
-					
-					dst_data->size = new_data.size;
-				}
-				if(dst_data->size < new_data.size)
-					return -ENOSPC;
-			}
-			
-			fastcall_read r_read2 = { { 5, ACTION_READ }, sizeof(new_data.size), dst_data->ptr, dst_data->size };
-			if( (ret = data_query(fargs->src, &r_read2)) < 0)
+		case FORMAT(binary):;
+			fastcall_read r_read = { { 5, ACTION_READ }, 0, &length, sizeof(length) };
+			if( (ret = data_query(fargs->src, &r_read)) < 0)
 				return ret;
 			
-			return 0;
+			return raw_read(dst, fargs->src, sizeof(length), length);
+			
 		default:
 			break;
 	};

@@ -80,6 +80,7 @@
 #define HK_VALUE_key_out 15791
 #define HK_VALUE_key_to 10016
 #define HK_VALUE_keyid 5780
+#define HK_VALUE_length 9794
 #define HK_VALUE_linear_len 40411
 #define HK_VALUE_loop 3343
 #define HK_VALUE_marker 9864
@@ -234,6 +235,7 @@ typedef enum hashkey_t {
       HK_key_out = HK_VALUE_key_out, 
       HK_key_to = HK_VALUE_key_to, 
       HK_keyid = HK_VALUE_keyid, 
+      HK_length = HK_VALUE_length, 
       HK_linear_len = HK_VALUE_linear_len, 
       HK_loop = HK_VALUE_loop, 
       HK_marker = HK_VALUE_marker, 
@@ -392,6 +394,7 @@ keypair_t hashkeys[] = {
       { "key_out", HK_VALUE_key_out }, 
       { "key_to", HK_VALUE_key_to }, 
       { "keyid", HK_VALUE_keyid }, 
+      { "length", HK_VALUE_length }, 
       { "linear_len", HK_VALUE_linear_len }, 
       { "loop", HK_VALUE_loop }, 
       { "marker", HK_VALUE_marker }, 
