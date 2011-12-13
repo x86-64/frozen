@@ -34,17 +34,19 @@ blank   [ \n\r\t]+
 
 %%
 
-"#line "+[0-9]*+" \""+[^"]*+"\"" {
+"#line "+[0-9]*+(" \""+[^"]*+"\"")? {
 	char *p = (char *)( &yytext[0] + 6 ); // "#line "
 	
 	config_set_lineno(strtoul(p,&p,10));
-	p+=2; // " \""
-	
-	if(config_ext_file)
-		free(config_ext_file);
-	
-	if( (config_ext_file = strdup(p)) )
-		config_ext_file[strlen(config_ext_file)-1] = '\0'; // "\""
+	if(*p==' ' && *(p+1)=='"'){
+		p+=2; // " \""
+		
+		if(config_ext_file)
+			free(config_ext_file);
+		
+		if( (config_ext_file = strdup(p)) )
+			config_ext_file[strlen(config_ext_file)-1] = '\0'; // "\""
+	}
 }
 
 "//"+[^\n]*     { }
