@@ -458,7 +458,7 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    48,    48,    51,    55,    60,    69,    73,    79,    80,
-      81,    92,    93,    94,   111,   129
+      81,    92,    93,    94,   113,   133
 };
 #endif
 
@@ -1506,12 +1506,14 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 94 "configs/config_parser.y"
     {
-		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.data).type);
+		datatype_t             type;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (4)].name) }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (4)].name));
 		
+		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
@@ -1527,15 +1529,17 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 111 "configs/config_parser.y"
+#line 113 "configs/config_parser.y"
     {
-		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.data).type);
+		datatype_t             type;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (6)].name) }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (6)].name));
 		
+		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
@@ -1551,7 +1555,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 129 "configs/config_parser.y"
+#line 133 "configs/config_parser.y"
     {
 			// TODO remove this
 		data_functions action;
@@ -1571,7 +1575,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1575 "configs/config_parser.tab.c"
+#line 1579 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1802,7 +1806,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 144 "configs/config_parser.y"
+#line 148 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){ // {{{

@@ -119,7 +119,7 @@ hash_value :
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", $2);
 		
-		$$.ptr  = type;
+		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
