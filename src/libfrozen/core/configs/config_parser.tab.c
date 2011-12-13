@@ -86,11 +86,23 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE config__scan_string (const char *string);  
 extern int config_lex_destroy(void);
 extern int config_lex(YYSTYPE *);
+extern int config_get_lineno(void);
+extern char *config_get_text(void);
+extern char *config_ext_file;
+
+#define emit_error(fmt, ...){                                           \
+	do {                                                            \
+		char _buffer[DEF_BUFFER_SIZE];                          \
+		                                                        \
+		snprintf(_buffer, sizeof(_buffer), fmt, ##__VA_ARGS__); \
+		yyerror(hash, _buffer);                                 \
+		YYERROR;                                                \
+	}while(0); }
 
 
 
 /* Line 268 of yacc.c  */
-#line 94 "configs/config_parser.tab.c"
+#line 106 "configs/config_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -131,18 +143,18 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 20 "configs/config_parser.y"
+#line 32 "configs/config_parser.y"
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
-	hashkey_t  key;
+	hashkey_t   key;
 	char       *name;
 	data_t      data;
 
 
 
 /* Line 293 of yacc.c  */
-#line 146 "configs/config_parser.tab.c"
+#line 158 "configs/config_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -154,7 +166,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 158 "configs/config_parser.tab.c"
+#line 170 "configs/config_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -445,8 +457,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    36,    36,    39,    43,    48,    57,    61,    67,    68,
-      69,    85,    86,    87,   112,   139
+       0,    48,    48,    51,    55,    60,    69,    73,    79,    80,
+      81,    92,    93,    94,   111,   129
 };
 #endif
 
@@ -1389,14 +1401,14 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 36 "configs/config_parser.y"
+#line 48 "configs/config_parser.y"
     { *hash = (yyvsp[(1) - (1)].hash_items); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 39 "configs/config_parser.y"
+#line 51 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(sizeof(hash_t));
 		hash_assign_hash_end((yyval.hash_items));
@@ -1406,7 +1418,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 43 "configs/config_parser.y"
+#line 55 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(2 * sizeof(hash_t));
 		hash_assign_hash_t   (&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item));
@@ -1417,7 +1429,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 48 "configs/config_parser.y"
+#line 60 "configs/config_parser.y"
     {
 		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
 		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
@@ -1430,7 +1442,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 57 "configs/config_parser.y"
+#line 69 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
 		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
@@ -1440,7 +1452,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 61 "configs/config_parser.y"
+#line 73 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = hash_ptr_null;
 	}
@@ -1449,33 +1461,28 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 67 "configs/config_parser.y"
+#line 79 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 68 "configs/config_parser.y"
+#line 80 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 69 "configs/config_parser.y"
+#line 81 "configs/config_parser.y"
     {
-		hashkey_t   key;
-		data_t       d_key    = DATA_PTR_HASHKEYT(&key);
-	
+		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
+		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(1) - (2)].name) }; 
-		if(data_query(&d_key, &r_init1) != 0){
-			yyerror(hash, "failed convert hashkey\n"); YYERROR;
-		}
-
-		if( ((yyval.key) = key) == 0){
-			printf("unknown key: %s\n", (yyvsp[(1) - (2)].name)); YYERROR;
-		}
+		if(data_query(&d_key, &r_init1) != 0)
+			emit_error("unknown hashkey_t (%s)", (yyvsp[(1) - (2)].name));
+		
 		free((yyvsp[(1) - (2)].name));
 	}
     break;
@@ -1483,42 +1490,34 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 85 "configs/config_parser.y"
+#line 92 "configs/config_parser.y"
     { (yyval.data).type = TYPE_STRINGT; (yyval.data).ptr = (yyvsp[(1) - (1)].name); }
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 86 "configs/config_parser.y"
+#line 93 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 87 "configs/config_parser.y"
+#line 94 "configs/config_parser.y"
     {
-		datatype_t  type;
-		data_t      d_type   = DATA_PTR_DATATYPET(&type);
+		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.data).type);
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (4)].name) }; 
-		if(data_query(&d_type, &r_init1) != 0){
-			yyerror(hash, "failed convert datatype\n"); YYERROR;
-		}
+		if(data_query(&d_type, &r_init1) != 0)
+			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (4)].name));
 		
-		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_init r_init2 = { { 3, ACTION_INIT }, (yyvsp[(4) - (4)].name) }; 
-		if(data_query(&(yyval.data), &r_init2) != 0){
-			char buffer[DEF_BUFFER_SIZE];
-			
-			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)'%s'\n", (yyvsp[(2) - (4)].name), (yyvsp[(4) - (4)].name));
-
-			yyerror(hash, buffer); YYERROR;
-		}
+		if(data_query(&(yyval.data), &r_init2) != 0)
+			emit_error("data init failed (%s)", (yyvsp[(2) - (4)].name));
 		
 		free((yyvsp[(2) - (4)].name));
 		free((yyvsp[(4) - (4)].name));
@@ -1528,51 +1527,43 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 112 "configs/config_parser.y"
+#line 111 "configs/config_parser.y"
     {
-		datatype_t  type;
-		data_t      d_type   = DATA_PTR_DATATYPET(&type);
-		data_t      d_hash   = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
+		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.data).type);
+		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (6)].name) }; 
-		if(data_query(&d_type, &r_init1) != 0){
-			yyerror(hash, "failed convert datatype\n"); YYERROR;
-		}
+		if(data_query(&d_type, &r_init1) != 0)
+			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (6)].name));
 		
-		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
-		if(data_query(&(yyval.data), &r_convert) != 0){
-			char buffer[DEF_BUFFER_SIZE];
-			
-			snprintf(buffer, sizeof(buffer), "failed convert data: (%s)\n", (yyvsp[(2) - (6)].name));
-
-			yyerror(hash, buffer); YYERROR;
-		}
+		if(data_query(&(yyval.data), &r_convert) != 0)
+			emit_error("data init failed (%s)", (yyvsp[(2) - (6)].name));
 		
 		free((yyvsp[(2) - (6)].name));
 		hash_free((yyvsp[(5) - (6)].hash_items));
-
 	}
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 139 "configs/config_parser.y"
+#line 129 "configs/config_parser.y"
     {
+			// TODO remove this
 		data_functions action;
 		if((action = request_str_to_action((yyvsp[(1) - (1)].name))) != ACTION_INVALID){
 			data_t d_act = DATA_UINT32T(action);
 			
 			fastcall_copy r_copy = { { 3, ACTION_COPY }, &(yyval.data) };
 			data_query(&d_act, &r_copy);
-
+			
 			free((yyvsp[(1) - (1)].name));
 		}else{
-			yyerror(hash, "wrong constant\n"); YYERROR;
+			emit_error("wrong constant");
 		}
      }
     break;
@@ -1580,7 +1571,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1584 "configs/config_parser.tab.c"
+#line 1575 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1811,13 +1802,18 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 153 "configs/config_parser.y"
+#line 144 "configs/config_parser.y"
 
 
-void yyerror(hash_t **hash, const char *msg){
+void yyerror(hash_t **hash, const char *msg){ // {{{
+	char                  *file              = config_ext_file; 
+	
+	if(!file)
+		file = "-";
+	
+	fprintf(stderr, "%s: error: %d: %s near '%s'\n", file, config_get_lineno(), msg, config_get_text());
 	(void)hash;
-	fprintf(stderr, "config error: %s\n", msg);
-}
+} // }}}
 
 hash_t *   configs_string_parse(char *string){ // {{{
 	hash_t *new_hash = NULL;
@@ -1829,26 +1825,55 @@ hash_t *   configs_string_parse(char *string){ // {{{
 	config_lex_destroy();
 	return new_hash;
 } // }}}
-
 hash_t *   configs_file_parse(char *filename){ // {{{
-	int     size = 0;
-	hash_t *new_hash = NULL;
-	char   *string;
-	FILE   *f;
-	
-	if( (f = fopen(filename, "rb")) == NULL)
-		return NULL;
-	
-	fseek(f, 0, SEEK_END); size = ftell(f); fseek(f, 0, SEEK_SET);
-	
-	if( (string = malloc(size+1)) != NULL){
-		if(fread(string, sizeof(char), size, f) == size){
-			string[size] = '\0';
-			new_hash = configs_string_parse(string);
-		} 
-		free(string);
+	hash_t                *new_hash          = NULL;
+	FILE                  *fd;
+	char                  *ext;
+	char                  *content           = NULL;
+	uintmax_t              content_off       = 0;
+	uintmax_t              content_size      = 0;
+	uintmax_t              is_process        = 0;
+
+	ext = strrchr(filename, '.');
+	if(ext != NULL && strcmp(ext, ".m4") == 0){
+		char buffer[DEF_BUFFER_SIZE];
+		
+		if(snprintf(buffer, sizeof(buffer), "%s -s %s", M4PATH, filename) > sizeof(buffer)) // -s for sync lines
+			return NULL;
+		
+		if( (fd = popen(buffer, "r")) == NULL)
+			return NULL;
+		
+		is_process = 1;
+	}else{
+		if( (fd = fopen(filename, "rb")) == NULL)
+			return NULL;
+		
 	}
-	fclose(f);
+	
+	while(!feof(fd)){
+		content_size += DEF_BUFFER_SIZE;
+		content       = realloc(content, content_size + 1); // 1 for terminating \0
+		if(!content)
+			break;
+		
+		content_off  += fread(content + content_off, 1, content_size - content_off, fd);
+	}
+	if(is_process == 1) pclose(fd); else fclose(fd);
+	
+	if(content){
+		config_ext_file = strdup(filename);
+		
+		content[content_off] = '\0';
+		
+		new_hash = configs_string_parse(content);
+		free(content);
+		
+		if(config_ext_file){
+			free(config_ext_file);
+			config_ext_file = NULL;
+		}
+	}
 	return new_hash;
 } // }}}
 

@@ -17535,6 +17535,12 @@ fi
 
 
 
+cat >>confdefs.h <<_ACEOF
+#define M4PATH "${M4}"
+_ACEOF
+
+
+
 
 
 

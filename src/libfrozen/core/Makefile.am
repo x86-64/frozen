@@ -22,7 +22,7 @@ libfrozen_core_la_SOURCES=  \
                         public.h
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
 
-configs/config_parser.tab.c:
+configs/config_parser.tab.c: configs/config_parser.lex.c
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
 configs/config_parser.lex.c:
 	${FLEX}  -Pconfig_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l

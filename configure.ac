@@ -80,6 +80,8 @@ AM_CONDITIONAL([HAVE_GCCGO], [test "$GCCGO" != "no"])
 AC_PATH_PROGS(SWIG, [swig], no)
 AM_CONDITIONAL([HAVE_SWIG], [test "$SWIG" != "no"])
 
+AC_DEFINE_UNQUOTED([M4PATH], "${M4}", [Define m4 path])
+
 sinclude(./build/libfrozen_backends.m4)
 sinclude(./build/libfrozen_data.m4)
 sinclude(./build/libfrozen_modules.m4)

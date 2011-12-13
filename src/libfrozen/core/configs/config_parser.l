@@ -4,6 +4,8 @@
 
 #define NEW_STRING_STEP 100
 
+char        *config_ext_file = NULL;
+
 char        *new_string_buf;
 char        *new_string;
 char        *new_string_end;
@@ -17,6 +19,7 @@ void check_new_string(uintmax_t size);
 %option case-insensitive
 %option noinput
 %option nounput
+%option yylineno
 
 %x comment
 %x str
@@ -30,6 +33,19 @@ null    NULL
 blank   [ \n\r\t]+
 
 %%
+
+"#line "+[0-9]*+" \""+[^"]*+"\"" {
+	char *p = (char *)( &yytext[0] + 6 ); // "#line "
+	
+	config_set_lineno(strtoul(p,&p,10));
+	p+=2; // " \""
+	
+	if(config_ext_file)
+		free(config_ext_file);
+	
+	if( (config_ext_file = strdup(p)) )
+		config_ext_file[strlen(config_ext_file)-1] = '\0'; // "\""
+}
 
 "//"+[^\n]*     { }
 "/*"                    BEGIN(comment);

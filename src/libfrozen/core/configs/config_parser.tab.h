@@ -51,11 +51,11 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 20 "configs/config_parser.y"
+#line 32 "configs/config_parser.y"
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
-	hashkey_t  key;
+	hashkey_t   key;
 	char       *name;
 	data_t      data;
 

@@ -144,6 +144,9 @@
    */
 #undef LT_OBJDIR
 
+/* Define m4 path */
+#undef M4PATH
+
 /* Name of package */
 #undef PACKAGE
 

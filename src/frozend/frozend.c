@@ -344,48 +344,7 @@ void main_rest(void){
 	signal(SIGTERM,signal_handler); /* catch kill signal */  // NOTICE after modules_load() coz Go override TERM
 	
 	
-	config_t              *config            = NULL;
-	char                  *ext;
-	
-	ext = strrchr(opt_config_file, '.');
-	if(ext != NULL && strcmp(ext, ".m4") == 0){
-		char buffer[DEF_BUFFER_SIZE];
-		
-		if(snprintf(buffer, sizeof(buffer), "%s %s", M4_PATH, opt_config_file) > sizeof(buffer)){
-			fprintf(stderr, "filename too long\n");
-			exit(255);
-		}
-		
-		char                  *content           = NULL;
-		uintmax_t              content_off       = 0;
-		uintmax_t              content_size      = 0;
-		FILE                  *fd;
-		
-		if( (fd = popen(buffer, "r")) == NULL){
-			fprintf(stderr, "popen failed\n");
-			exit(255);
-		}
-		
-		while(!feof(fd)){
-			content_size += DEF_BUFFER_SIZE;
-			content       = realloc(content, content_size + 1); // 1 for terminating \0
-			if(!content){
-				fprintf(stderr, "file too big\n");
-				exit(255);
-			}
-
-			content_off  += fread(content + content_off, 1, content_size - content_off, fd);
-		}
-		pclose(fd);
-		
-		content[content_off] = '\0';
-		config = configs_string_parse(content);
-		
-		free(content);
-	}else{
-		config = configs_file_parse(opt_config_file);
-	}
-	
+	config_t *config = configs_file_parse(opt_config_file);
 	if(config != NULL && backend_new(config) != NULL){
 		
 		// TODO do normal wait()
