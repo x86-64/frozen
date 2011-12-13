@@ -878,59 +878,58 @@ YY_RULE_SETUP
 		if( (config_ext_file = strdup(p)) )
 			config_ext_file[strlen(config_ext_file)-1] = '\0'; // "\""
 	}
-	printf("LINE: %d, %s\n", config_get_lineno(), config_ext_file);
 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 53 "configs/config_parser.l"
+#line 52 "configs/config_parser.l"
 { }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 54 "configs/config_parser.l"
+#line 53 "configs/config_parser.l"
 BEGIN(comment);
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 55 "configs/config_parser.l"
+#line 54 "configs/config_parser.l"
 
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 56 "configs/config_parser.l"
+#line 55 "configs/config_parser.l"
 
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 57 "configs/config_parser.l"
+#line 56 "configs/config_parser.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 61 "configs/config_parser.l"
+#line 60 "configs/config_parser.l"
 new_string_buf = new_string = malloc(NEW_STRING_STEP); new_string_end = new_string_buf + NEW_STRING_STEP; new_string_terminator = '"';  BEGIN(str);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 62 "configs/config_parser.l"
+#line 61 "configs/config_parser.l"
 new_string_buf = new_string = malloc(NEW_STRING_STEP); new_string_end = new_string_buf + NEW_STRING_STEP; new_string_terminator = '\''; BEGIN(str);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 63 "configs/config_parser.l"
+#line 62 "configs/config_parser.l"
 new_string_buf = new_string = malloc(NEW_STRING_STEP); new_string_end = new_string_buf + NEW_STRING_STEP; new_string_terminator = '#';  BEGIN(str);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 64 "configs/config_parser.l"
+#line 63 "configs/config_parser.l"
 new_string_buf = new_string = malloc(NEW_STRING_STEP); new_string_end = new_string_buf + NEW_STRING_STEP; new_string_terminator = '@';  BEGIN(str);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 65 "configs/config_parser.l"
+#line 64 "configs/config_parser.l"
 {
 	if(*config_text == new_string_terminator){
 		check_new_string(1);
@@ -946,27 +945,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 77 "configs/config_parser.l"
+#line 76 "configs/config_parser.l"
 { check_new_string(1); *new_string++ = '\n';      }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 78 "configs/config_parser.l"
+#line 77 "configs/config_parser.l"
 { check_new_string(1); *new_string++ = '\r';      }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 79 "configs/config_parser.l"
+#line 78 "configs/config_parser.l"
 { check_new_string(1); *new_string++ = '\t';      }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 80 "configs/config_parser.l"
+#line 79 "configs/config_parser.l"
 { check_new_string(1); *new_string++ = config_text[1]; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 81 "configs/config_parser.l"
+#line 80 "configs/config_parser.l"
 {
 	uintmax_t   size = strlen(config_text);
 	check_new_string(size);
@@ -977,36 +976,36 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 89 "configs/config_parser.l"
+#line 88 "configs/config_parser.l"
 { return TNULL; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 90 "configs/config_parser.l"
+#line 89 "configs/config_parser.l"
 { return ASSIGN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 91 "configs/config_parser.l"
+#line 90 "configs/config_parser.l"
 { yylval->name = strdup(config_text); return NAME;  }
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 93 "configs/config_parser.l"
+#line 92 "configs/config_parser.l"
 
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 94 "configs/config_parser.l"
+#line 93 "configs/config_parser.l"
 { return *config_text; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 96 "configs/config_parser.l"
+#line 95 "configs/config_parser.l"
 ECHO;
 	YY_BREAK
-#line 1010 "configs/config_parser.lex.c"
+#line 1009 "configs/config_parser.lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(str):
@@ -1977,7 +1976,7 @@ void config_free (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 96 "configs/config_parser.l"
+#line 95 "configs/config_parser.l"
 
 
 

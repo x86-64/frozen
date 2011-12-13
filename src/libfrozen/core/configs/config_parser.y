@@ -92,12 +92,14 @@ hash_value :
 	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
-		data_t                 d_type            = DATA_PTR_DATATYPET(&$$.type);
+		datatype_t             type;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", $2);
 		
+		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
@@ -109,13 +111,15 @@ hash_value :
 		free($4);
 	}
 	| '(' NAME ')' '{' hash_items '}' {
-		data_t                 d_type            = DATA_PTR_DATATYPET(&$$.type);
+		datatype_t             type;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_hash            = DATA_PTR_HASHT($5);
 		
 		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", $2);
 		
+		$$.ptr  = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */

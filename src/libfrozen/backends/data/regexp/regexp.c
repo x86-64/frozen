@@ -132,6 +132,9 @@ static int regexp_destroy(backend_t *backend){ // {{{
 	if(userdata->regmatch)
 		free(userdata->regmatch);
 	
+	if(userdata->regexp_str)
+		free(userdata->regexp_str);
+
 	free(userdata);
 	return 0;
 } // }}}
