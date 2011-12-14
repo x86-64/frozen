@@ -1,3 +1,4 @@
+- mongrel2 & zeromq
 - fix broken slice_t hash_dump's
 - hashes instead of incrementing in datatype_t
 - fix datatype_t convert_to
@@ -7,7 +8,6 @@
 - split_t inits
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 - data 'ipv4_t', 'timestamp_t', 'timerange_t'
-- try bind to nginx as module
 - dynamic data types + as .so module
 - libev
 - action definitions and documentation
