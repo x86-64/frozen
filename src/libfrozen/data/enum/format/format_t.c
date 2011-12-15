@@ -94,7 +94,7 @@ static ssize_t data_format_t_len(data_t *data, fastcall_len *fargs){ // {{{
 } // }}}
 
 data_proto_t format_t_proto = {
-	.type                   = TYPE_HASHKEYT,
+	.type                   = TYPE_FORMATT,
 	.type_str               = "format_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
