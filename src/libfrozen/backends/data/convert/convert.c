@@ -22,7 +22,7 @@
  *                      {
  *                           input         = (hashkey_t)'buffer',       # input key
  *                           type          = (datatype_t)'raw_t',       # desired type
- *                           format        = (uint_t)'0'                # format to convert
+ *                           format        = (format_t)'clean'          # format to convert, default "clean"
  *                      },
  *                      ...
  *              }
