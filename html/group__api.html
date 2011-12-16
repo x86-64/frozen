@@ -46,8 +46,8 @@
 
 <h3><a class="anchor" id="api_hash"></a>API_HASH</h3><div class="textblock"><p>Hash api deals with specially structured key-value pairs. From the C point of view they are arrays of <a class="el" href="structhash__t.html" title="Hash item.">hash_t</a> structure. To declare new hash you could write: </p>
 <div class="fragment"><pre class="fragment">      <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> new_hash[] = {
-         { <a class="code" href="hash_8h.html#a3508d6e22c146f4b94847f285ea113f9" title="Shortcut for registed hash keys. Also used in key registration process.">HK</a>(key), DATA_UINTT(100) },
-         <a class="code" href="hash_8h.html#a54d4ab179c50d381d2ff6d7928cf9506" title="Mark hash end.">hash_end</a>
+         { HK(key), DATA_UINTT(100) },
+         hash_end
       };
       backend_query(backend, new_hash);
 </pre></div><p> This hash declare one parameter named "key" with value of 100.</p>
@@ -106,7 +106,7 @@
 <h3><a class="anchor" id="api_newbackend"></a>Recomendations for new backends</h3><div class="textblock"><p>If you write new backend you have to choose which api to implement.</p>
 <p>If backend provide access to very fast things, such as memory - API_FAST is top priority. Common things, such as files, directories have to implement both API_HASH and API_FAST. Unusual things, and data processing can implement only API_HASH. </p>
 </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Dec 5 2011 15:15:19 for frozen by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Dec 16 2011 17:05:43 for frozen by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
