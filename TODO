@@ -30,3 +30,4 @@
 - m4 macro collection
 - dynamic data types + as .so module
 - mphf nelements_step with percents + remove from mphf to another backend
+- API_ENDPOINT for io modules: have standard API_HASH function which transfer requests to API_FAST via io_t type

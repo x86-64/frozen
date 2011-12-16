@@ -19,6 +19,7 @@
 #define HK_VALUE_backends 21834
 #define HK_VALUE_before 9682
 #define HK_VALUE_benchmark_function 227699
+#define HK_VALUE_bind 3108
 #define HK_VALUE_block_off 29437
 #define HK_VALUE_block_size 41545
 #define HK_VALUE_block_vid 29810
@@ -29,6 +30,7 @@
 #define HK_VALUE_class 6119
 #define HK_VALUE_clone 5815
 #define HK_VALUE_config 9498
+#define HK_VALUE_connect 15066
 #define HK_VALUE_count 6256
 #define HK_VALUE_create 9552
 #define HK_VALUE_default 15471
@@ -65,6 +67,7 @@
 #define HK_VALUE_http_req 22064
 #define HK_VALUE_http_resp 31264
 #define HK_VALUE_icase 5739
+#define HK_VALUE_identity 23282
 #define HK_VALUE_ignore_errors 90804
 #define HK_VALUE_index 6061
 #define HK_VALUE_input 6325
@@ -174,6 +177,7 @@ typedef enum hashkey_t {
       HK_backends = HK_VALUE_backends, 
       HK_before = HK_VALUE_before, 
       HK_benchmark_function = HK_VALUE_benchmark_function, 
+      HK_bind = HK_VALUE_bind, 
       HK_block_off = HK_VALUE_block_off, 
       HK_block_size = HK_VALUE_block_size, 
       HK_block_vid = HK_VALUE_block_vid, 
@@ -184,6 +188,7 @@ typedef enum hashkey_t {
       HK_class = HK_VALUE_class, 
       HK_clone = HK_VALUE_clone, 
       HK_config = HK_VALUE_config, 
+      HK_connect = HK_VALUE_connect, 
       HK_count = HK_VALUE_count, 
       HK_create = HK_VALUE_create, 
       HK_default = HK_VALUE_default, 
@@ -220,6 +225,7 @@ typedef enum hashkey_t {
       HK_http_req = HK_VALUE_http_req, 
       HK_http_resp = HK_VALUE_http_resp, 
       HK_icase = HK_VALUE_icase, 
+      HK_identity = HK_VALUE_identity, 
       HK_ignore_errors = HK_VALUE_ignore_errors, 
       HK_index = HK_VALUE_index, 
       HK_input = HK_VALUE_input, 
@@ -333,6 +339,7 @@ keypair_t hashkeys[] = {
       { "backends", HK_VALUE_backends }, 
       { "before", HK_VALUE_before }, 
       { "benchmark_function", HK_VALUE_benchmark_function }, 
+      { "bind", HK_VALUE_bind }, 
       { "block_off", HK_VALUE_block_off }, 
       { "block_size", HK_VALUE_block_size }, 
       { "block_vid", HK_VALUE_block_vid }, 
@@ -343,6 +350,7 @@ keypair_t hashkeys[] = {
       { "class", HK_VALUE_class }, 
       { "clone", HK_VALUE_clone }, 
       { "config", HK_VALUE_config }, 
+      { "connect", HK_VALUE_connect }, 
       { "count", HK_VALUE_count }, 
       { "create", HK_VALUE_create }, 
       { "default", HK_VALUE_default }, 
@@ -379,6 +387,7 @@ keypair_t hashkeys[] = {
       { "http_req", HK_VALUE_http_req }, 
       { "http_resp", HK_VALUE_http_resp }, 
       { "icase", HK_VALUE_icase }, 
+      { "identity", HK_VALUE_identity }, 
       { "ignore_errors", HK_VALUE_ignore_errors }, 
       { "index", HK_VALUE_index }, 
       { "input", HK_VALUE_input }, 

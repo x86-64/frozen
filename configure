@@ -774,6 +774,7 @@ with_sysroot
 enable_libtool_lock
 with_fuse
 enable_modulec_null
+enable_modulec_zmq
 enable_modulego_http
 enable_modulego_template
 enable_backendbenchmark
@@ -1514,6 +1515,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-module-c-null disable module c-null
+  --disable-module-c-zmq  disable module c-zmq
   --disable-module-go-http
                           disable module go-http
   --disable-module-go-template
@@ -17584,6 +17586,83 @@ fi
 		MODULE_MAKEFILE_c_null=yes
 	fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for zmq_init in -lzmq" >&5
+$as_echo_n "checking for zmq_init in -lzmq... " >&6; }
+if ${ac_cv_lib_zmq_zmq_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lzmq  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char zmq_init ();
+int
+main ()
+{
+return zmq_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_zmq_zmq_init=yes
+else
+  ac_cv_lib_zmq_zmq_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_zmq_zmq_init" >&5
+$as_echo "$ac_cv_lib_zmq_zmq_init" >&6; }
+if test "x$ac_cv_lib_zmq_zmq_init" = xyes; then :
+  HAVE_ZMQ=1
+else
+  HAVE_ZMQ=0
+fi
+
+if test "x$HAVE_ZMQ" = "x1"; then :
+
+
+
+
+	# Check whether --enable-modulec_zmq was given.
+if test "${enable_modulec_zmq+set}" = set; then :
+  enableval=$enable_modulec_zmq;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_modulec_zmq}" = "yes"; then
+			enable_modulec_zmq="no"
+		else
+			enable_modulec_zmq="yes"
+		fi
+	fi
+
+	if test "${enable_modulec_zmq}" = "yes"; then
+		MODULE_DIR_c_zmq="c_zmq"
+		MODULE_DEP_c_zmq=""
+		MODULE_SELECTED="$MODULE_SELECTED c_zmq"
+	fi
+
+	if test "$MODULE_MAKEFILE_c_zmq" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/c_zmq/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS c_zmq"
+
+		MODULE_MAKEFILE_c_zmq=yes
+	fi
+
+
+fi
 
 
 

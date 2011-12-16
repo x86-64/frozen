@@ -29,9 +29,9 @@
  *                                        "push",
  *                                        "pull",
  *                                        "pair",
- *              identity                = (string_t)'ident',  # set socket identity
- *              bind                    = (string_t)'',       # bind socket to            OR
- *              connect                 = (string_t)''.       # connect socket to
+ *              identity                = "ident",            # set socket identity
+ *              bind                    = "tcp://",           # bind socket to            OR
+ *              connect                 = "tcp://".           # connect socket to
  *
  *
  * }
@@ -43,12 +43,11 @@
 
 typedef struct zmq_userdata {
 	void                  *zmq_socket;
-	zmq_msg_t              zmq_recv_msg;
 } zmq_userdata;
 
 void                          *zmq_ctx           = NULL;
 uintmax_t                      zmq_backends      = 0;
-pthread_mutex_t                zmq_backends_mtx  = PTHREAD_MUTEx_INITIALIZER;
+pthread_mutex_t                zmq_backends_mtx  = PTHREAD_MUTEX_INITIALIZER;
 
 static int zmq_string_to_type(char *type_str){ // {{{
 	if(type_str != NULL){
@@ -65,7 +64,7 @@ static int zmq_string_to_type(char *type_str){ // {{{
 	return -1;
 } // }}}
 
-static int zmq_init(backend_t *backend){ // {{{
+static int zmqb_init(backend_t *backend){ // {{{
 	ssize_t                ret               = 0;
 	zmq_userdata          *userdata;
 	
@@ -89,7 +88,7 @@ error:
 	pthread_mutex_unlock(&zmq_backends_mtx);
 	return ret;
 } // }}}
-static int zmq_destroy(backend_t *backend){ // {{{
+static int zmqb_destroy(backend_t *backend){ // {{{
 	zmq_userdata         *userdata          = (zmq_userdata *)backend->userdata;
 	
 	if(userdata->zmq_socket){
@@ -107,8 +106,9 @@ static int zmq_destroy(backend_t *backend){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int zmq_configure(backend_t *backend, config_t *config){ // {{{
+static int zmqb_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;
+	int                    zmq_socket_type;
 	char                  *zmq_type_str      = NULL;
 	char                  *zmq_opt_ident     = NULL;
 	char                  *zmq_act_bind      = NULL;
@@ -124,9 +124,6 @@ static int zmq_configure(backend_t *backend, config_t *config){ // {{{
 	
 	if( (userdata->zmq_socket = zmq_socket(zmq_ctx, zmq_socket_type)) == NULL)
 		return error("zmq_socket failed");
-	
-	if( zmq_msg_init(&userdata->zmq_recv_msg) != 0)
-		return error("zmq_msg_init failed");
 	
 	//for(i; i<=sizeof(opts_array); i++){
 		hash_data_copy(ret, TYPE_STRINGT, zmq_opt_ident,   config, HK(identity));
@@ -146,28 +143,99 @@ static int zmq_configure(backend_t *backend, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t zmq_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
-	//zmq_userdata         *userdata = (zmq_userdata *)backend->userdata;
+static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
+	void                  *data;
+	size_t                 data_size;
+	zmq_msg_t              zmq_msg;
+	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
 	
-	return 0;
+	switch(hargs->action){
+		case ACTION_READ:;
+			fastcall_read *rargs = (fastcall_read *)hargs;
+			
+			if( zmq_msg_init(&zmq_msg) != 0)
+				return error("zmq_msg_init failed");
+			
+			if( zmq_recv(userdata->zmq_socket, &zmq_msg, 0) != 0)
+				return -errno;
+			
+			data      = zmq_msg_data(&zmq_msg);
+			data_size = zmq_msg_size(&zmq_msg);
+			
+			
+			if(rargs->buffer == NULL || rargs->offset > data_size)
+				return -EINVAL; // invalid range
+			
+			rargs->buffer_size = MIN(rargs->buffer_size, data_size - rargs->offset);
+			
+			if(rargs->buffer_size == 0)
+				return -1; // EOF
+			
+			memcpy(rargs->buffer, data + rargs->offset, rargs->buffer_size);
+			
+			zmq_msg_close(&zmq_msg);
+			return 0;
+			
+		case ACTION_WRITE:;
+			fastcall_write *wargs = (fastcall_write *)hargs;
+			
+			if( zmq_msg_init_size(&zmq_msg, wargs->buffer_size) != 0)
+				return -errno;
+			
+			data      = zmq_msg_data(&zmq_msg);
+			memcpy(data, wargs->buffer, wargs->buffer_size);
+			
+			if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
+				return -errno;
+			
+			return 0;
+			
+		default:
+			break;
+	}
+	return -ENOSYS;
 } // }}}
-static ssize_t zmq_handler(backend_t *backend, request_t *request){ // {{{
-	//zmq_userdata         *userdata = (zmq_userdata *)backend->userdata;
+static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
+	return zmqb_fast_handler((backend_t *)userdata, args);
+} // }}}
+static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
+	ssize_t                ret;
+	uintmax_t              action;
+	data_t                *buffer;
+	data_t                 zmq_iot           = DATA_IOT(backend, &zmqb_io_t_handler);
 	
-	return 0;
+	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
+	if(ret != 0)
+		return -EINVAL;
+	
+	switch(action){
+		case ACTION_READ:;
+			buffer = hash_data_find(request, HK(buffer));
+			fastcall_transfer r_transfer1 = { { 3, ACTION_TRANSFER }, buffer };
+			return data_query(&zmq_iot, &r_transfer1 );
+			
+		case ACTION_WRITE:;
+			buffer = hash_data_find(request, HK(buffer));
+			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &zmq_iot };
+			return data_query(buffer, &r_transfer2 );
+			
+		default:
+			break;
+	}
+	return -ENOSYS;
 } // }}}
 
 static backend_t zmq_proto = {                 // NOTE need static or unique name
 	.class          = "modules/c_zmq",
 	.supported_api  = API_HASH | API_FAST,
-	.func_init      = &zmq_init,
-	.func_configure = &zmq_configure,
-	.func_destroy   = &zmq_destroy,
+	.func_init      = &zmqb_init,
+	.func_configure = &zmqb_configure,
+	.func_destroy   = &zmqb_destroy,
 	.backend_type_hash = {
-		.func_handler = &zmq_handler
+		.func_handler = &zmqb_handler
 	},
 	.backend_type_fast = {
-		.func_handler = &zmq_fast_handler
+		.func_handler = (f_fast_func)&zmqb_fast_handler
 	}
 };
 
