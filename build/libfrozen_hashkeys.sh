@@ -29,7 +29,7 @@ for key in $keys; do
 	eval exists="\$COLLIDE_$value"
 	if [ "x$exists" != "x" ]; then
 		echo "echo 'ERROR: Static hash key collision: $key <=> $exists: $value <=> $value'; exit";
-		rm $hashkeys_h $hashkeys_tmp1 $hashkeys_tmp2 $hashkeys_tmp3
+		rm $hashkeys_h $hashkeys_tmp1 $hashkeys_tmp2 $hashkeys_tmp3 2>/dev/null
 		exit;
 	fi
 	eval "COLLIDE_${value}=$key"
@@ -51,4 +51,4 @@ echo "#ifdef HASHKEYS_C" >> $hashkeys_h
 	echo "};" >> $hashkeys_h
 echo "#endif" >> $hashkeys_h
 
-rm $hashkeys_tmp1 $hashkeys_tmp2 $hashkeys_tmp3
+rm $hashkeys_tmp1 $hashkeys_tmp2 $hashkeys_tmp3 2>/dev/null

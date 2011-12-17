@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <inttypes.h>
 
 #ifdef STDC_HEADERS
 # include <stdlib.h>

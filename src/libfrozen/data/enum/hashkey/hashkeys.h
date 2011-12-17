@@ -24,10 +24,12 @@
 #define HK_VALUE_block_size 41545
 #define HK_VALUE_block_vid 29810
 #define HK_VALUE_blocks 9928
+#define HK_VALUE_body 3378
 #define HK_VALUE_buffer 9745
 #define HK_VALUE_buffer_size 54686
 #define HK_VALUE_capture 15329
 #define HK_VALUE_class 6119
+#define HK_VALUE_clientid 21563
 #define HK_VALUE_clone 5815
 #define HK_VALUE_config 9498
 #define HK_VALUE_connect 15066
@@ -63,6 +65,7 @@
 #define HK_VALUE_hash_ptr_end 68083
 #define HK_VALUE_hash_ptr_inline 131665
 #define HK_VALUE_hash_ptr_null 89234
+#define HK_VALUE_headers 15245
 #define HK_VALUE_homedir 15011
 #define HK_VALUE_http_req 22064
 #define HK_VALUE_http_resp 31264
@@ -153,6 +156,7 @@
 #define HK_VALUE_tick_interval 88187
 #define HK_VALUE_type 3224
 #define HK_VALUE_url 1545
+#define HK_VALUE_uuid 3130
 #define HK_VALUE_value 5875
 #define HK_VALUE_value_bits 41713
 #define HK_VALUE_values 10015
@@ -182,10 +186,12 @@ typedef enum hashkey_t {
       HK_block_size = HK_VALUE_block_size, 
       HK_block_vid = HK_VALUE_block_vid, 
       HK_blocks = HK_VALUE_blocks, 
+      HK_body = HK_VALUE_body, 
       HK_buffer = HK_VALUE_buffer, 
       HK_buffer_size = HK_VALUE_buffer_size, 
       HK_capture = HK_VALUE_capture, 
       HK_class = HK_VALUE_class, 
+      HK_clientid = HK_VALUE_clientid, 
       HK_clone = HK_VALUE_clone, 
       HK_config = HK_VALUE_config, 
       HK_connect = HK_VALUE_connect, 
@@ -221,6 +227,7 @@ typedef enum hashkey_t {
       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
+      HK_headers = HK_VALUE_headers, 
       HK_homedir = HK_VALUE_homedir, 
       HK_http_req = HK_VALUE_http_req, 
       HK_http_resp = HK_VALUE_http_resp, 
@@ -311,6 +318,7 @@ typedef enum hashkey_t {
       HK_tick_interval = HK_VALUE_tick_interval, 
       HK_type = HK_VALUE_type, 
       HK_url = HK_VALUE_url, 
+      HK_uuid = HK_VALUE_uuid, 
       HK_value = HK_VALUE_value, 
       HK_value_bits = HK_VALUE_value_bits, 
       HK_values = HK_VALUE_values, 
@@ -344,10 +352,12 @@ keypair_t hashkeys[] = {
       { "block_size", HK_VALUE_block_size }, 
       { "block_vid", HK_VALUE_block_vid }, 
       { "blocks", HK_VALUE_blocks }, 
+      { "body", HK_VALUE_body }, 
       { "buffer", HK_VALUE_buffer }, 
       { "buffer_size", HK_VALUE_buffer_size }, 
       { "capture", HK_VALUE_capture }, 
       { "class", HK_VALUE_class }, 
+      { "clientid", HK_VALUE_clientid }, 
       { "clone", HK_VALUE_clone }, 
       { "config", HK_VALUE_config }, 
       { "connect", HK_VALUE_connect }, 
@@ -383,6 +393,7 @@ keypair_t hashkeys[] = {
       { "hash_ptr_end", HK_VALUE_hash_ptr_end }, 
       { "hash_ptr_inline", HK_VALUE_hash_ptr_inline }, 
       { "hash_ptr_null", HK_VALUE_hash_ptr_null }, 
+      { "headers", HK_VALUE_headers }, 
       { "homedir", HK_VALUE_homedir }, 
       { "http_req", HK_VALUE_http_req }, 
       { "http_resp", HK_VALUE_http_resp }, 
@@ -473,6 +484,7 @@ keypair_t hashkeys[] = {
       { "tick_interval", HK_VALUE_tick_interval }, 
       { "type", HK_VALUE_type }, 
       { "url", HK_VALUE_url }, 
+      { "uuid", HK_VALUE_uuid }, 
       { "value", HK_VALUE_value }, 
       { "value_bits", HK_VALUE_value_bits }, 
       { "values", HK_VALUE_values }, 

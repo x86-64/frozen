@@ -773,6 +773,7 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_fuse
+enable_modulec_mongrel2
 enable_modulec_null
 enable_modulec_zmq
 enable_modulego_http
@@ -1514,6 +1515,8 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-module-c-mongrel2
+                          disable module c-mongrel2
   --disable-module-c-null disable module c-null
   --disable-module-c-zmq  disable module c-zmq
   --disable-module-go-http
@@ -17554,6 +17557,37 @@ _ACEOF
 
 
 
+
+
+
+
+
+	# Check whether --enable-modulec_mongrel2 was given.
+if test "${enable_modulec_mongrel2+set}" = set; then :
+  enableval=$enable_modulec_mongrel2;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_modulec_mongrel2}" = "yes"; then
+			enable_modulec_mongrel2="no"
+		else
+			enable_modulec_mongrel2="yes"
+		fi
+	fi
+
+	if test "${enable_modulec_mongrel2}" = "yes"; then
+		MODULE_DIR_c_mongrel2="c_mongrel2"
+		MODULE_DEP_c_mongrel2=""
+		MODULE_SELECTED="$MODULE_SELECTED c_mongrel2"
+	fi
+
+	if test "$MODULE_MAKEFILE_c_mongrel2" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/c_mongrel2/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS c_mongrel2"
+
+		MODULE_MAKEFILE_c_mongrel2=yes
+	fi
 
 
 
