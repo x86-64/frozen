@@ -31,7 +31,36 @@
 #define EMODULE 102
 
 static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ // {{{
-	return -ENOSYS;
+	ssize_t                ret;
+	
+	hash_t reply_struct[] = {
+		{ HK(uuid), DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(default), DATA_STRING(" ")                },
+			hash_end
+		)},
+		{ HK(clientid), DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(netstring)) },
+			hash_end
+		)},
+		{ HK(body), DATA_HASHT(
+		//{ userdata->body, DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			hash_end
+		)},
+		hash_end
+	};
+	
+	request_t r_next[] = {
+		{ HK(buffer), DATA_STRUCTT(reply_struct, request) },
+		//{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
+		hash_inline(request),
+		hash_end
+	};
+	return ( (ret = backend_pass(backend, r_next)) < 0 ) ? ret : -EEXIST;
 } // }}}
 
 static backend_t mongrel2_reply_proto = {
@@ -75,6 +104,8 @@ static ssize_t mongrel2_parse_handler(backend_t *backend, fastcall_header *hargs
 		{ HK(path),     DATA_RAW(path_p,   path_l)   },
 		{ HK(headers),  DATA_RAW(header_p, header_l) },
 		{ HK(body),     DATA_RAW(body_p,   body_l)   },
+		
+		{ HK(action),   DATA_UINTT(ACTION_WRITE)     },
 		hash_end
 	};
 	
