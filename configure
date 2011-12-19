@@ -798,6 +798,8 @@ enable_backendlist
 enable_backendregexp
 enable_backendsplit
 enable_backendstructs
+enable_backendstruct_pack
+enable_backendstruct_unpack
 enable_backendtransfer
 enable_backendnull
 enable_backendjenkins32
@@ -1554,6 +1556,10 @@ Optional Features:
   --disable-backend-split disable backend split
   --disable-backend-structs
                           disable backend structs
+  --disable-backend-struct-pack
+                          disable backend struct-pack
+  --disable-backend-struct-unpack
+                          disable backend struct-unpack
   --disable-backend-transfer
                           disable backend transfer
   --disable-backend-null  disable backend null
@@ -18485,6 +18491,78 @@ fi
 		BACKEND_DIR_structs="data/structs"
 		BACKEND_DEP_structs=""
 				BACKEND_SELECTED="$BACKEND_SELECTED structs"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/structs"
+
+		BACKEND_MAKEFILE_data_structs=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendstruct_pack was given.
+if test "${enable_backendstruct_pack+set}" = set; then :
+  enableval=$enable_backendstruct_pack;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendstruct_pack}" = "yes"; then
+			enable_backendstruct_pack="no"
+		else
+			enable_backendstruct_pack="yes"
+		fi
+	fi
+
+	if test "${enable_backendstruct_pack}" = "yes"; then
+		BACKEND_DIR_struct_pack="data/structs"
+		BACKEND_DEP_struct_pack=""
+				BACKEND_SELECTED="$BACKEND_SELECTED struct_pack"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/structs"
+
+		BACKEND_MAKEFILE_data_structs=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-backendstruct_unpack was given.
+if test "${enable_backendstruct_unpack+set}" = set; then :
+  enableval=$enable_backendstruct_unpack;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendstruct_unpack}" = "yes"; then
+			enable_backendstruct_unpack="no"
+		else
+			enable_backendstruct_unpack="yes"
+		fi
+	fi
+
+	if test "${enable_backendstruct_unpack}" = "yes"; then
+		BACKEND_DIR_struct_unpack="data/structs"
+		BACKEND_DEP_struct_unpack=""
+				BACKEND_SELECTED="$BACKEND_SELECTED struct_unpack"
 
 			fi
 

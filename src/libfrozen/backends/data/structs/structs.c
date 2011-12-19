@@ -21,6 +21,7 @@
  *              buffer                  = (hashkey_t)'buffer', # input/output request key name, default "buffer"
  *              values                  = (hashkey_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
  *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
+ *              lazy                    = (uint_t)'1',         # use lazy packing (no size would be avaliable), default 0
  *              structure               = {                     # structure to pack/unpack to/from
  *                     keyname = {                              # - first field is keyname with default value of 10 and FORMAT(clean)
  *                                  default = (uint_t)'10',
@@ -41,11 +42,12 @@ typedef enum struct_values {
 } struct_values;
 
 typedef struct struct_userdata {
-	struct_t      *structure;
+	hash_t       *structure;
 	hashkey_t     buffer;
 	hashkey_t     key_values;
 	hashkey_t     size;
 	struct_values  values;
+	uintmax_t              lazy;
 } struct_userdata;
 
 static int struct_init(backend_t *backend){ // {{{
@@ -73,11 +75,12 @@ static int struct_configure(backend_t *backend, hash_t *config){ // {{{
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
 	
 	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	
-	if(userdata->buffer == 0)
+	if(userdata->buffer == 0 && userdata->lazy == 0)
 		return error("backend struct parameter buffer invalid");
 	if(userdata->structure == NULL)
 		return error("backend struct parameter structure invalid");
@@ -91,30 +94,38 @@ static ssize_t struct_backend_pack(backend_t *backend, request_t *request){
 	data_t          *buffer;
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)backend->userdata;
+		
+	switch(userdata->values){
+		case STRUCT_VALUES_WHOLE: values = request; break;
+		case STRUCT_VALUES_ONE:
+			hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
+			if(ret != 0)
+				return warning("hash with keys not supplied");
+			break;
+	};
 	
-	buffer = hash_data_find(request, userdata->buffer);
-	if(buffer != NULL){
-		switch(userdata->values){
-			case STRUCT_VALUES_WHOLE: values = request; break;
-			case STRUCT_VALUES_ONE:
-				hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
-				if(ret != 0)
-					return warning("hash with keys not supplied");
-				break;
-		};
-		
-		if( (struct_size = struct_pack(userdata->structure, values, buffer)) == 0)
-			return error("struct_pack failed");
-		
-		request_t new_request[] = {
-			{ userdata->size, DATA_PTR_SIZET(&struct_size) },
+	if(userdata->lazy == 1){
+		request_t r_next[] = {
+			{ userdata->buffer, DATA_STRUCTT(userdata->structure, values) },
 			hash_next(request)
 		};
 		
-		return ( (ret = backend_pass(backend, new_request)) < 0) ? ret : -EEXIST;
+		return ( (ret = backend_pass(backend, r_next)) < 0) ? ret : -EEXIST;
+	}else{
+		buffer = hash_data_find(request, userdata->buffer);
+		if(buffer != NULL){
+			if( (struct_size = struct_pack(userdata->structure, values, buffer)) == 0)
+				return error("struct_pack failed");
+			
+			request_t new_request[] = {
+				{ userdata->size, DATA_PTR_SIZET(&struct_size) },
+				hash_next(request)
+			};
+			
+			return ( (ret = backend_pass(backend, new_request)) < 0) ? ret : -EEXIST;
+		}
+		return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 	}
-	
-	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 }
 
 static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
@@ -144,7 +155,7 @@ static ssize_t struct_backend_unpack(backend_t *backend, request_t *request){
 }
 
 backend_t structs_proto = {
-	.class          = "data/structs",
+	.class          = "data/structs", // this backend would be deprecated
 	.supported_api  = API_CRWD,
 	.func_init      = &struct_init,
 	.func_configure = &struct_configure,
@@ -156,4 +167,24 @@ backend_t structs_proto = {
 	}
 };
 
+backend_t struct_pack_proto = {
+	.class          = "data/struct_pack",
+	.supported_api  = API_HASH,
+	.func_init      = &struct_init,
+	.func_configure = &struct_configure,
+	.func_destroy   = &struct_destroy,
+	.backend_type_hash = {
+		.func_handler = &struct_backend_pack
+	}
+};
 
+backend_t struct_unpack_proto = {
+	.class          = "data/struct_unpack",
+	.supported_api  = API_HASH,
+	.func_init      = &struct_init,
+	.func_configure = &struct_configure,
+	.func_destroy   = &struct_destroy,
+	.backend_type_hash = {
+		.func_handler = &struct_backend_unpack
+	}
+};

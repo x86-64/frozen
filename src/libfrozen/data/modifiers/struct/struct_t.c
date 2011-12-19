@@ -7,13 +7,6 @@
 #include <modifiers/slice/slice_t.h>
 #include <modifiers/slider/slider_t.h>
 
-static ssize_t   data_struct_t_read  (data_t *data, fastcall_read *fargs){
-	return -1;
-}
-static ssize_t   data_struct_t_write (data_t *data, fastcall_write *fargs){
-	return -1;
-}
-
 typedef struct struct_iter_ctx {
 	request_t             *values;
 	data_t                *buffer;
@@ -95,7 +88,7 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 }
 
 /** Pack hash with values, using structure into buffer */
-uintmax_t  struct_pack      (struct_t *structure, request_t *values, data_t *buffer){
+uintmax_t  struct_pack      (hash_t *structure, request_t *values, data_t *buffer){
 	data_t                 sl_buffer         = DATA_SLIDERT(buffer, 0);
 	struct_iter_ctx        iter_ctx;
 	
@@ -109,7 +102,7 @@ uintmax_t  struct_pack      (struct_t *structure, request_t *values, data_t *buf
 }
 
 /** Unpack buffer to values using structure */
-uintmax_t  struct_unpack    (struct_t *structure, request_t *values, data_t *buffer){
+uintmax_t  struct_unpack    (hash_t *structure, request_t *values, data_t *buffer){
 	data_t                 sl_buffer         = DATA_SLIDERT(buffer, 0);
 	struct_iter_ctx        iter_ctx;
 	
@@ -121,14 +114,31 @@ uintmax_t  struct_unpack    (struct_t *structure, request_t *values, data_t *buf
 	
 	return data_slider_t_get_offset(&sl_buffer);
 }
+
+static ssize_t   data_struct_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
+	struct_t              *fdata             = (struct_t *)(data->ptr);
 	
+	if(fargs->dest == NULL || fdata == NULL || fdata->values == NULL || fdata->structure == NULL)
+		return -EINVAL;
+	
+	data_t                 sl_buffer         = DATA_SLIDERT(fargs->dest, 0);
+	struct_iter_ctx        iter_ctx;
+	
+	iter_ctx.values      = fdata->values;
+	iter_ctx.buffer      = &sl_buffer;
+	
+	if(hash_iter(fdata->structure, &struct_iter_pack, &iter_ctx, 0) == ITER_BREAK)
+		return 0;
+	
+	return data_slider_t_get_offset(&sl_buffer);
+} // }}}
+
 data_proto_t struct_t_proto = {
 	.type                   = TYPE_STRUCTT,
 	.type_str               = "struct_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_READ]   = (f_data_func)&data_struct_t_read,
-		[ACTION_WRITE]  = (f_data_func)&data_struct_t_write
+		[ACTION_TRANSFER] = (f_data_func)&data_struct_t_transfer,
 	}
 };
 

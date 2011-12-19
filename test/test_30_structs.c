@@ -1,5 +1,5 @@
 START_TEST (test_structs){
-	struct_t structure[] = {
+	hash_t structure[] = {
 		{ HK(key1), DATA_HASHT(hash_end) },
 		{ HK(key2), DATA_HASHT(hash_end) },
 		{ HK(key3), DATA_HASHT(
