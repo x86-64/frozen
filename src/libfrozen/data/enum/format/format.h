@@ -14,7 +14,8 @@ typedef uintmax_t format_t;
 #define FORMAT_debug 3
 #define FORMAT_hash 4
 #define FORMAT_human 5
-#define FORMAT_value 6
+#define FORMAT_netstring 6
+#define FORMAT_value 7
 #endif
 #ifdef FORMAT_C
 keypair_t formats[] = {
@@ -23,7 +24,8 @@ keypair_t formats[] = {
 { "debug", 3 }, 
 { "hash", 4 }, 
 { "human", 5 }, 
-{ "value", 6 }, 
+{ "netstring", 6 }, 
+{ "value", 7 }, 
 };
 size_t formats_size       = sizeof(formats[0]);
 size_t formats_nelements  = (sizeof(formats)/sizeof(formats[0]));
