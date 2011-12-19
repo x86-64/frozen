@@ -150,6 +150,7 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
 	
 	switch(hargs->action){
+		// case ACTION_TRANSFER TODO
 		case ACTION_READ:;
 			fastcall_read *rargs = (fastcall_read *)hargs;
 			
@@ -183,7 +184,7 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 				return -errno;
 			
 			data      = zmq_msg_data(&zmq_msg);
-			memcpy(data, wargs->buffer, wargs->buffer_size);
+			memcpy(data, wargs->buffer, wargs->buffer_size); // TODO zero copy
 			
 			if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
 				return -errno;
@@ -195,14 +196,35 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t zmqb_io_t_multipart_handler(data_t *io_data, void *io_userdata, void *args){ // {{{
+	void                  *data;
+	zmq_msg_t              zmq_msg;
+	backend_t             *backend           = (backend_t *)io_userdata;
+	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	fastcall_write        *wargs             = (fastcall_write *)args;
+	
+	if( zmq_msg_init_size(&zmq_msg, wargs->buffer_size) != 0)
+		return -errno;
+	
+	data      = zmq_msg_data(&zmq_msg);
+	memcpy(data, wargs->buffer, wargs->buffer_size); // TODO zero copy
+	
+	if( zmq_send(userdata->zmq_socket, &zmq_msg, ZMQ_SNDMORE) != 0)
+		return -errno;
+	
+	return 0;
+} // }}}
 static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
 	return zmqb_fast_handler((backend_t *)userdata, args);
 } // }}}
 static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
+	zmq_msg_t              zmq_msg;
 	data_t                *buffer;
 	data_t                 zmq_iot           = DATA_IOT(backend, &zmqb_io_t_handler);
+	data_t                 zmq_iot_multi     = DATA_IOT(backend, &zmqb_io_t_multipart_handler);
+	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
 	if(ret != 0)
@@ -216,8 +238,17 @@ static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 			
 		case ACTION_WRITE:;
 			buffer = hash_data_find(request, HK(buffer));
-			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &zmq_iot };
-			return data_query(buffer, &r_transfer2 );
+			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &zmq_iot_multi };
+			ret = data_query(buffer, &r_transfer2 );
+			
+			// last part
+			if( zmq_msg_init_size(&zmq_msg, 0) != 0)
+				return -errno;
+			
+			if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
+				return -errno;
+			
+			return ret;
 			
 		default:
 			break;
