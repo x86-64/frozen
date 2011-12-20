@@ -39,11 +39,17 @@ static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ /
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
 			{ HK(default), DATA_STRING(" ")                },
 			hash_end
 		)},
 		{ HK(clientid), DATA_HASHT(
 			{ HK(format),  DATA_FORMATT(FORMAT(netstring)) },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(default), DATA_STRING(" ")                },
 			hash_end
 		)},
 		{ HK(body), DATA_HASHT(
@@ -60,7 +66,38 @@ static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ /
 		hash_inline(request),
 		hash_end
 	};
-	return ( (ret = backend_pass(backend, r_next)) < 0 ) ? ret : -EEXIST;
+	if( (ret = backend_pass(backend, r_next)) < 0 )
+		return ret;
+	
+	hash_t close_struct[] = {
+		{ HK(uuid), DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(default), DATA_STRING(" ")                },
+			hash_end
+		)},
+		{ HK(clientid), DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(netstring)) },
+			hash_end
+		)},
+		{ 0, DATA_HASHT(
+			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(default), DATA_STRING(" ")                },
+			hash_end
+		)},
+		hash_end
+	};
+	
+	request_t r_close[] = {
+		{ HK(buffer), DATA_STRUCTT(close_struct, request) },
+		//{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
+		hash_inline(request),
+		hash_end
+	};
+	return ( (ret = backend_pass(backend, r_close)) < 0 ) ? ret : -EEXIST;
 } // }}}
 
 static backend_t mongrel2_reply_proto = {

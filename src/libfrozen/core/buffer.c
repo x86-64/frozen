@@ -280,7 +280,7 @@ ssize_t         buffer_write               (buffer_t *buffer, off_t write_offset
 
 				}while(0)
 			);
-			return (write_offset + buf_size);
+			return buf_size;
 		case BUFF_TYPE_IO_DIRECT:
 		case BUFF_TYPE_IO_CACHED:
 			return buffer->io_write(buffer, write_offset, buf, buf_size);
