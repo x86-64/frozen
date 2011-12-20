@@ -171,6 +171,9 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
+	if(fargs->format != FORMAT(clean))
+		return -EINVAL;
+
 	roffset = woffset = transfered = 0;
 	
 	// first read
@@ -209,6 +212,17 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 		fargs->transfered = transfered;
 	return 0;
 } // }}}
+static ssize_t data_default_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
+	switch(fargs->format){
+		case FORMAT(clean):;
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, data };
+			return data_query(fargs->src, &r_transfer);
+			
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
 
 data_proto_t default_t_proto = {
 	.type            = TYPE_DEFAULTT,
@@ -221,6 +235,7 @@ data_proto_t default_t_proto = {
 		[ACTION_WRITE]       = (f_data_func)&data_default_write,
 		[ACTION_TRANSFER]    = (f_data_func)&data_default_transfer,
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
+		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
 		[ACTION_FREE]        = (f_data_func)&data_default_free,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
