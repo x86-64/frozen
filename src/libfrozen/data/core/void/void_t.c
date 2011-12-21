@@ -8,10 +8,6 @@ static ssize_t data_void_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	return 0;
 } // }}}
 static ssize_t data_void_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	fargs->dest->ptr = NULL;
 	return 0;
 } // }}}
 

@@ -31,6 +31,7 @@
 #define HK_VALUE_class 6119
 #define HK_VALUE_clientid 21563
 #define HK_VALUE_clone 5815
+#define HK_VALUE_close 5895
 #define HK_VALUE_config 9498
 #define HK_VALUE_connect 15066
 #define HK_VALUE_count 6256
@@ -194,6 +195,7 @@ typedef enum hashkey_t {
       HK_class = HK_VALUE_class, 
       HK_clientid = HK_VALUE_clientid, 
       HK_clone = HK_VALUE_clone, 
+      HK_close = HK_VALUE_close, 
       HK_config = HK_VALUE_config, 
       HK_connect = HK_VALUE_connect, 
       HK_count = HK_VALUE_count, 
@@ -361,6 +363,7 @@ keypair_t hashkeys[] = {
       { "class", HK_VALUE_class }, 
       { "clientid", HK_VALUE_clientid }, 
       { "clone", HK_VALUE_clone }, 
+      { "close", HK_VALUE_close }, 
       { "config", HK_VALUE_config }, 
       { "connect", HK_VALUE_connect }, 
       { "count", HK_VALUE_count }, 

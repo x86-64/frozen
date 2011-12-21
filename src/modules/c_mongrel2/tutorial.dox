@@ -1,0 +1,32 @@
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_mod_mongrel2 Tutorial: mongrel2 handlers
+ * 
+ * @section tutorial_mod_overview Overview
+ * 
+ * With frozen you can easily create custom handlers for mongrel2. To make one we need @ref mod_backend_zmq and @ref mod_backend_mongrel2.
+ * Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need
+ * create two sockets. Request will flow from one socket, pass through set of backends and end up in second socket.
+ * 
+ * @section tutorial_mod_example Example configuration
+ * @include tutorial_mod_mongrel2.conf
+ * 
+ * Here we have single-threaded handler which only send simple "hello!" string back to client.
+ *
+ * @section tutorial_mod_bench_data Benchmarking data
+ * 
+ * To benchmark this we use "ab" from apache-tools, 100000 requests in 30 concurrent threads. First benchmark for mongrel2+frozen set:
+ * @include benchmark_mod_mongrel2_frozen.bench
+ * 
+ * Second benchmark is mongrel2 c library (https://github.com/derdewey/mongrel2_c_handler) and it's body_to_upper handler.
+ * @include benchmark_mod_mongrel2_cmongrel.bench
+ *
+ * Last benchmark is plain nginx setup on same computer, just for reference:
+ * @include benchmark_mod_mongrel2_nginx.bench
+ *
+ * @section tutorial_mod_bench_res Benchmarking results
+ * 
+ * Mongrel C library goes little faster than frozen (even with all that json parsing and stuff), and nginx is way faster both of them. To be fair, don't forget that frozen
+ * have only one thread to handle requests. Frozen would be improved for speed and multi-threading.
+ */
+

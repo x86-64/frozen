@@ -1,0 +1,55 @@
+# ab -n 100000 -c 30 http://127.0.0.1:6767/
+This is ApacheBench, Version 2.3 <$Revision: 655654 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 10000 requests
+Completed 20000 requests
+Completed 30000 requests
+Completed 40000 requests
+Completed 50000 requests
+Completed 60000 requests
+Completed 70000 requests
+Completed 80000 requests
+Completed 90000 requests
+Completed 100000 requests
+Finished 100000 requests
+
+
+Server Software:        Mongrel2/1.7.5
+Server Hostname:        127.0.0.1
+Server Port:            6767
+
+Document Path:          /
+Document Length:        242 bytes
+
+Concurrency Level:      30
+Time taken for tests:   7.566 seconds
+Complete requests:      100000
+Failed requests:        0
+Write errors:           0
+Total transferred:      43302165 bytes
+HTML transferred:       24201210 bytes
+Requests per second:    13217.79 [#/sec] (mean)
+Time per request:       2.270 [ms] (mean)
+Time per request:       0.076 [ms] (mean, across all concurrent requests)
+Transfer rate:          5589.44 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.3      1       7
+Processing:     0    1   0.4      1       7
+Waiting:        0    1   0.3      1       7
+Total:          1    2   0.5      2       9
+
+Percentage of the requests served within a certain time (ms)
+  50%      2
+  66%      3
+  75%      3
+  80%      3
+  90%      3
+  95%      3
+  98%      3
+  99%      3
+ 100%      9 (longest request)

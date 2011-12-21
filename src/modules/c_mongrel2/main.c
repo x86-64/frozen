@@ -8,30 +8,103 @@
  * @ingroup mod_backend_mongrel2
  * @page page_mongrel2_info Description
  *
- * This module implement Mongrel2 protocol parsers. It works in pair with c_zmq module.
+ * This module implement Mongrel2 protocol parsers. It works in pair with ZeroMQ module. c_mongrel2_parse parse mongrel2 request
+ * and emit it to underlying backends. c_mongrel2_reply consturct reply for mongrel server and pass it to underlying backned.
  */
 /**
  * @ingroup mod_backend_mongrel2
  * @page page_mongrel2_config Configuration
- * 
- * Accepted configuration:
+ *  
+ * Accepted configuration for parser backend:
  * @code
  * {
  *              class                   = "modules/c_mongrel2_parse"
  * }
  * @endcode
  * 
+ * Accepted configuration for reply backend
  * @code
  * {
- *              class                   = "modules/c_mongrel2_reply"
+ *              class                   = "modules/c_mongrel2_reply",
+ *              buffer                  = (hashkey_t)'buffer',                 # output buffer hashkey name, default "buffer"
+ *              body                    = (hashkey_t)'body',                   # input http request body hashkey name, default "body"
+ *              close                   = (uint_t)'0'                          # close connection after reply, default 1
+ * }
+ * @endcode
+ */
+/**
+ * @ingroup mod_backend_mongrel2
+ * @page page_mongrel2_io Input and output
+ * 
+ * c_mongrel2_parse expect fast ACTION_WRITE request as input and emit following hash request on output:
+ * @code
+ * {
+ *              action                  = (action_t)"write",
+ *              uuid                    = (raw_t)"<server uuid>",              # server uuid, use it for reply
+ *              clientid                = (raw_t)"<clientid>",                 # mongrel client connection id
+ *              path                    = (raw_t)"/",                          # request url
+ *              headers                 = (raw_t)"{<json headers>}",           # request headers in form of json string, not parsed
+ *              body                    = (raw_t)"<body>"                      # request body
+ * }
+ * @endcode
+ *
+ * c_mongrel2_reply expect following minimum request for input:
+ * @code
+ * {
+ *              uuid                    = (raw_t)"<server uuid>",              # server uuid to reply for
+ *              clinetid                = (raw_t)"<clientid>",                 # mongrel client connection id, or list of id's
+ *             [config->body]           =                                      # reply for client
+ *                                        (raw_t)"<body>"                      # - full request body, including "HTTP/1.1 ..."
+ *                                        (void_t)""                           # - ask mongrel to close connection
+ * } 
+ * @endcode
+ * c_mongrel2_reply emit following request:
+ * @code
+ * {
+ *             [config->buffer]         = (struct_t)"",                        # constructed reply
+ *             ...
  * }
  * @endcode
  */
 
 #define EMODULE 102
 
+typedef struct mongrel2_userdata {
+	hashkey_t              buffer;
+	hashkey_t              body;
+	uintmax_t              close_conn;
+} mongrel2_userdata;
+
+static int mongrel2_init(backend_t *backend){ // {{{
+	mongrel2_userdata     *userdata;
+	
+	if((userdata = backend->userdata = calloc(1, sizeof(mongrel2_userdata))) == NULL)
+		return error("calloc failed");
+	
+	userdata->buffer     = HK(buffer);
+	userdata->body       = HK(body);
+	userdata->close_conn = 1;
+	return 0;
+} // }}}
+static int mongrel2_destroy(backend_t *backend){ // {{{
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
+	
+	free(userdata);
+	return 0;
+} // }}}
+static int mongrel2_configure(backend_t *backend, config_t *config){ // {{{
+	ssize_t                ret;
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
+	
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
+	hash_data_copy(ret, TYPE_HASHKEYT, userdata->body,       config, HK(body));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->close_conn, config, HK(close));
+	return 0;
+} // }}}
+
 static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
 	
 	hash_t reply_struct[] = {
 		{ HK(uuid), DATA_HASHT(
@@ -52,57 +125,45 @@ static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ /
 			{ HK(default), DATA_STRING(" ")                },
 			hash_end
 		)},
-		{ HK(body), DATA_HASHT(
-		//{ userdata->body, DATA_HASHT(
+		{ userdata->body, DATA_HASHT(
 			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
 			hash_end
 		)},
 		hash_end
 	};
 	
-	request_t r_next[] = {
-		{ HK(buffer), DATA_STRUCTT(reply_struct, request) },
-		//{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
+	request_t r_reply[] = {
+		{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
 		hash_inline(request),
 		hash_end
 	};
-	if( (ret = backend_pass(backend, r_next)) < 0 )
+	if( (ret = backend_pass(backend, r_reply)) < 0 )
 		return ret;
 	
-	hash_t close_struct[] = {
-		{ HK(uuid), DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+	if(userdata->close_conn == 1){
+		request_t r_voidbody[] = {
+			{ userdata->body, DATA_VOID },
+			hash_inline(request),
 			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
-			{ HK(default), DATA_STRING(" ")                },
+		};
+		
+		request_t r_close[] = {
+			{ userdata->buffer, DATA_STRUCTT(reply_struct, r_voidbody) },
+			hash_inline(r_voidbody),
 			hash_end
-		)},
-		{ HK(clientid), DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(netstring)) },
-			hash_end
-		)},
-		{ 0, DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
-			{ HK(default), DATA_STRING(" ")                },
-			hash_end
-		)},
-		hash_end
-	};
-	
-	request_t r_close[] = {
-		{ HK(buffer), DATA_STRUCTT(close_struct, request) },
-		//{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
-		hash_inline(request),
-		hash_end
-	};
-	return ( (ret = backend_pass(backend, r_close)) < 0 ) ? ret : -EEXIST;
+		};
+		if( (ret = backend_pass(backend, r_close)) < 0 )
+			return ret;
+	}
+	return -EEXIST;
 } // }}}
 
 static backend_t mongrel2_reply_proto = {
 	.class          = "modules/c_mongrel2_reply",
 	.supported_api  = API_HASH,
+	.func_init      = &mongrel2_init,
+	.func_destroy   = &mongrel2_destroy,
+	.func_configure = &mongrel2_configure,
 	.backend_type_hash = {
 		.func_handler = &mongrel2_reply_handler
 	},
