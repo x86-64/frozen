@@ -62,32 +62,32 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	return -ENOSYS;
 } // }}}
 static ssize_t data_format_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
-	char                  *string;
-	keypair_t         key, *ret;
-
-	if(fargs->dest == NULL)
+	ssize_t                ret;
+	keypair_t              key, *res;
+	char                  *string            = "(unknown)";
+	
+	if(src->ptr == NULL)
 		return -EINVAL;
 	
-	switch(fargs->dest->type){
-		case TYPE_STRINGT:	
-			key.key_val = *(format_t *)(src->ptr);
-			string      = "(unknown)";
-
-			if(key.key_val != 0){
-				if((ret = bsearch(&key, formats,
-					formats_nelements, formats_size,
-					&hash_bsearch_int)) != NULL
-				)
-					string = ret->key_str;
-			}else{
-				string = "(null)";
-			}
-			fargs->dest->ptr = strdup(string);
-			return 0;
-		default:
-			break;
-	};
-	return -ENOSYS;
+	key.key_val = *(format_t *)(src->ptr);
+	
+	if(key.key_val != 0){
+		if((res = bsearch(&key, formats,
+			formats_nelements, formats_size,
+			&hash_bsearch_int)) != NULL
+		)
+			string = res->key_str;
+	}else{
+		string = "(null)";
+	}
+	
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
+	ret        = data_query(fargs->dest, &r_write);
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = r_write.buffer_size;
+	
+	return ret;
 } // }}}		
 static ssize_t data_format_t_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = sizeof(format_t);

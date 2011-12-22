@@ -36,27 +36,26 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 	return -ENOSYS;
 } // }}}
 static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
 	datatype_t             type;
 	char                  *string            = "INVALID";
-
-	if(fargs->dest == NULL || src->ptr == NULL)
+	
+	if(src->ptr == NULL)
 		return -EINVAL;
 	
 	type = *(datatype_t *)(src->ptr);
 	
-	switch(fargs->dest->type){
-		case TYPE_STRINGT:	
-			if(type != TYPE_INVALID && (unsigned)type < data_protos_size){
-				string = data_protos[type]->type_str;
-			}
-			
-			fargs->dest->ptr = strdup(string);
-			return 0;
-		default:
-			// TODO to any type
-			break;
-	};
-	return -ENOSYS;
+	if(type != TYPE_INVALID && (unsigned)type < data_protos_size){
+		string = data_protos[type]->type_str;
+	}
+	
+	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
+	ret        = data_query(fargs->dest, &r_write);
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = r_write.buffer_size;
+	
+	return ret;
 } // }}}		
 static ssize_t data_datatype_t_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = sizeof(datatype_t);

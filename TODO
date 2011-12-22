@@ -1,7 +1,6 @@
 - find template engine
 - fix broken slice_t hash_dump's
 - hashes instead of incrementing in datatype_t
-- fix datatype_t convert_to
 - backend 'storage/malloc'
 - review indexes and caches (+ data free routines)
 - "magic" request_key_t data

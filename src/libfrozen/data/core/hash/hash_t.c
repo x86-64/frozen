@@ -81,9 +81,9 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	unsigned int           k;
 	char                   buffer[DEF_BUFFER_SIZE];
 	char                   b_s_key[DEF_BUFFER_SIZE];
-	//char                   b_s_type[DEF_BUFFER_SIZE];
-	data_t                 d_s_key           = DATA_RAW(b_s_key, sizeof(b_s_key));
-	data_t                 d_s_type          = DATA_STRING(NULL);
+	char                   b_s_type[DEF_BUFFER_SIZE];
+	data_t                 d_s_key           = DATA_RAW(b_s_key,  sizeof(b_s_key));
+	data_t                 d_s_type          = DATA_RAW(b_s_type, sizeof(b_s_type));
 	
 	if(element->key == hash_ptr_null){
 		data_hash_t_append_pad(ctx);
@@ -115,9 +115,9 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	data_query(&d_type, &r_convert2);
 	
 	snprintf(buffer, sizeof(buffer),
-		" - %.*s [%s] -> %p",
+		" - %.*s [%.*s] -> %p",
 		(int)r_convert1.transfered, (char *)b_s_key,
-		(char *)d_s_type.ptr,
+		(int)r_convert2.transfered, (char *)b_s_type,
 		element->data.ptr
 	);
 	data_hash_t_append_pad(ctx);
@@ -142,9 +142,6 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	}
 	data_hash_t_append(ctx, "\n");
 	
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	//data_query(&d_s_key,  &r_free);
-	data_query(&d_s_type, &r_free);
 	return ITER_CONTINUE;
 } // }}}
 
