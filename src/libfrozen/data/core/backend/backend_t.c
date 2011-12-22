@@ -31,7 +31,8 @@ static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *f
 			
 			dst->ptr = backend_new(config);
 			goto check;
-
+		
+		case FORMAT(config):;
 		case FORMAT(human):;      // TODO data_convert call with FORMAT(clean) :(
 		default:;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };

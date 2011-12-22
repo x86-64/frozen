@@ -45,10 +45,12 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	// alloc new buffer
 	switch(format){
 		case FORMAT(clean):         buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
-		case FORMAT(human): buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
+		case FORMAT(config):
+		case FORMAT(human):         
+		                            buffer_size = r_len.length;     malloc_size = r_len.length + 1; break;
 		case FORMAT(binary):        if(r_len.length == 0)
 						return -EINVAL;   
-					   buffer_size = r_len.length - 1; malloc_size = r_len.length;     break;
+					    buffer_size = r_len.length - 1; malloc_size = r_len.length;     break;
 		default:
 			return -ENOSYS;
 	};
@@ -103,6 +105,7 @@ static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 			transfered = r_write1.buffer_size;
 			break;
 		
+		case FORMAT(config):;
 		case FORMAT(clean):;
 		case FORMAT(human):;
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, src->ptr, buffer_size };

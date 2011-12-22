@@ -481,8 +481,8 @@ static const yytype_uint8 yyrline[] =
 {
        0,    64,    64,    66,    66,    83,    84,    88,    89,    90,
       94,    95,    99,   105,   106,   107,   113,   121,   121,   122,
-     122,   122,   123,   123,   125,   145,   173,   196,   225,   230,
-     238
+     122,   122,   123,   123,   125,   145,   175,   199,   228,   233,
+     241
 };
 #endif
 
@@ -1566,9 +1566,11 @@ yyreduce:
 #line 145 "rule_parser.y"
     {
 	datatype_t  type;
-	data_t      d_type   = DATA_PTR_DATATYPET(&type);
+	data_t      d_type          = DATA_PTR_DATATYPET(&type);
+	data_t      d_type_initstr  = DATA_PTR_STRING((yyvsp[(2) - (4)].string));
+	data_t      d_val_initstr   = DATA_PTR_STRING((yyvsp[(4) - (4)].string));
 	
-	fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(2) - (4)].string) }; 
+	fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 	if(data_query(&d_type, &r_init1) != 0){
 		yyerror(script, "failed convert datatype\n"); YYERROR;
 	}
@@ -1579,7 +1581,7 @@ yyreduce:
 	constant->data.ptr  = NULL;
 	
 	/* convert string to needed data */
-	fastcall_init r_init2 = { { 3, ACTION_INIT }, (yyvsp[(4) - (4)].string) }; 
+	fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
 	if(data_query(&constant->data, &r_init2) != 0){
 		yyerror(script, "failed convert data\n"); YYERROR;
 	}
@@ -1596,14 +1598,15 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 173 "rule_parser.y"
+#line 175 "rule_parser.y"
     {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, (yyvsp[(1) - (4)].string))) != NULL && curr->type == THING_HASHT){
-		hashkey_t  key;
-		data_t      d_key    = DATA_PTR_HASHKEYT(&key);
+		hashkey_t   key;
+		data_t      d_key     = DATA_PTR_HASHKEYT(&key);
+		data_t      d_initstr = DATA_PTR_STRING((yyvsp[(3) - (4)].string));
 	
-		fastcall_init r_init1 = { { 3, ACTION_INIT }, (yyvsp[(3) - (4)].string) }; 
+		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if(data_query(&d_key, &r_init1) != 0){
 			yyerror(script, "failed convert hashkey\n"); YYERROR;
 		}
@@ -1624,7 +1627,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 196 "rule_parser.y"
+#line 199 "rule_parser.y"
     {
 	rewrite_name_t *curr;
 	if((curr = rewrite_find_name(script, (yyvsp[(1) - (1)].string))) != NULL){
@@ -1658,7 +1661,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 225 "rule_parser.y"
+#line 228 "rule_parser.y"
     {
 			(yyval.thing).type = THING_LIST;
 			(yyval.thing).list = NULL;
@@ -1669,7 +1672,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 230 "rule_parser.y"
+#line 233 "rule_parser.y"
     {
 			(yyvsp[(1) - (1)].thing).next = NULL;
 			
@@ -1683,7 +1686,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 238 "rule_parser.y"
+#line 241 "rule_parser.y"
     {
 			(yyvsp[(3) - (3)].thing).next = NULL;
 			
@@ -1705,7 +1708,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1709 "rule_parser.tab.c"
+#line 1712 "rule_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1936,7 +1939,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 255 "rule_parser.y"
+#line 258 "rule_parser.y"
 
 
 static rewrite_actions   rewrite_get_function(char *string){

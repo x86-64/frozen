@@ -144,6 +144,7 @@ static ssize_t data_int32_t_convert_from(data_t *dst, fastcall_convert_from *far
 	}
 
 	switch( fargs->format ){
+		case FORMAT(config):;
 		case FORMAT(human):; // TODO fix it for slider_t 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0){

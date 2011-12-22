@@ -28,6 +28,7 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 	}
 	
 	switch(fargs->format){
+		case FORMAT(config):;
 		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) != 0)
@@ -95,6 +96,7 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 	value = *(hashkey_t *)src->ptr;
 	
 	switch(fargs->format){
+		case FORMAT(config):;
 		case FORMAT(clean):;
 		case FORMAT(human):;
 			// find in static keys first

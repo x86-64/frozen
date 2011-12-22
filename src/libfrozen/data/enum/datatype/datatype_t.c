@@ -13,6 +13,7 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 	}
 	
 	switch(fargs->format){
+		case FORMAT(config):;
 		case FORMAT(human):;
 			uintmax_t     i;
 			data_proto_t *proto;

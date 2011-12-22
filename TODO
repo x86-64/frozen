@@ -1,6 +1,4 @@
-- struct_t format(hash) convert_from
 - find template engine
-- deprecate ACTION_INIT for data
 - fix broken slice_t hash_dump's
 - hashes instead of incrementing in datatype_t
 - fix datatype_t convert_to

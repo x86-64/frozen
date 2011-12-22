@@ -80,9 +80,10 @@ hash_name :
 	| TNULL ASSIGN { $$ = 0; }
 	| NAME  ASSIGN {
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&$$);
-		
-		fastcall_init r_init1 = { { 3, ACTION_INIT }, $1 }; 
-		if(data_query(&d_key, &r_init1) != 0)
+		data_t                 d_initstr         = DATA_PTR_STRING($1);
+
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if(data_query(&d_key, &r_convert) != 0)
 			emit_error("unknown hashkey_t (%s)", $1);
 		
 		free($1);
@@ -94,8 +95,10 @@ hash_value :
 	| '(' NAME ')' STRING {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
+		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
+		data_t                 d_val_initstr     = DATA_PTR_STRING($4);
 		
-		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
+		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", $2);
 		
@@ -103,7 +106,7 @@ hash_value :
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_init r_init2 = { { 3, ACTION_INIT }, $4 }; 
+		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
 		if(data_query(&$$, &r_init2) != 0)
 			emit_error("data init failed (%s)", $2);
 		
@@ -113,9 +116,10 @@ hash_value :
 	| '(' NAME ')' '{' hash_items '}' {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
+		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
 		data_t                 d_hash            = DATA_PTR_HASHT($5);
-		
-		fastcall_init r_init1 = { { 3, ACTION_INIT }, $2 }; 
+
+		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if(data_query(&d_type, &r_init1) != 0)
 			emit_error("unknown datatype_t (%s)", $2);
 		
