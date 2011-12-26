@@ -9,20 +9,18 @@ It can be used to construct your own database, simple web server, data collector
 
 Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
 If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
-library - it is very likely to work properly.
+library - it is very likely to work properly. And even more - ZeroMQ module allow any language to be embedded into processing pipeline.
 
 Capabilities
 -------------
 
-* Fuse filesystem for input and output
-* Storage in memory or file
-* Memory caches
-* Indexes, lookup tables
-* Pack/unpack from defined structure
-* Ipc
-* Load balancing
-* Benchmarks
-
+* Two kinds of api: flexible and fast
+* Zero-copy everywhere it possible
+* Processing modules: regular expressions, switch, hashes, structures and many more
+* IO modules: fuse, ZeroMQ, file, memory, sockets
+* Can be used to construct common data structures: cache, index, lookup tables
+* Load balancing modules
+* Benchmarking and measurements
 
 Rationale
 --------
@@ -56,15 +54,13 @@ Rationale
  
   To setup a web server we need to install many different components: database, server, may be some cache, balancer, fastcgi handlers and so on. And every part
   must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why
-  bother with it? Lets join all components to one process. Simple call within process is best avaliable to world communication channel, it is fast and simple.
+  bother with it? Lets join all components to one process. Simple call within process is best available to world communication channel, it is fast and simple.
  
 Requirements
 -----------
- * check (for tests)
- * fuse (for fuse filesystem)
- * flex, bison, perl (if you make clean and want to rebuild from scratch, optional)
- * gccgo (for Go modules)
-
+  
+  Frozen written in pure C, so it have minimum dependencies. Some modules, however, have obvious requirements - 'io/fuse' will require fuse installed,
+  Go modules will need 'gccgo' and so on. But it is still possible to build and install frozen on clean system with only C build environment installed.
 
 Links
 -----

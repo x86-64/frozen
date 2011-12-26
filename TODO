@@ -1,32 +1,39 @@
-- find template engine
-- fix broken slice_t hash_dump's
-- hashes instead of incrementing in datatype_t
+- dynamic data types + as .so module
+- data 'ipv4_t', 'timestamp_t', 'timerange_t'
+
 - backend 'storage/malloc'
+- backend 'storage/memory'
+- backend 'data/buffer'
+
 - review indexes and caches (+ data free routines)
+- data 'refcount_t'
+
 - "magic" request_key_t data
 - split_t inits
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
-- data 'ipv4_t', 'timestamp_t', 'timerange_t'
-- dynamic data types + as .so module
-- libev
+
+- fix broken slice_t hash_dump's
+- hashes instead of incrementing in datatype_t
 - action definitions and documentation
 - rewrite file to use fd_t
+
 - review code for multi-threading support, document backend's thread-safety capabilities
+- backend thread_pool
+
+- new test suite, as benchmarks, deprecate check
+- data 'range_t', 'multiselect_t' and matching routines
+- backend queue
+- backend multi_request
+- backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
+- data 'action_t' + convert array from\to string
+- m4 macro collection
+- mphf nelements_step with percents + remove from mphf to another backend
+- helper functions for io module: function which transfer requests to API_FAST via io_t type
+
+- pcre
+- libev
+
 - delete ACTION_MOVE
 - add ACTION_GETID or something
 - rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
 - remove insert sort and write binary search instead
-- new test suite, as benchmarks, deprecate check
-- pcre
-- backend udp
-- data 'range_t', 'multiselect_t' and matching routines
-- backend thread_pool
-- backend queue
-- backend multi_request
-- backend go_session for http
-- backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
-- data 'action_t' + convert array from\to string
-- m4 macro collection
-- dynamic data types + as .so module
-- mphf nelements_step with percents + remove from mphf to another backend
-- API_ENDPOINT for io modules: have standard API_HASH function which transfer requests to API_FAST via io_t type

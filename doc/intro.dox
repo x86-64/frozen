@@ -14,14 +14,13 @@
  *    library - it is very likely to work properly.
  *
  *  @section caps Capabilities
- *    @li Fuse filesystem for input and output
- *    @li Storage in memory or file
- *    @li Memory caches
- *    @li Indexes, lookup tables
- *    @li Pack/unpack from defined structure
- *    @li Ipc
- *    @li Load balancing
- *    @li Benchmarks
+ *    @li Two kinds of api: flexible and fast
+ *    @li Zero-copy everywhere it possible
+ *    @li Processing modules: regular expressions, switch, hashes, structures and many more
+ *    @li IO modules: fuse, ZeroMQ, file, memory, sockets
+ *    @li Can be used to construct common data structures: cache, index, lookup tables
+ *    @li Load balancing modules
+ *    @li Benchmarking and measurements
  *
  *  @section rationale Rationale
  *    @li Model-oriented programming
