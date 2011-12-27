@@ -77,6 +77,8 @@ typedef struct data_t {
 	void                  *ptr;  ///< Pointer to data
 } data_t;
 
+typedef struct data_proto_t data_proto_t;
+
 /** Call action on data
  * @param data Data to process
  * @param args One of fastcall_* structs, with parameters to data

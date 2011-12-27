@@ -7,10 +7,7 @@ ssize_t              data_query         (data_t *data, void *args){ // {{{
 	data_proto_t          *proto;
 	fastcall_header       *fargs             = (fastcall_header *)args;
 	
-	if(
-		data  == NULL || data->type == TYPE_INVALID || (unsigned)data->type >= data_protos_size ||
-		fargs == NULL || fargs->nargs < 2
-	)
+	if(data == NULL || (unsigned)data->type >= data_protos_size)
 		return -EINVAL;
 	
 	proto = data_protos[data->type];
@@ -21,9 +18,6 @@ ssize_t              data_query         (data_t *data, void *args){ // {{{
 	};
 	if( func == NULL && (func = data_protos[TYPE_DEFAULTT]->handlers[ fargs->action ]) == NULL)
 		return -ENOSYS;
-	
-	if( fargs->nargs < fastcall_nargs[ fargs->action ] )
-		return -EINVAL;
 	
 	return func(data, args);
 } // }}}
