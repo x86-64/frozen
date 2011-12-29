@@ -17,7 +17,7 @@ typedef struct list {
 void       list_init          (list *clist);
 void       list_destroy       (list *clist);
 void       list_add           (list *clist, void *item);
-void       list_delete        (list *clist, void *item);
+size_t     list_delete        (list *clist, void *item);
 intmax_t   list_is_empty      (list *clist);
 uintmax_t  list_count         (list *clist);
 void       list_flatten       (list *clist, void **memory, size_t items);

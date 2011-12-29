@@ -59,10 +59,11 @@ found:
 	
 	pthread_rwlock_unlock(&clist->lock);
 } // }}}
-void       list_delete (list *clist, void *item){ // {{{
+size_t     list_delete (list *clist, void *item){ // {{{
 	void                 **list;
 	void                  *curr;
 	size_t                 lsz = 0;
+	size_t                 ret = 0;
 	
 	pthread_rwlock_wrlock(&clist->lock);
 	
@@ -72,6 +73,7 @@ void       list_delete (list *clist, void *item){ // {{{
 	while( (curr = list[lsz]) != LIST_END){
 		if(curr == item){
 			list[lsz] = LIST_FREE_ITEM;
+			ret = 1;
 			goto exit;
 		}
 		
@@ -79,6 +81,7 @@ void       list_delete (list *clist, void *item){ // {{{
 	}
 exit:
 	pthread_rwlock_unlock(&clist->lock);
+	return ret;
 } // }}}
 intmax_t   list_is_empty(list *clist){ // {{{
 	void                 **list;
