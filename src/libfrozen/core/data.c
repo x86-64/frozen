@@ -16,7 +16,7 @@ ssize_t              frozen_data_init(void){ // {{{
 	return 0;
 } // }}}
 void                 frozen_data_destroy(void){ // {{{
-	free(data_protos);
+	//free(data_protos); // TODO remove comment!
 } // }}}
 ssize_t              data_register(data_proto_t *proto){ // {{{
 	uintmax_t              new_id            = data_protos_nitems;
@@ -36,7 +36,6 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 	data_protos        = new_table;
 	data_protos_nitems = new_id + 1;
 	free(old_table);
-	printf("reg: %d %s\n", (int)new_id, proto->type_str);
 	return 0;
 } // }}}
 

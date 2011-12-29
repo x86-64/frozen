@@ -1,4 +1,3 @@
-- dynamic data types + as .so module
 - data 'ipv4_t', 'timestamp_t', 'timerange_t'
 
 - backend 'storage/malloc'
@@ -18,6 +17,7 @@
 - rewrite file to use fd_t
 
 - review code for multi-threading support, document backend's thread-safety capabilities
+- backend_destroy global lock
 - backend thread_pool
 
 - new test suite, as benchmarks, deprecate check

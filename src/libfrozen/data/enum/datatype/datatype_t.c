@@ -33,7 +33,6 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 				
 				if(strcasecmp(proto->type_str, buffer) == 0){
 					type = i; //proto->type;
-					printf("find: %d %s\n", (int)i, proto->type_str);
 					goto found;
 				}
 			}
