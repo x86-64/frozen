@@ -54,9 +54,12 @@
  *        must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why
  *        bother with it? Lets join all components to one process. Simple call within process is best available to world communication channel, it is fast and simple.
  *
- *  @section links Further reading
+ *  @section links Useful links
  *  
- *  Look at @ref tutorial section for first usage help.
- *  To understand architecture read @ref backend, @ref api, @ref data. 
+ *  @li @ref tutorial
+ *  @li Architecture review: @ref backend, @ref api, @ref data.
+ *  @li <a href="https://github.com/x86-64/frozen">Github project page</a>
+ *  @li <a href="https://github.com/x86-64/frozen/zipball/master">Download as .zip</a>
+ *  @li <a href="https://github.com/x86-64/frozen/tarball/master">Download as .tar.gz</a>
  *  
  */
