@@ -144,7 +144,7 @@ API void            class_unregister        (backend_t *proto); ///< Unregister 
  *  @retval non-NULL Creation success
  */
 API backend_t *     backend_new             (hash_t *config);
-API backend_t *     backend_acquire         (char *name); ///< Find backend by name and increment ref counter. Use backend_destroy to free.
+API void            backend_acquire         (backend_t *backend); ///< Increment ref counter of backend. Use backend_destroy to free.
 API backend_t *     backend_find            (char *name); ///< Find backend by name.
 API void            backend_destroy         (backend_t *backend); ///< Destroy backend
 

@@ -413,13 +413,9 @@ exit:
 	list_unlock(&backends_names);
 	return backend;
 } // }}}
-backend_t *     backend_acquire      (char *name){ // {{{
-	backend_t             *backend;
-	
-	if( (backend = backend_find(name)) != NULL)
+void            backend_acquire      (backend_t *backend){ // {{{
+	if(backend)
 		backend_ref_inc(backend);
-	
-	return backend;
 } // }}}
 backend_t *     backend_fork         (backend_t *backend, request_t *request){ // {{{
 	static request_t       r_fork[] = { hash_end };

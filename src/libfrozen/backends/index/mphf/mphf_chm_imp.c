@@ -208,7 +208,8 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_g));
 		if(ret == 0){
-			be_g = t = backend_acquire(backend);
+			be_g = t = backend_find(backend);
+			backend_acquire(t);
 			if(fork_req){
 				be_g = backend_fork(t, fork_req);
 				backend_destroy(t);
@@ -217,7 +218,8 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_v));
 		if(ret == 0){
-			be_v = t = backend_acquire(backend);
+			be_v = t = backend_find(backend);
+			backend_acquire(t);
 			if(fork_req){
 				be_v = backend_fork(t, fork_req);
 				backend_destroy(t);
@@ -226,7 +228,8 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		
 		hash_data_copy(ret, TYPE_STRINGT, backend,       mphf->config, HK(backend_e));
 		if(ret == 0){
-			be_e = t = backend_acquire(backend);
+			be_e = t = backend_find(backend);
+			backend_acquire(t);
 			if(fork_req){
 				be_e = backend_fork(t, fork_req);
 				backend_destroy(t);

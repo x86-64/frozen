@@ -11,6 +11,7 @@ static ssize_t data_backend_t_io  (data_t *data, fastcall_io *fargs){ // {{{
 } // }}}
 static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	backend_t             *backend;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
 	
 	if(fargs->src == NULL)
@@ -39,7 +40,10 @@ static ssize_t data_backend_t_convert_from(data_t *dst, fastcall_convert_from *f
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
 			
-			dst->ptr = backend_acquire(buffer);
+			backend = backend_find(buffer);
+			backend_acquire(backend);
+			
+			dst->ptr = backend;
 			goto check;
 	}
 
