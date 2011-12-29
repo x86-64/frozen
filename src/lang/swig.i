@@ -29,6 +29,8 @@
 %include ../../libfrozen/data/core/hash/hash_t.h
 %include ../../libfrozen/data/enum/hashkey/hashkey_t.h
 %include ../../libfrozen/data/enum/hashkey/hashkeys.h
+%include ../../libfrozen/data/enum/datatype/datatype_t.h
+%include ../../libfrozen/data/enum/datatype/datatype.h
 
 typedef hash_t                   request_t;
 typedef signed int               ssize_t;

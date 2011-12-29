@@ -11,7 +11,7 @@ libfrozen_core_la_SOURCES=  \
                         libfrozen.h     libfrozen.c                          \
                         api.h           api.c                                \
 			errors.h        errors.c                             \
-			data.h          data.c         data_protos.c         \
+			data.h          data.c                               \
 			list.h          list.c                               \
                         buffer.h        buffer.c                             \
                         backend.h       backend.c                            \

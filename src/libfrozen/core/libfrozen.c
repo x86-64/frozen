@@ -12,6 +12,8 @@ hash_t *global_settings = NULL; ///< Global settings
  * @return -1 on error
  */
 int frozen_init(void){
+	ssize_t                ret;
+
 	if(global_settings != NULL)
 		return 0;
 
@@ -24,6 +26,10 @@ int frozen_init(void){
 	memcpy(global_settings, &global_proto, sizeof(global_proto));
 	
 	srandom(time(NULL));
+	
+	if( (ret = frozen_data_init()) != 0)
+		return ret;
+	
 	return 0;
 }
 
@@ -36,6 +42,8 @@ int frozen_destroy(void){
 		return 0;
 
 	backend_destroy_all();
+	
+	frozen_data_destroy();
 	free(global_settings);
 	global_settings = NULL;
 	return 0;

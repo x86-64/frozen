@@ -36,7 +36,7 @@ static ssize_t null_handler(backend_t *backend, request_t *request){ // {{{
 	return (ssize_t)userdata->testparam;
 } // }}}
 
-static backend_t null_proto = {                 // NOTE need static or unique name
+static backend_t c_null_proto = {
 	.class          = "modules/c_null",
 	.supported_api  = API_HASH,
 	.func_init      = &null_init,
@@ -48,6 +48,6 @@ static backend_t null_proto = {                 // NOTE need static or unique na
 };
 
 int main(void){
-	class_register(&null_proto);
+	class_register(&c_null_proto);
 	return 0;
 }

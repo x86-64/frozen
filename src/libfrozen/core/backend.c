@@ -1,6 +1,5 @@
 #define BACKEND_C
 #include <libfrozen.h>
-#include <backend_selected.h>
 
 #include <pthread.h>
 

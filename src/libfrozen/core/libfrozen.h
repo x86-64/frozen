@@ -77,16 +77,16 @@ void *alloca (size_t);
 #include <errors.h>
 #include <public.h>
 
+#include <configs/config.h>
 #include <enums.h>
-#include <list.h>               // internal data storage
-#include <buffer.h>             //
-#include <data.h>               //
-#include <data_selected.h>      //
+#include <list.h>
+#include <buffer.h>
 
 #include <api.h>
-
-#include <configs/config.h>  // confiurations
-#include <backend.h>         // db logic 
+#include <data.h>
+#include <data_selected.h>
+#include <backend.h>
+#include <backend_selected.h>
 
 /* Global variables */
 API extern hash_t *global_settings;

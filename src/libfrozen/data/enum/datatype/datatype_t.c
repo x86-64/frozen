@@ -3,49 +3,6 @@
 #include <datatype_t.h>
 #include <enum/format/format_t.h>
 
-#define DYNAMIC_START_ID 1000
-
-typedef struct dynamic_dt_t {
-	uintmax_t              id;
-	char                  *name;
-} dynamic_dt_t;
-
-static uintmax_t               dynamic_dt_id     = DYNAMIC_START_ID;
-static list                    dynamic_dt_list   = LIST_INITIALIZER; // list is bad, coz of incrementing id simplier structure must be used
-
-ssize_t             datatype_register        (data_proto_t *proto){ // {{{
-	dynamic_dt_t          *new_dt;
-	
-	if( proto->type_str == NULL)
-		return -EINVAL;
-	
-	if( (new_dt = malloc(sizeof(dynamic_dt_t))) == NULL )
-		return -ENOMEM;
-	
-	new_dt->name = proto->type_str;
-	new_dt->id   = dynamic_dt_id++;
-	list_add(&dynamic_dt_list, new_dt);
-	
-	// TODO add proto to main list
-	
-	return 0;
-} // }}}
-uintmax_t           datatype_getid           (char *name){ // {{{
-	datatype_t             res               = TYPE_INVALID;
-	dynamic_dt_t          *dt;
-	void                  *iter              = NULL;
-	
-	list_rdlock(&dynamic_dt_list);
-		while( (dt = list_iter_next(&dynamic_dt_list, &iter)) != NULL){
-			if(strcasecmp(dt->name, name) == 0){
-				res = dt->id;
-				break;
-			}
-		}
-	list_unlock(&dynamic_dt_list);
-	return res;
-} // }}}
-
 static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	datatype_t             type;
 	char                   buffer[DEF_BUFFER_SIZE];
@@ -70,21 +27,16 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			// check static datatypes
-			for(i=0; i<data_protos_size; i++){
+			for(i=0; i<data_protos_nitems; i++){
 				if( (proto = data_protos[i]) == NULL)
 					continue;
 				
 				if(strcasecmp(proto->type_str, buffer) == 0){
-					type = proto->type;
+					type = i; //proto->type;
+					printf("find: %d %s\n", (int)i, proto->type_str);
 					goto found;
 				}
 			}
-			
-			// check dynamic datatypes
-			if( (type = datatype_getid(buffer)) != TYPE_INVALID)
-				goto found;
-			
 			return -EINVAL;
 			
 		found:
@@ -99,28 +51,15 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
 	datatype_t             type;
-	dynamic_dt_t          *dt;
 	char                  *string            = "INVALID";
-	void                  *iter              = NULL;
 	
 	if(src->ptr == NULL)
 		return -EINVAL;
 	
 	type = *(datatype_t *)(src->ptr);
 	
-	if(type != TYPE_INVALID && (unsigned)type < data_protos_size){
+	if(type != TYPE_INVALID && (unsigned)type < data_protos_nitems){
 		string = data_protos[type]->type_str;
-	}else{
-		if(type >= DYNAMIC_START_ID && type <= dynamic_dt_id){
-			list_rdlock(&dynamic_dt_list);
-				while( (dt = list_iter_next(&dynamic_dt_list, &iter)) != NULL){
-					if(type == dt->id){
-						string = dt->name;
-						break;
-					}
-				}
-			list_unlock(&dynamic_dt_list);
-		}
 	}
 	
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };

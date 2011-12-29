@@ -71,13 +71,42 @@
 
 #define DEF_BUFFER_SIZE 1024
 
-/// Data holder
-typedef struct data_t {
-	uintmax_t              type; ///< Data type. One of TYPE_*. Use datatype_t to hold this value.
-	void                  *ptr;  ///< Pointer to data
-} data_t;
+#include <enum/datatype/datatype_t.h>
 
-typedef struct data_proto_t data_proto_t;
+typedef enum data_api_type {
+	API_DEFAULT_HANDLER,
+	API_HANDLERS
+} data_api_type;
+
+typedef ssize_t    (*f_data_func)  (data_t *, void *args);
+
+/// Data holder
+struct data_t {
+	datatype_t             type; ///< Data type. One of TYPE_*. Use datatype_t to hold this value.
+	void                  *ptr;  ///< Pointer to data
+};
+
+struct data_proto_t {
+	char                  *type_str;
+	datatype_t             type;
+	data_api_type          api_type;
+	
+	f_data_func            handler_default;
+	f_data_func            handlers[ACTION_INVALID];
+};
+
+extern data_proto_t **         data_protos;
+extern uintmax_t               data_protos_nitems;
+
+ssize_t                  frozen_data_init(void);
+void                     frozen_data_destroy(void);
+
+/** Register dynamic data type. Not thread-safe, not safe to run on working system
+ * @param proto Data prototype
+ * @retval -ENOMEM Insufficient memory
+ * @retval 0       Call successful
+*/
+API ssize_t              data_register          (data_proto_t *proto);
 
 /** Call action on data
  * @param data Data to process
@@ -85,7 +114,7 @@ typedef struct data_proto_t data_proto_t;
  * @retval -ENOSYS No such function
  * @retval -EINVAL Invalid data passed, or arguments count
  * @retval <0      Another error related to data implementation
- * @retval 0       Call successfull
+ * @retval 0       Call successful
 */
 API ssize_t              data_query             (data_t *data, void *args);
 
@@ -95,7 +124,7 @@ API ssize_t              data_query             (data_t *data, void *args);
  * @param _dt   Destination data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc)
  * @param _src  Source data holder (data_t *)
  * @retval -EINVAL Invalid source, or convertation error
- * @retval 0       Operation successfull
+ * @retval 0       Operation successful
  */
 #define data_get(_ret,_type,_dt,_src){                                         \
 	if((_src) != NULL && (_src)->type == _type){                           \
@@ -117,7 +146,7 @@ API ssize_t              data_query             (data_t *data, void *args);
  * @param _dt   Source data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc)
  * @param _dst  Destination data holder (data_t *)
  * @retval -EINVAL Invalid source, or convertation error
- * @retval 0       Operation successfull
+ * @retval 0       Operation successful
  */
 #define data_set(_ret,_type,_dt,_dst){                                                   \
 	data_t __data_src = { _type, REF_##_type(_dt) };                                 \
@@ -132,7 +161,7 @@ API ssize_t              data_query             (data_t *data, void *args);
  * @param _type  Destination data type. Only constants allowed.
  * @param _dst   Destination data.
  * @param _src   Source data holder.
- * @retval 0     Convertation successfull.
+ * @retval 0     Convertation successful.
  * @retval <0    Convertation failed.
  */
 #define data_convert(_ret, _type, _dst, _src) {                                          \

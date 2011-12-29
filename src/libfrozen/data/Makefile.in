@@ -46,6 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/c_mongrel2/config.m4 \
 	$(top_srcdir)/./src/modules/c_null/config.m4 \
 	$(top_srcdir)/./src/modules/c_zmq/config.m4 \
+	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \

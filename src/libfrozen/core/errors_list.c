@@ -4,7 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
+ { -192595, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188483, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
  { -188448, "src/libfrozen/backends/request/iterate/iterate.c: calloc returns null" },
  { -184365, "src/libfrozen/backends/sync/mutex/mutex.c: pthread_mutex_init failed" },
@@ -186,7 +186,7 @@ static err_item errs_list[] = {
  { -8513, "src/libfrozen/backends/storage/file/file.c: filepath invalid" },
  { -8366, "src/libfrozen/backends/storage/file/file.c: resume error" },
  { -8357, "src/libfrozen/backends/storage/file/file.c: called fork_only file" },
- { -5666, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
+ { -5670, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4627, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_vid supplied" },
  { -4622, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no offset supplied" },
  { -4583, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_size supplied" },
