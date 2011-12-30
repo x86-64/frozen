@@ -180,7 +180,8 @@ API void            backend_disconnect      (backend_t *parent, backend_t *child
 API void            backend_insert          (backend_t *parent, backend_t *new_child); ///< Insert new_child in between of backend and it's childs
 API void            backend_add_terminators (backend_t *backend, list *terminators); ///< Wrap backend with terminators.
 
-     void           backend_destroy_all     (void);
+    ssize_t         frozen_backend_init     (void);
+    void            frozen_backend_destroy  (void);
 
     data_functions  request_str_to_action   (char *string);
 

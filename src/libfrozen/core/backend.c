@@ -6,7 +6,8 @@
 static list                    classes        = LIST_INITIALIZER; // dynamic classes passed from modules
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
-pthread_mutex_t                refs_mtx       = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t         refs_mtx       = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t         destroy_mtx;
 
 typedef struct backend_new_ctx {
 	list                   backends;
@@ -368,6 +369,34 @@ void               backend_insert(backend_t *parent, backend_t *new_child){ // {
 	
 	backend_connect(parent, new_child);
 } // }}}
+	
+ssize_t            frozen_backend_init(void){ // {{{
+	pthread_mutexattr_t    attr;
+	
+	if(pthread_mutexattr_init(&attr) != 0)
+		return -EFAULT;
+		
+	if(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE) != 0)
+		return -EFAULT;
+	
+	if(pthread_mutex_init(&destroy_mtx, &attr) != 0)
+		return -EFAULT;
+	
+	pthread_mutexattr_destroy(&attr);
+	
+	return 0;
+} // }}}
+void               frozen_backend_destroy(void){ // {{{
+	backend_t             *backend;
+	
+	while( (backend = list_pop(&backends_top)) != NULL)
+		backend_destroy(backend);
+	
+	list_destroy(&backends_top);
+	list_destroy(&backends_names);
+	
+	pthread_mutex_destroy(&destroy_mtx);
+} // }}}
 
 backend_t *     backend_new          (hash_t *config){ // {{{
 	backend_t             *backend;
@@ -420,6 +449,9 @@ void            backend_acquire      (backend_t *backend){ // {{{
 backend_t *     backend_fork         (backend_t *backend, request_t *request){ // {{{
 	static request_t       r_fork[] = { hash_end };
 	
+	if(backend == NULL)
+		return NULL;
+	
 	if(request == NULL)
 		request = r_fork;
 	
@@ -427,6 +459,9 @@ backend_t *     backend_fork         (backend_t *backend, request_t *request){ /
 } // }}}
 backend_t *     backend_clone        (backend_t *backend){ // {{{
 	backend_t *clone;
+	
+	if(backend == NULL)
+		return NULL;
 	
 	if( (clone = malloc(sizeof(backend_t))) == NULL)
 		return NULL;
@@ -458,15 +493,6 @@ void            backend_destroy      (backend_t *backend){ // {{{
 		backend_disconnect(curr, backend);
 	
 	backend_free_skeleton(backend);
-} // }}}
-void            backend_destroy_all  (void){ // {{{
-	backend_t             *backend;
-	
-	while( (backend = list_pop(&backends_top)) != NULL)
-		backend_destroy(backend);
-	
-	list_destroy(&backends_top);
-	list_destroy(&backends_names);
 } // }}}
 
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
