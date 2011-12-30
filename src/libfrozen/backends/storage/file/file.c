@@ -15,9 +15,8 @@
  * @code
  * 	{
  *              class    = "file",
- *              filename = "somefilename.dat",        # produce {homedir}{filename} file
+ *              filename = "somefilename.dat",        # simple file path
  *              filename = {                          # produce concat'ed string from following components:
- *                           homedir => (void_t)'',   #  - {homedir}
  *                           string  => "somename",   #  - any string, any times
  *                           string  => ".dat",       #
  *                           random  => "AAAA",       #  - random string [a-zA-Z0-9] of length 4
@@ -214,16 +213,13 @@ static ssize_t           file_gen_iterator(hash_t *config, file_gen_context *ctx
 			str      = (char *)curr_data->ptr; // TODO rewrite to data_read  BAD
 			str_size = strlen(str); //GET_TYPE_STRINGT_LEN(curr_data);
 			break;
-		case HK(homedir):
-			hash_data_copy(ret, TYPE_STRINGT, str, global_settings, HK(homedir));
-			if(ret != 0)
-				str = "./";
-			str_size = strlen(str);
-			break;
 		case HK(random):;
 			fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN }, 0 };
 			data_query(curr_data, &r_len);
 			str_size = r_len.length;
+			break;
+		case HK(homedir):
+			str_size = 0;
 			break;
 		default:
 			goto error;

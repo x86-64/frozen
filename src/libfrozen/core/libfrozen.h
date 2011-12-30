@@ -88,9 +88,6 @@ void *alloca (size_t);
 #include <backend.h>
 #include <backend_selected.h>
 
-/* Global variables */
-API extern hash_t *global_settings;
-
 API int       frozen_init(void);
 API int       frozen_destroy(void);
     intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y);

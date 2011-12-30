@@ -26,7 +26,6 @@ const char *       describe_error                (intmax_t errnum){ // {{{
 } // }}}
 intmax_t           handle_error                  (uintmax_t eflag, intmax_t errnum){ // {{{
         const char *errmsg;
-	// check global_settings
  	       
 	if( (errmsg = describe_error(errnum)) == NULL)
 		goto exit;

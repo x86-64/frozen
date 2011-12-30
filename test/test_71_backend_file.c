@@ -107,7 +107,6 @@ START_TEST (test_backend_file){
                 { 0, DATA_HASHT(
                         { HK(class),       DATA_STRING("file")                         },
                         { HK(filename),    DATA_HASHT(
-				{ HK(homedir),  DATA_VOID                              },
 				{ HK(string),   DATA_STRING("data_backend_file_")      },
 				{ HK(random),   DATA_STRING("AAAAAAAAAA")              },
 				{ HK(string),   DATA_STRING(".dat")                    },
