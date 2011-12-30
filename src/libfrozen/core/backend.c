@@ -479,20 +479,24 @@ backend_t *     backend_clone        (backend_t *backend){ // {{{
 void            backend_destroy      (backend_t *backend){ // {{{
 	backend_t             *curr;
 	
-	if(backend == NULL || backend_ref_dec(backend) != 0)
+	if(backend == NULL)
 		return;
 	
-	// call destroy
-	if(backend->func_destroy != NULL)
-		backend->func_destroy(backend);
-	
-	while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
-		backend_destroy(curr);
-	
-	while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
-		backend_disconnect(curr, backend);
-	
-	backend_free_skeleton(backend);
+	pthread_mutex_lock(&destroy_mtx);
+		if(backend_ref_dec(backend) == 1){
+			// call destroy
+			if(backend->func_destroy != NULL)
+				backend->func_destroy(backend);
+			
+			while( (curr = list_pop(&backend->childs)) != NULL)   // recursive destroy of all left childs
+				backend_destroy(curr);
+			
+			while( (curr = list_pop(&backend->parents)) != NULL)  // remove this backend from parents's childs list
+				backend_disconnect(curr, backend);
+			
+			backend_free_skeleton(backend);
+		}
+	pthread_mutex_lock(&destroy_mtx);
 } // }}}
 
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{
