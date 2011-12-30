@@ -5,12 +5,18 @@
 
 #include "libfrozen.h"
 
+uintmax_t inited = 0;
+
 /** @brief Initialize library
  * @return 0 on success
  * @return -1 on error
  */
 int frozen_init(void){
 	ssize_t                ret;
+	
+	if(inited == 1)
+		return 0;
+
 	srandom(time(NULL));
 	
 	if( (ret = frozen_data_init()) != 0)
@@ -19,6 +25,7 @@ int frozen_init(void){
 	if( (ret = frozen_backend_init()) != 0)
 		return ret;
 	
+	inited = 1;
 	return 0;
 }
 
@@ -27,8 +34,13 @@ int frozen_init(void){
  * @return -1 on error
  */
 int frozen_destroy(void){
+	if(inited == 0)
+		return 0;
+	
 	frozen_backend_destroy();
 	frozen_data_destroy();
+	
+	inited = 0;
 	return 0;
 }
 
