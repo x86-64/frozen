@@ -55,7 +55,7 @@ AC_DEFUN([FROZEN_DATA_END],[
 	datatype_tmp2=$folder/datatype.tmp2
 	datatype_tmp3=$folder/datatype.tmp3
 	
-	id=1
+	id=0
 	for h in $DATA_SELECTED; do
 		h_upper=$( echo "$h" | tr "a-z" "A-Z" | sed "s#_##g")
 		echo "   TYPE_$h_upper = $id," >> $datatype_tmp1

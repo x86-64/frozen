@@ -7,12 +7,47 @@
 extern data_proto_t *          data_protos_static[];
 extern size_t                  data_protos_static_size;
 
+static ssize_t data_default_donothing(data_t *data, void *hargs){ // {{{
+	return -ENOSYS;
+} // }}}
+
 ssize_t              frozen_data_init(void){ // {{{
+	uintmax_t              i, j;
+	data_proto_t          *p;
+	f_data_func            func;
+	
 	if( (data_protos = malloc(data_protos_static_size)) == NULL)
 		return -ENOMEM;
 	
 	memcpy(data_protos, &data_protos_static, data_protos_static_size);
 	data_protos_nitems = data_protos_static_size / sizeof(data_proto_t *);
+	
+	// prepare default_t
+	for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
+		if(!data_protos[ TYPE_DEFAULTT ]->handlers[j])
+			data_protos[ TYPE_DEFAULTT ]->handlers[j] = &data_default_donothing;
+	}
+	
+	// prepare rest
+	for(i=0; i<data_protos_nitems; i++){
+		if(i == TYPE_DEFAULTT)
+			continue;
+		
+		p = data_protos[i];
+		switch(p->api_type){
+			case API_DEFAULT_HANDLER:
+				func = p->handler_default;
+				for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++)
+					p->handlers[j] = func;
+				break;
+			case API_HANDLERS:
+				for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
+					if(!p->handlers[j])
+						p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
+				}
+				break;
+		}
+	}
 	return 0;
 } // }}}
 void                 frozen_data_destroy(void){ // {{{
@@ -40,22 +75,11 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 } // }}}
 
 ssize_t              data_query         (data_t *data, void *args){ // {{{
-	f_data_func            func;
-	data_proto_t          *proto;
-	fastcall_header       *fargs             = (fastcall_header *)args;
+	register fastcall_header       *fargs             = (fastcall_header *)args;
 	
-	if(data == NULL || data->type >= data_protos_nitems)
+	if(data == NULL || data->type >= data_protos_nitems || fargs->action >= ACTION_INVALID)
 		return -EINVAL;
 	
-	proto = data_protos[data->type];
-	
-	switch(proto->api_type){
-		case API_DEFAULT_HANDLER: func = proto->handler_default;           break;
-		case API_HANDLERS:        func = proto->handlers[ fargs->action ]; break;
-	};
-	if( func == NULL && (func = data_protos[TYPE_DEFAULTT]->handlers[ fargs->action ]) == NULL)
-		return -ENOSYS;
-	
-	return func(data, args);
+	return data_protos[ data->type ]->handlers[ fargs->action ](data, args);
 } // }}}
 
