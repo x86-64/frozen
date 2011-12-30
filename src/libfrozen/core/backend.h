@@ -185,4 +185,6 @@ API void            backend_add_terminators (backend_t *backend, list *terminato
 
     data_functions  request_str_to_action   (char *string);
 
+extern pthread_mutex_t                destroy_mtx; // TODO remove this..
+
 #endif // BACKEND_H

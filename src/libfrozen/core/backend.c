@@ -7,7 +7,7 @@ static list                    classes        = LIST_INITIALIZER; // dynamic cla
 static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
 static pthread_mutex_t         refs_mtx       = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t         destroy_mtx;
+pthread_mutex_t                destroy_mtx;
 
 typedef struct backend_new_ctx {
 	list                   backends;
@@ -483,7 +483,7 @@ void            backend_destroy      (backend_t *backend){ // {{{
 		return;
 	
 	pthread_mutex_lock(&destroy_mtx);
-		if(backend_ref_dec(backend) == 1){
+		if(backend_ref_dec(backend) == 0){
 			// call destroy
 			if(backend->func_destroy != NULL)
 				backend->func_destroy(backend);
@@ -496,7 +496,7 @@ void            backend_destroy      (backend_t *backend){ // {{{
 			
 			backend_free_skeleton(backend);
 		}
-	pthread_mutex_lock(&destroy_mtx);
+	pthread_mutex_unlock(&destroy_mtx);
 } // }}}
 
 ssize_t         backend_query        (backend_t *backend, request_t *request){ // {{{

@@ -56,13 +56,6 @@ static char                     short_options [sizeof(option_data)/sizeof(struct
 static struct cmdline_option *  map_opts      [96]; 
 
 // daemonization {{{
-void signal_handler(int sig){ // {{{
-	switch(sig) {
-		case SIGHUP:  break;
-		case SIGINT:
-		case SIGTERM: main_cleanup(); exit(0); break;
-	}
-} // }}}
 void daemonize(void){ // {{{
 	int i;
 	i=fork();
@@ -330,25 +323,36 @@ void main_cleanup(void){
 	remove_pidfile(opt_pidfile);
 }
 void main_rest(void){
+	int                    sig;
+	sigset_t               set;
+	
 	/* options init */
 	if(opt_daemon != 0)
 		daemonize();
 	
 	save_pid(opt_pidfile);
 	
-	frozen_init();
+	if(frozen_init() != 0){
+		fprintf(stderr, "libfrozen init failed\n");
+		exit(255);
+	}
+		
 	modules_load();
-
-	signal(SIGHUP,signal_handler); /* catch hangup signal */ // TODO rewrite to sigaction
-	signal(SIGINT,signal_handler);
-	signal(SIGTERM,signal_handler); /* catch kill signal */  // NOTICE after modules_load() coz Go override TERM
 	
+	sigfillset(&set);
+	sigprocmask(SIG_BLOCK, &set, NULL);                     // block all signals, main thread will handler that
 	
 	config_t *config = configs_file_parse(opt_config_file);
 	if(config != NULL && backend_new(config) != NULL){
+		sigprocmask(SIG_UNBLOCK, &set, NULL);           // enable all signals for this thread
 		
-		// TODO do normal wait()
-		while(1) sleep(100);
+		while(sigwait(&set, &sig) == 0){
+			switch(sig) {
+				case SIGHUP:  break;
+				case SIGINT:
+				case SIGTERM: main_cleanup(); exit(0); break;
+			}
+		}
 	}else{
 		fprintf(stderr, "config file not exist, empty or invalid\n");
 		exit(255);

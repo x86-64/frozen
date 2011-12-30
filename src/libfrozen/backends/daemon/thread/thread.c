@@ -35,14 +35,16 @@ typedef struct thread_userdata {
 	uintmax_t              ignore_errors;
 	uintmax_t              destroy_on_exit;
 	
-	uintmax_t              terminate;
+	uintmax_t              self_termination;
 	uintmax_t              thread_running;
 	pthread_t              thread;
+	pthread_mutex_t        thread_mutex;
 } thread_userdata;
 
 static void *  thread_routine(backend_t *backend){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
+	
 	
 	do{
 	//switch(apitype){
@@ -56,13 +58,26 @@ static void *  thread_routine(backend_t *backend){ // {{{
 	//		break;
 	//     case API_FAST:;
 	//}
-	}while(userdata->loop && userdata->terminate == 0);
+	}while(userdata->loop);
 	
-	userdata->thread_running = 0;
-	
-	if(userdata->destroy_on_exit)
-		backend_destroy(backend);
-	
+	pthread_mutex_lock(&destroy_mtx); // TODO remove this..
+	pthread_mutex_lock(&userdata->thread_mutex);
+		userdata->thread_running = 0;
+		
+		if(userdata->destroy_on_exit){
+			userdata->self_termination = 1;
+			backend_destroy(backend);
+			goto self_free;
+		}
+	pthread_mutex_unlock(&userdata->thread_mutex);
+	pthread_mutex_unlock(&destroy_mtx); // TODO remove this..
+	return NULL;
+
+self_free:
+	pthread_mutex_unlock(&userdata->thread_mutex);
+	pthread_mutex_unlock(&destroy_mtx);
+	pthread_mutex_destroy(&userdata->thread_mutex);
+	free(userdata);
 	return NULL;
 } // }}}
 static ssize_t thread_control_start(backend_t *backend){ // {{{
@@ -70,44 +85,66 @@ static ssize_t thread_control_start(backend_t *backend){ // {{{
 	pthread_attr_t         attr;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
-	if(userdata->thread_running == 0){
-		userdata->thread_running = 1;
-		userdata->terminate      = 0;
-		
-		pthread_attr_init(&attr);
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		
-		if(pthread_create(&userdata->thread, &attr, (void * (*)(void *))&thread_routine, backend) != 0)
-			ret = error("pthread_create failed");
-		
-		pthread_attr_destroy(&attr);
-	}
+	pthread_mutex_lock(&userdata->thread_mutex);
+		if(userdata->thread_running == 0){
+			userdata->thread_running = 1;
+			userdata->self_termination = 0;
+
+			pthread_attr_init(&attr);
+			pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+			
+			if(pthread_create(&userdata->thread, &attr, (void * (*)(void *))&thread_routine, backend) != 0)
+				ret = error("pthread_create failed");
+			
+			pthread_attr_destroy(&attr);
+		}
+	pthread_mutex_unlock(&userdata->thread_mutex);
 	return ret;
 } // }}}
 static ssize_t thread_control_stop(backend_t *backend){ // {{{
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
-	userdata->terminate = 1;
+	pthread_mutex_lock(&userdata->thread_mutex);
+		if(userdata->thread_running == 1){
+			userdata->thread_running = 0;
+			pthread_cancel(userdata->thread);
+		}
+	pthread_mutex_unlock(&userdata->thread_mutex);
 	return 0;
 } // }}}
 
 static int thread_init(backend_t *backend){ // {{{
-	thread_userdata         *userdata;
+	pthread_mutexattr_t    attr;
+	thread_userdata       *userdata;
 	
 	if((userdata = backend->userdata = calloc(1, sizeof(thread_userdata))) == NULL)
 		return error("calloc failed");
 	
+	if(pthread_mutexattr_init(&attr) != 0)
+		return -EFAULT;
+		
+	if(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE) != 0)
+		return -EFAULT;
+	
+	if(pthread_mutex_init(&userdata->thread_mutex, &attr) != 0)
+		return -EFAULT;
+	
+	pthread_mutexattr_destroy(&attr);
+
 	userdata->destroy_on_exit = 1;
 	return 0;
 } // }}}
 static int thread_destroy(backend_t *backend){ // {{{
-	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)backend->userdata;
 	
-	ret = thread_control_stop(backend);
+	if(userdata->self_termination == 1)
+		return 0;
 	
+	thread_control_stop(backend);
+	
+	pthread_mutex_destroy(&userdata->thread_mutex);
 	free(userdata);
-	return ret;
+	return 0;
 } // }}}
 static int thread_configure(backend_t *backend, config_t *config){ // {{{
 	ssize_t                ret;

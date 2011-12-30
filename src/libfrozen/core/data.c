@@ -16,7 +16,7 @@ ssize_t              frozen_data_init(void){ // {{{
 	return 0;
 } // }}}
 void                 frozen_data_destroy(void){ // {{{
-	//free(data_protos); // TODO remove comment!
+	free(data_protos);
 } // }}}
 ssize_t              data_register(data_proto_t *proto){ // {{{
 	uintmax_t              new_id            = data_protos_nitems;
