@@ -32,7 +32,7 @@ static err_item errs_list[] = {
  { -159897, "src/libfrozen/backends/io/console/console.c: output key not supplied" },
  { -159864, "src/libfrozen/backends/io/console/console.c: calloc failed" },
  { -155684, "src/libfrozen/backends/backend/end/end.c: calloc failed" },
- { -151599, "src/libfrozen/backends/data/convert/convert.c: calloc failed" },
+ { -151600, "src/libfrozen/backends/data/convert/convert.c: calloc failed" },
  { -147546, "src/libfrozen/backends/data/split/split.c: no input string in request" },
  { -147497, "src/libfrozen/backends/data/split/split.c: calloc failed" },
  { -143427, "src/libfrozen/backends/request/implode/implode.c: calloc failed" },

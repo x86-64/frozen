@@ -1,4 +1,6 @@
-- data 'ipv4_t', 'timestamp_t', 'timerange_t'
+- data 'timestamp_t', 'timerange_t'
+- format_t as hashes
+- string_t, raw_t write functions
 
 - backend 'storage/malloc'
 - backend 'storage/memory'

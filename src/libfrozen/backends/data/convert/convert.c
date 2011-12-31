@@ -19,10 +19,11 @@
  * {
  *              class                   = "data/convert",
  *              items                   = {
- *                      {
- *                           input         = (hashkey_t)'buffer',       # input key
+ *                      inputkey = {
  *                           type          = (datatype_t)'raw_t',       # desired type
- *                           format        = (format_t)'clean'          # format to convert, default "clean"
+ *                           output        = (hashkey_t)'buffer',       # output key, default eq inputkey
+ *                           format        = (format_t)'clean',         # format to convert, default "clean"
+ *                           convert_from  = (uint_t)'1'                # use convert_from routines instead, default 0 (use convert_to)     
  *                      },
  *                      ...
  *              }
@@ -64,38 +65,47 @@ static int convert_configure(backend_t *backend, hash_t *config){ // {{{
 
 static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	ssize_t                ret;
-	hashkey_t             input;
+	hashkey_t              input_hk;
+	hashkey_t              output_hk;
 	datatype_t             type              = TYPE_INVALID;
 	uintmax_t              format            = FORMAT(clean);
+	uintmax_t              from              = 0;
 	//uintmax_t              return_result     = 0;
-	data_t                *data;
+	data_t                *input;
 	hash_t                *new_hash;
 	hash_t                *item_cfg          = (hash_t *)item->data.ptr;
 	
 	if(item->data.type != TYPE_HASHT)
 		return ITER_CONTINUE;
 	
+	input_hk = output_hk = item->key;
+	
 	hash_data_copy(ret, TYPE_DATATYPET, type,           item_cfg, HK(type));
 	hash_data_copy(ret, TYPE_UINTT,     format,         item_cfg, HK(format));
+	hash_data_copy(ret, TYPE_UINTT,     from,           item_cfg, HK(convert_from));
+	hash_data_copy(ret, TYPE_HASHKEYT,  output_hk,      item_cfg, HK(output));
 	//hash_data_copy(ret, TYPE_UINTT,     return_result,  item_cfg, HK(return));
-	hash_data_copy(ret, TYPE_HASHKEYT,  input,          item_cfg, HK(input));
-	if(ret != 0)
-		return ITER_BREAK;
 	
 	if( (new_hash = hash_new(3)) == NULL)
 		return ITER_BREAK;
 	
-	new_hash[0].key       = input;
+	new_hash[0].key       = input_hk;
 	new_hash[0].data.type = type;
 	new_hash[0].data.ptr  = NULL;
 	hash_assign_hash_inline(&new_hash[1], ctx->new_request);
 	
-	if( (data = hash_data_find(ctx->request, input)) == NULL)
+	if( (input = hash_data_find(ctx->request, input_hk)) == NULL)
 		goto error;
 	
-	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, data, format };
-	if(data_query(&(new_hash[0].data), &r_convert) != 0)
-		goto error;
+	if(from == 0){
+		fastcall_convert_to   r_convert = { { 4, ACTION_CONVERT_TO   }, &(new_hash[0].data), format };
+		if(data_query(input, &r_convert) != 0)
+			goto error;
+	}else{
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, input, format };
+		if(data_query(&(new_hash[0].data), &r_convert) != 0)
+			goto error;
+	}
 	
 	ctx->new_request = new_hash;
 	return ITER_CONTINUE;

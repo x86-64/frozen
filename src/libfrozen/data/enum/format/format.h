@@ -15,8 +15,13 @@ typedef uintmax_t format_t;
 #define FORMAT_debug 4
 #define FORMAT_hash 5
 #define FORMAT_human 6
-#define FORMAT_netstring 7
-#define FORMAT_value 8
+#define FORMAT_ip_dothexint 7
+#define FORMAT_ip_dotint 8
+#define FORMAT_ip_dotoctint 9
+#define FORMAT_ip_hexint 10
+#define FORMAT_ip_int 11
+#define FORMAT_netstring 12
+#define FORMAT_value 13
 #endif
 #ifdef FORMAT_C
 keypair_t formats[] = {
@@ -26,8 +31,13 @@ keypair_t formats[] = {
 { "debug", 4 }, 
 { "hash", 5 }, 
 { "human", 6 }, 
-{ "netstring", 7 }, 
-{ "value", 8 }, 
+{ "ip_dothexint", 7 }, 
+{ "ip_dotint", 8 }, 
+{ "ip_dotoctint", 9 }, 
+{ "ip_hexint", 10 }, 
+{ "ip_int", 11 }, 
+{ "netstring", 12 }, 
+{ "value", 13 }, 
 };
 size_t formats_size       = sizeof(formats[0]);
 size_t formats_nelements  = (sizeof(formats)/sizeof(formats[0]));
