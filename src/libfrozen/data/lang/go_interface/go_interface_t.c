@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <go_interface_t.h>
 
 data_proto_t go_interface_t_proto = {

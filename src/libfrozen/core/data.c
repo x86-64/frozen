@@ -1,6 +1,5 @@
 #define DATA_C
 #include <libfrozen.h>
-#include <dataproto.h>
 
        data_proto_t **         data_protos;
        uintmax_t               data_protos_nitems;

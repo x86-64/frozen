@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <io_t.h>
 
 static ssize_t data_io_t_handler (data_t *data, fastcall_header *hargs){ // {{{

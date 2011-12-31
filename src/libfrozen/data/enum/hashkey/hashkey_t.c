@@ -1,6 +1,5 @@
 #define HASHKEYS_C
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <hashkey_t.h>
 
 #include <enum/format/format_t.h>

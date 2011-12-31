@@ -614,6 +614,7 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+headersdir
 modulesdir
 HAVE_DEBUG
 MODULE_DIRS
@@ -21088,6 +21089,8 @@ $as_echo "#define DYNAMIC_KEY_CHECK 1" >>confdefs.h
 fi
 
 modulesdir=${libexecdir}/frozen/
+headersdir=${includedir}/frozen/
+
 
 
 ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"

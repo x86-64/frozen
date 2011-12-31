@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <void_t.h>
 
 static ssize_t data_void_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{

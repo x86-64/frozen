@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <backend_t.h>
 
 #include <core/string/string_t.h>

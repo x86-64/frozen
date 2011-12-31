@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <random_t.h>
 
 static ssize_t data_random_t_handler (data_t *data, fastcall_header *hargs){ // {{{

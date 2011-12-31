@@ -2,25 +2,27 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 EXTRA_DIST=                                     \
 	errors_list.c                           \
-	hashkeys_int.h                          \
+        configs/config_parser.tab.h             \
 	configs/config_parser.l                 \
 	configs/config_parser.y                 
 
 noinst_LTLIBRARIES=libfrozen_core.la
-libfrozen_core_la_SOURCES=  \
-                        libfrozen.h     libfrozen.c                          \
-                        api.h           api.c                                \
-			errors.h        errors.c                             \
-			data.h          data.c                               \
-			list.h          list.c                               \
-                        buffer.h        buffer.c                             \
-                        backend.h       backend.c                            \
-                        configs/config.h                        \
-                        configs/config_parser.tab.h             \
-                        configs/config_parser.tab.c             \
-                        configs/config_parser.lex.c             \
-                        public.h
+libfrozen_core_la_SOURCES=                                   \
+                        libfrozen.c                          \
+                        api.c                                \
+			errors.c                             \
+			data.c                               \
+			list.c                               \
+                        buffer.c                             \
+                        backend.c                            \
+                        configs/config_parser.tab.c          \
+                        configs/config_parser.lex.c
+
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
+
+headers_confdir=$(headersdir)/configs/
+headers_HEADERS=libfrozen.h api.h errors.h data.h list.h buffer.h backend.h public.h enums.h data_selected.h backend_selected.h
+headers_conf_HEADERS=configs/config.h
 
 configs/config_parser.tab.c: configs/config_parser.lex.c
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y

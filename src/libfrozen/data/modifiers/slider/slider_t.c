@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <slider_t.h>
 
 uintmax_t data_slider_t_get_offset(data_t *data){ // {{{

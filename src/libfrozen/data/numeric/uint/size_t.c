@@ -1,6 +1,5 @@
 #line 1 "uint.c.m4"
 #include <libfrozen.h>
-#include <dataproto.h>
 
 #line 1 "uint_init.m4"
 
@@ -11,7 +10,7 @@
 
 
 
-#line 4 "uint.c.m4"
+#line 3 "uint.c.m4"
 
 
 #include <size_t.h>

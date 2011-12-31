@@ -130,7 +130,9 @@ if test "x$enable_collision-dyn-check" != "xyes"; then
 fi
 
 modulesdir=${libexecdir}/frozen/
+headersdir=${includedir}/frozen/
 AC_SUBST(modulesdir)
+AC_SUBST(headersdir)
 
 AC_CONFIG_FILES([Makefile
 		doc/Makefile

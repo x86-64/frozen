@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 
 m4_include(uint_init.m4)
 

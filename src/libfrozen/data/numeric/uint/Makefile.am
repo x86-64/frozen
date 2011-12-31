@@ -5,6 +5,9 @@ noinst_LTLIBRARIES                 = libfrozen_data_uint.la
 libfrozen_data_uint_la_SOURCES     = $(uint_src) $(uint_hdr) uint_init.m4
 libfrozen_data_uint_la_CFLAGS      = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 
+headers_mydirdir=$(headersdir)/numeric/uint/
+headers_mydir_HEADERS=$(uint_hdr)
+
 EXTRA_DIST = uint.c.m4 uint.h.m4
 
 $(uint_src): $(uint_hdr) uint.c.m4

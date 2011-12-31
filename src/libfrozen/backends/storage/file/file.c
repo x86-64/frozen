@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 
 /**
  * @ingroup backend

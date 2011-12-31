@@ -1,6 +1,5 @@
 #define FORMAT_C
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <enum/format/format_t.h>
 
 static int hash_bsearch_string(const void *m1, const void *m2){ // {{{

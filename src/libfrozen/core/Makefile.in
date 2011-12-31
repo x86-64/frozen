@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,7 +36,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/libfrozen/core
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(headers_HEADERS) $(headers_conf_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -149,6 +151,30 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libfrozen_core_la_SOURCES)
 DIST_SOURCES = $(libfrozen_core_la_SOURCES)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(headersdir)" \
+	"$(DESTDIR)$(headers_confdir)"
+HEADERS = $(headers_HEADERS) $(headers_conf_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -267,6 +293,7 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+headersdir = @headersdir@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -299,26 +326,26 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = \
 	errors_list.c                           \
-	hashkeys_int.h                          \
+        configs/config_parser.tab.h             \
 	configs/config_parser.l                 \
 	configs/config_parser.y                 
 
 noinst_LTLIBRARIES = libfrozen_core.la
 libfrozen_core_la_SOURCES = \
-                        libfrozen.h     libfrozen.c                          \
-                        api.h           api.c                                \
-			errors.h        errors.c                             \
-			data.h          data.c                               \
-			list.h          list.c                               \
-                        buffer.h        buffer.c                             \
-                        backend.h       backend.c                            \
-                        configs/config.h                        \
-                        configs/config_parser.tab.h             \
-                        configs/config_parser.tab.c             \
-                        configs/config_parser.lex.c             \
-                        public.h
+                        libfrozen.c                          \
+                        api.c                                \
+			errors.c                             \
+			data.c                               \
+			list.c                               \
+                        buffer.c                             \
+                        backend.c                            \
+                        configs/config_parser.tab.c          \
+                        configs/config_parser.lex.c
 
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
+headers_confdir = $(headersdir)/configs/
+headers_HEADERS = libfrozen.h api.h errors.h data.h list.h buffer.h backend.h public.h enums.h data_selected.h backend_selected.h
+headers_conf_HEADERS = configs/config.h
 CLEANFILES = \
 		configs/config_parser.tab.c                            \
 		configs/config_parser.tab.h                            \
@@ -493,6 +520,46 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf configs/.libs configs/_libs
+install-headersHEADERS: $(headers_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(headersdir)" || $(MKDIR_P) "$(DESTDIR)$(headersdir)"
+	@list='$(headers_HEADERS)'; test -n "$(headersdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(headersdir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(headersdir)" || exit $$?; \
+	done
+
+uninstall-headersHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(headers_HEADERS)'; test -n "$(headersdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(headersdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(headersdir)" && rm -f $$files
+install-headers_confHEADERS: $(headers_conf_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(headers_confdir)" || $(MKDIR_P) "$(DESTDIR)$(headers_confdir)"
+	@list='$(headers_conf_HEADERS)'; test -n "$(headers_confdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(headers_confdir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(headers_confdir)" || exit $$?; \
+	done
+
+uninstall-headers_confHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(headers_conf_HEADERS)'; test -n "$(headers_confdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(headers_confdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(headers_confdir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -578,8 +645,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
+	for dir in "$(DESTDIR)$(headersdir)" "$(DESTDIR)$(headers_confdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -631,7 +701,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-headersHEADERS install-headers_confHEADERS
 
 install-dvi: install-dvi-am
 
@@ -677,7 +747,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-headersHEADERS uninstall-headers_confHEADERS
 
 .MAKE: install-am install-strip
 
@@ -686,13 +756,16 @@ uninstall-am:
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am
+	install-dvi-am install-exec install-exec-am \
+	install-headersHEADERS install-headers_confHEADERS \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-headersHEADERS \
+	uninstall-headers_confHEADERS
 
 
 configs/config_parser.tab.c: configs/config_parser.lex.c

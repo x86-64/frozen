@@ -1,4 +1,3 @@
-- headers installation
 - data 'ipv4_t', 'timestamp_t', 'timerange_t'
 
 - backend 'storage/malloc'

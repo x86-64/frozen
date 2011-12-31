@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 #include <string_t.h>
 #include <enum/format/format_t.h>
 

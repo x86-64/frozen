@@ -1,5 +1,4 @@
 #include <libfrozen.h>
-#include <dataproto.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
