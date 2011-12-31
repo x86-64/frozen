@@ -1,9 +1,31 @@
 #include <libfrozen.h>
 #include <datatype_t.h>
 #include <enum/format/format_t.h>
+#include <core/void/void_t.h>
+
+datatype_t     data_getid(char *name, ssize_t *pret){ // {{{
+	uintmax_t              i;
+	ssize_t                ret               = -EINVAL;
+	datatype_t             type              = TYPE_VOIDT;
+	data_proto_t          *proto;
+	
+	for(i=0; i<data_protos_nitems; i++){
+		if( (proto = data_protos[i]) == NULL)
+			continue;
+		
+		if(strcasecmp(proto->type_str, name) == 0){
+			type = i;
+			ret  = 0;
+			break;
+		}
+	}
+	if(pret)
+		*pret = ret;
+	return type;
+} // }}}
 
 static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	datatype_t             type;
+	ssize_t                ret;
 	char                   buffer[DEF_BUFFER_SIZE];
 	
 	if(fargs->src == NULL)
@@ -17,29 +39,14 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 	switch(fargs->format){
 		case FORMAT(config):;
 		case FORMAT(human):;
-			uintmax_t     i;
-			data_proto_t *proto;
-			
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) < 0)
 				return -EINVAL;
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			for(i=0; i<data_protos_nitems; i++){
-				if( (proto = data_protos[i]) == NULL)
-					continue;
-				
-				if(strcasecmp(proto->type_str, buffer) == 0){
-					type = i; //proto->type;
-					goto found;
-				}
-			}
-			return -EINVAL;
-			
-		found:
-			*(datatype_t *)(dst->ptr) = type;
-			return 0;
+			*(datatype_t *)(dst->ptr) = data_getid(buffer, &ret);
+			return ret;
 
 		default:
 			break;
