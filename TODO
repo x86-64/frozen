@@ -12,7 +12,6 @@
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 
 - fix broken slice_t hash_dump's
-- hashes instead of incrementing in datatype_t
 - action definitions and documentation
 - rewrite file to use fd_t
 
