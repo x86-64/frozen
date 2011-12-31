@@ -10,11 +10,28 @@ extern size_t                  data_protos_static_size;
 static ssize_t data_default_donothing(data_t *data, void *hargs){ // {{{
 	return -ENOSYS;
 } // }}}
+static void    data_fill_blanks(data_proto_t *p){ // {{{
+	uintmax_t              j;
+	f_data_func            func;
+	
+	switch(p->api_type){
+		case API_DEFAULT_HANDLER:
+			func = p->handler_default;
+			for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++)
+				p->handlers[j] = func;
+			break;
+		case API_HANDLERS:
+			for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
+				if(!p->handlers[j])
+					p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
+			}
+			break;
+	}
+} // }}}
 
 ssize_t              frozen_data_init(void){ // {{{
-	uintmax_t              i, j;
+	uintmax_t              i;
 	data_proto_t          *p;
-	f_data_func            func;
 	
 	if( (data_protos = malloc(data_protos_static_size)) == NULL)
 		return -ENOMEM;
@@ -23,9 +40,9 @@ ssize_t              frozen_data_init(void){ // {{{
 	data_protos_nitems = data_protos_static_size / sizeof(data_proto_t *);
 	
 	// prepare default_t
-	for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
-		if(!data_protos[ TYPE_DEFAULTT ]->handlers[j])
-			data_protos[ TYPE_DEFAULTT ]->handlers[j] = &data_default_donothing;
+	for(i=0; i<sizeof(p->handlers)/sizeof(p->handlers[0]); i++){
+		if(!data_protos[ TYPE_DEFAULTT ]->handlers[i])
+			data_protos[ TYPE_DEFAULTT ]->handlers[i] = &data_default_donothing;
 	}
 	
 	// prepare rest
@@ -33,20 +50,7 @@ ssize_t              frozen_data_init(void){ // {{{
 		if(i == TYPE_DEFAULTT)
 			continue;
 		
-		p = data_protos[i];
-		switch(p->api_type){
-			case API_DEFAULT_HANDLER:
-				func = p->handler_default;
-				for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++)
-					p->handlers[j] = func;
-				break;
-			case API_HANDLERS:
-				for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
-					if(!p->handlers[j])
-						p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
-				}
-				break;
-		}
+		data_fill_blanks(data_protos[i]);
 	}
 	return 0;
 } // }}}
@@ -65,6 +69,9 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 	// fill
 	memcpy(new_table, data_protos, new_id * sizeof(data_proto_t *));
 	new_table[new_id]  = proto;
+	
+	// fill blank handlers
+	data_fill_blanks(proto);
 	
 	// swap tables
 	old_table          = data_protos;
