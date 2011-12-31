@@ -10,7 +10,10 @@ static ssize_t data_buffer_t_read(data_t *data, fastcall_read *fargs){ // {{{
 	
 	if(fargs->buffer == NULL)
 		return -EINVAL;
-
+	
+	if(data->ptr == NULL)
+		data->ptr = buffer_alloc();
+	
 	if( (ret = buffer_read( (buffer_t *)data->ptr, fargs->offset, fargs->buffer, fargs->buffer_size)) == -1){
 		fargs->buffer_size = 0;
 		return -1; // EOF
@@ -23,6 +26,9 @@ static ssize_t data_buffer_t_write (data_t *data, fastcall_write *fargs){ // {{{
 	
 	if(fargs->buffer == NULL)
 		return -EINVAL;
+	
+	if(data->ptr == NULL)
+		data->ptr = buffer_alloc();
 	
 	if( (ret = buffer_write( (buffer_t *)data->ptr, fargs->offset, fargs->buffer, fargs->buffer_size)) == -1){
 		fargs->buffer_size = 0;
