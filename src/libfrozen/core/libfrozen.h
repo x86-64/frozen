@@ -15,6 +15,10 @@
 #define _WITH_DPRINTF // for snprintf on FreeBSD
 #endif
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 /* Standart libraries */
 #include <stdint.h>
 #include <stdlib.h>

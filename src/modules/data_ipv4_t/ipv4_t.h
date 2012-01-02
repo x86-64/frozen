@@ -5,7 +5,7 @@
  *  @addtogroup ipv4_t ipv4_t
  */
 /** @ingroup ipv4_t
- *  @page int32_t_overview Overview
+ *  @page ipv4_t_overview Overview
  *  
  *  This data used to hold ipv4 address.
  */

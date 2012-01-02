@@ -779,6 +779,7 @@ enable_modulec_null
 enable_modulec_zmq
 enable_moduledata_ipv4_t
 enable_moduledata_null_t
+enable_moduledata_time_t
 enable_modulego_http
 enable_modulego_template
 enable_backendbenchmark
@@ -1528,6 +1529,8 @@ Optional Features:
                           disable module data-ipv4-t
   --disable-module-data-null-t
                           disable module data-null-t
+  --disable-module-data-time-t
+                          disable module data-time-t
   --disable-module-go-http
                           disable module go-http
   --disable-module-go-template
@@ -17770,6 +17773,37 @@ fi
 		MODULE_DIST_DIRS="$MODULE_DIST_DIRS data_null_t"
 
 		MODULE_MAKEFILE_data_null_t=yes
+	fi
+
+
+
+
+
+	# Check whether --enable-moduledata_time_t was given.
+if test "${enable_moduledata_time_t+set}" = set; then :
+  enableval=$enable_moduledata_time_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_moduledata_time_t}" = "yes"; then
+			enable_moduledata_time_t="no"
+		else
+			enable_moduledata_time_t="yes"
+		fi
+	fi
+
+	if test "${enable_moduledata_time_t}" = "yes"; then
+		MODULE_DIR_data_time_t="data_time_t"
+		MODULE_DEP_data_time_t=""
+		MODULE_SELECTED="$MODULE_SELECTED data_time_t"
+	fi
+
+	if test "$MODULE_MAKEFILE_data_time_t" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/data_time_t/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS data_time_t"
+
+		MODULE_MAKEFILE_data_time_t=yes
 	fi
 
 

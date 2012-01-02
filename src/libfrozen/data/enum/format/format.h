@@ -21,7 +21,16 @@ typedef uintmax_t format_t;
 #define FORMAT_ip_hexint 10
 #define FORMAT_ip_int 11
 #define FORMAT_netstring 12
-#define FORMAT_value 13
+#define FORMAT_time_dot_dmy 13
+#define FORMAT_time_dot_dmyhm 14
+#define FORMAT_time_dot_dmyhms 15
+#define FORMAT_time_plain 16
+#define FORMAT_time_rfc2822 17
+#define FORMAT_time_rfc3339 18
+#define FORMAT_time_slash_dmy 19
+#define FORMAT_time_slash_dmyhm 20
+#define FORMAT_time_slash_dmyhms 21
+#define FORMAT_value 22
 #endif
 #ifdef FORMAT_C
 keypair_t formats[] = {
@@ -37,7 +46,16 @@ keypair_t formats[] = {
 { "ip_hexint", 10 }, 
 { "ip_int", 11 }, 
 { "netstring", 12 }, 
-{ "value", 13 }, 
+{ "time_dot_dmy", 13 }, 
+{ "time_dot_dmyhm", 14 }, 
+{ "time_dot_dmyhms", 15 }, 
+{ "time_plain", 16 }, 
+{ "time_rfc2822", 17 }, 
+{ "time_rfc3339", 18 }, 
+{ "time_slash_dmy", 19 }, 
+{ "time_slash_dmyhm", 20 }, 
+{ "time_slash_dmyhms", 21 }, 
+{ "value", 22 }, 
 };
 size_t formats_size       = sizeof(formats[0]);
 size_t formats_nelements  = (sizeof(formats)/sizeof(formats[0]));
