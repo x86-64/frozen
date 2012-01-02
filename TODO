@@ -1,4 +1,4 @@
-- data 'timestamp_t', 'timerange_t'
+- data 'timerange_t'
 - format_t as hashes
 - string_t, raw_t write functions
 
