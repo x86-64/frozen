@@ -20031,7 +20031,7 @@ fi
 	if test "${enable_format_t}" = "yes"; then
 		DATA_DIR_format_t="enum/format"
 		DATA_DEP_format_t=""
-		DATA_ID_format_t="21"
+		DATA_ID_format_t=""
 		DATA_SELECTED="$DATA_SELECTED format_t"
 		DATA_HEADERS="$DATA_HEADERS enum/format/format_t.h"
 	fi
@@ -20045,6 +20045,7 @@ fi
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} enum/format/libfrozen_data_format.la"
 
 	fi
+
 
 
 
@@ -21078,7 +21079,6 @@ fi
 		MODULE_DIRS=$(echo $MODULE_DIRS | sed "s|$m_folder|REPLACEMEBACK|" | sed "s|$m_folder||g" | sed "s|REPLACEMEBACK|$m_folder|" )
 
 	done;
-
 
 
 

@@ -4,6 +4,7 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -196688, "src/libfrozen/data/enum/format/format_t.c: format collision" },
  { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188483, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
  { -188448, "src/libfrozen/backends/request/iterate/iterate.c: calloc returns null" },

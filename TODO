@@ -1,5 +1,4 @@
 - data 'timerange_t'
-- format_t as hashes
 - string_t, raw_t write functions
 
 - backend 'storage/malloc'

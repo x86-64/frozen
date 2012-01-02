@@ -2,22 +2,20 @@
 #include <libfrozen.h>
 #include <enum/format/format_t.h>
 
-static int hash_bsearch_string(const void *m1, const void *m2){ // {{{
-	keypair_t *mi1 = (keypair_t *) m1;
-	keypair_t *mi2 = (keypair_t *) m2;
-	return strcmp(mi1->key_str, mi2->key_str);
-} // }}}
-static int hash_bsearch_int(const void *m1, const void *m2){ // {{{
-	keypair_t *mi1 = (keypair_t *) m1;
-	keypair_t *mi2 = (keypair_t *) m2;
-	return (mi1->key_val - mi2->key_val);
-} // }}}
+#define EMODULE 47
+
+#if defined DYNAMIC_KEYS_CHECK || defined RESOLVE_DYNAMIC_KEYS
+static list                    dynamic_formats   = LIST_INITIALIZER;
+#endif
 
 static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	uintmax_t              i                       = 1;
+	char                   c;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
-	keypair_t           key, *ret;
-	format_t               key_val                  = 0;
-
+	char                  *p                       = buffer;
+	keypair_t             *kp;
+	format_t               key_val                 = 0;
+	
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
@@ -33,58 +31,103 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
 			
-			if( (key.key_str = buffer) == NULL)
-				return -EINVAL;
-			
-			/*
-			// get valid ordering
-			qsort(formats, formats_nelements, formats_size, &hash_bsearch_string);
-			int i;
-			for(i=0; i<enum/formats_nelements; i++){
-				printf("REGISTER_KEY(%s)\n", formats[i].key_str);
+			while((c = *p++)){
+				key_val += c * i * i;
+				i++;
 			}
-			exit(0);
-			*/
-
-			if((ret = bsearch(&key, formats,
-				formats_nelements, formats_size,
-				&hash_bsearch_string)) != NULL
-			)
-				key_val = ret->key_val;
+	
+	#ifdef COLLISION_CHECK
+		#ifdef STATIC_KEYS_CHECK
+			// find collisions
+			for(kp = &formats[0]; kp->key_str != NULL; kp++){
+				if(kp->key_val == key_val && strcmp(kp->key_str, buffer) != 0)
+					goto collision;
+			}
+		#endif
+		#ifdef DYNAMIC_KEYS_CHECK
+			void                  *iter              = NULL;
 			
+			list_rdlock(&dynamic_formats);
+			while( (kp = list_iter_next(&dynamic_formats, &iter)) != NULL){
+				if(kp->key_val == key_val && strcmp(kp->key_str, buffer) != 0){
+					list_unlock(&dynamic_formats);
+					goto collision;
+				}
+			}
+			list_unlock(&dynamic_formats);
+		#endif
+	#endif
+		#if defined DYNAMIC_KEYS_CHECK || defined RESOLVE_DYNAMIC_KEYS
+			keypair_t             *newkey            = malloc(sizeof(keypair_t));
+			
+			newkey->key_str = strdup(buffer);
+			newkey->key_val = key_val;
+			list_add(&dynamic_formats, newkey);
+		#endif
+	
 			*(format_t *)(dst->ptr) = key_val;
 			return 0;
 		
 		default:
 			break;
-	};
+	}
 	return -ENOSYS;
+	goto collision; // dummy
+
+collision:
+	// report collision
+	fprintf(stderr, "format collision: %s <=> %s\n", kp->key_str, buffer);
+	return error("format collision");
 } // }}}
 static ssize_t data_format_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
-	keypair_t              key, *res;
+	format_t               value;
+	uintmax_t              transfered;
+	keypair_t             *kp;
+	void                  *iter              = NULL;
 	char                  *string            = "(unknown)";
 	
-	if(src->ptr == NULL)
+	if(fargs->dest == NULL || src->ptr == NULL)
 		return -EINVAL;
 	
-	key.key_val = *(format_t *)(src->ptr);
+	value = *(format_t *)src->ptr;
 	
-	if(key.key_val != 0){
-		if((res = bsearch(&key, formats,
-			formats_nelements, formats_size,
-			&hash_bsearch_int)) != NULL
-		)
-			string = res->key_str;
-	}else{
-		string = "(null)";
+	switch(fargs->format){
+		case FORMAT(config):;
+		case FORMAT(clean):;
+		case FORMAT(human):;
+			// find in static keys first
+			for(kp = &formats[0]; kp->key_str != NULL; kp++){
+				if(kp->key_val == value){
+					string = kp->key_str;
+					goto found;
+				}
+			}
+			
+		#ifdef RESOLVE_DYNAMIC_KEYS
+			// find in dynamic keys
+			list_rdlock(&dynamic_formats);
+			while( (kp = list_iter_next(&dynamic_formats, &iter)) != NULL){
+				if(kp->key_val == value){
+					string = kp->key_str;
+					list_unlock(&dynamic_formats);
+					goto found;
+				}
+			}
+			list_unlock(&dynamic_formats);
+		#endif
+		
+		found:;
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
+			ret        = data_query(fargs->dest, &r_write);
+			transfered = r_write.buffer_size;
+			break;
+		
+		default:
+			return -ENOSYS;
 	}
-	
-	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
-	ret        = data_query(fargs->dest, &r_write);
-	
 	if(fargs->header.nargs >= 5)
-		fargs->transfered = r_write.buffer_size;
+		fargs->transfered = transfered;
 	
 	return ret;
 } // }}}		
@@ -94,7 +137,6 @@ static ssize_t data_format_t_len(data_t *data, fastcall_len *fargs){ // {{{
 } // }}}
 
 data_proto_t format_t_proto = {
-	.type                   = TYPE_FORMATT,
 	.type_str               = "format_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
