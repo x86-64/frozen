@@ -12,12 +12,12 @@ static char           *time_formats[] = {
 	"%d.%m.%Y %H:%M:%S",                   // common date representation
 	"%d.%m.%Y %H:%M",                      // common date representation
 	"%d.%m.%Y",                            // common date representation
-	"%Y%m%d%H%M%S",                        // plain datetime string
+	"%s",                                  // UNIX timestamp
 };
 
 static ssize_t timestamp_from_string(time_t *ptime, char *string, uintmax_t string_size){ // {{{
 	uintmax_t              i;
-	struct tm              timetm;
+	struct tm              timetm            = { 0 };
 	
 	for(i=0; i<sizeof(time_formats)/sizeof(time_formats[0]); i++){
 		if(strptime(string, time_formats[i], &timetm) != NULL){
@@ -45,7 +45,7 @@ static ssize_t timestamp_to_string(time_t time, char *string, size_t *string_siz
 		case FORMAT(time_dot_dmyhms):   if(time_format == -1) time_format = 5;
 		case FORMAT(time_dot_dmyhm):    if(time_format == -1) time_format = 6;
 		case FORMAT(time_dot_dmy):      if(time_format == -1) time_format = 7;
-		case FORMAT(time_plain):        if(time_format == -1) time_format = 8;
+		case FORMAT(time_unix):         if(time_format == -1) time_format = 8;
 		default:
 			if(time_format == -1)
 				break;

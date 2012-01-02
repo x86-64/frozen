@@ -30,7 +30,8 @@ typedef uintmax_t format_t;
 #define FORMAT_time_slash_dmy 19
 #define FORMAT_time_slash_dmyhm 20
 #define FORMAT_time_slash_dmyhms 21
-#define FORMAT_value 22
+#define FORMAT_time_unix 22
+#define FORMAT_value 23
 #endif
 #ifdef FORMAT_C
 keypair_t formats[] = {
@@ -55,7 +56,8 @@ keypair_t formats[] = {
 { "time_slash_dmy", 19 }, 
 { "time_slash_dmyhm", 20 }, 
 { "time_slash_dmyhms", 21 }, 
-{ "value", 22 }, 
+{ "time_unix", 22 }, 
+{ "value", 23 }, 
 };
 size_t formats_size       = sizeof(formats[0]);
 size_t formats_nelements  = (sizeof(formats)/sizeof(formats[0]));
