@@ -1,7 +1,12 @@
+- data list_t
+- enum list items
+- querying and editing inner records. unlimited nesting?
+- backend multi_request
+
 - data 'timerange_t'
 - string_t, raw_t write functions
 
-- backend 'storage/malloc'
+- backend 'storage/array' or 'storage/enum'?
 - backend 'storage/memory'
 - backend 'data/buffer'
 
@@ -22,7 +27,6 @@
 - new test suite, as benchmarks, deprecate check
 - data 'range_t', 'multiselect_t' and matching routines
 - backend queue
-- backend multi_request
 - backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
 - data 'action_t' + convert array from\to string
 - m4 macro collection
