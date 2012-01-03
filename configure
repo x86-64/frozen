@@ -20216,8 +20216,8 @@ fi
 
 	if test "${enable_slice_t}" = "yes"; then
 		DATA_DIR_slice_t="modifiers/slice"
-		DATA_DEP_slice_t=""
-		DATA_ID_slice_t="24"
+		DATA_DEP_slice_t="uint_t hash_t format_t"
+		DATA_ID_slice_t=""
 		DATA_SELECTED="$DATA_SELECTED slice_t"
 		DATA_HEADERS="$DATA_HEADERS modifiers/slice/slice_t.h"
 	fi
