@@ -1,5 +1,4 @@
 - helper functions for io module: function which transfer requests to API_FAST via io_t type
-- backend multi_request
 
 - data 'timerange_t'
 - string_t, raw_t write functions
@@ -20,6 +19,7 @@
 
 - review code for multi-threading support, document backend's thread-safety capabilities
 - backend thread_pool
+- backend multi_request
 
 - new test suite, as benchmarks, deprecate check
 - data 'range_t', 'multiselect_t' and matching routines
