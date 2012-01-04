@@ -188,7 +188,7 @@ API void            backend_add_terminators (backend_t *backend, list *terminato
 extern pthread_mutex_t                destroy_mtx; // TODO remove this..
 
 // Thread-specific userdata functions
-typedef void   * (*f_thread_create)    (void *)         ///< Thread-specific data constructor
+typedef void   * (*f_thread_create)    (void *);        ///< Thread-specific data constructor
 typedef void     (*f_thread_destroy)   (void *);        ///< Thread-specific data destructor
 
 /// Thread data context
@@ -196,6 +196,7 @@ typedef struct thread_data_ctx_t {
 	uintmax_t              inited;                  ///< Inited structure or not
 	pthread_key_t          key;                     ///< Pthread key to hold thread-specific data in it
 	f_thread_create        func_create;             ///< Constructor function
+	void                  *userdata;                ///< User data
 } thread_data_ctx_t;
 
 /** Initialize context for thread-specific data
