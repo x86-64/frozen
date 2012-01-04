@@ -37,6 +37,7 @@
 #define HK_VALUE_convert_from 70603
 #define HK_VALUE_count 6256
 #define HK_VALUE_create 9552
+#define HK_VALUE_data 3084
 #define HK_VALUE_default 15471
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
@@ -202,6 +203,7 @@ typedef enum hashkey_t {
       HK_convert_from = HK_VALUE_convert_from, 
       HK_count = HK_VALUE_count, 
       HK_create = HK_VALUE_create, 
+      HK_data = HK_VALUE_data, 
       HK_default = HK_VALUE_default, 
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
@@ -371,6 +373,7 @@ keypair_t hashkeys[] = {
       { "convert_from", HK_VALUE_convert_from }, 
       { "count", HK_VALUE_count }, 
       { "create", HK_VALUE_create }, 
+      { "data", HK_VALUE_data }, 
       { "default", HK_VALUE_default }, 
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 

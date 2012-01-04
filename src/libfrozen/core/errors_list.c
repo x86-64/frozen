@@ -4,6 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -200801, "src/libfrozen/backends/backend/wrapper/wrapper.c: no data in request" },
+ { -200782, "src/libfrozen/backends/backend/wrapper/wrapper.c: can not create terminator backend" },
+ { -200777, "src/libfrozen/backends/backend/wrapper/wrapper.c: backend config not supplied or invalid" },
+ { -200751, "src/libfrozen/backends/backend/wrapper/wrapper.c: calloc failed" },
  { -196688, "src/libfrozen/data/enum/format/format_t.c: format collision" },
  { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188483, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
@@ -85,6 +89,11 @@ static err_item errs_list[] = {
  { -61661, "src/libfrozen/backends/request/balancer/balancer.c: fork failed" },
  { -61633, "src/libfrozen/backends/request/balancer/balancer.c: invalid linear_len supplied" },
  { -61576, "src/libfrozen/backends/request/balancer/balancer.c: calloc returns null" },
+ { -57513, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no key_out supplied" },
+ { -57512, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: no buffer supplied" },
+ { -57501, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort engine not found" },
+ { -57492, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: backend insert-sort parameter engine not supplied" },
+ { -57465, "src/libfrozen/backends/rest/insert_sort/insert_sort.c: calloc failed" },
  { -57433, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no key_out supplied" },
  { -57432, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: no buffer supplied" },
  { -57421, "src/libfrozen/backends/rest/insert_sort/insert_sort.m4: backend insert-sort engine not found" },
@@ -182,6 +191,7 @@ static err_item errs_list[] = {
  { -8508, "src/libfrozen/backends/storage/file/file.c: filepath invalid" },
  { -8364, "src/libfrozen/backends/storage/file/file.c: resume error" },
  { -8355, "src/libfrozen/backends/storage/file/file.c: called fork_only file" },
+ { -5670, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4627, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_vid supplied" },
  { -4622, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no offset supplied" },
  { -4583, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_size supplied" },

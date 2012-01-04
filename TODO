@@ -1,6 +1,5 @@
-- data list_t
-- enum list items
-- querying and editing inner records. unlimited nesting?
+- threaddata functions
+- helper functions for io module: function which transfer requests to API_FAST via io_t type
 - backend multi_request
 
 - data 'timerange_t'
@@ -30,7 +29,6 @@
 - data 'action_t' + convert array from\to string
 - m4 macro collection
 - mphf nelements_step with percents + remove from mphf to another backend
-- helper functions for io module: function which transfer requests to API_FAST via io_t type
 
 - pcre
 - libev

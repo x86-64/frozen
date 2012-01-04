@@ -790,6 +790,7 @@ enable_backendmorph
 enable_backendpool
 enable_backendrebuild_monitor
 enable_backendrebuild_reader
+enable_backendwrapper
 enable_backendcache
 enable_backendcache_append
 enable_backendipc
@@ -1547,6 +1548,8 @@ Optional Features:
                           disable backend rebuild-monitor
   --disable-backend-rebuild-reader
                           disable backend rebuild-reader
+  --disable-backend-wrapper
+                          disable backend wrapper
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
@@ -18160,6 +18163,43 @@ fi
 		BACKEND_MAKEFILE_backend_rebuild=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/rebuild/libfrozen_backend_rebuild.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendwrapper was given.
+if test "${enable_backendwrapper+set}" = set; then :
+  enableval=$enable_backendwrapper;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendwrapper}" = "yes"; then
+			enable_backendwrapper="no"
+		else
+			enable_backendwrapper="yes"
+		fi
+	fi
+
+	if test "${enable_backendwrapper}" = "yes"; then
+		BACKEND_DIR_wrapper="backend/wrapper"
+		BACKEND_DEP_wrapper=""
+				BACKEND_SELECTED="$BACKEND_SELECTED wrapper"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_backend_wrapper" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/wrapper/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/wrapper"
+
+		BACKEND_MAKEFILE_backend_wrapper=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/wrapper/libfrozen_backend_wrapper.la"
 
 	fi
 
