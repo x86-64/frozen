@@ -69,6 +69,34 @@ void               class_unregister        (backend_t *proto){ // {{{
 	list_delete(&classes, proto);
 } // }}}
 
+ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy){ // {{{
+	if(thread_data->inited == 0){
+		if(pthread_key_create(&thread_data->key, func_destroy) != 0)
+			return -ENOMEM;
+		
+		thread_data->inited       = 1;
+		thread_data->func_create  = func_create;
+	}
+	return 0;
+} // }}}
+void               thread_data_destroy(thread_data_ctx_t *thread_data){ // {{{
+	if(thread_data->inited == 1){
+		pthread_key_delete(thread_data->key);
+		thread_data->inited = 0;
+	}
+} // }}}
+void *             thread_data_get(thread_data_ctx_t *thread_data){ // {{{
+	register void         *data;
+	
+	if( (data = pthread_getspecific(thread_data->key)) != NULL)
+		return data;
+	
+	data = thread_data->func_create();
+	pthread_setspecific(thread_data->key, data);
+	
+	return data;
+} // }}}
+
 static void        backend_ref_inc(backend_t *backend){ // {{{
 	pthread_mutex_lock(&refs_mtx);
 		backend->refs++;
