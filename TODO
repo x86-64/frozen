@@ -1,4 +1,3 @@
-- threaddata functions
 - helper functions for io module: function which transfer requests to API_FAST via io_t type
 - backend multi_request
 
