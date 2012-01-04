@@ -21,8 +21,13 @@ static void    data_fill_blanks(data_proto_t *p){ // {{{
 			break;
 		case API_HANDLERS:
 			for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
-				if(!p->handlers[j])
-					p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
+				if(!p->handlers[j]){
+					if(p->handler_default){
+						p->handlers[j] = p->handler_default;
+					}else{
+						p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
+					}
+				}
 			}
 			break;
 	}
