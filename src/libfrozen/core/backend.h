@@ -188,7 +188,7 @@ API void            backend_add_terminators (backend_t *backend, list *terminato
 extern pthread_mutex_t                destroy_mtx; // TODO remove this..
 
 // Thread-specific userdata functions
-typedef void   * (*f_thread_create)    (void);          ///< Thread-specific data constructor
+typedef void   * (*f_thread_create)    (void *)         ///< Thread-specific data constructor
 typedef void     (*f_thread_destroy)   (void *);        ///< Thread-specific data destructor
 
 /// Thread data context
@@ -202,10 +202,11 @@ typedef struct thread_data_ctx_t {
  *  @param thread_data Context. Prefer to store it in backend's userdata
  *  @param func_create  Constructor function for thread-specific data
  *  @param func_destroy Destructor function for thread-specific data
+ *  @param userdata User data
  *  @retval 0 No errors
  *  @retval <0 Error occurred
  */
-ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy);
+ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata);
 
 /** Destroy context for thread-specific data
  *  @param thread_data Context. Prefer to store it in backend's userdata

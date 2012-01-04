@@ -69,13 +69,14 @@ void               class_unregister        (backend_t *proto){ // {{{
 	list_delete(&classes, proto);
 } // }}}
 
-ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy){ // {{{
+ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
 	if(thread_data->inited == 0){
 		if(pthread_key_create(&thread_data->key, func_destroy) != 0)
 			return -ENOMEM;
 		
 		thread_data->inited       = 1;
 		thread_data->func_create  = func_create;
+		thread_data->userdata     = userdata;
 	}
 	return 0;
 } // }}}
@@ -91,7 +92,7 @@ void *             thread_data_get(thread_data_ctx_t *thread_data){ // {{{
 	if( (data = pthread_getspecific(thread_data->key)) != NULL)
 		return data;
 	
-	data = thread_data->func_create();
+	data = thread_data->func_create(thread_data->userdata);
 	pthread_setspecific(thread_data->key, data);
 	
 	return data;
