@@ -29,17 +29,26 @@
 #define EMODULE 48
 
 typedef struct wrapper_userdata {
+	thread_data_ctx_t      thread_data;
+	
 	backend_t             *backend;
 	hashkey_t              data_hk;
-	data_t                *data;
 } wrapper_userdata;
+
+typedef struct wrapper_threaddata {
+	data_t                *data;
+} wrapper_threaddata;
 
 static ssize_t wrapper_terminator_fast_handler(backend_t *backend, void *hargs){ // {{{
 	wrapper_userdata      *userdata          = (wrapper_userdata *)backend->userdata;
+	wrapper_threaddata    *threaddata        = thread_data_get(&userdata->thread_data);
 	
-	return data_query(userdata->data, hargs);
+	return data_query(threaddata->data, hargs);
 } // }}}
 
+static void * wrapper_threaddata_create(void *userdata){ // {{{
+	return malloc(sizeof(wrapper_threaddata));
+} // }}}
 static int wrapper_init(backend_t *backend){ // {{{
 	wrapper_userdata      *userdata;
 	
@@ -48,7 +57,12 @@ static int wrapper_init(backend_t *backend){ // {{{
 	
 	userdata->backend = NULL;
 	userdata->data_hk = HK(input);
-	return 0;
+	
+	return thread_data_init(
+		&userdata->thread_data, 
+		&wrapper_threaddata_create,
+		&free,
+		NULL);
 } // }}}
 static int wrapper_destroy(backend_t *backend){ // {{{
 	wrapper_userdata      *userdata          = (wrapper_userdata *)backend->userdata;
@@ -92,8 +106,9 @@ static int wrapper_configure(backend_t *backend, config_t *config){ // {{{
 static ssize_t wrapper_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	wrapper_userdata      *userdata          = (wrapper_userdata *)backend->userdata;
+	wrapper_threaddata    *threaddata        = thread_data_get(&userdata->thread_data);
 	
-	if( (userdata->data = hash_data_find(request, userdata->data_hk)) == NULL)
+	if( (threaddata->data = hash_data_find(request, userdata->data_hk)) == NULL)
 		return error("no data in request");
 	
 	if( (ret = backend_query(userdata->backend, request)) < 0)

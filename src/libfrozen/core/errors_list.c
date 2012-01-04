@@ -4,10 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -200801, "src/libfrozen/backends/backend/wrapper/wrapper.c: no data in request" },
- { -200782, "src/libfrozen/backends/backend/wrapper/wrapper.c: can not create terminator backend" },
- { -200777, "src/libfrozen/backends/backend/wrapper/wrapper.c: backend config not supplied or invalid" },
- { -200751, "src/libfrozen/backends/backend/wrapper/wrapper.c: calloc failed" },
+ { -200816, "src/libfrozen/backends/backend/wrapper/wrapper.c: no data in request" },
+ { -200796, "src/libfrozen/backends/backend/wrapper/wrapper.c: can not create terminator backend" },
+ { -200791, "src/libfrozen/backends/backend/wrapper/wrapper.c: backend config not supplied or invalid" },
+ { -200760, "src/libfrozen/backends/backend/wrapper/wrapper.c: calloc failed" },
  { -196688, "src/libfrozen/data/enum/format/format_t.c: format collision" },
  { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188483, "src/libfrozen/backends/request/iterate/iterate.c: no childs" },
