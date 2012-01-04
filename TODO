@@ -1,21 +1,25 @@
-- helper functions for io module: function which transfer requests to API_FAST via io_t type
-
-- data 'timerange_t'
-- string_t, raw_t write functions
-
-- backend 'storage/array' or 'storage/enum'?
+- review buffer_t, write create function
+- backend 'storage/array' or 'storage/record'?
 - backend 'storage/memory'
 - backend 'data/buffer'
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'
 
+- data 'timerange_t'
+- string_t, raw_t write functions
+
 - "magic" request_key_t data
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 
 - fix broken slice_t hash_dump's
-- action definitions and documentation
 - rewrite file to use fd_t
+
+- action definitions via m4 and documentation
+- move downgrade request to api.c
+- rewrite downgrade request to use m4'ed definitions
+- write upgrade request
+- backend 'api/switch' or something
 
 - review code for multi-threading support, document backend's thread-safety capabilities
 - backend thread_pool
