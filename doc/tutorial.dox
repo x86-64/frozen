@@ -1,33 +1,127 @@
 /**
  * @ingroup tutorial
- * @addtogroup tutorial_basics Tutorial: overview, basic i/o, processing
+ * @addtogroup tutorial_basics Tutorial: overview
  * 
- * @section tutorial_basics_overview Overview
  *
- * To construct necessary tool frozen have many different building blocks, called backends. Backends can connect to each other and form
- * nearly any configuration, like a graph. To describe which backends would be used and where connection must exist user fill configuration
- * file. Because of "one-dimensional" property of files this is not so trivial as it could be done in GUI. So, configuration written in
- * form of "chains" - list of blocks with connections first to second, second to third and so on. Configuration file can contain any number of
- * chain with any length. To separate different chains special keyword NULL used.
- *
- * @include tutorial_example.conf 
- *
- * Note different string quotes and assignment marks.
+ * To process data, user send specially crafted request to data processing pipeline.
+ * Every pipeline consist of blocks, called "backend". Backends can connect to each other and form so called "chains". Here is
+ * example of two such chains: left one consist of "backend 1,2,3", right one have "backend 4,5,6,7". Left one is simple -
+ * it pass request sequentially from backend 1 to 2, and next to 3. Right one pass same request to backend 5,6,7 from backend 4.
  * 
- * Next, if you want to one backend have many childs, you need supply two chains: both of them would contain this backend
- * and each of them would contain one of child backends. But this backend should be named. To name backend you need to write "name"
- * parameter and unique name for it.
+ * @dot
+ * digraph chain_example {
+ *    node [shape=record, fontname=Helvetica, fontsize=10];
+ *    a [ label="backend 1"];
+ *    b [ label="backend 2"];
+ *    c [ label="backend 3"];
+ *    d [ label="backend 4"];
+ *    e [ label="backend 5"];
+ *    f [ label="backend 6"];
+ *    g [ label="backend 7"];
+ *    a -> b -> c;
+ *    d -> e;
+ *    d -> f;
+ *    d -> g;
+ * }
+ * @enddot
  *
- * Following example demonstrate "debug" backend named "mynamehere" with two childs both "stdout":
- * @include tutorial_example_twochilds.conf
+ * Users with experience in math can see here graph with nodes and edges, and this is true. You can form any graph from backends, even looped one.
  *
- * Configuration file parsed from bottom to top, so, every named objects must be already created at bottom to be used properly. Some
- * of backends can be defined at bottom of file separately, and lately used in chains. Active backends, for example cache, can't be used
- * such way because on start it is trying fill cache with underlying backend's data.
+ * Almost every backend require some configuration parameters. You can supply them in configuration file. More about configuration parameters
+ * here: @ref tutorial_configuration.
  *
- * @section tutorial_basics_exec Executing configuration
+ * Next tutorial: @ref tutorial_configuration.
+ */
+
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_configuration Tutorial: configuration
  *
- * To actually execute some configuration you should write it to configuration file and type in your shell following:
+ * @section tutorial_configuration_chain Chain configuration
+ * 
+ * To describe chain you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with
+ * some modifications.
+ * @code
+ * { <backend 1 configuration> },
+ * { <backend 2 configuration> },
+ * { <backend 3 configuration> }
+ * @endcode
+ * 
+ * This example configuration describe chain showed in @ref tutorial_basics on left side. To describe chain showed on right side we need
+ * special thing, called name tag. With this tag you name backend with unique and global name, so later you can use only this tag to
+ * refer to this backend.
+ * @code
+ * { name = "backend_4" },
+ * { <backend 5 configuration> },
+ * NULL,
+ * { name = "backend_4" },
+ * { <backend 6 configuration> },
+ * NULL,
+ * { name = "backend_4", <backend 4 configuration> },
+ * { <backend 7 configuration> }
+ * @endcode
+ * Here you can notice two things: NULL keyword and special backend 4 position.
+ *
+ * NULL keyword used to split connection between backends - if there is
+ * no NULL - backend 5 would be connected to backend 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other
+ * common representation of graphs, we don't write connections between backends explicitly. It is too uncommon to create heavily branched chains, so
+ * it is easier to split some connections, than write all of them.
+ * 
+ * Backend 4 position is special, because it located and end of file. This is required, because configuration file chains created in reverse order - from
+ * top to bottom.
+ *
+ *
+ * @section tutorial_configuration_backend Backend configuration
+ * 
+ * To configure single backend with required parameters you write all of them inside {} of backend configuration splitting by comma.
+ * @code
+ * {
+ *    name      = "some backend name",                     // single line comment
+ *    stringpar = "some string value",
+ *    intpar    = (uint_t)"12345",
+ *    otherpar  = (sometype_t)"sometype configuration string",
+ *    morepar   = (sometype_t){
+ *           value  = "more parameters",
+ *           length = (uint_t)"100",
+ *           nestedpar = (anothertype_t){
+ *                size = (uint_t)"100"
+ *           }
+ *    },
+ *    envpar    = (env_t)"somekey"
+ * }
+ * @endcode
+ * Here we have every possible parameter that can be passed to backend. There is strings, ints, special types, nested types:
+ * @li Already known name parameter is used by core to maintain global names
+ * @li String parameter, can have "\t\r\n" inside string.
+ * @li Integer parameter, here we have @ref uint_t, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify
+ * @ref uint8_t, @ref int16_t and another variations.
+ * @li Some sometype_t data, which can be initialized from string. Examples: @ref format_t, @ref hashkey_t
+ * @li Some complex sometype_t data, which can be initialized from hash. Example: @ref raw_t.
+ * @li Environment data @ref env_t. It use current request key "somekey" to obtain data. Not every backend parameter can be used in such
+ * way. Backend must use this parameter during request and not in initialization stage.
+ * 
+ * @li You can use "=", "=>", ":" as assignment.
+ * @li Double or single quoted strings, @@ or ## strings.
+ * @li C-style comments, both single and multi-line.
+ *
+ * @section tutorial_configuration_m4 Macros and m4
+ * 
+ * Because of simple nature of backends, writing complex systems become very hard. Too many backend need to chain together to achieve some
+ * feature. So, we need some macros. And very powerful thing in this field is m4. It is macro processor with simple syntax, easy to learn and
+ * easy to solve our problems. Refer to m4 manual to learn it.
+ *
+ * It have includes, dynamic macro assignment, string manipulation and nice libraries.
+ * 
+ * Prev tutorial: @ref tutorial_basics
+ * 
+ * Next tutorial: @ref tutorial_execution
+ */
+
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_execution Tutorial: starting daemon
+ *
+ * To actually execute some configuration you should type in your shell following:
  * @code
  *   $ frozend -c configuration_file.conf
  * @endcode
@@ -39,7 +133,19 @@
  *   $ cat file | frozend -c configuration_file.conf  >log_stdout
  *   $ cat file | frozend -c configuration_file.conf 2>log_stderr
  * @endcode
+ * 
+ * m4 configuration file is same, change extension to use it.
+ * @code
+ *   $ frozend -c configuration_file.m4
+ * @endcode
  *
+ * Prev tutorial: @ref tutorial_configuration
+ *
+ * Next tutorial: @ref tutorial_common
+ */
+/**
+ * @ingroup tutorial
+ * @addtogroup tutorial_common Tutorial: most used modules
  * @section tutorial_basics_input Input
  * @em Stdin
  *
@@ -143,6 +249,9 @@
  * (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file.
  * If you pick up @ref mod_backend_fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. 
  * 
+ * Prev tutorial: @ref tutorial_execution
+ *
+ * More tutorials here: @ref tutorial
  */
 
 /**
