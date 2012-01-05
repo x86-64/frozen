@@ -99,56 +99,59 @@
 <a name="l00120"></a>00120 API ssize_t         class_register          (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *proto); 
 <a name="l00121"></a>00121 API <span class="keywordtype">void</span>            class_unregister        (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *proto); 
 <a name="l00122"></a>00122 
-<a name="l00146"></a>00146 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_new             (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config);
-<a name="l00147"></a>00147 API <span class="keywordtype">void</span>            backend_acquire         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend); 
-<a name="l00148"></a>00148 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_find            (<span class="keywordtype">char</span> *name); 
-<a name="l00149"></a>00149 API <span class="keywordtype">void</span>            backend_destroy         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend); 
-<a name="l00150"></a>00150 
-<a name="l00158"></a>00158 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_clone           (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend);
-<a name="l00159"></a>00159 
-<a name="l00170"></a>00170 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_fork            (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
-<a name="l00171"></a>00171 
-<a name="l00172"></a>00172 API ssize_t         backend_query           (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
-<a name="l00173"></a>00173 API ssize_t         backend_fast_query      (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <span class="keywordtype">void</span> *args); 
-<a name="l00174"></a>00174 
-<a name="l00175"></a>00175 API ssize_t         backend_pass            (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
-<a name="l00176"></a>00176 API ssize_t         backend_fast_pass       (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <span class="keywordtype">void</span> *args); 
-<a name="l00177"></a>00177 
-<a name="l00178"></a>00178 API <span class="keywordtype">void</span>            backend_connect         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *child); 
-<a name="l00179"></a>00179 API <span class="keywordtype">void</span>            backend_disconnect      (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *child); 
-<a name="l00180"></a>00180 API <span class="keywordtype">void</span>            backend_insert          (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *new_child); 
-<a name="l00181"></a>00181 API <span class="keywordtype">void</span>            backend_add_terminators (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structlist.html">list</a> *terminators); 
-<a name="l00182"></a>00182 
-<a name="l00183"></a>00183     ssize_t         frozen_backend_init     (<span class="keywordtype">void</span>);
-<a name="l00184"></a>00184     <span class="keywordtype">void</span>            frozen_backend_destroy  (<span class="keywordtype">void</span>);
-<a name="l00185"></a>00185 
-<a name="l00186"></a>00186     data_functions  request_str_to_action   (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>);
+<a name="l00123"></a>00123 API <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *        request_get_current(<span class="keywordtype">void</span>); 
+<a name="l00124"></a>00124 
+<a name="l00148"></a>00148 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_new             (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config);
+<a name="l00149"></a>00149 API <span class="keywordtype">void</span>            backend_acquire         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend); 
+<a name="l00150"></a>00150 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_find            (<span class="keywordtype">char</span> *name); 
+<a name="l00151"></a>00151 API <span class="keywordtype">void</span>            backend_destroy         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend); 
+<a name="l00152"></a>00152 
+<a name="l00160"></a>00160 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_clone           (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend);
+<a name="l00161"></a>00161 
+<a name="l00172"></a>00172 API <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *     backend_fork            (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174 API ssize_t         backend_query           (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
+<a name="l00175"></a>00175 API ssize_t         backend_fast_query      (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <span class="keywordtype">void</span> *args); 
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177 API ssize_t         backend_pass            (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
+<a name="l00178"></a>00178 API ssize_t         backend_fast_pass       (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <span class="keywordtype">void</span> *args); 
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180 API <span class="keywordtype">void</span>            backend_connect         (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *child); 
+<a name="l00181"></a>00181 API <span class="keywordtype">void</span>            backend_disconnect      (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *child); 
+<a name="l00182"></a>00182 API <span class="keywordtype">void</span>            backend_insert          (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *parent, <a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *new_child); 
+<a name="l00183"></a>00183 API <span class="keywordtype">void</span>            backend_add_terminators (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *backend, <a class="code" href="structlist.html">list</a> *terminators); 
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185     ssize_t         frozen_backend_init     (<span class="keywordtype">void</span>);
+<a name="l00186"></a>00186     <span class="keywordtype">void</span>            frozen_backend_destroy  (<span class="keywordtype">void</span>);
 <a name="l00187"></a>00187 
-<a name="l00188"></a>00188 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
+<a name="l00188"></a>00188     data_functions  request_str_to_action   (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>);
 <a name="l00189"></a>00189 
-<a name="l00190"></a>00190 <span class="comment">// Thread-specific userdata functions</span>
-<a name="l00191"></a><a class="code" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4">00191</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (void);          
-<a name="l00192"></a><a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">00192</a> <span class="keyword">typedef</span> void     (*<a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a>)   (<span class="keywordtype">void</span> *);        
-<a name="l00193"></a>00193 
-<a name="l00195"></a><a class="code" href="structthread__data__ctx__t.html">00195</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
-<a name="l00196"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00196</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
-<a name="l00197"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00197</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
-<a name="l00198"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00198</a>         <a class="code" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4" title="Thread-specific data constructor.">f_thread_create</a>        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
-<a name="l00199"></a>00199 } <a class="code" href="backend_8h.html#a8305ea7d017c23448a8f2226f07176d9" title="Thread data context.">thread_data_ctx_t</a>;
-<a name="l00200"></a>00200 
-<a name="l00208"></a>00208 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, <a class="code" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4" title="Thread-specific data constructor.">f_thread_create</a> func_create, <a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a> func_destroy);
-<a name="l00209"></a>00209 
-<a name="l00213"></a>00213 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00214"></a>00214 
-<a name="l00219"></a>00219 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00220"></a>00220 
-<a name="l00221"></a>00221 <span class="preprocessor">#endif // BACKEND_H</span>
+<a name="l00190"></a>00190 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
+<a name="l00191"></a>00191 
+<a name="l00192"></a>00192 <span class="comment">// Thread-specific userdata functions</span>
+<a name="l00193"></a><a class="code" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38">00193</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (<span class="keywordtype">void</span> *);        
+<a name="l00194"></a><a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">00194</a> <span class="keyword">typedef</span> void     (*<a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a>)   (<span class="keywordtype">void</span> *);        
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="structthread__data__ctx__t.html">00197</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
+<a name="l00198"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00198</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
+<a name="l00199"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00199</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
+<a name="l00200"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00200</a>         <a class="code" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a>        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
+<a name="l00201"></a><a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834">00201</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834" title="User data.">userdata</a>;                
+<a name="l00202"></a>00202 } <a class="code" href="backend_8h.html#a8305ea7d017c23448a8f2226f07176d9" title="Thread data context.">thread_data_ctx_t</a>;
+<a name="l00203"></a>00203 
+<a name="l00212"></a>00212 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, <a class="code" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a> func_create, <a class="code" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a> func_destroy, <span class="keywordtype">void</span> *userdata);
+<a name="l00213"></a>00213 
+<a name="l00217"></a>00217 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00218"></a>00218 
+<a name="l00223"></a>00223 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225 <span class="preprocessor">#endif // BACKEND_H</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 4 2012 16:10:49 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Jan 5 2012 20:16:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

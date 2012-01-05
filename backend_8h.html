@@ -83,8 +83,8 @@ typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" h
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2789ce85c146dee49c43c8605509a5eb"></a><!-- doxytag: member="backend.h::f_destroy" ref="a2789ce85c146dee49c43c8605509a5eb" args=")(backend_t *)" -->
 typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#a2789ce85c146dee49c43c8605509a5eb">f_destroy</a> )(<a class="el" href="structbackend__t.html">backend_t</a> *)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy function for backend. Free all allocated resources here. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a20d7f3894718d692baed4f7f318798d4"></a><!-- doxytag: member="backend.h::f_thread_create" ref="a20d7f3894718d692baed4f7f318798d4" args=")(void)" -->
-typedef void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4">f_thread_create</a> )(void)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a32fea2034c914567993e916e5f5cfb38"></a><!-- doxytag: member="backend.h::f_thread_create" ref="a32fea2034c914567993e916e5f5cfb38" args=")(void *)" -->
+typedef void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38">f_thread_create</a> )(void *)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-specific data constructor. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afdf36ae91ac2f85c25080ae29a9cd627"></a><!-- doxytag: member="backend.h::f_thread_destroy" ref="afdf36ae91ac2f85c25080ae29a9cd627" args=")(void *)" -->
 typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">f_thread_destroy</a> )(void *)</td></tr>
@@ -100,6 +100,9 @@ API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae77409724fca309e3d3342efd2033c40"></a><!-- doxytag: member="backend.h::class_unregister" ref="ae77409724fca309e3d3342efd2033c40" args="(backend_t *proto)" -->
 API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#ae77409724fca309e3d3342efd2033c40">class_unregister</a> (<a class="el" href="structbackend__t.html">backend_t</a> *proto)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregister dynamic class. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae6fe5195e120048429c5643a39644dd9"></a><!-- doxytag: member="backend.h::request_get_current" ref="ae6fe5195e120048429c5643a39644dd9" args="(void)" -->
+API <a class="el" href="structhash__t.html">request_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#ae6fe5195e120048429c5643a39644dd9">request_get_current</a> (void)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current request. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">API <a class="el" href="structbackend__t.html">backend_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#aa27659bc6fafedca7f7473f5795fc63d">backend_new</a> (<a class="el" href="structhash__t.html">hash_t</a> *config)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Create new backend.  <a href="#aa27659bc6fafedca7f7473f5795fc63d"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acc9910b3cf066012707668ac12995480"></a><!-- doxytag: member="backend.h::backend_acquire" ref="acc9910b3cf066012707668ac12995480" args="(backend_t *backend)" -->
@@ -143,7 +146,7 @@ ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>frozen_backend_ini
 void&#160;</td><td class="memItemRight" valign="bottom"><b>frozen_backend_destroy</b> (void)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a12c3b51d2d7804902f1783c3889121cb"></a><!-- doxytag: member="backend.h::request_str_to_action" ref="a12c3b51d2d7804902f1783c3889121cb" args="(char *string)" -->
 data_functions&#160;</td><td class="memItemRight" valign="bottom"><b>request_str_to_action</b> (char *string)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#af2f0f5c6e7704e4901d5f2f63022d500">thread_data_init</a> (<a class="el" href="structthread__data__ctx__t.html">thread_data_ctx_t</a> *thread_data, <a class="el" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4">f_thread_create</a> func_create, <a class="el" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">f_thread_destroy</a> func_destroy)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#a440c246f2c7fd25b456a14653a1da608">thread_data_init</a> (<a class="el" href="structthread__data__ctx__t.html">thread_data_ctx_t</a> *thread_data, <a class="el" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38">f_thread_create</a> func_create, <a class="el" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">f_thread_destroy</a> func_destroy, void *userdata)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#a02c5a975d14fa9c96d11933895b9a803">thread_data_destroy</a> (<a class="el" href="structthread__data__ctx__t.html">thread_data_ctx_t</a> *thread_data)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="backend_8h.html#af2f90af439bc74e74befeb4bd398c914">thread_data_get</a> (<a class="el" href="structthread__data__ctx__t.html">thread_data_ctx_t</a> *thread_data)</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
@@ -386,7 +389,7 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 
 </div>
 </div>
-<a class="anchor" id="af2f0f5c6e7704e4901d5f2f63022d500"></a><!-- doxytag: member="backend.h::thread_data_init" ref="af2f0f5c6e7704e4901d5f2f63022d500" args="(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy)" -->
+<a class="anchor" id="a440c246f2c7fd25b456a14653a1da608"></a><!-- doxytag: member="backend.h::thread_data_init" ref="a440c246f2c7fd25b456a14653a1da608" args="(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -399,14 +402,20 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="backend_8h.html#a20d7f3894718d692baed4f7f318798d4">f_thread_create</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="backend_8h.html#a32fea2034c914567993e916e5f5cfb38">f_thread_create</a>&#160;</td>
           <td class="paramname"><em>func_create</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="backend_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">f_thread_destroy</a>&#160;</td>
-          <td class="paramname"><em>func_destroy</em>&#160;</td>
+          <td class="paramname"><em>func_destroy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userdata</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -422,6 +431,7 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
     <tr><td class="paramname">thread_data</td><td>Context. Prefer to store it in backend's userdata </td></tr>
     <tr><td class="paramname">func_create</td><td>Constructor function for thread-specific data </td></tr>
     <tr><td class="paramname">func_destroy</td><td>Destructor function for thread-specific data </td></tr>
+    <tr><td class="paramname">userdata</td><td>User data </td></tr>
   </table>
   </dd>
 </dl>
@@ -439,7 +449,7 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 4 2012 16:10:49 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Jan 5 2012 20:16:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

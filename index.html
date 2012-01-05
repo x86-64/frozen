@@ -51,8 +51,8 @@
 <div class="contents">
 <div class="textblock"><h2><a class="anchor" id="intro"></a>
 Introduction</h2>
-<p>Frozen is data processing daemon driven by configuration files. It contain several modules for input, output and data processing. It can be used to construct your own database, simple web server, data collector, logger and so on.</p>
-<p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places. If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared library - it is very likely to work properly.</p>
+<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data for web or local clients.</p>
+<p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places. If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.</p>
 <h2><a class="anchor" id="caps"></a>
 Capabilities</h2>
 <ul>
@@ -78,10 +78,6 @@ Rationale</h2>
 <li>Configure every aspect</li>
 </ul>
 <p>Big configs filled with comments to every "max_recv_buffer_size" and alike drives people crazy. There is no image of how the hell this thing working, and which parameter belong to which part of software. And this lead to bad configuration and resource wasting.</p>
-<ul>
-<li>Reduce communication within single machine</li>
-</ul>
-<p>To setup a web server we need to install many different components: database, server, may be some cache, balancer, fastcgi handlers and so on. And every part must be connected somehow. But any connection introduce significant latency and limit performance of overall system. So, if there is only one physical machine, why bother with it? Lets join all components to one process. Simple call within process is best available to world communication channel, it is fast and simple.</p>
 <h2><a class="anchor" id="links"></a>
 Useful links</h2>
 <ul>
@@ -95,7 +91,7 @@ Useful links</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jan 4 2012 16:10:49 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Jan 5 2012 20:16:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
