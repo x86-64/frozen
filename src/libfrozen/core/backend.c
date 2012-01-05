@@ -8,6 +8,7 @@ static list                    backends_top   = LIST_INITIALIZER;
 static list                    backends_names = LIST_INITIALIZER;
 static pthread_mutex_t         refs_mtx       = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t                destroy_mtx;
+pthread_key_t                  key_curr_request;
 
 typedef struct backend_new_ctx {
 	list                   backends;
@@ -67,6 +68,10 @@ ssize_t            class_register          (backend_t *proto){ // {{{
 } // }}}
 void               class_unregister        (backend_t *proto){ // {{{
 	list_delete(&classes, proto);
+} // }}}
+
+request_t *        request_get_current(void){ // {{{
+	return (request_t *)pthread_getspecific(key_curr_request);
 } // }}}
 
 ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
@@ -413,6 +418,9 @@ ssize_t            frozen_backend_init(void){ // {{{
 	
 	pthread_mutexattr_destroy(&attr);
 	
+	if(pthread_key_create(&key_curr_request, NULL) != 0)
+		return -EFAULT;
+	
 	return 0;
 } // }}}
 void               frozen_backend_destroy(void){ // {{{
@@ -425,6 +433,7 @@ void               frozen_backend_destroy(void){ // {{{
 	list_destroy(&backends_names);
 	
 	pthread_mutex_destroy(&destroy_mtx);
+	pthread_key_delete(key_curr_request);
 } // }}}
 
 backend_t *     backend_new          (hash_t *config){ // {{{
@@ -567,6 +576,8 @@ ssize_t         backend_query        (backend_t *backend, request_t *request){ /
 		ret = backend_pass(backend, request);
 		goto exit;
 	}
+	
+	pthread_setspecific(key_curr_request, request);
 	
 	ret = func(backend, request);
 	

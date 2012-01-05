@@ -120,6 +120,8 @@ struct backend_t {
 API ssize_t         class_register          (backend_t *proto); ///< Register new dynamic class
 API void            class_unregister        (backend_t *proto); ///< Unregister dynamic class
 
+API request_t *        request_get_current(void); ///< Get current request
+
 /** @brief Create new backend.
  *
  *  Configuration is hash with items in reverse order. For example:
