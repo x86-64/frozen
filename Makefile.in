@@ -116,6 +116,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/buffer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \

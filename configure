@@ -863,6 +863,7 @@ enable_uint32_t
 enable_uint64_t
 enable_counter_t
 enable_emitter_t
+enable_env_t
 enable_random_t
 enable_buffer_t
 enable_memory_t
@@ -1659,6 +1660,7 @@ Optional Features:
                           disable data counter_t
   --disable-data-emitter_t
                           disable data emitter_t
+  --disable-data-env_t    disable data env_t
   --disable-data-random_t disable data random_t
   --disable-data-buffer_t disable data buffer_t
   --disable-data-memory_t disable data memory_t
@@ -20850,6 +20852,43 @@ fi
 		DATA_MAKEFILE_special_emitter=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/emitter/libfrozen_data_emitter.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-env_t was given.
+if test "${enable_env_t+set}" = set; then :
+  enableval=$enable_env_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_env_t}" = "yes"; then
+			enable_env_t="no"
+		else
+			enable_env_t="yes"
+		fi
+	fi
+
+	if test "${enable_env_t}" = "yes"; then
+		DATA_DIR_env_t="special/env"
+		DATA_DEP_env_t=""
+		DATA_ID_env_t="31"
+		DATA_SELECTED="$DATA_SELECTED env_t"
+		DATA_HEADERS="$DATA_HEADERS special/env/env_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_special_env" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/special/env/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS special/env"
+
+		DATA_MAKEFILE_special_env=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/env/libfrozen_data_env.la"
 
 	fi
 

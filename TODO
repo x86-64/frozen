@@ -10,7 +10,6 @@
 - data 'timerange_t'
 - string_t, raw_t write functions
 
-- "magic" request_key_t data
 - simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 
 - fix broken slice_t hash_dump's
