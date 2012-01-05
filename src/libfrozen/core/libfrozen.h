@@ -20,8 +20,16 @@
 #endif
 
 /* Standart libraries */
+
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -36,15 +44,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <inttypes.h>
-
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif
 
 #ifndef alloca
 
@@ -84,7 +83,6 @@ void *alloca (size_t);
 #include <configs/config.h>
 #include <enums.h>
 #include <list.h>
-#include <buffer.h>
 
 #include <api.h>
 #include <data.h>

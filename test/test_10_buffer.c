@@ -43,9 +43,9 @@ START_TEST (test_buffer){
 	
 	// TODO check chunked buffers
 	
-	fail_unless( buffer_memcmp(&data1_buffer, 0, &data2_buffer, 0, 4) == 0, "buffer_memcmp failed (test <=> test)");
-	fail_unless( buffer_memcmp(&data1_buffer, 8, &data2_buffer, 4, 4) == 0, "buffer_memcmp failed (tezt <=> tezt)");
-	fail_unless( buffer_memcmp(&data1_buffer, 4, &data2_buffer, 8, 4) != 0, "buffer_memcmp failed (1234 <=> 5678)");
+	//fail_unless( buffer_memcmp(&data1_buffer, 0, &data2_buffer, 0, 4) == 0, "buffer_memcmp failed (test <=> test)");
+	//fail_unless( buffer_memcmp(&data1_buffer, 8, &data2_buffer, 4, 4) == 0, "buffer_memcmp failed (tezt <=> tezt)");
+	//fail_unless( buffer_memcmp(&data1_buffer, 4, &data2_buffer, 8, 4) != 0, "buffer_memcmp failed (1234 <=> 5678)");
 	
 	buffer_destroy(&data1_buffer);
 	buffer_destroy(&data2_buffer);

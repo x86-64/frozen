@@ -131,7 +131,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
 	libfrozen_core_la-api.lo libfrozen_core_la-errors.lo \
 	libfrozen_core_la-data.lo libfrozen_core_la-list.lo \
-	libfrozen_core_la-buffer.lo libfrozen_core_la-backend.lo \
+	libfrozen_core_la-backend.lo \
 	configs/libfrozen_core_la-config_parser.tab.lo \
 	configs/libfrozen_core_la-config_parser.lex.lo
 libfrozen_core_la_OBJECTS = $(am_libfrozen_core_la_OBJECTS)
@@ -340,14 +340,13 @@ libfrozen_core_la_SOURCES = \
 			errors.c                             \
 			data.c                               \
 			list.c                               \
-                        buffer.c                             \
                         backend.c                            \
                         configs/config_parser.tab.c          \
                         configs/config_parser.lex.c
 
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
 headers_confdir = $(headersdir)/configs/
-headers_HEADERS = libfrozen.h api.h errors.h data.h list.h buffer.h backend.h public.h enums.h data_selected.h backend_selected.h
+headers_HEADERS = libfrozen.h api.h errors.h data.h list.h backend.h public.h enums.h data_selected.h backend_selected.h
 headers_conf_HEADERS = configs/config.h
 CLEANFILES = \
 		configs/config_parser.tab.c                            \
@@ -422,7 +421,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-backend.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-buffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-libfrozen.Plo@am__quote@
@@ -488,13 +486,6 @@ libfrozen_core_la-list.lo: list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='list.c' object='libfrozen_core_la-list.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-
-libfrozen_core_la-buffer.lo: buffer.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-buffer.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-buffer.Tpo -c -o libfrozen_core_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-buffer.Tpo $(DEPDIR)/libfrozen_core_la-buffer.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='buffer.c' object='libfrozen_core_la-buffer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-buffer.lo `test -f 'buffer.c' || echo '$(srcdir)/'`buffer.c
 
 libfrozen_core_la-backend.lo: backend.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-backend.Tpo -c -o libfrozen_core_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c

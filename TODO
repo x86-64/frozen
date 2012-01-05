@@ -1,7 +1,8 @@
-- review buffer_t, write create function
 - backend 'storage/array' or 'storage/record'?
 - backend 'storage/memory'
 - backend 'data/buffer'
+
+- buffer_t resize action
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'

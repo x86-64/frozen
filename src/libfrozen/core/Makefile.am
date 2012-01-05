@@ -13,7 +13,6 @@ libfrozen_core_la_SOURCES=                                   \
 			errors.c                             \
 			data.c                               \
 			list.c                               \
-                        buffer.c                             \
                         backend.c                            \
                         configs/config_parser.tab.c          \
                         configs/config_parser.lex.c
@@ -21,7 +20,7 @@ libfrozen_core_la_SOURCES=                                   \
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
 
 headers_confdir=$(headersdir)/configs/
-headers_HEADERS=libfrozen.h api.h errors.h data.h list.h buffer.h backend.h public.h enums.h data_selected.h backend_selected.h
+headers_HEADERS=libfrozen.h api.h errors.h data.h list.h backend.h public.h enums.h data_selected.h backend_selected.h
 headers_conf_HEADERS=configs/config.h
 
 configs/config_parser.tab.c: configs/config_parser.lex.c
