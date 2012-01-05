@@ -20,6 +20,8 @@
 
 #include <enum/hashkey/hashkeys.h>
 
+#define HK(value)         HK_VALUE_##value   ///< Shortcut for registed hash keys. Also used in key registration process.
+
 #define DATA_HASHKEYT(...)  { TYPE_HASHKEYT, (hashkey_t []){ __VA_ARGS__ } }
 #define DATA_PTR_HASHKEYT(...)  { TYPE_HASHKEYT, __VA_ARGS__ }
 #define DEREF_TYPE_HASHKEYT(_data) *(hashkey_t *)((_data)->ptr)
