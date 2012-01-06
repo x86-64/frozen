@@ -62,7 +62,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/wrapper/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
@@ -82,6 +81,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/console/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/io/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/tcp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/assign/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \

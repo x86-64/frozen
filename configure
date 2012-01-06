@@ -793,7 +793,6 @@ enable_backendrebuild_reader
 enable_backendwrapper
 enable_backendcache
 enable_backendcache_append
-enable_backendipc
 enable_backendkill
 enable_backendthread
 enable_backendallocator
@@ -819,6 +818,7 @@ enable_backendstdin
 enable_backendstdout
 enable_backendstderr
 enable_backendfuse
+enable_backendipc
 enable_backendtcp
 enable_backendtcp_child
 enable_backendassign
@@ -1554,7 +1554,6 @@ Optional Features:
   --disable-backend-cache disable backend cache
   --disable-backend-cache-append
                           disable backend cache-append
-  --disable-backend-ipc   disable backend ipc
   --disable-backend-kill  disable backend kill
   --disable-backend-thread
                           disable backend thread
@@ -1597,6 +1596,7 @@ Optional Features:
   --disable-backend-stderr
                           disable backend stderr
   --disable-backend-fuse  disable backend fuse
+  --disable-backend-ipc   disable backend ipc
   --disable-backend-tcp   disable backend tcp
   --disable-backend-tcp-child
                           disable backend tcp-child
@@ -18285,43 +18285,6 @@ fi
 
 
 
-	# Check whether --enable-backendipc was given.
-if test "${enable_backendipc+set}" = set; then :
-  enableval=$enable_backendipc;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendipc}" = "yes"; then
-			enable_backendipc="no"
-		else
-			enable_backendipc="yes"
-		fi
-	fi
-
-	if test "${enable_backendipc}" = "yes"; then
-		BACKEND_DIR_ipc="communication/ipc"
-		BACKEND_DEP_ipc=""
-				BACKEND_SELECTED="$BACKEND_SELECTED ipc"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_communication_ipc" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/communication/ipc/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS communication/ipc"
-
-		BACKEND_MAKEFILE_communication_ipc=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED communication/ipc/libfrozen_backend_ipc.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-backendkill was given.
 if test "${enable_backendkill+set}" = set; then :
   enableval=$enable_backendkill;
@@ -19239,6 +19202,43 @@ fi
 
 
 fi
+
+
+
+
+
+
+	# Check whether --enable-backendipc was given.
+if test "${enable_backendipc+set}" = set; then :
+  enableval=$enable_backendipc;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendipc}" = "yes"; then
+			enable_backendipc="no"
+		else
+			enable_backendipc="yes"
+		fi
+	fi
+
+	if test "${enable_backendipc}" = "yes"; then
+		BACKEND_DIR_ipc="io/ipc"
+		BACKEND_DEP_ipc=""
+				BACKEND_SELECTED="$BACKEND_SELECTED ipc"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_io_ipc" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/ipc/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/ipc"
+
+		BACKEND_MAKEFILE_io_ipc=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/ipc/libfrozen_backend_ipc.la"
+
+	fi
+
 
 
 

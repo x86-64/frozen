@@ -1,9 +1,21 @@
 /**
  * @ingroup tutorial
- * @addtogroup tutorial_basics Tutorial: overview
+ * @addtogroup tutorial_basics Tutorial: what is frozen?
  * 
+ * @section intro Introduction
  *
- * To process data, user send specially crafted request to data processing pipeline.
+ *    Frozen is data processing daemon. It contain several modules for input, output and data processing.
+ *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
+ *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data
+ *    for web or local clients.
+ *
+ *    Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
+ *    If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
+ *    library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.
+ * 
+ * @section architecture How it works?
+ *
+ * To process some data, user send specially crafted request to data processing pipeline.
  * Every pipeline consist of blocks, called "backend". Backends can connect to each other and form so called "chains". Here is
  * example of two such chains: left one consist of "backend 1,2,3", right one have "backend 4,5,6,7". Left one is simple -
  * it pass request sequentially from backend 1 to 2, and next to 3. Right one pass same request to backend 5,6,7 from backend 4.
@@ -32,7 +44,6 @@
  *
  * Next tutorial: @ref tutorial_configuration.
  */
-
 /**
  * @ingroup tutorial
  * @addtogroup tutorial_configuration Tutorial: configuration

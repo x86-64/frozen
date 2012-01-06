@@ -84,7 +84,7 @@ static ssize_t ipc_backend_query(backend_t *backend, request_t *request){ // {{{
 } // }}}
 
 backend_t ipc_proto = {
-	.class          = "communication/ipc",
+	.class          = "io/ipc",
 	.supported_api  = API_HASH,
 	.func_init      = &ipc_init,
 	.func_configure = &ipc_configure,
