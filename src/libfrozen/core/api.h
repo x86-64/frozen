@@ -158,7 +158,10 @@ typedef enum data_functions {
 	ACTION_TRANSFER,
 	ACTION_COPY,
 	ACTION_IS_NULL,
-
+	
+	ACTION_PUSH,
+	ACTION_POP,
+	
 	ACTION_GETDATAPTR,
 
 	ACTION_INVALID
@@ -289,6 +292,17 @@ typedef struct fastcall_count {
 	uintmax_t              nelements;
 } fastcall_count;
 
+typedef struct fastcall_push {
+	fastcall_header        header;
+	void                  *buffer;
+	uintmax_t              buffer_size;
+} fastcall_push;
+
+typedef struct fastcall_pop {
+	fastcall_header        header;
+	void                  *buffer;
+	uintmax_t              buffer_size;
+} fastcall_pop;
 
 extern uintmax_t fastcall_nargs[];
 
