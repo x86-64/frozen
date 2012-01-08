@@ -141,6 +141,7 @@ typedef enum data_functions {
 	ACTION_START,
 	ACTION_STOP,
 	ACTION_ALLOC,
+	ACTION_RESIZE,
 	ACTION_FREE,
 	ACTION_PHYSICALLEN,
 	ACTION_LOGICALLEN,
@@ -192,6 +193,11 @@ typedef struct fastcall_alloc {
 	fastcall_header        header;
 	uintmax_t              length;
 } fastcall_alloc;
+
+typedef struct fastcall_resize {
+	fastcall_header        header;
+	uintmax_t              length;
+} fastcall_resize;
 
 typedef struct fastcall_free {
 	fastcall_header        header;
