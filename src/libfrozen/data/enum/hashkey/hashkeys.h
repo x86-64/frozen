@@ -78,6 +78,7 @@
 #define HK_VALUE_index 6061
 #define HK_VALUE_input 6325
 #define HK_VALUE_insert 10222
+#define HK_VALUE_item_sample 53559
 #define HK_VALUE_item_size 30871
 #define HK_VALUE_items 6097
 #define HK_VALUE_key 1600
@@ -244,6 +245,7 @@ typedef enum hashkey_t {
       HK_index = HK_VALUE_index, 
       HK_input = HK_VALUE_input, 
       HK_insert = HK_VALUE_insert, 
+      HK_item_sample = HK_VALUE_item_sample, 
       HK_item_size = HK_VALUE_item_size, 
       HK_items = HK_VALUE_items, 
       HK_key = HK_VALUE_key, 
@@ -414,6 +416,7 @@ keypair_t hashkeys[] = {
       { "index", HK_VALUE_index }, 
       { "input", HK_VALUE_input }, 
       { "insert", HK_VALUE_insert }, 
+      { "item_sample", HK_VALUE_item_sample }, 
       { "item_size", HK_VALUE_item_size }, 
       { "items", HK_VALUE_items }, 
       { "key", HK_VALUE_key }, 

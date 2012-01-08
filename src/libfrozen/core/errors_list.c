@@ -4,6 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -204897, "src/libfrozen/backends/allocator/fixed/fixed.c: bad underlying storage" },
+ { -204892, "src/libfrozen/backends/allocator/fixed/fixed.c: bad item size" },
+ { -204887, "src/libfrozen/backends/allocator/fixed/fixed.c: bad item_sample" },
+ { -204883, "src/libfrozen/backends/allocator/fixed/fixed.c: no item_size nor item_sample supplied" },
+ { -204861, "src/libfrozen/backends/allocator/fixed/fixed.c: calloc failed" },
  { -200816, "src/libfrozen/backends/backend/wrapper/wrapper.c: no data in request" },
  { -200796, "src/libfrozen/backends/backend/wrapper/wrapper.c: can not create terminator backend" },
  { -200791, "src/libfrozen/backends/backend/wrapper/wrapper.c: backend config not supplied or invalid" },

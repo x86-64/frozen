@@ -782,6 +782,7 @@ enable_moduledata_null_t
 enable_moduledata_time_t
 enable_modulego_http
 enable_modulego_template
+enable_backendfixed
 enable_backendbenchmark
 enable_backendcall
 enable_backendend
@@ -1537,6 +1538,7 @@ Optional Features:
                           disable module go-http
   --disable-module-go-template
                           disable module go-template
+  --disable-backend-fixed disable backend fixed
   --disable-backend-benchmark
                           disable backend benchmark
   --disable-backend-call  disable backend call
@@ -17871,6 +17873,43 @@ fi
 		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_template"
 
 		MODULE_MAKEFILE_go_template=yes
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-backendfixed was given.
+if test "${enable_backendfixed+set}" = set; then :
+  enableval=$enable_backendfixed;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_backendfixed}" = "yes"; then
+			enable_backendfixed="no"
+		else
+			enable_backendfixed="yes"
+		fi
+	fi
+
+	if test "${enable_backendfixed}" = "yes"; then
+		BACKEND_DIR_fixed="allocator/fixed"
+		BACKEND_DEP_fixed=""
+				BACKEND_SELECTED="$BACKEND_SELECTED fixed"
+
+			fi
+
+	if test "$BACKEND_MAKEFILE_allocator_fixed" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/allocator/fixed/Makefile"
+		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS allocator/fixed"
+
+		BACKEND_MAKEFILE_allocator_fixed=yes
+
+		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED allocator/fixed/libfrozen_backend_fixed.la"
+
 	fi
 
 

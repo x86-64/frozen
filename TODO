@@ -1,4 +1,4 @@
-- backend 'storage/array' or 'storage/record'?
+- join physical and logical length into one
 - backend 'storage/memory'
 - backend 'data/buffer'
 
