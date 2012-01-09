@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>frozen: data/list</title>
+<title>frozen: allocator/list</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -46,25 +46,27 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">data/list</div>  </div>
+<div class="title">allocator/list</div>  </div>
 <div class="ingroups"><a class="el" href="group__backend.html">Backends</a></div></div>
 <div class="contents">
 
 
-<h3><a class="anchor" id="page_list_info"></a>Description</h3><div class="textblock"><p>This backend simulate list of values. On writing item to &lt;offset&gt; it move all values from &lt;offset&gt; to &lt;offset&gt;+1. On delete it do reverse operation.</p>
-<p>User request must have HK(insert) set for this.</p>
-<p>This module works in pair with "insert_sort" to provide clean inserts to file. This module move data on 1 (one) unit - use "incapsulate" to move for valid length. </p>
+<h3><a class="anchor" id="page_list_info"></a>Description</h3><div class="textblock"><p>This backend allocate and delete items from storage* backends or from clean datatypes. Data kept in form of list. Items can change their id's after delete actions.</p>
+<p>This backend support PUSH/POP api set. </p>
 </div>
 
 <h3><a class="anchor" id="page_list_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> {
-              <span class="keyword">class                   </span>= &quot;data/<a class="code" href="structlist.html">list</a>&quot;,
+              <span class="keyword">class                   </span>= &quot;allocator/<a class="code" href="structlist.html">list</a>&quot;,
+              item_size               = (uint_t)<span class="stringliteral">&#39;10&#39;</span>,       # specify size directly             OR
+              item_sample             = (sometype_t)<span class="stringliteral">&#39;&#39;</span>,     # sample item <span class="keywordflow">for</span> size estimation
+
  }
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 5 2012 20:47:32 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Mon Jan 9 2012 14:22:48 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

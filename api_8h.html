@@ -69,6 +69,7 @@ Data Structures</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__io.html">fastcall_io</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__len.html">fastcall_len</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__alloc.html">fastcall_alloc</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__resize.html">fastcall_resize</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__free.html">fastcall_free</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__execute.html">fastcall_execute</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__start.html">fastcall_start</a></td></tr>
@@ -87,6 +88,8 @@ Data Structures</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__delete.html">fastcall_delete</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__move.html">fastcall_move</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__count.html">fastcall_count</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__push.html">fastcall_push</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__pop.html">fastcall_pop</a></td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7404e11ee62f218dd5cf67817996d4f0"></a><!-- doxytag: member="api.h::api_types" ref="a7404e11ee62f218dd5cf67817996d4f0" args="" -->
@@ -113,6 +116,8 @@ typedef struct <a class="el" href="structfastcall__len.html">fastcall_len</a>&#1
 typedef struct <a class="el" href="structfastcall__len.html">fastcall_len</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_logicallen</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e4394752ea90c18266c7ffd0e161ce7"></a><!-- doxytag: member="api.h::fastcall_alloc" ref="a6e4394752ea90c18266c7ffd0e161ce7" args="" -->
 typedef struct <a class="el" href="structfastcall__alloc.html">fastcall_alloc</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_alloc</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a830a8c12e1555b0d3ddc7d10ab7df641"></a><!-- doxytag: member="api.h::fastcall_resize" ref="a830a8c12e1555b0d3ddc7d10ab7df641" args="" -->
+typedef struct <a class="el" href="structfastcall__resize.html">fastcall_resize</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_resize</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a553805b65d02b5813961a4c5437ac38c"></a><!-- doxytag: member="api.h::fastcall_free" ref="a553805b65d02b5813961a4c5437ac38c" args="" -->
 typedef struct <a class="el" href="structfastcall__free.html">fastcall_free</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_free</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abdba2c8b9ba60f6708e59ef329ed2b05"></a><!-- doxytag: member="api.h::fastcall_execute" ref="abdba2c8b9ba60f6708e59ef329ed2b05" args="" -->
@@ -165,6 +170,10 @@ typedef struct <a class="el" href="structfastcall__delete.html">fastcall_delete<
 typedef struct <a class="el" href="structfastcall__move.html">fastcall_move</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_move</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae330a106b87b42dfd20b2434f1a6a499"></a><!-- doxytag: member="api.h::fastcall_count" ref="ae330a106b87b42dfd20b2434f1a6a499" args="" -->
 typedef struct <a class="el" href="structfastcall__count.html">fastcall_count</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_count</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a208a6da1f6af0dc98dad9fe96ba944d0"></a><!-- doxytag: member="api.h::fastcall_push" ref="a208a6da1f6af0dc98dad9fe96ba944d0" args="" -->
+typedef struct <a class="el" href="structfastcall__push.html">fastcall_push</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_push</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe808ea29bb6451ed0618f3bcc92763f"></a><!-- doxytag: member="api.h::fastcall_pop" ref="abe808ea29bb6451ed0618f3bcc92763f" args="" -->
+typedef struct <a class="el" href="structfastcall__pop.html">fastcall_pop</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_pop</b></td></tr>
 <tr><td colspan="2"><h2><a name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>api_types</b> { <b>API_HASH</b> =  1, 
@@ -184,30 +193,33 @@ Enumerations</h2></td></tr>
 <br/>
 &#160;&#160;<b>ACTION_STOP</b>, 
 <b>ACTION_ALLOC</b>, 
+<b>ACTION_RESIZE</b>, 
 <b>ACTION_FREE</b>, 
-<b>ACTION_PHYSICALLEN</b>, 
 <br/>
-&#160;&#160;<b>ACTION_LOGICALLEN</b>, 
+&#160;&#160;<b>ACTION_PHYSICALLEN</b>, 
+<b>ACTION_LOGICALLEN</b>, 
 <b>ACTION_COMPARE</b>, 
 <b>ACTION_INCREMENT</b>, 
-<b>ACTION_DECREMENT</b>, 
 <br/>
-&#160;&#160;<b>ACTION_ADD</b>, 
+&#160;&#160;<b>ACTION_DECREMENT</b>, 
+<b>ACTION_ADD</b>, 
 <b>ACTION_SUB</b>, 
 <b>ACTION_MULTIPLY</b>, 
-<b>ACTION_DIVIDE</b>, 
 <br/>
-&#160;&#160;<b>ACTION_READ</b>, 
+&#160;&#160;<b>ACTION_DIVIDE</b>, 
+<b>ACTION_READ</b>, 
 <b>ACTION_WRITE</b>, 
 <b>ACTION_CONVERT_TO</b>, 
-<b>ACTION_CONVERT_FROM</b>, 
 <br/>
-&#160;&#160;<b>ACTION_TRANSFER</b>, 
+&#160;&#160;<b>ACTION_CONVERT_FROM</b>, 
+<b>ACTION_TRANSFER</b>, 
 <b>ACTION_COPY</b>, 
 <b>ACTION_IS_NULL</b>, 
-<b>ACTION_GETDATAPTR</b>, 
 <br/>
-&#160;&#160;<b>ACTION_INVALID</b>
+&#160;&#160;<b>ACTION_PUSH</b>, 
+<b>ACTION_POP</b>, 
+<b>ACTION_GETDATAPTR</b>, 
+<b>ACTION_INVALID</b>
 <br/>
  }</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
@@ -220,7 +232,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_nargs</
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jan 5 2012 20:47:32 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Mon Jan 9 2012 14:22:48 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
