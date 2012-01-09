@@ -4,6 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -209012, "src/libfrozen/backends/allocator/list/list.c: bad underlying storage" },
+ { -209007, "src/libfrozen/backends/allocator/list/list.c: bad item size" },
+ { -209002, "src/libfrozen/backends/allocator/list/list.c: bad item_sample" },
+ { -208998, "src/libfrozen/backends/allocator/list/list.c: no item_size nor item_sample supplied" },
+ { -208976, "src/libfrozen/backends/allocator/list/list.c: calloc failed" },
  { -204897, "src/libfrozen/backends/allocator/fixed/fixed.c: bad underlying storage" },
  { -204892, "src/libfrozen/backends/allocator/fixed/fixed.c: bad item size" },
  { -204887, "src/libfrozen/backends/allocator/fixed/fixed.c: bad item_sample" },
@@ -172,9 +177,6 @@ static err_item errs_list[] = {
  { -16576, "src/libfrozen/backends/cache/cache/cache.c: offset not supplied" },
  { -16552, "src/libfrozen/backends/cache/cache/cache.c: memory_grow failed" },
  { -16549, "src/libfrozen/backends/cache/cache/cache.c: no size supplied" },
- { -12359, "src/libfrozen/backends/data/list/list.c: no offset supplied" },
- { -12358, "src/libfrozen/backends/data/list/list.c: no size supplied" },
- { -12334, "src/libfrozen/backends/data/list/list.c: no offset supplied" },
  { -8856, "src/libfrozen/backends/storage/file/file.c: no buffer supplied" },
  { -8823, "src/libfrozen/backends/storage/file/file.c: file_update_count failed" },
  { -8820, "src/libfrozen/backends/storage/file/file.c: no buffer supplied" },
