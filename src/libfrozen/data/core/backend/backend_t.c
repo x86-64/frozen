@@ -4,6 +4,7 @@
 #include <core/string/string_t.h>
 #include <core/hash/hash_t.h>
 #include <enum/format/format_t.h>
+#include <core/default/default_t.h>
 
 static ssize_t data_backend_t_default(data_t *data, void *hargs){ // {{{
 	return backend_fast_query((backend_t *)data->ptr, hargs);
@@ -60,6 +61,21 @@ static ssize_t data_backend_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	backend_destroy((backend_t *)data->ptr);
 	return 0;
 } // }}}
+static ssize_t data_backend_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
+	ssize_t                ret;
+	
+	if( (ret = backend_fast_query((backend_t *)data->ptr, fargs)) == -ENOSYS){
+		// no fastcall transfer support avaliable, use default_t handler
+		
+		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(clean) };
+		if( (ret = data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_CONVERT_TO ](data, &r_convert)) != 0)
+			return ret;
+		
+		if(fargs->header.nargs >= 4)
+			fargs->transfered = r_convert.transfered;
+	}
+	return ret;
+} // }}}
 
 // temprorary
 static ssize_t data_backend_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
@@ -78,5 +94,6 @@ data_proto_t backend_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_backend_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_backend_t_free,
 		[ACTION_ALLOC]        = (f_data_func)&data_backend_t_alloc,
+		[ACTION_TRANSFER]     = (f_data_func)&data_backend_t_transfer,
 	}
 };
