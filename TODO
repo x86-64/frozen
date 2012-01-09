@@ -37,6 +37,4 @@
 - libev
 
 - delete ACTION_MOVE
-- add ACTION_GETID or something
-- rewrite incapsulate and list to use ACTION_GETID and ACTION_TRANSFER
 - remove insert sort and write binary search instead

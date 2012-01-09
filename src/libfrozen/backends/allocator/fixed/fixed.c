@@ -18,16 +18,29 @@
  * @code
  * {
  *              class                   = "allocator/fixed",
- *              item_size               = (uint_t)'10',       # sepcify size directly             OR
- *              item_sample             = (sometype_t)'',     # sample item for size estimation
+ *              item_size               = (uint_t)'10',                            # specify size directly             OR
+ *              item_sample             = (sometype_t)'',                          # sample item for size estimation
+ *              removed_items           = {                                        # removed items tracker, if not supplied - no tracking performed
+ *                   { class = "allocator/list", item_sample = (uint_t)"0" },      # - this or similar configuration expected
+ *                   { <memory or file backend to store info>              } 
+ *              }
  *
  * }
  * @endcode
+ */
+/**
+ * @ingroup mod_backend_fixed
+ * @page page_fixed_reqs Removed items tracker requirements
+ *
+ * @li Thread safety. Required.
+ * @li Support ACTION_PUSH and ACTION_POP functions. Required.
+ * @li Support ACTION_COUNT. Optional, for accurate measurement of elements count.
  */
 
 #define EMODULE 49
 
 typedef struct allocator_userdata {
+	backend_t             *removed_items;
 	uintmax_t              item_size;
 	uintmax_t              last_id;
 	pthread_rwlock_t       last_id_mtx;
@@ -37,11 +50,13 @@ static ssize_t   allocator_getnewid(allocator_userdata *userdata, uintmax_t *new
 	register ssize_t       ret               = 0;
 	
 	pthread_rwlock_wrlock(&userdata->last_id_mtx);
-		if(userdata->last_id != ~(uintmax_t)0){
-			*newid = userdata->last_id++;
+		
+		if(__MAX(uintmax_t) / userdata->item_size <= userdata->last_id){
+			ret = -ENOSPC;
 		}else{
-			ret = -EINVAL;
+			*newid = userdata->last_id++;
 		}
+		
 	pthread_rwlock_unlock(&userdata->last_id_mtx);
 	return ret;
 } // }}}
@@ -97,43 +112,70 @@ static int allocator_configure(backend_t *backend, hash_t *config){ // {{{
 			return error("bad underlying storage");
 		
 		userdata->last_id = r_len.length / userdata->item_size;
+		
+		// get removed items tracker
+		hash_data_copy(ret, TYPE_BACKENDT,  userdata->removed_items, config, HK(removed_items));
 	}
-	
 	
 	return 0;
 } // }}}
 
-static ssize_t allocator_fast_handler(backend_t *backend, fastcall_header *hargs){
+static ssize_t allocator_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
 	allocator_userdata    *userdata          = (allocator_userdata *)backend->userdata;
 	
 	switch(hargs->action){
 		case ACTION_CREATE:;
 			fastcall_create *r_create = (fastcall_create *)hargs;
 			
-			// ask removed items list
+			if(userdata->removed_items){
+				fastcall_pop r_pop = {
+					{ 4, ACTION_POP },
+					&r_create->offset,
+					sizeof(r_create->offset)
+				};
+				if(backend_fast_query(userdata->removed_items, &r_pop) == 0)
+					return 0;
+			}
 			
 			if(allocator_getnewid(userdata, &r_create->offset) != 0)
 				return -EFAULT;
 			
 			return 0;
 			
-		case ACTION_DELETE:
-			// add to removed items list
-			break;
+		case ACTION_DELETE:;
+			fastcall_delete *r_delete = (fastcall_delete *)hargs;
+			
+			if(userdata->removed_items){
+				fastcall_push r_push = {
+					{ 4, ACTION_PUSH },
+					&r_delete->offset,
+					sizeof(r_delete->offset)
+				};
+				if(backend_fast_query(userdata->removed_items, &r_push) != 0)
+					return -EFAULT;
+			}
+			return 0;
 		
 		case ACTION_COUNT:;
-			fastcall_count *r_count = (fastcall_count *)hargs;
-			// get removed items list length
+			uintmax_t       in_removed = 0;
+			fastcall_count *r_count    = (fastcall_count *)hargs;
 			
-			r_count->nelements = allocator_getlastid(userdata) - 1; // - del_items_count;
+			if(userdata->removed_items){
+				fastcall_count r_count = { { 3, ACTION_COUNT } };
+				if(backend_fast_query(userdata->removed_items, &r_count) == 0){
+					in_removed = r_count.nelements;
+				}
+			}
+			
+			r_count->nelements = allocator_getlastid(userdata) - in_removed - 1;
 			return 0;
 		
 		case ACTION_READ:
 		case ACTION_WRITE:;
 			fastcall_io *r_io = (fastcall_io *)hargs;
 			
-			//if(r_io->offset >= allocator_getlastid(userdata))
-			//	return -EINVAL;
+			if(r_io->offset >= allocator_getlastid(userdata))
+				return -EINVAL;
 			
 			if(safe_mul(&r_io->offset, r_io->offset, userdata->item_size) != 0)
 				return -EINVAL;
@@ -144,18 +186,7 @@ static ssize_t allocator_fast_handler(backend_t *backend, fastcall_header *hargs
 			break;
 	}
 	return -ENOSYS;
-}
-
-/*static ssize_t allocator_handler(backend_t *backend, request_t *request){
-	ssize_t                ret               = 0;
-	uintmax_t              action;
-	
-	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
-	if(ret != 0)
-		return -ENOSYS;
-	
-	return ret;
-}*/
+} // }}}
 
 backend_t fixed_proto = {
 	.class          = "allocator/fixed",

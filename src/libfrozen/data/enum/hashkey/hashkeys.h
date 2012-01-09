@@ -137,6 +137,7 @@
 #define HK_VALUE_readonly 22762
 #define HK_VALUE_real_offset 54467
 #define HK_VALUE_regexp 10093
+#define HK_VALUE_removed_items 88298
 #define HK_VALUE_req_count 31695
 #define HK_VALUE_req_read 20694
 #define HK_VALUE_req_rebuild 53236
@@ -304,6 +305,7 @@ typedef enum hashkey_t {
       HK_readonly = HK_VALUE_readonly, 
       HK_real_offset = HK_VALUE_real_offset, 
       HK_regexp = HK_VALUE_regexp, 
+      HK_removed_items = HK_VALUE_removed_items, 
       HK_req_count = HK_VALUE_req_count, 
       HK_req_read = HK_VALUE_req_read, 
       HK_req_rebuild = HK_VALUE_req_rebuild, 
@@ -475,6 +477,7 @@ keypair_t hashkeys[] = {
       { "readonly", HK_VALUE_readonly }, 
       { "real_offset", HK_VALUE_real_offset }, 
       { "regexp", HK_VALUE_regexp }, 
+      { "removed_items", HK_VALUE_removed_items }, 
       { "req_count", HK_VALUE_req_count }, 
       { "req_read", HK_VALUE_req_read }, 
       { "req_rebuild", HK_VALUE_req_rebuild }, 
