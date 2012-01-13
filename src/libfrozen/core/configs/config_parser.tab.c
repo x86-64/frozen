@@ -90,6 +90,12 @@ extern int config_get_lineno(void);
 extern char *config_get_text(void);
 extern char *config_ext_file;
 
+char  defconfig_m4_path[] = M4PATH;
+char  defconfig_m4_opts[] = "";
+
+char *config_m4_path      = defconfig_m4_path;
+char *config_m4_opts      = defconfig_m4_opts;
+
 #define emit_error(fmt, ...){                                           \
 	do {                                                            \
 		char _buffer[DEF_BUFFER_SIZE];                          \
@@ -102,7 +108,7 @@ extern char *config_ext_file;
 
 
 /* Line 268 of yacc.c  */
-#line 106 "configs/config_parser.tab.c"
+#line 112 "configs/config_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -143,7 +149,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 32 "configs/config_parser.y"
+#line 38 "configs/config_parser.y"
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
@@ -154,7 +160,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 158 "configs/config_parser.tab.c"
+#line 164 "configs/config_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -166,7 +172,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 170 "configs/config_parser.tab.c"
+#line 176 "configs/config_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -457,8 +463,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    48,    48,    51,    55,    60,    69,    73,    79,    80,
-      81,    93,    94,    95,   116,   137
+       0,    54,    54,    57,    61,    66,    75,    79,    85,    86,
+      87,    99,   100,   101,   122,   143
 };
 #endif
 
@@ -1401,14 +1407,14 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 48 "configs/config_parser.y"
+#line 54 "configs/config_parser.y"
     { *hash = (yyvsp[(1) - (1)].hash_items); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 51 "configs/config_parser.y"
+#line 57 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(sizeof(hash_t));
 		hash_assign_hash_end((yyval.hash_items));
@@ -1418,7 +1424,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 55 "configs/config_parser.y"
+#line 61 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(2 * sizeof(hash_t));
 		hash_assign_hash_t   (&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item));
@@ -1429,7 +1435,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 60 "configs/config_parser.y"
+#line 66 "configs/config_parser.y"
     {
 		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
 		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
@@ -1442,7 +1448,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 69 "configs/config_parser.y"
+#line 75 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
 		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
@@ -1452,7 +1458,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 73 "configs/config_parser.y"
+#line 79 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = hash_ptr_null;
 	}
@@ -1461,21 +1467,21 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 79 "configs/config_parser.y"
+#line 85 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 80 "configs/config_parser.y"
+#line 86 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 81 "configs/config_parser.y"
+#line 87 "configs/config_parser.y"
     {
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
 		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (2)].name));
@@ -1491,21 +1497,21 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 93 "configs/config_parser.y"
+#line 99 "configs/config_parser.y"
     { (yyval.data).type = TYPE_STRINGT; (yyval.data).ptr = (yyvsp[(1) - (1)].name); }
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 94 "configs/config_parser.y"
+#line 100 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 95 "configs/config_parser.y"
+#line 101 "configs/config_parser.y"
     {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
@@ -1532,7 +1538,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 116 "configs/config_parser.y"
+#line 122 "configs/config_parser.y"
     {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
@@ -1559,7 +1565,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 137 "configs/config_parser.y"
+#line 143 "configs/config_parser.y"
     {
 			// TODO remove this
 		data_functions action;
@@ -1579,7 +1585,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1583 "configs/config_parser.tab.c"
+#line 1589 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1810,7 +1816,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 152 "configs/config_parser.y"
+#line 158 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){ // {{{
@@ -1839,14 +1845,13 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	char                  *ext;
 	char                  *content           = NULL;
 	uintmax_t              content_off       = 0;
-	uintmax_t              content_size      = 0;
 	uintmax_t              is_process        = 0;
 
 	ext = strrchr(filename, '.');
 	if(ext != NULL && strcmp(ext, ".m4") == 0){
 		char buffer[DEF_BUFFER_SIZE];
 		
-		if(snprintf(buffer, sizeof(buffer), "%s -s %s", M4PATH, filename) > sizeof(buffer)) // -s for sync lines
+		if(snprintf(buffer, sizeof(buffer), "%s -s %s %s", config_m4_path, config_m4_opts, filename) > sizeof(buffer)) // -s for sync lines
 			return NULL;
 		
 		if( (fd = popen(buffer, "r")) == NULL)
@@ -1860,12 +1865,11 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	}
 	
 	while(!feof(fd)){
-		content_size += DEF_BUFFER_SIZE;
-		content       = realloc(content, content_size + 1); // 1 for terminating \0
+		content       = realloc(content, content_off + DEF_BUFFER_SIZE + 1); // 1 for terminating \0
 		if(!content)
 			break;
 		
-		content_off  += fread(content + content_off, 1, content_size - content_off, fd);
+		content_off  += fread(content + content_off, 1, DEF_BUFFER_SIZE, fd);
 	}
 	if(is_process == 1) pclose(fd); else fclose(fd);
 	

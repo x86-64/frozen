@@ -47,6 +47,8 @@ static struct cmdline_option option_data[] = {
 	{ "daemon",         'd', OPT_VALUE_BOOL, &opt_daemon,           "daemonize"                },
 	{ "pid-file",        0,  OPT_VALUE_STR,  &opt_pidfile,          "save pid to pidfile"      },
 	{ "modules",         0,  OPT_VALUE_STR,  &opt_modules_dir,      "frozen modules dir"       },
+	{ "m4-path",        'p', OPT_VALUE_STR,  &config_m4_path,       "m4 path"                  },
+	{ "m4-opts",        'o', OPT_VALUE_STR,  &config_m4_opts,       "m4 options"               },
 
 	{ NULL, 0, 0, NULL, NULL }
 };

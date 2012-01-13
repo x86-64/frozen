@@ -13,6 +13,12 @@ extern int config_get_lineno(void);
 extern char *config_get_text(void);
 extern char *config_ext_file;
 
+char  defconfig_m4_path[] = M4PATH;
+char  defconfig_m4_opts[] = "";
+
+char *config_m4_path      = defconfig_m4_path;
+char *config_m4_opts      = defconfig_m4_opts;
+
 #define emit_error(fmt, ...){                                           \
 	do {                                                            \
 		char _buffer[DEF_BUFFER_SIZE];                          \
@@ -177,14 +183,13 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	char                  *ext;
 	char                  *content           = NULL;
 	uintmax_t              content_off       = 0;
-	uintmax_t              content_size      = 0;
 	uintmax_t              is_process        = 0;
 
 	ext = strrchr(filename, '.');
 	if(ext != NULL && strcmp(ext, ".m4") == 0){
 		char buffer[DEF_BUFFER_SIZE];
 		
-		if(snprintf(buffer, sizeof(buffer), "%s -s %s", M4PATH, filename) > sizeof(buffer)) // -s for sync lines
+		if(snprintf(buffer, sizeof(buffer), "%s -s %s %s", config_m4_path, config_m4_opts, filename) > sizeof(buffer)) // -s for sync lines
 			return NULL;
 		
 		if( (fd = popen(buffer, "r")) == NULL)
@@ -198,12 +203,11 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	}
 	
 	while(!feof(fd)){
-		content_size += DEF_BUFFER_SIZE;
-		content       = realloc(content, content_size + 1); // 1 for terminating \0
+		content       = realloc(content, content_off + DEF_BUFFER_SIZE + 1); // 1 for terminating \0
 		if(!content)
 			break;
 		
-		content_off  += fread(content + content_off, 1, content_size - content_off, fd);
+		content_off  += fread(content + content_off, 1, DEF_BUFFER_SIZE, fd);
 	}
 	if(is_process == 1) pclose(fd); else fclose(fd);
 	
