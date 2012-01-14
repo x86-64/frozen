@@ -35,7 +35,7 @@ typedef enum datatype_t {
    TYPE_EMITTERT = 28,
    TYPE_ENVT = 29,
    TYPE_RANDOMT = 30,
-   TYPE_BUFFERT = 31,
+   TYPE_CONTAINERT = 31,
    TYPE_MEMORYT = 32,
    TYPE_RAWT = 33,
 } datatype_t;

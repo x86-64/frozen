@@ -217,17 +217,17 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
 	return zmqb_fast_handler((backend_t *)userdata, args);
 } // }}}
-static void zmq_buffer_free(void *data, void *hint){
-	buffer_free((buffer_t *)hint);
-}
+//static void zmq_buffer_free(void *data, void *hint){
+	//buffer_free((buffer_t *)hint);
+//}
 static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
-	zmq_msg_t              zmq_msg;
+	//zmq_msg_t              zmq_msg;
 	data_t                *buffer;
 	data_t                 zmq_iot           = DATA_IOT(backend, &zmqb_io_t_handler);
 	//data_t                 zmq_iot_multi     = DATA_IOT(backend, &zmqb_io_t_multipart_handler);
-	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	//zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
 	if(ret != 0)
@@ -240,27 +240,27 @@ static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 			return data_query(&zmq_iot, &r_transfer1 );
 			
 		case ACTION_WRITE:;
-			buffer_t           *flatbuffer;
-			void               *data;
-			uintmax_t           data_size;
+			//buffer_t           *flatbuffer;
+			//void               *data;
+			//uintmax_t           data_size;
 			
-			flatbuffer = buffer_alloc();
+			//flatbuffer = buffer_alloc();
 			
-			data_t              d_flatbuffer = DATA_BUFFERT(flatbuffer);
-			buffer = hash_data_find(request, HK(buffer));
-			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &d_flatbuffer };
-			ret = data_query(buffer, &r_transfer2 );
+			//data_t              d_flatbuffer = DATA_BUFFERT(flatbuffer);
+			//buffer = hash_data_find(request, HK(buffer));
+			//fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &d_flatbuffer };
+			//ret = data_query(buffer, &r_transfer2 );
 			
-			data      = buffer_defragment(flatbuffer);
-			data_size = buffer_get_size(flatbuffer);
+			//data      = buffer_defragment(flatbuffer);
+			//data_size = buffer_get_size(flatbuffer);
 
-			if( zmq_msg_init_data(&zmq_msg, data, data_size, &zmq_buffer_free, flatbuffer) != 0)
-				return -errno;
+			//if( zmq_msg_init_data(&zmq_msg, data, data_size, &zmq_buffer_free, NULL) != 0)
+			//	return -errno;
 			
-			if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
-				return -errno;
+			//if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
+			//	return -errno;
 			
-			return ret;
+			//return ret;
 			
 		default:
 			break;

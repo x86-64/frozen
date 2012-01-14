@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ./src/libfrozen/data/storage/buffer
+subdir = src/libfrozen/data/storage/container
 DIST_COMMON = $(headers_mydir_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -48,9 +48,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/c_mongrel2/config.m4 \
 	$(top_srcdir)/./src/modules/c_null/config.m4 \
 	$(top_srcdir)/./src/modules/c_zmq/config.m4 \
+	$(top_srcdir)/./src/modules/data_ipv4_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
+	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/allocator/fixed/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/allocator/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/end/config.m4 \
@@ -58,15 +62,14 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/backend/wrapper/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/convert/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
@@ -80,6 +83,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/console/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
+	$(top_srcdir)/./src/libfrozen/backends/io/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/io/tcp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/assign/config.m4 \
 	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
@@ -111,8 +115,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/storage/buffer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/configure.ac
@@ -123,14 +127,14 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfrozen_data_buffer_la_LIBADD =
-am_libfrozen_data_buffer_la_OBJECTS =  \
-	libfrozen_data_buffer_la-buffer_t.lo
-libfrozen_data_buffer_la_OBJECTS =  \
-	$(am_libfrozen_data_buffer_la_OBJECTS)
-libfrozen_data_buffer_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libfrozen_data_buffer_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+libfrozen_data_container_la_LIBADD =
+am_libfrozen_data_container_la_OBJECTS =  \
+	libfrozen_data_container_la-container_t.lo
+libfrozen_data_container_la_OBJECTS =  \
+	$(am_libfrozen_data_container_la_OBJECTS)
+libfrozen_data_container_la_LINK = $(LIBTOOL) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libfrozen_data_container_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
@@ -145,8 +149,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfrozen_data_buffer_la_SOURCES)
-DIST_SOURCES = $(libfrozen_data_buffer_la_SOURCES)
+SOURCES = $(libfrozen_data_container_la_SOURCES)
+DIST_SOURCES = $(libfrozen_data_container_la_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -318,11 +322,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LTLIBRARIES = libfrozen_data_buffer.la
-libfrozen_data_buffer_la_SOURCES = buffer_t.c
-headers_mydirdir = $(headersdir)/storage/buffer/
-headers_mydir_HEADERS = buffer_t.h
-libfrozen_data_buffer_la_CFLAGS = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+noinst_LTLIBRARIES = libfrozen_data_container.la
+libfrozen_data_container_la_SOURCES = container_t.c
+headers_mydirdir = $(headersdir)/storage/container/
+headers_mydir_HEADERS = container_t.h
+libfrozen_data_container_la_CFLAGS = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 
 .SUFFIXES:
@@ -336,9 +340,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ./src/libfrozen/data/storage/buffer/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/data/storage/container/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ./src/libfrozen/data/storage/buffer/Makefile
+	  $(AUTOMAKE) --foreign src/libfrozen/data/storage/container/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -366,8 +370,8 @@ clean-noinstLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libfrozen_data_buffer.la: $(libfrozen_data_buffer_la_OBJECTS) $(libfrozen_data_buffer_la_DEPENDENCIES) 
-	$(libfrozen_data_buffer_la_LINK)  $(libfrozen_data_buffer_la_OBJECTS) $(libfrozen_data_buffer_la_LIBADD) $(LIBS)
+libfrozen_data_container.la: $(libfrozen_data_container_la_OBJECTS) $(libfrozen_data_container_la_DEPENDENCIES) 
+	$(libfrozen_data_container_la_LINK)  $(libfrozen_data_container_la_OBJECTS) $(libfrozen_data_container_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -375,7 +379,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_data_buffer_la-buffer_t.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_data_container_la-container_t.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -398,12 +402,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-libfrozen_data_buffer_la-buffer_t.lo: buffer_t.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_buffer_la_CFLAGS) $(CFLAGS) -MT libfrozen_data_buffer_la-buffer_t.lo -MD -MP -MF $(DEPDIR)/libfrozen_data_buffer_la-buffer_t.Tpo -c -o libfrozen_data_buffer_la-buffer_t.lo `test -f 'buffer_t.c' || echo '$(srcdir)/'`buffer_t.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_data_buffer_la-buffer_t.Tpo $(DEPDIR)/libfrozen_data_buffer_la-buffer_t.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='buffer_t.c' object='libfrozen_data_buffer_la-buffer_t.lo' libtool=yes @AMDEPBACKSLASH@
+libfrozen_data_container_la-container_t.lo: container_t.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_container_la_CFLAGS) $(CFLAGS) -MT libfrozen_data_container_la-container_t.lo -MD -MP -MF $(DEPDIR)/libfrozen_data_container_la-container_t.Tpo -c -o libfrozen_data_container_la-container_t.lo `test -f 'container_t.c' || echo '$(srcdir)/'`container_t.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_data_container_la-container_t.Tpo $(DEPDIR)/libfrozen_data_container_la-container_t.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='container_t.c' object='libfrozen_data_container_la-container_t.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_buffer_la_CFLAGS) $(CFLAGS) -c -o libfrozen_data_buffer_la-buffer_t.lo `test -f 'buffer_t.c' || echo '$(srcdir)/'`buffer_t.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_container_la_CFLAGS) $(CFLAGS) -c -o libfrozen_data_container_la-container_t.lo `test -f 'container_t.c' || echo '$(srcdir)/'`container_t.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

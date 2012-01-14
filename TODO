@@ -1,9 +1,9 @@
+- raw_t auto resize
+- fix zmq writes
 - data/split fix line loosing
 - join physical and logical length into one
 - backend 'storage/memory'
 - backend 'data/buffer'
-
-- buffer_t resize action
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'

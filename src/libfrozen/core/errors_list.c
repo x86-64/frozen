@@ -198,7 +198,7 @@ static err_item errs_list[] = {
  { -8508, "src/libfrozen/backends/storage/file/file.c: filepath invalid" },
  { -8364, "src/libfrozen/backends/storage/file/file.c: resume error" },
  { -8355, "src/libfrozen/backends/storage/file/file.c: called fork_only file" },
- { -5670, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
+ { -5676, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4627, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_vid supplied" },
  { -4622, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no offset supplied" },
  { -4583, "src/libfrozen/backends/rest/blocks_addressing/blocks_addressing.c: no block_size supplied" },
