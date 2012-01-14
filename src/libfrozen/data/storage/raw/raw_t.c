@@ -15,19 +15,28 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 		if( (raw_data = data->ptr = malloc(sizeof(raw_t))) == NULL)
 			return -ENOMEM;
 		
-		if( (raw_data->ptr = malloc(new_size)) == NULL){
-			free(raw_data);
-			data->ptr = NULL;
-			return -ENOMEM;
+		if(new_size != 0){
+			if( (raw_data->ptr = malloc(new_size)) == NULL){
+				free(raw_data);
+				data->ptr = NULL;
+				return -ENOMEM;
+			}
+		}else{
+			raw_data->ptr = NULL;
 		}
 		
-		raw_data->size = new_size;
+		raw_data->size   = new_size;
+		raw_data->flags |= RAW_RESIZEABLE;
 		return 0;
 	}
 	
 	if(raw_data->ptr == NULL){ // empty data holder
-		if( (raw_data->ptr = malloc(new_size)) == NULL)
-			return -ENOMEM;
+		if(new_size != 0){
+			if( (raw_data->ptr = malloc(new_size)) == NULL)
+				return -ENOMEM;
+		}else{
+			raw_data->ptr = NULL;
+		}
 		
 		raw_data->size   = new_size;
 		raw_data->flags |= RAW_RESIZEABLE;
@@ -211,7 +220,7 @@ static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
 		return -EINVAL;
 	
 	if(dst->ptr == NULL){
-		if( (ret = raw_prepare(dst, DEF_BUFFER_SIZE)) < 0)
+		if( (ret = raw_prepare(dst, 0)) < 0)
 			return ret;
 	}
 	fdata = dst->ptr;
