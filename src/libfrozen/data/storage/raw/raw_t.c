@@ -201,6 +201,39 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 	};
 	return -ENOSYS;
 } // }}}
+static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
+	uintmax_t              new_size;
+	raw_t                 *fdata             = dst->ptr;
+	
+	if(fdata == NULL || fargs->buffer == NULL)
+		return -EINVAL;
+	
+	// check if we need to resize it?
+	
+	if(__MAX(uintmax_t) - fargs->buffer_size <= fargs->offset)
+		return -EINVAL;
+	
+	new_size = fargs->offset + fargs->buffer_size; 
+	if(fdata->size < new_size){
+		if( (fdata->flags & RAW_RESIZEABLE) == 0)
+			goto not_resizeable;
+		
+		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
+			fdata->size = 0;
+			return -ENOMEM;
+		}
+		fdata->size = new_size;
+	}
+
+not_resizeable:
+	fargs->buffer_size = MIN(fargs->buffer_size, fdata->size - fargs->offset);
+	
+	if(fargs->buffer_size == 0)
+		return -1; // EOF
+	
+	memcpy(fdata->ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
+	return 0;
+} // }}}
 
 data_proto_t raw_t_proto = {
 	.type          = TYPE_RAWT,
@@ -215,6 +248,7 @@ data_proto_t raw_t_proto = {
 		[ACTION_FREE]        = (f_data_func)&data_raw_free,
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_raw_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_raw_convert_from,
+		[ACTION_WRITE]       = (f_data_func)&data_raw_write,
 	}
 };
 
