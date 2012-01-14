@@ -233,7 +233,7 @@
  * Configuration will look like following:
  * @include tutorial_proc_shell.conf
  *
- * @ref mod_backend_file open file for reading only (../ hack is ugly, will fix someday). @ref mod_backend_split split it in lines.
+ * @ref mod_backend_file open file for reading only. @ref mod_backend_split split it in lines.
  * @ref mod_backend_regexp matches /bin/false aganist input line and pass to @ref mod_backend_switch. It lookup for default marker value and if find - pass
  * to @ref mod_backend_stdout. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem:
  * @include tutorial_proc_shell2.conf
