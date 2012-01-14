@@ -248,7 +248,7 @@ ssize_t         container_read                (container_t *container, uintmax_t
 		do{
 			fastcall_read r_read;
 			r_read.header.nargs  = 5;
-			r_read.header.action = ACTION_WRITE;
+			r_read.header.action = ACTION_READ;
 			r_read.offset        = chunk_offset;
 			r_read.buffer        = buf + read;
 			r_read.buffer_size   = chunk_size;
