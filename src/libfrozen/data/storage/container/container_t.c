@@ -103,8 +103,10 @@ static container_chunk_t *  chunk_alloc(data_t *data, chunk_flags_t flags){ // {
 	return chunk;
 } // }}}
 static void              chunk_free(container_chunk_t *chunk){ // {{{
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&chunk->data, &r_free);
+	if( (chunk->flags & CHUNK_DONT_FREE) == 0){
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&chunk->data, &r_free);
+	}
 	
 	free(chunk);
 } // }}}

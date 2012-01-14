@@ -33,7 +33,8 @@ typedef struct container_chunk_t container_chunk_t;
 typedef enum chunk_flags_t {
 	CHUNK_CACHE_SIZE = 1,
 	CHUNK_ADOPT_DATA = 2,
-	
+	CHUNK_DONT_FREE  = 4,
+
 	INTERNAL_CACHED  = 16
 } chunk_flags_t;
 
