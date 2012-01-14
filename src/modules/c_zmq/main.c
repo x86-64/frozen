@@ -217,17 +217,20 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
 	return zmqb_fast_handler((backend_t *)userdata, args);
 } // }}}
-//static void zmq_buffer_free(void *data, void *hint){
-	//buffer_free((buffer_t *)hint);
-//}
+static void zmq_buffer_free(void *data, void *hint){ // {{{
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query((data_t *)hint, &r_free);
+	
+	free(hint);
+} // }}}
 static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
-	//zmq_msg_t              zmq_msg;
+	zmq_msg_t              zmq_msg;
 	data_t                *buffer;
 	data_t                 zmq_iot           = DATA_IOT(backend, &zmqb_io_t_handler);
 	//data_t                 zmq_iot_multi     = DATA_IOT(backend, &zmqb_io_t_multipart_handler);
-	//zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
 	if(ret != 0)
@@ -240,27 +243,34 @@ static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 			return data_query(&zmq_iot, &r_transfer1 );
 			
 		case ACTION_WRITE:;
-			//buffer_t           *flatbuffer;
-			//void               *data;
-			//uintmax_t           data_size;
+			data_t                *flatbuffer;
 			
-			//flatbuffer = buffer_alloc();
+			if( (flatbuffer = malloc(sizeof(data_t))) == NULL)
+				return -ENOMEM;
 			
-			//data_t              d_flatbuffer = DATA_BUFFERT(flatbuffer);
-			//buffer = hash_data_find(request, HK(buffer));
-			//fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &d_flatbuffer };
-			//ret = data_query(buffer, &r_transfer2 );
+			flatbuffer->type = TYPE_RAWT;
+			flatbuffer->ptr  = NULL;
 			
-			//data      = buffer_defragment(flatbuffer);
-			//data_size = buffer_get_size(flatbuffer);
-
-			//if( zmq_msg_init_data(&zmq_msg, data, data_size, &zmq_buffer_free, NULL) != 0)
-			//	return -errno;
+			fastcall_alloc r_alloc = { { 3, ACTION_ALLOC }, DEF_BUFFER_SIZE };
+			if(data_query(flatbuffer, &r_alloc) < 0)
+				return -ENOMEM;
 			
-			//if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
-			//	return -errno;
+			buffer = hash_data_find(request, HK(buffer));
+			fastcall_transfer r_transfer2  = { { 3, ACTION_TRANSFER }, flatbuffer };
+			ret = data_query(buffer, &r_transfer2);
 			
-			//return ret;
+			fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
+			fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+			if( data_query(flatbuffer, &r_len) != 0 || data_query(flatbuffer, &r_ptr) != 0)
+				return -EFAULT;
+			
+			if( zmq_msg_init_data(&zmq_msg, r_ptr.ptr, r_len.length, &zmq_buffer_free, flatbuffer) != 0)
+				return -errno;
+			
+			if( zmq_send(userdata->zmq_socket, &zmq_msg, 0) != 0)
+				return -errno;
+			
+			return ret;
 			
 		default:
 			break;
