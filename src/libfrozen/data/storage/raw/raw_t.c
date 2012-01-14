@@ -29,7 +29,8 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 		if( (raw_data->ptr = malloc(new_size)) == NULL)
 			return -ENOMEM;
 		
-		raw_data->size = new_size;
+		raw_data->size   = new_size;
+		raw_data->flags |= RAW_RESIZEABLE;
 		return 0;
 	}
 	
