@@ -67,6 +67,13 @@ Example configuration</h2>
         destination = {
                 { <span class="keyword">class </span>= &quot;modules/c_mongrel2_parse&quot; },                         <span class="comment">// parse mongrel2 protocol</span>
                 
+                { <span class="keyword">class </span>= &quot;switch&quot;, rules = {                                   <span class="comment">// drop disconnect requests</span>
+                        {
+                                request = { headers = <span class="stringliteral">&quot;{\&quot;METHOD\&quot;:\&quot;JSON\&quot;}&quot;</span> },
+                                backend = { { <span class="keyword">class </span>= &quot;end&quot; } }
+                        }
+                }},
+
                 { <span class="keyword">class </span>= &quot;assign&quot;, before = {                                  <span class="comment">// assign simple reply</span>
                         body = <span class="stringliteral">&quot;HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\nhello!&quot;</span>
                 }},
@@ -260,7 +267,7 @@ Benchmarking results</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jan 9 2012 14:22:48 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
