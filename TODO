@@ -1,10 +1,10 @@
-- data/split fix line loosing
 - join physical and logical length into one
 - backend 'storage/memory'
 - backend 'data/buffer'
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'
+- fix tutorials examples
 
 - data 'timerange_t'
 - string_t, raw_t write functions

@@ -20,7 +20,9 @@
  *              class                   = "data/split",
  *              input                   = (hashkey_t)'buffer',  # input buffer key name
  *              split                   = "Z",                  # string to split on, default "\n"
- *              buffer_size             = (uint_t)'1024'        # size of internal buffer, default 1024
+ *              buffer_size             = (uint_t)'1024',       # size of internal buffer, default 1024
+ *              dump_last               = (uint_t)'1'           # dump last part of incoming buffer
+ *                                                              #   (overwise it would be collected for further request), default 0
  * }
  * @endcode
  */
@@ -30,9 +32,44 @@
 typedef struct split_userdata {
 	char                  *split_str;
 	uintmax_t              split_len;
-	hashkey_t             input;
+	hashkey_t              input;
 	uintmax_t              buffer_size;
+	uintmax_t              dump_last;
+
+	thread_data_ctx_t      thread_data;
 } split_userdata;
+
+typedef struct split_threaddata {
+	char                  *buffer;
+
+	uintmax_t              last_part_filled;
+	container_t            last_part;
+} split_threaddata;
+
+static void * split_threaddata_create(split_userdata *userdata){ // {{{
+	split_threaddata      *threaddata;
+	
+	if( (threaddata = malloc(sizeof(split_threaddata))) == NULL)
+		goto error1;
+	
+	if( (threaddata->buffer = malloc(userdata->buffer_size)) == NULL)
+		goto error2;
+	
+	container_init(&threaddata->last_part);
+	
+	threaddata->last_part_filled = 0;
+	return threaddata;
+
+error2:
+	free(threaddata);
+error1:
+	return NULL;
+} // }}}
+static void   split_threaddata_destroy(split_threaddata *threaddata){ // {{{
+	container_destroy(&threaddata->last_part);
+	free(threaddata->buffer);
+	free(threaddata);
+} // }}}
 
 static int split_init(backend_t *backend){ // {{{
 	split_userdata       *userdata;
@@ -44,10 +81,18 @@ static int split_init(backend_t *backend){ // {{{
 	userdata->split_str   = strdup("\n");
 	userdata->split_len   = 1;
 	userdata->buffer_size = 1024;
-	return 0;
+	userdata->dump_last   = 0;
+	
+	return thread_data_init(
+		&userdata->thread_data, 
+		(f_thread_create)&split_threaddata_create,
+		(f_thread_destroy)&split_threaddata_destroy,
+		userdata);
 } // }}}
 static int split_destroy(backend_t *backend){ // {{{
 	split_userdata        *userdata          = (split_userdata *)backend->userdata;
+	
+	thread_data_destroy(&userdata->thread_data);
 	
 	free(userdata->split_str);
 	free(userdata);
@@ -60,6 +105,7 @@ static int split_configure(backend_t *backend, hash_t *config){ // {{{
 	
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,        config, HK(input));
 	hash_data_copy(ret, TYPE_UINTT,    userdata->buffer_size,  config, HK(buffer_size));
+	hash_data_copy(ret, TYPE_UINTT,    userdata->dump_last,    config, HK(dump_last));
 	
 	hash_data_copy(ret, TYPE_STRINGT,  split_str,              config, HK(split));
 	if(ret == 0){
@@ -77,14 +123,12 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 	data_t                *input;
 	char                  *buffer;
 	char                  *match;
-	char                  *tmp;
 	uintmax_t              buffer_left;
 	uintmax_t              lmatch_offset     = 0;
 	uintmax_t              original_offset   = 0;
 	uintmax_t              original_eoffset;
 	split_userdata        *userdata          = (split_userdata *)backend->userdata;
-	
-	tmp = alloca(userdata->buffer_size);
+	split_threaddata      *threaddata        = thread_data_get(&userdata->thread_data);
 	
 	if( (input = hash_data_find(request, userdata->input)) == NULL)
 		return error("no input string in request");
@@ -92,11 +136,11 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 	data_t                 hslider           = DATA_SLIDERT(input, 0);
 	
 	while(1){
-		fastcall_read r_read = { { 5, ACTION_READ }, 0, tmp, userdata->buffer_size };
+		fastcall_read r_read = { { 5, ACTION_READ }, 0, threaddata->buffer, userdata->buffer_size };
 		if(data_query(&hslider, &r_read) != 0)
 			break;
 		
-		buffer            = tmp;
+		buffer            = threaddata->buffer;
 		buffer_left       = r_read.buffer_size;
 		original_eoffset  = original_offset + r_read.buffer_size;
 
@@ -107,30 +151,45 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 			buffer_left -= (match - buffer);
 			
 			if(buffer_left < userdata->split_len){
-				memcpy(tmp, match, buffer_left);
+				memcpy(threaddata->buffer, match, buffer_left);
 				
-				fastcall_read r_read = { { 5, ACTION_READ }, 0, tmp + buffer_left, userdata->buffer_size - buffer_left };
+				fastcall_read r_read = { { 5, ACTION_READ }, 0, threaddata->buffer + buffer_left, userdata->buffer_size - buffer_left };
 				if(data_query(&hslider, &r_read) != 0)
 					break;
 				
-				buffer            = tmp;
+				buffer            = threaddata->buffer;
 				buffer_left      += r_read.buffer_size;
-				original_offset  += (match - tmp);
+				original_offset  += (match - threaddata->buffer);
 				original_eoffset  = original_offset + r_read.buffer_size;
 				continue;
 			}
 			
 			if(memcmp(match, userdata->split_str, userdata->split_len) == 0){
-				uintmax_t       match_offset     = original_offset + (match - tmp) + userdata->split_len;
+				uintmax_t       match_offset     = original_offset + (match - threaddata->buffer) + userdata->split_len;
 				data_t          hslice           = DATA_SLICET(input, lmatch_offset, match_offset - lmatch_offset);
 				
-				request_t r_next[] = {
-					{ userdata->input, hslice },
-					hash_inline(request),
-					hash_end
-				};
-				if( (ret = backend_pass(backend, r_next)) < 0)
-					return ret;
+				if(threaddata->last_part_filled == 1){
+					container_add_tail_data(&threaddata->last_part, &hslice, CHUNK_ADOPT_DATA | CHUNK_DONT_FREE);
+					
+					request_t r_next[] = {
+						{ userdata->input, DATA_PTR_CONTAINERT(&threaddata->last_part) },
+						hash_inline(request),
+						hash_end
+					};
+					if( (ret = backend_pass(backend, r_next)) < 0)
+						return ret;
+					
+					container_clean(&threaddata->last_part);
+					threaddata->last_part_filled = 0;
+				}else{
+					request_t r_next[] = {
+						{ userdata->input, hslice },
+						hash_inline(request),
+						hash_end
+					};
+					if( (ret = backend_pass(backend, r_next)) < 0)
+						return ret;
+				}
 				
 				lmatch_offset = match_offset;
 			}
@@ -141,15 +200,26 @@ static ssize_t split_handler(backend_t *backend, request_t *request){ // {{{
 		
 		original_offset = original_eoffset;
 	}
-	
 	data_t    hslice           = DATA_SLICET(input, lmatch_offset, ~0);
-	request_t r_next[] = {
-		{ userdata->input, hslice },
-		hash_inline(request),
-		hash_end
-	};
-	if( (ret = backend_pass(backend, r_next)) < 0)
-		return ret;
+	
+	if(userdata->dump_last != 0){
+		request_t r_next[] = {
+			{ userdata->input, hslice },
+			hash_inline(request),
+			hash_end
+		};
+		if( (ret = backend_pass(backend, r_next)) < 0)
+			return ret;
+	}else{
+		// save end of buffer to use in next request
+		data_t         last_part         = { TYPE_RAWT, NULL };
+		
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &last_part };
+		if(data_query(&hslice, &r_transfer) >= 0){
+			container_add_tail_data(&threaddata->last_part, &last_part, CHUNK_ADOPT_DATA);
+			threaddata->last_part_filled = 1;
+		}
+	}
 	
 	return 0;
 } // }}}

@@ -44,6 +44,7 @@
 #define HK_VALUE_dns_domain 40645
 #define HK_VALUE_dns_ip 9752
 #define HK_VALUE_dns_tstamp 42056
+#define HK_VALUE_dump_last 31113
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
 #define HK_VALUE_error 6209
@@ -212,6 +213,7 @@ typedef enum hashkey_t {
       HK_dns_domain = HK_VALUE_dns_domain, 
       HK_dns_ip = HK_VALUE_dns_ip, 
       HK_dns_tstamp = HK_VALUE_dns_tstamp, 
+      HK_dump_last = HK_VALUE_dump_last, 
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
       HK_error = HK_VALUE_error, 
@@ -384,6 +386,7 @@ keypair_t hashkeys[] = {
       { "dns_domain", HK_VALUE_dns_domain }, 
       { "dns_ip", HK_VALUE_dns_ip }, 
       { "dns_tstamp", HK_VALUE_dns_tstamp }, 
+      { "dump_last", HK_VALUE_dump_last }, 
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
       { "error", HK_VALUE_error }, 
