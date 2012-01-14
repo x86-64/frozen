@@ -203,11 +203,18 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 	return -ENOSYS;
 } // }}}
 static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
+	ssize_t                ret;
 	uintmax_t              new_size;
-	raw_t                 *fdata             = dst->ptr;
+	raw_t                 *fdata;
 	
-	if(fdata == NULL || fargs->buffer == NULL)
+	if(fargs->buffer == NULL)
 		return -EINVAL;
+	
+	if(dst->ptr == NULL){
+		if( (ret = raw_prepare(dst, DEF_BUFFER_SIZE)) < 0)
+			return ret;
+	}
+	fdata = dst->ptr;
 	
 	// check if we need to resize it?
 	
