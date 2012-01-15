@@ -1,13 +1,12 @@
+- named_t data
+- rewrite balancer, forked requests, simple pool, selector
 - join physical and logical length into one
 - backend 'storage/memory'
 - backend 'data/buffer'
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'
-
 - data 'timerange_t'
-
-- simplify balancer using selector with random_t, counter_t, request_key_t instead of plain code
 
 - fix broken slice_t hash_dump's
 - rewrite file to use fd_t
