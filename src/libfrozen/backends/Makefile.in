@@ -104,6 +104,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/named/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
