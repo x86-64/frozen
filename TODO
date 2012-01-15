@@ -1,6 +1,15 @@
-- rewrite balancer, forked requests, simple pool, selector
+* flow-based architecture for backend, request-based architecture for data:
+  - index/fill: waiting for request end not flow-based (TOP, remove junk code)
+  - index/lookup: expecting return result from index not flow-based (TOP, replace with call and passing destination)
+  - request/implode: explode return result not flow-based (normal, remove junk code)
+  - backend/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
+  - cache/cache: get backend length not flow-based (not important, subject for deprecation)
+  - backend/pool: pool get parameter not flow-based (not important for now, another approach?)
+
+* m4 macro collection
+  - write m4 macro for balancer backend
+
 - join physical and logical length into one
-- backend 'storage/memory'
 - backend 'data/buffer'
 
 - review indexes and caches (+ data free routines)
@@ -23,10 +32,10 @@
 - new test suite, as benchmarks, deprecate check
 - data 'range_t', 'multiselect_t' and matching routines
 - backend queue
-- backend_t transfers: use ACTION_CONVERT_TO functions of backend if avaliable
 - data 'action_t' + convert array from\to string
-- m4 macro collection
 - mphf nelements_step with percents + remove from mphf to another backend
+
+- change alloca to threaddata
 
 - pcre
 - libev
