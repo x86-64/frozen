@@ -1,3 +1,8 @@
+- terminology change:
+  - backend chain -> assembly line
+  - backend -> machine
+  - data -> store
+
 * flow-based architecture for backend, request-based architecture for data:
   - index/fill: waiting for request end not flow-based (TOP, remove junk code)
   - index/lookup: expecting return result from index not flow-based (TOP, replace with call and passing destination)
