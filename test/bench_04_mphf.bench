@@ -41,8 +41,7 @@ NULL,
 		keyid = { default = (uint64_t)'0' }
 	}
 },
-{ class = "incapsulate", multiply = (off_t)'8'      },
-{ class = "allocator"                               },
+{ class = "allocator/fixed", item_size = (uint_t)"8" },
 { class = "file",  filename = "data_bench_mphf.dat" },
 NULL,
 {

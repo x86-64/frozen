@@ -9,6 +9,8 @@
 * m4 macro collection
   - write m4 macro for balancer backend
 
+- broken mphf backend rebuild: allocator backend not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
+
 - join physical and logical length into one
 - backend 'data/buffer'
 

@@ -30,7 +30,6 @@
 #define HK_VALUE_capture 15329
 #define HK_VALUE_class 6119
 #define HK_VALUE_clientid 21563
-#define HK_VALUE_clone 5815
 #define HK_VALUE_close 5895
 #define HK_VALUE_config 9498
 #define HK_VALUE_connect 15066
@@ -60,7 +59,6 @@
 #define HK_VALUE_forced 9281
 #define HK_VALUE_fork 3284
 #define HK_VALUE_fork_only 31758
-#define HK_VALUE_fork_request 72140
 #define HK_VALUE_format 9917
 #define HK_VALUE_function 22303
 #define HK_VALUE_global 9415
@@ -154,7 +152,6 @@
 #define HK_VALUE_rules 6045
 #define HK_VALUE_script 10193
 #define HK_VALUE_size 3249
-#define HK_VALUE_size_old 21312
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
 #define HK_VALUE_string 9743
@@ -199,7 +196,6 @@ typedef enum hashkey_t {
       HK_capture = HK_VALUE_capture, 
       HK_class = HK_VALUE_class, 
       HK_clientid = HK_VALUE_clientid, 
-      HK_clone = HK_VALUE_clone, 
       HK_close = HK_VALUE_close, 
       HK_config = HK_VALUE_config, 
       HK_connect = HK_VALUE_connect, 
@@ -229,7 +225,6 @@ typedef enum hashkey_t {
       HK_forced = HK_VALUE_forced, 
       HK_fork = HK_VALUE_fork, 
       HK_fork_only = HK_VALUE_fork_only, 
-      HK_fork_request = HK_VALUE_fork_request, 
       HK_format = HK_VALUE_format, 
       HK_function = HK_VALUE_function, 
       HK_global = HK_VALUE_global, 
@@ -323,7 +318,6 @@ typedef enum hashkey_t {
       HK_rules = HK_VALUE_rules, 
       HK_script = HK_VALUE_script, 
       HK_size = HK_VALUE_size, 
-      HK_size_old = HK_VALUE_size_old, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
       HK_string = HK_VALUE_string, 
@@ -372,7 +366,6 @@ keypair_t hashkeys[] = {
       { "capture", HK_VALUE_capture }, 
       { "class", HK_VALUE_class }, 
       { "clientid", HK_VALUE_clientid }, 
-      { "clone", HK_VALUE_clone }, 
       { "close", HK_VALUE_close }, 
       { "config", HK_VALUE_config }, 
       { "connect", HK_VALUE_connect }, 
@@ -402,7 +395,6 @@ keypair_t hashkeys[] = {
       { "forced", HK_VALUE_forced }, 
       { "fork", HK_VALUE_fork }, 
       { "fork_only", HK_VALUE_fork_only }, 
-      { "fork_request", HK_VALUE_fork_request }, 
       { "format", HK_VALUE_format }, 
       { "function", HK_VALUE_function }, 
       { "global", HK_VALUE_global }, 
@@ -496,7 +488,6 @@ keypair_t hashkeys[] = {
       { "rules", HK_VALUE_rules }, 
       { "script", HK_VALUE_script }, 
       { "size", HK_VALUE_size }, 
-      { "size_old", HK_VALUE_size_old }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
       { "string", HK_VALUE_string }, 

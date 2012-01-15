@@ -45,7 +45,7 @@ START_TEST (test_backend_mphf){
 			{ HK(backend_g),    DATA_STRING("backend_mphf_g")               },
 			{ HK(backend_e),    DATA_STRING("backend_mphf_e")               },
 			{ HK(backend_v),    DATA_STRING("backend_mphf_v")               },
-			{ HK(nelements_min),DATA_UINT64T(10)                            },
+			{ HK(nelements_min),DATA_UINT64T(1000)                          },
 			{ HK(nelements_step),DATA_UINT64T(10)                           },
 			{ HK(value_bits),   DATA_UINT32T(32)                            },
 			{ HK(input),        DATA_HASHKEYT(HK(keyid))                    },
@@ -72,16 +72,8 @@ START_TEST (test_backend_mphf){
                         hash_end
                 )},
                 { 0, DATA_HASHT(
-                        { HK(class),       DATA_STRING("cache")                         },
-                        hash_end
-                )},
-                { 0, DATA_HASHT(
-                        { HK(class),       DATA_STRING("allocator")                     },
-                        hash_end
-                )},
-                { 0, DATA_HASHT(
-                        { HK(class),       DATA_STRING("incapsulate")                   },
-                        { HK(multiply),    DATA_OFFT(30)                                },
+                        { HK(class),       DATA_STRING("allocator/fixed")               },
+                        { HK(item_size),   DATA_UINTT(30)                               },
                         hash_end
                 )},
                 { 0, DATA_HASHT(

@@ -797,7 +797,6 @@ enable_backendcache
 enable_backendcache_append
 enable_backendkill
 enable_backendthread
-enable_backendallocator
 enable_backendconvert
 enable_backendincapsulate
 enable_backendregexp
@@ -823,7 +822,6 @@ enable_backendipc
 enable_backendtcp
 enable_backendtcp_child
 enable_backendassign
-enable_backendbalancer
 enable_backenddebug
 enable_backendemitter
 enable_backendimplode
@@ -1561,8 +1559,6 @@ Optional Features:
   --disable-backend-kill  disable backend kill
   --disable-backend-thread
                           disable backend thread
-  --disable-backend-allocator
-                          disable backend allocator
   --disable-backend-convert
                           disable backend convert
   --disable-backend-incapsulate
@@ -1605,8 +1601,6 @@ Optional Features:
                           disable backend tcp-child
   --disable-backend-assign
                           disable backend assign
-  --disable-backend-balancer
-                          disable backend balancer
   --disable-backend-debug disable backend debug
   --disable-backend-emitter
                           disable backend emitter
@@ -18438,43 +18432,6 @@ fi
 
 
 
-	# Check whether --enable-backendallocator was given.
-if test "${enable_backendallocator+set}" = set; then :
-  enableval=$enable_backendallocator;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendallocator}" = "yes"; then
-			enable_backendallocator="no"
-		else
-			enable_backendallocator="yes"
-		fi
-	fi
-
-	if test "${enable_backendallocator}" = "yes"; then
-		BACKEND_DIR_allocator="data/allocator"
-		BACKEND_DEP_allocator=""
-				BACKEND_SELECTED="$BACKEND_SELECTED allocator"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_allocator" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/allocator/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/allocator"
-
-		BACKEND_MAKEFILE_data_allocator=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/allocator/libfrozen_backend_allocator.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-backendconvert was given.
 if test "${enable_backendconvert+set}" = set; then :
   enableval=$enable_backendconvert;
@@ -19388,43 +19345,6 @@ fi
 		BACKEND_MAKEFILE_request_assign=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/assign/libfrozen_backend_assign.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendbalancer was given.
-if test "${enable_backendbalancer+set}" = set; then :
-  enableval=$enable_backendbalancer;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendbalancer}" = "yes"; then
-			enable_backendbalancer="no"
-		else
-			enable_backendbalancer="yes"
-		fi
-	fi
-
-	if test "${enable_backendbalancer}" = "yes"; then
-		BACKEND_DIR_balancer="request/balancer"
-		BACKEND_DEP_balancer=""
-				BACKEND_SELECTED="$BACKEND_SELECTED balancer"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_balancer" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/balancer/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/balancer"
-
-		BACKEND_MAKEFILE_request_balancer=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/balancer/libfrozen_backend_balancer.la"
 
 	fi
 

@@ -669,15 +669,33 @@ static ssize_t file_custom(backend_t *backend, request_t *request){ // {{{
 pass:
 	return ( (ret = backend_pass(backend, request)) < 0) ? ret : -EEXIST;
 } // }}}
+static ssize_t file_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
+	file_userdata         *userdata          = ((file_userdata *)backend->userdata);
+	
+	switch(hargs->action){
+		case ACTION_PHYSICALLEN:;
+		case ACTION_LOGICALLEN:;
+			fastcall_len *r_len = (fastcall_len *)hargs;
+			
+			if(file_update_count(userdata) == STAT_ERROR)
+				return error("file_update_count failed");
+	
+			r_len->length = userdata->file_stat.st_size;
+			return 0;
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
 
 backend_t file_proto = {
 	.class          = "storage/file",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_CRWD | API_FAST,
 	.func_init      = &file_init,
 	.func_fork      = &file_fork,
 	.func_configure = &file_configure,
 	.func_destroy   = &file_destroy,
-	{
+	.backend_type_crwd = {
 		.func_create = &file_create,
 		.func_set    = &file_write,
 		.func_get    = &file_read,
@@ -685,6 +703,9 @@ backend_t file_proto = {
 		.func_move   = &file_move,
 		.func_count  = &file_count,
 		.func_custom = &file_custom
+	},
+	.backend_type_fast = {
+		.func_handler = (f_fast_func)&file_fast_handler,
 	}
 };
 
