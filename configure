@@ -827,9 +827,7 @@ enable_backendemitter
 enable_backendimplode
 enable_backendexplode
 enable_backenditerate
-enable_backendrewrite
 enable_backendswitch
-enable_backendinsert_sort
 enable_backendfile
 enable_backendpointers
 enable_backendmutex
@@ -1610,12 +1608,8 @@ Optional Features:
                           disable backend explode
   --disable-backend-iterate
                           disable backend iterate
-  --disable-backend-rewrite
-                          disable backend rewrite
   --disable-backend-switch
                           disable backend switch
-  --disable-backend-insert-sort
-                          disable backend insert-sort
   --disable-backend-file  disable backend file
   --disable-backend-pointers
                           disable backend pointers
@@ -19538,43 +19532,6 @@ fi
 
 
 
-	# Check whether --enable-backendrewrite was given.
-if test "${enable_backendrewrite+set}" = set; then :
-  enableval=$enable_backendrewrite;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendrewrite}" = "yes"; then
-			enable_backendrewrite="no"
-		else
-			enable_backendrewrite="yes"
-		fi
-	fi
-
-	if test "${enable_backendrewrite}" = "yes"; then
-		BACKEND_DIR_rewrite="request/rewrite"
-		BACKEND_DEP_rewrite=""
-				BACKEND_SELECTED="$BACKEND_SELECTED rewrite"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_rewrite" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/rewrite/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/rewrite"
-
-		BACKEND_MAKEFILE_request_rewrite=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/rewrite/libfrozen_backend_rewrite.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-backendswitch was given.
 if test "${enable_backendswitch+set}" = set; then :
   enableval=$enable_backendswitch;
@@ -19603,43 +19560,6 @@ fi
 		BACKEND_MAKEFILE_request_switch=yes
 
 		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/switch/libfrozen_backend_switch.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendinsert_sort was given.
-if test "${enable_backendinsert_sort+set}" = set; then :
-  enableval=$enable_backendinsert_sort;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendinsert_sort}" = "yes"; then
-			enable_backendinsert_sort="no"
-		else
-			enable_backendinsert_sort="yes"
-		fi
-	fi
-
-	if test "${enable_backendinsert_sort}" = "yes"; then
-		BACKEND_DIR_insert_sort="rest/insert_sort"
-		BACKEND_DEP_insert_sort=""
-				BACKEND_SELECTED="$BACKEND_SELECTED insert_sort"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_rest_insert_sort" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/rest/insert_sort/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS rest/insert_sort"
-
-		BACKEND_MAKEFILE_rest_insert_sort=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED rest/insert_sort/libfrozen_backend_insert_sort.la"
 
 	fi
 
