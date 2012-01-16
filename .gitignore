@@ -20,4 +20,6 @@ config.status
 frozend
 paths.h
 src/lang/*
-test/test*
+test/test
+test/tests.m4
+test/test.c
