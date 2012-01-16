@@ -234,8 +234,6 @@ static uintmax_t cache_get_filesize(machine_t *machine){ // {{{
 } // }}}
 static void      cache_enable(machine_t *machine){ // {{{
 	uintmax_t              file_size;
-	machine_t             *child;
-	void                  *iter              = NULL;
 	cache_userdata        *userdata          = (cache_userdata *)machine->userdata;
 	
 	pthread_rwlock_wrlock(&userdata->lock);
@@ -252,13 +250,12 @@ static void      cache_enable(machine_t *machine){ // {{{
 		
 		// read data from machine to new memory
 		data_t d_memory   = DATA_MEMORYT(&userdata->memory);
-		while( (child = list_iter_next(&machine->childs, &iter)) != NULL){
-			data_t d_machine  = DATA_MACHINET(machine);
-			
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_memory };
-			if(data_query(&d_machine, &r_transfer) < 0)
-				goto failed;
-		}
+		data_t d_machine  = DATA_NEXT_MACHINET(machine);
+		
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_memory };
+		if(data_query(&d_machine, &r_transfer) < 0)
+			goto failed;
+		
 		userdata->d_memory = d_memory;
 		
 		// enable caching
@@ -278,8 +275,6 @@ failed:
 } // }}}
 static void      cache_disable(machine_t *machine){ // {{{
 	uintmax_t              file_size;
-	machine_t             *child;
-	void                  *iter              = NULL;
 	cache_userdata        *userdata          = (cache_userdata *)machine->userdata;
 	
 	pthread_rwlock_wrlock(&userdata->lock);
@@ -292,12 +287,10 @@ static void      cache_disable(machine_t *machine){ // {{{
 		
 		// flush data from memory to machine
 		data_t d_memory  = DATA_MEMORYT(&userdata->memory);
-		while( (child = list_iter_next(&machine->childs, &iter)) != NULL){
-			data_t d_machine = DATA_MACHINET(child);
+		data_t d_machine = DATA_NEXT_MACHINET(machine);
 			
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_machine };
-			data_query(&d_memory, &r_transfer);
-		}
+		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_machine };
+		data_query(&d_memory, &r_transfer);
 
 		// free used memory
 		memory_free(&userdata->memory);

@@ -187,15 +187,12 @@ void        pool_machine_action(machine_t *machine, rule *rule){ // {{{
 	
 	switch(rule->action){
 		case ACTION_DESTROY:;
-			machine_t     *curr;
-			
 			// set machine mode to died
 			pool_set_handler(machine, &pool_machine_request_died);
 			
 			if(userdata->perfork_childs != &userdata->perfork_childs_own){
 				// kill childs for forked shops, keep for initial
-				while( (curr = list_pop(&machine->childs)) != NULL)
-					machine_destroy(curr);
+				machine_destroy(machine->cnext);
 			}
 			
 			break;

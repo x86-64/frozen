@@ -117,10 +117,8 @@ static uintmax_t   machine_ref_dec(machine_t *machine){ // {{{
 } // }}}
 
 static void        machine_top(machine_t *machine){ // {{{
-	if(list_is_empty(&machine->parents)){
-		list_delete (&machines_top, machine);
-		list_add    (&machines_top, machine);
-	}
+	list_delete (&machines_top, machine);
+	list_add    (&machines_top, machine);
 } // }}}
 static void        machine_untop(machine_t *machine){ // {{{
 	list_delete(&machines_top, machine);
@@ -135,9 +133,6 @@ static void        machine_free_skeleton(machine_t *machine_curr){ // {{{
 		list_delete(&machines_names, machine_curr);
 		free(machine_curr->name);
 	}
-	
-	list_destroy(&machine_curr->childs);
-	list_destroy(&machine_curr->parents);
 	
 	free(machine_curr);
 } // }}}
@@ -172,6 +167,27 @@ error:
 	return NULL;
 } // }}}
 
+void               machine_connect(machine_t *parent, machine_t *child){ // {{{
+	if(parent){
+		parent->cnext = child;
+		machine_top(parent);
+	}
+	if(child){
+		child->cprev = parent;
+		machine_untop(child);
+	}
+} // }}}
+void               machine_disconnect(machine_t *parent, machine_t *child){ // {{{
+	if(parent){
+		machine_untop(parent);
+		parent->cnext = NULL;
+	}
+	if(child){
+		machine_top(child);
+		child->cprev  = NULL;
+	}
+} // }}}
+
 static ssize_t     machine_new_iterator(hash_t *item, machine_new_ctx *ctx){ // {{{
 	ssize_t                ret;
 	machine_t             *machine;
@@ -181,7 +197,7 @@ static ssize_t     machine_new_iterator(hash_t *item, machine_new_ctx *ctx){ // 
 	char                  *machine_class;
 	
 	if(item->key == hash_ptr_null){
-		ctx->machine_prev = LIST_FREE_ITEM;
+		ctx->machine_prev = NULL;
 		return ITER_CONTINUE;
 	}
 		
@@ -195,28 +211,21 @@ static ssize_t     machine_new_iterator(hash_t *item, machine_new_ctx *ctx){ // 
 	hash_data_copy(ret, TYPE_STRINGT, machine_name,  machine_cfg, HK(name));  if(ret != 0) machine_name  = NULL;
 	hash_data_copy(ret, TYPE_STRINGT, machine_class, machine_cfg, HK(class)); if(ret != 0) machine_class = NULL;
 	
-	if(machine_class == NULL && machine_name == NULL)
+	if(machine_class == NULL)
 		goto error_inval;
 	
-	if(machine_class == NULL){
-		if( (machine = machine_find(machine_name)) == NULL)
-			goto error_inval;
-		
-		machine_connect(machine, ctx->machine_prev);
-	}else{
-		if( (machine = machine_new_skeleton(machine_name, machine_class, machine_cfg)) == NULL)
-			goto error_inval;
+	if( (machine = machine_new_skeleton(machine_name, machine_class, machine_cfg)) == NULL)
+		goto error_inval;
 
-		machine_connect(machine, ctx->machine_prev);
-		
-		if(machine->func_init != NULL && machine->func_init(machine) != 0)
-			goto error_init;
-		
-		if(machine->func_configure != NULL && machine->func_configure(machine, machine->config) != 0)
-			goto error_configure;
-		
-		list_add(&ctx->machines, machine);
-	}
+	machine_connect(machine, ctx->machine_prev);
+	
+	if(machine->func_init != NULL && machine->func_init(machine) != 0)
+		goto error_init;
+	
+	if(machine->func_configure != NULL && machine->func_configure(machine, machine->config) != 0)
+		goto error_configure;
+	
+	list_add(&ctx->machines, machine);
 	
 	ctx->machine_prev = machine;
 	return ITER_CONTINUE;
@@ -233,30 +242,11 @@ error_inval:
 	return ITER_BREAK;
 } // }}}
 static machine_t * machine_fork_rec(machine_t *machine, request_t *request){ // {{{
-	uintmax_t              lsz, i;
 	machine_t             *machine_curr;
-	void                 **childs_list;
+	machine_t             *machine_child;
 	
-	list_rdlock(&machine->childs);
-		
-		if( (lsz = list_count(&machine->childs)) != 0){
-			childs_list = (void **)alloca( sizeof(void *) * lsz );
-			list_flatten(&machine->childs, childs_list, lsz);
-		}
-		
-	list_unlock(&machine->childs);
-	
-	for(i=0; i<lsz; i++){
-		if( (childs_list[i] = machine_fork_rec((machine_t *)childs_list[i], request)) == NULL){
-			// unwind
-			while(i > 0){
-				i--;
-				machine_destroy(childs_list[i]);
-			}
-			
-			return NULL;
-		}
-	}
+	if(machine == NULL)
+		return NULL;
 	
 	if( (machine_curr = machine_clone(machine)) == NULL)
 		goto error_inval;
@@ -265,8 +255,9 @@ static machine_t * machine_fork_rec(machine_t *machine, request_t *request){ // 
 	machine_curr->name     = NULL;
 	machine_curr->userdata = NULL;
 	
-	for(i=0; i<lsz; i++)
-		machine_connect(machine_curr, childs_list[i]);
+	machine_child = machine_fork_rec(machine->cnext, request);
+	
+	machine_connect(machine_curr, machine_child);
 	
 	if(machine_curr->func_init != NULL && machine_curr->func_init(machine_curr) != 0)
 		goto error_init;
@@ -286,9 +277,7 @@ error_configure:
 		machine_curr->func_destroy(machine_curr);
 	
 error_init:
-	for(i=0; i<lsz; i++)
-		machine_disconnect(machine_curr, childs_list[i]);
-	
+	machine_disconnect(machine_curr, machine_child);
 	machine_free_skeleton(machine_curr);
 	
 error_inval:
@@ -352,57 +341,6 @@ static ssize_t     machine_downgrade_request(machine_t *machine, fastcall_header
 	return q_ret;
 } // }}}
 
-void               machine_connect(machine_t *parent, machine_t *child){ // {{{
-	list_add(&parent->childs, child);
-	machine_top(parent);
-	
-	if(child == LIST_FREE_ITEM)
-		return;
-	
-	machine_untop(child);
-	list_add(&child->parents, parent);
-} // }}}
-void               machine_disconnect(machine_t *parent, machine_t *child){ // {{{
-	machine_untop(parent);
-	list_delete(&parent->childs, child);
-	
-	if(child == LIST_FREE_ITEM)
-		return;
-	
-	list_delete(&child->parents, parent);
-	machine_top(child);
-} // }}}
-void               machine_add_terminators(machine_t *machine, list *new_childs){ // {{{
-	uintmax_t              lsz;
-	machine_t             *child;
-	void                  *childs_iter = NULL;
-	
-	list_rdlock(&machine->childs); // TODO loop shops bugs
-		
-		if( (lsz = list_count(&machine->childs)) != 0){
-			// go recurse
-			while( (child = list_iter_next(&machine->childs, &childs_iter)) != NULL)
-				machine_add_terminators(child, new_childs);
-		}
-	
-	list_unlock(&machine->childs);
-		
-	if(lsz == 0){
-		// add new childs to terminating machines without childs
-		while( (child = list_iter_next(new_childs, &childs_iter)) != NULL)
-			machine_connect(machine, child);
-	}
-} // }}}
-void               machine_insert(machine_t *parent, machine_t *new_child){ // {{{
-	machine_t             *child;
-	
-	machine_add_terminators(new_child, &parent->childs);
-	
-	while( (child = list_pop(&parent->childs)) != NULL)
-		machine_disconnect(parent, child);
-	
-	machine_connect(parent, new_child);
-} // }}}
 	
 ssize_t            frozen_machine_init(void){ // {{{
 	pthread_mutexattr_t    attr;
@@ -438,13 +376,12 @@ void               frozen_machine_destroy(void){ // {{{
 
 machine_t *     machine_new          (hash_t *config){ // {{{
 	machine_t             *machine;
-	machine_t             *child;
-	machine_new_ctx        ctx               = { LIST_INITIALIZER, LIST_FREE_ITEM };
+	machine_new_ctx        ctx               = { LIST_INITIALIZER, NULL };
 	
 	if(hash_iter(config, (hash_iterator)&machine_new_iterator, &ctx, HASH_ITER_NULL) == ITER_OK){
 		list_destroy(&ctx.machines);
 		
-		if(ctx.machine_prev == LIST_FREE_ITEM)
+		if(ctx.machine_prev == NULL)
 			return NULL;
 		
 		return ctx.machine_prev;
@@ -454,9 +391,7 @@ machine_t *     machine_new          (hash_t *config){ // {{{
 		if(machine->func_destroy != NULL)
 			machine->func_destroy(machine);
 		
-		while( (child = list_pop(&machine->childs)) != NULL)
-			machine_disconnect(machine, child);
-
+		machine_disconnect(machine, machine->cnext);
 		machine_free_skeleton(machine);
 	}
 	return NULL;
@@ -506,17 +441,12 @@ machine_t *     machine_clone        (machine_t *machine){ // {{{
 	
 	memcpy(clone, machine, sizeof(machine_t));
 	
-	list_init(&clone->parents);
-	list_init(&clone->childs);
-	
 	clone->refs     = 1;
 	clone->config   = hash_copy(machine->config);
 	
 	return clone;
 } // }}}
 void            machine_destroy      (machine_t *machine){ // {{{
-	machine_t             *curr;
-	
 	if(machine == NULL)
 		return;
 	
@@ -526,12 +456,8 @@ void            machine_destroy      (machine_t *machine){ // {{{
 			if(machine->func_destroy != NULL)
 				machine->func_destroy(machine);
 			
-			while( (curr = list_pop(&machine->childs)) != NULL)   // recursive destroy of all left childs
-				machine_destroy(curr);
-			
-			while( (curr = list_pop(&machine->parents)) != NULL)  // remove this machine from parents's childs list
-				machine_disconnect(curr, machine);
-			
+			machine_destroy(machine->cnext);
+			machine_disconnect(machine->cprev, machine);
 			machine_free_skeleton(machine);
 		}
 	pthread_mutex_unlock(&destroy_mtx);
@@ -573,7 +499,7 @@ ssize_t         machine_query        (machine_t *machine, request_t *request){ /
 	}while(0);
 	
 	if(func == NULL){
-		ret = machine_pass(machine, request);
+		ret = machine_query(machine->cnext, request);
 		goto exit;
 	}
 	
@@ -597,29 +523,7 @@ exit:
 	return ret;
 } // }}}
 ssize_t         machine_pass         (machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret = 0;
-	ssize_t                ret2;
-	uintmax_t              lsz, i;
-	void                 **childs_list;
-	
-	list_rdlock(&machine->childs);
-		
-		if( (lsz = list_count(&machine->childs)) != 0){
-			childs_list = (void **)alloca( sizeof(void *) * lsz );
-			list_flatten(&machine->childs, childs_list, lsz);
-		}
-		
-	list_unlock(&machine->childs);
-	
-	if(lsz == 0)
-		return -ENOSYS;
-	
-	for(i=0; i<lsz; i++){
-		if( (ret2 = machine_query((machine_t *)childs_list[i], request)) < 0){
-			ret = ret2;
-		}
-	}
-	return ret;
+	return machine_query(machine->cnext, request);
 } // }}}
 ssize_t         machine_fast_query   (machine_t *machine, void *fargs){ // {{{
 	f_fast_func            func              = NULL;
@@ -644,27 +548,7 @@ ssize_t         machine_fast_query   (machine_t *machine, void *fargs){ // {{{
 	return func(machine, fargs);
 } // }}}
 ssize_t         machine_fast_pass    (machine_t *machine, void *fargs){ // {{{
-	ssize_t                ret = 0;
-	uintmax_t              lsz, i;
-	void                 **childs_list;
-	
-	list_rdlock(&machine->childs);
-		
-		if( (lsz = list_count(&machine->childs)) != 0){
-			childs_list = (void **)alloca( sizeof(void *) * lsz );
-			list_flatten(&machine->childs, childs_list, lsz);
-		}
-		
-	list_unlock(&machine->childs);
-	
-	if(lsz == 0)
-		return -ENOSYS;
-	
-	for(i=0; i<lsz; i++){
-		if( (ret = machine_fast_query((machine_t *)childs_list[i], fargs)) < 0)
-			return ret;
-	}
-	return 0;
+	return machine_fast_query(machine->cnext, fargs);
 } // }}}
 
 data_functions request_str_to_action(char *string){ // {{{

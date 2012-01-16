@@ -53,7 +53,6 @@ static ssize_t switch_config_iterator(hash_t *rule_item, machine_t *machine){ //
 	hash_t                *rule;
 	switch_rule           *new_rule;
 	switch_userdata       *userdata          = (switch_userdata *)machine->userdata;
-	list                  *childs            = &machine->childs;
 
 	if( (new_rule = calloc(sizeof(switch_rule), 1)) == NULL)
 		return ITER_BREAK;
@@ -65,15 +64,10 @@ static ssize_t switch_config_iterator(hash_t *rule_item, machine_t *machine){ //
 	hash_data_copy(ret, TYPE_MACHINET, new_rule->machine, rule, HK(machine)); // converted copy of machine
 	hash_data_copy(ret, TYPE_HASHT,    new_rule->request, rule, HK(request)); // ptr to config, not copy
 	
-	if(new_rule->machine != NULL)
-		machine_add_terminators(new_rule->machine, childs);
-	
 	list_push(&userdata->rules, new_rule);
 	return ITER_CONTINUE;
 } // }}}
 static ssize_t switch_iterator(switch_rule *rule, switch_context *context){ // {{{
-	ssize_t                ret;
-	
 	data_t           d_rule_request = DATA_PTR_HASHT(rule->request);
 	data_t           d_ctx_request  = DATA_PTR_HASHT(context->request);
 	fastcall_compare r_compare = { { 3, ACTION_COMPARE }, &d_ctx_request };
@@ -87,10 +81,15 @@ query:
 	if(rule->machine == NULL)
 		goto pass;
 	
-	context->ret = machine_query(rule->machine, context->request);
+	request_t r_next[] = {
+		{ HK(return_to), DATA_NEXT_MACHINET(context->machine) },
+		hash_inline(context->request),
+		hash_end
+	};
+	context->ret = machine_query(rule->machine, r_next);
 	return 0;
 pass:
-	context->ret = ( ret = machine_pass(context->machine, context->request) ) ? ret : -EEXIST;
+	context->ret = machine_pass(context->machine, context->request);
 	return 0;
 } // }}}
 
@@ -128,18 +127,17 @@ static int switch_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t switch_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
-	void                  *childs_iter       = NULL;
+	void                  *iter              = NULL;
 	switch_rule           *rule;
 	switch_context         context           = { machine, request };
 	switch_userdata       *userdata          = (switch_userdata *)machine->userdata;
 	
-	while( (rule = list_iter_next(&userdata->rules, &childs_iter)) != NULL){
+	while( (rule = list_iter_next(&userdata->rules, &iter)) != NULL){
 		if(switch_iterator(rule, &context) == 0)
 			return context.ret;
 	}
 	
-	return ( (ret = machine_pass(machine, request)) < 0 ) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t switch_proto = {

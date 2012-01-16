@@ -98,7 +98,7 @@ static int wrapper_configure(machine_t *machine, config_t *config){ // {{{
 		terminator->machine_type_fast.func_handler = &wrapper_terminator_fast_handler;
 		
 		list_add(&term_list, terminator);
-		machine_add_terminators(userdata->machine, &term_list);
+		//machine_add_terminators(userdata->machine, &term_list);
 	}
 	return 0;
 } // }}}

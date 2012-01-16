@@ -80,7 +80,7 @@ static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 		if(child == NULL)
 			return error("child creation error");
 
-		machine_connect(machine, child); // on destroy - no need to disconnect or call _destory, core will automatically do it
+		//machine_connect(machine, child); // on destroy - no need to disconnect or call _destory, core will automatically do it
 		userdata->running = 1;
 
 		if(userdata->pass_first == 0)

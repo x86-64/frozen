@@ -860,7 +860,6 @@ enable_machinedebug
 enable_machineemitter
 enable_machineimplode
 enable_machineexplode
-enable_machineiterate
 enable_machineswitch
 enable_machinepass
 enable_machinefile
@@ -1649,8 +1648,6 @@ Optional Features:
                           disable machine implode
   --disable-machine-explode
                           disable machine explode
-  --disable-machine-iterate
-                          disable machine iterate
   --disable-machine-switch
                           disable machine switch
   --disable-machine-pass  disable machine pass
@@ -20734,43 +20731,6 @@ fi
 		MACHINE_MAKEFILE_request_implode=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/implode/libfrozen_machine_implode.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machineiterate was given.
-if test "${enable_machineiterate+set}" = set; then :
-  enableval=$enable_machineiterate;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machineiterate}" = "yes"; then
-			enable_machineiterate="no"
-		else
-			enable_machineiterate="yes"
-		fi
-	fi
-
-	if test "${enable_machineiterate}" = "yes"; then
-		MACHINE_DIR_iterate="request/iterate"
-		MACHINE_DEP_iterate=""
-				MACHINE_SELECTED="$MACHINE_SELECTED iterate"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_request_iterate" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/iterate/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/iterate"
-
-		MACHINE_MAKEFILE_request_iterate=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/iterate/libfrozen_machine_iterate.la"
 
 	fi
 

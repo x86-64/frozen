@@ -113,8 +113,8 @@ struct machine_t {
 	config_t              *config;           ///< Current instance configuraion. (Copy of passed to machine_new)
 
 	uintmax_t              refs;             ///< Internal.
-	list                   parents;          ///< parent machines including private _acquires. Internal.
-	list                   childs;           ///< child machines. Internal.
+	machine_t             *cnext;            ///< Next machine in shop
+	machine_t             *cprev;            ///< Prev machine in shop
 };
 
 API ssize_t         class_register          (machine_t *proto); ///< Register new dynamic class
@@ -176,11 +176,6 @@ API ssize_t         machine_fast_query      (machine_t *machine, void *args); //
 
 API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
 API ssize_t         machine_fast_pass       (machine_t *machine, void *args); ///< Pass fast request to next machines in shop. @param machine Current machine
-
-API void            machine_connect         (machine_t *parent, machine_t *child); ///< Create link between parent and child
-API void            machine_disconnect      (machine_t *parent, machine_t *child); ///< Remove link between parent and child
-API void            machine_insert          (machine_t *parent, machine_t *new_child); ///< Insert new_child in between of machine and it's childs
-API void            machine_add_terminators (machine_t *machine, list *terminators); ///< Wrap machine with terminators.
 
     ssize_t         frozen_machine_init     (void);
     void            frozen_machine_destroy  (void);

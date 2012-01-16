@@ -113,7 +113,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/request/iterate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/storage/file/config.m4 \

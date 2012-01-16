@@ -55,8 +55,6 @@ static ssize_t factory_handler(machine_t *machine, request_t *request){ // {{{
 	
 	if(child == NULL)
 		return error("child creation error");
-
-	machine_connect(machine, child); // on destroy - no need to disconnect or call _destory, core will automatically do it
 	
 	output->ptr = child;
 	return 0;
