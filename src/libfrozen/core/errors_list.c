@@ -171,6 +171,7 @@ static err_item errs_list[] = {
  { -8508, "src/libfrozen/machines/storage/file/file.c: filepath invalid" },
  { -8364, "src/libfrozen/machines/storage/file/file.c: resume error" },
  { -8355, "src/libfrozen/machines/storage/file/file.c: called fork_only file" },
+ { -5676, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4222, "src/libfrozen/machines/index/mphf/mphf_bdz_imp.c: mphf g_free" },
 
 };

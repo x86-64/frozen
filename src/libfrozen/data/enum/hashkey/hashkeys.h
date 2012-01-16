@@ -91,7 +91,6 @@
 #define HK_VALUE_machine_e 28847
 #define HK_VALUE_machine_g 29009
 #define HK_VALUE_machine_v 30224
-#define HK_VALUE_machines 21946
 #define HK_VALUE_marker 9864
 #define HK_VALUE_marker_data 52113
 #define HK_VALUE_max_global 39928
@@ -255,7 +254,6 @@ typedef enum hashkey_t {
       HK_machine_e = HK_VALUE_machine_e, 
       HK_machine_g = HK_VALUE_machine_g, 
       HK_machine_v = HK_VALUE_machine_v, 
-      HK_machines = HK_VALUE_machines, 
       HK_marker = HK_VALUE_marker, 
       HK_marker_data = HK_VALUE_marker_data, 
       HK_max_global = HK_VALUE_max_global, 
@@ -423,7 +421,6 @@ keypair_t hashkeys[] = {
       { "machine_e", HK_VALUE_machine_e }, 
       { "machine_g", HK_VALUE_machine_g }, 
       { "machine_v", HK_VALUE_machine_v }, 
-      { "machines", HK_VALUE_machines }, 
       { "marker", HK_VALUE_marker }, 
       { "marker_data", HK_VALUE_marker_data }, 
       { "max_global", HK_VALUE_max_global }, 
