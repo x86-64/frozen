@@ -7,18 +7,18 @@
  *  @page data_overview Data overview
  *  
  *  Frozen tries to use native C data representation where it possible. Native types is
- *  uintmax_t (TYPE_UINTT), char * (TYPE_STRING), own structures such as hash_t, backend_t, datatype_t and so on.
+ *  uintmax_t (TYPE_UINTT), char * (TYPE_STRING), own structures such as hash_t, machine_t, datatype_t and so on.
  *
  *  To keep data type consistensy and generalize data processing "data holder" was introduced. This is
  *  simple structure data_t which consist of data type field and pointer to data. Data api accept only
  *  data wrapped in such holder. Wrapping can be achieved directly in user function, without unnessesery calls, so
  *  this have low overhead.
  *
- *  Data api, as backend api, receive data holder and request with specified action inside. If this data have
+ *  Data api, as machine api, receive data holder and request with specified action inside. If this data have
  *  correct handlers for action api performs it. There are many standard actions defined, for example, ACTION_READ, _WRITE,
  *  _COPY, _ALLOC, _FREE, _COMPARE, _CONVERT_TO, _CONVERT_FROM and so on.
  *
- *  Data api use same structures and actions as API_FAST, so it will be easy to pass request, arrived to backend, to
+ *  Data api use same structures and actions as API_FAST, so it will be easy to pass request, arrived to machine, to
  *  data. See @ref api_fast
  */
 /** @ingroup data
@@ -49,24 +49,24 @@
  *  Data handler should be ready to any: sectioned, stacked and heaped data. Never realloc or free data if you not 100% sure it was
  *  allocated (keep flag or something).
  *
- *  Same policy applied to data created and processed by backends: backend responsible to free allocated data, supply valid or empty
+ *  Same policy applied to data created and processed by machines: machine responsible to free allocated data, supply valid or empty
  *  data for request.
  */
 /** @ingroup data
  *  @page data_conversion Data conversion
  *  
  *  Some of frozen api, for example hash_data_copy, can convert values from hash to desired type. It possible if data represent
- *  plain value (like integers), or plain pointer (as backend). For rest of data types, which require allocation, this process
+ *  plain value (like integers), or plain pointer (as machine). For rest of data types, which require allocation, this process
  *  can't be automated, as requires free of allocated resources. For those data types you should manually call data_convert macro, or
  *  plain data_query with proper request.
  *
  *  All integer data can be converted in any other integer type. Buffer or string, containing human representation of integer, can also
- *  be converted in clean integer type. String with backend name can be converted to this backend pointer, hash with backend config
- *  can also be converted to new backend, and so on.
+ *  be converted in clean integer type. String with machine name can be converted to this machine pointer, hash with machine config
+ *  can also be converted to new machine, and so on.
  *
- *  This ability also useful to avoid unnesessery data copying from place to place. For example, ipc_shmem backend use shared memory to
+ *  This ability also useful to avoid unnesessery data copying from place to place. For example, ipc_shmem machine use shared memory to
  *  send data to another process. If there was no conversion, it would require buffer with already packed data, which would be copied to
- *  shared memory. And, of course, special packing backend. Instead of that, ipc_shmem take any input and convert it directly to shared memory.
+ *  shared memory. And, of course, special packing machine. Instead of that, ipc_shmem take any input and convert it directly to shared memory.
  */
 
 #define DEF_BUFFER_SIZE 1024

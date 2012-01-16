@@ -82,11 +82,11 @@ AM_CONDITIONAL([HAVE_SWIG], [test "$SWIG" != "no"])
 
 AC_DEFINE_UNQUOTED([M4PATH], "${M4}", [Define m4 path])
 
-sinclude(./build/libfrozen_backends.m4)
+sinclude(./build/libfrozen_machines.m4)
 sinclude(./build/libfrozen_data.m4)
 sinclude(./build/libfrozen_modules.m4)
 esyscmd(./build/configs-find)
-FROZEN_BACKEND_END
+FROZEN_MACHINE_END
 FROZEN_DATA_END
 FROZEN_MODULE_END
 
@@ -138,7 +138,7 @@ AC_CONFIG_FILES([Makefile
 		src/Makefile
 		src/libfrozen/Makefile
 		src/libfrozen/core/Makefile
-		src/libfrozen/backends/Makefile
+		src/libfrozen/machines/Makefile
 		src/libfrozen/data/Makefile
 		src/frozend/Makefile
 		src/lang/Makefile

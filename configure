@@ -619,11 +619,11 @@ modulesdir
 HAVE_DEBUG
 MODULE_DIRS
 DATA_DIRS
-BACKEND_DIRS
+MACHINE_DIRS
+MACHINE_LIBS_SELECTED
+MACHINE_DIST_DIRS
 DATA_LIBS_SELECTED
 DATA_DIST_DIRS
-BACKEND_LIBS_SELECTED
-BACKEND_DIST_DIRS
 MODULE_DIST_DIRS
 HAVE_SWIG_FALSE
 HAVE_SWIG_TRUE
@@ -782,59 +782,10 @@ enable_moduledata_null_t
 enable_moduledata_time_t
 enable_modulego_http
 enable_modulego_template
-enable_backendfixed
-enable_backendlist
-enable_backendbenchmark
-enable_backendcall
-enable_backendend
-enable_backendfactory
-enable_backendmorph
-enable_backendpool
-enable_backendrebuild_monitor
-enable_backendrebuild_reader
-enable_backendwrapper
-enable_backendcache
-enable_backendcache_append
-enable_backendkill
-enable_backendthread
-enable_backendconvert
-enable_backendincapsulate
-enable_backendregexp
-enable_backendsplit
-enable_backendstructs
-enable_backendstruct_pack
-enable_backendstruct_unpack
-enable_backendtransfer
-enable_backendnull
-enable_backendjenkins32
-enable_backendjenkins64
-enable_backendmurmur2_32
-enable_backendmurmur2_64
-enable_backendfill
-enable_backendhashtable
-enable_backendlookup
-enable_backendmphf
-enable_backendstdin
-enable_backendstdout
-enable_backendstderr
-enable_backendfuse
-enable_backendipc
-enable_backendtcp
-enable_backendtcp_child
-enable_backendassign
-enable_backenddebug
-enable_backendemitter
-enable_backendimplode
-enable_backendexplode
-enable_backenditerate
-enable_backendswitch
-enable_backendfile
-enable_backendpointers
-enable_backendmutex
-enable_backend_t
 enable_dataptr_t
 enable_default_t
 enable_hash_t
+enable_machine_t
 enable_string_t
 enable_void_t
 enable_datatype_t
@@ -866,6 +817,55 @@ enable_random_t
 enable_container_t
 enable_memory_t
 enable_raw_t
+enable_machinefixed
+enable_machinelist
+enable_machinecache
+enable_machinecache_append
+enable_machinekill
+enable_machinethread
+enable_machineconvert
+enable_machineincapsulate
+enable_machineregexp
+enable_machinesplit
+enable_machinestructs
+enable_machinestruct_pack
+enable_machinestruct_unpack
+enable_machinetransfer
+enable_machinenull
+enable_machinejenkins32
+enable_machinejenkins64
+enable_machinemurmur2_32
+enable_machinemurmur2_64
+enable_machinefill
+enable_machinehashtable
+enable_machinelookup
+enable_machinemphf
+enable_machinestdin
+enable_machinestdout
+enable_machinestderr
+enable_machinefuse
+enable_machineipc
+enable_machinetcp
+enable_machinetcp_child
+enable_machinebenchmark
+enable_machinecall
+enable_machineend
+enable_machinefactory
+enable_machinemorph
+enable_machinepool
+enable_machinerebuild_monitor
+enable_machinerebuild_reader
+enable_machinewrapper
+enable_machineassign
+enable_machinedebug
+enable_machineemitter
+enable_machineimplode
+enable_machineexplode
+enable_machineiterate
+enable_machineswitch
+enable_machinefile
+enable_machinepointers
+enable_machinemutex
 enable_coverage
 enable_debug
 enable_profile
@@ -1535,92 +1535,13 @@ Optional Features:
                           disable module go-http
   --disable-module-go-template
                           disable module go-template
-  --disable-backend-fixed disable backend fixed
-  --disable-backend-list  disable backend list
-  --disable-backend-benchmark
-                          disable backend benchmark
-  --disable-backend-call  disable backend call
-  --disable-backend-end   disable backend end
-  --disable-backend-factory
-                          disable backend factory
-  --disable-backend-morph disable backend morph
-  --disable-backend-pool  disable backend pool
-  --disable-backend-rebuild-monitor
-                          disable backend rebuild-monitor
-  --disable-backend-rebuild-reader
-                          disable backend rebuild-reader
-  --disable-backend-wrapper
-                          disable backend wrapper
-  --disable-backend-cache disable backend cache
-  --disable-backend-cache-append
-                          disable backend cache-append
-  --disable-backend-kill  disable backend kill
-  --disable-backend-thread
-                          disable backend thread
-  --disable-backend-convert
-                          disable backend convert
-  --disable-backend-incapsulate
-                          disable backend incapsulate
-  --disable-backend-regexp
-                          disable backend regexp
-  --disable-backend-split disable backend split
-  --disable-backend-structs
-                          disable backend structs
-  --disable-backend-struct-pack
-                          disable backend struct-pack
-  --disable-backend-struct-unpack
-                          disable backend struct-unpack
-  --disable-backend-transfer
-                          disable backend transfer
-  --disable-backend-null  disable backend null
-  --disable-backend-jenkins32
-                          disable backend jenkins32
-  --disable-backend-jenkins64
-                          disable backend jenkins64
-  --disable-backend-murmur2-32
-                          disable backend murmur2-32
-  --disable-backend-murmur2-64
-                          disable backend murmur2-64
-  --disable-backend-fill  disable backend fill
-  --disable-backend-hashtable
-                          disable backend hashtable
-  --disable-backend-lookup
-                          disable backend lookup
-  --disable-backend-mphf  disable backend mphf
-  --disable-backend-stdin disable backend stdin
-  --disable-backend-stdout
-                          disable backend stdout
-  --disable-backend-stderr
-                          disable backend stderr
-  --disable-backend-fuse  disable backend fuse
-  --disable-backend-ipc   disable backend ipc
-  --disable-backend-tcp   disable backend tcp
-  --disable-backend-tcp-child
-                          disable backend tcp-child
-  --disable-backend-assign
-                          disable backend assign
-  --disable-backend-debug disable backend debug
-  --disable-backend-emitter
-                          disable backend emitter
-  --disable-backend-implode
-                          disable backend implode
-  --disable-backend-explode
-                          disable backend explode
-  --disable-backend-iterate
-                          disable backend iterate
-  --disable-backend-switch
-                          disable backend switch
-  --disable-backend-file  disable backend file
-  --disable-backend-pointers
-                          disable backend pointers
-  --disable-backend-mutex disable backend mutex
-  --disable-data-backend_t
-                          disable data backend_t
   --disable-data-dataptr_t
                           disable data dataptr_t
   --disable-data-default_t
                           disable data default_t
   --disable-data-hash_t   disable data hash_t
+  --disable-data-machine_t
+                          disable data machine_t
   --disable-data-string_t disable data string_t
   --disable-data-void_t   disable data void_t
   --disable-data-datatype_t
@@ -1658,6 +1579,85 @@ Optional Features:
                           disable data container_t
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
+  --disable-machine-fixed disable machine fixed
+  --disable-machine-list  disable machine list
+  --disable-machine-cache disable machine cache
+  --disable-machine-cache-append
+                          disable machine cache-append
+  --disable-machine-kill  disable machine kill
+  --disable-machine-thread
+                          disable machine thread
+  --disable-machine-convert
+                          disable machine convert
+  --disable-machine-incapsulate
+                          disable machine incapsulate
+  --disable-machine-regexp
+                          disable machine regexp
+  --disable-machine-split disable machine split
+  --disable-machine-structs
+                          disable machine structs
+  --disable-machine-struct-pack
+                          disable machine struct-pack
+  --disable-machine-struct-unpack
+                          disable machine struct-unpack
+  --disable-machine-transfer
+                          disable machine transfer
+  --disable-machine-null  disable machine null
+  --disable-machine-jenkins32
+                          disable machine jenkins32
+  --disable-machine-jenkins64
+                          disable machine jenkins64
+  --disable-machine-murmur2-32
+                          disable machine murmur2-32
+  --disable-machine-murmur2-64
+                          disable machine murmur2-64
+  --disable-machine-fill  disable machine fill
+  --disable-machine-hashtable
+                          disable machine hashtable
+  --disable-machine-lookup
+                          disable machine lookup
+  --disable-machine-mphf  disable machine mphf
+  --disable-machine-stdin disable machine stdin
+  --disable-machine-stdout
+                          disable machine stdout
+  --disable-machine-stderr
+                          disable machine stderr
+  --disable-machine-fuse  disable machine fuse
+  --disable-machine-ipc   disable machine ipc
+  --disable-machine-tcp   disable machine tcp
+  --disable-machine-tcp-child
+                          disable machine tcp-child
+  --disable-machine-benchmark
+                          disable machine benchmark
+  --disable-machine-call  disable machine call
+  --disable-machine-end   disable machine end
+  --disable-machine-factory
+                          disable machine factory
+  --disable-machine-morph disable machine morph
+  --disable-machine-pool  disable machine pool
+  --disable-machine-rebuild-monitor
+                          disable machine rebuild-monitor
+  --disable-machine-rebuild-reader
+                          disable machine rebuild-reader
+  --disable-machine-wrapper
+                          disable machine wrapper
+  --disable-machine-assign
+                          disable machine assign
+  --disable-machine-debug disable machine debug
+  --disable-machine-emitter
+                          disable machine emitter
+  --disable-machine-implode
+                          disable machine implode
+  --disable-machine-explode
+                          disable machine explode
+  --disable-machine-iterate
+                          disable machine iterate
+  --disable-machine-switch
+                          disable machine switch
+  --disable-machine-file  disable machine file
+  --disable-machine-pointers
+                          disable machine pointers
+  --disable-machine-mutex disable machine mutex
   --enable-coverage       enable coverage testing
   --enable-debug          compile with debug symbols
   --enable-profile        enable code profiling
@@ -17871,1851 +17871,6 @@ fi
 
 
 
-
-	# Check whether --enable-backendfixed was given.
-if test "${enable_backendfixed+set}" = set; then :
-  enableval=$enable_backendfixed;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendfixed}" = "yes"; then
-			enable_backendfixed="no"
-		else
-			enable_backendfixed="yes"
-		fi
-	fi
-
-	if test "${enable_backendfixed}" = "yes"; then
-		BACKEND_DIR_fixed="allocator/fixed"
-		BACKEND_DEP_fixed=""
-				BACKEND_SELECTED="$BACKEND_SELECTED fixed"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_allocator_fixed" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/allocator/fixed/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS allocator/fixed"
-
-		BACKEND_MAKEFILE_allocator_fixed=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED allocator/fixed/libfrozen_backend_fixed.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendlist was given.
-if test "${enable_backendlist+set}" = set; then :
-  enableval=$enable_backendlist;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendlist}" = "yes"; then
-			enable_backendlist="no"
-		else
-			enable_backendlist="yes"
-		fi
-	fi
-
-	if test "${enable_backendlist}" = "yes"; then
-		BACKEND_DIR_list="allocator/list"
-		BACKEND_DEP_list=""
-				BACKEND_SELECTED="$BACKEND_SELECTED list"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_allocator_list" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/allocator/list/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS allocator/list"
-
-		BACKEND_MAKEFILE_allocator_list=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED allocator/list/libfrozen_backend_list.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendbenchmark was given.
-if test "${enable_backendbenchmark+set}" = set; then :
-  enableval=$enable_backendbenchmark;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendbenchmark}" = "yes"; then
-			enable_backendbenchmark="no"
-		else
-			enable_backendbenchmark="yes"
-		fi
-	fi
-
-	if test "${enable_backendbenchmark}" = "yes"; then
-		BACKEND_DIR_benchmark="backend/benchmark"
-		BACKEND_DEP_benchmark=""
-				BACKEND_SELECTED="$BACKEND_SELECTED benchmark"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_benchmark" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/benchmark/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/benchmark"
-
-		BACKEND_MAKEFILE_backend_benchmark=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/benchmark/libfrozen_backend_benchmark.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendcall was given.
-if test "${enable_backendcall+set}" = set; then :
-  enableval=$enable_backendcall;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendcall}" = "yes"; then
-			enable_backendcall="no"
-		else
-			enable_backendcall="yes"
-		fi
-	fi
-
-	if test "${enable_backendcall}" = "yes"; then
-		BACKEND_DIR_call="backend/call"
-		BACKEND_DEP_call=""
-				BACKEND_SELECTED="$BACKEND_SELECTED call"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_call" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/call/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/call"
-
-		BACKEND_MAKEFILE_backend_call=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/call/libfrozen_backend_call.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendend was given.
-if test "${enable_backendend+set}" = set; then :
-  enableval=$enable_backendend;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendend}" = "yes"; then
-			enable_backendend="no"
-		else
-			enable_backendend="yes"
-		fi
-	fi
-
-	if test "${enable_backendend}" = "yes"; then
-		BACKEND_DIR_end="backend/end"
-		BACKEND_DEP_end=""
-				BACKEND_SELECTED="$BACKEND_SELECTED end"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_end" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/end/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/end"
-
-		BACKEND_MAKEFILE_backend_end=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/end/libfrozen_backend_end.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendfactory was given.
-if test "${enable_backendfactory+set}" = set; then :
-  enableval=$enable_backendfactory;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendfactory}" = "yes"; then
-			enable_backendfactory="no"
-		else
-			enable_backendfactory="yes"
-		fi
-	fi
-
-	if test "${enable_backendfactory}" = "yes"; then
-		BACKEND_DIR_factory="backend/factory"
-		BACKEND_DEP_factory=""
-				BACKEND_SELECTED="$BACKEND_SELECTED factory"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_factory" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/factory/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/factory"
-
-		BACKEND_MAKEFILE_backend_factory=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/factory/libfrozen_backend_factory.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendmorph was given.
-if test "${enable_backendmorph+set}" = set; then :
-  enableval=$enable_backendmorph;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmorph}" = "yes"; then
-			enable_backendmorph="no"
-		else
-			enable_backendmorph="yes"
-		fi
-	fi
-
-	if test "${enable_backendmorph}" = "yes"; then
-		BACKEND_DIR_morph="backend/morph"
-		BACKEND_DEP_morph=""
-				BACKEND_SELECTED="$BACKEND_SELECTED morph"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_morph" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/morph/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/morph"
-
-		BACKEND_MAKEFILE_backend_morph=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/morph/libfrozen_backend_morph.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendpool was given.
-if test "${enable_backendpool+set}" = set; then :
-  enableval=$enable_backendpool;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendpool}" = "yes"; then
-			enable_backendpool="no"
-		else
-			enable_backendpool="yes"
-		fi
-	fi
-
-	if test "${enable_backendpool}" = "yes"; then
-		BACKEND_DIR_pool="backend/pool"
-		BACKEND_DEP_pool=""
-				BACKEND_SELECTED="$BACKEND_SELECTED pool"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_pool" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/pool/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/pool"
-
-		BACKEND_MAKEFILE_backend_pool=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/pool/libfrozen_backend_pool.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendrebuild_monitor was given.
-if test "${enable_backendrebuild_monitor+set}" = set; then :
-  enableval=$enable_backendrebuild_monitor;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendrebuild_monitor}" = "yes"; then
-			enable_backendrebuild_monitor="no"
-		else
-			enable_backendrebuild_monitor="yes"
-		fi
-	fi
-
-	if test "${enable_backendrebuild_monitor}" = "yes"; then
-		BACKEND_DIR_rebuild_monitor="backend/rebuild"
-		BACKEND_DEP_rebuild_monitor=""
-				BACKEND_SELECTED="$BACKEND_SELECTED rebuild_monitor"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_rebuild" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/rebuild/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/rebuild"
-
-		BACKEND_MAKEFILE_backend_rebuild=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/rebuild/libfrozen_backend_rebuild.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendrebuild_reader was given.
-if test "${enable_backendrebuild_reader+set}" = set; then :
-  enableval=$enable_backendrebuild_reader;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendrebuild_reader}" = "yes"; then
-			enable_backendrebuild_reader="no"
-		else
-			enable_backendrebuild_reader="yes"
-		fi
-	fi
-
-	if test "${enable_backendrebuild_reader}" = "yes"; then
-		BACKEND_DIR_rebuild_reader="backend/rebuild"
-		BACKEND_DEP_rebuild_reader=""
-				BACKEND_SELECTED="$BACKEND_SELECTED rebuild_reader"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_rebuild" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/rebuild/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/rebuild"
-
-		BACKEND_MAKEFILE_backend_rebuild=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/rebuild/libfrozen_backend_rebuild.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendwrapper was given.
-if test "${enable_backendwrapper+set}" = set; then :
-  enableval=$enable_backendwrapper;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendwrapper}" = "yes"; then
-			enable_backendwrapper="no"
-		else
-			enable_backendwrapper="yes"
-		fi
-	fi
-
-	if test "${enable_backendwrapper}" = "yes"; then
-		BACKEND_DIR_wrapper="backend/wrapper"
-		BACKEND_DEP_wrapper=""
-				BACKEND_SELECTED="$BACKEND_SELECTED wrapper"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_backend_wrapper" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/backend/wrapper/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS backend/wrapper"
-
-		BACKEND_MAKEFILE_backend_wrapper=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED backend/wrapper/libfrozen_backend_wrapper.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendcache was given.
-if test "${enable_backendcache+set}" = set; then :
-  enableval=$enable_backendcache;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendcache}" = "yes"; then
-			enable_backendcache="no"
-		else
-			enable_backendcache="yes"
-		fi
-	fi
-
-	if test "${enable_backendcache}" = "yes"; then
-		BACKEND_DIR_cache="cache/cache"
-		BACKEND_DEP_cache=""
-				BACKEND_SELECTED="$BACKEND_SELECTED cache"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_cache_cache" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/cache/cache/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS cache/cache"
-
-		BACKEND_MAKEFILE_cache_cache=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED cache/cache/libfrozen_backend_cache.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendcache_append was given.
-if test "${enable_backendcache_append+set}" = set; then :
-  enableval=$enable_backendcache_append;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendcache_append}" = "yes"; then
-			enable_backendcache_append="no"
-		else
-			enable_backendcache_append="yes"
-		fi
-	fi
-
-	if test "${enable_backendcache_append}" = "yes"; then
-		BACKEND_DIR_cache_append="cache/cache_append"
-		BACKEND_DEP_cache_append=""
-				BACKEND_SELECTED="$BACKEND_SELECTED cache_append"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_cache_cache_append" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/cache/cache_append/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS cache/cache_append"
-
-		BACKEND_MAKEFILE_cache_cache_append=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED cache/cache_append/libfrozen_backend_cache_append.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendkill was given.
-if test "${enable_backendkill+set}" = set; then :
-  enableval=$enable_backendkill;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendkill}" = "yes"; then
-			enable_backendkill="no"
-		else
-			enable_backendkill="yes"
-		fi
-	fi
-
-	if test "${enable_backendkill}" = "yes"; then
-		BACKEND_DIR_kill="daemon/kill"
-		BACKEND_DEP_kill=""
-				BACKEND_SELECTED="$BACKEND_SELECTED kill"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_daemon_kill" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/daemon/kill/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS daemon/kill"
-
-		BACKEND_MAKEFILE_daemon_kill=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED daemon/kill/libfrozen_backend_kill.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendthread was given.
-if test "${enable_backendthread+set}" = set; then :
-  enableval=$enable_backendthread;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendthread}" = "yes"; then
-			enable_backendthread="no"
-		else
-			enable_backendthread="yes"
-		fi
-	fi
-
-	if test "${enable_backendthread}" = "yes"; then
-		BACKEND_DIR_thread="daemon/thread"
-		BACKEND_DEP_thread=""
-				BACKEND_SELECTED="$BACKEND_SELECTED thread"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_daemon_thread" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/daemon/thread/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS daemon/thread"
-
-		BACKEND_MAKEFILE_daemon_thread=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED daemon/thread/libfrozen_backend_thread.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendconvert was given.
-if test "${enable_backendconvert+set}" = set; then :
-  enableval=$enable_backendconvert;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendconvert}" = "yes"; then
-			enable_backendconvert="no"
-		else
-			enable_backendconvert="yes"
-		fi
-	fi
-
-	if test "${enable_backendconvert}" = "yes"; then
-		BACKEND_DIR_convert="data/convert"
-		BACKEND_DEP_convert=""
-				BACKEND_SELECTED="$BACKEND_SELECTED convert"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_convert" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/convert/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/convert"
-
-		BACKEND_MAKEFILE_data_convert=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/convert/libfrozen_backend_convert.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendincapsulate was given.
-if test "${enable_backendincapsulate+set}" = set; then :
-  enableval=$enable_backendincapsulate;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendincapsulate}" = "yes"; then
-			enable_backendincapsulate="no"
-		else
-			enable_backendincapsulate="yes"
-		fi
-	fi
-
-	if test "${enable_backendincapsulate}" = "yes"; then
-		BACKEND_DIR_incapsulate="data/incapsulate"
-		BACKEND_DEP_incapsulate=""
-				BACKEND_SELECTED="$BACKEND_SELECTED incapsulate"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_incapsulate" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/incapsulate/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/incapsulate"
-
-		BACKEND_MAKEFILE_data_incapsulate=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/incapsulate/libfrozen_backend_incapsulate.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendregexp was given.
-if test "${enable_backendregexp+set}" = set; then :
-  enableval=$enable_backendregexp;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendregexp}" = "yes"; then
-			enable_backendregexp="no"
-		else
-			enable_backendregexp="yes"
-		fi
-	fi
-
-	if test "${enable_backendregexp}" = "yes"; then
-		BACKEND_DIR_regexp="data/regexp"
-		BACKEND_DEP_regexp=""
-				BACKEND_SELECTED="$BACKEND_SELECTED regexp"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_regexp" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/regexp/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/regexp"
-
-		BACKEND_MAKEFILE_data_regexp=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/regexp/libfrozen_backend_regexp.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendsplit was given.
-if test "${enable_backendsplit+set}" = set; then :
-  enableval=$enable_backendsplit;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendsplit}" = "yes"; then
-			enable_backendsplit="no"
-		else
-			enable_backendsplit="yes"
-		fi
-	fi
-
-	if test "${enable_backendsplit}" = "yes"; then
-		BACKEND_DIR_split="data/split"
-		BACKEND_DEP_split=""
-				BACKEND_SELECTED="$BACKEND_SELECTED split"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_split" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/split/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/split"
-
-		BACKEND_MAKEFILE_data_split=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/split/libfrozen_backend_split.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendstructs was given.
-if test "${enable_backendstructs+set}" = set; then :
-  enableval=$enable_backendstructs;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstructs}" = "yes"; then
-			enable_backendstructs="no"
-		else
-			enable_backendstructs="yes"
-		fi
-	fi
-
-	if test "${enable_backendstructs}" = "yes"; then
-		BACKEND_DIR_structs="data/structs"
-		BACKEND_DEP_structs=""
-				BACKEND_SELECTED="$BACKEND_SELECTED structs"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/structs"
-
-		BACKEND_MAKEFILE_data_structs=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendstruct_pack was given.
-if test "${enable_backendstruct_pack+set}" = set; then :
-  enableval=$enable_backendstruct_pack;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstruct_pack}" = "yes"; then
-			enable_backendstruct_pack="no"
-		else
-			enable_backendstruct_pack="yes"
-		fi
-	fi
-
-	if test "${enable_backendstruct_pack}" = "yes"; then
-		BACKEND_DIR_struct_pack="data/structs"
-		BACKEND_DEP_struct_pack=""
-				BACKEND_SELECTED="$BACKEND_SELECTED struct_pack"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/structs"
-
-		BACKEND_MAKEFILE_data_structs=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendstruct_unpack was given.
-if test "${enable_backendstruct_unpack+set}" = set; then :
-  enableval=$enable_backendstruct_unpack;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstruct_unpack}" = "yes"; then
-			enable_backendstruct_unpack="no"
-		else
-			enable_backendstruct_unpack="yes"
-		fi
-	fi
-
-	if test "${enable_backendstruct_unpack}" = "yes"; then
-		BACKEND_DIR_struct_unpack="data/structs"
-		BACKEND_DEP_struct_unpack=""
-				BACKEND_SELECTED="$BACKEND_SELECTED struct_unpack"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_structs" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/structs/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/structs"
-
-		BACKEND_MAKEFILE_data_structs=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/structs/libfrozen_backend_structs.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendtransfer was given.
-if test "${enable_backendtransfer+set}" = set; then :
-  enableval=$enable_backendtransfer;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendtransfer}" = "yes"; then
-			enable_backendtransfer="no"
-		else
-			enable_backendtransfer="yes"
-		fi
-	fi
-
-	if test "${enable_backendtransfer}" = "yes"; then
-		BACKEND_DIR_transfer="data/transfer"
-		BACKEND_DEP_transfer=""
-				BACKEND_SELECTED="$BACKEND_SELECTED transfer"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_data_transfer" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/data/transfer/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS data/transfer"
-
-		BACKEND_MAKEFILE_data_transfer=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED data/transfer/libfrozen_backend_transfer.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendnull was given.
-if test "${enable_backendnull+set}" = set; then :
-  enableval=$enable_backendnull;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendnull}" = "yes"; then
-			enable_backendnull="no"
-		else
-			enable_backendnull="yes"
-		fi
-	fi
-
-	if test "${enable_backendnull}" = "yes"; then
-		BACKEND_DIR_null="examples/null"
-		BACKEND_DEP_null=""
-				BACKEND_SELECTED="$BACKEND_SELECTED null"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_examples_null" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/examples/null/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS examples/null"
-
-		BACKEND_MAKEFILE_examples_null=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED examples/null/libfrozen_backend_null.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendjenkins32 was given.
-if test "${enable_backendjenkins32+set}" = set; then :
-  enableval=$enable_backendjenkins32;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendjenkins32}" = "yes"; then
-			enable_backendjenkins32="no"
-		else
-			enable_backendjenkins32="yes"
-		fi
-	fi
-
-	if test "${enable_backendjenkins32}" = "yes"; then
-		BACKEND_DIR_jenkins32="hash/jenkins"
-		BACKEND_DEP_jenkins32=""
-				BACKEND_SELECTED="$BACKEND_SELECTED jenkins32"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_hash_jenkins" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/jenkins/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/jenkins"
-
-		BACKEND_MAKEFILE_hash_jenkins=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/jenkins/libfrozen_backend_jenkins.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendjenkins64 was given.
-if test "${enable_backendjenkins64+set}" = set; then :
-  enableval=$enable_backendjenkins64;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendjenkins64}" = "yes"; then
-			enable_backendjenkins64="no"
-		else
-			enable_backendjenkins64="yes"
-		fi
-	fi
-
-	if test "${enable_backendjenkins64}" = "yes"; then
-		BACKEND_DIR_jenkins64="hash/jenkins"
-		BACKEND_DEP_jenkins64=""
-				BACKEND_SELECTED="$BACKEND_SELECTED jenkins64"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_hash_jenkins" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/jenkins/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/jenkins"
-
-		BACKEND_MAKEFILE_hash_jenkins=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/jenkins/libfrozen_backend_jenkins.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendmurmur2_32 was given.
-if test "${enable_backendmurmur2_32+set}" = set; then :
-  enableval=$enable_backendmurmur2_32;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmurmur2_32}" = "yes"; then
-			enable_backendmurmur2_32="no"
-		else
-			enable_backendmurmur2_32="yes"
-		fi
-	fi
-
-	if test "${enable_backendmurmur2_32}" = "yes"; then
-		BACKEND_DIR_murmur2_32="hash/murmur"
-		BACKEND_DEP_murmur2_32=""
-				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_32"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
-
-		BACKEND_MAKEFILE_hash_murmur=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendmurmur2_64 was given.
-if test "${enable_backendmurmur2_64+set}" = set; then :
-  enableval=$enable_backendmurmur2_64;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmurmur2_64}" = "yes"; then
-			enable_backendmurmur2_64="no"
-		else
-			enable_backendmurmur2_64="yes"
-		fi
-	fi
-
-	if test "${enable_backendmurmur2_64}" = "yes"; then
-		BACKEND_DIR_murmur2_64="hash/murmur"
-		BACKEND_DEP_murmur2_64=""
-				BACKEND_SELECTED="$BACKEND_SELECTED murmur2_64"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_hash_murmur" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/hash/murmur/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS hash/murmur"
-
-		BACKEND_MAKEFILE_hash_murmur=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED hash/murmur/libfrozen_backend_murmur.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendfill was given.
-if test "${enable_backendfill+set}" = set; then :
-  enableval=$enable_backendfill;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendfill}" = "yes"; then
-			enable_backendfill="no"
-		else
-			enable_backendfill="yes"
-		fi
-	fi
-
-	if test "${enable_backendfill}" = "yes"; then
-		BACKEND_DIR_fill="index/fill"
-		BACKEND_DEP_fill=""
-				BACKEND_SELECTED="$BACKEND_SELECTED fill"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_index_fill" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/fill/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/fill"
-
-		BACKEND_MAKEFILE_index_fill=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/fill/libfrozen_backend_fill.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendhashtable was given.
-if test "${enable_backendhashtable+set}" = set; then :
-  enableval=$enable_backendhashtable;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendhashtable}" = "yes"; then
-			enable_backendhashtable="no"
-		else
-			enable_backendhashtable="yes"
-		fi
-	fi
-
-	if test "${enable_backendhashtable}" = "yes"; then
-		BACKEND_DIR_hashtable="index/hashtable"
-		BACKEND_DEP_hashtable=""
-				BACKEND_SELECTED="$BACKEND_SELECTED hashtable"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_index_hashtable" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/hashtable/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/hashtable"
-
-		BACKEND_MAKEFILE_index_hashtable=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/hashtable/libfrozen_backend_hashtable.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendlookup was given.
-if test "${enable_backendlookup+set}" = set; then :
-  enableval=$enable_backendlookup;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendlookup}" = "yes"; then
-			enable_backendlookup="no"
-		else
-			enable_backendlookup="yes"
-		fi
-	fi
-
-	if test "${enable_backendlookup}" = "yes"; then
-		BACKEND_DIR_lookup="index/lookup"
-		BACKEND_DEP_lookup=""
-				BACKEND_SELECTED="$BACKEND_SELECTED lookup"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_index_lookup" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/lookup/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/lookup"
-
-		BACKEND_MAKEFILE_index_lookup=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/lookup/libfrozen_backend_lookup.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendmphf was given.
-if test "${enable_backendmphf+set}" = set; then :
-  enableval=$enable_backendmphf;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmphf}" = "yes"; then
-			enable_backendmphf="no"
-		else
-			enable_backendmphf="yes"
-		fi
-	fi
-
-	if test "${enable_backendmphf}" = "yes"; then
-		BACKEND_DIR_mphf="index/mphf"
-		BACKEND_DEP_mphf=""
-				BACKEND_SELECTED="$BACKEND_SELECTED mphf"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_index_mphf" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/index/mphf/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS index/mphf"
-
-		BACKEND_MAKEFILE_index_mphf=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED index/mphf/libfrozen_backend_mphf.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendstdin was given.
-if test "${enable_backendstdin+set}" = set; then :
-  enableval=$enable_backendstdin;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstdin}" = "yes"; then
-			enable_backendstdin="no"
-		else
-			enable_backendstdin="yes"
-		fi
-	fi
-
-	if test "${enable_backendstdin}" = "yes"; then
-		BACKEND_DIR_stdin="io/console"
-		BACKEND_DEP_stdin=""
-				BACKEND_SELECTED="$BACKEND_SELECTED stdin"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_console" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
-
-		BACKEND_MAKEFILE_io_console=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendstdout was given.
-if test "${enable_backendstdout+set}" = set; then :
-  enableval=$enable_backendstdout;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstdout}" = "yes"; then
-			enable_backendstdout="no"
-		else
-			enable_backendstdout="yes"
-		fi
-	fi
-
-	if test "${enable_backendstdout}" = "yes"; then
-		BACKEND_DIR_stdout="io/console"
-		BACKEND_DEP_stdout=""
-				BACKEND_SELECTED="$BACKEND_SELECTED stdout"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_console" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
-
-		BACKEND_MAKEFILE_io_console=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendstderr was given.
-if test "${enable_backendstderr+set}" = set; then :
-  enableval=$enable_backendstderr;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendstderr}" = "yes"; then
-			enable_backendstderr="no"
-		else
-			enable_backendstderr="yes"
-		fi
-	fi
-
-	if test "${enable_backendstderr}" = "yes"; then
-		BACKEND_DIR_stderr="io/console"
-		BACKEND_DEP_stderr=""
-				BACKEND_SELECTED="$BACKEND_SELECTED stderr"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_console" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/console/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/console"
-
-		BACKEND_MAKEFILE_io_console=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/console/libfrozen_backend_console.la"
-
-	fi
-
-
-if test "x$HAVE_FUSE" = "x1"; then :
-
-
-
-
-
-
-	# Check whether --enable-backendfuse was given.
-if test "${enable_backendfuse+set}" = set; then :
-  enableval=$enable_backendfuse;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendfuse}" = "yes"; then
-			enable_backendfuse="no"
-		else
-			enable_backendfuse="yes"
-		fi
-	fi
-
-	if test "${enable_backendfuse}" = "yes"; then
-		BACKEND_DIR_fuse="io/fuse"
-		BACKEND_DEP_fuse=""
-				BACKEND_SELECTED="$BACKEND_SELECTED fuse"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_fuse" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/fuse/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/fuse"
-
-		BACKEND_MAKEFILE_io_fuse=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/fuse/libfrozen_backend_fuse.la"
-
-	fi
-
-
-fi
-
-
-
-
-
-
-	# Check whether --enable-backendipc was given.
-if test "${enable_backendipc+set}" = set; then :
-  enableval=$enable_backendipc;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendipc}" = "yes"; then
-			enable_backendipc="no"
-		else
-			enable_backendipc="yes"
-		fi
-	fi
-
-	if test "${enable_backendipc}" = "yes"; then
-		BACKEND_DIR_ipc="io/ipc"
-		BACKEND_DEP_ipc=""
-				BACKEND_SELECTED="$BACKEND_SELECTED ipc"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_ipc" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/ipc/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/ipc"
-
-		BACKEND_MAKEFILE_io_ipc=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/ipc/libfrozen_backend_ipc.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendtcp was given.
-if test "${enable_backendtcp+set}" = set; then :
-  enableval=$enable_backendtcp;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendtcp}" = "yes"; then
-			enable_backendtcp="no"
-		else
-			enable_backendtcp="yes"
-		fi
-	fi
-
-	if test "${enable_backendtcp}" = "yes"; then
-		BACKEND_DIR_tcp="io/tcp"
-		BACKEND_DEP_tcp=""
-				BACKEND_SELECTED="$BACKEND_SELECTED tcp"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_tcp" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/tcp/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/tcp"
-
-		BACKEND_MAKEFILE_io_tcp=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/tcp/libfrozen_backend_tcp.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendtcp_child was given.
-if test "${enable_backendtcp_child+set}" = set; then :
-  enableval=$enable_backendtcp_child;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendtcp_child}" = "yes"; then
-			enable_backendtcp_child="no"
-		else
-			enable_backendtcp_child="yes"
-		fi
-	fi
-
-	if test "${enable_backendtcp_child}" = "yes"; then
-		BACKEND_DIR_tcp_child="io/tcp"
-		BACKEND_DEP_tcp_child=""
-				BACKEND_SELECTED="$BACKEND_SELECTED tcp_child"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_io_tcp" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/io/tcp/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS io/tcp"
-
-		BACKEND_MAKEFILE_io_tcp=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED io/tcp/libfrozen_backend_tcp.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendassign was given.
-if test "${enable_backendassign+set}" = set; then :
-  enableval=$enable_backendassign;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendassign}" = "yes"; then
-			enable_backendassign="no"
-		else
-			enable_backendassign="yes"
-		fi
-	fi
-
-	if test "${enable_backendassign}" = "yes"; then
-		BACKEND_DIR_assign="request/assign"
-		BACKEND_DEP_assign=""
-				BACKEND_SELECTED="$BACKEND_SELECTED assign"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_assign" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/assign/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/assign"
-
-		BACKEND_MAKEFILE_request_assign=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/assign/libfrozen_backend_assign.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backenddebug was given.
-if test "${enable_backenddebug+set}" = set; then :
-  enableval=$enable_backenddebug;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backenddebug}" = "yes"; then
-			enable_backenddebug="no"
-		else
-			enable_backenddebug="yes"
-		fi
-	fi
-
-	if test "${enable_backenddebug}" = "yes"; then
-		BACKEND_DIR_debug="request/debug"
-		BACKEND_DEP_debug=""
-				BACKEND_SELECTED="$BACKEND_SELECTED debug"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_debug" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/debug/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/debug"
-
-		BACKEND_MAKEFILE_request_debug=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/debug/libfrozen_backend_debug.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendemitter was given.
-if test "${enable_backendemitter+set}" = set; then :
-  enableval=$enable_backendemitter;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendemitter}" = "yes"; then
-			enable_backendemitter="no"
-		else
-			enable_backendemitter="yes"
-		fi
-	fi
-
-	if test "${enable_backendemitter}" = "yes"; then
-		BACKEND_DIR_emitter="request/emitter"
-		BACKEND_DEP_emitter=""
-				BACKEND_SELECTED="$BACKEND_SELECTED emitter"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_emitter" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/emitter/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/emitter"
-
-		BACKEND_MAKEFILE_request_emitter=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/emitter/libfrozen_backend_emitter.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendimplode was given.
-if test "${enable_backendimplode+set}" = set; then :
-  enableval=$enable_backendimplode;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendimplode}" = "yes"; then
-			enable_backendimplode="no"
-		else
-			enable_backendimplode="yes"
-		fi
-	fi
-
-	if test "${enable_backendimplode}" = "yes"; then
-		BACKEND_DIR_implode="request/implode"
-		BACKEND_DEP_implode=""
-				BACKEND_SELECTED="$BACKEND_SELECTED implode"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_implode" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/implode/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/implode"
-
-		BACKEND_MAKEFILE_request_implode=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/implode/libfrozen_backend_implode.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backendexplode was given.
-if test "${enable_backendexplode+set}" = set; then :
-  enableval=$enable_backendexplode;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendexplode}" = "yes"; then
-			enable_backendexplode="no"
-		else
-			enable_backendexplode="yes"
-		fi
-	fi
-
-	if test "${enable_backendexplode}" = "yes"; then
-		BACKEND_DIR_explode="request/implode"
-		BACKEND_DEP_explode=""
-				BACKEND_SELECTED="$BACKEND_SELECTED explode"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_implode" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/implode/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/implode"
-
-		BACKEND_MAKEFILE_request_implode=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/implode/libfrozen_backend_implode.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backenditerate was given.
-if test "${enable_backenditerate+set}" = set; then :
-  enableval=$enable_backenditerate;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backenditerate}" = "yes"; then
-			enable_backenditerate="no"
-		else
-			enable_backenditerate="yes"
-		fi
-	fi
-
-	if test "${enable_backenditerate}" = "yes"; then
-		BACKEND_DIR_iterate="request/iterate"
-		BACKEND_DEP_iterate=""
-				BACKEND_SELECTED="$BACKEND_SELECTED iterate"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_iterate" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/iterate/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/iterate"
-
-		BACKEND_MAKEFILE_request_iterate=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/iterate/libfrozen_backend_iterate.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendswitch was given.
-if test "${enable_backendswitch+set}" = set; then :
-  enableval=$enable_backendswitch;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendswitch}" = "yes"; then
-			enable_backendswitch="no"
-		else
-			enable_backendswitch="yes"
-		fi
-	fi
-
-	if test "${enable_backendswitch}" = "yes"; then
-		BACKEND_DIR_switch="request/switch"
-		BACKEND_DEP_switch=""
-				BACKEND_SELECTED="$BACKEND_SELECTED switch"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_request_switch" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/request/switch/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS request/switch"
-
-		BACKEND_MAKEFILE_request_switch=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED request/switch/libfrozen_backend_switch.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendfile was given.
-if test "${enable_backendfile+set}" = set; then :
-  enableval=$enable_backendfile;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendfile}" = "yes"; then
-			enable_backendfile="no"
-		else
-			enable_backendfile="yes"
-		fi
-	fi
-
-	if test "${enable_backendfile}" = "yes"; then
-		BACKEND_DIR_file="storage/file"
-		BACKEND_DEP_file=""
-				BACKEND_SELECTED="$BACKEND_SELECTED file"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_storage_file" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/storage/file/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS storage/file"
-
-		BACKEND_MAKEFILE_storage_file=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED storage/file/libfrozen_backend_file.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendpointers was given.
-if test "${enable_backendpointers+set}" = set; then :
-  enableval=$enable_backendpointers;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendpointers}" = "yes"; then
-			enable_backendpointers="no"
-		else
-			enable_backendpointers="yes"
-		fi
-	fi
-
-	if test "${enable_backendpointers}" = "yes"; then
-		BACKEND_DIR_pointers="storage/pointers"
-		BACKEND_DEP_pointers=""
-				BACKEND_SELECTED="$BACKEND_SELECTED pointers"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_storage_pointers" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/storage/pointers/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS storage/pointers"
-
-		BACKEND_MAKEFILE_storage_pointers=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED storage/pointers/libfrozen_backend_pointers.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-backendmutex was given.
-if test "${enable_backendmutex+set}" = set; then :
-  enableval=$enable_backendmutex;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backendmutex}" = "yes"; then
-			enable_backendmutex="no"
-		else
-			enable_backendmutex="yes"
-		fi
-	fi
-
-	if test "${enable_backendmutex}" = "yes"; then
-		BACKEND_DIR_mutex="sync/mutex"
-		BACKEND_DEP_mutex=""
-				BACKEND_SELECTED="$BACKEND_SELECTED mutex"
-
-			fi
-
-	if test "$BACKEND_MAKEFILE_sync_mutex" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/backends/sync/mutex/Makefile"
-		BACKEND_DIST_DIRS="$BACKEND_DIST_DIRS sync/mutex"
-
-		BACKEND_MAKEFILE_sync_mutex=yes
-
-		BACKEND_LIBS_SELECTED="$BACKEND_LIBS_SELECTED sync/mutex/libfrozen_backend_mutex.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-backend_t was given.
-if test "${enable_backend_t+set}" = set; then :
-  enableval=$enable_backend_t;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_backend_t}" = "yes"; then
-			enable_backend_t="no"
-		else
-			enable_backend_t="yes"
-		fi
-	fi
-
-	if test "${enable_backend_t}" = "yes"; then
-		DATA_DIR_backend_t="core/backend"
-		DATA_DEP_backend_t="string_t hash_t"
-		DATA_ID_backend_t="1"
-		DATA_SELECTED="$DATA_SELECTED backend_t"
-		DATA_HEADERS="$DATA_HEADERS core/backend/backend_t.h"
-	fi
-
-	if test "$DATA_MAKEFILE_core_backend" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/core/backend/Makefile"
-		DATA_DIST_DIRS="$DATA_DIST_DIRS core/backend"
-
-		DATA_MAKEFILE_core_backend=yes
-
-		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/backend/libfrozen_data_backend.la"
-
-	fi
-
-
-
-
-
-
 	# Check whether --enable-dataptr_t was given.
 if test "${enable_dataptr_t+set}" = set; then :
   enableval=$enable_dataptr_t;
@@ -19819,6 +17974,43 @@ fi
 		DATA_MAKEFILE_core_hash=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/hash/libfrozen_data_hash.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machine_t was given.
+if test "${enable_machine_t+set}" = set; then :
+  enableval=$enable_machine_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machine_t}" = "yes"; then
+			enable_machine_t="no"
+		else
+			enable_machine_t="yes"
+		fi
+	fi
+
+	if test "${enable_machine_t}" = "yes"; then
+		DATA_DIR_machine_t="core/machine"
+		DATA_DEP_machine_t="string_t hash_t"
+		DATA_ID_machine_t="1"
+		DATA_SELECTED="$DATA_SELECTED machine_t"
+		DATA_HEADERS="$DATA_HEADERS core/machine/machine_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_core_machine" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/core/machine/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS core/machine"
+
+		DATA_MAKEFILE_core_machine=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/machine/libfrozen_data_machine.la"
 
 	fi
 
@@ -20962,40 +19154,1848 @@ fi
 
 
 
-	BACKEND_SELECTED_DEPS=$BACKEND_SELECTED
-	for m in $BACKEND_SELECTED; do
-		eval m_deps="\$BACKEND_DEP_$m"
+
+
+
+	# Check whether --enable-machinefixed was given.
+if test "${enable_machinefixed+set}" = set; then :
+  enableval=$enable_machinefixed;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinefixed}" = "yes"; then
+			enable_machinefixed="no"
+		else
+			enable_machinefixed="yes"
+		fi
+	fi
+
+	if test "${enable_machinefixed}" = "yes"; then
+		MACHINE_DIR_fixed="allocator/fixed"
+		MACHINE_DEP_fixed=""
+				MACHINE_SELECTED="$MACHINE_SELECTED fixed"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_allocator_fixed" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/allocator/fixed/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS allocator/fixed"
+
+		MACHINE_MAKEFILE_allocator_fixed=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED allocator/fixed/libfrozen_machine_fixed.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinelist was given.
+if test "${enable_machinelist+set}" = set; then :
+  enableval=$enable_machinelist;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinelist}" = "yes"; then
+			enable_machinelist="no"
+		else
+			enable_machinelist="yes"
+		fi
+	fi
+
+	if test "${enable_machinelist}" = "yes"; then
+		MACHINE_DIR_list="allocator/list"
+		MACHINE_DEP_list=""
+				MACHINE_SELECTED="$MACHINE_SELECTED list"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_allocator_list" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/allocator/list/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS allocator/list"
+
+		MACHINE_MAKEFILE_allocator_list=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED allocator/list/libfrozen_machine_list.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinecache was given.
+if test "${enable_machinecache+set}" = set; then :
+  enableval=$enable_machinecache;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinecache}" = "yes"; then
+			enable_machinecache="no"
+		else
+			enable_machinecache="yes"
+		fi
+	fi
+
+	if test "${enable_machinecache}" = "yes"; then
+		MACHINE_DIR_cache="cache/cache"
+		MACHINE_DEP_cache=""
+				MACHINE_SELECTED="$MACHINE_SELECTED cache"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_cache_cache" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/cache/cache/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS cache/cache"
+
+		MACHINE_MAKEFILE_cache_cache=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED cache/cache/libfrozen_machine_cache.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinecache_append was given.
+if test "${enable_machinecache_append+set}" = set; then :
+  enableval=$enable_machinecache_append;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinecache_append}" = "yes"; then
+			enable_machinecache_append="no"
+		else
+			enable_machinecache_append="yes"
+		fi
+	fi
+
+	if test "${enable_machinecache_append}" = "yes"; then
+		MACHINE_DIR_cache_append="cache/cache_append"
+		MACHINE_DEP_cache_append=""
+				MACHINE_SELECTED="$MACHINE_SELECTED cache_append"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_cache_cache_append" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/cache/cache_append/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS cache/cache_append"
+
+		MACHINE_MAKEFILE_cache_cache_append=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED cache/cache_append/libfrozen_machine_cache_append.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinekill was given.
+if test "${enable_machinekill+set}" = set; then :
+  enableval=$enable_machinekill;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinekill}" = "yes"; then
+			enable_machinekill="no"
+		else
+			enable_machinekill="yes"
+		fi
+	fi
+
+	if test "${enable_machinekill}" = "yes"; then
+		MACHINE_DIR_kill="daemon/kill"
+		MACHINE_DEP_kill=""
+				MACHINE_SELECTED="$MACHINE_SELECTED kill"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_daemon_kill" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/daemon/kill/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS daemon/kill"
+
+		MACHINE_MAKEFILE_daemon_kill=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED daemon/kill/libfrozen_machine_kill.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinethread was given.
+if test "${enable_machinethread+set}" = set; then :
+  enableval=$enable_machinethread;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinethread}" = "yes"; then
+			enable_machinethread="no"
+		else
+			enable_machinethread="yes"
+		fi
+	fi
+
+	if test "${enable_machinethread}" = "yes"; then
+		MACHINE_DIR_thread="daemon/thread"
+		MACHINE_DEP_thread=""
+				MACHINE_SELECTED="$MACHINE_SELECTED thread"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_daemon_thread" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/daemon/thread/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS daemon/thread"
+
+		MACHINE_MAKEFILE_daemon_thread=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED daemon/thread/libfrozen_machine_thread.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineconvert was given.
+if test "${enable_machineconvert+set}" = set; then :
+  enableval=$enable_machineconvert;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineconvert}" = "yes"; then
+			enable_machineconvert="no"
+		else
+			enable_machineconvert="yes"
+		fi
+	fi
+
+	if test "${enable_machineconvert}" = "yes"; then
+		MACHINE_DIR_convert="data/convert"
+		MACHINE_DEP_convert=""
+				MACHINE_SELECTED="$MACHINE_SELECTED convert"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_convert" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/convert/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/convert"
+
+		MACHINE_MAKEFILE_data_convert=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/convert/libfrozen_machine_convert.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineincapsulate was given.
+if test "${enable_machineincapsulate+set}" = set; then :
+  enableval=$enable_machineincapsulate;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineincapsulate}" = "yes"; then
+			enable_machineincapsulate="no"
+		else
+			enable_machineincapsulate="yes"
+		fi
+	fi
+
+	if test "${enable_machineincapsulate}" = "yes"; then
+		MACHINE_DIR_incapsulate="data/incapsulate"
+		MACHINE_DEP_incapsulate=""
+				MACHINE_SELECTED="$MACHINE_SELECTED incapsulate"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_incapsulate" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/incapsulate/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/incapsulate"
+
+		MACHINE_MAKEFILE_data_incapsulate=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/incapsulate/libfrozen_machine_incapsulate.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineregexp was given.
+if test "${enable_machineregexp+set}" = set; then :
+  enableval=$enable_machineregexp;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineregexp}" = "yes"; then
+			enable_machineregexp="no"
+		else
+			enable_machineregexp="yes"
+		fi
+	fi
+
+	if test "${enable_machineregexp}" = "yes"; then
+		MACHINE_DIR_regexp="data/regexp"
+		MACHINE_DEP_regexp=""
+				MACHINE_SELECTED="$MACHINE_SELECTED regexp"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_regexp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/regexp/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/regexp"
+
+		MACHINE_MAKEFILE_data_regexp=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/regexp/libfrozen_machine_regexp.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinesplit was given.
+if test "${enable_machinesplit+set}" = set; then :
+  enableval=$enable_machinesplit;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinesplit}" = "yes"; then
+			enable_machinesplit="no"
+		else
+			enable_machinesplit="yes"
+		fi
+	fi
+
+	if test "${enable_machinesplit}" = "yes"; then
+		MACHINE_DIR_split="data/split"
+		MACHINE_DEP_split=""
+				MACHINE_SELECTED="$MACHINE_SELECTED split"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_split" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/split/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/split"
+
+		MACHINE_MAKEFILE_data_split=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/split/libfrozen_machine_split.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinestructs was given.
+if test "${enable_machinestructs+set}" = set; then :
+  enableval=$enable_machinestructs;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestructs}" = "yes"; then
+			enable_machinestructs="no"
+		else
+			enable_machinestructs="yes"
+		fi
+	fi
+
+	if test "${enable_machinestructs}" = "yes"; then
+		MACHINE_DIR_structs="data/structs"
+		MACHINE_DEP_structs=""
+				MACHINE_SELECTED="$MACHINE_SELECTED structs"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_structs" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/structs/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/structs"
+
+		MACHINE_MAKEFILE_data_structs=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/structs/libfrozen_machine_structs.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinestruct_pack was given.
+if test "${enable_machinestruct_pack+set}" = set; then :
+  enableval=$enable_machinestruct_pack;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestruct_pack}" = "yes"; then
+			enable_machinestruct_pack="no"
+		else
+			enable_machinestruct_pack="yes"
+		fi
+	fi
+
+	if test "${enable_machinestruct_pack}" = "yes"; then
+		MACHINE_DIR_struct_pack="data/structs"
+		MACHINE_DEP_struct_pack=""
+				MACHINE_SELECTED="$MACHINE_SELECTED struct_pack"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_structs" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/structs/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/structs"
+
+		MACHINE_MAKEFILE_data_structs=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/structs/libfrozen_machine_structs.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinestruct_unpack was given.
+if test "${enable_machinestruct_unpack+set}" = set; then :
+  enableval=$enable_machinestruct_unpack;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestruct_unpack}" = "yes"; then
+			enable_machinestruct_unpack="no"
+		else
+			enable_machinestruct_unpack="yes"
+		fi
+	fi
+
+	if test "${enable_machinestruct_unpack}" = "yes"; then
+		MACHINE_DIR_struct_unpack="data/structs"
+		MACHINE_DEP_struct_unpack=""
+				MACHINE_SELECTED="$MACHINE_SELECTED struct_unpack"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_structs" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/structs/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/structs"
+
+		MACHINE_MAKEFILE_data_structs=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/structs/libfrozen_machine_structs.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinetransfer was given.
+if test "${enable_machinetransfer+set}" = set; then :
+  enableval=$enable_machinetransfer;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinetransfer}" = "yes"; then
+			enable_machinetransfer="no"
+		else
+			enable_machinetransfer="yes"
+		fi
+	fi
+
+	if test "${enable_machinetransfer}" = "yes"; then
+		MACHINE_DIR_transfer="data/transfer"
+		MACHINE_DEP_transfer=""
+				MACHINE_SELECTED="$MACHINE_SELECTED transfer"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_transfer" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/transfer/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/transfer"
+
+		MACHINE_MAKEFILE_data_transfer=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/transfer/libfrozen_machine_transfer.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinenull was given.
+if test "${enable_machinenull+set}" = set; then :
+  enableval=$enable_machinenull;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinenull}" = "yes"; then
+			enable_machinenull="no"
+		else
+			enable_machinenull="yes"
+		fi
+	fi
+
+	if test "${enable_machinenull}" = "yes"; then
+		MACHINE_DIR_null="examples/null"
+		MACHINE_DEP_null=""
+				MACHINE_SELECTED="$MACHINE_SELECTED null"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_examples_null" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/examples/null/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS examples/null"
+
+		MACHINE_MAKEFILE_examples_null=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED examples/null/libfrozen_machine_null.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinejenkins32 was given.
+if test "${enable_machinejenkins32+set}" = set; then :
+  enableval=$enable_machinejenkins32;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinejenkins32}" = "yes"; then
+			enable_machinejenkins32="no"
+		else
+			enable_machinejenkins32="yes"
+		fi
+	fi
+
+	if test "${enable_machinejenkins32}" = "yes"; then
+		MACHINE_DIR_jenkins32="hash/jenkins"
+		MACHINE_DEP_jenkins32=""
+				MACHINE_SELECTED="$MACHINE_SELECTED jenkins32"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_hash_jenkins" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/hash/jenkins/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS hash/jenkins"
+
+		MACHINE_MAKEFILE_hash_jenkins=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED hash/jenkins/libfrozen_machine_jenkins.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinejenkins64 was given.
+if test "${enable_machinejenkins64+set}" = set; then :
+  enableval=$enable_machinejenkins64;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinejenkins64}" = "yes"; then
+			enable_machinejenkins64="no"
+		else
+			enable_machinejenkins64="yes"
+		fi
+	fi
+
+	if test "${enable_machinejenkins64}" = "yes"; then
+		MACHINE_DIR_jenkins64="hash/jenkins"
+		MACHINE_DEP_jenkins64=""
+				MACHINE_SELECTED="$MACHINE_SELECTED jenkins64"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_hash_jenkins" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/hash/jenkins/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS hash/jenkins"
+
+		MACHINE_MAKEFILE_hash_jenkins=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED hash/jenkins/libfrozen_machine_jenkins.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinemurmur2_32 was given.
+if test "${enable_machinemurmur2_32+set}" = set; then :
+  enableval=$enable_machinemurmur2_32;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinemurmur2_32}" = "yes"; then
+			enable_machinemurmur2_32="no"
+		else
+			enable_machinemurmur2_32="yes"
+		fi
+	fi
+
+	if test "${enable_machinemurmur2_32}" = "yes"; then
+		MACHINE_DIR_murmur2_32="hash/murmur"
+		MACHINE_DEP_murmur2_32=""
+				MACHINE_SELECTED="$MACHINE_SELECTED murmur2_32"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_hash_murmur" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/hash/murmur/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS hash/murmur"
+
+		MACHINE_MAKEFILE_hash_murmur=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED hash/murmur/libfrozen_machine_murmur.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinemurmur2_64 was given.
+if test "${enable_machinemurmur2_64+set}" = set; then :
+  enableval=$enable_machinemurmur2_64;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinemurmur2_64}" = "yes"; then
+			enable_machinemurmur2_64="no"
+		else
+			enable_machinemurmur2_64="yes"
+		fi
+	fi
+
+	if test "${enable_machinemurmur2_64}" = "yes"; then
+		MACHINE_DIR_murmur2_64="hash/murmur"
+		MACHINE_DEP_murmur2_64=""
+				MACHINE_SELECTED="$MACHINE_SELECTED murmur2_64"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_hash_murmur" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/hash/murmur/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS hash/murmur"
+
+		MACHINE_MAKEFILE_hash_murmur=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED hash/murmur/libfrozen_machine_murmur.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinefill was given.
+if test "${enable_machinefill+set}" = set; then :
+  enableval=$enable_machinefill;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinefill}" = "yes"; then
+			enable_machinefill="no"
+		else
+			enable_machinefill="yes"
+		fi
+	fi
+
+	if test "${enable_machinefill}" = "yes"; then
+		MACHINE_DIR_fill="index/fill"
+		MACHINE_DEP_fill=""
+				MACHINE_SELECTED="$MACHINE_SELECTED fill"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_index_fill" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/index/fill/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS index/fill"
+
+		MACHINE_MAKEFILE_index_fill=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED index/fill/libfrozen_machine_fill.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinehashtable was given.
+if test "${enable_machinehashtable+set}" = set; then :
+  enableval=$enable_machinehashtable;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinehashtable}" = "yes"; then
+			enable_machinehashtable="no"
+		else
+			enable_machinehashtable="yes"
+		fi
+	fi
+
+	if test "${enable_machinehashtable}" = "yes"; then
+		MACHINE_DIR_hashtable="index/hashtable"
+		MACHINE_DEP_hashtable=""
+				MACHINE_SELECTED="$MACHINE_SELECTED hashtable"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_index_hashtable" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/index/hashtable/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS index/hashtable"
+
+		MACHINE_MAKEFILE_index_hashtable=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED index/hashtable/libfrozen_machine_hashtable.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinelookup was given.
+if test "${enable_machinelookup+set}" = set; then :
+  enableval=$enable_machinelookup;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinelookup}" = "yes"; then
+			enable_machinelookup="no"
+		else
+			enable_machinelookup="yes"
+		fi
+	fi
+
+	if test "${enable_machinelookup}" = "yes"; then
+		MACHINE_DIR_lookup="index/lookup"
+		MACHINE_DEP_lookup=""
+				MACHINE_SELECTED="$MACHINE_SELECTED lookup"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_index_lookup" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/index/lookup/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS index/lookup"
+
+		MACHINE_MAKEFILE_index_lookup=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED index/lookup/libfrozen_machine_lookup.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinemphf was given.
+if test "${enable_machinemphf+set}" = set; then :
+  enableval=$enable_machinemphf;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinemphf}" = "yes"; then
+			enable_machinemphf="no"
+		else
+			enable_machinemphf="yes"
+		fi
+	fi
+
+	if test "${enable_machinemphf}" = "yes"; then
+		MACHINE_DIR_mphf="index/mphf"
+		MACHINE_DEP_mphf=""
+				MACHINE_SELECTED="$MACHINE_SELECTED mphf"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_index_mphf" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/index/mphf/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS index/mphf"
+
+		MACHINE_MAKEFILE_index_mphf=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED index/mphf/libfrozen_machine_mphf.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinestdin was given.
+if test "${enable_machinestdin+set}" = set; then :
+  enableval=$enable_machinestdin;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestdin}" = "yes"; then
+			enable_machinestdin="no"
+		else
+			enable_machinestdin="yes"
+		fi
+	fi
+
+	if test "${enable_machinestdin}" = "yes"; then
+		MACHINE_DIR_stdin="io/console"
+		MACHINE_DEP_stdin=""
+				MACHINE_SELECTED="$MACHINE_SELECTED stdin"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/console/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/console"
+
+		MACHINE_MAKEFILE_io_console=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/console/libfrozen_machine_console.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinestdout was given.
+if test "${enable_machinestdout+set}" = set; then :
+  enableval=$enable_machinestdout;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestdout}" = "yes"; then
+			enable_machinestdout="no"
+		else
+			enable_machinestdout="yes"
+		fi
+	fi
+
+	if test "${enable_machinestdout}" = "yes"; then
+		MACHINE_DIR_stdout="io/console"
+		MACHINE_DEP_stdout=""
+				MACHINE_SELECTED="$MACHINE_SELECTED stdout"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/console/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/console"
+
+		MACHINE_MAKEFILE_io_console=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/console/libfrozen_machine_console.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinestderr was given.
+if test "${enable_machinestderr+set}" = set; then :
+  enableval=$enable_machinestderr;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinestderr}" = "yes"; then
+			enable_machinestderr="no"
+		else
+			enable_machinestderr="yes"
+		fi
+	fi
+
+	if test "${enable_machinestderr}" = "yes"; then
+		MACHINE_DIR_stderr="io/console"
+		MACHINE_DEP_stderr=""
+				MACHINE_SELECTED="$MACHINE_SELECTED stderr"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_console" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/console/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/console"
+
+		MACHINE_MAKEFILE_io_console=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/console/libfrozen_machine_console.la"
+
+	fi
+
+
+if test "x$HAVE_FUSE" = "x1"; then :
+
+
+
+
+
+
+	# Check whether --enable-machinefuse was given.
+if test "${enable_machinefuse+set}" = set; then :
+  enableval=$enable_machinefuse;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinefuse}" = "yes"; then
+			enable_machinefuse="no"
+		else
+			enable_machinefuse="yes"
+		fi
+	fi
+
+	if test "${enable_machinefuse}" = "yes"; then
+		MACHINE_DIR_fuse="io/fuse"
+		MACHINE_DEP_fuse=""
+				MACHINE_SELECTED="$MACHINE_SELECTED fuse"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_fuse" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/fuse/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/fuse"
+
+		MACHINE_MAKEFILE_io_fuse=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/fuse/libfrozen_machine_fuse.la"
+
+	fi
+
+
+fi
+
+
+
+
+
+
+	# Check whether --enable-machineipc was given.
+if test "${enable_machineipc+set}" = set; then :
+  enableval=$enable_machineipc;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineipc}" = "yes"; then
+			enable_machineipc="no"
+		else
+			enable_machineipc="yes"
+		fi
+	fi
+
+	if test "${enable_machineipc}" = "yes"; then
+		MACHINE_DIR_ipc="io/ipc"
+		MACHINE_DEP_ipc=""
+				MACHINE_SELECTED="$MACHINE_SELECTED ipc"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_ipc" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/ipc/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/ipc"
+
+		MACHINE_MAKEFILE_io_ipc=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/ipc/libfrozen_machine_ipc.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinetcp was given.
+if test "${enable_machinetcp+set}" = set; then :
+  enableval=$enable_machinetcp;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinetcp}" = "yes"; then
+			enable_machinetcp="no"
+		else
+			enable_machinetcp="yes"
+		fi
+	fi
+
+	if test "${enable_machinetcp}" = "yes"; then
+		MACHINE_DIR_tcp="io/tcp"
+		MACHINE_DEP_tcp=""
+				MACHINE_SELECTED="$MACHINE_SELECTED tcp"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_tcp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/tcp/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/tcp"
+
+		MACHINE_MAKEFILE_io_tcp=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/tcp/libfrozen_machine_tcp.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinetcp_child was given.
+if test "${enable_machinetcp_child+set}" = set; then :
+  enableval=$enable_machinetcp_child;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinetcp_child}" = "yes"; then
+			enable_machinetcp_child="no"
+		else
+			enable_machinetcp_child="yes"
+		fi
+	fi
+
+	if test "${enable_machinetcp_child}" = "yes"; then
+		MACHINE_DIR_tcp_child="io/tcp"
+		MACHINE_DEP_tcp_child=""
+				MACHINE_SELECTED="$MACHINE_SELECTED tcp_child"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_io_tcp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/io/tcp/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS io/tcp"
+
+		MACHINE_MAKEFILE_io_tcp=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED io/tcp/libfrozen_machine_tcp.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinebenchmark was given.
+if test "${enable_machinebenchmark+set}" = set; then :
+  enableval=$enable_machinebenchmark;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinebenchmark}" = "yes"; then
+			enable_machinebenchmark="no"
+		else
+			enable_machinebenchmark="yes"
+		fi
+	fi
+
+	if test "${enable_machinebenchmark}" = "yes"; then
+		MACHINE_DIR_benchmark="machine/benchmark"
+		MACHINE_DEP_benchmark=""
+				MACHINE_SELECTED="$MACHINE_SELECTED benchmark"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_benchmark" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/benchmark/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/benchmark"
+
+		MACHINE_MAKEFILE_machine_benchmark=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/benchmark/libfrozen_machine_benchmark.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinecall was given.
+if test "${enable_machinecall+set}" = set; then :
+  enableval=$enable_machinecall;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinecall}" = "yes"; then
+			enable_machinecall="no"
+		else
+			enable_machinecall="yes"
+		fi
+	fi
+
+	if test "${enable_machinecall}" = "yes"; then
+		MACHINE_DIR_call="machine/call"
+		MACHINE_DEP_call=""
+				MACHINE_SELECTED="$MACHINE_SELECTED call"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_call" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/call/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/call"
+
+		MACHINE_MAKEFILE_machine_call=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/call/libfrozen_machine_call.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineend was given.
+if test "${enable_machineend+set}" = set; then :
+  enableval=$enable_machineend;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineend}" = "yes"; then
+			enable_machineend="no"
+		else
+			enable_machineend="yes"
+		fi
+	fi
+
+	if test "${enable_machineend}" = "yes"; then
+		MACHINE_DIR_end="machine/end"
+		MACHINE_DEP_end=""
+				MACHINE_SELECTED="$MACHINE_SELECTED end"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_end" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/end/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/end"
+
+		MACHINE_MAKEFILE_machine_end=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/end/libfrozen_machine_end.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinefactory was given.
+if test "${enable_machinefactory+set}" = set; then :
+  enableval=$enable_machinefactory;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinefactory}" = "yes"; then
+			enable_machinefactory="no"
+		else
+			enable_machinefactory="yes"
+		fi
+	fi
+
+	if test "${enable_machinefactory}" = "yes"; then
+		MACHINE_DIR_factory="machine/factory"
+		MACHINE_DEP_factory=""
+				MACHINE_SELECTED="$MACHINE_SELECTED factory"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_factory" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/factory/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/factory"
+
+		MACHINE_MAKEFILE_machine_factory=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/factory/libfrozen_machine_factory.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinemorph was given.
+if test "${enable_machinemorph+set}" = set; then :
+  enableval=$enable_machinemorph;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinemorph}" = "yes"; then
+			enable_machinemorph="no"
+		else
+			enable_machinemorph="yes"
+		fi
+	fi
+
+	if test "${enable_machinemorph}" = "yes"; then
+		MACHINE_DIR_morph="machine/morph"
+		MACHINE_DEP_morph=""
+				MACHINE_SELECTED="$MACHINE_SELECTED morph"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_morph" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/morph/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/morph"
+
+		MACHINE_MAKEFILE_machine_morph=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/morph/libfrozen_machine_morph.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinepool was given.
+if test "${enable_machinepool+set}" = set; then :
+  enableval=$enable_machinepool;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinepool}" = "yes"; then
+			enable_machinepool="no"
+		else
+			enable_machinepool="yes"
+		fi
+	fi
+
+	if test "${enable_machinepool}" = "yes"; then
+		MACHINE_DIR_pool="machine/pool"
+		MACHINE_DEP_pool=""
+				MACHINE_SELECTED="$MACHINE_SELECTED pool"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_pool" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/pool/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/pool"
+
+		MACHINE_MAKEFILE_machine_pool=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/pool/libfrozen_machine_pool.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinerebuild_monitor was given.
+if test "${enable_machinerebuild_monitor+set}" = set; then :
+  enableval=$enable_machinerebuild_monitor;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinerebuild_monitor}" = "yes"; then
+			enable_machinerebuild_monitor="no"
+		else
+			enable_machinerebuild_monitor="yes"
+		fi
+	fi
+
+	if test "${enable_machinerebuild_monitor}" = "yes"; then
+		MACHINE_DIR_rebuild_monitor="machine/rebuild"
+		MACHINE_DEP_rebuild_monitor=""
+				MACHINE_SELECTED="$MACHINE_SELECTED rebuild_monitor"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_rebuild" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/rebuild/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/rebuild"
+
+		MACHINE_MAKEFILE_machine_rebuild=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machinerebuild_reader was given.
+if test "${enable_machinerebuild_reader+set}" = set; then :
+  enableval=$enable_machinerebuild_reader;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinerebuild_reader}" = "yes"; then
+			enable_machinerebuild_reader="no"
+		else
+			enable_machinerebuild_reader="yes"
+		fi
+	fi
+
+	if test "${enable_machinerebuild_reader}" = "yes"; then
+		MACHINE_DIR_rebuild_reader="machine/rebuild"
+		MACHINE_DEP_rebuild_reader=""
+				MACHINE_SELECTED="$MACHINE_SELECTED rebuild_reader"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_rebuild" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/rebuild/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/rebuild"
+
+		MACHINE_MAKEFILE_machine_rebuild=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinewrapper was given.
+if test "${enable_machinewrapper+set}" = set; then :
+  enableval=$enable_machinewrapper;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinewrapper}" = "yes"; then
+			enable_machinewrapper="no"
+		else
+			enable_machinewrapper="yes"
+		fi
+	fi
+
+	if test "${enable_machinewrapper}" = "yes"; then
+		MACHINE_DIR_wrapper="machine/wrapper"
+		MACHINE_DEP_wrapper=""
+				MACHINE_SELECTED="$MACHINE_SELECTED wrapper"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_wrapper" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/wrapper/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/wrapper"
+
+		MACHINE_MAKEFILE_machine_wrapper=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/wrapper/libfrozen_machine_wrapper.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineassign was given.
+if test "${enable_machineassign+set}" = set; then :
+  enableval=$enable_machineassign;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineassign}" = "yes"; then
+			enable_machineassign="no"
+		else
+			enable_machineassign="yes"
+		fi
+	fi
+
+	if test "${enable_machineassign}" = "yes"; then
+		MACHINE_DIR_assign="request/assign"
+		MACHINE_DEP_assign=""
+				MACHINE_SELECTED="$MACHINE_SELECTED assign"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_assign" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/assign/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/assign"
+
+		MACHINE_MAKEFILE_request_assign=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/assign/libfrozen_machine_assign.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinedebug was given.
+if test "${enable_machinedebug+set}" = set; then :
+  enableval=$enable_machinedebug;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinedebug}" = "yes"; then
+			enable_machinedebug="no"
+		else
+			enable_machinedebug="yes"
+		fi
+	fi
+
+	if test "${enable_machinedebug}" = "yes"; then
+		MACHINE_DIR_debug="request/debug"
+		MACHINE_DEP_debug=""
+				MACHINE_SELECTED="$MACHINE_SELECTED debug"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_debug" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/debug/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/debug"
+
+		MACHINE_MAKEFILE_request_debug=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/debug/libfrozen_machine_debug.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineemitter was given.
+if test "${enable_machineemitter+set}" = set; then :
+  enableval=$enable_machineemitter;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineemitter}" = "yes"; then
+			enable_machineemitter="no"
+		else
+			enable_machineemitter="yes"
+		fi
+	fi
+
+	if test "${enable_machineemitter}" = "yes"; then
+		MACHINE_DIR_emitter="request/emitter"
+		MACHINE_DEP_emitter=""
+				MACHINE_SELECTED="$MACHINE_SELECTED emitter"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_emitter" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/emitter/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/emitter"
+
+		MACHINE_MAKEFILE_request_emitter=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/emitter/libfrozen_machine_emitter.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineimplode was given.
+if test "${enable_machineimplode+set}" = set; then :
+  enableval=$enable_machineimplode;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineimplode}" = "yes"; then
+			enable_machineimplode="no"
+		else
+			enable_machineimplode="yes"
+		fi
+	fi
+
+	if test "${enable_machineimplode}" = "yes"; then
+		MACHINE_DIR_implode="request/implode"
+		MACHINE_DEP_implode=""
+				MACHINE_SELECTED="$MACHINE_SELECTED implode"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_implode" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/implode/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/implode"
+
+		MACHINE_MAKEFILE_request_implode=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/implode/libfrozen_machine_implode.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-machineexplode was given.
+if test "${enable_machineexplode+set}" = set; then :
+  enableval=$enable_machineexplode;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineexplode}" = "yes"; then
+			enable_machineexplode="no"
+		else
+			enable_machineexplode="yes"
+		fi
+	fi
+
+	if test "${enable_machineexplode}" = "yes"; then
+		MACHINE_DIR_explode="request/implode"
+		MACHINE_DEP_explode=""
+				MACHINE_SELECTED="$MACHINE_SELECTED explode"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_implode" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/implode/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/implode"
+
+		MACHINE_MAKEFILE_request_implode=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/implode/libfrozen_machine_implode.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineiterate was given.
+if test "${enable_machineiterate+set}" = set; then :
+  enableval=$enable_machineiterate;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineiterate}" = "yes"; then
+			enable_machineiterate="no"
+		else
+			enable_machineiterate="yes"
+		fi
+	fi
+
+	if test "${enable_machineiterate}" = "yes"; then
+		MACHINE_DIR_iterate="request/iterate"
+		MACHINE_DEP_iterate=""
+				MACHINE_SELECTED="$MACHINE_SELECTED iterate"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_iterate" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/iterate/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/iterate"
+
+		MACHINE_MAKEFILE_request_iterate=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/iterate/libfrozen_machine_iterate.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineswitch was given.
+if test "${enable_machineswitch+set}" = set; then :
+  enableval=$enable_machineswitch;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineswitch}" = "yes"; then
+			enable_machineswitch="no"
+		else
+			enable_machineswitch="yes"
+		fi
+	fi
+
+	if test "${enable_machineswitch}" = "yes"; then
+		MACHINE_DIR_switch="request/switch"
+		MACHINE_DEP_switch=""
+				MACHINE_SELECTED="$MACHINE_SELECTED switch"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_switch" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/switch/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/switch"
+
+		MACHINE_MAKEFILE_request_switch=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/switch/libfrozen_machine_switch.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinefile was given.
+if test "${enable_machinefile+set}" = set; then :
+  enableval=$enable_machinefile;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinefile}" = "yes"; then
+			enable_machinefile="no"
+		else
+			enable_machinefile="yes"
+		fi
+	fi
+
+	if test "${enable_machinefile}" = "yes"; then
+		MACHINE_DIR_file="storage/file"
+		MACHINE_DEP_file=""
+				MACHINE_SELECTED="$MACHINE_SELECTED file"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_storage_file" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/storage/file/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS storage/file"
+
+		MACHINE_MAKEFILE_storage_file=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED storage/file/libfrozen_machine_file.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinepointers was given.
+if test "${enable_machinepointers+set}" = set; then :
+  enableval=$enable_machinepointers;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinepointers}" = "yes"; then
+			enable_machinepointers="no"
+		else
+			enable_machinepointers="yes"
+		fi
+	fi
+
+	if test "${enable_machinepointers}" = "yes"; then
+		MACHINE_DIR_pointers="storage/pointers"
+		MACHINE_DEP_pointers=""
+				MACHINE_SELECTED="$MACHINE_SELECTED pointers"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_storage_pointers" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/storage/pointers/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS storage/pointers"
+
+		MACHINE_MAKEFILE_storage_pointers=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED storage/pointers/libfrozen_machine_pointers.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinemutex was given.
+if test "${enable_machinemutex+set}" = set; then :
+  enableval=$enable_machinemutex;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinemutex}" = "yes"; then
+			enable_machinemutex="no"
+		else
+			enable_machinemutex="yes"
+		fi
+	fi
+
+	if test "${enable_machinemutex}" = "yes"; then
+		MACHINE_DIR_mutex="sync/mutex"
+		MACHINE_DEP_mutex=""
+				MACHINE_SELECTED="$MACHINE_SELECTED mutex"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_sync_mutex" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/sync/mutex/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS sync/mutex"
+
+		MACHINE_MAKEFILE_sync_mutex=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED sync/mutex/libfrozen_machine_mutex.la"
+
+	fi
+
+
+
+
+	MACHINE_SELECTED_DEPS=$MACHINE_SELECTED
+	for m in $MACHINE_SELECTED; do
+		eval m_deps="\$MACHINE_DEP_$m"
 		for d in $m_deps; do
-			BACKEND_SELECTED_DEPS=$( echo $BACKEND_SELECTED_DEPS | sed "s|$d|$d $m|" | sed "s|$m||" )
+			MACHINE_SELECTED_DEPS=$( echo $MACHINE_SELECTED_DEPS | sed "s|$d|$d $m|" | sed "s|$m||" )
 			# add this module after dependency and remove first occurence of module, leaving inserted
 		done;
 	done;
-	for m in $BACKEND_SELECTED_DEPS; do
-		eval m_folder="\$BACKEND_DIR_$m"
-		BACKEND_DIRS="$BACKEND_DIRS $m_folder"
-		BACKEND_DIRS=$(echo $BACKEND_DIRS | sed "s|$m_folder|REPLACEMEBACK|" | sed "s|$m_folder||g" | sed "s|REPLACEMEBACK|$m_folder|" )
+	for m in $MACHINE_SELECTED_DEPS; do
+		eval m_folder="\$MACHINE_DIR_$m"
+		MACHINE_DIRS="$MACHINE_DIRS $m_folder"
+		MACHINE_DIRS=$(echo $MACHINE_DIRS | sed "s|$m_folder|REPLACEMEBACK|" | sed "s|$m_folder||g" | sed "s|REPLACEMEBACK|$m_folder|" )
 
 	done;
 
 
-	backend_hdr_file=src/libfrozen/core/backend_selected.h
-	echo "/* Autogenerated file. Don't edit */" > $backend_hdr_file
-	echo "#ifndef BACKEND_SELECTED_H" >> $backend_hdr_file
-	echo "#define BACKEND_SELECTED_H" >> $backend_hdr_file
-	for h in $BACKEND_SELECTED; do
-		echo "extern backend_t ${h}_proto;" >> $backend_hdr_file
+	machine_hdr_file=src/libfrozen/core/machine_selected.h
+	echo "/* Autogenerated file. Don't edit */" > $machine_hdr_file
+	echo "#ifndef MACHINE_SELECTED_H" >> $machine_hdr_file
+	echo "#define MACHINE_SELECTED_H" >> $machine_hdr_file
+	for h in $MACHINE_SELECTED; do
+		echo "extern machine_t ${h}_proto;" >> $machine_hdr_file
 	done;
-	echo "#ifdef BACKEND_C" >> $backend_hdr_file
-	echo "backend_t * backend_protos[] = {" >> $backend_hdr_file
-	for h in $BACKEND_SELECTED; do
+	echo "#ifdef MACHINE_C" >> $machine_hdr_file
+	echo "machine_t * machine_protos[] = {" >> $machine_hdr_file
+	for h in $MACHINE_SELECTED; do
 		h_rpl=$(echo $h | sed "s@-@_@g")
-		echo "   &${h_rpl}_proto," >> $backend_hdr_file
+		echo "   &${h_rpl}_proto," >> $machine_hdr_file
 	done;
-	echo "};" >> $backend_hdr_file
-	echo "size_t backend_protos_size = (sizeof(backend_protos)/sizeof(backend_protos[0]));" >> $backend_hdr_file
-	echo "#endif" >> $backend_hdr_file
+	echo "};" >> $machine_hdr_file
+	echo "size_t machine_protos_size = (sizeof(machine_protos)/sizeof(machine_protos[0]));" >> $machine_hdr_file
+	echo "#endif" >> $machine_hdr_file
 
-	echo "#endif" >> $backend_hdr_file
+	echo "#endif" >> $machine_hdr_file
 
 
 	DATA_SELECTED_DEPS=$DATA_SELECTED
@@ -21159,7 +21159,7 @@ headersdir=${includedir}/frozen/
 
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/backends/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/machines/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -22291,7 +22291,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/libfrozen/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/Makefile" ;;
     "src/libfrozen/core/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/core/Makefile" ;;
-    "src/libfrozen/backends/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/backends/Makefile" ;;
+    "src/libfrozen/machines/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/machines/Makefile" ;;
     "src/libfrozen/data/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/data/Makefile" ;;
     "src/frozend/Makefile") CONFIG_FILES="$CONFIG_FILES src/frozend/Makefile" ;;
     "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;

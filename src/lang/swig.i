@@ -13,7 +13,7 @@
 %typemap(gotype) f_destroy,   const void * & "func(uintptr) int"
 %typemap(gotype) f_crwd,      const void * & "func(uintptr, uintptr) int"
 
-%typemap(gotype) backend_t *, const void * & "uintptr"
+%typemap(gotype) machine_t *, const void * & "uintptr"
 %typemap(gotype) hash_t *,    const void * & "uintptr"
 %typemap(gotype) request_t *, const void * & "uintptr"
 #endif
@@ -22,7 +22,7 @@
 %include ../../libfrozen/core/enums.h
 %include ../../libfrozen/core/data.h
 %include ../../libfrozen/core/data_selected.h
-%include ../../libfrozen/core/backend.h
+%include ../../libfrozen/core/machine.h
 %include ../../libfrozen/core/errors.h
 %include ../../libfrozen/core/configs/config.h
 
@@ -52,7 +52,7 @@ INIT    { frozen_init();  }
 DESTROY { frozen_destroy(); }
 
 sub query {
-	my $backend = shift;
+	my $machine = shift;
 	my $request = shift;
 	my $code    = (shift or undef);
 	
@@ -67,7 +67,7 @@ sub query {
 		hash_set($h_request, $k, $t, "$v");
 	}
 	
-	$ret = backend_query($backend, $h_request);
+	$ret = machine_query($machine, $h_request);
 	
 	if(defined $code){
 		&$code($h_request);
@@ -136,11 +136,11 @@ uintmax_t  go_data_to_uint(data_t *data){
 	return ret;
 }
 
-void _backend_setuserdata(backend_t *backend, void *data){
-	backend->userdata = data;
+void _machine_setuserdata(machine_t *machine, void *data){
+	machine->userdata = data;
 }
-void *_backend_getuserdata(backend_t *backend){
-	return backend->userdata;
+void *_machine_getuserdata(machine_t *machine){
+	return machine->userdata;
 }
 void data_assign(data_t *data, datatype_t type, void *ptr){
 	data->type = type;
@@ -161,11 +161,11 @@ data_t * hash_item_data(hash_t *hash){
 
 %insert("go_wrapper") %{
 
-func Backend_SetUserdata(backend uintptr, userdata interface{}) {
-	X_backend_setuserdata(backend, ObjToPtr(userdata))
+func Machine_SetUserdata(machine uintptr, userdata interface{}) {
+	X_machine_setuserdata(machine, ObjToPtr(userdata))
 }
-func Backend_GetUserdata(backend uintptr) interface {} {
-	return ObjFromPtr( X_backend_getuserdata(backend) )
+func Machine_GetUserdata(machine uintptr) interface {} {
+	return ObjFromPtr( X_machine_getuserdata(machine) )
 }
 
 type Hskel struct {

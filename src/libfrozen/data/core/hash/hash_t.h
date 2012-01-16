@@ -44,7 +44,7 @@
 /** @ingroup hash_t
  *  @page hash_t_overview Hash overview
  *  
- *  Hashes used to store key-value pairs. This is not crypto nor fast-lookup hashes.
+ *  Hashes used to data key-value pairs. This is not crypto nor fast-lookup hashes.
  *  From C point of view, hash is array of hash_t structure. Example of hash:
  *  @code
  *     hash_t somehash[] = {
@@ -95,7 +95,7 @@
  *  @page hash_t_recomendations Recomendations
  *  
  *  @li Don't mess with clear assignment, just redefine. It is cheap and fast.
- *  @li Keep old request inlined in new requests. Hash can contain some keys you can't know about, and some backend is waiting them.
+ *  @li Keep old request inlined in new requests. Hash can contain some keys you can't know about, and some machine is waiting them.
  *  @li To lower access time to hash keep keys than would be accessed many times as top as possible. That's why
  *  action key is at top in most of requests.
  */

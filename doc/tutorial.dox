@@ -6,7 +6,7 @@
  *
  *    Frozen is data processing daemon. It contain several modules for input, output and data processing.
  *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
- *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data
+ *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data
  *    for web or local clients.
  *
  *    Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
@@ -15,21 +15,24 @@
  * 
  * @section architecture How it works?
  *
- * To process some data, user send specially crafted request to data processing pipeline.
- * Every pipeline consist of blocks, called "backend". Backends can connect to each other and form so called "chains". Here is
- * example of two such chains: left one consist of "backend 1,2,3", right one have "backend 4,5,6,7". Left one is simple -
- * it pass request sequentially from backend 1 to 2, and next to 3. Right one pass same request to backend 5,6,7 from backend 4.
+ * To process some data, we need to construct processing pipeline, like in real industries. And like in real factory we need special blocks
+ * called "machine". Machines connected to each other and form production line or "machine-shop". On picture below there is
+ * examples of two such shops: left one consist of "machine 1,2,3", right one have "machine 4,5,6,7". Left one is simple -
+ * it pass request sequentially from machine 1 to 2, and next to 3. Right one pass same request to machine 5,6,7 from machine 4 (it act as duplicator).
+ * 
+ * There is many kinds of machines, but almost all of them used to only transform or mark data. To do useful things we need to get some data or store it in our stores.
+ * So processing is data-centric and this is all about data. We transfer data from user, modify it and send to another store, or back to user.
  * 
  * @dot
- * digraph chain_example {
+ * digraph shop_example {
  *    node [shape=record, fontname=Helvetica, fontsize=10];
- *    a [ label="backend 1"];
- *    b [ label="backend 2"];
- *    c [ label="backend 3"];
- *    d [ label="backend 4"];
- *    e [ label="backend 5"];
- *    f [ label="backend 6"];
- *    g [ label="backend 7"];
+ *    a [ label="machine 1"];
+ *    b [ label="machine 2"];
+ *    c [ label="machine 3"];
+ *    d [ label="machine 4"];
+ *    e [ label="machine 5"];
+ *    f [ label="machine 6"];
+ *    g [ label="machine 7"];
  *    a -> b -> c;
  *    d -> e;
  *    d -> f;
@@ -37,9 +40,7 @@
  * }
  * @enddot
  *
- * Users with experience in math can see here graph with nodes and edges, and this is true. You can form any graph from backends, even looped one.
- *
- * Almost every backend require some configuration parameters. You can supply them in configuration file. More about configuration parameters
+ * Almost every machine require some configuration parameters. You can supply them in configuration file. More about configuration parameters
  * here: @ref tutorial_configuration.
  *
  * Next tutorial: @ref tutorial_configuration.
@@ -48,46 +49,37 @@
  * @ingroup tutorial
  * @addtogroup tutorial_configuration Tutorial: configuration
  *
- * @section tutorial_configuration_chain Chain configuration
+ * @section tutorial_configuration_shop Shop configuration
  * 
- * To describe chain you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with
+ * To describe shop you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with
  * some modifications.
  * @code
- * { <backend 1 configuration> },
- * { <backend 2 configuration> },
- * { <backend 3 configuration> }
+ * { <machine 1 configuration> },
+ * { <machine 2 configuration> },
+ * { <machine 3 configuration> },
+ * NULL,
+ * {
+ *   <machine 4 configuration>
+ *   duplicate_to = {                             // this is configuration parameter name for imaginary duplicator machine
+ *     { <machine 5 configuration> },
+ *     { <machine 6 configuration> },
+ *     { <machine 7 configuration> },
+ *   }
+ * }
  * @endcode
  * 
- * This example configuration describe chain showed in @ref tutorial_basics on left side. To describe chain showed on right side we need
- * special thing, called name tag. With this tag you name backend with unique and global name, so later you can use only this tag to
- * refer to this backend.
- * @code
- * { name = "backend_4" },
- * { <backend 5 configuration> },
- * NULL,
- * { name = "backend_4" },
- * { <backend 6 configuration> },
- * NULL,
- * { name = "backend_4", <backend 4 configuration> },
- * { <backend 7 configuration> }
- * @endcode
- * Here you can notice two things: NULL keyword and special backend 4 position.
+ * This example configuration describe shops showed on picture in @ref tutorial_basics.
  *
- * NULL keyword used to split connection between backends - if there is
- * no NULL - backend 5 would be connected to backend 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other
- * common representation of graphs, we don't write connections between backends explicitly. It is too uncommon to create heavily branched chains, so
- * it is easier to split some connections, than write all of them.
+ * NULL keyword used to split connection between machines - if there is
+ * no NULL - machine 3 would be connected to machine 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other
+ * common representation of graphs, we don't write connections between machines explicitly.
+ *
+ * @section tutorial_configuration_machine Machine configuration
  * 
- * Backend 4 position is special, because it located and end of file. This is required, because configuration file chains created in reverse order - from
- * top to bottom.
- *
- *
- * @section tutorial_configuration_backend Backend configuration
- * 
- * To configure single backend with required parameters you write all of them inside {} of backend configuration splitting by comma.
+ * To configure single machine with required parameters you write all of them inside {} of machine configuration splitting by comma.
  * @code
  * {
- *    name      = "some backend name",                     // single line comment
+ *    name      = "some machine name",                     // single line comment
  *    stringpar = "some string value",
  *    intpar    = (uint_t)"12345",
  *    otherpar  = (sometype_t)"sometype configuration string",
@@ -101,15 +93,15 @@
  *    envpar    = (env_t)"somekey"
  * }
  * @endcode
- * Here we have every possible parameter that can be passed to backend. There is strings, ints, special types, nested types:
+ * Here we have every possible parameter that can be passed to machine. There is strings, ints, special types, nested types:
  * @li Already known name parameter is used by core to maintain global names
  * @li String parameter, can have "\t\r\n" inside string.
  * @li Integer parameter, here we have @ref uint_t, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify
  * @ref uint8_t, @ref int16_t and another variations.
  * @li Some sometype_t data, which can be initialized from string. Examples: @ref format_t, @ref hashkey_t
  * @li Some complex sometype_t data, which can be initialized from hash. Example: @ref raw_t.
- * @li Environment data @ref env_t. It use current request key "somekey" to obtain data. Not every backend parameter can be used in such
- * way. Backend must use this parameter during request and not in initialization stage.
+ * @li Environment data @ref env_t. It use current request key "somekey" to obtain data. Not every machine parameter can be used in such
+ * way. Machine must use this parameter during request and not in initialization stage.
  * 
  * @li You can use "=", "=>", ":" as assignment.
  * @li Double or single quoted strings, @@ or ## strings.
@@ -117,7 +109,7 @@
  *
  * @section tutorial_configuration_m4 Macros and m4
  * 
- * Because of simple nature of backends, writing complex systems become very hard. Too many backend need to chain together to achieve some
+ * Because of simple nature of machines, writing complex systems become very hard. Too many machine need to shop together to achieve some
  * feature. So, we need some macros. And very powerful thing in this field is m4. It is macro processor with simple syntax, easy to learn and
  * easy to solve our problems. Refer to m4 manual to learn it.
  *
@@ -136,9 +128,9 @@
  * @code
  *   $ frozend -c configuration_file.conf
  * @endcode
- * @b frozend here is frozen daemon which parse configration file and create backends. <b>frozend --help</b> for more daemon options.
+ * @b frozend here is frozen daemon which parse configration file and create machines. <b>frozend --help</b> for more daemon options.
  * 
- * If you use @ref mod_backend_stdin in configuration, pass input as usual. Same for @ref mod_backend_stdout, @ref mod_backend_stderr.
+ * If you use @ref mod_machine_stdin in configuration, pass input as usual. Same for @ref mod_machine_stdout, @ref mod_machine_stderr.
  * @code
  *   $ cat file | frozend -c configuration_file.conf
  *   $ cat file | frozend -c configuration_file.conf  >log_stdout
@@ -160,15 +152,15 @@
  * @section tutorial_basics_input Input
  * @em Stdin
  *
- * To have anything to be parsed it should be somehow passed in backend. Frozen have different ways in input data, most simple one is console.
- * @ref mod_backend_stdin used to get data from stdin. And because stdin module is passive, @ref mod_backend_transfer with @ref mod_backend_thread used to activly transfer
- * data from one backend chain to another. In this case destination is @ref mod_backend_stdout used. For more about outputs read next chapter.
+ * To have anything to be parsed it should be somehow passed in machine. Frozen have different ways in input data, most simple one is console.
+ * @ref mod_machine_stdin used to get data from stdin. And because stdin module is passive, @ref mod_machine_transfer with @ref mod_machine_thread used to activly transfer
+ * data from one machine shop to another. In this case destination is @ref mod_machine_stdout used. For more about outputs read next chapter.
  * 
  * @include tutorial_in_stdin.conf 
  *
  * @em Fuse
  * 
- * Next way is @ref mod_backend_fuse backend. It create filesystem using fuse and pass all read and writes to user defined backends.
+ * Next way is @ref mod_machine_fuse machine. It create filesystem using fuse and pass all read and writes to user defined machines.
  * Sample configuration can look like so:
  *
  * @include tutorial_in_fuse.conf
@@ -178,12 +170,12 @@
  * 
  * @em Emitter
  *
- * One more way to input is describe backend which send requests you want. One of such backends is @ref mod_backend_emitter. Example:
+ * One more way to input is describe machine which send requests you want. One of such machines is @ref mod_machine_emitter. Example:
  * @include tutorial_in_emitter.conf
  * 
  * @em HTTP
  *
- * Another way is different modules, for example go_http. It create simple web server and pass request to user's backends.
+ * Another way is different modules, for example go_http. It create simple web server and pass request to user's machines.
  * @include tutorial_in_http.conf
  *
  * @em File
@@ -195,18 +187,18 @@
  * 
  * @em Debugging
  * 
- * To debug request flow you can use @ref mod_backend_debug backend. It print line in stderr on request arrival, and optionally on request end.
+ * To debug request flow you can use @ref mod_machine_debug machine. It print line in stderr on request arrival, and optionally on request end.
  * Also it can show request content. Example:
  * @include tutorial_out_debug.conf
  *
  * @em Stdout
  * 
- * This could be done by @ref mod_backend_stdout. It print buffer in console stdout. For stderr - use @ref mod_backend_stderr.
+ * This could be done by @ref mod_machine_stdout. It print buffer in console stdout. For stderr - use @ref mod_machine_stderr.
  * @include tutorial_io_file.conf
  *
  * @em File
  * 
- * Write data to file with @ref mod_backend_file backend. Example:
+ * Write data to file with @ref mod_machine_file machine. Example:
  * @include tutorial_out_file.conf
  *
  * @section tutorial_basics_processing Processing
@@ -214,28 +206,28 @@
  * @em Split
  * 
  * It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split
- * incoming data on lines. If you want lines you should use @ref mod_backend_split backend. By default it split input exactly by \n which mean
+ * incoming data on lines. If you want lines you should use @ref mod_machine_split machine. By default it split input exactly by \n which mean
  * end of line. 
  * 
  * @em Regexp
  * 
- * To match some input for pattern you can use @ref mod_backend_regexp. It add special marker to current request if data match defined pattern.
+ * To match some input for pattern you can use @ref mod_machine_regexp. It add special marker to current request if data match defined pattern.
  * 
  * @em Conditions
  * 
- * As we have some markers, where got to be some condition. @ref mod_backend_switch control request flow using conditions. Because flow could be
- * redirected in any other backend chain you could do anything with such request or enviroment, for example terminate request, return success or
+ * As we have some markers, where got to be some condition. @ref mod_machine_switch control request flow using conditions. Because flow could be
+ * redirected in any other machine shop you could do anything with such request or enviroment, for example terminate request, return success or
  * error, write this to logger, trigger some action and so on.
  *
  * @section tutorial_basics_combine Combining all together
  *
- * As we know some of processing and input\output backends we could combine it in something useful. For example, you want to know which users have /bin/false shell.
+ * As we know some of processing and input\output machines we could combine it in something useful. For example, you want to know which users have /bin/false shell.
  * Configuration will look like following:
  * @include tutorial_proc_shell.conf
  *
- * @ref mod_backend_file open file for reading only. @ref mod_backend_split split it in lines.
- * @ref mod_backend_regexp matches /bin/false aganist input line and pass to @ref mod_backend_switch. It lookup for default marker value and if find - pass
- * to @ref mod_backend_stdout. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem:
+ * @ref mod_machine_file open file for reading only. @ref mod_machine_split split it in lines.
+ * @ref mod_machine_regexp matches /bin/false aganist input line and pass to @ref mod_machine_switch. It lookup for default marker value and if find - pass
+ * to @ref mod_machine_stdout. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem:
  * @include tutorial_proc_shell2.conf
  * 
  * As regexp set same marker this construction works like OR. For AND use different markers and combine them in switch rule like so:
@@ -253,12 +245,12 @@
  *
  *
  * @endcode
- * Because @ref mod_backend_switch don't care what in your rule's request you could first check for such AND condition, if it not matches check
- * for only one marker, or for another, or for both. And for each rule you can supply different backend with any action. 
+ * Because @ref mod_machine_switch don't care what in your rule's request you could first check for such AND condition, if it not matches check
+ * for only one marker, or for another, or for both. And for each rule you can supply different machine with any action. 
  *
  * You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions
  * (including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file.
- * If you pick up @ref mod_backend_fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. 
+ * If you pick up @ref mod_machine_fuse for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. 
  * 
  * Prev tutorial: @ref tutorial_execution
  *
@@ -275,16 +267,16 @@
  * { class=>"io/tcp", addr = "0.0.0.0", port = (uint_t)'12345' }
  * @endcode
  * 
- * As we can see there is one thread created using @ref mod_backend_thread in loop mode and @ref mod_backend_tcp which listen 0.0.0.0:12345 port.
- * Such construction only accept new connections and try create new backend chain. Because we didn't specified one - there would be error. So, with
- * specified backend it would look like this:
+ * As we can see there is one thread created using @ref mod_machine_thread in loop mode and @ref mod_machine_tcp which listen 0.0.0.0:12345 port.
+ * Such construction only accept new connections and try create new machine shop. Because we didn't specified one - there would be error. So, with
+ * specified machine it would look like this:
  * @include tutorial_tcpecho.conf
  *
- * In beginning of new backend chain there is one @ref mod_backend_thread in loop mode in pair with @ref mod_backend_transfer, next comes two special "io/tcp_child" backends which
- * represent newly connected socket. Backend chain can contain any number of such backends, and each of them represent same socket. Read request to
- * this backend causes read from socket and write request - write to it.
+ * In beginning of new machine shop there is one @ref mod_machine_thread in loop mode in pair with @ref mod_machine_transfer, next comes two special "io/tcp_child" machines which
+ * represent newly connected socket. Machine shop can contain any number of such machines, and each of them represent same socket. Read request to
+ * this machine causes read from socket and write request - write to it.
  *
- * Note, @ref mod_backend_transfer first try fast api to transfer, if it possible, but if one of backends in chain don't have it - request downgraded
+ * Note, @ref mod_machine_transfer first try fast api to transfer, if it possible, but if one of machines in shop don't have it - request downgraded
  * and passed through hash api. This will cause performance decrease.
  *
  */
@@ -294,14 +286,14 @@
  * @addtogroup tutorial_memcached Tutorial: tcp server with memcached alike protocol
  * 
  * Tcp echo server is fun, but not usefull. So, we need some protocol and parsing routines. Hopefuly we can use simple text protocol like
- * memcached use. All we need is @ref mod_backend_regexp and @ref mod_backend_switch. And working server configuration would look like following:
+ * memcached use. All we need is @ref mod_machine_regexp and @ref mod_machine_switch. And working server configuration would look like following:
  *
  * @include tutorial_protocol_memcache.conf
  *
  * Here we use same multithreaded tcp server as in @ref tutorial_tcpecho, next we match input text with simple regular expression and get result
- * using captures. Next comes switch which select requests and redirect them to proper backend chains.
+ * using captures. Next comes switch which select requests and redirect them to proper machine shops.
  *
- * Here we only parse input and reply back some answers. To be more usefull we need change rules to flow requests to some index or cache backend.
+ * Here we only parse input and reply back some answers. To be more usefull we need change rules to flow requests to some index or cache machine.
  *
  */
 

@@ -4,10 +4,10 @@
 
 typedef enum datatype_t {
    TYPE_INVALID = 0,
-   TYPE_BACKENDT = 0,
-   TYPE_DATAPTRT = 1,
-   TYPE_DEFAULTT = 2,
-   TYPE_HASHT = 3,
+   TYPE_DATAPTRT = 0,
+   TYPE_DEFAULTT = 1,
+   TYPE_HASHT = 2,
+   TYPE_MACHINET = 3,
    TYPE_STRINGT = 4,
    TYPE_VOIDT = 5,
    TYPE_DATATYPET = 6,

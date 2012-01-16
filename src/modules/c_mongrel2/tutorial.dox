@@ -4,9 +4,9 @@
  * 
  * @section tutorial_mod_overview Overview
  * 
- * With frozen you can easily create custom handlers for mongrel2. To make one we need @ref mod_backend_zmq and @ref mod_backend_mongrel2.
+ * With frozen you can easily create custom handlers for mongrel2. To make one we need @ref mod_machine_zmq and @ref mod_machine_mongrel2.
  * Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need
- * create two sockets. Request will flow from one socket, pass through set of backends and end up in second socket.
+ * create two sockets. Request will flow from one socket, pass through set of machines and end up in second socket.
  * 
  * @section tutorial_mod_example Example configuration
  * @include tutorial_mod_mongrel2.conf

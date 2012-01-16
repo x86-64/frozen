@@ -42,7 +42,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/./build/libfrozen_backends.m4 \
+	$(top_srcdir)/./build/libfrozen_machines.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
 	$(top_srcdir)/./build/libfrozen_modules.m4 \
 	$(top_srcdir)/./src/modules/c_mongrel2/config.m4 \
@@ -53,50 +53,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/allocator/fixed/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/allocator/list/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/end/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/wrapper/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/daemon/kill/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/daemon/thread/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/convert/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/split/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/transfer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/fill/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/hashtable/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/console/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/ipc/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/tcp/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/assign/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/implode/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/iterate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/switch/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/storage/pointers/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/sync/mutex/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/machine/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
@@ -117,6 +77,46 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/allocator/fixed/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/allocator/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/cache/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/cache/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/convert/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/regexp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/transfer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/hash/murmur/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/fill/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/hashtable/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/lookup/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/console/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/fuse/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/tcp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/call/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/end/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/morph/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/rebuild/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/wrapper/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/assign/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/iterate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/storage/file/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/storage/pointers/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -130,7 +130,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
 	libfrozen_core_la-api.lo libfrozen_core_la-errors.lo \
 	libfrozen_core_la-data.lo libfrozen_core_la-list.lo \
-	libfrozen_core_la-backend.lo \
+	libfrozen_core_la-machine.lo \
 	configs/libfrozen_core_la-config_parser.tab.lo \
 	configs/libfrozen_core_la-config_parser.lex.lo
 libfrozen_core_la_OBJECTS = $(am_libfrozen_core_la_OBJECTS)
@@ -188,9 +188,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BACKEND_DIRS = @BACKEND_DIRS@
-BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
-BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -239,6 +236,9 @@ LN_S = @LN_S@
 LS = @LS@
 LTLIBOBJS = @LTLIBOBJS@
 M4 = @M4@
+MACHINE_DIRS = @MACHINE_DIRS@
+MACHINE_DIST_DIRS = @MACHINE_DIST_DIRS@
+MACHINE_LIBS_SELECTED = @MACHINE_LIBS_SELECTED@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -339,13 +339,13 @@ libfrozen_core_la_SOURCES = \
 			errors.c                             \
 			data.c                               \
 			list.c                               \
-                        backend.c                            \
+                        machine.c                            \
                         configs/config_parser.tab.c          \
                         configs/config_parser.lex.c
 
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
 headers_confdir = $(headersdir)/configs/
-headers_HEADERS = libfrozen.h api.h errors.h data.h list.h backend.h public.h enums.h data_selected.h backend_selected.h
+headers_HEADERS = libfrozen.h api.h errors.h data.h list.h machine.h public.h enums.h data_selected.h machine_selected.h
 headers_conf_HEADERS = configs/config.h
 CLEANFILES = \
 		configs/config_parser.tab.c                            \
@@ -419,11 +419,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-api.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-backend.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-libfrozen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-machine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Plo@am__quote@
 
@@ -486,12 +486,12 @@ libfrozen_core_la-list.lo: list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
 
-libfrozen_core_la-backend.lo: backend.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-backend.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-backend.Tpo -c -o libfrozen_core_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-backend.Tpo $(DEPDIR)/libfrozen_core_la-backend.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='backend.c' object='libfrozen_core_la-backend.lo' libtool=yes @AMDEPBACKSLASH@
+libfrozen_core_la-machine.lo: machine.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT libfrozen_core_la-machine.lo -MD -MP -MF $(DEPDIR)/libfrozen_core_la-machine.Tpo -c -o libfrozen_core_la-machine.lo `test -f 'machine.c' || echo '$(srcdir)/'`machine.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_core_la-machine.Tpo $(DEPDIR)/libfrozen_core_la-machine.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='machine.c' object='libfrozen_core_la-machine.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-backend.lo `test -f 'backend.c' || echo '$(srcdir)/'`backend.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-machine.lo `test -f 'machine.c' || echo '$(srcdir)/'`machine.c
 
 configs/libfrozen_core_la-config_parser.tab.lo: configs/config_parser.tab.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config_parser.tab.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Tpo -c -o configs/libfrozen_core_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c

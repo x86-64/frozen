@@ -22,7 +22,7 @@ int frozen_init(void){
 	if( (ret = frozen_data_init()) != 0)
 		return ret;
 	
-	if( (ret = frozen_backend_init()) != 0)
+	if( (ret = frozen_machine_init()) != 0)
 		return ret;
 	
 	inited = 1;
@@ -37,7 +37,7 @@ int frozen_destroy(void){
 	if(inited == 0)
 		return 0;
 	
-	frozen_backend_destroy();
+	frozen_machine_destroy();
 	frozen_data_destroy();
 	
 	inited = 0;

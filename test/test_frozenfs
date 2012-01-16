@@ -6,7 +6,7 @@ mkdir data_frozenfs 2>/dev/null
 sleep 1
 #time find data_frozenfs/ -ls
 
-TEST_FILE=data_frozenfs/backends/be_file/whole
+TEST_FILE=data_frozenfs/machines/be_file/whole
 #echo "*** write string"
 #	echo "Hello, world!" >> $TEST_FILE
 #	echo "Woott, world!" >> $TEST_FILE
@@ -28,7 +28,7 @@ echo "*** read data"
 
 time find data_frozenfs/ -ls
 
-stat data_frozenfs/backends/b_data/whole
+stat data_frozenfs/machines/b_data/whole
 
 fusermount -u data_frozenfs
 killall frozenfs 2>/dev/null

@@ -1,28 +1,28 @@
 #include <libfrozen.h>
 
 /**
- * @ingroup backend
- * @addtogroup mod_backend_mongrel2 module/c_mongrel2
+ * @ingroup machine
+ * @addtogroup mod_machine_mongrel2 module/c_mongrel2
  */
 /**
- * @ingroup mod_backend_mongrel2
+ * @ingroup mod_machine_mongrel2
  * @page page_mongrel2_info Description
  *
  * This module implement Mongrel2 protocol parsers. It works in pair with ZeroMQ module. c_mongrel2_parse parse mongrel2 request
- * and emit it to underlying backends. c_mongrel2_reply consturct reply for mongrel server and pass it to underlying backned.
+ * and emit it to underlying machines. c_mongrel2_reply consturct reply for mongrel server and pass it to underlying backned.
  */
 /**
- * @ingroup mod_backend_mongrel2
+ * @ingroup mod_machine_mongrel2
  * @page page_mongrel2_config Configuration
  *  
- * Accepted configuration for parser backend:
+ * Accepted configuration for parser machine:
  * @code
  * {
  *              class                   = "modules/c_mongrel2_parse"
  * }
  * @endcode
  * 
- * Accepted configuration for reply backend
+ * Accepted configuration for reply machine
  * @code
  * {
  *              class                   = "modules/c_mongrel2_reply",
@@ -33,7 +33,7 @@
  * @endcode
  */
 /**
- * @ingroup mod_backend_mongrel2
+ * @ingroup mod_machine_mongrel2
  * @page page_mongrel2_io Input and output
  * 
  * c_mongrel2_parse expect fast ACTION_WRITE request as input and emit following hash request on output:
@@ -75,10 +75,10 @@ typedef struct mongrel2_userdata {
 	uintmax_t              close_conn;
 } mongrel2_userdata;
 
-static int mongrel2_init(backend_t *backend){ // {{{
+static int mongrel2_init(machine_t *machine){ // {{{
 	mongrel2_userdata     *userdata;
 	
-	if((userdata = backend->userdata = calloc(1, sizeof(mongrel2_userdata))) == NULL)
+	if((userdata = machine->userdata = calloc(1, sizeof(mongrel2_userdata))) == NULL)
 		return error("calloc failed");
 	
 	userdata->buffer     = HK(buffer);
@@ -86,15 +86,15 @@ static int mongrel2_init(backend_t *backend){ // {{{
 	userdata->close_conn = 1;
 	return 0;
 } // }}}
-static int mongrel2_destroy(backend_t *backend){ // {{{
-	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
+static int mongrel2_destroy(machine_t *machine){ // {{{
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int mongrel2_configure(backend_t *backend, config_t *config){ // {{{
+static int mongrel2_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
-	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->body,       config, HK(body));
@@ -102,9 +102,9 @@ static int mongrel2_configure(backend_t *backend, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ // {{{
+static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	mongrel2_userdata     *userdata          = (mongrel2_userdata *)backend->userdata;
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
 	hash_t reply_struct[] = {
 		{ HK(uuid), DATA_HASHT(
@@ -137,7 +137,7 @@ static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ /
 		hash_inline(request),
 		hash_end
 	};
-	if( (ret = backend_pass(backend, r_reply)) < 0 )
+	if( (ret = machine_pass(machine, r_reply)) < 0 )
 		return ret;
 	
 	if(userdata->close_conn == 1){
@@ -152,24 +152,24 @@ static ssize_t mongrel2_reply_handler(backend_t *backend, request_t *request){ /
 			hash_inline(r_voidbody),
 			hash_end
 		};
-		if( (ret = backend_pass(backend, r_close)) < 0 )
+		if( (ret = machine_pass(machine, r_close)) < 0 )
 			return ret;
 	}
 	return -EEXIST;
 } // }}}
 
-static backend_t mongrel2_reply_proto = {
+static machine_t mongrel2_reply_proto = {
 	.class          = "modules/c_mongrel2_reply",
 	.supported_api  = API_HASH,
 	.func_init      = &mongrel2_init,
 	.func_destroy   = &mongrel2_destroy,
 	.func_configure = &mongrel2_configure,
-	.backend_type_hash = {
+	.machine_type_hash = {
 		.func_handler = &mongrel2_reply_handler
 	},
 };
 
-static ssize_t mongrel2_parse_handler(backend_t *backend, fastcall_header *hargs){ // {{{
+static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs){ // {{{
 	ssize_t                ret;
 	char                  *p, *uuid_p, *connid_p, *path_p, *header_p, *body_p, *e;
 	uintmax_t                  uuid_l,  connid_l,  path_l,  header_l,  body_l;
@@ -207,13 +207,13 @@ static ssize_t mongrel2_parse_handler(backend_t *backend, fastcall_header *hargs
 		hash_end
 	};
 	
-	return ( (ret = (backend_pass(backend, request)) < 0) ) ? ret : -EEXIST;
+	return ( (ret = (machine_pass(machine, request)) < 0) ) ? ret : -EEXIST;
 } // }}}
 
-static backend_t mongrel2_parse_proto = {
+static machine_t mongrel2_parse_proto = {
 	.class          = "modules/c_mongrel2_parse",
 	.supported_api  = API_FAST,
-	.backend_type_fast = {
+	.machine_type_fast = {
 		.func_handler = (f_fast_func)&mongrel2_parse_handler
 	},
 };

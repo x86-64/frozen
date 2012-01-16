@@ -9,8 +9,8 @@ START_TEST (test_real_store_nums){
                 hash_end
 	};
 	
-	backend_t  *backend = backend_new(config);
-	        fail_unless(backend != NULL, "backend_new failed");
+	machine_t  *machine = machine_new(config);
+	        fail_unless(machine != NULL, "machine_new failed");
 
 	off_t data_ptrs[6];
 	int   data_array[] = { 100, 200, 500, 800, 888, 900 };
@@ -28,8 +28,8 @@ START_TEST (test_real_store_nums){
 			{ HK(ret),        DATA_PTR_SIZET(&ret)                },
                         hash_end
 		};
-		backend_query(backend, r_write);
-			fail_unless(ret == 0, "backend real_store_nums: write array failed");
+		machine_query(machine, r_write);
+			fail_unless(ret == 0, "machine real_store_nums: write array failed");
 	}
 	
 	// check
@@ -42,12 +42,12 @@ START_TEST (test_real_store_nums){
 			{ HK(ret),    DATA_PTR_SIZET(&ret)               },
 			hash_end
 		};
-		backend_query(backend, r_read);
-			fail_unless(ret == 0,                   "backend real_store_nums: read array failed");
-			fail_unless(data_read == data_array[i], "backend real_store_nums: read array data failed");
+		machine_query(machine, r_read);
+			fail_unless(ret == 0,                   "machine real_store_nums: read array failed");
+			fail_unless(data_read == data_array[i], "machine real_store_nums: read array data failed");
 	}
 	
-	backend_destroy(backend);
+	machine_destroy(machine);
 }
 END_TEST
 REGISTER_TEST(core, test_real_store_nums)

@@ -88,11 +88,11 @@
    fun:data_write
    fun:data_transfer
    fun:file_write
-   fun:backend_query
-   fun:backend_pass
-   fun:incap_backend_createwrite
-   fun:backend_query
-   fun:backend_pass
+   fun:machine_query
+   fun:machine_pass
+   fun:incap_machine_createwrite
+   fun:machine_query
+   fun:machine_pass
    fun:rewrite_func_ablock
 }
 

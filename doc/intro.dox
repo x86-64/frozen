@@ -1,5 +1,5 @@
 /** @defgroup api Api */
-/** @defgroup backend Backends */
+/** @defgroup machine Machines */
 /** @defgroup data Data */
 /** @defgroup tutorial Tutorials */
 
@@ -8,7 +8,7 @@
  *  @section intro Introduction
  *    Frozen is data processing daemon. It contain several modules for input, output and data processing.
  *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
- *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data
+ *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data
  *    for web or local clients.
  *
  *    Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
@@ -28,7 +28,7 @@
  *  
  *  @li @ref tutorial_basics
  *  @li More tutorials: @ref tutorial
- *  @li Architecture review: @ref backend, @ref api, @ref data.
+ *  @li Architecture review: @ref machine, @ref api, @ref data.
  *  @li <a href="https://github.com/x86-64/frozen">Github project page</a>
  *  @li <a href="https://github.com/x86-64/frozen/zipball/master">Download as .zip</a>
  *  @li <a href="https://github.com/x86-64/frozen/tarball/master">Download as .tar.gz</a>

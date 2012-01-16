@@ -15,8 +15,8 @@
  *
  *  Despite of kind of api used, every api deals with requests. Request is a set of key-value pairs.
  *
- *  Each request have "action" key to tell backend what to do with data. Some backends don't require
- *  action for request, so initial user request can have no action, but for further processing one of backends
+ *  Each request have "action" key to tell machine what to do with data. Some machines don't require
+ *  action for request, so initial user request can have no action, but for further processing one of machines
  *  have to define it.
  */
 /** @ingroup api
@@ -29,7 +29,7 @@
  *         { HK(key), DATA_UINTT(100) },
  *         hash_end
  *      };
- *      backend_query(backend, new_hash);
+ *      machine_query(machine, new_hash);
  *  @endcode
  *  This hash declare one parameter named "key" with value of 100.
  *
@@ -38,10 +38,10 @@
  *  unnessesary copying form place to place avoided.
  *
  *  If hash defined within function such declaration converted to several "mov" and "lea" assembly command,
- *  which write hash in current stack frame. This can be processed very fast, because of lack of chained
+ *  which write hash in current stack frame. This can be processed very fast, because of lack of shoped
  *  computation and hopefuly with help of caches.
  *
- *  Staticly declared hashes already stored in usable form, so no overhead here.
+ *  Staticly declared hashes already datad in usable form, so no overhead here.
  *
  *  Hash can contain inline hashes, can contain embeded hashes and so on. @see hashes
  *
@@ -60,12 +60,12 @@
  *  @page api_fast API_FAST
  *  
  *  As opposite to API_HASH, API_FAST was introduced. Main reason is speed - hash api is too slow
- *  for key find. Then some "index" backends deals with "memory" each user request produce hundreds of
- *  requests to "memory" backend, and every request to "memory" have at least 3 parameters
+ *  for key find. Then some "index" machines deals with "memory" each user request produce hundreds of
+ *  requests to "memory" machine, and every request to "memory" have at least 3 parameters
  *  (offset, size, buffer). So, hash_find api gets very busy and callgrind isn't very happy with that.
  *
  *  However, this situation is simple to solve. We know how many parameters we want to pass, and we have no
- *  optional parameters. Simpliest solution is pack all parameters in order known to both backends. In C world
+ *  optional parameters. Simpliest solution is pack all parameters in order known to both machines. In C world
  *  this can be perfectly done by defining a struct. So, we use them for fast api.
  *  
  *  Each action have own structure, where data defined in specified order. As bonus, you can have own
@@ -79,7 +79,7 @@
  *          &buffer,                    // .buffer
  *          100                         // .buffer_size
  *       };
- *       backend_fast_query(backend, &r_read);
+ *       machine_fast_query(machine, &r_read);
  *  @endcode
  *
  *  Advantages:
@@ -101,8 +101,8 @@
 /** @ingroup api
  *  @page api_downgrade Downgrading
  *  
- *  Currenly backend code have support for so called "request downgrading". This process occurs then some API_FAST-capable
- *  backend pass request to API_FAST-notcapable backend. So, this code creates new hash request and fill it with parameters from
+ *  Currenly machine code have support for so called "request downgrading". This process occurs then some API_FAST-capable
+ *  machine pass request to API_FAST-notcapable machine. So, this code creates new hash request and fill it with parameters from
  *  fast request.
  *
  *  This is very painful process. At first, all optional parameters is lost. Second, this is overhead in any case. Third,
@@ -111,11 +111,11 @@
  *  As developer, try avoid this. As end user, you can ignore it.
  */
 /** @ingroup api
- *  @page api_newbackend Recomendations for new backends
+ *  @page api_newmachine Recomendations for new machines
  *  
- *  If you write new backend you have to choose which api to implement.
+ *  If you write new machine you have to choose which api to implement.
  *
- *  If backend provide access to very fast things, such as memory - API_FAST is top priority.
+ *  If machine provide access to very fast things, such as memory - API_FAST is top priority.
  *  Common things, such as files, directories have to implement both API_HASH and API_FAST.
  *  Unusual things, and data processing can implement only API_HASH. 
  */
@@ -126,8 +126,8 @@ typedef enum api_types {
 	API_FAST = 4
 } api_types;
 
-typedef ssize_t (*f_crwd)      (backend_t *, request_t *);
-typedef ssize_t (*f_fast_func) (backend_t *, void *);
+typedef ssize_t (*f_crwd)      (machine_t *, request_t *);
+typedef ssize_t (*f_fast_func) (machine_t *, void *);
 
 typedef enum data_functions {
 	ACTION_CREATE,

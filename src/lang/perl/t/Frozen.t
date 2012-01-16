@@ -7,7 +7,7 @@ sub ok { die(shift) unless shift; }
 
 exit; # BAD BAD BAD
 
-my ($ret, $config, $r_create, $backend, $string);
+my ($ret, $config, $r_create, $machine, $string);
 
 # init all
         $config = Frozen::configs_string_parse(q!
@@ -15,11 +15,11 @@ my ($ret, $config, $r_create, $backend, $string);
         !);
                 ok($config, "configs_string_parse");
 
-        $backend = Frozen::backend_new($config);
-                ok($backend, "backend_new");
+        $machine = Frozen::machine_new($config);
+                ok($machine, "machine_new");
 
 # test creates
-        $ret = Frozen::query($backend, {
+        $ret = Frozen::query($machine, {
 		action => { uint32_t => $Frozen::ACTION_CREATE                },
 		buffer => { string_t => "Hello, world!"                            },
 		size   => { size_t   => 100                                        }
@@ -27,7 +27,7 @@ my ($ret, $config, $r_create, $backend, $string);
 	ok($ret >= 0, "r_create");
 
 # test reads
-	$ret = Frozen::query($backend, {
+	$ret = Frozen::query($machine, {
 		action => { uint32_t => $Frozen::ACTION_READ                 },
 		offset => { off_t    => 0                                         },
 		buffer => { string_t => " " x 100                                 },
@@ -40,6 +40,6 @@ my ($ret, $config, $r_create, $backend, $string);
 	ok(substr($string, 0, 13) eq "Hello, world!",   "r_read data");
 	
 # free all
-        Frozen::backend_destroy($backend);
+        Frozen::machine_destroy($machine);
         Frozen::hash_free($config);
 	

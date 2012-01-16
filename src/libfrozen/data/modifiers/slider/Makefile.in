@@ -42,66 +42,66 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/./build/libfrozen_backends.m4 \
+	$(top_srcdir)/./build/libfrozen_machines.m4 \
 	$(top_srcdir)/./build/libfrozen_data.m4 \
 	$(top_srcdir)/./build/libfrozen_modules.m4 \
 	$(top_srcdir)/./src/modules/c_mongrel2/config.m4 \
 	$(top_srcdir)/./src/modules/c_null/config.m4 \
 	$(top_srcdir)/./src/modules/c_zmq/config.m4 \
+	$(top_srcdir)/./src/modules/data_ipv4_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
+	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/call/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/end/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/factory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/morph/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/backend/rebuild/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/cache_append/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/cache/cache/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/communication/ipc/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/daemon/kill/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/daemon/thread/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/allocator/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/convert/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/incapsulate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/list/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/regexp/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/split/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/structs/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/data/transfer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/examples/null/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/hash/jenkins/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/hash/murmur/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/fill/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/hashtable/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/lookup/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/index/mphf/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/console/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/fuse/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/io/tcp/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/assign/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/balancer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/debug/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/implode/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/iterate/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/rewrite/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/request/switch/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/rest/insert_sort/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/storage/file/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/storage/pointers/config.m4 \
-	$(top_srcdir)/./src/libfrozen/backends/sync/mutex/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/allocator/fixed/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/allocator/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/call/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/end/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/morph/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/rebuild/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/wrapper/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/cache/cache_append/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/cache/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/convert/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/incapsulate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/regexp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/data/transfer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/examples/null/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/hash/murmur/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/fill/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/hashtable/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/lookup/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/index/mphf/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/console/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/fuse/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/ipc/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/io/tcp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/assign/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/iterate/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/storage/file/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/storage/pointers/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/backend/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/named/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
@@ -111,8 +111,9 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/storage/buffer/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/configure.ac
@@ -128,8 +129,8 @@ am_libfrozen_data_slider_la_OBJECTS =  \
 	libfrozen_data_slider_la-slider_t.lo
 libfrozen_data_slider_la_OBJECTS =  \
 	$(am_libfrozen_data_slider_la_OBJECTS)
-libfrozen_data_slider_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+libfrozen_data_slider_la_LINK = $(LIBTOOL) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libfrozen_data_slider_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -181,9 +182,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BACKEND_DIRS = @BACKEND_DIRS@
-BACKEND_DIST_DIRS = @BACKEND_DIST_DIRS@
-BACKEND_LIBS_SELECTED = @BACKEND_LIBS_SELECTED@
 BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -197,9 +195,6 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DATA_DIRS = @DATA_DIRS@
-DATA_DIST_DIRS = @DATA_DIST_DIRS@
-DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -232,6 +227,9 @@ LN_S = @LN_S@
 LS = @LS@
 LTLIBOBJS = @LTLIBOBJS@
 M4 = @M4@
+MACHINE_DIRS = @MACHINE_DIRS@
+MACHINE_DIST_DIRS = @MACHINE_DIST_DIRS@
+MACHINE_LIBS_SELECTED = @MACHINE_LIBS_SELECTED@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -260,6 +258,9 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+DATA_DIRS = @DATA_DIRS@
+DATA_DIST_DIRS = @DATA_DIST_DIRS@
+DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 STRIP = @STRIP@
 SWIG = @SWIG@
 VERSION = @VERSION@

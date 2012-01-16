@@ -232,7 +232,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		if(data_query(&sl_src, &r_read) < 0)
 			return -EFAULT;
 		
-		// restore data holders if any
+		// redata data holders if any
 		if(dst->ptr != NULL){
 			if( (old_data = hash_data_find((hash_t *)dst->ptr, curr->key)) != NULL){
 				curr->data.ptr  = old_data->ptr;
@@ -262,7 +262,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			break;
 	}
 	
-	// restore data
+	// redata data
 	hash_t_ctx ctx = { .sl_data = &sl_src };
 	if(hash_iter(hash, (hash_iterator)&data_hash_t_convert_from_iter, &ctx, 0) != ITER_OK){
 		hash_free(hash);
@@ -276,7 +276,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		while( (old_data = list_pop(&new_data)) != NULL)
 			data_query(old_data, &r_free);
 		
-		free(hash);      // no need for this hash - we restore data in old one
+		free(hash);      // no need for this hash - we redata data in old one
 	}
 	return 0;
 } // }}}

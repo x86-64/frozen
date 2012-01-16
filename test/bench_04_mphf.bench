@@ -1,21 +1,21 @@
 { class => "daemon/thread" },
-{ class => "emitter", request = { backend = { { name  => "mphf" }        }, request = { benchmark_function = "restart" } } },
-{ class => "emitter", request = { backend = { { name  => "mphf" }        },
+{ class => "emitter", request = { machine = { { name  => "mphf" }        }, request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { machine = { { name  => "mphf" }        },
 	request = {
 		action => create,
 		key    => "moo",
 		buffer => "aaaaaaaaaaaaaaaaaaaaaaaaa"
 	}
 } },
-{ class => "emitter", request = { backend = { { name  => "mphf" }        },
+{ class => "emitter", request = { machine = { { name  => "mphf" }        },
 	request = {
 		action => write,
 		key    => "moo",
 		buffer => "bbbbbbbbbbbbbbbbbbbbbbbbb"
 	}
 }, count => (uint_t)'1000000' },
-{ class => "emitter", request = { backend = { { name  => "mphf" }        }, request = { benchmark_function = "print_long" } } },
-{ class => "emitter", request = { backend = { { class => "daemon/kill" } }, request = {} } },
+{ class => "emitter", request = { machine = { { name  => "mphf" }        }, request = { benchmark_function = "print_long" } } },
+{ class => "emitter", request = { machine = { { class => "daemon/kill" } }, request = {} } },
 { class => "end"                                                             },
 NULL,
 { class => "benchmark", name => "mphf"                                   },
@@ -26,11 +26,11 @@ NULL,
 	rules = {
 		{
 			request = { action = create },
-		  	backend = { { class = "index/fill", index = "mymphf" } }
+		  	machine = { { class = "index/fill", index = "mymphf" } }
 		},
 		{
 			request = { action = read },
-			backend = { { class = "index/lookup", index = "mymphf", output = (hashkey_t)'offset', output_type = (datatype_t)'uint_t' } }
+			machine = { { class = "index/lookup", index = "mymphf", output = (hashkey_t)'offset', output_type = (datatype_t)'uint_t' } }
 		}
 	}
 },
@@ -48,9 +48,9 @@ NULL,
 	name = "mymphf",
 	class = "mphf",
 	type = "chm_imp",
-	backend_g = "test_mphf_g",
-	backend_e = "test_mphf_e",
-	backend_v = "test_mphf_v",
+	machine_g = "test_mphf_g",
+	machine_e = "test_mphf_e",
+	machine_v = "test_mphf_v",
 	key_from = (hashkey_t)'keyid',
 	nelements_min = (uint64_t)'1000000',
 	nelements_step = (uint64_t)'10000',

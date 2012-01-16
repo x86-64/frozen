@@ -2,17 +2,17 @@
 #include <zmq.h>
 
 /**
- * @ingroup backend
- * @addtogroup mod_backend_zmq module/c_zmq
+ * @ingroup machine
+ * @addtogroup mod_machine_zmq module/c_zmq
  */
 /**
- * @ingroup mod_backend_zmq
+ * @ingroup mod_machine_zmq
  * @page page_zmq_info Description
  *
  * This module implement stubs to work with ZeroMQ.
  */
 /**
- * @ingroup mod_backend_zmq
+ * @ingroup mod_machine_zmq
  * @page page_zmq_config Configuration
  * 
  * Accepted configuration:
@@ -46,8 +46,8 @@ typedef struct zmq_userdata {
 } zmq_userdata;
 
 void                          *zmq_ctx           = NULL;
-uintmax_t                      zmq_backends      = 0;
-pthread_mutex_t                zmq_backends_mtx  = PTHREAD_MUTEX_INITIALIZER;
+uintmax_t                      zmq_machines      = 0;
+pthread_mutex_t                zmq_machines_mtx  = PTHREAD_MUTEX_INITIALIZER;
 
 static int zmq_string_to_type(char *type_str){ // {{{
 	if(type_str != NULL){
@@ -64,56 +64,56 @@ static int zmq_string_to_type(char *type_str){ // {{{
 	return -1;
 } // }}}
 
-static int zmqb_init(backend_t *backend){ // {{{
+static int zmqb_init(machine_t *machine){ // {{{
 	ssize_t                ret               = 0;
 	zmq_userdata          *userdata;
 	
 	// manage global zmq context
-	pthread_mutex_lock(&zmq_backends_mtx);
+	pthread_mutex_lock(&zmq_machines_mtx);
 		if(!zmq_ctx){
 			if( (zmq_ctx = zmq_init(ZMQ_NTHREADS)) == NULL){
 				ret = error("zmq_init failed");
 				goto error;
 			}
 		}
-		zmq_backends++;
-	pthread_mutex_unlock(&zmq_backends_mtx);
+		zmq_machines++;
+	pthread_mutex_unlock(&zmq_machines_mtx);
 	
-	if((userdata = backend->userdata = calloc(1, sizeof(zmq_userdata))) == NULL)
+	if((userdata = machine->userdata = calloc(1, sizeof(zmq_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return ret;
 
 error:
-	pthread_mutex_unlock(&zmq_backends_mtx);
+	pthread_mutex_unlock(&zmq_machines_mtx);
 	return ret;
 } // }}}
-static int zmqb_destroy(backend_t *backend){ // {{{
-	zmq_userdata         *userdata          = (zmq_userdata *)backend->userdata;
+static int zmqb_destroy(machine_t *machine){ // {{{
+	zmq_userdata         *userdata          = (zmq_userdata *)machine->userdata;
 	
 	if(userdata->zmq_socket){
 		zmq_close(userdata->zmq_socket);
 	}
 	
 	// manage global zmq context
-	pthread_mutex_lock(&zmq_backends_mtx);
-		if(zmq_backends-- == 0){
+	pthread_mutex_lock(&zmq_machines_mtx);
+		if(zmq_machines-- == 0){
 			zmq_term(zmq_ctx);
 			zmq_ctx = NULL;
 		}
-	pthread_mutex_unlock(&zmq_backends_mtx);
+	pthread_mutex_unlock(&zmq_machines_mtx);
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int zmqb_configure(backend_t *backend, config_t *config){ // {{{
+static int zmqb_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	int                    zmq_socket_type;
 	char                  *zmq_type_str      = NULL;
 	char                  *zmq_opt_ident     = NULL;
 	char                  *zmq_act_bind      = NULL;
 	char                  *zmq_act_connect   = NULL;
-	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	zmq_userdata          *userdata          = (zmq_userdata *)machine->userdata;
 	
 	hash_data_copy(ret, TYPE_STRINGT, zmq_type_str,    config, HK(type));
 	hash_data_copy(ret, TYPE_STRINGT, zmq_act_bind,    config, HK(bind));
@@ -143,11 +143,11 @@ static int zmqb_configure(backend_t *backend, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ // {{{
+static ssize_t zmqb_fast_handler(machine_t *machine, fastcall_header *hargs){ // {{{
 	void                  *data;
 	size_t                 data_size;
 	zmq_msg_t              zmq_msg;
-	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	zmq_userdata          *userdata          = (zmq_userdata *)machine->userdata;
 	
 	switch(hargs->action){
 		// case ACTION_TRANSFER TODO
@@ -199,8 +199,8 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 /*static ssize_t zmqb_io_t_multipart_handler(data_t *io_data, void *io_userdata, void *args){ // {{{
 	void                  *data;
 	zmq_msg_t              zmq_msg;
-	backend_t             *backend           = (backend_t *)io_userdata;
-	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	machine_t             *machine           = (machine_t *)io_userdata;
+	zmq_userdata          *userdata          = (zmq_userdata *)machine->userdata;
 	fastcall_write        *wargs             = (fastcall_write *)args;
 	
 	if( zmq_msg_init_size(&zmq_msg, wargs->buffer_size) != 0)
@@ -215,7 +215,7 @@ static ssize_t zmqb_fast_handler(backend_t *backend, fastcall_header *hargs){ //
 	return 0;
 } // }}}*/
 static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
-	return zmqb_fast_handler((backend_t *)userdata, args);
+	return zmqb_fast_handler((machine_t *)userdata, args);
 } // }}}
 static void zmq_buffer_free(void *data, void *hint){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
@@ -223,14 +223,14 @@ static void zmq_buffer_free(void *data, void *hint){ // {{{
 	
 	free(hint);
 } // }}}
-static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
+static ssize_t zmqb_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
 	zmq_msg_t              zmq_msg;
 	data_t                *buffer;
-	data_t                 zmq_iot           = DATA_IOT(backend, &zmqb_io_t_handler);
-	//data_t                 zmq_iot_multi     = DATA_IOT(backend, &zmqb_io_t_multipart_handler);
-	zmq_userdata          *userdata          = (zmq_userdata *)backend->userdata;
+	data_t                 zmq_iot           = DATA_IOT(machine, &zmqb_io_t_handler);
+	//data_t                 zmq_iot_multi     = DATA_IOT(machine, &zmqb_io_t_multipart_handler);
+	zmq_userdata          *userdata          = (zmq_userdata *)machine->userdata;
 	
 	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
 	if(ret != 0)
@@ -278,16 +278,16 @@ static ssize_t zmqb_handler(backend_t *backend, request_t *request){ // {{{
 	return -ENOSYS;
 } // }}}
 
-static backend_t zmq_proto = {                 // NOTE need static or unique name
+static machine_t zmq_proto = {                 // NOTE need static or unique name
 	.class          = "modules/c_zmq",
 	.supported_api  = API_HASH | API_FAST,
 	.func_init      = &zmqb_init,
 	.func_configure = &zmqb_configure,
 	.func_destroy   = &zmqb_destroy,
-	.backend_type_hash = {
+	.machine_type_hash = {
 		.func_handler = &zmqb_handler
 	},
-	.backend_type_fast = {
+	.machine_type_fast = {
 		.func_handler = (f_fast_func)&zmqb_fast_handler
 	}
 };

@@ -13,10 +13,6 @@
 #define HK_VALUE_after 6015
 #define HK_VALUE_async 5881
 #define HK_VALUE_backend 14474
-#define HK_VALUE_backend_e 28735
-#define HK_VALUE_backend_g 28897
-#define HK_VALUE_backend_v 30112
-#define HK_VALUE_backends 21834
 #define HK_VALUE_before 9682
 #define HK_VALUE_benchmark_function 227699
 #define HK_VALUE_bind 3108
@@ -91,6 +87,11 @@
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
 #define HK_VALUE_loop 3343
+#define HK_VALUE_machine 14586
+#define HK_VALUE_machine_e 28847
+#define HK_VALUE_machine_g 29009
+#define HK_VALUE_machine_v 30224
+#define HK_VALUE_machines 21946
 #define HK_VALUE_marker 9864
 #define HK_VALUE_marker_data 52113
 #define HK_VALUE_max_global 39928
@@ -176,10 +177,6 @@ typedef enum hashkey_t {
       HK_after = HK_VALUE_after, 
       HK_async = HK_VALUE_async, 
       HK_backend = HK_VALUE_backend, 
-      HK_backend_e = HK_VALUE_backend_e, 
-      HK_backend_g = HK_VALUE_backend_g, 
-      HK_backend_v = HK_VALUE_backend_v, 
-      HK_backends = HK_VALUE_backends, 
       HK_before = HK_VALUE_before, 
       HK_benchmark_function = HK_VALUE_benchmark_function, 
       HK_bind = HK_VALUE_bind, 
@@ -254,6 +251,11 @@ typedef enum hashkey_t {
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
       HK_loop = HK_VALUE_loop, 
+      HK_machine = HK_VALUE_machine, 
+      HK_machine_e = HK_VALUE_machine_e, 
+      HK_machine_g = HK_VALUE_machine_g, 
+      HK_machine_v = HK_VALUE_machine_v, 
+      HK_machines = HK_VALUE_machines, 
       HK_marker = HK_VALUE_marker, 
       HK_marker_data = HK_VALUE_marker_data, 
       HK_max_global = HK_VALUE_max_global, 
@@ -343,10 +345,6 @@ keypair_t hashkeys[] = {
       { "after", HK_VALUE_after }, 
       { "async", HK_VALUE_async }, 
       { "backend", HK_VALUE_backend }, 
-      { "backend_e", HK_VALUE_backend_e }, 
-      { "backend_g", HK_VALUE_backend_g }, 
-      { "backend_v", HK_VALUE_backend_v }, 
-      { "backends", HK_VALUE_backends }, 
       { "before", HK_VALUE_before }, 
       { "benchmark_function", HK_VALUE_benchmark_function }, 
       { "bind", HK_VALUE_bind }, 
@@ -421,6 +419,11 @@ keypair_t hashkeys[] = {
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
       { "loop", HK_VALUE_loop }, 
+      { "machine", HK_VALUE_machine }, 
+      { "machine_e", HK_VALUE_machine_e }, 
+      { "machine_g", HK_VALUE_machine_g }, 
+      { "machine_v", HK_VALUE_machine_v }, 
+      { "machines", HK_VALUE_machines }, 
       { "marker", HK_VALUE_marker }, 
       { "marker_data", HK_VALUE_marker_data }, 
       { "max_global", HK_VALUE_max_global }, 

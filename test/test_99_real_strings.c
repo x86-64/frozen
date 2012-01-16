@@ -9,7 +9,7 @@ START_TEST (test_real_store_strings){
 		hash_end
 	};
 	
-	backend_t  *backend = backend_new(config);
+	machine_t  *machine = machine_new(config);
 	
 	off_t  data_ptrs[6];
 	char  *data_array[] = {
@@ -34,8 +34,8 @@ START_TEST (test_real_store_strings){
 			{ HK(ret),        DATA_PTR_SIZET(&ret)                                      },
                         hash_end
 		};
-		backend_query(backend, r_write);
-			fail_unless(ret == 0, "backend real_store_strings: write array failed");
+		machine_query(machine, r_write);
+			fail_unless(ret == 0, "machine real_store_strings: write array failed");
 	}
 	
 	// check
@@ -48,12 +48,12 @@ START_TEST (test_real_store_strings){
 			{ HK(ret),    DATA_PTR_SIZET(&ret)              },
                         hash_end
 		};
-		backend_query(backend, r_read);
-			fail_unless(ret == 0,                              "backend real_store_strings: read array failed");
-			fail_unless(strcmp(data_read, data_array[i]) == 0, "backend real_store_strings: read array data failed");
+		machine_query(machine, r_read);
+			fail_unless(ret == 0,                              "machine real_store_strings: read array failed");
+			fail_unless(strcmp(data_read, data_array[i]) == 0, "machine real_store_strings: read array data failed");
 	}
 	
-	backend_destroy(backend);
+	machine_destroy(machine);
 }
 END_TEST
 REGISTER_TEST(core, test_real_store_strings)

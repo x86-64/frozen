@@ -10,7 +10,7 @@ import (
 
 // HK(addr) HK(url) HK(http_resp) HK(http_req)    // dont remove
 
-func runServer(addr string, backend uintptr) os.Error {
+func runServer(addr string, machine uintptr) os.Error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func (resp http.ResponseWriter, req *http.Request){
 		h := f.Hash([]f.Hskel {
@@ -19,7 +19,7 @@ func runServer(addr string, backend uintptr) os.Error {
 			f.Hitem(f.HK_http_req,   f.TYPE_GOINTERFACET, req),
 			f.Hend() });
 
-		f.Backend_query(backend, h)
+		f.Machine_query(machine, h)
 	})
 
 	l, e := net.Listen("tcp", addr)
@@ -30,10 +30,10 @@ func runServer(addr string, backend uintptr) os.Error {
 	return nil
 }
 
-func http_configure(backend uintptr, config uintptr) int{
+func http_configure(machine uintptr, config uintptr) int{
 	addr, ok := f.Hget(config, f.HK_addr).(string)
 
-	if e := runServer(addr, backend); e != nil {
+	if e := runServer(addr, machine); e != nil {
 		log.Print("go_http failed configure: %v", e)
 		return -1
 	}
@@ -41,7 +41,7 @@ func http_configure(backend uintptr, config uintptr) int{
 }
 
 func main(){
-	g := f.NewBackend_t()
+	g := f.NewMachine_t()
 	g.SetClass("go_http")
 	g.SetSupported_api(f.API_HASH)
 	g.SetFunc_configure(http_configure)

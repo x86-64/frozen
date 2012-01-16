@@ -1,22 +1,17 @@
-- terminology change:
-  - backend chain -> assembly line
-  - backend -> machine
-  - data -> store
-
-* flow-based architecture for backend, request-based architecture for data:
-  - backend/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
-  - cache/cache: get backend length not flow-based (not important, subject for deprecation)
-  - backend/pool: pool get parameter not flow-based (not important for now, another approach?)
+* flow-based architecture for machine, request-based architecture for data:
+  - machine/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
+  - cache/cache: get machine length not flow-based (not important, subject for deprecation)
+  - machine/pool: pool get parameter not flow-based (not important for now, another approach?)
 
 * m4 macro collection
-  - write m4 macro for balancer backend
+  - write m4 macro for balancer machine
 
-- broken mphf backend rebuild: allocator backend not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
+- broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
 - index/fill query store api, not machine
 - replace index/lookup with machine/call_func
 
 - join physical and logical length into one
-- backend 'data/buffer'
+- machine 'data/buffer'
 
 - review indexes and caches (+ data free routines)
 - data 'refcount_t'
@@ -29,17 +24,17 @@
 - move downgrade request to api.c
 - rewrite downgrade request to use m4'ed definitions
 - write upgrade request
-- backend 'api/switch' or something
+- machine 'api/switch' or something
 
-- review code for multi-threading support, document backend's thread-safety capabilities
-- backend thread_pool
-- backend multi_request
+- review code for multi-threading support, document machine's thread-safety capabilities
+- machine thread_pool
+- machine multi_request
 
 - new test suite, as benchmarks, deprecate check
 - data 'range_t', 'multiselect_t' and matching routines
-- backend queue
+- machine queue
 - data 'action_t' + convert array from\to string
-- mphf nelements_step with percents + remove from mphf to another backend
+- mphf nelements_step with percents + remove from mphf to another machine
 
 - change alloca to threaddata
 

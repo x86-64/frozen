@@ -3,7 +3,7 @@
 
 #include <enum/format/format_t.h>
 #include <core/hash/hash_t.h>
-#include <core/backend/backend_t.h>
+#include <core/machine/machine_t.h>
 
 static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ // {{{
 	ssize_t                   ret;
@@ -25,10 +25,10 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				fdata->allocated = 1;
 			}
 			
-			hash_data_copy(ret, TYPE_BACKENDT, fdata->backend, parameters, HK(backend));
+			hash_data_copy(ret, TYPE_MACHINET, fdata->machine, parameters, HK(machine));
 			hash_data_copy(ret, TYPE_HASHT,    fdata->request, parameters, HK(request));
 			
-			if(fdata->backend != NULL && fdata->request != NULL){
+			if(fdata->machine != NULL && fdata->request != NULL){
 				fdata->request = hash_copy(fdata->request);
 				break;
 			}
@@ -39,8 +39,8 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			if(fdata == NULL)
 				return -EFAULT;
 			
-			if(fdata->backend)
-				backend_destroy(fdata->backend);
+			if(fdata->machine)
+				machine_destroy(fdata->machine);
 			if(fdata->request)
 				hash_free(fdata->request);
 			if(fdata->allocated)
@@ -53,7 +53,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			if(fdata == NULL)
 				return -EFAULT;
 			
-			return backend_query(fdata->backend, fdata->request);
+			return machine_query(fdata->machine, fdata->request);
 	}
 	return 0;
 } // }}}
