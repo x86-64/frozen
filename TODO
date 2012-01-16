@@ -4,7 +4,6 @@
   - data -> store
 
 * flow-based architecture for backend, request-based architecture for data:
-  - request/implode: explode return result not flow-based (normal, remove junk code)
   - backend/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
   - cache/cache: get backend length not flow-based (not important, subject for deprecation)
   - backend/pool: pool get parameter not flow-based (not important for now, another approach?)

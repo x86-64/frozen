@@ -37,8 +37,7 @@
  *
  * This backend unpack new request from current request. Useful for ipc. See @ref mod_backend_implode for packing.
  *
- * Unpacking process use data _CONVERT_FROM functions, and _CONVERT_TO for result returning. All data types used in request
- * have to support them.
+ * Unpacking process use data _CONVERT_FROM functions. All data types used in request have to support it.
  */
 /**
  * @ingroup mod_backend_explode
@@ -49,7 +48,6 @@
  * {
  *              class                   = "request/explode",
  *              buffer                  = (hashkey_t)'buffer',  # key name in new request
- *              return_result           = (uint_t)'0',          # pack changed, during further processing, request back to old one, default 1
  * }
  * @endcode
  */
@@ -57,8 +55,7 @@
 #define EMODULE 34
 
 typedef struct plode_userdata {
-	hashkey_t             buffer;
-	uintmax_t              return_result;
+	hashkey_t              buffer;
 } plode_userdata;
 
 static int plode_init(backend_t *backend){ // {{{
@@ -67,7 +64,6 @@ static int plode_init(backend_t *backend){ // {{{
 		return error("calloc failed");
 	
 	userdata->buffer        = HK(buffer);
-	userdata->return_result = 1;
 	return 0;
 } // }}}
 static int plode_destroy(backend_t *backend){ // {{{
@@ -81,19 +77,17 @@ static int plode_configure(backend_t *backend, hash_t *config){ // {{{
 	plode_userdata        *userdata          = (plode_userdata *)backend->userdata;
 	
 	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,        config, HK(buffer));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->return_result, config, HK(return_result));
 	return 0;
 } // }}}
 
 static ssize_t implode_request(backend_t *backend, request_t *request){ // {{{
-	ssize_t                ret;
 	plode_userdata        *userdata          = (plode_userdata *)backend->userdata;
 	
 	request_t r_next[] = {
 		{ userdata->buffer, DATA_PTR_HASHT(request) },
 		hash_end
 	};
-	return ( (ret = backend_pass(backend, r_next)) < 0) ? ret : -EEXIST;
+	return backend_pass(backend, r_next);
 } // }}}
 static ssize_t explode_request(backend_t *backend, request_t *request){ // {{{
 	ssize_t                ret;
@@ -111,13 +105,7 @@ static ssize_t explode_request(backend_t *backend, request_t *request){ // {{{
 	if(r_hash.ptr == NULL)
 		return -EFAULT;
 	
-	ret = ( (ret = backend_pass(backend, r_hash.ptr)) < 0) ? ret : -EEXIST;
-	
-	if(userdata->return_result != 0){
-		fastcall_convert_to    r_convert_to = { { 4, ACTION_CONVERT_TO }, buffer, FORMAT(binary) };
-		if( (ret = data_query(&r_hash, &r_convert_to)) < 0)
-			return -EFAULT;
-	}
+	ret = backend_pass(backend, r_hash.ptr);
 	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
 	data_query(&r_hash, &r_free);
