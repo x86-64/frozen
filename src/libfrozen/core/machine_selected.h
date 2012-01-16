@@ -32,7 +32,6 @@ extern machine_t ipc_proto;
 extern machine_t tcp_proto;
 extern machine_t tcp_child_proto;
 extern machine_t benchmark_proto;
-extern machine_t call_proto;
 extern machine_t end_proto;
 extern machine_t factory_proto;
 extern machine_t morph_proto;
@@ -47,6 +46,7 @@ extern machine_t implode_proto;
 extern machine_t explode_proto;
 extern machine_t iterate_proto;
 extern machine_t switch_proto;
+extern machine_t pass_proto;
 extern machine_t file_proto;
 extern machine_t pointers_proto;
 extern machine_t mutex_proto;
@@ -83,7 +83,6 @@ machine_t * machine_protos[] = {
    &tcp_proto,
    &tcp_child_proto,
    &benchmark_proto,
-   &call_proto,
    &end_proto,
    &factory_proto,
    &morph_proto,
@@ -98,6 +97,7 @@ machine_t * machine_protos[] = {
    &explode_proto,
    &iterate_proto,
    &switch_proto,
+   &pass_proto,
    &file_proto,
    &pointers_proto,
    &mutex_proto,

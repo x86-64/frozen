@@ -7,7 +7,6 @@
   - write m4 macro for balancer machine
 
 - working with shop machines:
-  - shop/pass  (rename machine/call)
   - shop/process - return result to our shop
     - use instead of index/lookup
 

@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ./src/libfrozen/machines/backend/call
+subdir = ./src/libfrozen/machines/backend/pass
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -54,7 +54,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/allocator/fixed/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/allocator/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/backend/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/call/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/backend/pass/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/backend/end/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/backend/factory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/backend/morph/config.m4 \
@@ -122,14 +122,14 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfrozen_machine_call_la_LIBADD =
-am_libfrozen_machine_call_la_OBJECTS =  \
-	libfrozen_machine_call_la-call.lo
-libfrozen_machine_call_la_OBJECTS =  \
-	$(am_libfrozen_machine_call_la_OBJECTS)
-libfrozen_machine_call_la_LINK = $(LIBTOOL) --tag=CC \
+libfrozen_machine_pass_la_LIBADD =
+am_libfrozen_machine_pass_la_OBJECTS =  \
+	libfrozen_machine_pass_la-pass.lo
+libfrozen_machine_pass_la_OBJECTS =  \
+	$(am_libfrozen_machine_pass_la_OBJECTS)
+libfrozen_machine_pass_la_LINK = $(LIBTOOL) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libfrozen_machine_call_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(libfrozen_machine_pass_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
@@ -144,8 +144,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfrozen_machine_call_la_SOURCES)
-DIST_SOURCES = $(libfrozen_machine_call_la_SOURCES)
+SOURCES = $(libfrozen_machine_pass_la_SOURCES)
+DIST_SOURCES = $(libfrozen_machine_pass_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -294,9 +294,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LTLIBRARIES = libfrozen_machine_call.la
-libfrozen_machine_call_la_SOURCES = call.c
-libfrozen_machine_call_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+noinst_LTLIBRARIES = libfrozen_machine_pass.la
+libfrozen_machine_pass_la_SOURCES = pass.c
+libfrozen_machine_pass_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 
 .SUFFIXES:
@@ -310,9 +310,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ./src/libfrozen/machines/backend/call/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ./src/libfrozen/machines/backend/pass/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ./src/libfrozen/machines/backend/call/Makefile
+	  $(AUTOMAKE) --foreign ./src/libfrozen/machines/backend/pass/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -340,8 +340,8 @@ clean-noinstLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libfrozen_machine_call.la: $(libfrozen_machine_call_la_OBJECTS) $(libfrozen_machine_call_la_DEPENDENCIES) 
-	$(libfrozen_machine_call_la_LINK)  $(libfrozen_machine_call_la_OBJECTS) $(libfrozen_machine_call_la_LIBADD) $(LIBS)
+libfrozen_machine_pass.la: $(libfrozen_machine_pass_la_OBJECTS) $(libfrozen_machine_pass_la_DEPENDENCIES) 
+	$(libfrozen_machine_pass_la_LINK)  $(libfrozen_machine_pass_la_OBJECTS) $(libfrozen_machine_pass_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -349,7 +349,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_machine_call_la-call.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_machine_pass_la-pass.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -372,12 +372,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-libfrozen_machine_call_la-call.lo: call.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_call_la_CFLAGS) $(CFLAGS) -MT libfrozen_machine_call_la-call.lo -MD -MP -MF $(DEPDIR)/libfrozen_machine_call_la-call.Tpo -c -o libfrozen_machine_call_la-call.lo `test -f 'call.c' || echo '$(srcdir)/'`call.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_machine_call_la-call.Tpo $(DEPDIR)/libfrozen_machine_call_la-call.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='call.c' object='libfrozen_machine_call_la-call.lo' libtool=yes @AMDEPBACKSLASH@
+libfrozen_machine_pass_la-pass.lo: pass.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_pass_la_CFLAGS) $(CFLAGS) -MT libfrozen_machine_pass_la-pass.lo -MD -MP -MF $(DEPDIR)/libfrozen_machine_pass_la-pass.Tpo -c -o libfrozen_machine_pass_la-pass.lo `test -f 'pass.c' || echo '$(srcdir)/'`pass.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_machine_pass_la-pass.Tpo $(DEPDIR)/libfrozen_machine_pass_la-pass.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pass.c' object='libfrozen_machine_pass_la-pass.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_call_la_CFLAGS) $(CFLAGS) -c -o libfrozen_machine_call_la-call.lo `test -f 'call.c' || echo '$(srcdir)/'`call.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_pass_la_CFLAGS) $(CFLAGS) -c -o libfrozen_machine_pass_la-pass.lo `test -f 'pass.c' || echo '$(srcdir)/'`pass.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

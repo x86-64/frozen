@@ -148,6 +148,7 @@
 #define HK_VALUE_role 3146
 #define HK_VALUE_rules 6045
 #define HK_VALUE_script 10193
+#define HK_VALUE_shop 3322
 #define HK_VALUE_size 3249
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
@@ -311,6 +312,7 @@ typedef enum hashkey_t {
       HK_role = HK_VALUE_role, 
       HK_rules = HK_VALUE_rules, 
       HK_script = HK_VALUE_script, 
+      HK_shop = HK_VALUE_shop, 
       HK_size = HK_VALUE_size, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
@@ -478,6 +480,7 @@ keypair_t hashkeys[] = {
       { "role", HK_VALUE_role }, 
       { "rules", HK_VALUE_rules }, 
       { "script", HK_VALUE_script }, 
+      { "shop", HK_VALUE_shop }, 
       { "size", HK_VALUE_size }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 

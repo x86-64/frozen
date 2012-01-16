@@ -848,7 +848,6 @@ enable_machineipc
 enable_machinetcp
 enable_machinetcp_child
 enable_machinebenchmark
-enable_machinecall
 enable_machineend
 enable_machinefactory
 enable_machinemorph
@@ -863,6 +862,7 @@ enable_machineimplode
 enable_machineexplode
 enable_machineiterate
 enable_machineswitch
+enable_machinepass
 enable_machinefile
 enable_machinepointers
 enable_machinemutex
@@ -1629,7 +1629,6 @@ Optional Features:
                           disable machine tcp-child
   --disable-machine-benchmark
                           disable machine benchmark
-  --disable-machine-call  disable machine call
   --disable-machine-end   disable machine end
   --disable-machine-factory
                           disable machine factory
@@ -1654,6 +1653,7 @@ Optional Features:
                           disable machine iterate
   --disable-machine-switch
                           disable machine switch
+  --disable-machine-pass  disable machine pass
   --disable-machine-file  disable machine file
   --disable-machine-pointers
                           disable machine pointers
@@ -20301,43 +20301,6 @@ fi
 
 
 
-	# Check whether --enable-machinecall was given.
-if test "${enable_machinecall+set}" = set; then :
-  enableval=$enable_machinecall;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinecall}" = "yes"; then
-			enable_machinecall="no"
-		else
-			enable_machinecall="yes"
-		fi
-	fi
-
-	if test "${enable_machinecall}" = "yes"; then
-		MACHINE_DIR_call="machine/call"
-		MACHINE_DEP_call=""
-				MACHINE_SELECTED="$MACHINE_SELECTED call"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_call" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/call/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/call"
-
-		MACHINE_MAKEFILE_machine_call=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/call/libfrozen_machine_call.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-machineend was given.
 if test "${enable_machineend+set}" = set; then :
   enableval=$enable_machineend;
@@ -20845,6 +20808,43 @@ fi
 		MACHINE_MAKEFILE_request_switch=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/switch/libfrozen_machine_switch.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinepass was given.
+if test "${enable_machinepass+set}" = set; then :
+  enableval=$enable_machinepass;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinepass}" = "yes"; then
+			enable_machinepass="no"
+		else
+			enable_machinepass="yes"
+		fi
+	fi
+
+	if test "${enable_machinepass}" = "yes"; then
+		MACHINE_DIR_pass="shop/pass"
+		MACHINE_DEP_pass=""
+				MACHINE_SELECTED="$MACHINE_SELECTED pass"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_shop_pass" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/shop/pass/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS shop/pass"
+
+		MACHINE_MAKEFILE_shop_pass=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/pass/libfrozen_machine_pass.la"
 
 	fi
 

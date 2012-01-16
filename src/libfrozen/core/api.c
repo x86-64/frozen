@@ -30,4 +30,5 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_PUSH] = 4,
 	[ACTION_POP] = 4,
 	[ACTION_RESIZE] = 3,
+	[ACTION_QUERY] = 3,
 };

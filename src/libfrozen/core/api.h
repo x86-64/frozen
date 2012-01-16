@@ -163,6 +163,8 @@ typedef enum data_functions {
 	ACTION_PUSH,
 	ACTION_POP,
 	
+	ACTION_QUERY,
+
 	ACTION_GETDATAPTR,
 
 	ACTION_INVALID
@@ -309,6 +311,11 @@ typedef struct fastcall_pop {
 	void                  *buffer;
 	uintmax_t              buffer_size;
 } fastcall_pop;
+
+typedef struct fastcall_query {
+	fastcall_header        header;
+	request_t             *request;
+} fastcall_query;
 
 extern uintmax_t fastcall_nargs[];
 
