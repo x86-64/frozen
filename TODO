@@ -6,9 +6,12 @@
 * m4 macro collection
   - write m4 macro for balancer machine
 
+- working with shop machines:
+  - shop/pass  (rename machine/call)
+  - shop/process - return result to our shop
+    - use instead of index/lookup
+
 - broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
-- index/fill query store api, not machine
-- replace index/lookup with machine/call_func
 
 - join physical and logical length into one
 - machine 'data/buffer'
