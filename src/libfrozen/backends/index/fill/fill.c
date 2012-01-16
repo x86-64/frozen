@@ -27,8 +27,6 @@
  *                                        "index_name",       # existing index
  *                                        { ... },            # new index configuration
  *              fatal                   = (uint_t)'1',        # don't ignore errors from index, default 0
- *              before                  = (uint_t)'1'         # query index before passing request, default 1 for action=="delete", 0 for others
- *                                                            # this value override defaults
  * }
  * @endcode
  */
@@ -44,7 +42,6 @@
 
 typedef struct fill_userdata {
 	uintmax_t              fatal;
-	uintmax_t              before;
 	data_functions         action;
 	backend_t             *backend_index;
 } fill_userdata;
@@ -76,20 +73,12 @@ static int fill_configure(backend_t *backend, config_t *config){ // {{{
 		return error("supplied index backend not valid, or not found");
 	
 	userdata->action = request_str_to_action(action_str);
-	
-	if(userdata->action == ACTION_DELETE)
-		userdata->before = 1; // set default value
-	
-	hash_data_copy(ret, TYPE_UINTT,    userdata->before,        config, HK(before));
 	return 0;
 } // }}}
 
 static ssize_t fill_handler(backend_t *backend, request_t *request){ // {{{
-	ssize_t              ret, ret2, ret3;
+	ssize_t              ret2, ret3;
 	fill_userdata       *userdata            = (fill_userdata *)backend->userdata;
-	
-	if( userdata->before == 0 )
-		ret = backend_pass(backend, request);
 	
 	// data = hash_data_find( request, userdata->output );
 	// if (data->flags & MODIFIED && userdata->force_update == 0) {
@@ -105,10 +94,7 @@ static ssize_t fill_handler(backend_t *backend, request_t *request){ // {{{
 		}
 	// }
 	
-	if( userdata->before != 0 )
-		ret = backend_pass(backend, request);
-	
-	return (ret < 0) ? ret : -EEXIST;
+	return backend_pass(backend, request);
 } // }}}
 
 backend_t fill_proto = {
