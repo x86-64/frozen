@@ -4,7 +4,6 @@
   - data -> store
 
 * flow-based architecture for backend, request-based architecture for data:
-  - index/lookup: expecting return result from index not flow-based (TOP, replace with call and passing destination)
   - request/implode: explode return result not flow-based (normal, remove junk code)
   - backend/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
   - cache/cache: get backend length not flow-based (not important, subject for deprecation)
@@ -15,6 +14,7 @@
 
 - broken mphf backend rebuild: allocator backend not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
 - index/fill query store api, not machine
+- replace index/lookup with machine/call_func
 
 - join physical and logical length into one
 - backend 'data/buffer'

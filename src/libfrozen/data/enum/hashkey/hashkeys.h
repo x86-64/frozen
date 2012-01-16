@@ -54,7 +54,6 @@
 #define HK_VALUE_filename 21157
 #define HK_VALUE_folder 9747
 #define HK_VALUE_force_async 53994
-#define HK_VALUE_force_query 56348
 #define HK_VALUE_force_sync 41290
 #define HK_VALUE_forced 9281
 #define HK_VALUE_fork 3284
@@ -91,7 +90,6 @@
 #define HK_VALUE_keyid 5780
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
-#define HK_VALUE_linear_len 40411
 #define HK_VALUE_loop 3343
 #define HK_VALUE_marker 9864
 #define HK_VALUE_marker_data 52113
@@ -126,9 +124,7 @@
 #define HK_VALUE_path 3208
 #define HK_VALUE_paused 9518
 #define HK_VALUE_perlevel 21904
-#define HK_VALUE_pool 3283
 #define HK_VALUE_pool_interval 88331
-#define HK_VALUE_pool_size 30932
 #define HK_VALUE_port 3438
 #define HK_VALUE_random 9791
 #define HK_VALUE_read_size 30640
@@ -148,6 +144,7 @@
 #define HK_VALUE_retry_request 91119
 #define HK_VALUE_return 10244
 #define HK_VALUE_return_result 91189
+#define HK_VALUE_return_to 31314
 #define HK_VALUE_role 3146
 #define HK_VALUE_rules 6045
 #define HK_VALUE_script 10193
@@ -220,7 +217,6 @@ typedef enum hashkey_t {
       HK_filename = HK_VALUE_filename, 
       HK_folder = HK_VALUE_folder, 
       HK_force_async = HK_VALUE_force_async, 
-      HK_force_query = HK_VALUE_force_query, 
       HK_force_sync = HK_VALUE_force_sync, 
       HK_forced = HK_VALUE_forced, 
       HK_fork = HK_VALUE_fork, 
@@ -257,7 +253,6 @@ typedef enum hashkey_t {
       HK_keyid = HK_VALUE_keyid, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
-      HK_linear_len = HK_VALUE_linear_len, 
       HK_loop = HK_VALUE_loop, 
       HK_marker = HK_VALUE_marker, 
       HK_marker_data = HK_VALUE_marker_data, 
@@ -292,9 +287,7 @@ typedef enum hashkey_t {
       HK_path = HK_VALUE_path, 
       HK_paused = HK_VALUE_paused, 
       HK_perlevel = HK_VALUE_perlevel, 
-      HK_pool = HK_VALUE_pool, 
       HK_pool_interval = HK_VALUE_pool_interval, 
-      HK_pool_size = HK_VALUE_pool_size, 
       HK_port = HK_VALUE_port, 
       HK_random = HK_VALUE_random, 
       HK_read_size = HK_VALUE_read_size, 
@@ -314,6 +307,7 @@ typedef enum hashkey_t {
       HK_retry_request = HK_VALUE_retry_request, 
       HK_return = HK_VALUE_return, 
       HK_return_result = HK_VALUE_return_result, 
+      HK_return_to = HK_VALUE_return_to, 
       HK_role = HK_VALUE_role, 
       HK_rules = HK_VALUE_rules, 
       HK_script = HK_VALUE_script, 
@@ -390,7 +384,6 @@ keypair_t hashkeys[] = {
       { "filename", HK_VALUE_filename }, 
       { "folder", HK_VALUE_folder }, 
       { "force_async", HK_VALUE_force_async }, 
-      { "force_query", HK_VALUE_force_query }, 
       { "force_sync", HK_VALUE_force_sync }, 
       { "forced", HK_VALUE_forced }, 
       { "fork", HK_VALUE_fork }, 
@@ -427,7 +420,6 @@ keypair_t hashkeys[] = {
       { "keyid", HK_VALUE_keyid }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
-      { "linear_len", HK_VALUE_linear_len }, 
       { "loop", HK_VALUE_loop }, 
       { "marker", HK_VALUE_marker }, 
       { "marker_data", HK_VALUE_marker_data }, 
@@ -462,9 +454,7 @@ keypair_t hashkeys[] = {
       { "path", HK_VALUE_path }, 
       { "paused", HK_VALUE_paused }, 
       { "perlevel", HK_VALUE_perlevel }, 
-      { "pool", HK_VALUE_pool }, 
       { "pool_interval", HK_VALUE_pool_interval }, 
-      { "pool_size", HK_VALUE_pool_size }, 
       { "port", HK_VALUE_port }, 
       { "random", HK_VALUE_random }, 
       { "read_size", HK_VALUE_read_size }, 
@@ -484,6 +474,7 @@ keypair_t hashkeys[] = {
       { "retry_request", HK_VALUE_retry_request }, 
       { "return", HK_VALUE_return }, 
       { "return_result", HK_VALUE_return_result }, 
+      { "return_to", HK_VALUE_return_to }, 
       { "role", HK_VALUE_role }, 
       { "rules", HK_VALUE_rules }, 
       { "script", HK_VALUE_script }, 
