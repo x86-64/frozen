@@ -1,99 +1,60 @@
 ssize_t         machine_stdcall_create(machine_t *machine, off_t *offset, size_t size){ // {{{
-               ssize_t q_ret = 0, b_ret;
-
-               request_t  r_create[] = {
-                       { HK(action),     DATA_UINT32T(ACTION_CREATE)   },
-                       { HK(size),       DATA_PTR_SIZET(&size)              },
-                       { HK(offset_out), DATA_PTR_OFFT(offset)              },
-                       { HK(ret),        DATA_PTR_SIZET(&q_ret)             },
-                       hash_end
-               };
-               if( (b_ret = machine_query(machine, r_create)) < 0)
-                       return b_ret;
-
-               return q_ret;
+	request_t  r_create[] = {
+	       { HK(action),     DATA_UINT32T(ACTION_CREATE)   },
+	       { HK(size),       DATA_PTR_SIZET(&size)              },
+	       { HK(offset_out), DATA_PTR_OFFT(offset)              },
+	       hash_end
+	};
+	return machine_query(machine, r_create);
 } // }}}
 ssize_t         machine_stdcall_read  (machine_t *machine, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-               ssize_t q_ret = 0, b_ret;
-
-               request_t  r_read[] = {
-                       { HK(action),     DATA_UINT32T(ACTION_READ)    },
-                       { HK(offset),     DATA_PTR_OFFT(&offset)            },
-                       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-                       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-                       { HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-                       hash_end
-               };
-
-               if( (b_ret = machine_query(machine, r_read)) < 0)
-                       return b_ret;
-
-               return q_ret;
+	request_t  r_read[] = {
+	       { HK(action),     DATA_UINT32T(ACTION_READ)    },
+	       { HK(offset),     DATA_PTR_OFFT(&offset)            },
+	       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+	       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+	       hash_end
+	};
+	return machine_query(machine, r_read);
 } // }}}
 ssize_t         machine_stdcall_write (machine_t *machine, off_t  offset, void *buffer, size_t buffer_size){ // {{{
-               ssize_t q_ret = 0, b_ret;
-
-               request_t  r_write[] = {
-                       { HK(action),     DATA_UINT32T(ACTION_WRITE)   },
-                       { HK(offset),     DATA_PTR_OFFT(&offset)            },
-                       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
-                       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
-                       { HK(ret),        DATA_PTR_SIZET(&q_ret)            },
-                       hash_end
-               };
-
-               if( (b_ret = machine_query(machine, r_write)) < 0)
-                       return b_ret;
- 
-               return q_ret;
+	request_t  r_write[] = {
+	       { HK(action),     DATA_UINT32T(ACTION_WRITE)   },
+	       { HK(offset),     DATA_PTR_OFFT(&offset)            },
+	       { HK(size),       DATA_PTR_SIZET(&buffer_size)      },
+	       { HK(buffer),     DATA_RAW(buffer, buffer_size)     },
+	       hash_end
+	};
+	return machine_query(machine, r_write);
 } // }}}
 ssize_t         machine_stdcall_move  (machine_t *machine, off_t  from, off_t to, size_t size){ // {{{
-       ssize_t q_ret = 0, b_ret;
-
        request_t  r_move[] = {
                { HK(action),      DATA_UINT32T(ACTION_MOVE)       },
                { HK(offset_from), DATA_PTR_OFFT(&from)                 },
                { HK(offset_to),   DATA_PTR_OFFT(&to)                   },
                { HK(size),        DATA_PTR_SIZET(&size)                },
-               { HK(ret),         DATA_PTR_SIZET(&q_ret)               },
                hash_end
        };
- 
-       if( (b_ret = machine_query(machine, r_move)) < 0)
-               return b_ret;
- 
-       return q_ret;
+       return machine_query(machine, r_move);
 } // }}}
 ssize_t         machine_stdcall_delete(machine_t *machine, off_t  offset, size_t size){ // {{{
-               ssize_t q_ret = 0, b_ret;
+       request_t  r_delete[] = {
+	       { HK(action),     DATA_UINT32T(ACTION_DELETE)     },
+	       { HK(offset),     DATA_PTR_OFFT(&offset)               },
+	       { HK(size),       DATA_PTR_SIZET(&size)                },
+	       hash_end
+       };
 
-               request_t  r_delete[] = {
-                       { HK(action),     DATA_UINT32T(ACTION_DELETE)     },
-                       { HK(offset),     DATA_PTR_OFFT(&offset)               },
-                       { HK(size),       DATA_PTR_SIZET(&size)                },
-                       { HK(ret),        DATA_PTR_SIZET(&q_ret)               },
-                       hash_end
-               };
-
-               if( (b_ret = machine_query(machine, r_delete)) < 0)
-                       return b_ret;
-
-               return q_ret;
+       return machine_query(machine, r_delete);
 } // }}}
 ssize_t         machine_stdcall_count (machine_t *machine, size_t *count){ // {{{
-       ssize_t q_ret = 0, b_ret;
-
        request_t r_count[] = {
                { HK(action),     DATA_UINT32T(ACTION_COUNT)      },
                { HK(buffer),     DATA_PTR_SIZET(count)                },
-               { HK(ret),        DATA_PTR_SIZET(&q_ret)               },
                hash_end
        };
 
-       if( (b_ret = machine_query(machine, r_count)) < 0)
-               return b_ret;
-
-       return q_ret;
+       return machine_query(machine, r_count);
 } // }}}
 
 
@@ -117,7 +78,7 @@ START_TEST (test_machine_file){
                 hash_end
 	};
 	
-	machine = machine_new(settings);
+	machine = shop_new(settings);
 		fail_unless(machine != NULL, "machine creation failed");
 	
 	
@@ -194,7 +155,7 @@ START_TEST (test_machine_file){
 	/* }}}1 */
 	
 	free(test_chunk);
-	machine_destroy(machine);
+	shop_destroy(machine);
 }
 END_TEST
 REGISTER_TEST(core, test_machine_file)

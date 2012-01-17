@@ -66,7 +66,7 @@ static void *  thread_routine(machine_t *machine){ // {{{
 		
 		if(userdata->destroy_on_exit){
 			userdata->self_termination = 1;
-			machine_destroy(machine);
+			shop_destroy(machine);
 			goto self_free;
 		}
 	pthread_mutex_unlock(&userdata->thread_mutex);

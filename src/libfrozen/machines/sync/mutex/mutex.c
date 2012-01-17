@@ -61,7 +61,7 @@ static ssize_t mutex_request(machine_t *machine, request_t *request){ // {{{
 	
 	pthread_mutex_lock(&userdata->mutex);
 	
-		ret = ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+		ret = machine_pass(machine, request);
 	
 	pthread_mutex_unlock(&userdata->mutex);
 	return ret;
@@ -72,7 +72,7 @@ static ssize_t mutex_fast_request(machine_t *machine, void *hargs){ // {{{
 	
 	pthread_mutex_lock(&userdata->mutex);
 		
-		ret = ( (ret = machine_fast_pass(machine, hargs)) < 0) ? ret : -EEXIST;
+		ret = machine_fast_pass(machine, hargs);
 	
 	pthread_mutex_unlock(&userdata->mutex);
 	return ret;

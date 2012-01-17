@@ -12,7 +12,7 @@ pthread_key_t                  key_curr_request;
 
 typedef struct machine_new_ctx {
 	list                   machines;
-	machine_t             *machine_prev;
+	machine_t             *machine_next;
 } machine_new_ctx;
 
 static int         class_strcmp            (char *class_str1, char *class_str2){ // {{{
@@ -70,220 +70,7 @@ void               class_unregister        (machine_t *proto){ // {{{
 	list_delete(&classes, proto);
 } // }}}
 
-request_t *        request_get_current(void){ // {{{
-	return (request_t *)pthread_getspecific(key_curr_request);
-} // }}}
-
-ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
-	if(thread_data->inited == 0){
-		if(pthread_key_create(&thread_data->key, func_destroy) != 0)
-			return -ENOMEM;
-		
-		thread_data->inited       = 1;
-		thread_data->func_create  = func_create;
-		thread_data->userdata     = userdata;
-	}
-	return 0;
-} // }}}
-void               thread_data_destroy(thread_data_ctx_t *thread_data){ // {{{
-	if(thread_data->inited == 1){
-		pthread_key_delete(thread_data->key);
-		thread_data->inited = 0;
-	}
-} // }}}
-void *             thread_data_get(thread_data_ctx_t *thread_data){ // {{{
-	register void         *data;
-	
-	if( (data = pthread_getspecific(thread_data->key)) != NULL)
-		return data;
-	
-	data = thread_data->func_create(thread_data->userdata);
-	pthread_setspecific(thread_data->key, data);
-	
-	return data;
-} // }}}
-
-static void        machine_ref_inc(machine_t *machine){ // {{{
-	pthread_mutex_lock(&refs_mtx);
-		machine->refs++;
-	pthread_mutex_unlock(&refs_mtx);
-} // }}}
-static uintmax_t   machine_ref_dec(machine_t *machine){ // {{{
-	uintmax_t              ret;
-	pthread_mutex_lock(&refs_mtx);
-		ret = --machine->refs;
-	pthread_mutex_unlock(&refs_mtx);
-	return ret;
-} // }}}
-
-static void        machine_top(machine_t *machine){ // {{{
-	list_delete (&machines_top, machine);
-	list_add    (&machines_top, machine);
-} // }}}
-static void        machine_untop(machine_t *machine){ // {{{
-	list_delete(&machines_top, machine);
-} // }}}
-
-static void        machine_free_skeleton(machine_t *machine_curr){ // {{{
-	machine_untop(machine_curr);
-		
-	hash_free(machine_curr->config);
-	
-	if(machine_curr->name){
-		list_delete(&machines_names, machine_curr);
-		free(machine_curr->name);
-	}
-	
-	free(machine_curr);
-} // }}}
-static machine_t * machine_new_skeleton(char *machine_name, char *machine_class, hash_t *config){ // {{{
-	machine_t             *machine;
-	machine_t             *class;
-	
-	if( (class = class_find(machine_class)) == NULL)
-		goto error;
-	
-	if( (machine = machine_clone(class)) == NULL)
-		goto error;
-	
-	if(machine_name){
-		if( (machine->name = strdup(machine_name)) == NULL)
-			goto error_mem;
-		
-		list_add(&machines_names, machine);
-	}else{
-		machine->name = NULL;
-	}
-	
-	if( (machine->config = hash_copy(config)) == NULL)
-		goto error_mem;
-	
-	machine->userdata   = NULL;
-	return machine;
-	
-error_mem:
-	machine_free_skeleton(machine);
-error:
-	return NULL;
-} // }}}
-
-void               machine_connect(machine_t *parent, machine_t *child){ // {{{
-	if(parent){
-		parent->cnext = child;
-		machine_top(parent);
-	}
-	if(child){
-		child->cprev = parent;
-		machine_untop(child);
-	}
-} // }}}
-void               machine_disconnect(machine_t *parent, machine_t *child){ // {{{
-	if(parent){
-		machine_untop(parent);
-		parent->cnext = NULL;
-	}
-	if(child){
-		machine_top(child);
-		child->cprev  = NULL;
-	}
-} // }}}
-
-static ssize_t     machine_new_iterator(hash_t *item, machine_new_ctx *ctx){ // {{{
-	ssize_t                ret;
-	machine_t             *machine;
-	hash_t                *machine_cfg;
-	data_t                *machine_cfg_data;
-	char                  *machine_name;
-	char                  *machine_class;
-	
-	if(item->key == hash_ptr_null){
-		ctx->machine_prev = NULL;
-		return ITER_CONTINUE;
-	}
-		
-	machine_cfg_data = &item->data;
-	
-	if(machine_cfg_data->type != TYPE_HASHT)
-		return ITER_CONTINUE;
-	
-	machine_cfg = (hash_t *)machine_cfg_data->ptr;
-	
-	hash_data_copy(ret, TYPE_STRINGT, machine_name,  machine_cfg, HK(name));  if(ret != 0) machine_name  = NULL;
-	hash_data_copy(ret, TYPE_STRINGT, machine_class, machine_cfg, HK(class)); if(ret != 0) machine_class = NULL;
-	
-	if(machine_class == NULL)
-		goto error_inval;
-	
-	if( (machine = machine_new_skeleton(machine_name, machine_class, machine_cfg)) == NULL)
-		goto error_inval;
-
-	machine_connect(machine, ctx->machine_prev);
-	
-	if(machine->func_init != NULL && machine->func_init(machine) != 0)
-		goto error_init;
-	
-	if(machine->func_configure != NULL && machine->func_configure(machine, machine->config) != 0)
-		goto error_configure;
-	
-	list_add(&ctx->machines, machine);
-	
-	ctx->machine_prev = machine;
-	return ITER_CONTINUE;
-	
-error_configure:
-	if(machine->func_destroy != NULL)
-		machine->func_destroy(machine);
-	
-error_init:
-	machine_disconnect(machine, ctx->machine_prev);
-	machine_free_skeleton(machine);
-
-error_inval:
-	return ITER_BREAK;
-} // }}}
-static machine_t * machine_fork_rec(machine_t *machine, request_t *request){ // {{{
-	machine_t             *machine_curr;
-	machine_t             *machine_child;
-	
-	if(machine == NULL)
-		return NULL;
-	
-	if( (machine_curr = machine_clone(machine)) == NULL)
-		goto error_inval;
-		
-	// NOTE forked machine lose name and parents
-	machine_curr->name     = NULL;
-	machine_curr->userdata = NULL;
-	
-	machine_child = machine_fork_rec(machine->cnext, request);
-	
-	machine_connect(machine_curr, machine_child);
-	
-	if(machine_curr->func_init != NULL && machine_curr->func_init(machine_curr) != 0)
-		goto error_init;
-	
-	if(machine_curr->func_fork != NULL){
-		if(machine_curr->func_fork(machine_curr, machine, request) != 0)
-			goto error_configure;
-	}else{
-		if(machine_curr->func_configure != NULL && machine_curr->func_configure(machine_curr, machine_curr->config) != 0)
-			goto error_configure;
-	}
-	
-	return machine_curr;
-	
-error_configure:
-	if(machine_curr->func_destroy != NULL)
-		machine_curr->func_destroy(machine_curr);
-	
-error_init:
-	machine_disconnect(machine_curr, machine_child);
-	machine_free_skeleton(machine_curr);
-	
-error_inval:
-	return NULL;
-} // }}}
-static ssize_t     machine_downgrade_request(machine_t *machine, fastcall_header *hargs){ // {{{
+static ssize_t     request_downgrade(machine_t *machine, fastcall_header *hargs){ // {{{
 	ssize_t q_ret = 0, b_ret;
 	
 	switch(hargs->action){
@@ -340,8 +127,210 @@ static ssize_t     machine_downgrade_request(machine_t *machine, fastcall_header
 	};
 	return q_ret;
 } // }}}
+request_t *        request_get_current(void){ // {{{
+	return (request_t *)pthread_getspecific(key_curr_request);
+} // }}}
 
+ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
+	if(thread_data->inited == 0){
+		if(pthread_key_create(&thread_data->key, func_destroy) != 0)
+			return -ENOMEM;
+		
+		thread_data->inited       = 1;
+		thread_data->func_create  = func_create;
+		thread_data->userdata     = userdata;
+	}
+	return 0;
+} // }}}
+void               thread_data_destroy(thread_data_ctx_t *thread_data){ // {{{
+	if(thread_data->inited == 1){
+		pthread_key_delete(thread_data->key);
+		thread_data->inited = 0;
+	}
+} // }}}
+void *             thread_data_get(thread_data_ctx_t *thread_data){ // {{{
+	register void         *data;
 	
+	if( (data = pthread_getspecific(thread_data->key)) != NULL)
+		return data;
+	
+	data = thread_data->func_create(thread_data->userdata);
+	pthread_setspecific(thread_data->key, data);
+	
+	return data;
+} // }}}
+
+static void        machine_ref_inc(machine_t *machine){ // {{{
+	pthread_mutex_lock(&refs_mtx);
+		machine->refs++;
+	pthread_mutex_unlock(&refs_mtx);
+} // }}}
+static uintmax_t   machine_ref_dec(machine_t *machine){ // {{{
+	uintmax_t              ret;
+	pthread_mutex_lock(&refs_mtx);
+		ret = --machine->refs;
+	pthread_mutex_unlock(&refs_mtx);
+	return ret;
+} // }}}
+static void        machine_top(machine_t *machine){ // {{{
+	list_delete (&machines_top, machine);
+	list_add    (&machines_top, machine);
+} // }}}
+static void        machine_untop(machine_t *machine){ // {{{
+	list_delete(&machines_top, machine);
+} // }}}
+static void        machine_connect(machine_t *parent, machine_t *child){ // {{{
+	if(parent){
+		parent->cnext = child;
+		machine_top(parent);
+	}
+	if(child){
+		child->cprev = parent;
+		machine_untop(child);
+	}
+} // }}}
+static void        machine_disconnect(machine_t *parent, machine_t *child){ // {{{
+	if(parent){
+		machine_untop(parent);
+		parent->cnext = NULL;
+	}
+	if(child){
+		machine_top(child);
+		child->cprev  = NULL;
+	}
+} // }}}
+
+static machine_t * machine_ghost_new(char *name){ // {{{
+	machine_t             *machine;
+	
+	// create new ghost
+	if( (machine = calloc(1, sizeof(machine_t))) == NULL)
+		return NULL;
+	
+	if(name){
+		if( (machine->name = strdup(name)) == NULL)
+			goto error_mem;
+		
+		list_add(&machines_names, machine);
+	}else{
+		machine->name = NULL;
+	}
+	
+	machine->refs     = 1;
+	machine->userdata = NULL;
+	return machine;
+
+error_mem:
+	free(machine);
+	return NULL;
+} // }}}
+static ssize_t     machine_ghost_resurrect(machine_t *machine, machine_t *class, hash_t *config){ // {{{
+	char                  *name = machine->name;
+	uintmax_t              refs = machine->refs;
+	
+	memcpy(machine, class, sizeof(machine_t)); // TODO remove this
+	machine->name = name;
+	machine->refs = refs;
+	
+	if( (machine->config = hash_copy(config)) == NULL)
+		return -ENOMEM;
+	
+	if(machine->func_init != NULL && machine->func_init(machine) != 0)
+		return -EFAULT;
+	
+	if(machine->func_configure != NULL && machine->func_configure(machine, machine->config) != 0)
+		goto error;
+	
+	return 0;
+	
+error:
+	if(machine->func_destroy != NULL)
+		machine->func_destroy(machine);
+	
+	return -EFAULT;
+} // }}}
+static void        machine_ghost_free(machine_t *machine){ // {{{
+	machine_untop(machine);
+	
+	if(machine->name){
+		list_delete(&machines_names, machine);
+		free(machine->name);
+	}
+	free(machine);
+} // }}}
+
+ssize_t            machine_new(machine_t **pmachine, hash_t *config){ // {{{
+	ssize_t                ret;
+	machine_t             *class;
+	machine_t             *machine;
+	char                  *machine_name      = NULL;
+	char                  *machine_class     = NULL;
+	
+	hash_data_copy(ret, TYPE_STRINGT, machine_name,  config, HK(name));
+	hash_data_copy(ret, TYPE_STRINGT, machine_class, config, HK(class));
+	
+	if(machine_class == NULL || (class = class_find(machine_class)) == NULL)
+		return -EINVAL;
+	
+	if( (machine = machine_find(machine_name)) == NULL ){
+		if( (machine = machine_ghost_new(NULL)) == NULL)
+			return -ENOMEM;
+	}
+	
+	ret = machine_ghost_resurrect(machine, class, config);
+	
+	*pmachine = machine;
+	return ret;
+} // }}}
+machine_t *        machine_find(char *name){ // {{{
+	machine_t             *machine;
+	void                  *list_status  = NULL;
+	
+	if(name == NULL)
+		return NULL;
+	
+	list_rdlock(&machines_names);
+		while( (machine = list_iter_next(&machines_names, &list_status)) != NULL){
+			if(machine->name == NULL)
+				continue;
+			
+			if(strcmp(machine->name, name) == 0){
+				machine_acquire(machine);
+				break;
+			}
+		}
+	list_unlock(&machines_names);
+	
+	if(!machine)
+		machine = machine_ghost_new(name);
+	
+	return machine;
+} // }}}
+ssize_t            machine_is_ghost(machine_t *machine){ // {{{
+	return (machine->class == NULL) ? 1 : 0;
+} // }}}
+void               machine_acquire(machine_t *machine){ // {{{
+	if(machine)
+		machine_ref_inc(machine);
+} // }}}
+void               machine_destroy(machine_t *machine){ // {{{
+	pthread_mutex_lock(&destroy_mtx);
+		if(machine_ref_dec(machine) == 0){
+			// call destroy
+			if(machine->func_destroy != NULL)
+				machine->func_destroy(machine);
+			
+			if(machine->config)
+				hash_free(machine->config);
+
+			machine_disconnect(machine->cprev, machine);
+			machine_disconnect(machine, machine->cnext);
+			
+			machine_ghost_free(machine);
+		}
+	pthread_mutex_unlock(&destroy_mtx);
+} // }}}
+
 ssize_t            frozen_machine_init(void){ // {{{
 	pthread_mutexattr_t    attr;
 	
@@ -374,100 +363,51 @@ void               frozen_machine_destroy(void){ // {{{
 	pthread_key_delete(key_curr_request);
 } // }}}
 
-machine_t *     machine_new          (hash_t *config){ // {{{
+static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
+	machine_t             *machine;
+	
+	if( item->key == hash_ptr_null || item->data.type != TYPE_HASHT){
+		ctx->machine_next = NULL;
+		return ITER_CONTINUE;
+	}
+	
+	if(machine_new(&machine, (hash_t *)(item->data.ptr)) < 0)
+		return ITER_BREAK;
+	
+	machine_connect(machine, ctx->machine_next);
+	ctx->machine_next = machine;
+	
+	list_add(&ctx->machines, machine);
+	return ITER_CONTINUE;
+} // }}}
+
+machine_t *        shop_new          (hash_t *config){ // {{{
 	machine_t             *machine;
 	machine_new_ctx        ctx               = { LIST_INITIALIZER, NULL };
 	
-	if(hash_iter(config, (hash_iterator)&machine_new_iterator, &ctx, HASH_ITER_NULL) == ITER_OK){
-		list_destroy(&ctx.machines);
+	if(hash_iter(config, (hash_iterator)&shop_new_iter, &ctx, HASH_ITER_NULL) != ITER_OK){
+		while( (machine = list_pop(&ctx.machines)) )
+			machine_destroy(machine);
 		
-		if(ctx.machine_prev == NULL)
-			return NULL;
-		
-		return ctx.machine_prev;
+		ctx.machine_next = NULL;
 	}
 	
-	while( (machine = list_pop(&ctx.machines)) != NULL){
-		if(machine->func_destroy != NULL)
-			machine->func_destroy(machine);
-		
-		machine_disconnect(machine, machine->cnext);
-		machine_free_skeleton(machine);
+	list_destroy(&ctx.machines);
+	return ctx.machine_next;
+} // }}}
+void               shop_destroy      (machine_t *machine){ // {{{
+	machine_t             *curr;
+	machine_t             *next;
+	
+	for(curr = machine; curr; curr = next){
+		next = curr->cnext;
+		machine_destroy(curr);
 	}
-	return NULL;
-} // }}}
-machine_t *     machine_find         (char *name){ // {{{
-	machine_t             *machine;
-	void                  *list_status  = NULL;
-	
-	if(name == NULL)
-		return NULL;
-	
-	list_rdlock(&machines_names);
-		while( (machine = list_iter_next(&machines_names, &list_status)) != NULL){
-			if(machine->name == NULL)
-				continue;
-			if(strcmp(machine->name, name) == 0)
-				goto exit;
-		}
-		machine = NULL;
-exit:
-	list_unlock(&machines_names);
-	return machine;
-} // }}}
-void            machine_acquire      (machine_t *machine){ // {{{
-	if(machine)
-		machine_ref_inc(machine);
-} // }}}
-machine_t *     machine_fork         (machine_t *machine, request_t *request){ // {{{
-	static request_t       r_fork[] = { hash_end };
-	
-	if(machine == NULL)
-		return NULL;
-	
-	if(request == NULL)
-		request = r_fork;
-	
-	return machine_fork_rec(machine, request);
-} // }}}
-machine_t *     machine_clone        (machine_t *machine){ // {{{
-	machine_t *clone;
-	
-	if(machine == NULL)
-		return NULL;
-	
-	if( (clone = malloc(sizeof(machine_t))) == NULL)
-		return NULL;
-	
-	memcpy(clone, machine, sizeof(machine_t));
-	
-	clone->refs     = 1;
-	clone->config   = hash_copy(machine->config);
-	
-	return clone;
-} // }}}
-void            machine_destroy      (machine_t *machine){ // {{{
-	if(machine == NULL)
-		return;
-	
-	pthread_mutex_lock(&destroy_mtx);
-		if(machine_ref_dec(machine) == 0){
-			// call destroy
-			if(machine->func_destroy != NULL)
-				machine->func_destroy(machine);
-			
-			machine_destroy(machine->cnext);
-			machine_disconnect(machine->cprev, machine);
-			machine_free_skeleton(machine);
-		}
-	pthread_mutex_unlock(&destroy_mtx);
 } // }}}
 
-ssize_t         machine_query        (machine_t *machine, request_t *request){ // {{{
+ssize_t            machine_query        (machine_t *machine, request_t *request){ // {{{
 	f_crwd                 func              = NULL;
 	ssize_t                ret;
-	data_t                 ret_data          = DATA_PTR_SIZET(&ret);
-	data_t                *ret_req;
 	
 	if(machine == NULL || request == NULL)
 		return -ENOSYS;
@@ -498,34 +438,17 @@ ssize_t         machine_query        (machine_t *machine, request_t *request){ /
 		}
 	}while(0);
 	
-	if(func == NULL){
-		ret = machine_query(machine->cnext, request);
-		goto exit;
-	}
+	if(func == NULL)
+		return machine_query(machine->cnext, request);
 	
 	pthread_setspecific(key_curr_request, request);
 	
-	ret = func(machine, request);
-	
-	switch(ret){
-		case -EBADF:            // dead machine
-			return ret;
-		case -EEXIST:           // no ret override
-			break;
-		default:                // override ret
-			ret_req = hash_data_find(request, HK(ret));
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, ret_req };
-			data_query(&ret_data, &r_transfer);
-			break;
-	};
-	ret = 0;
-exit:
-	return ret;
+	return func(machine, request);
 } // }}}
-ssize_t         machine_pass         (machine_t *machine, request_t *request){ // {{{
+ssize_t            machine_pass         (machine_t *machine, request_t *request){ // {{{
 	return machine_query(machine->cnext, request);
 } // }}}
-ssize_t         machine_fast_query   (machine_t *machine, void *fargs){ // {{{
+ssize_t            machine_fast_query   (machine_t *machine, void *fargs){ // {{{
 	f_fast_func            func              = NULL;
 	
 	if(machine == NULL || fargs == NULL)
@@ -539,7 +462,7 @@ ssize_t         machine_fast_query   (machine_t *machine, void *fargs){ // {{{
 		// TODO API_FAST_TABLE
 		
 		// if fast api not supported by machine - downgrade fast request to hash request and do query
-		return machine_downgrade_request(machine, fargs);
+		return request_downgrade(machine, fargs);
 	}while(0);
 	
 	if(func == NULL)
@@ -547,11 +470,11 @@ ssize_t         machine_fast_query   (machine_t *machine, void *fargs){ // {{{
 	
 	return func(machine, fargs);
 } // }}}
-ssize_t         machine_fast_pass    (machine_t *machine, void *fargs){ // {{{
+ssize_t            machine_fast_pass    (machine_t *machine, void *fargs){ // {{{
 	return machine_fast_query(machine->cnext, fargs);
 } // }}}
 
-data_functions request_str_to_action(char *string){ // {{{
+data_functions     request_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "create") == 0) return ACTION_CREATE;
 	if(strcasecmp(string, "write")  == 0) return ACTION_WRITE;
 	if(strcasecmp(string, "read")   == 0) return ACTION_READ;

@@ -155,7 +155,7 @@ static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ /
 		if( (ret = machine_pass(machine, r_close)) < 0 )
 			return ret;
 	}
-	return -EEXIST;
+	return 0;
 } // }}}
 
 static machine_t mongrel2_reply_proto = {
@@ -170,7 +170,6 @@ static machine_t mongrel2_reply_proto = {
 };
 
 static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs){ // {{{
-	ssize_t                ret;
 	char                  *p, *uuid_p, *connid_p, *path_p, *header_p, *body_p, *e;
 	uintmax_t                  uuid_l,  connid_l,  path_l,  header_l,  body_l;
 	fastcall_write        *wargs             = (fastcall_write *)hargs;
@@ -207,7 +206,7 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs
 		hash_end
 	};
 	
-	return ( (ret = (machine_pass(machine, request)) < 0) ) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 static machine_t mongrel2_parse_proto = {

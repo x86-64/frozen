@@ -41,9 +41,9 @@ static int transfer_destroy(machine_t *machine){ // {{{
 	transfer_userdata        *userdata          = (transfer_userdata *)machine->userdata;
 	
 	if(userdata->source)
-		machine_destroy(userdata->source);
+		shop_destroy(userdata->source);
 	if(userdata->destination)
-		machine_destroy(userdata->destination);
+		shop_destroy(userdata->destination);
 	
 	free(userdata);
 	return 0;

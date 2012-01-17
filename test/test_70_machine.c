@@ -1,6 +1,6 @@
 
 START_TEST (test_machines){
-	machine_t *machine, *machinef;
+	machine_t *shop;
 	
 	hash_t  settings[] = {
                 { 0, DATA_HASHT(
@@ -11,19 +11,10 @@ START_TEST (test_machines){
                 hash_end
 	};
 	
-	/* re-run with good parameters */
-	machine = machine_new(settings);
-		fail_unless(machine != NULL, "machine creation failed");
+	shop = shop_new(settings);
+		fail_unless(shop != NULL, "machine creation failed");
 	
-	request_t r_fork[] = {
-		hash_end
-	};
-	
-	machinef = machine_fork(machine, r_fork);
-		fail_unless(machinef != NULL, "machine fork creation failed");
-	
-	machine_destroy(machinef);
-	machine_destroy(machine);
+	shop_destroy(shop);
 }
 END_TEST
 REGISTER_TEST(core, test_machines)

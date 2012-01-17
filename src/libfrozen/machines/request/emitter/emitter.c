@@ -61,7 +61,6 @@ static int emitter_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t              ret;
 	uintmax_t            i;
 	emitter_userdata    *userdata          = (emitter_userdata *)((machine_t *)machine)->userdata;
 	
@@ -72,7 +71,7 @@ static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
 		for(i = 0; i < userdata->nreq; i++)
 			data_query(&d_emitter, &r_exec);
 	}
-	return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t emitter_proto = {

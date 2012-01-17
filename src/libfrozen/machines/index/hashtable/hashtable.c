@@ -75,9 +75,9 @@ static ssize_t hashtable_handler(machine_t *machine, request_t *request){ // {{{
 			{ userdata->input,  DATA_PTR_UINTT(&d_input) },
 			hash_next(request)
 		};
-		return ( (ret = machine_pass(machine, r_next)) < 0 ) ? ret : -EEXIST;
+		return machine_pass(machine, r_next);
 	}
-	return ( (ret = machine_pass(machine, request)) < 0 ) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t hashtable_proto = {

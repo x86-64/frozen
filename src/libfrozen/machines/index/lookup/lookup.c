@@ -41,7 +41,7 @@ static int lookup_destroy(machine_t *machine){ // {{{
 	lookup_userdata       *userdata = (lookup_userdata *)machine->userdata;
 	
 	if(userdata->machine_index != NULL)
-		machine_destroy(userdata->machine_index);
+		shop_destroy(userdata->machine_index);
 
 	free(userdata);
 	return 0;

@@ -827,7 +827,6 @@ enable_machineconvert
 enable_machineincapsulate
 enable_machineregexp
 enable_machinesplit
-enable_machinestructs
 enable_machinestruct_pack
 enable_machinestruct_unpack
 enable_machinetransfer
@@ -854,7 +853,6 @@ enable_machinemorph
 enable_machinepool
 enable_machinerebuild_monitor
 enable_machinerebuild_reader
-enable_machinewrapper
 enable_machineassign
 enable_machinedebug
 enable_machineemitter
@@ -1593,8 +1591,6 @@ Optional Features:
   --disable-machine-regexp
                           disable machine regexp
   --disable-machine-split disable machine split
-  --disable-machine-structs
-                          disable machine structs
   --disable-machine-struct-pack
                           disable machine struct-pack
   --disable-machine-struct-unpack
@@ -1637,8 +1633,6 @@ Optional Features:
                           disable machine rebuild-monitor
   --disable-machine-rebuild-reader
                           disable machine rebuild-reader
-  --disable-machine-wrapper
-                          disable machine wrapper
   --disable-machine-assign
                           disable machine assign
   --disable-machine-debug disable machine debug
@@ -19524,42 +19518,6 @@ fi
 
 
 
-	# Check whether --enable-machinestructs was given.
-if test "${enable_machinestructs+set}" = set; then :
-  enableval=$enable_machinestructs;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinestructs}" = "yes"; then
-			enable_machinestructs="no"
-		else
-			enable_machinestructs="yes"
-		fi
-	fi
-
-	if test "${enable_machinestructs}" = "yes"; then
-		MACHINE_DIR_structs="data/structs"
-		MACHINE_DEP_structs=""
-				MACHINE_SELECTED="$MACHINE_SELECTED structs"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_data_structs" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/structs/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/structs"
-
-		MACHINE_MAKEFILE_data_structs=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/structs/libfrozen_machine_structs.la"
-
-	fi
-
-
-
-
-
-
 	# Check whether --enable-machinestruct_pack was given.
 if test "${enable_machinestruct_pack+set}" = set; then :
   enableval=$enable_machinestruct_pack;
@@ -20510,43 +20468,6 @@ fi
 		MACHINE_MAKEFILE_machine_rebuild=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinewrapper was given.
-if test "${enable_machinewrapper+set}" = set; then :
-  enableval=$enable_machinewrapper;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinewrapper}" = "yes"; then
-			enable_machinewrapper="no"
-		else
-			enable_machinewrapper="yes"
-		fi
-	fi
-
-	if test "${enable_machinewrapper}" = "yes"; then
-		MACHINE_DIR_wrapper="machine/wrapper"
-		MACHINE_DEP_wrapper=""
-				MACHINE_SELECTED="$MACHINE_SELECTED wrapper"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_wrapper" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/wrapper/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/wrapper"
-
-		MACHINE_MAKEFILE_machine_wrapper=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/wrapper/libfrozen_machine_wrapper.la"
 
 	fi
 

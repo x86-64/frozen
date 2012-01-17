@@ -11,14 +11,13 @@ static ssize_t data_machine_t_default(data_t *data, void *hargs){ // {{{
 } // }}}
 static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	machine_t             *machine;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
 	switch( fargs->src->type ){
-		case TYPE_HASHT: dst->ptr = machine_new( (hash_t *)fargs->src->ptr ); goto check;
+		case TYPE_HASHT: dst->ptr = shop_new( (hash_t *)fargs->src->ptr ); goto check;
 		default:
 			break;
 	}
@@ -30,7 +29,7 @@ static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *f
 			if(ret != 0)
 				return -EINVAL;
 			
-			dst->ptr = machine_new(config);
+			dst->ptr = shop_new(config);
 			goto check;
 		
 		case FORMAT(config):;
@@ -40,10 +39,9 @@ static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *f
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
 			
-			machine = machine_find(buffer);
-			machine_acquire(machine);
+			buffer[r_read.buffer_size] = '\0';
 			
-			dst->ptr = machine;
+			dst->ptr = machine_find(buffer);
 			goto check;
 	}
 
@@ -57,8 +55,16 @@ static ssize_t data_machine_t_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = 0;
 	return 0;
 } // }}}
+static ssize_t data_machine_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
+	if(src->ptr == NULL || fargs->dest == NULL)
+		return -EINVAL;
+	
+	fargs->dest->ptr = src->ptr;
+	machine_acquire(src->ptr);
+	return 0;
+} // }}}
 static ssize_t data_machine_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	machine_destroy((machine_t *)data->ptr);
+	shop_destroy((machine_t *)data->ptr);
 	return 0;
 } // }}}
 static ssize_t data_machine_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
@@ -99,5 +105,6 @@ data_proto_t machine_t_proto = {
 		[ACTION_ALLOC]        = (f_data_func)&data_machine_t_alloc,
 		[ACTION_TRANSFER]     = (f_data_func)&data_machine_t_transfer,
 		[ACTION_QUERY]        = (f_data_func)&data_machine_t_query,
+		[ACTION_COPY]         = (f_data_func)&data_machine_t_copy,
 	}
 };

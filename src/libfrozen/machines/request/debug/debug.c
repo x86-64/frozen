@@ -90,7 +90,7 @@ static ssize_t debug_request(machine_t *machine, request_t *request){ // {{{
 	if( (userdata->flags & DEBUG_BEFORE) != 0)
 		debug_do(machine, request, DEBUG_BEFORE);
 	
-	ret = ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	ret = machine_pass(machine, request);
 	
 	if( (userdata->flags & DEBUG_AFTER) != 0)
 		debug_do(machine, request, DEBUG_AFTER);

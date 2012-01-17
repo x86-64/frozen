@@ -129,7 +129,7 @@ static ssize_t convert_handler(machine_t *machine, request_t *request){ // {{{
 		hash_inline(request),
 		hash_end
 	};
-	ret = ( (ret = machine_pass(machine, r_next)) < 0) ? ret : -EEXIST;
+	ret = machine_pass(machine, r_next);
 	
 	hash_free(ctx.new_request);
 	return ret;

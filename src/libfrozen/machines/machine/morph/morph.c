@@ -62,9 +62,8 @@ static int morph_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
 	machine_t             *child;
-	morph_userdata      *userdata = (morph_userdata *)machine->userdata;
+	morph_userdata        *userdata = (morph_userdata *)machine->userdata;
 
 	if(userdata->running == 0){
 		config_t  child_config[] = {
@@ -75,7 +74,7 @@ static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 			)},
 			hash_end
 		};
-		child = machine_new(child_config);
+		child = shop_new(child_config);
 		
 		if(child == NULL)
 			return error("child creation error");
@@ -87,7 +86,7 @@ static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 			return 0;
 	}
 
-	return ( (ret = machine_pass(machine, request)) < 0 ) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t morph_proto = {

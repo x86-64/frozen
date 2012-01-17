@@ -155,7 +155,7 @@ static void       vfs_item_destroy(vfs_item *root, vfs_item *item){ // {{{
 	while(item->childs != NULL)
 		vfs_item_destroy(root, item->childs);
 	
-	machine_destroy((machine_t *)item->userdata);
+	shop_destroy((machine_t *)item->userdata);
 
 	free(item->path);
 	free(item);

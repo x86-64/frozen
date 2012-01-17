@@ -58,11 +58,10 @@ static int assign_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t assign_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
 	assign_userdata       *userdata          = (assign_userdata *)machine->userdata;
 	
 	if(userdata->request != NULL){
-		return ( (ret = machine_pass(machine, userdata->request)) < 0 ) ? ret : -EEXIST;
+		return machine_pass(machine, userdata->request);
 	}else{
 		hash_t r_next[] = {
 			hash_inline(userdata->before),
@@ -71,7 +70,7 @@ static ssize_t assign_handler(machine_t *machine, request_t *request){ // {{{
 			hash_end
 		};
 		
-		return ( (ret = machine_pass(machine, r_next)) < 0 ) ? ret : -EEXIST;
+		return machine_pass(machine, r_next);
 	}
 } // }}}
 

@@ -17,7 +17,9 @@
  * Accepted configuration:
  * @code
  * {
- *              class                   = "data/structs",
+ *              class                   =
+ *                                        "data/struct_pack",
+ *                                        "data/struct_unpack",
  *              buffer                  = (hashkey_t)'buffer', # input/output request key name, default "buffer"
  *              values                  = (hashkey_t)'some',   # if supplied - request key name to take/write values from/to, default take from request
  *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
@@ -110,7 +112,7 @@ static ssize_t struct_machine_pack(machine_t *machine, request_t *request){
 			hash_next(request)
 		};
 		
-		return ( (ret = machine_pass(machine, r_next)) < 0) ? ret : -EEXIST;
+		return machine_pass(machine, r_next);
 	}else{
 		buffer = hash_data_find(request, userdata->buffer);
 		if(buffer != NULL){
@@ -122,27 +124,25 @@ static ssize_t struct_machine_pack(machine_t *machine, request_t *request){
 				hash_next(request)
 			};
 			
-			return ( (ret = machine_pass(machine, new_request)) < 0) ? ret : -EEXIST;
+			return machine_pass(machine, new_request);
 		}
-		return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+		return machine_pass(machine, request);
 	}
 }
 
 static ssize_t struct_machine_unpack(machine_t *machine, request_t *request){
-	ssize_t          ret, ret2;
+	ssize_t          ret;
 	data_t          *buffer;
 	request_t       *values;
 	struct_userdata *userdata = (struct_userdata *)machine->userdata;
-	
-	ret = (ret = machine_pass(machine, request)) < 0 ? ret : -EEXIST;
 	
 	buffer = hash_data_find(request, userdata->buffer);
 	if(buffer != NULL){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
 			case STRUCT_VALUES_ONE:
-				hash_data_copy(ret2, TYPE_HASHT, values, request, userdata->key_values);
-				if(ret2 != 0)
+				hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
+				if(ret != 0)
 					return warning("hash with keys not supplied");
 				break;
 		};
@@ -151,21 +151,8 @@ static ssize_t struct_machine_unpack(machine_t *machine, request_t *request){
 			return error("struct_unpack failed");
 	}
 	
-	return ret;
+	return machine_pass(machine, request);
 }
-
-machine_t structs_proto = {
-	.class          = "data/structs", // this machine would be deprecated
-	.supported_api  = API_CRWD,
-	.func_init      = &struct_init,
-	.func_configure = &struct_configure,
-	.func_destroy   = &struct_destroy,
-	{
-		.func_create = &struct_machine_pack,
-		.func_set    = &struct_machine_pack,
-		.func_get    = &struct_machine_unpack
-	}
-};
 
 machine_t struct_pack_proto = {
 	.class          = "data/struct_pack",

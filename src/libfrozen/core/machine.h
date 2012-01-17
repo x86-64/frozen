@@ -120,9 +120,21 @@ struct machine_t {
 API ssize_t         class_register          (machine_t *proto); ///< Register new dynamic class
 API void            class_unregister        (machine_t *proto); ///< Unregister dynamic class
 
-API request_t *        request_get_current(void); ///< Get current request
+API request_t *     request_get_current(void); ///< Get current request
 
-/** @brief Create new machine.
+API ssize_t         machine_new             (machine_t **pmachine, hash_t *config); ///< Create machine
+API void            machine_acquire         (machine_t *machine); ///< Increment ref counter of machine. Use shop_destroy to free.
+API machine_t *     machine_find            (char *name); ///< Find machine by name and acquire it, if not found - create "ghost" machine
+API void            machine_destroy         (machine_t *machine); ///< Destroy machine
+API ssize_t         machine_is_ghost        (machine_t *machine);
+
+API ssize_t         machine_query           (machine_t *machine, request_t *request); ///< Query machine with hash request
+API ssize_t         machine_fast_query      (machine_t *machine, void *args); ///< Query machine with fast request
+
+API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
+API ssize_t         machine_fast_pass       (machine_t *machine, void *args); ///< Pass fast request to next machines in shop. @param machine Current machine
+
+/** @brief Create new shop.
  *
  *  Configuration is hash with items in reverse order. For example:
  *  @code
@@ -145,37 +157,8 @@ API request_t *        request_get_current(void); ///< Get current request
  *  @retval NULL     Creation failed
  *  @retval non-NULL Creation success
  */
-API machine_t *     machine_new             (hash_t *config);
-API void            machine_acquire         (machine_t *machine); ///< Increment ref counter of machine. Use machine_destroy to free.
-API machine_t *     machine_find            (char *name); ///< Find machine by name.
-API void            machine_destroy         (machine_t *machine); ///< Destroy machine
-
-/** @brief Clone machine
- *
- *  This function will create clone of supplied machine. Clone will not have links with any of machines.
- *  But it will have same pointer to userdata. No func_* functions will be called for it.
- *  
- *  @li Can be useful to make dummy machines, without full implementation with registration and classes.
- */
-API machine_t *     machine_clone           (machine_t *machine);
-
-/** @brief Fork whole shop of machines
- * 
- *  This function forks machines starting from suppliend machine. For each forked machine
- *  special function func_fork called, if supplied, or used ordinary configure.
- *
- *  @param machine  Machine to fork
- *  @param request  Fork request. Useful for passing some real-time configurations, like part of filename to open
- *  @retval NULL Fork failed
- *  @retval non-NULL Fork successfull
- */
-API machine_t *     machine_fork            (machine_t *machine, request_t *request);
-
-API ssize_t         machine_query           (machine_t *machine, request_t *request); ///< Query machine with hash request
-API ssize_t         machine_fast_query      (machine_t *machine, void *args); ///< Query machine with fast request
-
-API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
-API ssize_t         machine_fast_pass       (machine_t *machine, void *args); ///< Pass fast request to next machines in shop. @param machine Current machine
+API machine_t *     shop_new               (hash_t *config);
+API void            shop_destroy           (machine_t *machine); ///< Destroy shop
 
     ssize_t         frozen_machine_init     (void);
     void            frozen_machine_destroy  (void);

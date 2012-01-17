@@ -1,6 +1,6 @@
 { class => "daemon/thread" },
-{ class => "emitter", request = { machine = (machine_t)"file"        }, request = { benchmark_function = "restart" } } },
-{ class => "emitter", request = { machine = (machine_t)"file"        },
+{ class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { machine = (machine_t)"file",
 	request = {
 		action => create,
 		size   => (size_t)'100',
@@ -15,7 +15,7 @@
 		buffer => "                         "
 	}
 }, count => (uint_t)'1000000' },
-{ class => "emitter", request = { machine = (machine_t)"file"            }, request = { benchmark_function = "print_long" } } },
+{ class => "emitter", request = { machine = (machine_t)"file"             , request = { benchmark_function = "print_long" } } },
 { class => "emitter", request = { machine = { { class => "daemon/kill" } }, request = {} } },
 { class => "end"                                              },
 NULL,

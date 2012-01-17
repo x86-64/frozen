@@ -9,7 +9,7 @@ START_TEST (test_real_store_strings){
 		hash_end
 	};
 	
-	machine_t  *machine = machine_new(config);
+	machine_t  *machine = shop_new(config);
 	
 	off_t  data_ptrs[6];
 	char  *data_array[] = {
@@ -31,10 +31,9 @@ START_TEST (test_real_store_strings){
 			{ HK(offset_out), DATA_PTR_OFFT(&data_ptrs[i])                              },
 			{ HK(buffer),     DATA_PTR_STRING(data_array[i])                            },
 			{ HK(size),       DATA_UINT32T(strlen(data_array[i])+1)                     },
-			{ HK(ret),        DATA_PTR_SIZET(&ret)                                      },
                         hash_end
 		};
-		machine_query(machine, r_write);
+		ret = machine_query(machine, r_write);
 			fail_unless(ret == 0, "machine real_store_strings: write array failed");
 	}
 	
@@ -45,15 +44,14 @@ START_TEST (test_real_store_strings){
 			{ HK(action), DATA_UINT32T(ACTION_READ)    },
 			{ HK(offset), DATA_OFFT(data_ptrs[i])           },
 			{ HK(buffer), DATA_RAW(&data_read, 1024)        },
-			{ HK(ret),    DATA_PTR_SIZET(&ret)              },
                         hash_end
 		};
-		machine_query(machine, r_read);
+		ret = machine_query(machine, r_read);
 			fail_unless(ret == 0,                              "machine real_store_strings: read array failed");
 			fail_unless(strcmp(data_read, data_array[i]) == 0, "machine real_store_strings: read array data failed");
 	}
 	
-	machine_destroy(machine);
+	shop_destroy(machine);
 }
 END_TEST
 REGISTER_TEST(core, test_real_store_strings)

@@ -40,6 +40,6 @@ my ($ret, $config, $r_create, $machine, $string);
 	ok(substr($string, 0, 13) eq "Hello, world!",   "r_read data");
 	
 # free all
-        Frozen::machine_destroy($machine);
+        Frozen::shop_destroy($machine);
         Frozen::hash_free($config);
 	

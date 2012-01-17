@@ -192,7 +192,7 @@ void        pool_machine_action(machine_t *machine, rule *rule){ // {{{
 			
 			if(userdata->perfork_childs != &userdata->perfork_childs_own){
 				// kill childs for forked shops, keep for initial
-				machine_destroy(machine->cnext);
+				shop_destroy(machine->cnext);
 			}
 			
 			break;
@@ -486,7 +486,6 @@ static int pool_fork(machine_t *machine, machine_t *parent, config_t *config){ /
 } // }}}
 
 static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
 	uintmax_t              time_curr;
 	pool_userdata         *userdata = (pool_userdata *)machine->userdata;
 	
@@ -500,7 +499,7 @@ static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *reques
 	}
 	userdata->usage_ticks_curr++;
 	
-	return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 static ssize_t pool_machine_request_died(machine_t *machine, request_t *request){ // {{{
 	return -EBADF;

@@ -345,7 +345,7 @@ void main_rest(void){
 	sigprocmask(SIG_BLOCK, &set, NULL);                     // block all signals, main thread will handler that
 	
 	config_t *config = configs_file_parse(opt_config_file);
-	if(config != NULL && machine_new(config) != NULL){
+	if(config != NULL && shop_new(config) != NULL){
 		sigprocmask(SIG_UNBLOCK, &set, NULL);           // enable all signals for this thread
 		
 		while(sigwait(&set, &sig) == 0){

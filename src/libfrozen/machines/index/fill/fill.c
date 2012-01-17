@@ -56,7 +56,7 @@ static int fill_destroy(machine_t *machine){ // {{{
 	fill_userdata       *userdata = (fill_userdata *)machine->userdata;
 	
 	if(userdata->machine_index != NULL)
-		machine_destroy(userdata->machine_index);
+		shop_destroy(userdata->machine_index);
 
 	free(userdata);
 	return 0;

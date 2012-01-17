@@ -51,7 +51,7 @@ static ssize_t factory_handler(machine_t *machine, request_t *request){ // {{{
 		)},
 		hash_end
 	};
-	child = machine_new(child_config);
+	child = shop_new(child_config);
 	
 	if(child == NULL)
 		return error("child creation error");

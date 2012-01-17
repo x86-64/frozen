@@ -61,7 +61,6 @@ static int murmur_configure(machine_t *machine, hash_t *config){ // {{{
 } // }}}
 
 static ssize_t murmur2_32_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
 	uint32_t               hash              = 0;
 	data_t                *key               = NULL;
 	murmur_userdata       *userdata          = (murmur_userdata *)machine->userdata;
@@ -69,7 +68,7 @@ static ssize_t murmur2_32_handler(machine_t *machine, request_t *request){ // {{
 	key = hash_data_find(request, userdata->input);
 	if(key == NULL){
 		if(userdata->fatal == 0)
-			return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+			return machine_pass(machine, request);
 		return error("input key not supplied");
 	}
 	
@@ -79,10 +78,9 @@ static ssize_t murmur2_32_handler(machine_t *machine, request_t *request){ // {{
 		{ userdata->output, DATA_PTR_UINT32T(&hash) },
 		hash_next(request)
 	};
-	return ( (ret = machine_pass(machine, r_next)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, r_next);
 } // }}}
 static ssize_t murmur2_64_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
 	uint64_t               hash              = 0;
 	data_t                *key               = NULL;
 	murmur_userdata       *userdata          = (murmur_userdata *)machine->userdata;
@@ -90,7 +88,7 @@ static ssize_t murmur2_64_handler(machine_t *machine, request_t *request){ // {{
 	key = hash_data_find(request, userdata->input);
 	if(key == NULL){
 		if(userdata->fatal == 0)
-			return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+			return machine_pass(machine, request);
 		return error("input key not supplied");
 	}
 	
@@ -100,7 +98,7 @@ static ssize_t murmur2_64_handler(machine_t *machine, request_t *request){ // {{
 		{ userdata->output, DATA_PTR_UINT64T(&hash) },
 		hash_next(request)
 	};
-	return ( (ret = machine_pass(machine, r_next)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, r_next);
 } // }}}
 
 machine_t murmur2_32_proto = {

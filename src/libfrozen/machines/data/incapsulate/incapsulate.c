@@ -113,7 +113,7 @@ static ssize_t incap_handler(machine_t *machine, request_t *request){
 	if( (data = hash_data_find(request, userdata->key_from)) != NULL)
 		data_query(data, &r_mul);
 	
-	ret = (ret = machine_pass(machine, request) < 0) ? ret : -EEXIST;
+	ret = machine_pass(machine, request);
 	
 	fastcall_div r_div = { { 3, ACTION_DIVIDE }, &userdata->multiply_data };
 	

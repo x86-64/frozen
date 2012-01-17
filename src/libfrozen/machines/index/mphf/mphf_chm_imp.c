@@ -187,11 +187,9 @@ static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
 } // }}}
 static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	ssize_t                ret;
-	machine_t             *t;
 	machine_t             *be_g              = NULL;
 	machine_t             *be_v              = NULL;
 	machine_t             *be_e              = NULL;
-	char                  *machine           = NULL;
 	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
 	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
 	uintmax_t              nelements_mul     = CAPACITY_MUL_DEFAULT;
@@ -206,36 +204,9 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		hash_data_copy(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to data
 		hash_data_copy(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
-		hash_data_copy(ret, TYPE_STRINGT, machine,       mphf->config, HK(machine_g));
-		if(ret == 0){
-			be_g = t = machine_find(machine);
-			machine_acquire(t);
-			if(fork_req){
-				be_g = machine_fork(t, fork_req);
-				machine_destroy(t);
-			}
-		}
-		
-		hash_data_copy(ret, TYPE_STRINGT, machine,       mphf->config, HK(machine_v));
-		if(ret == 0){
-			be_v = t = machine_find(machine);
-			machine_acquire(t);
-			if(fork_req){
-				be_v = machine_fork(t, fork_req);
-				machine_destroy(t);
-			}
-		}
-		
-		hash_data_copy(ret, TYPE_STRINGT, machine,       mphf->config, HK(machine_e));
-		if(ret == 0){
-			be_e = t = machine_find(machine);
-			machine_acquire(t);
-			if(fork_req){
-				be_e = machine_fork(t, fork_req);
-				machine_destroy(t);
-			}
-		}
-		
+		hash_data_copy(ret, TYPE_MACHINET, be_g,         mphf->config, HK(machine_g));
+		hash_data_copy(ret, TYPE_MACHINET, be_v,         mphf->config, HK(machine_g));
+		hash_data_copy(ret, TYPE_MACHINET, be_e,         mphf->config, HK(machine_g));
 		
 		if(be_g == NULL)
 			return error("machine chm_imp parameter machine_g invalid");
@@ -319,11 +290,11 @@ static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 	chm_imp_param_write(mphf);
 	
 	if(data->be_g)
-		machine_destroy(data->be_g);
+		shop_destroy(data->be_g);
 	
 	if( (data->status & WRITEABLE) ){
-		machine_destroy(data->be_e);
-		machine_destroy(data->be_v);
+		shop_destroy(data->be_e);
+		shop_destroy(data->be_v);
 	}
 	return 0;
 } // }}}

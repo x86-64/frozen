@@ -133,8 +133,8 @@ static ssize_t tcp_fast_handler(machine_t *machine, void *hargs){ // {{{
 	if(pthread_setspecific(tcp_primary_key, NULL) != 0)
 		return error("pthread_setspecific error");
 	
-	if(machine_new(userdata->machine) == NULL)
-		return error("machine_new error");
+	if(shop_new(userdata->machine) == NULL)
+		return error("shop_new error");
 	
 	return 0;
 } // }}}

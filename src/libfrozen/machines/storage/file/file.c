@@ -667,7 +667,7 @@ static ssize_t file_custom(machine_t *machine, request_t *request){ // {{{
 		return data_query(&answer_data, &r_transfer);
 	}
 pass:
-	return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 static ssize_t file_fast_handler(machine_t *machine, fastcall_header *hargs){ // {{{
 	file_userdata         *userdata          = ((file_userdata *)machine->userdata);

@@ -153,7 +153,7 @@ static ssize_t benchmark_handler(machine_t *machine, request_t *request){ // {{{
 	if(ret == 0)
 		goto custom;
 	
-	return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 	
 custom:	
 	value  = hash_data_find(request, HK(value));
@@ -194,7 +194,7 @@ custom:
 			return 0;
 		}
 	}
-	return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
+	return machine_pass(machine, request);
 write:;
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &buffer, sizeof(buffer) };	
 	data_query(string, &r_write);

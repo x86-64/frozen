@@ -84,7 +84,7 @@ static ssize_t pointers_handler(machine_t *machine, request_t *request){ // {{{
 				{ HK(size),         DATA_SIZET(sizeof(data_t))      }, // TODO remove size
 				hash_next(request)
 			};
-			return ( (ret = machine_pass(machine, r_next)) < 0) ? ret : -EEXIST;
+			return machine_pass(machine, r_next);
 	};
 	return 0;
 } // }}}

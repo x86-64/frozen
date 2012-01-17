@@ -184,14 +184,12 @@ static ssize_t regexp_matched(machine_t *machine, request_t *request, data_t *in
 	regexp_userdata       *userdata          = (regexp_userdata *)machine->userdata;
 	
 	if(capture_id == 0){
-		ssize_t             ret;
-
 		request_t r_next[] = {
 			{ userdata->marker, *userdata->marker_data },
 			hash_inline(request),
 			hash_end
 		};
-		return (ret = machine_pass(machine, r_next)) < 0 ? ret : -EEXIST;
+		return machine_pass(machine, r_next);
 	}
 	
 	uintmax_t              sl_soffset        = MAX(userdata->regmatch[capture_id - 1].rm_so, 0);
@@ -237,7 +235,7 @@ static ssize_t regexp_handler(machine_t *machine, request_t *request){ // {{{
 	if(ret == 0)
 		return regexp_matched(machine, request, input, userdata->ncaptures);
 	
-	return (ret = machine_pass(machine, request)) < 0 ? ret : -EEXIST;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t regexp_proto = {

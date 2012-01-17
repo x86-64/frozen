@@ -106,7 +106,7 @@ static int switch_destroy(machine_t *machine){ // {{{
 	
 	while( (rule = list_pop(&userdata->rules)) != NULL){
 		if(rule->machine)
-			machine_destroy(rule->machine);
+			shop_destroy(rule->machine);
 		free(rule);
 	}
 	list_destroy(&userdata->rules);

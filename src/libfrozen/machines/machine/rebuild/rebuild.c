@@ -167,7 +167,7 @@ static int rebuildread_destroy(machine_t *machine){ // {{{
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)machine->userdata;
 	
 	if(userdata->writer)
-		machine_destroy(userdata->writer);
+		shop_destroy(userdata->writer);
 	if(userdata->req_rebuild)
 		hash_free(userdata->req_rebuild);
 
@@ -237,7 +237,7 @@ static int rebuildmon_destroy(machine_t *machine){ // {{{
 	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)machine->userdata;
 	
 	if(userdata->rebuild_reader)
-		machine_destroy(userdata->rebuild_reader);
+		shop_destroy(userdata->rebuild_reader);
 	
 	free(userdata);
 	return 0;

@@ -40,7 +40,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				return -EFAULT;
 			
 			if(fdata->machine)
-				machine_destroy(fdata->machine);
+				shop_destroy(fdata->machine);
 			if(fdata->request)
 				hash_free(fdata->request);
 			if(fdata->allocated)

@@ -11,7 +11,6 @@ extern machine_t convert_proto;
 extern machine_t incapsulate_proto;
 extern machine_t regexp_proto;
 extern machine_t split_proto;
-extern machine_t structs_proto;
 extern machine_t struct_pack_proto;
 extern machine_t struct_unpack_proto;
 extern machine_t transfer_proto;
@@ -38,7 +37,6 @@ extern machine_t morph_proto;
 extern machine_t pool_proto;
 extern machine_t rebuild_monitor_proto;
 extern machine_t rebuild_reader_proto;
-extern machine_t wrapper_proto;
 extern machine_t assign_proto;
 extern machine_t debug_proto;
 extern machine_t emitter_proto;
@@ -61,7 +59,6 @@ machine_t * machine_protos[] = {
    &incapsulate_proto,
    &regexp_proto,
    &split_proto,
-   &structs_proto,
    &struct_pack_proto,
    &struct_unpack_proto,
    &transfer_proto,
@@ -88,7 +85,6 @@ machine_t * machine_protos[] = {
    &pool_proto,
    &rebuild_monitor_proto,
    &rebuild_reader_proto,
-   &wrapper_proto,
    &assign_proto,
    &debug_proto,
    &emitter_proto,
