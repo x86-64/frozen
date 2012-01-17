@@ -57,7 +57,7 @@ static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
 	request_t r_next[] = {
-		//{ HK(return_to), 
+		{ HK(return_to), DATA_NEXT_MACHINET(machine) },
 		hash_inline(request),
 		hash_end
 	};
