@@ -53,8 +53,8 @@ static err_item errs_list[] = {
  { -131112, "src/libfrozen/machines/index/hashtable/hashtable.c: calloc failed" },
  { -127100, "src/libfrozen/machines/request/switch/switch.c: failed to configure switch" },
  { -127074, "src/libfrozen/machines/request/switch/switch.c: calloc returns null" },
- { -122953, "src/libfrozen/machines/index/fill/fill.c: supplied index machine not valid, or not found" },
- { -122931, "src/libfrozen/machines/index/fill/fill.c: calloc failed" },
+ { -122955, "src/libfrozen/machines/index/fill/fill.c: supplied index machine not valid, or not found" },
+ { -122933, "src/libfrozen/machines/index/fill/fill.c: calloc failed" },
  { -119407, "src/libfrozen/machines/io/fuse/fuse.c: fuse fs creation failed" },
  { -114908, "src/libfrozen/machines/data/regexp/regexp.c: can not convert data to string" },
  { -114903, "src/libfrozen/machines/data/regexp/regexp.c: no input string in request" },
@@ -147,7 +147,6 @@ static err_item errs_list[] = {
  { -8241, "src/libfrozen/data/storage/file/file_t.c: filename invalid" },
  { -8233, "src/libfrozen/data/storage/file/file_t.c: filename not supplied" },
  { -8224, "src/libfrozen/data/storage/file/file_t.c: calloc returns null" },
- { -5676, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4222, "src/libfrozen/machines/index/mphf/mphf_bdz_imp.c: mphf g_free" },
 
 };

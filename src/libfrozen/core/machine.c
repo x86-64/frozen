@@ -473,13 +473,3 @@ ssize_t            machine_fast_pass    (machine_t *machine, void *fargs){ // {{
 	return machine_fast_query(machine->cnext, fargs);
 } // }}}
 
-data_functions     request_str_to_action(char *string){ // {{{
-	if(strcasecmp(string, "create") == 0) return ACTION_CREATE;
-	if(strcasecmp(string, "write")  == 0) return ACTION_WRITE;
-	if(strcasecmp(string, "read")   == 0) return ACTION_READ;
-	if(strcasecmp(string, "delete") == 0) return ACTION_DELETE;
-	if(strcasecmp(string, "count")  == 0) return ACTION_COUNT;
-	if(strcasecmp(string, "custom") == 0) return ACTION_CUSTOM;
-	if(strcasecmp(string, "compare") == 0) return ACTION_COMPARE;
-	return ACTION_INVALID;
-} // }}}

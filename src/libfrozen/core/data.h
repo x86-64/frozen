@@ -71,6 +71,7 @@
 
 #define DEF_BUFFER_SIZE 1024
 
+#include <enum/action/action_t.h>
 #include <enum/datatype/datatype_t.h>
 
 typedef enum data_api_type {

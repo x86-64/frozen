@@ -63,6 +63,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/machine/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/action/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \

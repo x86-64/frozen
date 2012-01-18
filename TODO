@@ -35,7 +35,6 @@
 - new test suite, as benchmarks, deprecate check
 - data 'range_t', 'multiselect_t' and matching routines
 - machine queue
-- data 'action_t' + convert array from\to string
 - mphf nelements_step with percents + remove from mphf to another machine
 
 - pcre

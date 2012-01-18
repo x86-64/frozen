@@ -163,8 +163,6 @@ API void            shop_destroy           (machine_t *machine); ///< Destroy sh
     ssize_t         frozen_machine_init     (void);
     void            frozen_machine_destroy  (void);
 
-    data_functions  request_str_to_action   (char *string);
-
 extern pthread_mutex_t                destroy_mtx; // TODO remove this..
 
 // Thread-specific userdata functions

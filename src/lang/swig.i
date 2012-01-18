@@ -31,6 +31,8 @@
 %include ../../libfrozen/data/enum/hashkey/hashkeys.h
 %include ../../libfrozen/data/enum/datatype/datatype_t.h
 %include ../../libfrozen/data/enum/datatype/datatype.h
+%include ../../libfrozen/data/enum/action/action_t.h
+%include ../../libfrozen/data/enum/action/action.h
 
 typedef hash_t                   request_t;
 typedef signed int               ssize_t;
@@ -193,7 +195,7 @@ func hitem_getptr(s interface {}) unsafe.Pointer {
 		case uint64: data_ptr = unsafe.Pointer(&v)
 		case string: data_ptr = unsafe.Pointer(&([]byte( v )[0]))
 		case []byte: data_ptr = unsafe.Pointer(&v[0])
-		case Enum_SS_data_functions: 
+		case Enum_SS_action_t: 
 			     data_ptr = unsafe.Pointer(&v)
 		default: fmt.Printf("Hitem: unexpected type %T\n", v)
 	}
@@ -212,7 +214,7 @@ func hitem_getlen(s interface {}) uint {
 	       case uint64: return uint(unsafe.Sizeof(v))
 	       case string: return uint(len(v))
 	       case []byte: return uint(len(v))
-	       case Enum_SS_data_functions: 
+	       case Enum_SS_action_t: 
 			    return uint(unsafe.Sizeof(v))
 	       default: fmt.Printf("Hitem: unexpected type %T\n", v)
         }

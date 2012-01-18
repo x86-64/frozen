@@ -42,14 +42,17 @@
 
 typedef struct fill_userdata {
 	uintmax_t              fatal;
-	data_functions         action;
+	action_t               action;
 	machine_t             *machine_index;
 } fill_userdata;
 
 static int fill_init(machine_t *machine){ // {{{
-	if((machine->userdata = calloc(1, sizeof(fill_userdata))) == NULL)
+	fill_userdata         *userdata;
+
+	if((userdata = machine->userdata = calloc(1, sizeof(fill_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->action = ACTION_WRITE;
 	return 0;
 } // }}}
 static int fill_destroy(machine_t *machine){ // {{{
@@ -63,16 +66,14 @@ static int fill_destroy(machine_t *machine){ // {{{
 } // }}}
 static int fill_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
-	char                  *action_str        = "write";
 	fill_userdata         *userdata          = (fill_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT,  action_str,              config, HK(action));
+	hash_data_copy(ret, TYPE_ACTIONT,  userdata->action,        config, HK(action));
 	hash_data_copy(ret, TYPE_UINTT,    userdata->fatal,         config, HK(fatal));
 	hash_data_copy(ret, TYPE_MACHINET, userdata->machine_index, config, HK(index));
 	if(ret != 0)
 		return error("supplied index machine not valid, or not found");
 	
-	userdata->action = request_str_to_action(action_str);
 	return 0;
 } // }}}
 

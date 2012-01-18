@@ -139,21 +139,7 @@ hash_value :
 		
 		free($2);
 		hash_free($5);
-	}
-	| NAME {
-			// TODO remove this
-		data_functions action;
-		if((action = request_str_to_action($1)) != ACTION_INVALID){
-			data_t d_act = DATA_UINT32T(action);
-			
-			fastcall_copy r_copy = { { 3, ACTION_COPY }, &$$ };
-			data_query(&d_act, &r_copy);
-			
-			free($1);
-		}else{
-			emit_error("wrong constant");
-		}
-     };
+	};
 
 %%
 
