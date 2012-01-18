@@ -41,7 +41,7 @@ static err_item errs_list[] = {
  { -159911, "src/libfrozen/machines/io/console/console.c: input key not supplied" },
  { -159897, "src/libfrozen/machines/io/console/console.c: output key not supplied" },
  { -159864, "src/libfrozen/machines/io/console/console.c: calloc failed" },
- { -155684, "src/libfrozen/machines/machine/end/end.c: calloc failed" },
+ { -155684, "src/libfrozen/machines/request/end/end.c: calloc failed" },
  { -151600, "src/libfrozen/machines/data/convert/convert.c: calloc failed" },
  { -147590, "src/libfrozen/machines/data/split/split.c: no input string in request" },
  { -147534, "src/libfrozen/machines/data/split/split.c: calloc failed" },

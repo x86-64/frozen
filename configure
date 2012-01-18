@@ -848,7 +848,6 @@ enable_machineipc
 enable_machinetcp
 enable_machinetcp_child
 enable_machinebenchmark
-enable_machineend
 enable_machinefactory
 enable_machinemorph
 enable_machinepool
@@ -857,6 +856,7 @@ enable_machinerebuild_reader
 enable_machineassign
 enable_machinedebug
 enable_machineemitter
+enable_machineend
 enable_machineimplode
 enable_machineexplode
 enable_machineswitch
@@ -1626,7 +1626,6 @@ Optional Features:
                           disable machine tcp-child
   --disable-machine-benchmark
                           disable machine benchmark
-  --disable-machine-end   disable machine end
   --disable-machine-factory
                           disable machine factory
   --disable-machine-morph disable machine morph
@@ -1640,6 +1639,7 @@ Optional Features:
   --disable-machine-debug disable machine debug
   --disable-machine-emitter
                           disable machine emitter
+  --disable-machine-end   disable machine end
   --disable-machine-implode
                           disable machine implode
   --disable-machine-explode
@@ -20292,43 +20292,6 @@ fi
 
 
 
-	# Check whether --enable-machineend was given.
-if test "${enable_machineend+set}" = set; then :
-  enableval=$enable_machineend;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machineend}" = "yes"; then
-			enable_machineend="no"
-		else
-			enable_machineend="yes"
-		fi
-	fi
-
-	if test "${enable_machineend}" = "yes"; then
-		MACHINE_DIR_end="machine/end"
-		MACHINE_DEP_end=""
-				MACHINE_SELECTED="$MACHINE_SELECTED end"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_end" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/end/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/end"
-
-		MACHINE_MAKEFILE_machine_end=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/end/libfrozen_machine_end.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-machinefactory was given.
 if test "${enable_machinefactory+set}" = set; then :
   enableval=$enable_machinefactory;
@@ -20615,6 +20578,43 @@ fi
 		MACHINE_MAKEFILE_request_emitter=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/emitter/libfrozen_machine_emitter.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machineend was given.
+if test "${enable_machineend+set}" = set; then :
+  enableval=$enable_machineend;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machineend}" = "yes"; then
+			enable_machineend="no"
+		else
+			enable_machineend="yes"
+		fi
+	fi
+
+	if test "${enable_machineend}" = "yes"; then
+		MACHINE_DIR_end="request/end"
+		MACHINE_DEP_end=""
+				MACHINE_SELECTED="$MACHINE_SELECTED end"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_end" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/end/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/end"
+
+		MACHINE_MAKEFILE_request_end=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/end/libfrozen_machine_end.la"
 
 	fi
 

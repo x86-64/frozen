@@ -29,7 +29,6 @@ extern machine_t ipc_proto;
 extern machine_t tcp_proto;
 extern machine_t tcp_child_proto;
 extern machine_t benchmark_proto;
-extern machine_t end_proto;
 extern machine_t factory_proto;
 extern machine_t morph_proto;
 extern machine_t pool_proto;
@@ -38,6 +37,7 @@ extern machine_t rebuild_reader_proto;
 extern machine_t assign_proto;
 extern machine_t debug_proto;
 extern machine_t emitter_proto;
+extern machine_t end_proto;
 extern machine_t implode_proto;
 extern machine_t explode_proto;
 extern machine_t switch_proto;
@@ -73,7 +73,6 @@ machine_t * machine_protos[] = {
    &tcp_proto,
    &tcp_child_proto,
    &benchmark_proto,
-   &end_proto,
    &factory_proto,
    &morph_proto,
    &pool_proto,
@@ -82,6 +81,7 @@ machine_t * machine_protos[] = {
    &assign_proto,
    &debug_proto,
    &emitter_proto,
+   &end_proto,
    &implode_proto,
    &explode_proto,
    &switch_proto,

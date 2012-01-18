@@ -2,7 +2,7 @@
 
 /**
  * @ingroup machine
- * @addtogroup mod_machine_end machine/end
+ * @addtogroup mod_machine_end request/end
  */
 /**
  * @ingroup mod_machine_end
@@ -17,7 +17,7 @@
  * Accepted configuration:
  * @code
  * {
- *              class                   = "machine/end",
+ *              class                   = "request/end",
  *              return                  = (uint_t)'0'          # return this error code, default 0 (no error)
  * }
  * @endcode
@@ -57,24 +57,15 @@ static ssize_t end_handler(machine_t *machine, request_t *request){ // {{{
 	
 	return userdata->ret;
 } // }}}
-static ssize_t end_fast_handler(machine_t *machine, void *hargs){ // {{{
-	end_userdata          *userdata          = (end_userdata *)machine->userdata;
-	
-	return userdata->ret;
-} // }}}
-
 
 machine_t end_proto = {
-	.class          = "machine/end",
-	.supported_api  = API_HASH | API_FAST,
+	.class          = "request/end",
+	.supported_api  = API_HASH,
 	.func_init      = &end_init,
 	.func_destroy   = &end_destroy,
 	.func_configure = &end_configure,
 	.machine_type_hash = {
 		.func_handler = &end_handler
 	},
-	.machine_type_fast = {
-		.func_handler = &end_fast_handler
-	}
 };
 
