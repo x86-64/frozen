@@ -52,6 +52,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/allocator/fixed/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/allocator/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
@@ -77,7 +78,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/allocator/fixed/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/cache/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/cache/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
