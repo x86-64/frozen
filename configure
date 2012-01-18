@@ -831,7 +831,6 @@ enable_machinesplit
 enable_machinestruct_pack
 enable_machinestruct_unpack
 enable_machinetransfer
-enable_machinenull
 enable_machinejenkins32
 enable_machinejenkins64
 enable_machinemurmur2_32
@@ -859,6 +858,7 @@ enable_machineemitter
 enable_machineend
 enable_machineimplode
 enable_machineexplode
+enable_machinenull
 enable_machineswitch
 enable_machinepass
 enable_machinemutex
@@ -1599,7 +1599,6 @@ Optional Features:
                           disable machine struct-unpack
   --disable-machine-transfer
                           disable machine transfer
-  --disable-machine-null  disable machine null
   --disable-machine-jenkins32
                           disable machine jenkins32
   --disable-machine-jenkins64
@@ -1644,6 +1643,7 @@ Optional Features:
                           disable machine implode
   --disable-machine-explode
                           disable machine explode
+  --disable-machine-null  disable machine null
   --disable-machine-switch
                           disable machine switch
   --disable-machine-pass  disable machine pass
@@ -19664,43 +19664,6 @@ fi
 
 
 
-	# Check whether --enable-machinenull was given.
-if test "${enable_machinenull+set}" = set; then :
-  enableval=$enable_machinenull;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinenull}" = "yes"; then
-			enable_machinenull="no"
-		else
-			enable_machinenull="yes"
-		fi
-	fi
-
-	if test "${enable_machinenull}" = "yes"; then
-		MACHINE_DIR_null="examples/null"
-		MACHINE_DEP_null=""
-				MACHINE_SELECTED="$MACHINE_SELECTED null"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_examples_null" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/examples/null/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS examples/null"
-
-		MACHINE_MAKEFILE_examples_null=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED examples/null/libfrozen_machine_null.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-machinejenkins32 was given.
 if test "${enable_machinejenkins32+set}" = set; then :
   enableval=$enable_machinejenkins32;
@@ -20688,6 +20651,43 @@ fi
 		MACHINE_MAKEFILE_request_implode=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/implode/libfrozen_machine_implode.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinenull was given.
+if test "${enable_machinenull+set}" = set; then :
+  enableval=$enable_machinenull;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinenull}" = "yes"; then
+			enable_machinenull="no"
+		else
+			enable_machinenull="yes"
+		fi
+	fi
+
+	if test "${enable_machinenull}" = "yes"; then
+		MACHINE_DIR_null="request/null"
+		MACHINE_DEP_null=""
+				MACHINE_SELECTED="$MACHINE_SELECTED null"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_null" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/null/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/null"
+
+		MACHINE_MAKEFILE_request_null=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/null/libfrozen_machine_null.la"
 
 	fi
 

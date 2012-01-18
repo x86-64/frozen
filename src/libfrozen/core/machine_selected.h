@@ -12,7 +12,6 @@ extern machine_t split_proto;
 extern machine_t struct_pack_proto;
 extern machine_t struct_unpack_proto;
 extern machine_t transfer_proto;
-extern machine_t null_proto;
 extern machine_t jenkins32_proto;
 extern machine_t jenkins64_proto;
 extern machine_t murmur2_32_proto;
@@ -40,6 +39,7 @@ extern machine_t emitter_proto;
 extern machine_t end_proto;
 extern machine_t implode_proto;
 extern machine_t explode_proto;
+extern machine_t null_proto;
 extern machine_t switch_proto;
 extern machine_t pass_proto;
 extern machine_t mutex_proto;
@@ -56,7 +56,6 @@ machine_t * machine_protos[] = {
    &struct_pack_proto,
    &struct_unpack_proto,
    &transfer_proto,
-   &null_proto,
    &jenkins32_proto,
    &jenkins64_proto,
    &murmur2_32_proto,
@@ -84,6 +83,7 @@ machine_t * machine_protos[] = {
    &end_proto,
    &implode_proto,
    &explode_proto,
+   &null_proto,
    &switch_proto,
    &pass_proto,
    &mutex_proto,

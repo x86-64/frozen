@@ -87,7 +87,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/transfer/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/examples/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/murmur/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/index/fill/config.m4 \
@@ -108,6 +107,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/end/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
