@@ -782,6 +782,7 @@ enable_moduledata_null_t
 enable_moduledata_time_t
 enable_modulego_http
 enable_modulego_template
+enable_allocator_list_t
 enable_dataptr_t
 enable_default_t
 enable_hash_t
@@ -818,7 +819,6 @@ enable_container_t
 enable_memory_t
 enable_raw_t
 enable_machinefixed
-enable_machinelist
 enable_machinecache
 enable_machinecache_append
 enable_machinekill
@@ -1532,6 +1532,8 @@ Optional Features:
                           disable module go-http
   --disable-module-go-template
                           disable module go-template
+  --disable-data-allocator_list_t
+                          disable data allocator_list_t
   --disable-data-dataptr_t
                           disable data dataptr_t
   --disable-data-default_t
@@ -1577,7 +1579,6 @@ Optional Features:
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
   --disable-machine-fixed disable machine fixed
-  --disable-machine-list  disable machine list
   --disable-machine-cache disable machine cache
   --disable-machine-cache-append
                           disable machine cache-append
@@ -17862,6 +17863,43 @@ fi
 
 
 
+	# Check whether --enable-allocator_list_t was given.
+if test "${enable_allocator_list_t+set}" = set; then :
+  enableval=$enable_allocator_list_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_allocator_list_t}" = "yes"; then
+			enable_allocator_list_t="no"
+		else
+			enable_allocator_list_t="yes"
+		fi
+	fi
+
+	if test "${enable_allocator_list_t}" = "yes"; then
+		DATA_DIR_allocator_list_t="allocator/list"
+		DATA_DEP_allocator_list_t="uint_t hash_t format_t"
+		DATA_ID_allocator_list_t=""
+		DATA_SELECTED="$DATA_SELECTED allocator_list_t"
+		DATA_HEADERS="$DATA_HEADERS allocator/list/allocator_list_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_allocator_list" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/allocator/list/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS allocator/list"
+
+		DATA_MAKEFILE_allocator_list=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} allocator/list/libfrozen_data_list.la"
+
+	fi
+
+
+
+
+
+
 	# Check whether --enable-dataptr_t was given.
 if test "${enable_dataptr_t+set}" = set; then :
   enableval=$enable_dataptr_t;
@@ -19176,43 +19214,6 @@ fi
 		MACHINE_MAKEFILE_allocator_fixed=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED allocator/fixed/libfrozen_machine_fixed.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinelist was given.
-if test "${enable_machinelist+set}" = set; then :
-  enableval=$enable_machinelist;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinelist}" = "yes"; then
-			enable_machinelist="no"
-		else
-			enable_machinelist="yes"
-		fi
-	fi
-
-	if test "${enable_machinelist}" = "yes"; then
-		MACHINE_DIR_list="allocator/list"
-		MACHINE_DEP_list=""
-				MACHINE_SELECTED="$MACHINE_SELECTED list"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_allocator_list" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/allocator/list/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS allocator/list"
-
-		MACHINE_MAKEFILE_allocator_list=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED allocator/list/libfrozen_machine_list.la"
 
 	fi
 

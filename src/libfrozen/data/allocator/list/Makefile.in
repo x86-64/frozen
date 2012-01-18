@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -34,8 +35,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ./src/libfrozen/machines/allocator/list
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+subdir = src/libfrozen/data/allocator/list
+DIST_COMMON = $(headers_mydir_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -51,16 +53,32 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
 	$(top_srcdir)/./src/modules/go_http/config.m4 \
 	$(top_srcdir)/./src/modules/go_template/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/allocator/list/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/machine/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/datatype/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/enum/named/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/slider/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/modifiers/struct/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/allocator/fixed/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/allocator/list/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/benchmark/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/call/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/end/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/factory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/morph/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/rebuild/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/backend/wrapper/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/cache/cache_append/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/cache/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
@@ -82,38 +100,21 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/fuse/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/tcp/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/benchmark/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/end/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/morph/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/pool/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/rebuild/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/assign/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/debug/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/request/iterate/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/storage/pointers/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/backend/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/void/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/enum/named/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/modifiers/slider/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/modifiers/struct/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -122,14 +123,13 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfrozen_machine_list_la_LIBADD =
-am_libfrozen_machine_list_la_OBJECTS =  \
-	libfrozen_machine_list_la-list.lo
-libfrozen_machine_list_la_OBJECTS =  \
-	$(am_libfrozen_machine_list_la_OBJECTS)
-libfrozen_machine_list_la_LINK = $(LIBTOOL) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libfrozen_machine_list_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+libfrozen_data_list_la_LIBADD =
+am_libfrozen_data_list_la_OBJECTS =  \
+	libfrozen_data_list_la-allocator_list_t.lo
+libfrozen_data_list_la_OBJECTS = $(am_libfrozen_data_list_la_OBJECTS)
+libfrozen_data_list_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libfrozen_data_list_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
@@ -144,8 +144,31 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfrozen_machine_list_la_SOURCES)
-DIST_SOURCES = $(libfrozen_machine_list_la_SOURCES)
+SOURCES = $(libfrozen_data_list_la_SOURCES)
+DIST_SOURCES = $(libfrozen_data_list_la_SOURCES)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(headers_mydirdir)"
+HEADERS = $(headers_mydir_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -170,6 +193,9 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+DATA_DIRS = @DATA_DIRS@
+DATA_DIST_DIRS = @DATA_DIST_DIRS@
+DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -233,9 +259,6 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
-DATA_DIRS = @DATA_DIRS@
-DATA_DIST_DIRS = @DATA_DIST_DIRS@
-DATA_LIBS_SELECTED = @DATA_LIBS_SELECTED@
 STRIP = @STRIP@
 SWIG = @SWIG@
 VERSION = @VERSION@
@@ -294,9 +317,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LTLIBRARIES = libfrozen_machine_list.la
-libfrozen_machine_list_la_SOURCES = list.c
-libfrozen_machine_list_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+noinst_LTLIBRARIES = libfrozen_data_list.la
+libfrozen_data_list_la_SOURCES = allocator_list_t.c
+libfrozen_data_list_la_CFLAGS = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
+headers_mydirdir = $(headersdir)/allocator/list/
+headers_mydir_HEADERS = allocator_list_t.h
 all: all-am
 
 .SUFFIXES:
@@ -310,9 +335,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ./src/libfrozen/machines/allocator/list/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/libfrozen/data/allocator/list/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ./src/libfrozen/machines/allocator/list/Makefile
+	  $(AUTOMAKE) --foreign src/libfrozen/data/allocator/list/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -340,8 +365,8 @@ clean-noinstLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libfrozen_machine_list.la: $(libfrozen_machine_list_la_OBJECTS) $(libfrozen_machine_list_la_DEPENDENCIES) 
-	$(libfrozen_machine_list_la_LINK)  $(libfrozen_machine_list_la_OBJECTS) $(libfrozen_machine_list_la_LIBADD) $(LIBS)
+libfrozen_data_list.la: $(libfrozen_data_list_la_OBJECTS) $(libfrozen_data_list_la_DEPENDENCIES) 
+	$(libfrozen_data_list_la_LINK)  $(libfrozen_data_list_la_OBJECTS) $(libfrozen_data_list_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -349,7 +374,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_machine_list_la-list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_data_list_la-allocator_list_t.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -372,18 +397,38 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-libfrozen_machine_list_la-list.lo: list.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_list_la_CFLAGS) $(CFLAGS) -MT libfrozen_machine_list_la-list.lo -MD -MP -MF $(DEPDIR)/libfrozen_machine_list_la-list.Tpo -c -o libfrozen_machine_list_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_machine_list_la-list.Tpo $(DEPDIR)/libfrozen_machine_list_la-list.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='list.c' object='libfrozen_machine_list_la-list.lo' libtool=yes @AMDEPBACKSLASH@
+libfrozen_data_list_la-allocator_list_t.lo: allocator_list_t.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_list_la_CFLAGS) $(CFLAGS) -MT libfrozen_data_list_la-allocator_list_t.lo -MD -MP -MF $(DEPDIR)/libfrozen_data_list_la-allocator_list_t.Tpo -c -o libfrozen_data_list_la-allocator_list_t.lo `test -f 'allocator_list_t.c' || echo '$(srcdir)/'`allocator_list_t.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfrozen_data_list_la-allocator_list_t.Tpo $(DEPDIR)/libfrozen_data_list_la-allocator_list_t.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='allocator_list_t.c' object='libfrozen_data_list_la-allocator_list_t.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_machine_list_la_CFLAGS) $(CFLAGS) -c -o libfrozen_machine_list_la-list.lo `test -f 'list.c' || echo '$(srcdir)/'`list.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_data_list_la_CFLAGS) $(CFLAGS) -c -o libfrozen_data_list_la-allocator_list_t.lo `test -f 'allocator_list_t.c' || echo '$(srcdir)/'`allocator_list_t.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-headers_mydirHEADERS: $(headers_mydir_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(headers_mydirdir)" || $(MKDIR_P) "$(DESTDIR)$(headers_mydirdir)"
+	@list='$(headers_mydir_HEADERS)'; test -n "$(headers_mydirdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(headers_mydirdir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(headers_mydirdir)" || exit $$?; \
+	done
+
+uninstall-headers_mydirHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(headers_mydir_HEADERS)'; test -n "$(headers_mydirdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(headers_mydirdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(headers_mydirdir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -469,8 +514,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
+	for dir in "$(DESTDIR)$(headers_mydirdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -519,7 +567,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-headers_mydirHEADERS
 
 install-dvi: install-dvi-am
 
@@ -565,7 +613,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-headers_mydirHEADERS
 
 .MAKE: install-am install-strip
 
@@ -574,13 +622,14 @@ uninstall-am:
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am
+	install-dvi-am install-exec install-exec-am \
+	install-headers_mydirHEADERS install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-headers_mydirHEADERS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

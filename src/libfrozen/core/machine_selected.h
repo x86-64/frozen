@@ -2,7 +2,6 @@
 #ifndef MACHINE_SELECTED_H
 #define MACHINE_SELECTED_H
 extern machine_t fixed_proto;
-extern machine_t list_proto;
 extern machine_t cache_proto;
 extern machine_t cache_append_proto;
 extern machine_t kill_proto;
@@ -50,7 +49,6 @@ extern machine_t mutex_proto;
 #ifdef MACHINE_C
 machine_t * machine_protos[] = {
    &fixed_proto,
-   &list_proto,
    &cache_proto,
    &cache_append_proto,
    &kill_proto,

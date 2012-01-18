@@ -152,6 +152,7 @@
 #define HK_VALUE_size 3249
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
+#define HK_VALUE_storage 14484
 #define HK_VALUE_string 9743
 #define HK_VALUE_structure 31338
 #define HK_VALUE_test 3411
@@ -316,6 +317,7 @@ typedef enum hashkey_t {
       HK_size = HK_VALUE_size, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
+      HK_storage = HK_VALUE_storage, 
       HK_string = HK_VALUE_string, 
       HK_structure = HK_VALUE_structure, 
       HK_test = HK_VALUE_test, 
@@ -484,6 +486,7 @@ keypair_t hashkeys[] = {
       { "size", HK_VALUE_size }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
+      { "storage", HK_VALUE_storage }, 
       { "string", HK_VALUE_string }, 
       { "structure", HK_VALUE_structure }, 
       { "test", HK_VALUE_test }, 

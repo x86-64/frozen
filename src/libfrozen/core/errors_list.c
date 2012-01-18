@@ -4,11 +4,11 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -209012, "src/libfrozen/machines/allocator/list/list.c: bad underlying storage" },
- { -209007, "src/libfrozen/machines/allocator/list/list.c: bad item size" },
- { -209002, "src/libfrozen/machines/allocator/list/list.c: bad item_sample" },
- { -208998, "src/libfrozen/machines/allocator/list/list.c: no item_size nor item_sample supplied" },
- { -208976, "src/libfrozen/machines/allocator/list/list.c: calloc failed" },
+ { -208994, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad underlying storage" },
+ { -208987, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item size" },
+ { -208980, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item_sample" },
+ { -208974, "src/libfrozen/data/allocator/list/allocator_list_t.c: no item_size nor item_sample supplied" },
+ { -208967, "src/libfrozen/data/allocator/list/allocator_list_t.c: invalid storage" },
  { -204912, "src/libfrozen/machines/allocator/fixed/fixed.c: bad underlying storage" },
  { -204907, "src/libfrozen/machines/allocator/fixed/fixed.c: bad item size" },
  { -204902, "src/libfrozen/machines/allocator/fixed/fixed.c: bad item_sample" },
@@ -165,7 +165,6 @@ static err_item errs_list[] = {
  { -8508, "src/libfrozen/machines/storage/file/file.c: filepath invalid" },
  { -8364, "src/libfrozen/machines/storage/file/file.c: resume error" },
  { -8355, "src/libfrozen/machines/storage/file/file.c: called fork_only file" },
- { -5676, "src/libfrozen/core/configs/config_parser.tab.c: wrong constant" },
  { -4222, "src/libfrozen/machines/index/mphf/mphf_bdz_imp.c: mphf g_free" },
 
 };
