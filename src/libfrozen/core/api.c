@@ -22,7 +22,6 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_IS_NULL] = 3,
 	[ACTION_CREATE] = 4,
 	[ACTION_DELETE] = 4,
-	[ACTION_MOVE] = 5,
 	[ACTION_COUNT] = 3,
 	[ACTION_EXECUTE] = 2,
 	[ACTION_START] = 2,

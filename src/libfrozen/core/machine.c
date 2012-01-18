@@ -428,7 +428,6 @@ ssize_t            machine_query        (machine_t *machine, request_t *request)
 				case ACTION_READ:   func = machine->machine_type_crwd.func_get   ; break;
 				case ACTION_WRITE:  func = machine->machine_type_crwd.func_set   ; break;
 				case ACTION_DELETE: func = machine->machine_type_crwd.func_delete; break;
-				case ACTION_MOVE:   func = machine->machine_type_crwd.func_move  ; break;
 				case ACTION_COUNT:  func = machine->machine_type_crwd.func_count ; break;
 				case ACTION_CUSTOM: func = machine->machine_type_crwd.func_custom; break;
 				default:
@@ -479,7 +478,6 @@ data_functions     request_str_to_action(char *string){ // {{{
 	if(strcasecmp(string, "write")  == 0) return ACTION_WRITE;
 	if(strcasecmp(string, "read")   == 0) return ACTION_READ;
 	if(strcasecmp(string, "delete") == 0) return ACTION_DELETE;
-	if(strcasecmp(string, "move")   == 0) return ACTION_MOVE;
 	if(strcasecmp(string, "count")  == 0) return ACTION_COUNT;
 	if(strcasecmp(string, "custom") == 0) return ACTION_CUSTOM;
 	if(strcasecmp(string, "compare") == 0) return ACTION_COMPARE;

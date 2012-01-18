@@ -39,5 +39,4 @@
 - pcre
 - libev
 
-- delete ACTION_MOVE
 - remove insert sort and write binary search instead

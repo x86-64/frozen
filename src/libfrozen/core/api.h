@@ -132,7 +132,6 @@ typedef ssize_t (*f_fast_func) (machine_t *, void *);
 typedef enum data_functions {
 	ACTION_CREATE,
 	ACTION_DELETE,
-	ACTION_MOVE,
 	ACTION_COUNT,
 	ACTION_CUSTOM,
 	ACTION_REBUILD,
