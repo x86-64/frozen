@@ -115,7 +115,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/storage/pointers/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \

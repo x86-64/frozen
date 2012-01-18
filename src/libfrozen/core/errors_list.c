@@ -49,7 +49,6 @@ static err_item errs_list[] = {
  { -139321, "src/libfrozen/machines/machine/factory/factory.c: child creation error" },
  { -139294, "src/libfrozen/machines/machine/factory/factory.c: HK(config) not supplied" },
  { -139277, "src/libfrozen/machines/machine/factory/factory.c: calloc failed" },
- { -135201, "src/libfrozen/machines/storage/pointers/pointers.c: calloc returns null" },
  { -131131, "src/libfrozen/machines/index/hashtable/hashtable.c: invalid hashtable size" },
  { -131112, "src/libfrozen/machines/index/hashtable/hashtable.c: calloc failed" },
  { -127100, "src/libfrozen/machines/request/switch/switch.c: failed to configure switch" },

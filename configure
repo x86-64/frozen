@@ -861,7 +861,6 @@ enable_machineimplode
 enable_machineexplode
 enable_machineswitch
 enable_machinepass
-enable_machinepointers
 enable_machinemutex
 enable_coverage
 enable_debug
@@ -1648,8 +1647,6 @@ Optional Features:
   --disable-machine-switch
                           disable machine switch
   --disable-machine-pass  disable machine pass
-  --disable-machine-pointers
-                          disable machine pointers
   --disable-machine-mutex disable machine mutex
   --enable-coverage       enable coverage testing
   --enable-debug          compile with debug symbols
@@ -20765,43 +20762,6 @@ fi
 		MACHINE_MAKEFILE_shop_pass=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/pass/libfrozen_machine_pass.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinepointers was given.
-if test "${enable_machinepointers+set}" = set; then :
-  enableval=$enable_machinepointers;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinepointers}" = "yes"; then
-			enable_machinepointers="no"
-		else
-			enable_machinepointers="yes"
-		fi
-	fi
-
-	if test "${enable_machinepointers}" = "yes"; then
-		MACHINE_DIR_pointers="storage/pointers"
-		MACHINE_DEP_pointers=""
-				MACHINE_SELECTED="$MACHINE_SELECTED pointers"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_storage_pointers" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/storage/pointers/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS storage/pointers"
-
-		MACHINE_MAKEFILE_storage_pointers=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED storage/pointers/libfrozen_machine_pointers.la"
 
 	fi
 
