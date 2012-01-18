@@ -42,7 +42,6 @@ extern machine_t implode_proto;
 extern machine_t explode_proto;
 extern machine_t switch_proto;
 extern machine_t pass_proto;
-extern machine_t file_proto;
 extern machine_t pointers_proto;
 extern machine_t mutex_proto;
 #ifdef MACHINE_C
@@ -88,7 +87,6 @@ machine_t * machine_protos[] = {
    &explode_proto,
    &switch_proto,
    &pass_proto,
-   &file_proto,
    &pointers_proto,
    &mutex_proto,
 };

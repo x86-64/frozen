@@ -75,6 +75,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/cache/cache_append/config.m4 \
@@ -110,7 +111,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/storage/pointers/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
 	$(top_srcdir)/configure.ac

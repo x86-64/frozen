@@ -51,8 +51,6 @@
 #define HK_VALUE_folder 9747
 #define HK_VALUE_force_async 53994
 #define HK_VALUE_force_sync 41290
-#define HK_VALUE_forced 9281
-#define HK_VALUE_fork 3284
 #define HK_VALUE_fork_only 31758
 #define HK_VALUE_format 9917
 #define HK_VALUE_function 22303
@@ -63,7 +61,6 @@
 #define HK_VALUE_hash_ptr_inline 131665
 #define HK_VALUE_hash_ptr_null 89234
 #define HK_VALUE_headers 15245
-#define HK_VALUE_homedir 15011
 #define HK_VALUE_http_req 22064
 #define HK_VALUE_http_resp 31264
 #define HK_VALUE_icase 5739
@@ -216,8 +213,6 @@ typedef enum hashkey_t {
       HK_folder = HK_VALUE_folder, 
       HK_force_async = HK_VALUE_force_async, 
       HK_force_sync = HK_VALUE_force_sync, 
-      HK_forced = HK_VALUE_forced, 
-      HK_fork = HK_VALUE_fork, 
       HK_fork_only = HK_VALUE_fork_only, 
       HK_format = HK_VALUE_format, 
       HK_function = HK_VALUE_function, 
@@ -228,7 +223,6 @@ typedef enum hashkey_t {
       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
       HK_headers = HK_VALUE_headers, 
-      HK_homedir = HK_VALUE_homedir, 
       HK_http_req = HK_VALUE_http_req, 
       HK_http_resp = HK_VALUE_http_resp, 
       HK_icase = HK_VALUE_icase, 
@@ -385,8 +379,6 @@ keypair_t hashkeys[] = {
       { "folder", HK_VALUE_folder }, 
       { "force_async", HK_VALUE_force_async }, 
       { "force_sync", HK_VALUE_force_sync }, 
-      { "forced", HK_VALUE_forced }, 
-      { "fork", HK_VALUE_fork }, 
       { "fork_only", HK_VALUE_fork_only }, 
       { "format", HK_VALUE_format }, 
       { "function", HK_VALUE_function }, 
@@ -397,7 +389,6 @@ keypair_t hashkeys[] = {
       { "hash_ptr_inline", HK_VALUE_hash_ptr_inline }, 
       { "hash_ptr_null", HK_VALUE_hash_ptr_null }, 
       { "headers", HK_VALUE_headers }, 
-      { "homedir", HK_VALUE_homedir }, 
       { "http_req", HK_VALUE_http_req }, 
       { "http_resp", HK_VALUE_http_resp }, 
       { "icase", HK_VALUE_icase }, 

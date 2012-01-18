@@ -4,8 +4,7 @@ START_TEST (test_machines){
 	
 	hash_t  settings[] = {
                 { 0, DATA_HASHT(
-                        { HK(class),       DATA_STRING("file")                     },
-                        { HK(filename),    DATA_STRING("data_machine_file.dat")    },
+                        { HK(class),       DATA_STRING("end")                      },
                         hash_end
                 )},
                 hash_end

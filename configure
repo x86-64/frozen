@@ -817,6 +817,7 @@ enable_emitter_t
 enable_env_t
 enable_random_t
 enable_container_t
+enable_file_t
 enable_memory_t
 enable_raw_t
 enable_machinecache
@@ -860,7 +861,6 @@ enable_machineimplode
 enable_machineexplode
 enable_machineswitch
 enable_machinepass
-enable_machinefile
 enable_machinepointers
 enable_machinemutex
 enable_coverage
@@ -1578,6 +1578,7 @@ Optional Features:
   --disable-data-random_t disable data random_t
   --disable-data-container_t
                           disable data container_t
+  --disable-data-file_t   disable data file_t
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
   --disable-machine-cache disable machine cache
@@ -1647,7 +1648,6 @@ Optional Features:
   --disable-machine-switch
                           disable machine switch
   --disable-machine-pass  disable machine pass
-  --disable-machine-file  disable machine file
   --disable-machine-pointers
                           disable machine pointers
   --disable-machine-mutex disable machine mutex
@@ -19149,6 +19149,43 @@ fi
 
 
 
+	# Check whether --enable-file_t was given.
+if test "${enable_file_t+set}" = set; then :
+  enableval=$enable_file_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_file_t}" = "yes"; then
+			enable_file_t="no"
+		else
+			enable_file_t="yes"
+		fi
+	fi
+
+	if test "${enable_file_t}" = "yes"; then
+		DATA_DIR_file_t="storage/file"
+		DATA_DEP_file_t="hash_t format_t uint_t string_t"
+		DATA_ID_file_t=""
+		DATA_SELECTED="$DATA_SELECTED file_t"
+		DATA_HEADERS="$DATA_HEADERS storage/file/file_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_storage_file" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/storage/file/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS storage/file"
+
+		DATA_MAKEFILE_storage_file=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/file/libfrozen_data_file.la"
+
+	fi
+
+
+
+
+
+
 	# Check whether --enable-memory_t was given.
 if test "${enable_memory_t+set}" = set; then :
   enableval=$enable_memory_t;
@@ -20728,43 +20765,6 @@ fi
 		MACHINE_MAKEFILE_shop_pass=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/pass/libfrozen_machine_pass.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinefile was given.
-if test "${enable_machinefile+set}" = set; then :
-  enableval=$enable_machinefile;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinefile}" = "yes"; then
-			enable_machinefile="no"
-		else
-			enable_machinefile="yes"
-		fi
-	fi
-
-	if test "${enable_machinefile}" = "yes"; then
-		MACHINE_DIR_file="storage/file"
-		MACHINE_DEP_file=""
-				MACHINE_SELECTED="$MACHINE_SELECTED file"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_storage_file" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/storage/file/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS storage/file"
-
-		MACHINE_MAKEFILE_storage_file=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED storage/file/libfrozen_machine_file.la"
 
 	fi
 
