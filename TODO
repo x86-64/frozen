@@ -9,6 +9,7 @@
   - shop_call
   - shop_return
 
+- review hash_copy'ing of configuration, switch to "consume input config" mode?
 - broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api
 - broken mphf
 - test file_t, allocator_*_t
