@@ -142,7 +142,7 @@ static int zmqb_configure(machine_t *machine, config_t *config){ // {{{
 	}
 	return 0;
 } // }}}
-
+/*
 static ssize_t zmqb_fast_handler(machine_t *machine, fastcall_header *hargs){ // {{{
 	void                  *data;
 	size_t                 data_size;
@@ -196,6 +196,7 @@ static ssize_t zmqb_fast_handler(machine_t *machine, fastcall_header *hargs){ //
 	}
 	return -ENOSYS;
 } // }}}
+*/
 /*static ssize_t zmqb_io_t_multipart_handler(data_t *io_data, void *io_userdata, void *args){ // {{{
 	void                  *data;
 	zmq_msg_t              zmq_msg;
@@ -215,7 +216,8 @@ static ssize_t zmqb_fast_handler(machine_t *machine, fastcall_header *hargs){ //
 	return 0;
 } // }}}*/
 static ssize_t zmqb_io_t_handler(data_t *data, void *userdata, void *args){ // {{{
-	return zmqb_fast_handler((machine_t *)userdata, args);
+	return -ENOSYS;
+	//return zmqb_fast_handler((machine_t *)userdata, args);
 } // }}}
 static void zmq_buffer_free(void *data, void *hint){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
@@ -280,16 +282,13 @@ static ssize_t zmqb_handler(machine_t *machine, request_t *request){ // {{{
 
 static machine_t zmq_proto = {                 // NOTE need static or unique name
 	.class          = "modules/c_zmq",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = &zmqb_init,
 	.func_configure = &zmqb_configure,
 	.func_destroy   = &zmqb_destroy,
 	.machine_type_hash = {
 		.func_handler = &zmqb_handler
 	},
-	.machine_type_fast = {
-		.func_handler = (f_fast_func)&zmqb_fast_handler
-	}
 };
 
 int main(void){

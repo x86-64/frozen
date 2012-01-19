@@ -70,63 +70,6 @@ void               class_unregister        (machine_t *proto){ // {{{
 	list_delete(&classes, proto);
 } // }}}
 
-static ssize_t     request_downgrade(machine_t *machine, fastcall_header *hargs){ // {{{
-	ssize_t q_ret = 0, b_ret;
-	
-	switch(hargs->action){
-		case ACTION_CREATE:;
-			request_t  r_create[] = {
-				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                    },
-				{ HK(size),       DATA_PTR_UINTT( &((fastcall_create *)hargs)->size   ) },
-				{ HK(offset_out), DATA_PTR_UINTT( &((fastcall_create *)hargs)->offset ) },
-				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                },
-				hash_end
-			};
-			if( (b_ret = machine_query(machine, r_create)) < 0)
-				return b_ret;
-			break;
-
-		case ACTION_READ:
-		case ACTION_WRITE:;
-			request_t  r_io[] = {
-				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                       },
-				{ HK(offset),     DATA_PTR_UINTT( &((fastcall_io *)hargs)->offset        ) },
-				{ HK(buffer),     DATA_RAW( ((fastcall_io *)hargs)->buffer, ((fastcall_io *)hargs)->buffer_size ) },
-				{ HK(size),       DATA_PTR_UINTT( &((fastcall_io *)hargs)->buffer_size   ) },
-				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                   },
-				hash_end
-			};
-			if( (b_ret = machine_query(machine, r_io)) < 0)
-				return b_ret;
-			break;
-		
-		case ACTION_DELETE:;
-			request_t  r_delete[] = {
-				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                    },
-				{ HK(offset),     DATA_PTR_UINTT( &((fastcall_delete *)hargs)->offset ) },
-				{ HK(size),       DATA_PTR_UINTT( &((fastcall_delete *)hargs)->size   ) },
-				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                },
-				hash_end
-			};
-			if( (b_ret = machine_query(machine, r_delete)) < 0)
-				return b_ret;
-			break;
-		
-		case ACTION_COUNT:;
-			request_t  r_count[] = {
-				{ HK(action),     DATA_PTR_UINT32T( &hargs->action )                      },
-				{ HK(buffer),     DATA_PTR_UINTT( &((fastcall_count *)hargs)->nelements ) },
-				{ HK(ret),        DATA_PTR_SIZET(&q_ret)                                  },
-				hash_end
-			};
-			if( (b_ret = machine_query(machine, r_count)) < 0)
-				return b_ret;
-			break;
-		default:
-			return -ENOSYS;
-	};
-	return q_ret;
-} // }}}
 request_t *        request_get_current(void){ // {{{
 	return (request_t *)pthread_getspecific(key_curr_request);
 } // }}}
@@ -447,29 +390,3 @@ ssize_t            machine_query        (machine_t *machine, request_t *request)
 ssize_t            machine_pass         (machine_t *machine, request_t *request){ // {{{
 	return machine_query(machine->cnext, request);
 } // }}}
-ssize_t            machine_fast_query   (machine_t *machine, void *fargs){ // {{{
-	f_fast_func            func              = NULL;
-	
-	if(machine == NULL || fargs == NULL)
-		return -ENOSYS;
-	
-	do {
-		if( (machine->supported_api & API_FAST) != 0){
-			func = machine->machine_type_fast.func_handler;
-			break;
-		}
-		// TODO API_FAST_TABLE
-		
-		// if fast api not supported by machine - downgrade fast request to hash request and do query
-		return request_downgrade(machine, fargs);
-	}while(0);
-	
-	if(func == NULL)
-		return machine_fast_pass(machine, fargs);
-	
-	return func(machine, fargs);
-} // }}}
-ssize_t            machine_fast_pass    (machine_t *machine, void *fargs){ // {{{
-	return machine_fast_query(machine->cnext, fargs);
-} // }}}
-

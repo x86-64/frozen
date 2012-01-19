@@ -127,7 +127,7 @@ typedef enum api_types {
 } api_types;
 
 typedef ssize_t (*f_crwd)      (machine_t *, request_t *);
-typedef ssize_t (*f_fast_func) (machine_t *, void *);
+typedef ssize_t (*f_fast_func) (data_t *,    void *);
 
 /*
 	ACTION(CREATE),
@@ -286,13 +286,6 @@ typedef struct fastcall_delete {
 	uintmax_t              size;
 } fastcall_delete;
 
-typedef struct fastcall_move {
-	fastcall_header        header;
-	uintmax_t              offset_from;
-	uintmax_t              offset_to;
-	uintmax_t              size;
-} fastcall_move;
-
 typedef struct fastcall_count {
 	fastcall_header        header;
 	uintmax_t              nelements;
@@ -316,5 +309,8 @@ typedef struct fastcall_query {
 } fastcall_query;
 
 extern uintmax_t fastcall_nargs[];
+
+ssize_t     data_hash_query(data_t *data, request_t *request);
+ssize_t     machine_fast_query(machine_t *machine, void *hargs);
 
 #endif

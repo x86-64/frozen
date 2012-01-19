@@ -117,7 +117,7 @@ static int tcp_configure(machine_t *machine, hash_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t tcp_fast_handler(machine_t *machine, void *hargs){ // {{{
+static ssize_t tcp_handler(machine_t *machine, request_t *request){ // {{{
 	int                    socket;
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
 	
@@ -138,28 +138,16 @@ static ssize_t tcp_fast_handler(machine_t *machine, void *hargs){ // {{{
 	
 	return 0;
 } // }}}
-static ssize_t tcp_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
-	uintmax_t              action;
-	
-	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
-	
-	fastcall_header r_fast = { 2, action };
-	return tcp_fast_handler(machine, &r_fast);
-} // }}}
 
 machine_t tcp_proto = {
 	.class          = "io/tcp",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = &tcp_init,
 	.func_configure = &tcp_configure,
 	.func_destroy   = &tcp_destroy,
 	.machine_type_hash = {
 		.func_handler  = &tcp_handler
 	},
-	.machine_type_fast = {
-		.func_handler  = &tcp_fast_handler
-	}
 };
 
 static int tcp_child_init(machine_t *machine){ // {{{
@@ -192,12 +180,6 @@ static int tcp_child_destroy(machine_t *machine){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t tcp_child_fast_handler(machine_t *machine, fastcall_header *hargs){ // {{{
-	tcp_child_userdata    *userdata          = (tcp_child_userdata *)machine->userdata;
-	data_t                 fdt               = DATA_FDT(userdata->socket, 0);
-	
-	return data_query(&fdt, hargs);
-} // }}}
 static ssize_t tcp_child_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
@@ -228,13 +210,10 @@ static ssize_t tcp_child_handler(machine_t *machine, request_t *request){ // {{{
 
 machine_t tcp_child_proto = {
 	.class          = "io/tcp_child",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = &tcp_child_init,
 	.func_destroy   = &tcp_child_destroy,
 	.machine_type_hash = {
 		.func_handler  = &tcp_child_handler
 	},
-	.machine_type_fast = {
-		.func_handler  = (f_fast_func)&tcp_child_fast_handler
-	}
 };

@@ -129,10 +129,7 @@ API void            machine_destroy         (machine_t *machine); ///< Destroy m
 API ssize_t         machine_is_ghost        (machine_t *machine);
 
 API ssize_t         machine_query           (machine_t *machine, request_t *request); ///< Query machine with hash request
-API ssize_t         machine_fast_query      (machine_t *machine, void *args); ///< Query machine with fast request
-
 API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
-API ssize_t         machine_fast_pass       (machine_t *machine, void *args); ///< Pass fast request to next machines in shop. @param machine Current machine
 
 /** @brief Create new shop.
  *

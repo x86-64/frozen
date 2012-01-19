@@ -168,7 +168,7 @@ static machine_t mongrel2_reply_proto = {
 		.func_handler = &mongrel2_reply_handler
 	},
 };
-
+/*
 static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs){ // {{{
 	char                  *p, *uuid_p, *connid_p, *path_p, *header_p, *body_p, *e;
 	uintmax_t                  uuid_l,  connid_l,  path_l,  header_l,  body_l;
@@ -208,13 +208,10 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs
 	
 	return machine_pass(machine, request);
 } // }}}
-
+*/
 static machine_t mongrel2_parse_proto = {
 	.class          = "modules/c_mongrel2_parse",
-	.supported_api  = API_FAST,
-	.machine_type_fast = {
-		.func_handler = (f_fast_func)&mongrel2_parse_handler
-	},
+	.supported_api  = API_HASH,
 };
 
 int main(void){

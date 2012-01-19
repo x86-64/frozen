@@ -161,8 +161,13 @@ static int thread_configure(machine_t *machine, config_t *config){ // {{{
 	return 0;
 } // }}}
 
-static ssize_t thread_fast_handler(machine_t *machine, fastcall_header *hargs){ // {{{
-	switch(hargs->action){
+static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
+	uintmax_t              action;
+	
+	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
+	
+	switch(action){
 		case ACTION_START: return thread_control_start(machine);
 		case ACTION_STOP:  return thread_control_stop(machine);
 		default:
@@ -170,27 +175,15 @@ static ssize_t thread_fast_handler(machine_t *machine, fastcall_header *hargs){ 
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
-	uintmax_t              action;
-	
-	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
-	
-	fastcall_header r_fast = { 2, action };
-	return thread_fast_handler(machine, &r_fast);
-} // }}}
 
 machine_t thread_proto = {
 	.class          = "daemon/thread",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = thread_init,
 	.func_destroy   = thread_destroy,
 	.func_configure = thread_configure,
 	.machine_type_hash = {
 		.func_handler = &thread_handler
 	},
-	.machine_type_fast = {
-		.func_handler = (f_fast_func)&thread_fast_handler
-	}
 };
 

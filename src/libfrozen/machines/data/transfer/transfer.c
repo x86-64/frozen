@@ -70,21 +70,15 @@ static ssize_t transfer_handler(machine_t *machine, request_t *request){ // {{{
 	fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_destination };
 	return data_query(&d_source, &r_transfer);
 } // }}}
-static ssize_t transfer_fast_handler(machine_t *machine, void *hargs){ // {{{
-	return transfer_handler(machine, NULL);
-} // }}}
 
 machine_t transfer_proto = {
 	.class          = "data/transfer",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = &transfer_init,
 	.func_configure = &transfer_configure,
 	.func_destroy   = &transfer_destroy,
 	.machine_type_hash = {
 		.func_handler = &transfer_handler
-	},
-	.machine_type_fast = {
-		.func_handler = &transfer_fast_handler
 	}
 };
 

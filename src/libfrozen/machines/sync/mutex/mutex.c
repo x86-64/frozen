@@ -66,28 +66,14 @@ static ssize_t mutex_request(machine_t *machine, request_t *request){ // {{{
 	pthread_mutex_unlock(&userdata->mutex);
 	return ret;
 } // }}}
-static ssize_t mutex_fast_request(machine_t *machine, void *hargs){ // {{{
-	ssize_t                ret;
-	mutex_userdata        *userdata          = (mutex_userdata *)machine->userdata;
-	
-	pthread_mutex_lock(&userdata->mutex);
-		
-		ret = machine_fast_pass(machine, hargs);
-	
-	pthread_mutex_unlock(&userdata->mutex);
-	return ret;
-} // }}}
 
 machine_t mutex_proto = {
 	.class          = "sync/mutex",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.func_init      = &mutex_init,
 	.func_destroy   = &mutex_destroy,
 	.machine_type_hash = {
 		.func_handler = &mutex_request
 	},
-	.machine_type_fast = {
-		.func_handler = &mutex_fast_request
-	}
 };
 

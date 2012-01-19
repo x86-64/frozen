@@ -70,7 +70,7 @@ static ssize_t data_machine_t_free(data_t *data, fastcall_free *fargs){ // {{{
 static ssize_t data_machine_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
 	ssize_t                ret;
 	
-	if( (ret = machine_fast_query((machine_t *)data->ptr, fargs)) == -ENOSYS){
+	if( (ret = machine_fast_query((machine_t *)data->ptr, (fastcall_header *)fargs)) == -ENOSYS){
 		// no fastcall transfer support avaliable, use default_t handler
 		
 		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(clean) };

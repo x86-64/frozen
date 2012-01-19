@@ -26,19 +26,12 @@ static ssize_t kill_handler(machine_t *machine, request_t *request){ // {{{
 	kill(getpid(), SIGTERM);
 	return 0;
 } // }}}
-static ssize_t kill_fast_handler(machine_t *machine, void *hargs){ // {{{
-	kill(getpid(), SIGTERM);
-	return 0;
-} // }}}
 
 machine_t kill_proto = {
 	.class          = "daemon/kill",
-	.supported_api  = API_HASH | API_FAST,
+	.supported_api  = API_HASH,
 	.machine_type_hash = {
 		.func_handler = &kill_handler
-	},
-	.machine_type_fast = {
-		.func_handler = &kill_fast_handler
 	}
 };
 
