@@ -110,9 +110,6 @@ static int mphf_destroy(machine_t *machine){ // {{{
 static int mphf_configure(machine_t *machine, config_t *config){ // {{{
 	return mphf_configure_any(machine, config, NULL);
 } // }}}
-static int mphf_fork(machine_t *machine, machine_t *parent, request_t *request){ // {{{
-	return mphf_configure_any(machine, machine->config, request);
-} // }}}
 
 static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t               ret;
@@ -202,7 +199,6 @@ machine_t mphf_proto = {
 	.supported_api  = API_HASH,
 	.func_init      = &mphf_init,
 	.func_configure = &mphf_configure,
-	.func_fork      = &mphf_fork,
 	.func_destroy   = &mphf_destroy,
 	.machine_type_hash = {
 		.func_handler = &mphf_handler

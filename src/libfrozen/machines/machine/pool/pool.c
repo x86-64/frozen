@@ -474,16 +474,6 @@ static int pool_configure(machine_t *machine, config_t *config){ // {{{
 	
 	return pool_configure_any(machine, NULL, config);
 } // }}}
-static int pool_fork(machine_t *machine, machine_t *parent, config_t *config){ // {{{
-	pool_userdata        *userdata_parent   = (pool_userdata *)parent->userdata;
-	pool_userdata        *userdata          = (pool_userdata *)machine->userdata;
-	
-	// have fork, so use parent data
-	userdata->perfork_childs       = &userdata_parent->perfork_childs_own;
-	list_add(userdata->perfork_childs, machine);
-	
-	return pool_configure_any(machine, parent, machine->config);
-} // }}}
 
 static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *request){ // {{{
 	uintmax_t              time_curr;
@@ -510,7 +500,6 @@ machine_t pool_proto = {
 	.supported_api  = API_CRWD,
 	.func_init      = &pool_init,
 	.func_configure = &pool_configure,
-	.func_fork      = &pool_fork,
 	.func_destroy   = &pool_destroy
 };
 
