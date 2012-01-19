@@ -827,6 +827,7 @@ enable_machinekill
 enable_machinethread
 enable_machineconvert
 enable_machineincapsulate
+enable_machinequery
 enable_machineregexp
 enable_machinesplit
 enable_machinestruct_pack
@@ -1592,6 +1593,7 @@ Optional Features:
                           disable machine convert
   --disable-machine-incapsulate
                           disable machine incapsulate
+  --disable-machine-query disable machine query
   --disable-machine-regexp
                           disable machine regexp
   --disable-machine-split disable machine split
@@ -19511,6 +19513,43 @@ fi
 		MACHINE_MAKEFILE_data_incapsulate=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/incapsulate/libfrozen_machine_incapsulate.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinequery was given.
+if test "${enable_machinequery+set}" = set; then :
+  enableval=$enable_machinequery;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinequery}" = "yes"; then
+			enable_machinequery="no"
+		else
+			enable_machinequery="yes"
+		fi
+	fi
+
+	if test "${enable_machinequery}" = "yes"; then
+		MACHINE_DIR_query="data/query"
+		MACHINE_DEP_query=""
+				MACHINE_SELECTED="$MACHINE_SELECTED query"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_data_query" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/query/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/query"
+
+		MACHINE_MAKEFILE_data_query=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/query/libfrozen_machine_query.la"
 
 	fi
 

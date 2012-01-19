@@ -9,10 +9,6 @@
   - shop_call
   - shop_return
 
-- machine data/query (stubs for data querying and using it in flow)
-  - move downgrade request to api.c
-  - write upgrade request
-
 - broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api. Need some api/switch, now!
 
 - join physical and logical length into one
@@ -25,9 +21,6 @@
 - fix broken slice_t hash_dump's
 - rewrite file_t to use fd_t
 
-- action definitions via m4 and documentation
-- rewrite up- and down-grade request to use m4'ed definitions
-
 - review code for multi-threading support, document machine's thread-safety capabilities
 - machine thread_pool
 - machine multi_request
@@ -39,3 +32,5 @@
 
 - pcre
 - libev
+
+- actions documentation

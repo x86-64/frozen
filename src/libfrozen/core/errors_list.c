@@ -4,6 +4,8 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -217144, "src/libfrozen/machines/data/query/query.c: data not supplied" },
+ { -217127, "src/libfrozen/machines/data/query/query.c: calloc failed" },
  { -208994, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad underlying storage" },
  { -208987, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item size" },
  { -208980, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item_sample" },
@@ -22,8 +24,8 @@ static err_item errs_list[] = {
  { -184359, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_init failed" },
  { -184356, "src/libfrozen/machines/sync/mutex/mutex.c: calloc failed" },
  { -180264, "src/libfrozen/machines/request/assign/assign.c: calloc returns null" },
- { -176305, "src/libfrozen/machines/io/tcp/tcp.c: pthread_setspecific error" },
- { -176298, "src/libfrozen/machines/io/tcp/tcp.c: calloc failed" },
+ { -176293, "src/libfrozen/machines/io/tcp/tcp.c: pthread_setspecific error" },
+ { -176286, "src/libfrozen/machines/io/tcp/tcp.c: calloc failed" },
  { -176265, "src/libfrozen/machines/io/tcp/tcp.c: shop_new error" },
  { -176262, "src/libfrozen/machines/io/tcp/tcp.c: pthread_setspecific error" },
  { -176259, "src/libfrozen/machines/io/tcp/tcp.c: pthread_setspecific error" },
