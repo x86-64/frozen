@@ -181,31 +181,10 @@ static int tcp_child_destroy(machine_t *machine){ // {{{
 } // }}}
 
 static ssize_t tcp_child_handler(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
-	uintmax_t              action;
-	data_t                *buffer;
 	tcp_child_userdata    *userdata          = (tcp_child_userdata *)machine->userdata;
 	data_t                 fdt               = DATA_FDT(userdata->socket, 0);
 	
-	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
-	if(ret != 0)
-		return -EINVAL;
-	
-	switch(action){
-		case ACTION_READ:;
-			buffer = hash_data_find(request, HK(buffer));
-			fastcall_transfer r_transfer1 = { { 3, ACTION_TRANSFER }, buffer };
-			return data_query(&fdt, &r_transfer1 );
-			
-		case ACTION_WRITE:;
-			buffer = hash_data_find(request, HK(buffer));
-			fastcall_transfer r_transfer2 = { { 3, ACTION_TRANSFER }, &fdt };
-			return data_query(buffer, &r_transfer2 );
-			
-		default:
-			break;
-	}
-	return -ENOSYS;
+	return data_hash_query(&fdt, request);
 } // }}}
 
 machine_t tcp_child_proto = {
