@@ -137,6 +137,25 @@ ssize_t     action_count_fast(data_t *data, request_t *request){ // {{{
 	return ret;
 } // }}}
 
+ssize_t     action_transfer_hash(machine_t *machine, fastcall_transfer *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),      DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(destination), *fargs->dest                                         },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_transfer_fast(data_t *data, request_t *request){ // {{{
+	data_t                *destination;
+	
+	if( (destination = hash_data_find(request, HK(destination))) == NULL)
+		return -EINVAL;
+	
+	fastcall_transfer      fargs             = { { 3, ACTION_TRANSFER }, destination };
+	return data_query(data, &fargs);
+} // }}}
+
+
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	action_t               action;
@@ -202,6 +221,7 @@ f_data_hash  api_data_hash[ACTION_INVALID] = {
 	[ACTION_WRITE]  = (f_data_hash)&action_io_hash,
 	[ACTION_DELETE] = (f_data_hash)&action_delete_hash,
 	[ACTION_COUNT]  = (f_data_hash)&action_count_hash,
+	[ACTION_TRANSFER] = (f_data_hash)&action_transfer_hash,
 };
 
 f_machine_fast api_machine_fast[ACTION_INVALID] = {
@@ -210,5 +230,6 @@ f_machine_fast api_machine_fast[ACTION_INVALID] = {
 	[ACTION_WRITE]  = (f_machine_fast)&action_write_fast,
 	[ACTION_DELETE] = (f_machine_fast)&action_delete_fast,
 	[ACTION_COUNT]  = (f_machine_fast)&action_count_fast,
+	[ACTION_TRANSFER] = (f_machine_fast)&action_transfer_fast,
 };
 
