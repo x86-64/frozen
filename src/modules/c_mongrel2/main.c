@@ -168,17 +168,23 @@ static machine_t mongrel2_reply_proto = {
 		.func_handler = &mongrel2_reply_handler
 	},
 };
-/*
-static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs){ // {{{
+
+static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ // {{{
+	data_t                *buffer;
 	char                  *p, *uuid_p, *connid_p, *path_p, *header_p, *body_p, *e;
 	uintmax_t                  uuid_l,  connid_l,  path_l,  header_l,  body_l;
-	fastcall_write        *wargs             = (fastcall_write *)hargs;
 	
-	if(hargs->action != ACTION_WRITE)
-		return -ENOSYS;
+	if( (buffer = hash_data_find(request, HK(buffer))) == NULL )
+		return -EINVAL;
 	
-	p = wargs->buffer;
-	e = wargs->buffer + wargs->buffer_size;
+	// little hack here, parsing real data would be difficult, so we accept only "plain" memory chunks
+	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	if( data_query(buffer, &r_len) != 0 || data_query(buffer, &r_ptr) != 0 || r_ptr.ptr == NULL)
+		return -EINVAL;
+	
+	p = r_ptr.ptr;
+	e = r_ptr.ptr + r_len.length;
 	
 	     uuid_p   = p;
 	if( (connid_p = memchr(p, ' ', (e-p))) == NULL) return -EINVAL; uuid_l   = connid_p - uuid_p;   p = ++connid_p;
@@ -195,23 +201,24 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, fastcall_header *hargs
 	if( (body_p   = memchr(body_p,   ':', (e-body_p))) == NULL) return -EINVAL; body_p++;
 	if(body_l >= (e-body_p)) return -EINVAL;
 	
-	request_t request[] = {
+	request_t r_next[] = {
 		{ HK(uuid),     DATA_RAW(uuid_p,   uuid_l)   },
 		{ HK(clientid), DATA_RAW(connid_p, connid_l) },
 		{ HK(path),     DATA_RAW(path_p,   path_l)   },
 		{ HK(headers),  DATA_RAW(header_p, header_l) },
 		{ HK(body),     DATA_RAW(body_p,   body_l)   },
-		
-		{ HK(action),   DATA_UINTT(ACTION_WRITE)     },
 		hash_end
 	};
 	
-	return machine_pass(machine, request);
+	return machine_pass(machine, r_next);
 } // }}}
-*/
+
 static machine_t mongrel2_parse_proto = {
 	.class          = "modules/c_mongrel2_parse",
 	.supported_api  = API_HASH,
+	.machine_type_hash = {
+		.func_handler = &mongrel2_parse_handler,
+	}
 };
 
 int main(void){
