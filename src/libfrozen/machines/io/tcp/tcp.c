@@ -96,12 +96,15 @@ static int tcp_init(machine_t *machine){ // {{{
 	if((userdata = machine->userdata = calloc(1, sizeof(tcp_userdata))) == NULL)
 		return error("calloc failed");
 	
-	userdata->tcp_addr = "127.0.0.1";
+	userdata->tcp_addr = strdup("127.0.0.1");
 	return 0;
 } // }}}
 static int tcp_destroy(machine_t *machine){ // {{{
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
-
+	
+	if(userdata->tcp_addr)
+		free(userdata->tcp_addr);
+	
 	free(userdata);
 	return 0;
 } // }}}
@@ -109,9 +112,9 @@ static int tcp_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_STRINGT, userdata->tcp_addr, config, HK(addr));
-	hash_data_get(ret, TYPE_UINTT,   userdata->tcp_port, config, HK(port));
-	hash_data_get(ret, TYPE_HASHT,   userdata->machine,  config, HK(machine));
+	hash_data_consume(ret, TYPE_STRINGT, userdata->tcp_addr, config, HK(addr));
+	hash_data_get    (ret, TYPE_UINTT,   userdata->tcp_port, config, HK(port));
+	hash_data_get    (ret, TYPE_HASHT,   userdata->machine,  config, HK(machine));
 	
 	tcp_control_start(machine);
 	return 0;

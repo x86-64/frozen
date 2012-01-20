@@ -52,6 +52,7 @@ static int convert_init(machine_t *machine){ // {{{
 static int convert_destroy(machine_t *machine){ // {{{
 	convert_userdata        *userdata          = (convert_userdata *)machine->userdata;
 	
+	hash_free(userdata->items);
 	free(userdata);
 	return 0;
 } // }}}
@@ -59,7 +60,7 @@ static int convert_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	convert_userdata      *userdata          = (convert_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_HASHT,    userdata->items,        config, HK(items));
+	hash_data_consume(ret, TYPE_HASHT,    userdata->items,        config, HK(items));
 	return 0;
 } // }}}
 

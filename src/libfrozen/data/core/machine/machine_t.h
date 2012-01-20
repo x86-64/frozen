@@ -25,6 +25,6 @@
 #define DATA_NEXT_MACHINET(_machine) { TYPE_MACHINET, _machine->cnext }
 #define DEREF_TYPE_MACHINET(_data) (machine_t *)((_data)->ptr)
 #define REF_TYPE_MACHINET(_dt) _dt
-#define HAVEBUFF_TYPE_MACHINET 1
+#define HAVEBUFF_TYPE_MACHINET 0
 
 #endif

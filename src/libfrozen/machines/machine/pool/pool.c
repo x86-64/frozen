@@ -416,30 +416,30 @@ static int pool_configure_any(machine_t *machine, machine_t *parent, config_t *c
 	hash_data_get(ret, TYPE_STRINGT, cfg_act_global,   config, HK(action_global));
 	
 	// requests
-	hash_data_get(ret, TYPE_HASHT,   cfg_param_req,    config, HK(parameter_request));
+	hash_data_consume(ret, TYPE_HASHT,   cfg_param_req,    config, HK(parameter_request));
 	
-	hash_data_get(ret, TYPE_HASHT,   cfg_act_req,      config, HK(action_request));
+	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req,      config, HK(action_request));
 	cfg_act_req_one = cfg_act_req;
 	cfg_act_req_frk = cfg_act_req;
 	cfg_act_req_glb = cfg_act_req;
-	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_one,  config, HK(action_request_one));
-	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_frk,  config, HK(action_request_perfork));
-	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_glb,  config, HK(action_request_global));
+	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req_one,  config, HK(action_request_one));
+	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req_frk,  config, HK(action_request_perfork));
+	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req_glb,  config, HK(action_request_global));
 	
 	hash_data_get(ret, TYPE_UINTT,   cfg_pool,         config, HK(pool_interval));
 	if(ret != 0)
 		pool_interval = cfg_pool;
 	
 	userdata->parameter                   = pool_string_to_parameter(cfg_parameter);
-	userdata->parameter_request           = hash_copy(cfg_param_req);
+	userdata->parameter_request           = cfg_param_req ? cfg_param_req : hash_copy(cfg_act_req_def);
 	userdata->rule_perfork.mode           = pool_string_to_method(cfg_mode_perfork);
 	userdata->rule_global.mode            = pool_string_to_method(cfg_mode_global);
 	userdata->rule_one.action             = pool_string_to_action(cfg_act_perfork);
 	userdata->rule_perfork.action         = pool_string_to_action(cfg_act_perfork);
 	userdata->rule_global.action          = pool_string_to_action(cfg_act_global);
-	userdata->rule_one.action_request     = hash_copy(cfg_act_req_one);
-	userdata->rule_perfork.action_request = hash_copy(cfg_act_req_frk);
-	userdata->rule_global.action_request  = hash_copy(cfg_act_req_glb);
+	userdata->rule_one.action_request     = cfg_act_req_one;
+	userdata->rule_perfork.action_request = cfg_act_req_frk;
+	userdata->rule_global.action_request  = cfg_act_req_glb;
 	userdata->tick_interval               = cfg_tick;
 	userdata->created_on                  = time(NULL);
 	

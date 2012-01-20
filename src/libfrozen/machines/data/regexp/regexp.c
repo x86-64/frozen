@@ -134,7 +134,8 @@ static int regexp_destroy(machine_t *machine){ // {{{
 	
 	if(userdata->regexp_str)
 		free(userdata->regexp_str);
-
+	
+	hash_free(userdata->capture);
 	free(userdata);
 	return 0;
 } // }}}
@@ -151,7 +152,7 @@ static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	config_updateflag(config, HK(notbol),   REG_NOTBOL,   &userdata->eflags);
 	config_updateflag(config, HK(noteol),   REG_NOTEOL,   &userdata->eflags);
 	
-	hash_data_get(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
+	hash_data_consume(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
 	userdata->ncaptures = hash_nelements(userdata->capture); // nelements return 0 on null hash, 1 on hash_end, 2 on element + hash_end, so on
 	if(userdata->ncaptures > 1){
 		userdata->ncaptures--;

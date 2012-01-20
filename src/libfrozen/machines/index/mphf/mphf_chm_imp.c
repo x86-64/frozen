@@ -204,22 +204,19 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 		hash_data_get(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to data
 		hash_data_get(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
-		hash_data_get(ret, TYPE_MACHINET, be_g,         mphf->config, HK(machine_g));
-		hash_data_get(ret, TYPE_MACHINET, be_v,         mphf->config, HK(machine_g));
-		hash_data_get(ret, TYPE_MACHINET, be_e,         mphf->config, HK(machine_g));
+		hash_data_consume(ret, TYPE_MACHINET, data->be_g,         mphf->config, HK(machine_g));
+		hash_data_consume(ret, TYPE_MACHINET, data->be_v,         mphf->config, HK(machine_g));
+		hash_data_consume(ret, TYPE_MACHINET, data->be_e,         mphf->config, HK(machine_g));
 		
-		if(be_g == NULL)
+		if(data->be_g == NULL)
 			return error("machine chm_imp parameter machine_g invalid");
 		
-		if(be_v == NULL || be_e == NULL || readonly != 0){
+		if(data->be_v == NULL || data->be_e == NULL || readonly != 0){
 			data->status &= ~WRITEABLE;
 		}else{
 			data->status |= WRITEABLE;
 		}
 		
-		data->be_g           = be_g;
-		data->be_v           = be_v;
-		data->be_e           = be_e;
 		data->nelements_min  = nelements_min;
 		data->nelements_step = nelements_step;
 		data->nelements_mul  = nelements_mul;
@@ -289,13 +286,9 @@ static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 	// save .params
 	chm_imp_param_write(mphf);
 	
-	if(data->be_g)
-		shop_destroy(data->be_g);
-	
-	if( (data->status & WRITEABLE) ){
-		shop_destroy(data->be_e);
-		shop_destroy(data->be_v);
-	}
+	shop_destroy(data->be_g);
+	shop_destroy(data->be_e);
+	shop_destroy(data->be_v);
 	return 0;
 } // }}}
 

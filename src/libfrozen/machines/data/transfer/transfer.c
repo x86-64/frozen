@@ -40,11 +40,8 @@ static int transfer_init(machine_t *machine){ // {{{
 static int transfer_destroy(machine_t *machine){ // {{{
 	transfer_userdata        *userdata          = (transfer_userdata *)machine->userdata;
 	
-	if(userdata->source)
-		shop_destroy(userdata->source);
-	if(userdata->destination)
-		shop_destroy(userdata->destination);
-	
+	shop_destroy(userdata->source);
+	shop_destroy(userdata->destination);
 	free(userdata);
 	return 0;
 } // }}}
@@ -52,8 +49,8 @@ static int transfer_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	transfer_userdata     *userdata          = (transfer_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_MACHINET,   userdata->source,        config, HK(source));
-	hash_data_get(ret, TYPE_MACHINET,   userdata->destination,   config, HK(destination));
+	hash_data_consume(ret, TYPE_MACHINET,   userdata->source,        config, HK(source));
+	hash_data_consume(ret, TYPE_MACHINET,   userdata->destination,   config, HK(destination));
 	
 	if(userdata->source == NULL || userdata->destination == NULL)
 		return error("source or destination machine invalid");

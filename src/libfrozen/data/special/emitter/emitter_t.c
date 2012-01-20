@@ -25,13 +25,11 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				fdata->allocated = 1;
 			}
 			
-			hash_data_get(ret, TYPE_MACHINET, fdata->machine, parameters, HK(machine));
-			hash_data_get(ret, TYPE_HASHT,    fdata->request, parameters, HK(request));
+			hash_data_consume(ret, TYPE_MACHINET, fdata->machine, parameters, HK(machine));
+			hash_data_consume(ret, TYPE_HASHT,    fdata->request, parameters, HK(request));
 			
-			if(fdata->machine != NULL && fdata->request != NULL){
-				fdata->request = hash_copy(fdata->request);
+			if(fdata->machine != NULL && fdata->request != NULL)
 				break;
-			}
 			
 			fdata->request = NULL;
 			// fall
@@ -39,10 +37,8 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			if(fdata == NULL)
 				return -EFAULT;
 			
-			if(fdata->machine)
-				shop_destroy(fdata->machine);
-			if(fdata->request)
-				hash_free(fdata->request);
+			shop_destroy(fdata->machine);
+			hash_free(fdata->request);
 			if(fdata->allocated)
 				free(data->ptr);
 			

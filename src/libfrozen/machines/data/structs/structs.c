@@ -65,21 +65,20 @@ static int struct_init(machine_t *machine){ // {{{
 static int struct_destroy(machine_t *machine){ // {{{
 	struct_userdata *userdata = (struct_userdata *)machine->userdata;
 	
+	hash_free(userdata->structure);
 	free(userdata);
 	return 0;
 } // }}}
 static int struct_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
-	hash_t                *struct_hash   = NULL;
 	struct_userdata       *userdata      = (struct_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_HASHT,    struct_hash,          config, HK(structure));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
-	hash_data_get(ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
+	hash_data_consume(ret, TYPE_HASHT,    userdata->structure,  config, HK(structure));
+	hash_data_get    (ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
+	hash_data_get    (ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
+	hash_data_get    (ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
+	hash_data_get    (ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
 	
-	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
 	
 	if(userdata->buffer == 0 && userdata->lazy == 0)

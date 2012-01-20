@@ -40,9 +40,7 @@ static int lookup_init(machine_t *machine){ // {{{
 static int lookup_destroy(machine_t *machine){ // {{{
 	lookup_userdata       *userdata = (lookup_userdata *)machine->userdata;
 	
-	if(userdata->machine_index != NULL)
-		shop_destroy(userdata->machine_index);
-
+	shop_destroy(userdata->machine_index);
 	free(userdata);
 	return 0;
 } // }}}
@@ -50,7 +48,7 @@ static int lookup_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	lookup_userdata       *userdata          = (lookup_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_MACHINET,  userdata->machine_index, config, HK(index));
+	hash_data_consume(ret, TYPE_MACHINET,  userdata->machine_index, config, HK(index));
 	if(ret != 0)
 		return error("supplied index machine not valid, or not found");
 	

@@ -45,6 +45,8 @@ static int morph_init(machine_t *machine){ // {{{
 } // }}}
 static int morph_destroy(machine_t *machine){ // {{{
 	morph_userdata      *userdata = (morph_userdata *)machine->userdata;
+	
+	hash_free(userdata->machine_config);
 	free(userdata);
 	return 0;
 } // }}}
@@ -52,8 +54,8 @@ static int morph_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	morph_userdata      *userdata          = (morph_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_UINTT, userdata->pass_first,     config, HK(pass_first));
-	hash_data_get(ret, TYPE_HASHT, userdata->machine_config, config, HK(config));
+	hash_data_get    (ret, TYPE_UINTT, userdata->pass_first,     config, HK(pass_first));
+	hash_data_consume(ret, TYPE_HASHT, userdata->machine_config, config, HK(config));
 	if(ret != 0)
 		return error("HK(config) not supplied");
 	

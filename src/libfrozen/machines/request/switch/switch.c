@@ -61,8 +61,8 @@ static ssize_t switch_config_iterator(hash_t *rule_item, machine_t *machine){ //
 	if(ret != 0)
 		return ITER_CONTINUE;
 	
-	hash_data_get(ret, TYPE_MACHINET, new_rule->machine, rule, HK(machine)); // converted copy of machine
-	hash_data_get(ret, TYPE_HASHT,    new_rule->request, rule, HK(request)); // ptr to config, not copy
+	hash_data_consume(ret, TYPE_MACHINET, new_rule->machine, rule, HK(machine)); // converted copy of machine
+	hash_data_consume(ret, TYPE_HASHT,    new_rule->request, rule, HK(request)); // ptr to config, not copy
 	
 	list_push(&userdata->rules, new_rule);
 	return ITER_CONTINUE;
@@ -105,8 +105,8 @@ static int switch_destroy(machine_t *machine){ // {{{
 	switch_rule           *rule;
 	
 	while( (rule = list_pop(&userdata->rules)) != NULL){
-		if(rule->machine)
-			shop_destroy(rule->machine);
+		shop_destroy(rule->machine);
+		hash_free(rule->request);
 		free(rule);
 	}
 	list_destroy(&userdata->rules);
