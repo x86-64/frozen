@@ -41,6 +41,11 @@
 
 #define EMODULE 28
 
+typedef struct fuseb_userdata {
+	char                  *mountpoint;
+	hash_t                *items;
+} fuseb_userdata;
+
 typedef enum vfs_item_type {
 	VFS_FOLDER,
 	VFS_FILE
@@ -589,46 +594,56 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	return ITER_CONTINUE;
 } // }}}
 
-static int fuseb_destroy(machine_t *machine){ // {{{
-	ssize_t                ret;
-	vfs_item              *root;
-	hash_t                *items;
-	char                  *mountpoint        = NULL;
+static int fuseb_init(machine_t *machine){ // {{{
+	ssize_t                ret               = 0;
+	fuseb_userdata        *userdata          = machine->userdata = calloc(1, sizeof(fuseb_userdata));
+	if(userdata == NULL)
+		return -ENOMEM;
 	
-	hash_data_copy(ret, TYPE_STRINGT, mountpoint,    machine->config, HK(mountpoint));
-	hash_data_copy(ret, TYPE_HASHT,   items,         machine->config, HK(items));
-
-	if( (root = vfs_find(mountpoint)) == NULL)
+	return ret;
+} // }}}
+static int fuseb_destroy(machine_t *machine){ // {{{
+	vfs_item              *root;
+	fuseb_userdata        *userdata          = machine->userdata;
+	
+	if( (root = vfs_find(userdata->mountpoint)) == NULL)
 		return 0;
 	
-	hash_iter(items, (hash_iterator)&fuseb_item_destroy, (void *)root, 0);
+	hash_iter(userdata->items, (hash_iterator)&fuseb_item_destroy, (void *)root, 0);
 	
 	if(root->childs == NULL)
 		vfs_destroy(root);
+	
+	hash_free(userdata->items);
+	free(userdata->mountpoint);
+	free(userdata);
 	return 0;
 } // }}}
 static int fuseb_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	vfs_item              *root;
-	hash_t                *items;
 	uintmax_t              multithreaded     = 0;
-	char                  *mountpoint        = NULL;
+	fuseb_userdata        *userdata          = machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, mountpoint,    config, HK(mountpoint));
-	hash_data_copy(ret, TYPE_UINTT,   multithreaded, config, HK(multithread));
-	hash_data_copy(ret, TYPE_HASHT,   items,         config, HK(items));
-
-	if( (root = vfs_find(mountpoint)) == NULL)
-		if( (root = vfs_create(mountpoint, multithreaded)) == NULL)
+	hash_data_copy   (ret, TYPE_UINTT,   multithreaded,        config, HK(multithread));
+	hash_data_consume(ret, TYPE_STRINGT, userdata->mountpoint, config, HK(mountpoint));
+	hash_data_consume(ret, TYPE_HASHT,   userdata->items,      config, HK(items));
+	
+	if(userdata->mountpoint == NULL)
+		return error("mountpoint not supplied");
+	
+	if( (root = vfs_find(userdata->mountpoint)) == NULL)
+		if( (root = vfs_create(userdata->mountpoint, multithreaded)) == NULL)
 			return error("fuse fs creation failed");
 	
-	hash_iter(items, (hash_iterator)&fuseb_item_configure, (void *)root, 0);
+	hash_iter(userdata->items, (hash_iterator)&fuseb_item_configure, (void *)root, 0);
 	return 0;
 } // }}}
 
 machine_t fuse_proto = {
 	.class          = "io/fuse",
 	.supported_api  = API_HASH,
+	.func_init      = &fuseb_init,
 	.func_configure = &fuseb_configure,
 	.func_destroy   = &fuseb_destroy
 };
