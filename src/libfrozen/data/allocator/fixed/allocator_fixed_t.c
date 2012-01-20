@@ -9,8 +9,8 @@
 typedef struct allocator_fixed_t {
 	uintmax_t              item_size;
 	uintmax_t              last_id;
-	data_t                *storage;
-	data_t                *removed_items;
+	data_t                 storage;
+	data_t                 removed_items;
 	pthread_rwlock_t       last_id_mtx;
 } allocator_fixed_t;
 
@@ -38,10 +38,8 @@ static uintmax_t allocator_getlastid(allocator_fixed_t *fdata){ // {{{
 } // }}}
 
 static void allocator_destroy(allocator_fixed_t *fdata){ // {{{
-	if(fdata->storage){
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(fdata->storage, &r_free);
-	}
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&fdata->storage, &r_free);
 	
 	pthread_rwlock_destroy(&fdata->last_id_mtx);
 	free(fdata);
@@ -57,9 +55,9 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 	pthread_rwlock_init(&fdata->last_id_mtx, NULL);
 	
 	// get removed items tracker
-	fdata->removed_items = hash_data_find(config, HK(removed_items));
-	
-	if( (fdata->storage = hash_data_find(config, HK(storage))) == NULL){
+	hash_holder_consume(ret, fdata->removed_items, config, HK(removed_items));
+	hash_holder_consume(ret, fdata->storage,       config, HK(storage));
+	if(ret != 0){
 		ret = error("invalid storage supplied");
 		goto error;
 	}
@@ -86,7 +84,7 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 	
 	// get last id
 	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	if( data_query(fdata->storage, &r_len) != 0){
+	if( data_query(&fdata->storage, &r_len) != 0){
 		ret = error("bad underlying storage");
 		goto error;
 	}
@@ -135,13 +133,13 @@ static ssize_t data_allocator_fixed_t_default(data_t *data, fastcall_header *har
 		case ACTION_CREATE:;
 			fastcall_create *r_create = (fastcall_create *)hargs;
 			
-			if(fdata->removed_items){
+			if(fdata->removed_items.type){
 				fastcall_pop r_pop = {
 					{ 4, ACTION_POP },
 					&r_create->offset,
 					sizeof(r_create->offset)
 				};
-				if(data_query(fdata->removed_items, &r_pop) == 0)
+				if(data_query(&fdata->removed_items, &r_pop) == 0)
 					return 0;
 			}
 			
@@ -153,13 +151,13 @@ static ssize_t data_allocator_fixed_t_default(data_t *data, fastcall_header *har
 		case ACTION_DELETE:;
 			fastcall_delete *r_delete = (fastcall_delete *)hargs;
 			
-			if(fdata->removed_items){
+			if(fdata->removed_items.type){
 				fastcall_push r_push = {
 					{ 4, ACTION_PUSH },
 					&r_delete->offset,
 					sizeof(r_delete->offset)
 				};
-				if(data_query(fdata->removed_items, &r_push) != 0)
+				if(data_query(&fdata->removed_items, &r_push) != 0)
 					return -EFAULT;
 			}
 			return 0;
@@ -168,9 +166,9 @@ static ssize_t data_allocator_fixed_t_default(data_t *data, fastcall_header *har
 			uintmax_t       in_removed = 0;
 			fastcall_count *r_count    = (fastcall_count *)hargs;
 			
-			if(fdata->removed_items){
+			if(fdata->removed_items.type){
 				fastcall_count r_count = { { 3, ACTION_COUNT } };
-				if(data_query(fdata->removed_items, &r_count) == 0){
+				if(data_query(&fdata->removed_items, &r_count) == 0){
 					in_removed = r_count.nelements;
 				}
 			}
@@ -188,7 +186,7 @@ static ssize_t data_allocator_fixed_t_default(data_t *data, fastcall_header *har
 			if(safe_mul(&r_io->offset, r_io->offset, fdata->item_size) != 0)
 				return -EINVAL;
 			
-			return data_query(fdata->storage, r_io);
+			return data_query(&fdata->storage, r_io);
 		
 		default:
 			break;

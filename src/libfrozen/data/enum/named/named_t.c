@@ -23,8 +23,11 @@ static void      named_destroy(named_t *fdata){ // {{{
 			list_delete(&named_data, fdata);
 			free(fdata->name);
 			
-			fastcall_free r_free = { { 2, ACTION_FREE } };
-			data_query(fdata->data, &r_free);
+			if(fdata->data){
+				fastcall_free r_free = { { 2, ACTION_FREE } };
+				data_query(fdata->data, &r_free);
+				free(fdata->data);
+			}
 			
 			free(fdata);
 		}
@@ -106,7 +109,8 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 		case FORMAT(hash):;
 			hash_t                *config;
 			data_t                *name;
-			data_t                *data;
+			data_t                *data         = NULL;
+			data_t                 data_holder;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
@@ -115,20 +119,12 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 			if( (name = hash_data_find(config, HK(name))) == NULL)
 				return -EINVAL;
 			
-			if( (data = hash_data_find(config, HK(data))) != NULL){
-				data_t        *new_data;
-				
-				if( (new_data = malloc(sizeof(data_t))) == NULL)
+			hash_holder_consume(ret, data_holder, config, HK(data));
+			if(ret == 0){
+				if( (data = malloc(sizeof(data_t))) == NULL)
 					return -ENOMEM;
 				
-				new_data->type = data->type;
-				new_data->ptr  = NULL;
-				
-				fastcall_copy r_copy = { { 3, ACTION_COPY }, new_data };
-				if( (ret = data_query(data, &r_copy)) < 0)
-					return ret;
-				
-				data = new_data;
+				*data = data_holder;
 			}
 			
 			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, buffer, sizeof(buffer) - 1 };

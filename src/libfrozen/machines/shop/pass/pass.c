@@ -29,7 +29,7 @@
 #define EMODULE 25
 
 typedef struct pass_userdata {
-	data_t                *machine;
+	data_t                 machine;
 } pass_userdata;
 
 static int pass_init(machine_t *machine){ // {{{
@@ -43,14 +43,21 @@ static int pass_init(machine_t *machine){ // {{{
 static int pass_destroy(machine_t *machine){ // {{{
 	pass_userdata      *userdata = (pass_userdata *)machine->userdata;
 	
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&userdata->machine, &r_free);
+	
 	free(userdata);
 	return 0;
 } // }}}
 static int pass_configure(machine_t *machine, config_t *config){ // {{{
+	ssize_t                ret;
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
-	return ( (userdata->machine = hash_data_find(config, HK(shop))) == NULL) ?
-		-EINVAL : 0;
+	hash_holder_consume(ret, userdata->machine, config, HK(shop));
+	if(ret != 0)
+		return error("shop parameter not supplied");
+	
+	return 0;
 } // }}}
 
 static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
@@ -63,7 +70,7 @@ static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
 	};
 	
 	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-	return data_query(userdata->machine, &r_query);
+	return data_query(&userdata->machine, &r_query);
 } // }}}
 
 machine_t pass_proto = {

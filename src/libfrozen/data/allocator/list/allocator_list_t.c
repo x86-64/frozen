@@ -9,7 +9,7 @@
 typedef struct allocator_list_t {
 	uintmax_t              item_size;
 	uintmax_t              last_id;
-	data_t                *storage;
+	data_t                 storage;
 	pthread_rwlock_t       rwlock;
 } allocator_list_t;
 
@@ -25,7 +25,7 @@ static ssize_t   allocator_getnewid(allocator_list_t *fdata, uintmax_t *newid){ 
 		{ 3, ACTION_RESIZE },
 		fdata->last_id * fdata->item_size
 	};
-	if( (ret = data_query(fdata->storage, &r_resize)) < 0){
+	if( (ret = data_query(&fdata->storage, &r_resize)) < 0){
 		fdata->last_id--;
 		return ret;
 	}
@@ -41,7 +41,7 @@ static ssize_t   allocator_removelastid(allocator_list_t *fdata){ // {{{
 		{ 3, ACTION_RESIZE },
 		id * fdata->item_size
 	};
-	if( (ret = data_query(fdata->storage, &r_resize)) < 0){
+	if( (ret = data_query(&fdata->storage, &r_resize)) < 0){
 		fdata->last_id++;
 		return ret;
 	}
@@ -49,10 +49,8 @@ static ssize_t   allocator_removelastid(allocator_list_t *fdata){ // {{{
 } // }}}
 
 static void      allocator_destroy(allocator_list_t *fdata){ // {{{
-	if(fdata->storage){
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(fdata->storage, &r_free);
-	}
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&fdata->storage, &r_free);
 	
 	pthread_rwlock_destroy(&fdata->rwlock);
 	free(fdata);
@@ -67,7 +65,8 @@ static ssize_t   allocator_new(allocator_list_t **pfdata, hash_t *config){ // {{
 	
 	pthread_rwlock_init(&fdata->rwlock, NULL);
 	
-	if( (fdata->storage = hash_data_find(config, HK(storage))) == NULL){
+	hash_holder_consume(ret, fdata->storage, config, HK(storage));
+	if(ret != 0){
 		ret = error("invalid storage");
 		goto error;
 	}
@@ -94,7 +93,7 @@ static ssize_t   allocator_new(allocator_list_t **pfdata, hash_t *config){ // {{
 	
 	// get last id
 	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	if( data_query(fdata->storage, &r_len) != 0){
+	if( data_query(&fdata->storage, &r_len) != 0){
 		ret = error("bad underlying storage");
 		goto error;
 	}
@@ -168,7 +167,7 @@ static ssize_t data_allocator_list_t_default(data_t *data, fastcall_header *harg
 					break;
 				}
 				
-				ret = data_query(fdata->storage, r_io);
+				ret = data_query(&fdata->storage, r_io);
 			
 			break;
 		
@@ -207,7 +206,7 @@ static ssize_t data_allocator_list_t_default(data_t *data, fastcall_header *harg
 					r_push->buffer,
 					MIN(r_push->buffer_size, fdata->item_size)
 				};
-				if( (ret = data_query(fdata->storage, &r_write)) < 0)
+				if( (ret = data_query(&fdata->storage, &r_write)) < 0)
 					goto push_unwind;
 				
 				r_push->buffer_size = r_write.buffer_size;
@@ -236,7 +235,7 @@ static ssize_t data_allocator_list_t_default(data_t *data, fastcall_header *harg
 					r_pop->buffer,
 					MIN(r_pop->buffer_size, fdata->item_size)
 				};
-				if( (ret = data_query(fdata->storage, &r_read)) < 0)
+				if( (ret = data_query(&fdata->storage, &r_read)) < 0)
 					break;
 				
 				r_pop->buffer_size = r_read.buffer_size;

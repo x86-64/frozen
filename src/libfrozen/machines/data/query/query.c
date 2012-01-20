@@ -29,7 +29,7 @@
 #define EMODULE 52
 
 typedef struct query_userdata {
-	data_t                *data;
+	data_t                 data;
 } query_userdata;
 
 static int query_init(machine_t *machine){ // {{{
@@ -44,15 +44,17 @@ static int query_destroy(machine_t *machine){ // {{{
 	query_userdata       *userdata          = (query_userdata *)machine->userdata;
 	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(userdata->data, &r_free);
+	data_query(&userdata->data, &r_free);
 	
 	free(userdata);
 	return 0;
 } // }}}
 static int query_configure(machine_t *machine, hash_t *config){ // {{{
+	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
-	if( (userdata->data = hash_data_find(config, HK(data))) == NULL)
+	hash_holder_consume(ret, userdata->data, config, HK(data));
+	if(ret != 0)
 		return error("data not supplied");
 	
 	return 0;
@@ -62,7 +64,7 @@ static ssize_t query_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
-	ret = data_hash_query(userdata->data, request);
+	ret = data_hash_query(&userdata->data, request);
 	
 	request_t r_next[] = {
 		{ HK(ret), DATA_PTR_SIZET(&ret) },
