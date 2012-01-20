@@ -187,9 +187,6 @@ static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
 } // }}}
 static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	ssize_t                ret;
-	machine_t             *be_g              = NULL;
-	machine_t             *be_v              = NULL;
-	machine_t             *be_e              = NULL;
 	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
 	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
 	uintmax_t              nelements_mul     = CAPACITY_MUL_DEFAULT;

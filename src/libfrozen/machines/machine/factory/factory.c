@@ -18,7 +18,7 @@ static int factory_init(machine_t *machine){ // {{{
 static int factory_destroy(machine_t *machine){ // {{{
 	factory_userdata      *userdata = (factory_userdata *)machine->userdata;
 	
-	hash_free(machine_config);
+	hash_free(userdata->machine_config);
 	free(userdata);
 	return 0;
 } // }}}
