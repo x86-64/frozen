@@ -141,6 +141,22 @@ API ssize_t              data_query             (data_t *data, void *args);
 	(void)_ret;                                                            \
 }
 
+/** Consume value from holder to supplied buffer
+ * @param _ret  Return value (ssize_t)
+ * @param _type Destination data type: one of TYPE_*. Only constants allowed
+ * @param _dt   Destination data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc)
+ * @param _src  Source data holder (data_t *)
+ * @retval -EINVAL Invalid source, or convertation error
+ * @retval 0       Operation successful
+ */
+#define data_consume(_ret,_type,_dt,_src){                                     \
+	data_get(_ret,_type,_dt,_src);                                         \
+	if(_ret == 0){                                                         \
+		_src->type = TYPE_VOIDT;                                       \
+		_src->ptr  = NULL;                                             \
+	}                                                                      \
+}
+
 /** Write value from holder to supplied buffer.
  * @param _ret  Return value (ssize_t)
  * @param _type Source data type: one of TYPE_*. Only constants allowed
