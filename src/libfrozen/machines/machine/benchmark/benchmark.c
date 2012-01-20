@@ -149,7 +149,7 @@ static ssize_t benchmark_handler(machine_t *machine, request_t *request){ // {{{
 	
 	userdata->ticks++;
 	
-	hash_data_copy(ret, TYPE_STRINGT,  function,  request, HK(benchmark_function));
+	hash_data_get(ret, TYPE_STRINGT,  function,  request, HK(benchmark_function));
 	if(ret == 0)
 		goto custom;
 	

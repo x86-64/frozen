@@ -64,7 +64,7 @@ static int ipc_configure(machine_t *machine, hash_t *config){ // {{{
 	char            *ipc_type_str  = NULL;
 	ipc_userdata    *userdata      = (ipc_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, ipc_type_str,  config, HK(type));
+	hash_data_get(ret, TYPE_STRINGT, ipc_type_str,  config, HK(type));
 	
 	if( (userdata->ipc_proto = ipc_string_to_proto(ipc_type_str)) == NULL)
 		return error("machine ipc parameter type invalid");

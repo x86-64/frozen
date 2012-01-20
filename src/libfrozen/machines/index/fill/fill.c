@@ -68,9 +68,9 @@ static int fill_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	fill_userdata         *userdata          = (fill_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_ACTIONT,  userdata->action,        config, HK(action));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->fatal,         config, HK(fatal));
-	hash_data_copy(ret, TYPE_MACHINET, userdata->machine_index, config, HK(index));
+	hash_data_get(ret, TYPE_ACTIONT,  userdata->action,        config, HK(action));
+	hash_data_get(ret, TYPE_UINTT,    userdata->fatal,         config, HK(fatal));
+	hash_data_get(ret, TYPE_MACHINET, userdata->machine_index, config, HK(index));
 	if(ret != 0)
 		return error("supplied index machine not valid, or not found");
 	

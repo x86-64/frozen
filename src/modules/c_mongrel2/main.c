@@ -96,9 +96,9 @@ static int mongrel2_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->body,       config, HK(body));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->close_conn, config, HK(close));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->body,       config, HK(body));
+	hash_data_get(ret, TYPE_UINTT,    userdata->close_conn, config, HK(close));
 	return 0;
 } // }}}
 

@@ -401,32 +401,32 @@ static int pool_configure_any(machine_t *machine, machine_t *parent, config_t *c
 	hash_t                *cfg_param_req     = cfg_act_req_def;
 	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, cfg_parameter,    config, HK(parameter));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_mode_perfork, config, HK(mode_perfork));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_mode_global,  config, HK(mode_global));
-	hash_data_copy(ret, TYPE_UINTT,   cfg_tick,         config, HK(tick_interval));
+	hash_data_get(ret, TYPE_STRINGT, cfg_parameter,    config, HK(parameter));
+	hash_data_get(ret, TYPE_STRINGT, cfg_mode_perfork, config, HK(mode_perfork));
+	hash_data_get(ret, TYPE_STRINGT, cfg_mode_global,  config, HK(mode_global));
+	hash_data_get(ret, TYPE_UINTT,   cfg_tick,         config, HK(tick_interval));
 	
 	// actions
-	hash_data_copy(ret, TYPE_STRINGT, cfg_act,          config, HK(action));
+	hash_data_get(ret, TYPE_STRINGT, cfg_act,          config, HK(action));
 	cfg_act_one = cfg_act;
 	cfg_act_perfork = cfg_act;
 	cfg_act_global = cfg_act;
-	hash_data_copy(ret, TYPE_STRINGT, cfg_act_one,      config, HK(action_one));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_act_perfork,  config, HK(action_perfork));
-	hash_data_copy(ret, TYPE_STRINGT, cfg_act_global,   config, HK(action_global));
+	hash_data_get(ret, TYPE_STRINGT, cfg_act_one,      config, HK(action_one));
+	hash_data_get(ret, TYPE_STRINGT, cfg_act_perfork,  config, HK(action_perfork));
+	hash_data_get(ret, TYPE_STRINGT, cfg_act_global,   config, HK(action_global));
 	
 	// requests
-	hash_data_copy(ret, TYPE_HASHT,   cfg_param_req,    config, HK(parameter_request));
+	hash_data_get(ret, TYPE_HASHT,   cfg_param_req,    config, HK(parameter_request));
 	
-	hash_data_copy(ret, TYPE_HASHT,   cfg_act_req,      config, HK(action_request));
+	hash_data_get(ret, TYPE_HASHT,   cfg_act_req,      config, HK(action_request));
 	cfg_act_req_one = cfg_act_req;
 	cfg_act_req_frk = cfg_act_req;
 	cfg_act_req_glb = cfg_act_req;
-	hash_data_copy(ret, TYPE_HASHT,   cfg_act_req_one,  config, HK(action_request_one));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_act_req_frk,  config, HK(action_request_perfork));
-	hash_data_copy(ret, TYPE_HASHT,   cfg_act_req_glb,  config, HK(action_request_global));
+	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_one,  config, HK(action_request_one));
+	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_frk,  config, HK(action_request_perfork));
+	hash_data_get(ret, TYPE_HASHT,   cfg_act_req_glb,  config, HK(action_request_global));
 	
-	hash_data_copy(ret, TYPE_UINTT,   cfg_pool,         config, HK(pool_interval));
+	hash_data_get(ret, TYPE_UINTT,   cfg_pool,         config, HK(pool_interval));
 	if(ret != 0)
 		pool_interval = cfg_pool;
 	
@@ -443,16 +443,16 @@ static int pool_configure_any(machine_t *machine, machine_t *parent, config_t *c
 	userdata->tick_interval               = cfg_tick;
 	userdata->created_on                  = time(NULL);
 	
-	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_one,    config, HK(max_perinstance));
+	hash_data_get(ret, TYPE_UINTT,   cfg_limit_one,    config, HK(max_perinstance));
 	userdata->rule_one.limit              = cfg_limit_one;
 	list_add(&watch_one, machine);
 	
-	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_fork,   config, HK(max_perfork));
+	hash_data_get(ret, TYPE_UINTT,   cfg_limit_fork,   config, HK(max_perfork));
 	userdata->rule_perfork.limit          = cfg_limit_fork;
 	if(ret == 0)
 		list_add(&watch_perfork, (parent == NULL) ? machine : parent);
 	
-	hash_data_copy(ret, TYPE_UINTT,   cfg_limit_global, config, HK(max_global));
+	hash_data_get(ret, TYPE_UINTT,   cfg_limit_global, config, HK(max_global));
 	userdata->rule_global.limit           = cfg_limit_global;
 	if(ret == 0)
 		list_add(&watch_global,  machine);

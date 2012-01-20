@@ -64,7 +64,7 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 		goto error;
 	}
 	
-	hash_data_copy(ret, TYPE_UINTT, fdata->item_size, config, HK(item_size));
+	hash_data_get(ret, TYPE_UINTT, fdata->item_size, config, HK(item_size));
 	if(ret != 0){
 		if( (sample = hash_data_find(config, HK(item_sample))) == NULL){
 			ret = error("no item_size nor item_sample supplied");

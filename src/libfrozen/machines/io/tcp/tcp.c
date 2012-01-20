@@ -109,9 +109,9 @@ static int tcp_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, userdata->tcp_addr, config, HK(addr));
-	hash_data_copy(ret, TYPE_UINTT,   userdata->tcp_port, config, HK(port));
-	hash_data_copy(ret, TYPE_HASHT,   userdata->machine,  config, HK(machine));
+	hash_data_get(ret, TYPE_STRINGT, userdata->tcp_addr, config, HK(addr));
+	hash_data_get(ret, TYPE_UINTT,   userdata->tcp_port, config, HK(port));
+	hash_data_get(ret, TYPE_HASHT,   userdata->machine,  config, HK(machine));
 	
 	tcp_control_start(machine);
 	return 0;

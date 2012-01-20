@@ -133,14 +133,14 @@ static int stdin_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,      config, HK(output));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key,      config, HK(output));
 	return 0;
 } // }}}
 static int stdout_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,      config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key,      config, HK(input));
 	return 0;
 } // }}}
 

@@ -35,8 +35,8 @@ ssize_t mphf_bdz_imp_new    (mphf_t *mphf, config_t *config){
 	DT_UINT64T   nelements      = N_INITIAL_DEFAULT;
 	DT_UINT32T   value_bits     = VALUE_BITS_DEFAULT;
 	
-	hash_data_copy(ret, TYPE_UINT64T,  nelements,     config, HK(n_initial));
-	hash_data_copy(ret, TYPE_UINT32T,  value_bits,    config, HK(value_bits));
+	hash_data_get(ret, TYPE_UINT64T,  nelements,     config, HK(n_initial));
+	hash_data_get(ret, TYPE_UINT32T,  value_bits,    config, HK(value_bits));
 	
 	srandom(time(NULL));
 	

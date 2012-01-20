@@ -170,14 +170,14 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	userdata->buffer        = HK(buffer);
 	userdata->return_result = 1;
 	
-	hash_data_copy(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
-	hash_data_copy(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
-	hash_data_copy(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
-	hash_data_copy(ret, TYPE_SIZET,   nitems,     config, HK(size));
-	hash_data_copy(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
-	hash_data_copy(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,   config, HK(buffer));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->return_result, config, HK(return_result));
+	hash_data_get(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
+	hash_data_get(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
+	hash_data_get(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
+	hash_data_get(ret, TYPE_SIZET,   nitems,     config, HK(size));
+	hash_data_get(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
+	hash_data_get(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,   config, HK(buffer));
+	hash_data_get(ret, TYPE_UINTT,    userdata->return_result, config, HK(return_result));
 
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
@@ -247,7 +247,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	switch(userdata->forced_state){
 		case FORCE_SYNC:  break; // already == 0
 		case FORCE_ASYNC: f_async = 1; break;
-		case FORCE_NONE:  hash_data_copy(ret, TYPE_UINTT, f_async, request, HK(async)); break;
+		case FORCE_NONE:  hash_data_get(ret, TYPE_UINTT, f_async, request, HK(async)); break;
 	};
 	
 	buffer = hash_data_find(request, userdata->buffer);

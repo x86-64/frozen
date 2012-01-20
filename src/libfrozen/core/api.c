@@ -19,7 +19,7 @@ ssize_t     action_create_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	fastcall_create        fargs             = { { 4, ACTION_CREATE } };
 	
-	hash_data_copy(ret, TYPE_UINTT, fargs.size,   request, HK(size));
+	hash_data_get(ret, TYPE_UINTT, fargs.size,   request, HK(size));
 	
 	ret = data_query(data, &fargs);
 	
@@ -48,7 +48,7 @@ ssize_t     action_read_from_hash(data_t *data, request_t *request){ // {{{
 	uintmax_t              offset            = 0;
 	uintmax_t              size              = ~0;
 	
-	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
+	hash_data_get(ret, TYPE_UINTT, offset, request, HK(offset));
 	
 	if( (r_size   = hash_data_find(request, HK(size))) != NULL){
 		data_get(ret, TYPE_UINTT, size, r_size);
@@ -75,7 +75,7 @@ ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
 	uintmax_t              offset            = 0;
 	uintmax_t              size              = ~0;
 	
-	hash_data_copy(ret, TYPE_UINTT, offset, request, HK(offset));
+	hash_data_get(ret, TYPE_UINTT, offset, request, HK(offset));
 	
 	if( (r_size   = hash_data_find(request, HK(size))) != NULL){
 		data_get(ret, TYPE_UINTT, size, r_size);
@@ -109,8 +109,8 @@ ssize_t     action_delete_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	fastcall_delete        fargs             = { { 4, ACTION_DELETE } };
 	
-	hash_data_copy(ret, TYPE_UINTT, fargs.offset,   request, HK(offset));
-	hash_data_copy(ret, TYPE_UINTT, fargs.size,     request, HK(size));
+	hash_data_get(ret, TYPE_UINTT, fargs.offset,   request, HK(offset));
+	hash_data_get(ret, TYPE_UINTT, fargs.size,     request, HK(size));
 	
 	return data_query(data, &fargs);
 } // }}}
@@ -161,7 +161,7 @@ ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	action_t               action;
 	f_data_from_hash       func;
 	
-	hash_data_copy(ret, TYPE_ACTIONT, action, request, HK(action));
+	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(
 		ret != 0 ||
 		action >= ACTION_INVALID ||

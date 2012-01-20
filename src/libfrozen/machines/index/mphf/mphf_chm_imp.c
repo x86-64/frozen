@@ -198,15 +198,15 @@ static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	if( (data->status & FILLED) == 0){
-		hash_data_copy(ret, TYPE_UINTT,  nelements_min,  mphf->config, HK(nelements_min));
-		hash_data_copy(ret, TYPE_UINTT,  nelements_step, mphf->config, HK(nelements_step));
-		hash_data_copy(ret, TYPE_UINTT,  nelements_mul,  mphf->config, HK(nelements_mul));
-		hash_data_copy(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to data
-		hash_data_copy(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
+		hash_data_get(ret, TYPE_UINTT,  nelements_min,  mphf->config, HK(nelements_min));
+		hash_data_get(ret, TYPE_UINTT,  nelements_step, mphf->config, HK(nelements_step));
+		hash_data_get(ret, TYPE_UINTT,  nelements_mul,  mphf->config, HK(nelements_mul));
+		hash_data_get(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to data
+		hash_data_get(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
 		
-		hash_data_copy(ret, TYPE_MACHINET, be_g,         mphf->config, HK(machine_g));
-		hash_data_copy(ret, TYPE_MACHINET, be_v,         mphf->config, HK(machine_g));
-		hash_data_copy(ret, TYPE_MACHINET, be_e,         mphf->config, HK(machine_g));
+		hash_data_get(ret, TYPE_MACHINET, be_g,         mphf->config, HK(machine_g));
+		hash_data_get(ret, TYPE_MACHINET, be_v,         mphf->config, HK(machine_g));
+		hash_data_get(ret, TYPE_MACHINET, be_e,         mphf->config, HK(machine_g));
 		
 		if(be_g == NULL)
 			return error("machine chm_imp parameter machine_g invalid");

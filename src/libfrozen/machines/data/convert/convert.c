@@ -59,7 +59,7 @@ static int convert_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	convert_userdata      *userdata          = (convert_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT,    userdata->items,        config, HK(items));
+	hash_data_get(ret, TYPE_HASHT,    userdata->items,        config, HK(items));
 	return 0;
 } // }}}
 
@@ -80,11 +80,11 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	
 	input_hk = output_hk = item->key;
 	
-	hash_data_copy(ret, TYPE_DATATYPET, type,           item_cfg, HK(type));
-	hash_data_copy(ret, TYPE_UINTT,     format,         item_cfg, HK(format));
-	hash_data_copy(ret, TYPE_UINTT,     from,           item_cfg, HK(convert_from));
-	hash_data_copy(ret, TYPE_HASHKEYT,  output_hk,      item_cfg, HK(output));
-	//hash_data_copy(ret, TYPE_UINTT,     return_result,  item_cfg, HK(return));
+	hash_data_get(ret, TYPE_DATATYPET, type,           item_cfg, HK(type));
+	hash_data_get(ret, TYPE_UINTT,     format,         item_cfg, HK(format));
+	hash_data_get(ret, TYPE_UINTT,     from,           item_cfg, HK(convert_from));
+	hash_data_get(ret, TYPE_HASHKEYT,  output_hk,      item_cfg, HK(output));
+	//hash_data_get(ret, TYPE_UINTT,     return_result,  item_cfg, HK(return));
 	
 	if( (new_hash = hash_new(3)) == NULL)
 		return ITER_BREAK;

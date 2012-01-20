@@ -25,8 +25,8 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				fdata->allocated = 1;
 			}
 			
-			hash_data_copy(ret, TYPE_MACHINET, fdata->machine, parameters, HK(machine));
-			hash_data_copy(ret, TYPE_HASHT,    fdata->request, parameters, HK(request));
+			hash_data_get(ret, TYPE_MACHINET, fdata->machine, parameters, HK(machine));
+			hash_data_get(ret, TYPE_HASHT,    fdata->request, parameters, HK(request));
 			
 			if(fdata->machine != NULL && fdata->request != NULL){
 				fdata->request = hash_copy(fdata->request);

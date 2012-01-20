@@ -162,7 +162,7 @@ static ssize_t cache_machine_create(machine_t *machine, request_t *request){ // 
 	data_t                 offset_data       = DATA_PTR_OFFT(&offset);
 	data_t                *offset_out;
 	
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
+	hash_data_get(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return warning("no size supplied");
 	
 	if( (cache_fast_create(machine, &offset, size) != size) )
 		return error("memory_grow failed");
@@ -189,8 +189,8 @@ static ssize_t cache_machine_delete(machine_t *machine, request_t *request){ // 
 	
 	// TIP cache, as like as file, can only truncate
 	
-	hash_data_copy(ret, TYPE_OFFT,  offset, request, HK(offset));  if(ret != 0) return warning("offset not supplied");
-	hash_data_copy(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
+	hash_data_get(ret, TYPE_OFFT,  offset, request, HK(offset));  if(ret != 0) return warning("offset not supplied");
+	hash_data_get(ret, TYPE_SIZET, size,   request, HK(size));    if(ret != 0) return warning("size not supplied");
 	
 	if( cache_fast_delete(machine, offset, size) != size )
 		return error("cache delete failed");

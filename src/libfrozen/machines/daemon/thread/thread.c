@@ -150,10 +150,10 @@ static int thread_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_UINTT, userdata->paused,            config, HK(paused));
-	hash_data_copy(ret, TYPE_UINTT, userdata->loop,              config, HK(loop));
-	hash_data_copy(ret, TYPE_UINTT, userdata->ignore_errors,     config, HK(ignore_errors));
-	hash_data_copy(ret, TYPE_UINTT, userdata->destroy_on_exit,   config, HK(destroy));
+	hash_data_get(ret, TYPE_UINTT, userdata->paused,            config, HK(paused));
+	hash_data_get(ret, TYPE_UINTT, userdata->loop,              config, HK(loop));
+	hash_data_get(ret, TYPE_UINTT, userdata->ignore_errors,     config, HK(ignore_errors));
+	hash_data_get(ret, TYPE_UINTT, userdata->destroy_on_exit,   config, HK(destroy));
 	
 	if(userdata->paused == 0)
 		thread_control_start(machine);
@@ -165,7 +165,7 @@ static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	uintmax_t              action;
 	
-	hash_data_copy(ret, TYPE_UINTT, action, request, HK(action));
+	hash_data_get(ret, TYPE_UINTT, action, request, HK(action));
 	
 	switch(action){
 		case ACTION_START: return thread_control_start(machine);

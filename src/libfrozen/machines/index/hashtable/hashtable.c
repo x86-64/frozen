@@ -52,8 +52,8 @@ static int hashtable_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	hashtable_userdata    *userdata        = (hashtable_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,          config, HK(input));
-       	hash_data_copy(ret, TYPE_UINTT,    userdata->hashtable_size, config, HK(nelements));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,          config, HK(input));
+       	hash_data_get(ret, TYPE_UINTT,    userdata->hashtable_size, config, HK(nelements));
 	
 	if(userdata->hashtable_size == 0)
 		return error("invalid hashtable size");
@@ -66,8 +66,8 @@ static ssize_t hashtable_handler(machine_t *machine, request_t *request){ // {{{
 	uintmax_t              d_input;
 	hashtable_userdata    *userdata          = (hashtable_userdata *)machine->userdata;
 
-	hash_data_copy(ret, TYPE_UINT32T, action,  request, HK(action));         if(ret != 0) return -ENOSYS;
-	hash_data_copy(ret, TYPE_UINTT,   d_input, request, userdata->input);
+	hash_data_get(ret, TYPE_UINT32T, action,  request, HK(action));         if(ret != 0) return -ENOSYS;
+	hash_data_get(ret, TYPE_UINTT,   d_input, request, userdata->input);
 	if(ret == 0){
 		d_input = d_input % userdata->hashtable_size;
 		

@@ -60,10 +60,10 @@ static ssize_t          mphf_configure_any(machine_t *machine, config_t *config,
 	char            *mphf_type_str   = NULL;
 	mphf_userdata   *userdata        = (mphf_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
-	hash_data_copy(ret, TYPE_UINTT,    fork_only,        config, HK(fork_only));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
+	hash_data_get(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
+	hash_data_get(ret, TYPE_UINTT,    fork_only,        config, HK(fork_only));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
        
 	if(fork_only == 1 && fork_req == NULL)
 		return 0;
@@ -119,7 +119,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	data_t               *data_output;
 	mphf_userdata        *userdata           = (mphf_userdata *)machine->userdata;
 
-	hash_data_copy(ret, TYPE_UINT32T, action, request, HK(action));
+	hash_data_get(ret, TYPE_UINT32T, action, request, HK(action));
 	if(ret != 0)
 		return -ENOSYS;
 	
@@ -135,7 +135,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 		return -EBADF;
 	//
 	
-	hash_data_copy(ret, TYPE_UINTT, d_input, request, userdata->input);
+	hash_data_get(ret, TYPE_UINTT, d_input, request, userdata->input);
 	if(ret != 0)
 		return -EINVAL;
 	

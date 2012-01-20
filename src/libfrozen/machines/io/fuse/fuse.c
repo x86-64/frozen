@@ -560,9 +560,9 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root){ // {{{
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		
-		hash_data_copy(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
-		hash_data_copy(ret, TYPE_UINTT,    item_type,    item_config, HK(folder));
-		hash_data_copy(ret, TYPE_MACHINET, item_machine, item_config, HK(machine));
+		hash_data_get(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
+		hash_data_get(ret, TYPE_UINTT,    item_type,    item_config, HK(folder));
+		hash_data_get(ret, TYPE_MACHINET, item_machine, item_config, HK(machine));
 		
 		vfs_item_create(
 			root,
@@ -584,7 +584,7 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		
-		hash_data_copy(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
+		hash_data_get(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
 		
 		if( (vfs_item = vfs_item_find(root, item_path, ~0)) == NULL)
 			return ITER_CONTINUE;
@@ -625,7 +625,7 @@ static int fuseb_configure(machine_t *machine, config_t *config){ // {{{
 	uintmax_t              multithreaded     = 0;
 	fuseb_userdata        *userdata          = machine->userdata;
 	
-	hash_data_copy   (ret, TYPE_UINTT,   multithreaded,        config, HK(multithread));
+	hash_data_get   (ret, TYPE_UINTT,   multithreaded,        config, HK(multithread));
 	hash_data_consume(ret, TYPE_STRINGT, userdata->mountpoint, config, HK(mountpoint));
 	hash_data_consume(ret, TYPE_HASHT,   userdata->items,      config, HK(items));
 	

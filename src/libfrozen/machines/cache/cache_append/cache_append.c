@@ -55,7 +55,7 @@ static int cacheapp_configure(machine_t *machine, hash_t *config){ // {{{
 	size_t              cache_max_size = DEF_CACHE_SIZE;
 	cacheapp_userdata  *userdata       = (cacheapp_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_SIZET, cache_max_size, config, HK(size));
+	hash_data_get(ret, TYPE_SIZET, cache_max_size, config, HK(size));
 	if(cache_max_size == 0)
 		return error("size too small");
 	
@@ -88,7 +88,7 @@ static ssize_t cacheapp_machine_read(machine_t *machine, request_t *request){ //
 	data_ctx_t        *buffer_ctx;
 	cacheapp_userdata *userdata = (cacheapp_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_OFFT, offset, request, HK(offset));
+	hash_data_get(ret, TYPE_OFFT, offset, request, HK(offset));
 	if(ret != 0 || offset < userdata->cache_start_offset)
 		return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
 	
@@ -111,7 +111,7 @@ static ssize_t cacheapp_machine_write(machine_t *machine, request_t *request){ /
 	data_ctx_t        *buffer_ctx;
 	cacheapp_userdata *userdata = (cacheapp_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_OFFT, offset, request, HK(offset));
+	hash_data_get(ret, TYPE_OFFT, offset, request, HK(offset));
 	if(ret != 0 || offset < userdata->cache_start_offset)
 		return ( (ret = machine_pass(machine, request)) < 0) ? ret : -EEXIST;
 	
@@ -143,7 +143,7 @@ static ssize_t cacheapp_machine_create(machine_t *machine, request_t *request){ 
 		cacheapp_flush(userdata);
 	
 	// do create
-	hash_data_copy(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return error("no size supplied");
+	hash_data_get(ret, TYPE_SIZET, size, request, HK(size)); if(ret != 0) return error("no size supplied");
 	
 	if(memory_grow(&userdata->memory, size, &offset) != 0)
 		return error("memory_grow failed");

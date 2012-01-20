@@ -50,7 +50,7 @@ static int lookup_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	lookup_userdata       *userdata          = (lookup_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_MACHINET,  userdata->machine_index, config, HK(index));
+	hash_data_get(ret, TYPE_MACHINET,  userdata->machine_index, config, HK(index));
 	if(ret != 0)
 		return error("supplied index machine not valid, or not found");
 	

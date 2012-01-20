@@ -195,7 +195,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 				return -EINVAL;
 			
 			buffer = hash_data_find(config, HK(buffer));
-			hash_data_copy(ret, TYPE_UINTT, length, config, HK(length)); if(ret != 0) return -EINVAL;
+			hash_data_get(ret, TYPE_UINTT, length, config, HK(length)); if(ret != 0) return -EINVAL;
 			
 			return raw_read(dst, buffer, 0, length);
 

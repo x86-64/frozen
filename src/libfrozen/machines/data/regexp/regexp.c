@@ -65,7 +65,7 @@ static void    config_updateflag(hash_t *config, hashkey_t key, uintmax_t value,
 	ssize_t                ret;
 	uintmax_t              new_value;
 	
-	hash_data_copy(ret, TYPE_UINTT, new_value, config, key);
+	hash_data_get(ret, TYPE_UINTT, new_value, config, key);
 	if(ret == 0){
 		if(new_value == 0){
 			*flag &= ~value;
@@ -151,7 +151,7 @@ static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	config_updateflag(config, HK(notbol),   REG_NOTBOL,   &userdata->eflags);
 	config_updateflag(config, HK(noteol),   REG_NOTEOL,   &userdata->eflags);
 	
-	hash_data_copy(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
+	hash_data_get(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
 	userdata->ncaptures = hash_nelements(userdata->capture); // nelements return 0 on null hash, 1 on hash_end, 2 on element + hash_end, so on
 	if(userdata->ncaptures > 1){
 		userdata->ncaptures--;
@@ -159,10 +159,10 @@ static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
 			return -ENOMEM;
 	}
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->marker,  config, HK(marker));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->marker,  config, HK(marker));
 	
-	hash_data_copy(ret, TYPE_STRINGT,  regexp_str,        config, HK(regexp));
+	hash_data_get(ret, TYPE_STRINGT,  regexp_str,        config, HK(regexp));
 	if(ret == 0){
 		free(userdata->regexp_str);
 		userdata->regexp_str = strdup(regexp_str);

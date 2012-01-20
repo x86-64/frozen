@@ -209,8 +209,8 @@ ssize_t            machine_new(machine_t **pmachine, hash_t *config){ // {{{
 	char                  *machine_name      = NULL;
 	char                  *machine_class     = NULL;
 	
-	hash_data_copy(ret, TYPE_STRINGT, machine_name,  config, HK(name));
-	hash_data_copy(ret, TYPE_STRINGT, machine_class, config, HK(class));
+	hash_data_get(ret, TYPE_STRINGT, machine_name,  config, HK(name));
+	hash_data_get(ret, TYPE_STRINGT, machine_class, config, HK(class));
 	
 	if(machine_class == NULL || (class = class_find(machine_class)) == NULL)
 		return -EINVAL;
@@ -364,7 +364,7 @@ ssize_t            machine_query        (machine_t *machine, request_t *request)
 		if( (machine->supported_api & API_CRWD) != 0){
 			uint32_t               r_action;
 			
-			hash_data_copy(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
+			hash_data_get(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
 			
 			switch(r_action){
 				case ACTION_CREATE: func = machine->machine_type_crwd.func_create; break;

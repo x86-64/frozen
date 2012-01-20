@@ -73,11 +73,11 @@ static int struct_configure(machine_t *machine, hash_t *config){ // {{{
 	hash_t                *struct_hash   = NULL;
 	struct_userdata       *userdata      = (struct_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT,    struct_hash,          config, HK(structure));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
+	hash_data_get(ret, TYPE_HASHT,    struct_hash,          config, HK(structure));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key_values, config, HK(values));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->size,       config, HK(size));
+	hash_data_get(ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
 	
 	userdata->structure  = struct_hash;
 	userdata->values     = (userdata->key_values == 0) ? STRUCT_VALUES_WHOLE : STRUCT_VALUES_ONE;
@@ -100,7 +100,7 @@ static ssize_t struct_machine_pack(machine_t *machine, request_t *request){
 	switch(userdata->values){
 		case STRUCT_VALUES_WHOLE: values = request; break;
 		case STRUCT_VALUES_ONE:
-			hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
+			hash_data_get(ret, TYPE_HASHT, values, request, userdata->key_values);
 			if(ret != 0)
 				return warning("hash with keys not supplied");
 			break;
@@ -141,7 +141,7 @@ static ssize_t struct_machine_unpack(machine_t *machine, request_t *request){
 		switch(userdata->values){
 			case STRUCT_VALUES_WHOLE: values = request; break;
 			case STRUCT_VALUES_ONE:
-				hash_data_copy(ret, TYPE_HASHT, values, request, userdata->key_values);
+				hash_data_get(ret, TYPE_HASHT, values, request, userdata->key_values);
 				if(ret != 0)
 					return warning("hash with keys not supplied");
 				break;

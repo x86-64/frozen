@@ -61,8 +61,8 @@ static ssize_t switch_config_iterator(hash_t *rule_item, machine_t *machine){ //
 	if(ret != 0)
 		return ITER_CONTINUE;
 	
-	hash_data_copy(ret, TYPE_MACHINET, new_rule->machine, rule, HK(machine)); // converted copy of machine
-	hash_data_copy(ret, TYPE_HASHT,    new_rule->request, rule, HK(request)); // ptr to config, not copy
+	hash_data_get(ret, TYPE_MACHINET, new_rule->machine, rule, HK(machine)); // converted copy of machine
+	hash_data_get(ret, TYPE_HASHT,    new_rule->request, rule, HK(request)); // ptr to config, not copy
 	
 	list_push(&userdata->rules, new_rule);
 	return ITER_CONTINUE;
@@ -118,7 +118,7 @@ static int switch_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	hash_t                *rules             = NULL;
 	
-	hash_data_copy(ret, TYPE_HASHT, rules, config, HK(rules));
+	hash_data_get(ret, TYPE_HASHT, rules, config, HK(rules));
 	
 	if(hash_iter(rules, (hash_iterator)&switch_config_iterator, machine, 0) != ITER_OK)
 		return error("failed to configure switch");

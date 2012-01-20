@@ -72,9 +72,9 @@ static int debug_configure(machine_t *machine, hash_t *config){ // {{{
 	uintmax_t              cfg_after         = 0;
 	debug_userdata        *userdata          = (debug_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_UINTT, cfg_showdump, config, HK(verbose));
-	hash_data_copy(ret, TYPE_UINTT, cfg_before,   config, HK(before));
-	hash_data_copy(ret, TYPE_UINTT, cfg_after,    config, HK(after));
+	hash_data_get(ret, TYPE_UINTT, cfg_showdump, config, HK(verbose));
+	hash_data_get(ret, TYPE_UINTT, cfg_before,   config, HK(before));
+	hash_data_get(ret, TYPE_UINTT, cfg_after,    config, HK(after));
 	
 	userdata->flags |= (cfg_before != 0) ? DEBUG_BEFORE : 0;
 	userdata->flags |= (cfg_after  != 0) ? DEBUG_AFTER  : 0;

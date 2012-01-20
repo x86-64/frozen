@@ -56,7 +56,7 @@ static int emitter_configure(machine_t *machine, config_t *config){ // {{{
 	emitter_userdata      *userdata          = (emitter_userdata *)machine->userdata;
 	
 	hash_data_convert (ret, TYPE_EMITTERT, userdata->req,       config, HK(request));
-	hash_data_copy    (ret, TYPE_UINTT,    userdata->nreq,      config, HK(count));
+	hash_data_get    (ret, TYPE_UINTT,    userdata->nreq,      config, HK(count));
 	return 0;
 } // }}}
 

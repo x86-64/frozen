@@ -65,9 +65,9 @@ static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
 	if((fdata = calloc(1, sizeof(zeromq_t))) == NULL)
 		return -ENOMEM;
 	
-	hash_data_copy(ret, TYPE_STRINGT, zmq_type_str,    config, HK(type));
-	hash_data_copy(ret, TYPE_STRINGT, zmq_act_bind,    config, HK(bind));
-	hash_data_copy(ret, TYPE_STRINGT, zmq_act_connect, config, HK(connect));
+	hash_data_get(ret, TYPE_STRINGT, zmq_type_str,    config, HK(type));
+	hash_data_get(ret, TYPE_STRINGT, zmq_act_bind,    config, HK(bind));
+	hash_data_get(ret, TYPE_STRINGT, zmq_act_connect, config, HK(connect));
 	
 	if( (zmq_socket_type = zeromq_t_string_to_type(zmq_type_str)) == -1 ){
 		ret = error("invalid zmq type");
@@ -80,7 +80,7 @@ static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
 	}
 	
 	//for(i; i<=sizeof(opts_array); i++){
-		hash_data_copy(ret, TYPE_STRINGT, zmq_opt_ident,   config, HK(identity));
+		hash_data_get(ret, TYPE_STRINGT, zmq_opt_ident,   config, HK(identity));
 		if(zmq_opt_ident){
 			if(zmq_setsockopt(fdata->zmq_socket, ZMQ_IDENTITY, zmq_opt_ident, strlen(zmq_opt_ident)) != 0){
 				ret = error("zmq_setsockopt (identity) failed");

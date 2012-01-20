@@ -76,7 +76,7 @@ static int plode_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	plode_userdata        *userdata          = (plode_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->buffer,        config, HK(buffer));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,        config, HK(buffer));
 	return 0;
 } // }}}
 

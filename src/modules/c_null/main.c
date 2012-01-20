@@ -26,7 +26,7 @@ static int null_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	null_userdata         *userdata          = (null_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_UINTT, userdata->testparam, config, HK(test));
+	hash_data_get(ret, TYPE_UINTT, userdata->testparam, config, HK(test));
 	return 0;
 } // }}}
 

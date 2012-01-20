@@ -51,9 +51,9 @@ static int assign_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	assign_userdata       *userdata          = (assign_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHT, userdata->before,   config, HK(before));
-	hash_data_copy(ret, TYPE_HASHT, userdata->after,    config, HK(after));
-	hash_data_copy(ret, TYPE_HASHT, userdata->request,  config, HK(request));
+	hash_data_get(ret, TYPE_HASHT, userdata->before,   config, HK(before));
+	hash_data_get(ret, TYPE_HASHT, userdata->after,    config, HK(after));
+	hash_data_get(ret, TYPE_HASHT, userdata->request,  config, HK(request));
 	return 0;
 } // }}}
 

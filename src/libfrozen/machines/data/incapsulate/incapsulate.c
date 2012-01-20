@@ -71,13 +71,13 @@ static int incap_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	incap_userdata        *userdata      = (incap_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key,       config, HK(key));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_out,   config, HK(key_out));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_to,    config, HK(key_to));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->key_from,  config, HK(key_from));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->count,     config, HK(count));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->size,      config, HK(size));
-	hash_data_copy(ret, TYPE_OFFT,     userdata->multiply,  config, HK(multiply));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key,       config, HK(key));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key_out,   config, HK(key_out));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key_to,    config, HK(key_to));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->key_from,  config, HK(key_from));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->count,     config, HK(count));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->size,      config, HK(size));
+	hash_data_get(ret, TYPE_OFFT,     userdata->multiply,  config, HK(multiply));
 	
 	if(userdata->multiply == 0)
 		return error("machine incapsulate parameter multiply invalid");

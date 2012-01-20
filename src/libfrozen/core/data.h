@@ -55,7 +55,7 @@
 /** @ingroup data
  *  @page data_conversion Data conversion
  *  
- *  Some of frozen api, for example hash_data_copy, can convert values from hash to desired type. It possible if data represent
+ *  Some of frozen api, for example hash_data_get, can convert values from hash to desired type. It possible if data represent
  *  plain value (like integers), or plain pointer (as machine). For rest of data types, which require allocation, this process
  *  can't be automated, as requires free of allocated resources. For those data types you should manually call data_convert macro, or
  *  plain data_query with proper request.

@@ -52,9 +52,9 @@ static int jenkins_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	jenkins_userdata      *userdata          = (jenkins_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->input,      config, HK(input));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->output,     config, HK(output));
-	hash_data_copy(ret, TYPE_UINTT,    userdata->fatal,      config, HK(fatal));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,      config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->output,     config, HK(output));
+	hash_data_get(ret, TYPE_UINTT,    userdata->fatal,      config, HK(fatal));
 	
 	userdata->fatal   = ( userdata->fatal == 0 ) ? 0 : 1;
 	return 0;

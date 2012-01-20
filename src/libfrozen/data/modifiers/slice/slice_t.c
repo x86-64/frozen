@@ -63,8 +63,8 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 						return -EINVAL;
 					
 					input = hash_data_find(config, HK(input));
-					hash_data_copy(ret, TYPE_UINTT, offset, config, HK(offset));
-					hash_data_copy(ret, TYPE_UINTT, size,   config, HK(size));
+					hash_data_get(ret, TYPE_UINTT, offset, config, HK(offset));
+					hash_data_get(ret, TYPE_UINTT, size,   config, HK(size));
 					
 					if(input == NULL)
 						return -EINVAL;

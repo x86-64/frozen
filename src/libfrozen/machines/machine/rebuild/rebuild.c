@@ -184,14 +184,14 @@ static int rebuildread_configure(machine_t *machine, config_t *config){ // {{{
 	char                  *enum_method_str   = NULL;
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)machine->userdata;
 	
-	hash_data_copy(ret, TYPE_STRINGT, enum_method_str,                 config, HK(enum_method));
-	hash_data_copy(ret, TYPE_HASHKEYT, userdata->hk_offset,            config, HK(offset_key));
-	hash_data_copy(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
-	hash_data_copy(ret, TYPE_HASHT,   req_read,                        config, HK(req_read));
-	hash_data_copy(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
-	hash_data_copy(ret, TYPE_UINTT,   req_rebuild_enable,              config, HK(req_rebuild_enable));
-	hash_data_copy(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
-	hash_data_copy(ret, TYPE_MACHINET,  userdata->writer,              config, HK(writer));
+	hash_data_get(ret, TYPE_STRINGT, enum_method_str,                 config, HK(enum_method));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_offset,            config, HK(offset_key));
+	hash_data_get(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
+	hash_data_get(ret, TYPE_HASHT,   req_read,                        config, HK(req_read));
+	hash_data_get(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
+	hash_data_get(ret, TYPE_UINTT,   req_rebuild_enable,              config, HK(req_rebuild_enable));
+	hash_data_get(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
+	hash_data_get(ret, TYPE_MACHINET,  userdata->writer,              config, HK(writer));
 	
 	if(req_rebuild_enable != 0){                         // emit allowed, prepare signal
 		hash_t r_signal_orig[] = {
@@ -248,8 +248,8 @@ static int rebuildmon_configure(machine_t *machine, config_t *config){ // {{{
 	
 	userdata->retry_request = 1;
 	
-	hash_data_copy(ret, TYPE_UINTT,     userdata->retry_request,       config, HK(retry_request));
-	hash_data_copy(ret, TYPE_MACHINET,  userdata->rebuild_reader,      config, HK(reader));
+	hash_data_get(ret, TYPE_UINTT,     userdata->retry_request,       config, HK(retry_request));
+	hash_data_get(ret, TYPE_MACHINET,  userdata->rebuild_reader,      config, HK(reader));
 	if(ret != 0)
 		return error("no reader supplied");
 	

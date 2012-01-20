@@ -151,7 +151,7 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @param _key  Key to search for
  * @see data_get
  */
-#define hash_data_copy(_ret,_type,_dt,_hash,_key){                  \
+#define hash_data_get(_ret,_type,_dt,_hash,_key){                  \
 	data_get(_ret,                                              \
 		_type,                                              \
 		_dt,                                                \

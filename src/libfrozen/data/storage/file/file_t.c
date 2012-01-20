@@ -31,11 +31,11 @@ static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
 	if( (fdata = calloc(1, sizeof(file_t))) == NULL)
 		return error("calloc returns null");
 	
-	hash_data_copy(ret, TYPE_UINTT, cfg_rdonly,   config, HK(readonly));
-	hash_data_copy(ret, TYPE_UINTT, cfg_excl,     config, HK(exclusive));
-	hash_data_copy(ret, TYPE_UINTT, cfg_creat,    config, HK(create));
-	hash_data_copy(ret, TYPE_UINTT, cfg_mode,     config, HK(mode));
-	hash_data_copy(ret, TYPE_UINTT, cfg_retry,    config, HK(retry));
+	hash_data_get(ret, TYPE_UINTT, cfg_rdonly,   config, HK(readonly));
+	hash_data_get(ret, TYPE_UINTT, cfg_excl,     config, HK(exclusive));
+	hash_data_get(ret, TYPE_UINTT, cfg_creat,    config, HK(create));
+	hash_data_get(ret, TYPE_UINTT, cfg_mode,     config, HK(mode));
+	hash_data_get(ret, TYPE_UINTT, cfg_retry,    config, HK(retry));
 	
 	if( (cfg_filename = hash_data_find(config, HK(filename))) == NULL){
 		ret = error("filename not supplied");

@@ -22,7 +22,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 	if(ret != 0)
 		return ITER_BREAK;
 	
-	hash_data_copy(ret, TYPE_FORMATT, format, element_params, HK(format));
+	hash_data_get(ret, TYPE_FORMATT, format, element_params, HK(format));
 	
 	if( (value = hash_data_find(iter_ctx->values, element->key)) == NULL){      // find value for current key
 		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // get default value
@@ -54,7 +54,7 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 	if(ret != 0)
 		return ITER_BREAK;
 	
-	hash_data_copy(ret, TYPE_FORMATT, format, element_params, HK(format));
+	hash_data_get(ret, TYPE_FORMATT, format, element_params, HK(format));
 	
 	// prepare data
 	if( (value = hash_data_find(iter_ctx->values, element->key)) == NULL){      // find destination data for current key
