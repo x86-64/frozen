@@ -153,7 +153,7 @@
  * @em Stdin
  *
  * To have anything to be parsed it should be somehow passed in machine. Frozen have different ways in input data, most simple one is console.
- * @ref mod_machine_stdin used to get data from stdin. And because stdin module is passive, @ref mod_machine_transfer with @ref mod_machine_thread used to activly transfer
+ * @ref mod_machine_stdin used to get data from stdin. And because stdin module is passive, @ref mod_machine_query with @ref mod_machine_thread used to activly transfer
  * data from one machine shop to another. In this case destination is @ref mod_machine_stdout used. For more about outputs read next chapter.
  * 
  * @include tutorial_in_stdin.conf 
