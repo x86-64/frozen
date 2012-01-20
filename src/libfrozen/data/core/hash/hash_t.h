@@ -177,6 +177,20 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
 	(void)_ret;                                                 \
 };
 
+/** Consume holder from hash
+ * @param _ret  Return value (ssize_t)
+ * @param _data Destination data holder.
+ * @param _hash Hash to get value from
+ * @param _key  Key to search for
+ * @see data_get
+ */
+#define hash_holder_consume(_ret,_data,_hash,_key){                 \
+	holder_consume(_ret,                                        \
+		_data,                                              \
+		hash_data_find(_hash,_key)                          \
+	);                                                          \
+};
+
 /** Convert value from hash.
  * @param _ret  Return value (ssize_t)
  * @param _type Destination data type. Only constants allowed.
