@@ -6,7 +6,7 @@
 #include <core/machine/machine_t.h>
 
 static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ // {{{
-	ssize_t                   ret;
+	ssize_t                   ret            = 0;
 	emitter_t                *fdata          = (emitter_t *)data->ptr;
 	
 	switch(hargs->action){
@@ -32,6 +32,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 				break;
 			
 			fdata->request = NULL;
+			ret = -EFAULT;
 			// fall
 		case ACTION_FREE:
 			if(fdata == NULL)
@@ -51,7 +52,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			
 			return machine_query(fdata->machine, fdata->request);
 	}
-	return 0;
+	return ret;
 } // }}}
 
 data_proto_t emitter_t_proto = {
