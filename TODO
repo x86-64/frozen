@@ -9,7 +9,6 @@
   - shop_call
   - shop_return
 
-- review hash_copy'ing of configuration, switch to "consume input config" mode?
 - broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api
 - broken mphf
 - test file_t, allocator_*_t
@@ -32,6 +31,12 @@
 - data 'range_t', 'multiselect_t' and matching routines
 - machine queue
 - mphf nelements_step with percents + remove from mphf to another machine
+
+- deprecate emitter_t data, move to machine
+- deprecate incapsulate as useless
+- deprecate data/transfer as useless
+- deprecate cache, write cache_t instead
+- deprecate cache_append, use data/buffer instead
 
 - pcre
 - libev
