@@ -175,13 +175,10 @@ static ssize_t     machine_ghost_resurrect(machine_t *machine, machine_t *class,
 	machine->name = name;
 	machine->refs = refs;
 	
-	if( (machine->config = hash_copy(config)) == NULL)
-		return -ENOMEM;
-	
 	if(machine->func_init != NULL && machine->func_init(machine) != 0)
 		return -EFAULT;
 	
-	if(machine->func_configure != NULL && machine->func_configure(machine, machine->config) != 0)
+	if(machine->func_configure != NULL && machine->func_configure(machine, config) != 0)
 		goto error;
 	
 	return 0;
@@ -263,9 +260,6 @@ void               machine_destroy(machine_t *machine){ // {{{
 			if(machine->func_destroy != NULL)
 				machine->func_destroy(machine);
 			
-			if(machine->config)
-				hash_free(machine->config);
-
 			machine_disconnect(machine->cprev, machine);
 			machine_disconnect(machine, machine->cnext);
 			
@@ -307,20 +301,31 @@ void               frozen_machine_destroy(void){ // {{{
 } // }}}
 
 static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
+	ssize_t                ret;
 	machine_t             *machine;
+	hash_t                *config;
 	
-	if( item->key == hash_ptr_null || item->data.type != TYPE_HASHT){
-		ctx->machine_next = NULL;
-		return ITER_CONTINUE;
-	}
+	if(item->key == hash_ptr_null)
+		goto error;
 	
-	if(machine_new(&machine, (hash_t *)(item->data.ptr)) < 0)
+	data_consume(ret, TYPE_HASHT, config, (&(item->data)));
+	if(ret != 0)
+		goto error;
+	
+	if(machine_new(&machine, config) < 0){
+		hash_free(config);
 		return ITER_BREAK;
+	}
 	
 	machine_connect(machine, ctx->machine_next);
 	ctx->machine_next = machine;
 	
 	list_add(&ctx->machines, machine);
+	hash_free(config);
+	return ITER_CONTINUE;
+
+error:
+	ctx->machine_next = NULL;
 	return ITER_CONTINUE;
 } // }}}
 

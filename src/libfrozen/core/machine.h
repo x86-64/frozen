@@ -110,7 +110,6 @@ struct machine_t {
 	} machine_type_fast;
 
 	void *                 userdata;         ///< Pointer to userdata for machine
-	config_t              *config;           ///< Current instance configuraion. (Copy of passed to machine_new)
 
 	uintmax_t              refs;             ///< Internal.
 	machine_t             *cnext;            ///< Next machine in shop
