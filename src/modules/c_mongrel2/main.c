@@ -207,6 +207,7 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ /
 		{ HK(path),     DATA_RAW(path_p,   path_l)   },
 		{ HK(headers),  DATA_RAW(header_p, header_l) },
 		{ HK(body),     DATA_RAW(body_p,   body_l)   },
+		hash_inline(request),
 		hash_end
 	};
 	
