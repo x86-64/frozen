@@ -4,7 +4,7 @@
 
 /**
  * @ingroup machine
- * @addtogroup mod_machine_ipc communication/ipc
+ * @addtogroup mod_machine_ipc io/ipc
  */
 /**
  * @ingroup mod_machine_ipc
@@ -19,7 +19,7 @@
  * Accepted configuration:
  * @code
  * {
- *              class                   = "communication/ipc",
+ *              class                   = "io/ipc",
  *              type                    = <see types>              # mechanism to use for transport
  * }
  * @endcode

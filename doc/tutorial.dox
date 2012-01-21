@@ -3,11 +3,14 @@
  * @addtogroup tutorial_basics Tutorial: what is frozen?
  * 
  * @section intro Introduction
- *
  *    Frozen is data processing daemon. It contain several modules for input, output and data processing.
  *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
  *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data
  *    for web or local clients.
+ *
+ *    There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one
+ *    approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels
+ *    of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.
  *
  *    Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
  *    If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
