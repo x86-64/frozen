@@ -51,23 +51,24 @@
 <div class="contents">
 <h2><a class="anchor" id="intro"></a>
 Introduction</h2>
-<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data for web or local clients.</p>
+<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data for web or local clients.</p>
+<p>There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.</p>
 <p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places. If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.</p>
 <h2><a class="anchor" id="architecture"></a>
 How it works?</h2>
-<p>To process some data, user send specially crafted request to data processing pipeline. Every pipeline consist of blocks, called "backend". Backends can connect to each other and form so called "chains". Here is example of two such chains: left one consist of "backend 1,2,3", right one have "backend 4,5,6,7". Left one is simple - it pass request sequentially from backend 1 to 2, and next to 3. Right one pass same request to backend 5,6,7 from backend 4.</p>
+<p>To process some data, we need to construct processing pipeline, like in real industries. And like in real factory we need special blocks called "machine". Machines connected to each other and form production line or "machine-shop". On picture below there is examples of two such shops: left one consist of "machine 1,2,3", right one have "machine 4,5,6,7". Left one is simple - it pass request sequentially from machine 1 to 2, and next to 3. Right one pass same request to machine 5,6,7 from machine 4 (it act as duplicator).</p>
+<p>There is many kinds of machines, but almost all of them used to only transform or mark data. To do useful things we need to get some data or store it in our stores. So processing is data-centric and this is all about data. We transfer data from user, modify it and send to another store, or back to user.</p>
 <div align="center">
 <img src="dot_inline_dotgraph_1.png" alt="dot_inline_dotgraph_1.png" border="0" usemap="#dot_inline_dotgraph_1.map"/>
 <map name="dot_inline_dotgraph_1.map" id="dot_inline_dotgraph_1.map"></map>
 </div>
-<p>Users with experience in math can see here graph with nodes and edges, and this is true. You can form any graph from backends, even looped one.</p>
-<p>Almost every backend require some configuration parameters. You can supply them in configuration file. More about configuration parameters here: <a class="el" href="group__tutorial__configuration.html">Tutorial: configuration</a>.</p>
+<p>Almost every machine require some configuration parameters. You can supply them in configuration file. More about configuration parameters here: <a class="el" href="group__tutorial__configuration.html">Tutorial: configuration</a>.</p>
 <p>Next tutorial: <a class="el" href="group__tutorial__configuration.html">Tutorial: configuration</a>. </p>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

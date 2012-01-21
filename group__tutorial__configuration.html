@@ -49,29 +49,28 @@
 <div class="title">Tutorial: configuration</div>  </div>
 <div class="ingroups"><a class="el" href="group__tutorial.html">Tutorials</a></div></div>
 <div class="contents">
-<h2><a class="anchor" id="tutorial_configuration_chain"></a>
-Chain configuration</h2>
-<p>To describe chain you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with some modifications. </p>
-<div class="fragment"><pre class="fragment"> { &lt;backend 1 configuration&gt; },
- { &lt;backend 2 configuration&gt; },
- { &lt;backend 3 configuration&gt; }
-</pre></div><p>This example configuration describe chain showed in <a class="el" href="group__tutorial__basics.html">Tutorial: what is frozen?</a> on left side. To describe chain showed on right side we need special thing, called name tag. With this tag you name backend with unique and global name, so later you can use only this tag to refer to this backend. </p>
-<div class="fragment"><pre class="fragment"> { name = <span class="stringliteral">&quot;backend_4&quot;</span> },
- { &lt;backend 5 configuration&gt; },
+<h2><a class="anchor" id="tutorial_configuration_shop"></a>
+Shop configuration</h2>
+<p>To describe shop you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with some modifications. </p>
+<div class="fragment"><pre class="fragment"> { &lt;machine 1 configuration&gt; },
+ { &lt;machine 2 configuration&gt; },
+ { &lt;machine 3 configuration&gt; },
  NULL,
- { name = <span class="stringliteral">&quot;backend_4&quot;</span> },
- { &lt;backend 6 configuration&gt; },
- NULL,
- { name = <span class="stringliteral">&quot;backend_4&quot;</span>, &lt;backend 4 configuration&gt; },
- { &lt;backend 7 configuration&gt; }
-</pre></div><p> Here you can notice two things: NULL keyword and special backend 4 position.</p>
-<p>NULL keyword used to split connection between backends - if there is no NULL - backend 5 would be connected to backend 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other common representation of graphs, we don't write connections between backends explicitly. It is too uncommon to create heavily branched chains, so it is easier to split some connections, than write all of them.</p>
-<p>Backend 4 position is special, because it located and end of file. This is required, because configuration file chains created in reverse order - from top to bottom.</p>
-<h2><a class="anchor" id="tutorial_configuration_backend"></a>
-Backend configuration</h2>
-<p>To configure single backend with required parameters you write all of them inside {} of backend configuration splitting by comma. </p>
+ {
+   &lt;machine 4 configuration&gt;
+   duplicate_to = {                             <span class="comment">// this is configuration parameter name for imaginary duplicator machine</span>
+     { &lt;machine 5 configuration&gt; },
+     { &lt;machine 6 configuration&gt; },
+     { &lt;machine 7 configuration&gt; },
+   }
+ }
+</pre></div><p>This example configuration describe shops showed on picture in <a class="el" href="group__tutorial__basics.html">Tutorial: what is frozen?</a>.</p>
+<p>NULL keyword used to split connection between machines - if there is no NULL - machine 3 would be connected to machine 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other common representation of graphs, we don't write connections between machines explicitly.</p>
+<h2><a class="anchor" id="tutorial_configuration_machine"></a>
+Machine configuration</h2>
+<p>To configure single machine with required parameters you write all of them inside {} of machine configuration splitting by comma. </p>
 <div class="fragment"><pre class="fragment"> {
-    name      = <span class="stringliteral">&quot;some backend name&quot;</span>,                     <span class="comment">// single line comment</span>
+    name      = <span class="stringliteral">&quot;some machine name&quot;</span>,                     <span class="comment">// single line comment</span>
     stringpar = <span class="stringliteral">&quot;some string value&quot;</span>,
     intpar    = (uint_t)<span class="stringliteral">&quot;12345&quot;</span>,
     otherpar  = (sometype_t)<span class="stringliteral">&quot;sometype configuration string&quot;</span>,
@@ -84,14 +83,14 @@ Backend configuration</h2>
     },
     envpar    = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;somekey&quot;</span>
  }
-</pre></div><p> Here we have every possible parameter that can be passed to backend. There is strings, ints, special types, nested types: </p>
+</pre></div><p> Here we have every possible parameter that can be passed to machine. There is strings, ints, special types, nested types: </p>
 <ul>
 <li>Already known name parameter is used by core to maintain global names </li>
 <li>String parameter, can have "\t\r\n" inside string. </li>
 <li>Integer parameter, here we have uint_t, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify <a class="el" href="group__uint8__t.html">uint8_t</a>, <a class="el" href="group__int16__t.html">int16_t</a> and another variations. </li>
 <li>Some sometype_t data, which can be initialized from string. Examples: <a class="el" href="group__format__t.html">format_t</a>, <a class="el" href="group__hashkey__t.html">hashkey_t</a> </li>
 <li>Some complex sometype_t data, which can be initialized from hash. Example: <a class="el" href="group__raw__t.html">raw_t</a>. </li>
-<li>Environment data <a class="el" href="group__env__t.html">env_t</a>. It use current request key "somekey" to obtain data. Not every backend parameter can be used in such way. Backend must use this parameter during request and not in initialization stage.</li>
+<li>Environment data <a class="el" href="group__env__t.html">env_t</a>. It use current request key "somekey" to obtain data. Not every machine parameter can be used in such way. Machine must use this parameter during request and not in initialization stage.</li>
 </ul>
 <ul>
 <li>You can use "=", "=&gt;", ":" as assignment. </li>
@@ -100,7 +99,7 @@ Backend configuration</h2>
 </ul>
 <h2><a class="anchor" id="tutorial_configuration_m4"></a>
 Macros and m4</h2>
-<p>Because of simple nature of backends, writing complex systems become very hard. Too many backend need to chain together to achieve some feature. So, we need some macros. And very powerful thing in this field is m4. It is macro processor with simple syntax, easy to learn and easy to solve our problems. Refer to m4 manual to learn it.</p>
+<p>Because of simple nature of machines, writing complex systems become very hard. Too many machine need to shop together to achieve some feature. So, we need some macros. And very powerful thing in this field is m4. It is macro processor with simple syntax, easy to learn and easy to solve our problems. Refer to m4 manual to learn it.</p>
 <p>It have includes, dynamic macro assignment, string manipulation and nice libraries.</p>
 <p>Prev tutorial: <a class="el" href="group__tutorial__basics.html">Tutorial: what is frozen?</a></p>
 <p>Next tutorial: <a class="el" href="group__tutorial__execution.html">Tutorial: starting daemon</a> </p>
@@ -108,7 +107,7 @@ Macros and m4</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

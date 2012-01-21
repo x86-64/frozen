@@ -62,7 +62,8 @@
 <div class="title">data.h File Reference</div>  </div>
 </div>
 <div class="contents">
-<div class="textblock"><code>#include &lt;enum/datatype/datatype_t.h&gt;</code><br/>
+<div class="textblock"><code>#include &lt;enum/action/action_t.h&gt;</code><br/>
+<code>#include &lt;enum/datatype/datatype_t.h&gt;</code><br/>
 </div>
 <p><a href="data_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -76,6 +77,8 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab945901d008f6641e11b33e8d45723a5"></a><!-- doxytag: member="data.h::DEF_BUFFER_SIZE" ref="ab945901d008f6641e11b33e8d45723a5" args="" -->
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DEF_BUFFER_SIZE</b>&#160;&#160;&#160;1024</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">data_get</a>(_ret, _type, _dt, _src)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a418ba9c2e3050d3403c1f40272a83d47">data_consume</a>(_ret, _type, _dt, _src)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a3e4322607c859246bdfc7f656822e160">holder_consume</a>(_ret, _dt, _src)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#ae840456f64f9045e3b9748dcdf74efd5">data_set</a>(_ret, _type, _dt, _dst)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">data_convert</a>(_ret, _type, _dst, _src)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
@@ -106,6 +109,69 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"></div><hr/><h2>Define Documentation</h2>
+<a class="anchor" id="a418ba9c2e3050d3403c1f40272a83d47"></a><!-- doxytag: member="data.h::data_consume" ref="a418ba9c2e3050d3403c1f40272a83d47" args="(_ret, _type, _dt, _src)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define data_consume</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_ret, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_type, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_dt, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_src&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment">{                                     \
+        data_get(_ret,_type,_dt,_src);                                         \
+        if(_ret == 0){                                                         \
+                _src-&gt;type = TYPE_VOIDT;                                       \
+                _src-&gt;ptr  = NULL;                                             \
+        }                                                                      \
+}
+</pre></div><p>Consume value from holder to supplied buffer </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_ret</td><td>Return value (ssize_t) </td></tr>
+    <tr><td class="paramname">_type</td><td>Destination data type: one of TYPE_*. Only constants allowed </td></tr>
+    <tr><td class="paramname">_dt</td><td>Destination data. (uintmax_t for TYPE_UINTT, char * for TYPE_STRINGT, etc) </td></tr>
+    <tr><td class="paramname">_src</td><td>Source data holder (<a class="el" href="structdata__t.html" title="Data holder.">data_t</a> *) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl><dt><b>Return values:</b></dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">-EINVAL</td><td>Invalid source, or convertation error </td></tr>
+    <tr><td class="paramname">0</td><td>Operation successful </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a5f5647dd60912e1f4926b8a51995f880"></a><!-- doxytag: member="data.h::data_convert" ref="a5f5647dd60912e1f4926b8a51995f880" args="(_ret, _type, _dst, _src)" -->
 <div class="memitem">
 <div class="memproto">
@@ -300,6 +366,65 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 </div>
 </div>
+<a class="anchor" id="a3e4322607c859246bdfc7f656822e160"></a><!-- doxytag: member="data.h::holder_consume" ref="a3e4322607c859246bdfc7f656822e160" args="(_ret, _dt, _src)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define holder_consume</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_ret, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_dt, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_src&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment">{                                         \
+        if( (_src) != NULL){                                                   \
+                _dt = *(_src);                                                 \
+                (_src)-&gt;type = TYPE_VOIDT;                                     \
+                (_src)-&gt;ptr  = NULL;                                           \
+                _ret = 0;                                                      \
+        }<span class="keywordflow">else</span>{                                                                 \
+                _ret = -EINVAL;                                                \
+        }                                                                      \
+}
+</pre></div><p>Consume holder </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_ret</td><td>Return value (ssize_t) </td></tr>
+    <tr><td class="paramname">_dt</td><td>Destination data holder. (<a class="el" href="structdata__t.html" title="Data holder.">data_t</a>) </td></tr>
+    <tr><td class="paramname">_src</td><td>Source data holder (<a class="el" href="structdata__t.html" title="Data holder.">data_t</a> *) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl><dt><b>Return values:</b></dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">-EINVAL</td><td>Invalid source, or convertation error </td></tr>
+    <tr><td class="paramname">0</td><td>Operation successful </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/><h2>Function Documentation</h2>
 <a class="anchor" id="a7a428cd48115cf6fcb1f1679fe34960c"></a><!-- doxytag: member="data.h::data_query" ref="a7a428cd48115cf6fcb1f1679fe34960c" args="(data_t *data, void *args)" -->
 <div class="memitem">
@@ -380,7 +505,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

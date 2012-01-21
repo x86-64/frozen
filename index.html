@@ -51,14 +51,14 @@
 <div class="contents">
 <div class="textblock"><h2><a class="anchor" id="intro"></a>
 Introduction</h2>
-<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, store and retrieve data for web or local clients.</p>
+<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data for web or local clients.</p>
+<p>There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.</p>
 <p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places. If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.</p>
 <h2><a class="anchor" id="caps"></a>
 Capabilities</h2>
 <ul>
-<li>Two kinds of api: flexible and fast </li>
 <li>Zero-copy everywhere it possible </li>
-<li>Processing modules: regular expressions, switch, hashes, structures and many more </li>
+<li>Processing modules: regular expressions, switches, structures and many more </li>
 <li>IO modules: fuse, ZeroMQ, file, memory, sockets </li>
 <li>Can be used to construct common data structures: cache, index, lookup tables </li>
 <li>Load balancing modules </li>
@@ -69,7 +69,7 @@ Useful links</h2>
 <ul>
 <li><a class="el" href="group__tutorial__basics.html">Tutorial: what is frozen?</a> </li>
 <li>More tutorials: <a class="el" href="group__tutorial.html">Tutorials</a> </li>
-<li>Architecture review: <a class="el" href="group__backend.html">Backends</a>, <a class="el" href="group__api.html">Api</a>, <a class="el" href="group__data.html">Data</a>. </li>
+<li>Architecture review: <a class="el" href="group__machine.html">Machines</a>, <a class="el" href="group__api.html">Api</a>, <a class="el" href="group__data.html">Data</a>. </li>
 <li><a href="https://github.com/x86-64/frozen">Github project page</a> </li>
 <li><a href="https://github.com/x86-64/frozen/zipball/master">Download as .zip</a> </li>
 <li><a href="https://github.com/x86-64/frozen/tarball/master">Download as .tar.gz</a></li>
@@ -92,7 +92,7 @@ Rationale</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

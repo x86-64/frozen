@@ -51,41 +51,54 @@
 <div class="contents">
 <h2><a class="anchor" id="tutorial_mod_overview"></a>
 Overview</h2>
-<p>With frozen you can easily create custom handlers for mongrel2. To make one we need <a class="el" href="group__mod__backend__zmq.html">module/c_zmq</a> and <a class="el" href="group__mod__backend__mongrel2.html">module/c_mongrel2</a>. Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need create two sockets. Request will flow from one socket, pass through set of backends and end up in second socket.</p>
+<p>With frozen you can easily create custom handlers for mongrel2. To make one we need mod_machine_zmq and <a class="el" href="group__mod__machine__mongrel2.html">module/c_mongrel2</a>. Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need create two sockets. Request will flow from one socket, pass through set of machines and end up in second socket.</p>
 <h2><a class="anchor" id="tutorial_mod_example"></a>
 Example configuration</h2>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
-{ <span class="keyword">class </span>= &quot;data/transfer&quot;, 
-        source = {
-                {
-                        <span class="keyword">class </span>= &quot;modules/c_zmq&quot;,                                <span class="comment">// read client&#39;s request from socket</span>
-                        type     = <span class="stringliteral">&quot;pull&quot;</span>,
-                        identity = <span class="stringliteral">&quot;82209006-86FF-4982-B5EA-D1E29E55D481&quot;</span>,
-                        connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9999&quot;</span>
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
+{ <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
+        request = {
+                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
+                        { <span class="keyword">class </span>= &quot;modules/c_mongrel2_parse&quot; },                         <span class="comment">// parse mongrel2 protocol</span>
+                        
+                        { <span class="keyword">class </span>= &quot;switch&quot;, rules = {                                   <span class="comment">// drop disconnect requests</span>
+                                {
+                                        request = { headers = <span class="stringliteral">&quot;{\&quot;METHOD\&quot;:\&quot;JSON\&quot;}&quot;</span> },
+                                        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
+                                                { <span class="keyword">class </span>= &quot;end&quot; }
+                                        }
+                                }
+                        }},
+                        
+                        { <span class="keyword">class </span>= &quot;assign&quot;, before = {                                  <span class="comment">// assign simple reply</span>
+                                body = <span class="stringliteral">&quot;HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\nhello!&quot;</span>
+                        }},
+                        
+                        { <span class="keyword">class </span>= &quot;modules/c_mongrel2_reply&quot; },                         <span class="comment">// pack our reply according mongrel2 protocol</span>
+                        { <span class="keyword">class </span>= &quot;convert&quot;, items = {                                  <span class="comment">// convert buffer to raw_t, because zeromq data do not work with structures</span>
+                                buffer = { type = (datatype_t)<span class="stringliteral">&quot;raw_t&quot;</span> }
+                        }},
+                        
+                        { <span class="keyword">class </span>= &quot;data/query&quot;,
+                                data = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                                        type     = <span class="stringliteral">&quot;pub&quot;</span>,
+                                        connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9998&quot;</span>
+                                }
+                        },
+                        { <span class="keyword">class </span>= &quot;end&quot; }
                 }
         },
-        destination = {
-                { <span class="keyword">class </span>= &quot;modules/c_mongrel2_parse&quot; },                         <span class="comment">// parse mongrel2 protocol</span>
-                
-                { <span class="keyword">class </span>= &quot;switch&quot;, rules = {                                   <span class="comment">// drop disconnect requests</span>
-                        {
-                                request = { headers = <span class="stringliteral">&quot;{\&quot;METHOD\&quot;:\&quot;JSON\&quot;}&quot;</span> },
-                                backend = { { <span class="keyword">class </span>= &quot;end&quot; } }
+        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
+                { <span class="keyword">class </span>= &quot;data/query&quot;,
+                        data = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                                type     = <span class="stringliteral">&quot;pull&quot;</span>,
+                                identity = <span class="stringliteral">&quot;82209006-86FF-4982-B5EA-D1E29E55D481&quot;</span>,
+                                connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9999&quot;</span>
                         }
-                }},
-
-                { <span class="keyword">class </span>= &quot;assign&quot;, before = {                                  <span class="comment">// assign simple reply</span>
-                        body = <span class="stringliteral">&quot;HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\nhello!&quot;</span>
-                }},
-                
-                { <span class="keyword">class </span>= &quot;modules/c_mongrel2_reply&quot; },                         <span class="comment">// pack our reply according mongrel2 protocol</span>
-                {
-                        <span class="keyword">class </span>= &quot;modules/c_zmq&quot;,                                <span class="comment">// send reply</span>
-                        type     = <span class="stringliteral">&quot;pub&quot;</span>,
-                        connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9998&quot;</span>
                 }
         }
-}
+}},
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>Here we have single-threaded handler which only send simple "hello!" string back to client.</p>
 <h2><a class="anchor" id="tutorial_mod_bench_data"></a>
 Benchmarking data</h2>
@@ -267,7 +280,7 @@ Benchmarking results</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

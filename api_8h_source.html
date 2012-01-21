@@ -63,47 +63,47 @@
 <a name="l00126"></a>00126         API_FAST = 4
 <a name="l00127"></a>00127 } api_types;
 <a name="l00128"></a>00128 
-<a name="l00129"></a>00129 <span class="keyword">typedef</span> ssize_t (*f_crwd)      (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *);
-<a name="l00130"></a>00130 <span class="keyword">typedef</span> ssize_t (*f_fast_func) (<a class="code" href="structbackend__t.html" title="Backend structure.">backend_t</a> *, <span class="keywordtype">void</span> *);
+<a name="l00129"></a>00129 <span class="keyword">typedef</span> ssize_t (*f_crwd)      (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *);
+<a name="l00130"></a>00130 <span class="keyword">typedef</span> ssize_t (*f_fast_func) (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *,    <span class="keywordtype">void</span> *);
 <a name="l00131"></a>00131 
-<a name="l00132"></a>00132 <span class="keyword">typedef</span> <span class="keyword">enum</span> data_functions {
-<a name="l00133"></a>00133         ACTION_CREATE,
-<a name="l00134"></a>00134         ACTION_DELETE,
-<a name="l00135"></a>00135         ACTION_MOVE,
-<a name="l00136"></a>00136         ACTION_COUNT,
-<a name="l00137"></a>00137         ACTION_CUSTOM,
-<a name="l00138"></a>00138         ACTION_REBUILD,
-<a name="l00139"></a>00139 
-<a name="l00140"></a>00140         ACTION_EXECUTE,
-<a name="l00141"></a>00141         ACTION_START,
-<a name="l00142"></a>00142         ACTION_STOP,
-<a name="l00143"></a>00143         ACTION_ALLOC,
-<a name="l00144"></a>00144         ACTION_RESIZE,
-<a name="l00145"></a>00145         ACTION_FREE,
-<a name="l00146"></a>00146         ACTION_PHYSICALLEN,
-<a name="l00147"></a>00147         ACTION_LOGICALLEN,
-<a name="l00148"></a>00148         ACTION_COMPARE,
-<a name="l00149"></a>00149         ACTION_INCREMENT,
-<a name="l00150"></a>00150         ACTION_DECREMENT,
-<a name="l00151"></a>00151         ACTION_ADD,
-<a name="l00152"></a>00152         ACTION_SUB,
-<a name="l00153"></a>00153         ACTION_MULTIPLY,
-<a name="l00154"></a>00154         ACTION_DIVIDE,
-<a name="l00155"></a>00155         ACTION_READ,
-<a name="l00156"></a>00156         ACTION_WRITE,
-<a name="l00157"></a>00157         ACTION_CONVERT_TO,
-<a name="l00158"></a>00158         ACTION_CONVERT_FROM,
-<a name="l00159"></a>00159         ACTION_TRANSFER,
-<a name="l00160"></a>00160         ACTION_COPY,
-<a name="l00161"></a>00161         ACTION_IS_NULL,
-<a name="l00162"></a>00162         
-<a name="l00163"></a>00163         ACTION_PUSH,
-<a name="l00164"></a>00164         ACTION_POP,
-<a name="l00165"></a>00165         
-<a name="l00166"></a>00166         ACTION_GETDATAPTR,
-<a name="l00167"></a>00167 
-<a name="l00168"></a>00168         ACTION_INVALID
-<a name="l00169"></a>00169 } data_functions;
+<a name="l00132"></a>00132 <span class="comment">/*</span>
+<a name="l00133"></a>00133 <span class="comment">        ACTION(CREATE),</span>
+<a name="l00134"></a>00134 <span class="comment">        ACTION(DELETE),</span>
+<a name="l00135"></a>00135 <span class="comment">        ACTION(COUNT),</span>
+<a name="l00136"></a>00136 <span class="comment">        ACTION(CUSTOM),</span>
+<a name="l00137"></a>00137 <span class="comment">        ACTION(REBUILD),</span>
+<a name="l00138"></a>00138 <span class="comment"></span>
+<a name="l00139"></a>00139 <span class="comment">        ACTION(EXECUTE),</span>
+<a name="l00140"></a>00140 <span class="comment">        ACTION(START),</span>
+<a name="l00141"></a>00141 <span class="comment">        ACTION(STOP),</span>
+<a name="l00142"></a>00142 <span class="comment">        ACTION(ALLOC),</span>
+<a name="l00143"></a>00143 <span class="comment">        ACTION(RESIZE),</span>
+<a name="l00144"></a>00144 <span class="comment">        ACTION(FREE),</span>
+<a name="l00145"></a>00145 <span class="comment">        ACTION(PHYSICALLEN),</span>
+<a name="l00146"></a>00146 <span class="comment">        ACTION(LOGICALLEN),</span>
+<a name="l00147"></a>00147 <span class="comment">        ACTION(COMPARE),</span>
+<a name="l00148"></a>00148 <span class="comment">        ACTION(INCREMENT),</span>
+<a name="l00149"></a>00149 <span class="comment">        ACTION(DECREMENT),</span>
+<a name="l00150"></a>00150 <span class="comment">        ACTION(ADD),</span>
+<a name="l00151"></a>00151 <span class="comment">        ACTION(SUB),</span>
+<a name="l00152"></a>00152 <span class="comment">        ACTION(MULTIPLY),</span>
+<a name="l00153"></a>00153 <span class="comment">        ACTION(DIVIDE),</span>
+<a name="l00154"></a>00154 <span class="comment">        ACTION(READ),</span>
+<a name="l00155"></a>00155 <span class="comment">        ACTION(WRITE),</span>
+<a name="l00156"></a>00156 <span class="comment">        ACTION(CONVERT_TO)</span>
+<a name="l00157"></a>00157 <span class="comment">        ACTION(CONVERT_FROM),</span>
+<a name="l00158"></a>00158 <span class="comment">        ACTION(TRANSFER),</span>
+<a name="l00159"></a>00159 <span class="comment">        ACTION(COPY),</span>
+<a name="l00160"></a>00160 <span class="comment">        ACTION(IS_NULL),</span>
+<a name="l00161"></a>00161 <span class="comment">        </span>
+<a name="l00162"></a>00162 <span class="comment">        ACTION(PUSH),</span>
+<a name="l00163"></a>00163 <span class="comment">        ACTION(POP),</span>
+<a name="l00164"></a>00164 <span class="comment">        </span>
+<a name="l00165"></a>00165 <span class="comment">        ACTION(QUERY),</span>
+<a name="l00166"></a>00166 <span class="comment"></span>
+<a name="l00167"></a>00167 <span class="comment">        ACTION(GETDATAPTR),</span>
+<a name="l00168"></a>00168 <span class="comment"></span>
+<a name="l00169"></a>00169 <span class="comment">*/</span>
 <a name="l00170"></a>00170 
 <a name="l00171"></a><a class="code" href="structfastcall__header.html">00171</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__header.html">fastcall_header</a> {
 <a name="l00172"></a>00172         uintmax_t              nargs;
@@ -223,39 +223,40 @@
 <a name="l00286"></a>00286         uintmax_t              size;
 <a name="l00287"></a>00287 } <a class="code" href="structfastcall__delete.html">fastcall_delete</a>;
 <a name="l00288"></a>00288 
-<a name="l00289"></a><a class="code" href="structfastcall__move.html">00289</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__move.html">fastcall_move</a> {
+<a name="l00289"></a><a class="code" href="structfastcall__count.html">00289</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__count.html">fastcall_count</a> {
 <a name="l00290"></a>00290         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00291"></a>00291         uintmax_t              offset_from;
-<a name="l00292"></a>00292         uintmax_t              offset_to;
-<a name="l00293"></a>00293         uintmax_t              size;
-<a name="l00294"></a>00294 } <a class="code" href="structfastcall__move.html">fastcall_move</a>;
-<a name="l00295"></a>00295 
-<a name="l00296"></a><a class="code" href="structfastcall__count.html">00296</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__count.html">fastcall_count</a> {
-<a name="l00297"></a>00297         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00298"></a>00298         uintmax_t              nelements;
-<a name="l00299"></a>00299 } <a class="code" href="structfastcall__count.html">fastcall_count</a>;
-<a name="l00300"></a>00300 
-<a name="l00301"></a><a class="code" href="structfastcall__push.html">00301</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__push.html">fastcall_push</a> {
-<a name="l00302"></a>00302         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00303"></a>00303         <span class="keywordtype">void</span>                  *buffer;
-<a name="l00304"></a>00304         uintmax_t              buffer_size;
-<a name="l00305"></a>00305 } <a class="code" href="structfastcall__push.html">fastcall_push</a>;
-<a name="l00306"></a>00306 
-<a name="l00307"></a><a class="code" href="structfastcall__pop.html">00307</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__pop.html">fastcall_pop</a> {
-<a name="l00308"></a>00308         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00309"></a>00309         <span class="keywordtype">void</span>                  *buffer;
-<a name="l00310"></a>00310         uintmax_t              buffer_size;
-<a name="l00311"></a>00311 } <a class="code" href="structfastcall__pop.html">fastcall_pop</a>;
+<a name="l00291"></a>00291         uintmax_t              nelements;
+<a name="l00292"></a>00292 } <a class="code" href="structfastcall__count.html">fastcall_count</a>;
+<a name="l00293"></a>00293 
+<a name="l00294"></a><a class="code" href="structfastcall__push.html">00294</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__push.html">fastcall_push</a> {
+<a name="l00295"></a>00295         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00296"></a>00296         <span class="keywordtype">void</span>                  *buffer;
+<a name="l00297"></a>00297         uintmax_t              buffer_size;
+<a name="l00298"></a>00298 } <a class="code" href="structfastcall__push.html">fastcall_push</a>;
+<a name="l00299"></a>00299 
+<a name="l00300"></a><a class="code" href="structfastcall__pop.html">00300</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__pop.html">fastcall_pop</a> {
+<a name="l00301"></a>00301         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00302"></a>00302         <span class="keywordtype">void</span>                  *buffer;
+<a name="l00303"></a>00303         uintmax_t              buffer_size;
+<a name="l00304"></a>00304 } <a class="code" href="structfastcall__pop.html">fastcall_pop</a>;
+<a name="l00305"></a>00305 
+<a name="l00306"></a><a class="code" href="structfastcall__query.html">00306</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__query.html">fastcall_query</a> {
+<a name="l00307"></a>00307         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00308"></a>00308         <a class="code" href="structhash__t.html" title="Hash item.">request_t</a>             *request;
+<a name="l00309"></a>00309 } <a class="code" href="structfastcall__query.html">fastcall_query</a>;
+<a name="l00310"></a>00310 
+<a name="l00311"></a>00311 <span class="keyword">extern</span> uintmax_t fastcall_nargs[];
 <a name="l00312"></a>00312 
-<a name="l00313"></a>00313 <span class="keyword">extern</span> uintmax_t fastcall_nargs[];
-<a name="l00314"></a>00314 
-<a name="l00315"></a>00315 <span class="preprocessor">#endif</span>
+<a name="l00313"></a>00313 ssize_t     data_hash_query(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
+<a name="l00314"></a>00314 ssize_t     machine_fast_query(<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine, <span class="keywordtype">void</span> *hargs);
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

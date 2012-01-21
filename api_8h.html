@@ -55,6 +55,7 @@
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">api.h File Reference</div>  </div>
@@ -86,20 +87,18 @@ Data Structures</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__is__null.html">fastcall_is_null</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__create.html">fastcall_create</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__delete.html">fastcall_delete</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__move.html">fastcall_move</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__count.html">fastcall_count</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__push.html">fastcall_push</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__pop.html">fastcall_pop</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__query.html">fastcall_query</a></td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7404e11ee62f218dd5cf67817996d4f0"></a><!-- doxytag: member="api.h::api_types" ref="a7404e11ee62f218dd5cf67817996d4f0" args="" -->
 typedef enum api_types&#160;</td><td class="memItemRight" valign="bottom"><b>api_types</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a449e105bc76b5a4f0a463a6590c09e1c"></a><!-- doxytag: member="api.h::f_crwd" ref="a449e105bc76b5a4f0a463a6590c09e1c" args=")(backend_t *, request_t *)" -->
-typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_crwd</b> )(<a class="el" href="structbackend__t.html">backend_t</a> *, <a class="el" href="structhash__t.html">request_t</a> *)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a08236cc7166eb91c758972da5daeca"></a><!-- doxytag: member="api.h::f_fast_func" ref="a3a08236cc7166eb91c758972da5daeca" args=")(backend_t *, void *)" -->
-typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_fast_func</b> )(<a class="el" href="structbackend__t.html">backend_t</a> *, void *)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a62c0e712316e8027f075fbb64c28ebda"></a><!-- doxytag: member="api.h::data_functions" ref="a62c0e712316e8027f075fbb64c28ebda" args="" -->
-typedef enum data_functions&#160;</td><td class="memItemRight" valign="bottom"><b>data_functions</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4dbc8b67dccd0118363780e21e1e53a2"></a><!-- doxytag: member="api.h::f_crwd" ref="a4dbc8b67dccd0118363780e21e1e53a2" args=")(machine_t *, request_t *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_crwd</b> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">request_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a89043a1956ac518d0738debded83e8"></a><!-- doxytag: member="api.h::f_fast_func" ref="a3a89043a1956ac518d0738debded83e8" args=")(data_t *, void *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_fast_func</b> )(<a class="el" href="structdata__t.html">data_t</a> *, void *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab63eda70fadf826403195b6ea44e970b"></a><!-- doxytag: member="api.h::fastcall_header" ref="ab63eda70fadf826403195b6ea44e970b" args="" -->
 typedef struct <a class="el" href="structfastcall__header.html">fastcall_header</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_header</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a82686459eeab59bb0d911538addd4278"></a><!-- doxytag: member="api.h::fastcall_io" ref="a82686459eeab59bb0d911538addd4278" args="" -->
@@ -166,62 +165,26 @@ typedef struct <a class="el" href="structfastcall__is__null.html">fastcall_is_nu
 typedef struct <a class="el" href="structfastcall__create.html">fastcall_create</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_create</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0509ef21896e6390ee53118685911c34"></a><!-- doxytag: member="api.h::fastcall_delete" ref="a0509ef21896e6390ee53118685911c34" args="" -->
 typedef struct <a class="el" href="structfastcall__delete.html">fastcall_delete</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_delete</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3de0e10b63579c73e31e7f216cae7d85"></a><!-- doxytag: member="api.h::fastcall_move" ref="a3de0e10b63579c73e31e7f216cae7d85" args="" -->
-typedef struct <a class="el" href="structfastcall__move.html">fastcall_move</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_move</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae330a106b87b42dfd20b2434f1a6a499"></a><!-- doxytag: member="api.h::fastcall_count" ref="ae330a106b87b42dfd20b2434f1a6a499" args="" -->
 typedef struct <a class="el" href="structfastcall__count.html">fastcall_count</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_count</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a208a6da1f6af0dc98dad9fe96ba944d0"></a><!-- doxytag: member="api.h::fastcall_push" ref="a208a6da1f6af0dc98dad9fe96ba944d0" args="" -->
 typedef struct <a class="el" href="structfastcall__push.html">fastcall_push</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_push</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe808ea29bb6451ed0618f3bcc92763f"></a><!-- doxytag: member="api.h::fastcall_pop" ref="abe808ea29bb6451ed0618f3bcc92763f" args="" -->
 typedef struct <a class="el" href="structfastcall__pop.html">fastcall_pop</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_pop</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a964f08d90086795ff038b077b1474a63"></a><!-- doxytag: member="api.h::fastcall_query" ref="a964f08d90086795ff038b077b1474a63" args="" -->
+typedef struct <a class="el" href="structfastcall__query.html">fastcall_query</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_query</b></td></tr>
 <tr><td colspan="2"><h2><a name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>api_types</b> { <b>API_HASH</b> =  1, 
 <b>API_CRWD</b> =  2, 
 <b>API_FAST</b> =  4
  }</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>data_functions</b> { <br/>
-&#160;&#160;<b>ACTION_CREATE</b>, 
-<b>ACTION_DELETE</b>, 
-<b>ACTION_MOVE</b>, 
-<b>ACTION_COUNT</b>, 
-<br/>
-&#160;&#160;<b>ACTION_CUSTOM</b>, 
-<b>ACTION_REBUILD</b>, 
-<b>ACTION_EXECUTE</b>, 
-<b>ACTION_START</b>, 
-<br/>
-&#160;&#160;<b>ACTION_STOP</b>, 
-<b>ACTION_ALLOC</b>, 
-<b>ACTION_RESIZE</b>, 
-<b>ACTION_FREE</b>, 
-<br/>
-&#160;&#160;<b>ACTION_PHYSICALLEN</b>, 
-<b>ACTION_LOGICALLEN</b>, 
-<b>ACTION_COMPARE</b>, 
-<b>ACTION_INCREMENT</b>, 
-<br/>
-&#160;&#160;<b>ACTION_DECREMENT</b>, 
-<b>ACTION_ADD</b>, 
-<b>ACTION_SUB</b>, 
-<b>ACTION_MULTIPLY</b>, 
-<br/>
-&#160;&#160;<b>ACTION_DIVIDE</b>, 
-<b>ACTION_READ</b>, 
-<b>ACTION_WRITE</b>, 
-<b>ACTION_CONVERT_TO</b>, 
-<br/>
-&#160;&#160;<b>ACTION_CONVERT_FROM</b>, 
-<b>ACTION_TRANSFER</b>, 
-<b>ACTION_COPY</b>, 
-<b>ACTION_IS_NULL</b>, 
-<br/>
-&#160;&#160;<b>ACTION_PUSH</b>, 
-<b>ACTION_POP</b>, 
-<b>ACTION_GETDATAPTR</b>, 
-<b>ACTION_INVALID</b>
-<br/>
- }</td></tr>
+<tr><td colspan="2"><h2><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b9da8f6846b9304777e3273dbb90929"></a><!-- doxytag: member="api.h::data_hash_query" ref="a5b9da8f6846b9304777e3273dbb90929" args="(data_t *data, request_t *request)" -->
+ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_hash_query</b> (<a class="el" href="structdata__t.html">data_t</a> *data, <a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af28f98099fff38cd89f457c633d868a7"></a><!-- doxytag: member="api.h::machine_fast_query" ref="af28f98099fff38cd89f457c633d868a7" args="(machine_t *machine, void *hargs)" -->
+ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>machine_fast_query</b> (<a class="el" href="structmachine__t.html">machine_t</a> *machine, void *hargs)</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aece7e89a23da58dae667f0f42358ecae"></a><!-- doxytag: member="api.h::fastcall_nargs" ref="aece7e89a23da58dae667f0f42358ecae" args="[]" -->
@@ -232,7 +195,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_nargs</
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

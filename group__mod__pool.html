@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>frozen: backend/pool</title>
+<title>frozen: machine/pool</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -46,10 +46,10 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">backend/pool</div>  </div>
-<div class="ingroups"><a class="el" href="group__backend.html">Backends</a></div></div>
+<div class="title">machine/pool</div>  </div>
+<div class="ingroups"><a class="el" href="group__machine.html">Machines</a></div></div>
 <div class="contents">
-<p>Pool module inserted in forkable backend chain can track any property of backend (like memory usage) and limit it. Underlying modules can be destroyed or call special function. </p>
+<p>Pool module inserted in forkable machine shop can track any property of machine (like memory usage) and limit it. Underlying modules can be destroyed or call special function. </p>
 
 
 <h3><a class="anchor" id="page_pool_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
@@ -62,15 +62,15 @@
 
                                                      # Step 2: limit
               max_perinstance   = (uint_t)<span class="stringliteral">&#39;1000&#39;</span>,    # <span class="keyword">set</span> maximum &lt;parameter&gt; value <span class="keywordflow">for</span> one instance to 1000
-              max_perfork       = (uint_t)<span class="stringliteral">&#39;2000&#39;</span>,    # <span class="keyword">set</span> maximum &lt;parameter&gt; value <span class="keywordflow">for</span> group of forked backends to 2000
-              max_global        = (uint_t)<span class="stringliteral">&#39;3000&#39;</span>,    # <span class="keyword">set</span> maximum &lt;parameter&gt; value <span class="keywordflow">for</span> all backends (can be different <span class="keywordflow">for each</span> instance)
+              max_perfork       = (uint_t)<span class="stringliteral">&#39;2000&#39;</span>,    # <span class="keyword">set</span> maximum &lt;parameter&gt; value <span class="keywordflow">for</span> group of forked machines to 2000
+              max_global        = (uint_t)<span class="stringliteral">&#39;3000&#39;</span>,    # <span class="keyword">set</span> maximum &lt;parameter&gt; value <span class="keywordflow">for</span> all machines (can be different <span class="keywordflow">for each</span> instance)
 
               mode_perfork      =                    # Step 3: choose victum
-                                  <span class="stringliteral">&quot;first&quot;</span>,           #   - earliest registered backend, <span class="keywordflow">default</span>
-                                  <span class="stringliteral">&quot;last&quot;</span>,            #   - latest registered backend
+                                  <span class="stringliteral">&quot;first&quot;</span>,           #   - earliest registered machine, <span class="keywordflow">default</span>
+                                  <span class="stringliteral">&quot;last&quot;</span>,            #   - latest registered machine
                                   <span class="stringliteral">&quot;random&quot;</span>,          #   - random item
-                                  <span class="stringliteral">&quot;highest&quot;</span>,         #   - backend with higest &lt;parameter&gt; value
-                                  <span class="stringliteral">&quot;lowest&quot;</span>,          #   - backend with lowest &lt;parameter&gt; value
+                                  <span class="stringliteral">&quot;highest&quot;</span>,         #   - machine with higest &lt;parameter&gt; value
+                                  <span class="stringliteral">&quot;lowest&quot;</span>,          #   - machine with lowest &lt;parameter&gt; value
               mode_global       ... same as _perfork #
                                                      
 <span class="preprocessor">                                                     # Step 4: what to do with victum?</span>
@@ -87,19 +87,19 @@
               action_request_global  = { ... }       # <span class="keyword">override</span> <span class="keywordflow">for</span> _global limits
               
               pool_interval     = (uint_t)<span class="charliteral">&#39;5&#39;</span>        # see below. This parameter is global,
-                                                       newly created backends overwrite it
+                                                       newly created machines overwrite it
               tick_interval     = (uint_t)<span class="charliteral">&#39;5&#39;</span>        # see below.
         }
 
  Limit behavior:
-   - Limit checked ones per &lt;pool_interval&gt; (<span class="keywordflow">default</span> 5 seconds). Between two checks backends can overconsume limit, but <span class="keyword">this</span> method
+   - Limit checked ones per &lt;pool_interval&gt; (<span class="keywordflow">default</span> 5 seconds). Between two checks machines can overconsume limit, but <span class="keyword">this</span> method
      will have less performance loss.
    - Ticks collected in &lt;tick_interval&gt; period. One tick is one passed request.
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

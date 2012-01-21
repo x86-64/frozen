@@ -59,75 +59,95 @@
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
 <a name="l00072"></a>00072 <span class="preprocessor">#define DEF_BUFFER_SIZE 1024</span>
 <a name="l00073"></a>00073 <span class="preprocessor"></span>
-<a name="l00074"></a>00074 <span class="preprocessor">#include &lt;enum/datatype/datatype_t.h&gt;</span>
-<a name="l00075"></a>00075 
-<a name="l00076"></a>00076 <span class="keyword">typedef</span> <span class="keyword">enum</span> data_api_type {
-<a name="l00077"></a>00077         API_DEFAULT_HANDLER,
-<a name="l00078"></a>00078         API_HANDLERS
-<a name="l00079"></a>00079 } data_api_type;
-<a name="l00080"></a>00080 
-<a name="l00081"></a>00081 <span class="keyword">typedef</span> ssize_t    (*f_data_func)  (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *, <span class="keywordtype">void</span> *args);
-<a name="l00082"></a>00082 
-<a name="l00084"></a><a class="code" href="structdata__t.html">00084</a> <span class="keyword">struct </span><a class="code" href="structdata__t.html" title="Data holder.">data_t</a> {
-<a name="l00085"></a><a class="code" href="structdata__t.html#a37ca1479ebef0751ffe2815dd54b0524">00085</a>         datatype_t             <a class="code" href="structdata__t.html#a37ca1479ebef0751ffe2815dd54b0524" title="Data type. One of TYPE_*. Use datatype_t to hold this value.">type</a>; 
-<a name="l00086"></a><a class="code" href="structdata__t.html#add9af9569af79ec26dd741fb226b38ba">00086</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structdata__t.html#add9af9569af79ec26dd741fb226b38ba" title="Pointer to data.">ptr</a>;  
-<a name="l00087"></a>00087 };
-<a name="l00088"></a>00088 
-<a name="l00089"></a><a class="code" href="structdata__proto__t.html">00089</a> <span class="keyword">struct </span><a class="code" href="structdata__proto__t.html">data_proto_t</a> {
-<a name="l00090"></a>00090         <span class="keywordtype">char</span>                  *type_str;
-<a name="l00091"></a>00091         datatype_t             type;
-<a name="l00092"></a>00092         data_api_type          api_type;
-<a name="l00093"></a>00093         
-<a name="l00094"></a>00094         f_data_func            handler_default;
-<a name="l00095"></a>00095         f_data_func            handlers[ACTION_INVALID];
-<a name="l00096"></a>00096 };
-<a name="l00097"></a>00097 
-<a name="l00098"></a>00098 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> **         data_protos;
-<a name="l00099"></a>00099 <span class="keyword">extern</span> uintmax_t               data_protos_nitems;
-<a name="l00100"></a>00100 
-<a name="l00101"></a>00101 ssize_t                  frozen_data_init(<span class="keywordtype">void</span>);
-<a name="l00102"></a>00102 <span class="keywordtype">void</span>                     frozen_data_destroy(<span class="keywordtype">void</span>);
-<a name="l00103"></a>00103 
-<a name="l00109"></a>00109 API ssize_t              data_register          (<a class="code" href="structdata__proto__t.html">data_proto_t</a> *proto);
-<a name="l00110"></a>00110 
-<a name="l00119"></a>00119 API ssize_t              data_query             (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <span class="keywordtype">void</span> *args);
-<a name="l00120"></a>00120 
-<a name="l00129"></a><a class="code" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">00129</a> <span class="preprocessor">#define data_get(_ret,_type,_dt,_src){                                         \</span>
-<a name="l00130"></a>00130 <span class="preprocessor">        if((_src) != NULL &amp;&amp; (_src)-&gt;type == _type){                           \</span>
-<a name="l00131"></a>00131 <span class="preprocessor">                _dt  = DEREF_##_type(_src);                                    \</span>
-<a name="l00132"></a>00132 <span class="preprocessor">                _ret = 0;                                                      \</span>
-<a name="l00133"></a>00133 <span class="preprocessor">        }else{                                                                 \</span>
-<a name="l00134"></a>00134 <span class="preprocessor">                if( HAVEBUFF_##_type == 1 ){                                   \</span>
-<a name="l00135"></a>00135 <span class="preprocessor">                        data_convert(_ret, _type, _dt, _src);                  \</span>
-<a name="l00136"></a>00136 <span class="preprocessor">                }else{                                                         \</span>
-<a name="l00137"></a>00137 <span class="preprocessor">                        _ret = -EINVAL;                                        \</span>
-<a name="l00138"></a>00138 <span class="preprocessor">                }                                                              \</span>
-<a name="l00139"></a>00139 <span class="preprocessor">        }                                                                      \</span>
-<a name="l00140"></a>00140 <span class="preprocessor">        (void)_ret;                                                            \</span>
-<a name="l00141"></a>00141 <span class="preprocessor">}</span>
-<a name="l00142"></a>00142 <span class="preprocessor"></span>
-<a name="l00151"></a><a class="code" href="data_8h.html#ae840456f64f9045e3b9748dcdf74efd5">00151</a> <span class="preprocessor">#define data_set(_ret,_type,_dt,_dst){                                                   \</span>
-<a name="l00152"></a>00152 <span class="preprocessor">        data_t __data_src = { _type, REF_##_type(_dt) };                                 \</span>
-<a name="l00153"></a>00153 <span class="preprocessor">        fastcall_transfer _r_transfer = { { 3, ACTION_TRANSFER }, _dst };                \</span>
-<a name="l00154"></a>00154 <span class="preprocessor">        _ret = data_query(&amp;__data_src, &amp;_r_transfer);                                    \</span>
-<a name="l00155"></a>00155 <span class="preprocessor">        (void)_ret;                                                                      \</span>
-<a name="l00156"></a>00156 <span class="preprocessor">}</span>
-<a name="l00157"></a>00157 <span class="preprocessor"></span>
-<a name="l00167"></a><a class="code" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">00167</a> <span class="preprocessor">#define data_convert(_ret, _type, _dst, _src) {                                          \</span>
-<a name="l00168"></a>00168 <span class="preprocessor">        data_t __data_dst = { _type, REF_##_type(_dst) };                                \</span>
-<a name="l00169"></a>00169 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(clean) };  \</span>
-<a name="l00170"></a>00170 <span class="preprocessor">        _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \</span>
-<a name="l00171"></a>00171 <span class="preprocessor">        _dst = DEREF_##_type(&amp;__data_dst);                                               \</span>
-<a name="l00172"></a>00172 <span class="preprocessor">        (void)_ret;                                                                      \</span>
-<a name="l00173"></a>00173 <span class="preprocessor">};</span>
-<a name="l00174"></a>00174 <span class="preprocessor"></span>
-<a name="l00175"></a>00175 <span class="preprocessor">#endif // DATA_H</span>
+<a name="l00074"></a>00074 <span class="preprocessor">#include &lt;enum/action/action_t.h&gt;</span>
+<a name="l00075"></a>00075 <span class="preprocessor">#include &lt;enum/datatype/datatype_t.h&gt;</span>
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 <span class="keyword">typedef</span> <span class="keyword">enum</span> data_api_type {
+<a name="l00078"></a>00078         API_DEFAULT_HANDLER,
+<a name="l00079"></a>00079         API_HANDLERS
+<a name="l00080"></a>00080 } data_api_type;
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082 <span class="keyword">typedef</span> ssize_t    (*f_data_func)  (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *, <span class="keywordtype">void</span> *args);
+<a name="l00083"></a>00083 
+<a name="l00085"></a><a class="code" href="structdata__t.html">00085</a> <span class="keyword">struct </span><a class="code" href="structdata__t.html" title="Data holder.">data_t</a> {
+<a name="l00086"></a><a class="code" href="structdata__t.html#a37ca1479ebef0751ffe2815dd54b0524">00086</a>         datatype_t             <a class="code" href="structdata__t.html#a37ca1479ebef0751ffe2815dd54b0524" title="Data type. One of TYPE_*. Use datatype_t to hold this value.">type</a>; 
+<a name="l00087"></a><a class="code" href="structdata__t.html#add9af9569af79ec26dd741fb226b38ba">00087</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structdata__t.html#add9af9569af79ec26dd741fb226b38ba" title="Pointer to data.">ptr</a>;  
+<a name="l00088"></a>00088 };
+<a name="l00089"></a>00089 
+<a name="l00090"></a><a class="code" href="structdata__proto__t.html">00090</a> <span class="keyword">struct </span><a class="code" href="structdata__proto__t.html">data_proto_t</a> {
+<a name="l00091"></a>00091         <span class="keywordtype">char</span>                  *type_str;
+<a name="l00092"></a>00092         datatype_t             type;
+<a name="l00093"></a>00093         data_api_type          api_type;
+<a name="l00094"></a>00094         
+<a name="l00095"></a>00095         f_data_func            handler_default;
+<a name="l00096"></a>00096         f_data_func            handlers[ACTION_INVALID];
+<a name="l00097"></a>00097 };
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> **         data_protos;
+<a name="l00100"></a>00100 <span class="keyword">extern</span> uintmax_t               data_protos_nitems;
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102 ssize_t                  frozen_data_init(<span class="keywordtype">void</span>);
+<a name="l00103"></a>00103 <span class="keywordtype">void</span>                     frozen_data_destroy(<span class="keywordtype">void</span>);
+<a name="l00104"></a>00104 
+<a name="l00110"></a>00110 API ssize_t              data_register          (<a class="code" href="structdata__proto__t.html">data_proto_t</a> *proto);
+<a name="l00111"></a>00111 
+<a name="l00120"></a>00120 API ssize_t              data_query             (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <span class="keywordtype">void</span> *args);
+<a name="l00121"></a>00121 
+<a name="l00130"></a><a class="code" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">00130</a> <span class="preprocessor">#define data_get(_ret,_type,_dt,_src){                                         \</span>
+<a name="l00131"></a>00131 <span class="preprocessor">        if((_src) != NULL &amp;&amp; (_src)-&gt;type == _type){                           \</span>
+<a name="l00132"></a>00132 <span class="preprocessor">                _dt  = DEREF_##_type(_src);                                    \</span>
+<a name="l00133"></a>00133 <span class="preprocessor">                _ret = 0;                                                      \</span>
+<a name="l00134"></a>00134 <span class="preprocessor">        }else{                                                                 \</span>
+<a name="l00135"></a>00135 <span class="preprocessor">                if( HAVEBUFF_##_type == 1 ){                                   \</span>
+<a name="l00136"></a>00136 <span class="preprocessor">                        data_convert(_ret, _type, _dt, _src);                  \</span>
+<a name="l00137"></a>00137 <span class="preprocessor">                }else{                                                         \</span>
+<a name="l00138"></a>00138 <span class="preprocessor">                        _ret = -EINVAL;                                        \</span>
+<a name="l00139"></a>00139 <span class="preprocessor">                }                                                              \</span>
+<a name="l00140"></a>00140 <span class="preprocessor">        }                                                                      \</span>
+<a name="l00141"></a>00141 <span class="preprocessor">        (void)_ret;                                                            \</span>
+<a name="l00142"></a>00142 <span class="preprocessor">}</span>
+<a name="l00143"></a>00143 <span class="preprocessor"></span>
+<a name="l00152"></a><a class="code" href="data_8h.html#a418ba9c2e3050d3403c1f40272a83d47">00152</a> <span class="preprocessor">#define data_consume(_ret,_type,_dt,_src){                                     \</span>
+<a name="l00153"></a>00153 <span class="preprocessor">        data_get(_ret,_type,_dt,_src);                                         \</span>
+<a name="l00154"></a>00154 <span class="preprocessor">        if(_ret == 0){                                                         \</span>
+<a name="l00155"></a>00155 <span class="preprocessor">                _src-&gt;type = TYPE_VOIDT;                                       \</span>
+<a name="l00156"></a>00156 <span class="preprocessor">                _src-&gt;ptr  = NULL;                                             \</span>
+<a name="l00157"></a>00157 <span class="preprocessor">        }                                                                      \</span>
+<a name="l00158"></a>00158 <span class="preprocessor">}</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span>
+<a name="l00167"></a><a class="code" href="data_8h.html#a3e4322607c859246bdfc7f656822e160">00167</a> <span class="preprocessor">#define holder_consume(_ret,_dt,_src){                                         \</span>
+<a name="l00168"></a>00168 <span class="preprocessor">        if( (_src) != NULL){                                                   \</span>
+<a name="l00169"></a>00169 <span class="preprocessor">                _dt = *(_src);                                                 \</span>
+<a name="l00170"></a>00170 <span class="preprocessor">                (_src)-&gt;type = TYPE_VOIDT;                                     \</span>
+<a name="l00171"></a>00171 <span class="preprocessor">                (_src)-&gt;ptr  = NULL;                                           \</span>
+<a name="l00172"></a>00172 <span class="preprocessor">                _ret = 0;                                                      \</span>
+<a name="l00173"></a>00173 <span class="preprocessor">        }else{                                                                 \</span>
+<a name="l00174"></a>00174 <span class="preprocessor">                _ret = -EINVAL;                                                \</span>
+<a name="l00175"></a>00175 <span class="preprocessor">        }                                                                      \</span>
+<a name="l00176"></a>00176 <span class="preprocessor">}</span>
+<a name="l00177"></a>00177 <span class="preprocessor"></span>
+<a name="l00186"></a><a class="code" href="data_8h.html#ae840456f64f9045e3b9748dcdf74efd5">00186</a> <span class="preprocessor">#define data_set(_ret,_type,_dt,_dst){                                                   \</span>
+<a name="l00187"></a>00187 <span class="preprocessor">        data_t __data_src = { _type, REF_##_type(_dt) };                                 \</span>
+<a name="l00188"></a>00188 <span class="preprocessor">        fastcall_transfer _r_transfer = { { 3, ACTION_TRANSFER }, _dst };                \</span>
+<a name="l00189"></a>00189 <span class="preprocessor">        _ret = data_query(&amp;__data_src, &amp;_r_transfer);                                    \</span>
+<a name="l00190"></a>00190 <span class="preprocessor">        (void)_ret;                                                                      \</span>
+<a name="l00191"></a>00191 <span class="preprocessor">}</span>
+<a name="l00192"></a>00192 <span class="preprocessor"></span>
+<a name="l00202"></a><a class="code" href="data_8h.html#a5f5647dd60912e1f4926b8a51995f880">00202</a> <span class="preprocessor">#define data_convert(_ret, _type, _dst, _src) {                                          \</span>
+<a name="l00203"></a>00203 <span class="preprocessor">        data_t __data_dst = { _type, REF_##_type(_dst) };                                \</span>
+<a name="l00204"></a>00204 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(clean) };  \</span>
+<a name="l00205"></a>00205 <span class="preprocessor">        _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \</span>
+<a name="l00206"></a>00206 <span class="preprocessor">        _dst = DEREF_##_type(&amp;__data_dst);                                               \</span>
+<a name="l00207"></a>00207 <span class="preprocessor">        (void)_ret;                                                                      \</span>
+<a name="l00208"></a>00208 <span class="preprocessor">};</span>
+<a name="l00209"></a>00209 <span class="preprocessor"></span>
+<a name="l00210"></a>00210 <span class="preprocessor">#endif // DATA_H</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:45 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

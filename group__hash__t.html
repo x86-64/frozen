@@ -72,7 +72,7 @@
       };
 </pre></div> </div>
 
-<h3><a class="anchor" id="hash_t_overview"></a>Hash overview</h3><div class="textblock"><p>Hashes used to store key-value pairs. This is not crypto nor fast-lookup hashes. From C point of view, hash is array of <a class="el" href="structhash__t.html" title="Hash item.">hash_t</a> structure. Example of hash: </p>
+<h3><a class="anchor" id="hash_t_overview"></a>Hash overview</h3><div class="textblock"><p>Hashes used to data key-value pairs. This is not crypto nor fast-lookup hashes. From C point of view, hash is array of <a class="el" href="structhash__t.html" title="Hash item.">hash_t</a> structure. Example of hash: </p>
 <div class="fragment"><pre class="fragment">     <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> somehash[] = {
           { HK(key1), DATA_UINTT(100) },      <span class="comment">// (1)</span>
           { HK(key2), DATA_UINTT(200) },
@@ -106,14 +106,14 @@
 
 <h3><a class="anchor" id="hash_t_recomendations"></a>Recomendations</h3><div class="textblock"><ul>
 <li>Don't mess with clear assignment, just redefine. It is cheap and fast. </li>
-<li>Keep old request inlined in new requests. Hash can contain some keys you can't know about, and some backend is waiting them. </li>
+<li>Keep old request inlined in new requests. Hash can contain some keys you can't know about, and some machine is waiting them. </li>
 <li>To lower access time to hash keep keys than would be accessed many times as top as possible. That's why action key is at top in most of requests. </li>
 </ul>
 </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 14 2012 19:28:38 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
