@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>frozen: Tutorial: mongrel2 handlers</title>
-
+<meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
+<title>Frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
 
 
@@ -51,7 +51,7 @@
 <div class="contents">
 <h2><a class="anchor" id="tutorial_mod_overview"></a>
 Overview</h2>
-<p>With frozen you can easily create custom handlers for mongrel2. To make one we need mod_machine_zmq and <a class="el" href="group__mod__machine__mongrel2.html">module/c_mongrel2</a>. Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need create two sockets. Request will flow from one socket, pass through set of machines and end up in second socket.</p>
+<p>With frozen you can easily create custom handlers for mongrel2. To make one we need <a class="el" href="group__zeromq__t.html">zeromq_t</a> and <a class="el" href="group__mod__machine__mongrel2.html">module/c_mongrel2</a>. Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need create two sockets. Request will flow from one socket, pass through set of machines and end up in second socket.</p>
 <h2><a class="anchor" id="tutorial_mod_example"></a>
 Example configuration</h2>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
@@ -280,7 +280,7 @@ Benchmarking results</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:22:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
