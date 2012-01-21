@@ -113,13 +113,13 @@ static int mphf_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t               ret;
-	uint32_t              action;
+	action_t              action;
 	uintmax_t             d_input;
 	uintmax_t            *d_output;
 	data_t               *data_output;
 	mphf_userdata        *userdata           = (mphf_userdata *)machine->userdata;
 
-	hash_data_get(ret, TYPE_UINT32T, action, request, HK(action));
+	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(ret != 0)
 		return -ENOSYS;
 	
@@ -190,6 +190,8 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 			}
 			
 			break;
+		default:
+			return -ENOSYS;
 	}
 	return 0;
 } // }}}

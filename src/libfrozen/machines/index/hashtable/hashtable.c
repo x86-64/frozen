@@ -30,8 +30,8 @@
 #define EMODULE              31
 
 typedef struct hashtable_userdata {
-	hashkey_t           input;
-	uintmax_t            hashtable_size;
+	hashkey_t              input;
+	uintmax_t              hashtable_size;
 } hashtable_userdata;
 
 static int hashtable_init(machine_t *machine){ // {{{
@@ -62,11 +62,9 @@ static int hashtable_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t hashtable_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	uint32_t               action;
 	uintmax_t              d_input;
 	hashtable_userdata    *userdata          = (hashtable_userdata *)machine->userdata;
 
-	hash_data_get(ret, TYPE_UINT32T, action,  request, HK(action));         if(ret != 0) return -ENOSYS;
 	hash_data_get(ret, TYPE_UINTT,   d_input, request, userdata->input);
 	if(ret == 0){
 		d_input = d_input % userdata->hashtable_size;

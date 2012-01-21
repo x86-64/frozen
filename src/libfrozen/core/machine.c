@@ -367,9 +367,9 @@ ssize_t            machine_query        (machine_t *machine, request_t *request)
 		}
 		
 		if( (machine->supported_api & API_CRWD) != 0){
-			uint32_t               r_action;
+			action_t               r_action;
 			
-			hash_data_get(ret, TYPE_UINT32T, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
+			hash_data_get(ret, TYPE_ACTIONT, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
 			
 			switch(r_action){
 				case ACTION_CREATE: func = machine->machine_type_crwd.func_create; break;

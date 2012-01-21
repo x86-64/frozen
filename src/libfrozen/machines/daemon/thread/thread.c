@@ -163,9 +163,9 @@ static int thread_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	uintmax_t              action;
+	action_t               action;
 	
-	hash_data_get(ret, TYPE_UINTT, action, request, HK(action));
+	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	
 	switch(action){
 		case ACTION_START: return thread_control_start(machine);

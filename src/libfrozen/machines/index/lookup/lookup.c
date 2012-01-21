@@ -59,7 +59,7 @@ static ssize_t lookup_handler(machine_t *machine, request_t *request){ // {{{
 	lookup_userdata       *userdata          = (lookup_userdata *)machine->userdata;
 	
 	request_t r_query[] = {
-		{ HK(action),          DATA_UINT32T(ACTION_READ) },
+		{ HK(action),          DATA_ACTIONT(ACTION_READ) },
 		{ HK(return_to),       DATA_MACHINET(machine)    },
 		hash_next(request)
 	};

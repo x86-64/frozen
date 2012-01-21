@@ -222,7 +222,7 @@ static uintmax_t cache_get_filesize(machine_t *machine){ // {{{
 	
 	/* get file size */
 	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_COUNT)   },
+		{ HK(action), DATA_ACTIONT(ACTION_COUNT)        },
 		{ HK(buffer), DATA_PTR_UINTT(&file_size)        },
 		{ HK(ret),    DATA_PTR_SIZET(&ret)              },
 		hash_end

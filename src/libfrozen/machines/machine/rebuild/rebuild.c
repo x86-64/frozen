@@ -111,7 +111,7 @@ redo:
 			uintmax_t              count = 0;
 			
 			request_t r_count[] = {
-				{ HK(action), DATA_UINT32T(ACTION_COUNT) },
+				{ HK(action), DATA_ACTIONT(ACTION_COUNT) },
 				{ HK(buffer), DATA_PTR_UINTT(&count)          },
 				{ HK(ret),    DATA_PTR_SIZET(&rret)           },
 				hash_next(userdata->req_count)
@@ -123,7 +123,7 @@ redo:
 			
 			for(i=0; i<count; i++){
 				request_t r_read[] = {
-					{ HK(action),          DATA_UINT32T(ACTION_READ)          },
+					{ HK(action),          DATA_ACTIONT(ACTION_READ)          },
 					{ userdata->hk_offset, DATA_UINTT(i)                           }, // copy of i, not ptr
 					hash_next(userdata->req_read)
 				};
@@ -135,7 +135,7 @@ redo:
 
 				if(userdata->writer){
 					request_t r_write[] = {
-						{ HK(action),          DATA_UINT32T(ACTION_CREATE)        },
+						{ HK(action),          DATA_ACTIONT(ACTION_CREATE)        },
 						{ userdata->hk_offset, DATA_UINTT(i)                           }, // r_read could change offset during request, so, new copy
 						hash_next(r_read)
 					};
@@ -195,7 +195,7 @@ static int rebuildread_configure(machine_t *machine, config_t *config){ // {{{
 	
 	if(req_rebuild_enable != 0){                         // emit allowed, prepare signal
 		hash_t r_signal_orig[] = {
-			{ HK(action),        DATA_UINT32T(ACTION_REBUILD)           },
+			{ HK(action),        DATA_ACTIONT(ACTION_REBUILD)           },
 			hash_end	
 		};
 		if(req_rebuild == NULL)                      // no custom signal supplied, use standard

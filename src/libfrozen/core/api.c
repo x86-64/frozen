@@ -8,7 +8,7 @@ extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
 
 ssize_t     action_create_from_fast(machine_t *machine, fastcall_create *fargs){ // {{{
 	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(size),       DATA_PTR_UINTT( &fargs->size                       ) },
 		{ HK(offset_out), DATA_PTR_UINTT( &fargs->offset                     ) },
 		hash_end
@@ -33,7 +33,7 @@ ssize_t     action_create_from_hash(data_t *data, request_t *request){ // {{{
 
 ssize_t     action_io_from_fast(machine_t *machine, fastcall_io *fargs){ // {{{
 	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(offset),     DATA_PTR_UINTT( &fargs->offset                     ) },
 		{ HK(buffer),     DATA_RAW(        fargs->buffer, fargs->buffer_size ) },
 		{ HK(size),       DATA_PTR_UINTT( &fargs->buffer_size                ) },
@@ -98,7 +98,7 @@ ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
 
 ssize_t     action_delete_from_fast(machine_t *machine, fastcall_delete *fargs){ // {{{
 	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(offset),     DATA_PTR_UINTT( &fargs->offset                     ) },
 		{ HK(size),       DATA_PTR_UINTT( &fargs->size                       ) },
 		hash_end
@@ -117,7 +117,7 @@ ssize_t     action_delete_from_hash(data_t *data, request_t *request){ // {{{
 
 ssize_t     action_count_from_fast(machine_t *machine, fastcall_count *fargs){ // {{{
 	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(buffer),     DATA_PTR_UINTT( &fargs->nelements                  ) },
 		hash_end
 	};
@@ -139,7 +139,7 @@ ssize_t     action_count_from_hash(data_t *data, request_t *request){ // {{{
 
 ssize_t     action_transfer_from_fast(machine_t *machine, fastcall_transfer *fargs){ // {{{
 	request_t  r_next[] = {
-		{ HK(action),      DATA_PTR_UINTT( &fargs->header.action              ) },
+		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(destination), *fargs->dest                                         },
 		hash_end
 	};

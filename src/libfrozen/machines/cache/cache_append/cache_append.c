@@ -61,7 +61,7 @@ static int cacheapp_configure(machine_t *machine, hash_t *config){ // {{{
 	
 	//get file size //
 	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_COUNT)   },
+		{ HK(action), DATA_ACTIONT(ACTION_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINT64T(&file_size)      },
 		hash_end
 	};
@@ -173,7 +173,7 @@ static ssize_t cacheapp_machine_rest(machine_t *machine, request_t *request){ //
 	
 	//get file size //
 	request_t r_count[] = {
-		{ HK(action), DATA_UINT32T(ACTION_COUNT)   },
+		{ HK(action), DATA_ACTIONT(ACTION_COUNT)   },
 		{ HK(buffer), DATA_PTR_UINT64T(&file_size)      },
 		hash_end
 	};
