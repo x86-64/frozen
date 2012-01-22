@@ -10,7 +10,7 @@ ssize_t     action_create_from_fast(machine_t *machine, fastcall_create *fargs){
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(size),       DATA_PTR_UINTT( &fargs->size                       ) },
-		{ HK(offset_out), DATA_PTR_UINTT( &fargs->offset                     ) },
+		{ HK(offset),     DATA_PTR_UINTT( &fargs->offset                     ) },
 		hash_end
 	};
 	return machine_query(machine, r_next);
@@ -23,10 +23,10 @@ ssize_t     action_create_from_hash(data_t *data, request_t *request){ // {{{
 	
 	ret = data_query(data, &fargs);
 	
-	data_t                *offset_out        = hash_data_find(request, HK(offset_out));
+	data_t                *offset            = hash_data_find(request, HK(offset));
 	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.offset, sizeof(fargs.offset) };
-	if(offset_out)
-		data_query(offset_out, &r_write);
+	if(offset)
+		data_query(offset, &r_write);
 	
 	return ret;
 } // }}}
