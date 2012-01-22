@@ -43,9 +43,8 @@ typedef struct mphf_userdata {
 	mphf_proto_t        *mphf_proto;
 	uintmax_t            broken;
 
-	hashkey_t           input;
-	hashkey_t           output;
-
+	hashkey_t            input;
+	hashkey_t            output;
 } mphf_userdata;
 
 static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
@@ -54,40 +53,9 @@ static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
 	if(strcmp(string, "bdz_imp") == 0) return &mphf_protos[MPHF_TYPE_BDZ_IMP];
 	return NULL;
 } // }}}
-static ssize_t          mphf_configure_any(machine_t *machine, config_t *config, request_t *fork_req){ // {{{
-	ssize_t          ret;
-	uintmax_t        fork_only       = 0;
-	char            *mphf_type_str   = NULL;
-	mphf_userdata   *userdata        = (mphf_userdata *)machine->userdata;
-	
-	hash_data_get(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
-	hash_data_get(ret, TYPE_UINTT,    fork_only,        config, HK(fork_only));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
-       
-	if(fork_only == 1 && fork_req == NULL)
-		return 0;
-
-	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
-		return error("machine mphf parameter mphf_type invalid or not supplied");
-	
-	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
-	
-	userdata->mphf.config     = config;
-	userdata->broken          = 0;
-
-	if(fork_req == NULL){
-		if( (ret = userdata->mphf_proto->func_load(&userdata->mphf)) < 0)
-			return ret;
-	}else{
-		if( (ret = userdata->mphf_proto->func_fork(&userdata->mphf, fork_req)) < 0)
-			return ret;
-	}
-	return 0;
-} // }}}
 
 static int mphf_init(machine_t *machine){ // {{{
-	mphf_userdata *userdata = machine->userdata = calloc(1, sizeof(mphf_userdata));
+	mphf_userdata         *userdata          = machine->userdata = calloc(1, sizeof(mphf_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
 	
@@ -96,8 +64,8 @@ static int mphf_init(machine_t *machine){ // {{{
 	return 0;
 } // }}}
 static int mphf_destroy(machine_t *machine){ // {{{
-	intmax_t       ret;
-	mphf_userdata *userdata = (mphf_userdata *)machine->userdata;
+	ssize_t                ret;
+	mphf_userdata         *userdata          = (mphf_userdata *)machine->userdata;
 	
 	if(userdata->mphf_proto != NULL){
 		if( (ret = userdata->mphf_proto->func_unload(&userdata->mphf)) < 0)
@@ -108,7 +76,23 @@ static int mphf_destroy(machine_t *machine){ // {{{
 	return 0;
 } // }}}
 static int mphf_configure(machine_t *machine, config_t *config){ // {{{
-	return mphf_configure_any(machine, config, NULL);
+	ssize_t                ret;
+	char                  *mphf_type_str     = NULL;
+	mphf_userdata         *userdata          = (mphf_userdata *)machine->userdata;
+	
+	hash_data_get(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
+	
+	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
+		return error("machine mphf parameter mphf_type invalid or not supplied");
+	
+	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
+	userdata->broken          = 0;
+	
+	if( (ret = userdata->mphf_proto->func_load(&userdata->mphf, config)) < 0)
+		return ret;
+	return 0;
 } // }}}
 
 static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
@@ -118,7 +102,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	uintmax_t            *d_output;
 	data_t               *data_output;
 	mphf_userdata        *userdata           = (mphf_userdata *)machine->userdata;
-
+	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(ret != 0)
 		return -ENOSYS;
@@ -193,7 +177,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 		default:
 			return -ENOSYS;
 	}
-	return 0;
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t mphf_proto = {

@@ -10,7 +10,6 @@
   - shop_return
 
 - broken mphf machine rebuild: allocator machine not used in chain, coz structs unable to talk with FAST api
-- broken mphf
 - broken tcp
 
 - join physical and logical length into one

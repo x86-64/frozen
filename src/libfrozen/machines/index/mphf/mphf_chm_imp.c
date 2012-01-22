@@ -12,19 +12,14 @@
  *              nelements_min           = (uint_t)'1000',    # starting index size, default 256
  *              nelements_step          = (uint_t)'500',     # index expanding step size, default 256
  *              nelements_mul           = (uint_t)'2',       # index expanding multiply coefficient, default 1
- *              value_bits              = (uint_t)'32',      # value size in bits
- *              readonly                = (uint_t)'0',       # index in read-only mode
- *              machine_g               = (machine_t)'name', # machine for storing g-array
- *              machine_v               = (machine_t)'name', # machine for storing v-array
- *              machine_e               = (machine_t)'name'  # machine for storing e-array
+ *              value_size              = (uint_t)'4',       # value size in bytes, default 4
+ *              readonly                = (uint_t)'0',       # index in read-only mode, default 0
+ *              data_g                  = (file_t){ ... },   # data for storing g-array
+ *              data_v                  = (file_t){ ... },   # data for storing v-array, optional for read-only mode
+ *              data_e                  = (file_t){ ... },   # data for storing e-array, optional for read-only mode
  * }
  * @endcode
  */
-
-typedef enum chm_imp_fill_flags {
-	FILLED                 = 1,
-	WRITEABLE              = 2
-} chm_imp_fill_flags;
 
 typedef struct chm_imp_params_t {
 	uintmax_t               capacity;  // current mphf capacity
@@ -34,21 +29,18 @@ typedef struct chm_imp_params_t {
 } chm_imp_params_t;
 
 typedef struct chm_imp_t {
-	uintmax_t              status;
-	
-	machine_t             *be_g;
-	machine_t             *be_v;
-	machine_t             *be_e;
+	data_t                 be_g;
+	data_t                 be_v;
+	data_t                 be_e;
 	
 	chm_imp_params_t       params;
 	uintmax_t              nelements_min;  // minimum required capacity
 	uintmax_t              nelements_step; // minimum capacity step
-	uintmax_t              nelements_mul; // capacity step multiplexer
+	uintmax_t              nelements_mul;  // capacity step multiplexer
 	uintmax_t              nvertex;
-	uintmax_t              bi_value;
 	uintmax_t              bt_value;
 	uintmax_t              bt_vertex;
-	uintmax_t              bi_vertex;
+	uintmax_t              readonly;
 } chm_imp_t;
 
 typedef struct graph_edge_t {
@@ -67,8 +59,7 @@ typedef struct vertex_list_t {
 #define CAPACITY_MIN_DEFAULT  256
 #define CAPACITY_STEP_DEFAULT 256
 #define CAPACITY_MUL_DEFAULT  1
-#define KEY_BITS_DEFAULT      32
-#define VALUE_BITS_DEFAULT    32
+#define VALUE_BYTES_DEFAULT   32
 #define BITS_TO_BYTES(x) ( ((x - 1) >> 3) + 1)
 
 //#define MPHF_DEBUG
@@ -95,7 +86,7 @@ static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	fastcall_read r_read = { { 5, ACTION_READ }, 0, &data->params, sizeof(data->params) };
-	if(machine_fast_query(data->be_g, &r_read) < 0){
+	if(data_query(&data->be_g, &r_read) < 0){
 		memset(&data->params, 0, sizeof(data->params));
 		return -EFAULT;
 	}
@@ -106,122 +97,73 @@ static ssize_t chm_imp_param_write(mphf_t *mphf){ // {{{
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &data->params, sizeof(data->params) };
-	if(machine_fast_query(data->be_g, &r_write) < 0)
+	if(data_query(&data->be_g, &r_write) < 0)
 		return error("params write failed");
 	
 	return 0;
 } // }}}
-static ssize_t chm_imp_file_wipe  (mphf_t *mphf){ // {{{
-	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
-	
-	fastcall_count r_count = { { 3, ACTION_COUNT } };
-	
-	// kill g
-	r_count.nelements = 0;
-	machine_fast_query(data->be_g, &r_count);
-	if(r_count.nelements != 0){
-		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
-		if(machine_fast_query(data->be_g, &r_delete) < 0)
-			return error("g array delete failed");
-	}
-	
-	// kill e
-	r_count.nelements = 0;
-	machine_fast_query(data->be_e, &r_count);
-	if(r_count.nelements != 0){
-		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
-		if(machine_fast_query(data->be_e, &r_delete) < 0)
-			return error("g array delete failed");
-	}
-	
-	// kill v
-	r_count.nelements = 0;
-	machine_fast_query(data->be_v, &r_count);
-	if(r_count.nelements != 0){
-		fastcall_delete r_delete = { { 4, ACTION_DELETE }, 0, r_count.nelements };
-		if(machine_fast_query(data->be_v, &r_delete) < 0)
-			return error("g array delete failed");
-	}
-	return 0;
-} // }}}
-static ssize_t chm_imp_file_one_init(machine_t *machine, uintmax_t size){ // {{{
+static ssize_t chm_imp_file_one_init(data_t *data, uintmax_t size){ // {{{
+	ssize_t                ret;
 	uintmax_t              fill_size;
+	uintmax_t              offset;
 	
-	fastcall_create r_create = { { 4, ACTION_CREATE }, size };
-	if(machine_fast_query(machine, &r_create) < 0)
-		return -1;
+	fastcall_resize r_resize = { { 3, ACTION_RESIZE }, size };
+	if( (ret = data_query(data, &r_resize)) < 0)
+		return ret;
 	
-	if(r_create.offset != 0)                                 // TODO remove this
-		return -1;
-	
-	do{
+	offset = 0;
+	while(size > 0){
 		fill_size = MIN(size, sizeof(clean));
 		
-		fastcall_write r_write = { { 5, ACTION_WRITE }, r_create.offset, &clean, fill_size };
-		if(machine_fast_query(machine, &r_write) != 0)
-			return -1;
+		fastcall_write r_write = { { 5, ACTION_WRITE }, offset, &clean, fill_size };
+		if( (ret = data_query(data, &r_write)) < 0)
+			return ret;
 		
-		r_create.offset  += r_write.buffer_size;
+		offset           += r_write.buffer_size;
 		size             -= r_write.buffer_size;
-	}while(size > 0);
+	}
 	return 0;
 } // }}}
 static ssize_t chm_imp_file_init  (mphf_t *mphf){ // {{{
-	ssize_t                ret;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_file_wipe(mphf)) < 0)
-		return ret;
-	
 	// fill g
-	if(chm_imp_file_one_init(data->be_g, sizeof(data->params) + data->nvertex * data->bt_value) != 0)
+	if(chm_imp_file_one_init(&data->be_g, sizeof(data->params) + data->nvertex * data->bt_value) != 0)
 		return error("g array init failed");
 	
 	// fill v
-	if(chm_imp_file_one_init(data->be_v, data->nvertex * data->bt_vertex) != 0)
+	if(chm_imp_file_one_init(&data->be_v, data->nvertex * data->bt_vertex) != 0)
 		return error("v array init failed");
 	
 	// fill e
-	// empty
+	if(chm_imp_file_one_init(&data->be_e, 0) != 0)
+		return error("e array init failed");
 	return 0;
 } // }}}
-static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *fork_req){ // {{{
+static ssize_t chm_imp_configure  (mphf_t *mphf, request_t *config){ // {{{
 	ssize_t                ret;
-	uintmax_t              nelements_min     = CAPACITY_MIN_DEFAULT;
-	uintmax_t              nelements_step    = CAPACITY_STEP_DEFAULT;
-	uintmax_t              nelements_mul     = CAPACITY_MUL_DEFAULT;
-	uintmax_t              bi_value          = VALUE_BITS_DEFAULT;
-	uintmax_t              readonly          = 0;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
-	if( (data->status & FILLED) == 0){
-		hash_data_get(ret, TYPE_UINTT,  nelements_min,  mphf->config, HK(nelements_min));
-		hash_data_get(ret, TYPE_UINTT,  nelements_step, mphf->config, HK(nelements_step));
-		hash_data_get(ret, TYPE_UINTT,  nelements_mul,  mphf->config, HK(nelements_mul));
-		hash_data_get(ret, TYPE_UINTT,  bi_value,       mphf->config, HK(value_bits));     // number of bits per value to data
-		hash_data_get(ret, TYPE_UINTT,  readonly,       mphf->config, HK(readonly));       // run in read-only mode
-		
-		hash_data_consume(ret, TYPE_MACHINET, data->be_g,         mphf->config, HK(machine_g));
-		hash_data_consume(ret, TYPE_MACHINET, data->be_v,         mphf->config, HK(machine_g));
-		hash_data_consume(ret, TYPE_MACHINET, data->be_e,         mphf->config, HK(machine_g));
-		
-		if(data->be_g == NULL)
-			return error("machine chm_imp parameter machine_g invalid");
-		
-		if(data->be_v == NULL || data->be_e == NULL || readonly != 0){
-			data->status &= ~WRITEABLE;
-		}else{
-			data->status |= WRITEABLE;
-		}
-		
-		data->nelements_min  = nelements_min;
-		data->nelements_step = nelements_step;
-		data->nelements_mul  = nelements_mul;
-		data->bi_value       = bi_value;
-		data->bt_value       = BITS_TO_BYTES(data->bi_value);
-		
-		data->status        |= FILLED;
-	}
+	data->nelements_min  = CAPACITY_MIN_DEFAULT;
+	data->nelements_step = CAPACITY_STEP_DEFAULT;
+	data->nelements_mul  = CAPACITY_MUL_DEFAULT;
+	data->readonly       = 0;
+	
+	hash_data_get(ret, TYPE_UINTT,  data->nelements_min,  config, HK(nelements_min));
+	hash_data_get(ret, TYPE_UINTT,  data->nelements_step, config, HK(nelements_step));
+	hash_data_get(ret, TYPE_UINTT,  data->nelements_mul,  config, HK(nelements_mul));
+	hash_data_get(ret, TYPE_UINTT,  data->bt_value,       config, HK(value_size));
+	hash_data_get(ret, TYPE_UINTT,  data->readonly,       config, HK(readonly));       // run in read-only mode
+	
+	if(data->bt_value > sizeof(uintmax_t))
+		return error("value_size is too big");
+	
+	hash_holder_consume(ret, data->be_v, config, HK(data_v)); if(ret != 0) data->readonly = 1;
+	hash_holder_consume(ret, data->be_e, config, HK(data_e)); if(ret != 0) data->readonly = 1;
+	hash_holder_consume(ret, data->be_g, config, HK(data_g));
+	if(ret != 0)
+		return error("data chm_imp parameter data_g invalid");
+	
 	return 0;
 } // }}}
 static ssize_t chm_imp_configure_r(mphf_t *mphf, uintmax_t capacity){ // {{{
@@ -241,16 +183,15 @@ static ssize_t chm_imp_configure_r(mphf_t *mphf, uintmax_t capacity){ // {{{
 	
 	data->nvertex            = nvertex;
 	data->params.capacity    = capacity;
-	data->bi_vertex          = log_any(nvertex, 2);
-	data->bt_vertex          = BITS_TO_BYTES(data->bi_vertex);
+	data->bt_vertex          = BITS_TO_BYTES( log_any(nvertex, 2) );
 	return 0;
 } // }}}
-static ssize_t chm_imp_load       (mphf_t *mphf, request_t *fork_req){ // {{{
+static ssize_t chm_imp_load       (mphf_t *mphf, request_t *config){ // {{{
 	ssize_t                ret;
 	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
 	
 	// configure initial parameters for mphf
-	if( (ret = chm_imp_configure(mphf, fork_req)) < 0)
+	if( (ret = chm_imp_configure(mphf, config)) < 0)
 		return ret;
 	
 	if( (ret = chm_imp_param_read(mphf)) < 0)
@@ -269,23 +210,30 @@ rebuild:
 	// if mphf not exist - run rebuild with minimum nelements
 	return mphf_chm_imp_rebuild(mphf);
 } // }}}
-static ssize_t chm_imp_check      (mphf_t *mphf, size_t flags){ // {{{
-	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
-	
-	if( (flags & WRITEABLE) && ((data->status & WRITEABLE) == 0) )
-		return error("mphf is read-only");
-	
-	return 0;
-} // }}}
 static ssize_t chm_imp_unload     (mphf_t *mphf){ // {{{
 	chm_imp_t             *data  = (chm_imp_t *)&mphf->data;
 	
 	// save .params
 	chm_imp_param_write(mphf);
 	
-	shop_destroy(data->be_g);
-	shop_destroy(data->be_e);
-	shop_destroy(data->be_v);
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&data->be_g, &r_free);
+	data_query(&data->be_e, &r_free);
+	data_query(&data->be_v, &r_free);
+	return 0;
+} // }}}
+static ssize_t chm_imp_destroy    (mphf_t *mphf){ // {{{
+	chm_imp_t             *data              = (chm_imp_t *)&mphf->data;
+	fastcall_resize        r_resize          = { { 3, ACTION_RESIZE }, 0 };
+	
+	if(data_query(&data->be_g, &r_resize) < 0)
+		return error("g array resize failed");
+	
+	if(data_query(&data->be_e, &r_resize) < 0)
+		return error("e array resize failed");
+	
+	if(data_query(&data->be_v, &r_resize) < 0)
+		return error("v array resize failed");
 	return 0;
 } // }}}
 
@@ -295,7 +243,7 @@ static ssize_t graph_new_edge_id(chm_imp_t *data, uintmax_t *id){ // {{{
 	sizeof_edge = 4 * data->bt_vertex;
 	
 	fastcall_create r_create = { { 4, ACTION_CREATE }, sizeof_edge };
-	if(machine_fast_query(data->be_e, &r_create) < 0)
+	if(data_query(&data->be_e, &r_create) < 0)
 		return error("new_edge_id failed");
 	
 	*id = (r_create.offset / sizeof_edge) + 1;
@@ -313,7 +261,7 @@ static ssize_t graph_get_first(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 			&edge_id[i],
 			data->bt_vertex
 		};
-		if(machine_fast_query(data->be_v, &r_read) < 0)
+		if(data_query(&data->be_v, &r_read) < 0)
 			return error("get_first failed");
 	}
 	return 0;
@@ -328,7 +276,7 @@ static ssize_t graph_set_first(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 			&edge_id[i],
 			data->bt_vertex
 		};
-		if(machine_fast_query(data->be_v, &r_write)< 0)
+		if(data_query(&data->be_v, &r_write)< 0)
 			return error("set first failed");
 	}
 	return 0;
@@ -346,7 +294,7 @@ static ssize_t graph_get_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 		&buffer,
 		sizeof_edge
 	};
-	if(machine_fast_query(data->be_e, &r_read) < 0)
+	if(data_query(&data->be_e, &r_read) < 0)
 		return -ENOENT; //error("get_edge failed");
 	
 	edge->vertex[0] = (*(uintmax_t *)(buffer                                           )) & vertex_mask;
@@ -373,7 +321,7 @@ static ssize_t graph_set_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 		&buffer,
 		edge_size
 	};
-	if(machine_fast_query(data->be_e, &r_write) < 0)
+	if(data_query(&data->be_e, &r_write) < 0)
 		return error("set_edge failed");
 	
 	return 0;
@@ -418,7 +366,7 @@ static ssize_t graph_getg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, ui
 			&g[i],
 			data->bt_value
 		};
-		if(machine_fast_query(data->be_g, &r_read) < 0)
+		if(data_query(&data->be_g, &r_read) < 0)
 			return error("get_g failed");
 	}
 	return 0;
@@ -434,7 +382,7 @@ static ssize_t graph_setg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, ui
 			&new_g[i],
 			data->bt_value
 		};
-		if(machine_fast_query(data->be_g, &r_write) < 0)
+		if(data_query(&data->be_g, &r_write) < 0)
 			return error("set_g failed");
 	}
 	return 0;
@@ -554,14 +502,11 @@ insert_ok:
 	return 0;
 } // }}}
 
-ssize_t mphf_chm_imp_load        (mphf_t *mphf){ // {{{
-	return chm_imp_load(mphf, NULL);
+ssize_t mphf_chm_imp_load        (mphf_t *mphf, hash_t *config){ // {{{
+	return chm_imp_load(mphf, config);
 } // }}}
 ssize_t mphf_chm_imp_unload      (mphf_t *mphf){ // {{{
 	return chm_imp_unload(mphf);
-} // }}}
-ssize_t mphf_chm_imp_fork        (mphf_t *mphf, request_t *request){ // {{{
-	return chm_imp_load(mphf, request);
 } // }}}
 ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 	ssize_t                ret;
@@ -618,16 +563,15 @@ ssize_t mphf_chm_imp_rebuild     (mphf_t *mphf){ // {{{
 	return 0;
 } // }}}
 ssize_t mphf_chm_imp_destroy     (mphf_t *mphf){ // {{{
-	return chm_imp_file_wipe(mphf);
+	return chm_imp_destroy(mphf);
 } // }}}
 
 ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {{{
 	uintmax_t              vertex[2];
-	intmax_t               ret;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
-		return ret;
+	if(data->readonly != 0)
+		return error("mphf is read-only");
 	
 	vertex[0] = ((key ^ (uintmax_t)data->params.hash1) % data->nvertex);
 	vertex[1] = ((key ^ (uintmax_t)data->params.hash2) % data->nvertex);
@@ -648,8 +592,8 @@ ssize_t mphf_chm_imp_update (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	vertex_list_t          vertex_new;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
 	
-	if( (ret = chm_imp_check(mphf, WRITEABLE)) < 0)
-		return ret;
+	if(data->readonly != 0)
+		return error("mphf is read-only");
 	
 	vertex[0] = ((key ^ (uintmax_t)data->params.hash1) % data->nvertex);
 	vertex[1] = ((key ^ (uintmax_t)data->params.hash2) % data->nvertex);
@@ -685,12 +629,8 @@ insert_new:
 	return mphf_chm_imp_insert(mphf, key, value);
 } // }}}
 ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // {{{
-	intmax_t               ret;
 	uintmax_t              vertex[2], g[2], result;
 	chm_imp_t             *data = (chm_imp_t *)&mphf->data;
-	
-	if( (ret = chm_imp_check(mphf, 0)) < 0)
-		return ret;
 	
 	vertex[0] = ((key ^ data->params.hash1) % data->nvertex);
 	vertex[1] = ((key ^ data->params.hash2) % data->nvertex);
@@ -701,7 +641,7 @@ ssize_t mphf_chm_imp_query  (mphf_t *mphf, uintmax_t key, uintmax_t *value){ // 
 	if(graph_getg(data, 2, (uintmax_t *)&vertex, (uintmax_t *)&g) < 0)
 		return MPHF_QUERY_NOTFOUND;
 	
-	result = ((g[0] + g[1]) & ( ((uintmax_t)1 << data->bi_value) - 1));
+	result = ((g[0] + g[1]) & ( ((uintmax_t)1 << (data->bt_value * 8)) - 1));
 	
 #ifdef MPHF_DEBUG
 	printf("mphf: query %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",

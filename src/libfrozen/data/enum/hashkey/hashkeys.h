@@ -33,6 +33,9 @@
 #define HK_VALUE_count 6256
 #define HK_VALUE_create 9552
 #define HK_VALUE_data 3084
+#define HK_VALUE_data_e 9095
+#define HK_VALUE_data_g 9167
+#define HK_VALUE_data_v 9707
 #define HK_VALUE_default 15471
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
@@ -51,7 +54,6 @@
 #define HK_VALUE_folder 9747
 #define HK_VALUE_force_async 53994
 #define HK_VALUE_force_sync 41290
-#define HK_VALUE_fork_only 31758
 #define HK_VALUE_format 9917
 #define HK_VALUE_function 22303
 #define HK_VALUE_global 9415
@@ -159,6 +161,7 @@
 #define HK_VALUE_uuid 3130
 #define HK_VALUE_value 5875
 #define HK_VALUE_value_bits 41713
+#define HK_VALUE_value_size 41632
 #define HK_VALUE_values 10015
 #define HK_VALUE_verbose 14980
 #define HK_VALUE_writer 10005
@@ -195,6 +198,9 @@ typedef enum hashkey_t {
       HK_count = HK_VALUE_count, 
       HK_create = HK_VALUE_create, 
       HK_data = HK_VALUE_data, 
+      HK_data_e = HK_VALUE_data_e, 
+      HK_data_g = HK_VALUE_data_g, 
+      HK_data_v = HK_VALUE_data_v, 
       HK_default = HK_VALUE_default, 
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
@@ -213,7 +219,6 @@ typedef enum hashkey_t {
       HK_folder = HK_VALUE_folder, 
       HK_force_async = HK_VALUE_force_async, 
       HK_force_sync = HK_VALUE_force_sync, 
-      HK_fork_only = HK_VALUE_fork_only, 
       HK_format = HK_VALUE_format, 
       HK_function = HK_VALUE_function, 
       HK_global = HK_VALUE_global, 
@@ -321,6 +326,7 @@ typedef enum hashkey_t {
       HK_uuid = HK_VALUE_uuid, 
       HK_value = HK_VALUE_value, 
       HK_value_bits = HK_VALUE_value_bits, 
+      HK_value_size = HK_VALUE_value_size, 
       HK_values = HK_VALUE_values, 
       HK_verbose = HK_VALUE_verbose, 
       HK_writer = HK_VALUE_writer, 
@@ -361,6 +367,9 @@ keypair_t hashkeys[] = {
       { "count", HK_VALUE_count }, 
       { "create", HK_VALUE_create }, 
       { "data", HK_VALUE_data }, 
+      { "data_e", HK_VALUE_data_e }, 
+      { "data_g", HK_VALUE_data_g }, 
+      { "data_v", HK_VALUE_data_v }, 
       { "default", HK_VALUE_default }, 
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 
@@ -379,7 +388,6 @@ keypair_t hashkeys[] = {
       { "folder", HK_VALUE_folder }, 
       { "force_async", HK_VALUE_force_async }, 
       { "force_sync", HK_VALUE_force_sync }, 
-      { "fork_only", HK_VALUE_fork_only }, 
       { "format", HK_VALUE_format }, 
       { "function", HK_VALUE_function }, 
       { "global", HK_VALUE_global }, 
@@ -487,6 +495,7 @@ keypair_t hashkeys[] = {
       { "uuid", HK_VALUE_uuid }, 
       { "value", HK_VALUE_value }, 
       { "value_bits", HK_VALUE_value_bits }, 
+      { "value_size", HK_VALUE_value_size }, 
       { "values", HK_VALUE_values }, 
       { "verbose", HK_VALUE_verbose }, 
       { "writer", HK_VALUE_writer }, 

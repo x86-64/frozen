@@ -2,22 +2,21 @@
 { class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "restart" } } },
 { class => "emitter", request = { machine = (machine_t)"file",
 	request = {
-		action => create,
+		action => (action_t)"create",
 		size   => (size_t)'100',
 		buffer => "abcdefghjklmnopqrstuvwxyz"
 	}
 } },
 { class => "emitter", request = { machine = (machine_t)"file",
 	request = {
-		action => read,
+		action => (action_t)"read",
 		offset => (off_t)'0',
 		size   => (size_t)'26',
 		buffer => "                         "
 	}
 }, count => (uint_t)'1000000' },
-{ class => "emitter", request = { machine = (machine_t)"file"             , request = { benchmark_function = "print_long" } } },
-{ class => "emitter", request = { machine = { { class => "daemon/kill" } }, request = {} } },
-{ class => "end"                                              },
+{ class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "print_long" } } },
+{ class => "kill"                                              },
 NULL,
 { class => "benchmark", name => "file"                                },
-{ class => "file", filename => "data_bench_file.dat"                  }
+{ class => "data/query", data = (file_t){ filename => "data_bench_file.dat" } }

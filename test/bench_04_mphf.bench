@@ -1,68 +1,77 @@
 { class => "daemon/thread" },
-{ class => "emitter", request = { machine = { { name  => "mphf" }        }, request = { benchmark_function = "restart" } } },
-{ class => "emitter", request = { machine = { { name  => "mphf" }        },
+{ class => "emitter", request = { machine = (machine_t)"mphf", request = { benchmark_function = "restart" } } },
+{ class => "emitter", request = { machine = (machine_t)"mphf",
 	request = {
-		action => create,
+		action => (action_t)"write",
 		key    => "moo",
-		buffer => "aaaaaaaaaaaaaaaaaaaaaaaaa"
+		buffer => (raw_t){ length = (uint_t)"0" }
 	}
 } },
-{ class => "emitter", request = { machine = { { name  => "mphf" }        },
+{ class => "emitter", request = { machine = (machine_t)"mphf",
 	request = {
-		action => write,
+		action => (action_t)"read",
 		key    => "moo",
-		buffer => "bbbbbbbbbbbbbbbbbbbbbbbbb"
+		buffer => (raw_t){ length = (uint_t)"0" }
 	}
-}, count => (uint_t)'1000000' },
-{ class => "emitter", request = { machine = { { name  => "mphf" }        }, request = { benchmark_function = "print_long" } } },
-{ class => "emitter", request = { machine = { { class => "daemon/kill" } }, request = {} } },
-{ class => "end"                                                             },
+}, count => (uint_t)'500000' },
+{ class => "emitter", request = { machine = (machine_t)"mphf", request = { benchmark_function = "print_long" } } },
+{ class => "kill" },
 NULL,
-{ class => "benchmark", name => "mphf"                                   },
+{ class => "benchmark", name => "mphf" },
 
-{ class = "hash/murmur2_64", input = (hashkey_t)'key', output = (hashkey_t)'keyid'             },
+{ class = "assign", before = { offset = (uint_t)"0" } },
+{ class = "hash/murmur2_64", input = (hashkey_t)'key', output = (hashkey_t)'keyid' },
 {
 	class = "request/switch",
+	data  = (named_t){
+		name = "mphf_data",
+		data = (file_t){ filename = "data_bench_mphf_data.dat" }
+	},
 	rules = {
 		{
-			request = { action = create },
-		  	machine = { { class = "index/fill", index = "mymphf" } }
+			request = { action = (action_t)"read" },
+			machine = (machine_t){
+				{ class = "shop/pass", shop = (machine_t)"mphf_index" },
+				
+				{ class = "data/query", data = (named_t)"mphf_data" },
+				{
+					class = "struct_unpack",
+					structure = {
+						keyid = { default = (uint64_t)'0' }
+					}
+				}
+			}
 		},
 		{
-			request = { action = read },
-			machine = { { class = "index/lookup", index = "mymphf", output = (hashkey_t)'offset', output_type = (datatype_t)'uint_t' } }
+			request = { action = (action_t)"write" },
+			machine = (machine_t){
+				{
+					class = "struct_pack",
+					structure = {
+						keyid = { default = (uint64_t)'0' }
+					}
+				},
+				{ class = "data/query", data = (named_t)"mphf_data" },
+				
+				{ class = "shop/pass",  shop = (machine_t)"mphf_index" }
+			}
 		}
 	}
 },
-{
-	class = "structs",
-	size = "size",
-	structure = {
-		keyid = { default = (uint64_t)'0' }
-	}
-},
-{ class = "allocator/fixed", item_size = (uint_t)"8" },
-{ class = "file",  filename = "data_bench_mphf.dat" },
-NULL,
-{
-	name = "mymphf",
-	class = "mphf",
-	type = "chm_imp",
-	machine_g = "test_mphf_g",
-	machine_e = "test_mphf_e",
-	machine_v = "test_mphf_v",
-	key_from = (hashkey_t)'keyid',
-	nelements_min = (uint64_t)'1000000',
-	nelements_step = (uint64_t)'10000',
-	value_bits = (uint32_t)'32'
-},
-NULL,
+{ class = "end" },
 
-{ class = "cache", name = "test_mphf_g" },
-{ class = "file",  filename = "data_bench_mphf_g.dat" },
 NULL,
-{ class = "cache", name = "test_mphf_v" },
-{ class = "file",  filename = "data_bench_mphf_v.dat" },
-NULL,
-{ class = "cache", name = "test_mphf_e" },
-{ class = "file",  filename = "data_bench_mphf_e.dat" }
+{
+	name = "mphf_index",
+	class = "mphf",
+	type  = "chm_imp",
+	value_size = (uint_t)"4",
+	nelements_min  = (uint64_t)'1000',
+	nelements_step = (uint64_t)'100',
+	data_g = (file_t){ filename = "data_bench_mphf_g.dat" },
+	data_e = (file_t){ filename = "data_bench_mphf_v.dat" },
+	data_v = (file_t){ filename = "data_bench_mphf_e.dat" },
+	input  = (hashkey_t)"keyid",
+	output = (hashkey_t)"offset"
+},
+{ class = "shop/pass", shop = (env_t)"return_to" }
