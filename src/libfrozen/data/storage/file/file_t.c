@@ -173,6 +173,24 @@ static ssize_t data_file_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
 	
 	return 0;
 } // }}}
+static ssize_t data_file_t_create(data_t *data, fastcall_create *fargs){ // {{{
+	ssize_t                ret;
+	struct stat            stat;
+	file_t                *fdata             = (file_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if( (ret = fstat(fdata->handle, &stat) != 0) )
+		return ret;
+	
+	fargs->offset = stat.st_size;
+	
+	if(ftruncate(fdata->handle, stat.st_size + fargs->size) == -1)
+		return -errno;
+	
+	return 0;
+} // }}}
 
 data_proto_t file_t_proto = {
 	.type                   = TYPE_FILET,
@@ -183,6 +201,7 @@ data_proto_t file_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_file_t_free,
 		[ACTION_PHYSICALLEN]  = (f_data_func)&data_file_t_len,
 		[ACTION_LOGICALLEN]   = (f_data_func)&data_file_t_len,
+		[ACTION_CREATE]       = (f_data_func)&data_file_t_create,
 		[ACTION_READ]         = (f_data_func)&data_file_t_read,
 		[ACTION_WRITE]        = (f_data_func)&data_file_t_write,
 		[ACTION_RESIZE]       = (f_data_func)&data_file_t_resize,
