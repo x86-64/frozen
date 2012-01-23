@@ -22,6 +22,7 @@
  *                                        (env_t)'machine',       #  - to shop supplied in user request under "machine" hashkey 
  *                                        (machine_t)'name',      #  - to shop named "name"
  *                                        ...
+ *              return_to               = (hashkey_t)"return_to"  # return_to hash key, default "return_to"
  * }
  * @endcode
  */
