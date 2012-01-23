@@ -34,6 +34,7 @@ extern machine_t morph_proto;
 extern machine_t pool_proto;
 extern machine_t rebuild_monitor_proto;
 extern machine_t rebuild_reader_proto;
+extern machine_t rebuild_writer_proto;
 extern machine_t assign_proto;
 extern machine_t debug_proto;
 extern machine_t emitter_proto;
@@ -80,6 +81,7 @@ machine_t * machine_protos[] = {
    &pool_proto,
    &rebuild_monitor_proto,
    &rebuild_reader_proto,
+   &rebuild_writer_proto,
    &assign_proto,
    &debug_proto,
    &emitter_proto,
