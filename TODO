@@ -30,8 +30,6 @@
 - machine queue
 - mphf nelements_step with percents + remove from mphf to another machine
 
-- deprecate emitter_t data, move to machine
-- deprecate incapsulate as useless
 - deprecate data/transfer as useless
 - deprecate cache, write cache_t instead
 - deprecate cache_append, use data/buffer instead

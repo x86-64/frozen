@@ -129,8 +129,6 @@ static err_item errs_list[] = {
  { -41115, "src/libfrozen/machines/io/ipc/ipc_shmem.c: ipc_shmem_listen dead" },
  { -36934, "src/libfrozen/machines/io/ipc/ipc.c: machine ipc parameter type invalid" },
  { -36914, "src/libfrozen/machines/io/ipc/ipc.c: calloc failed" },
- { -28755, "src/libfrozen/machines/data/incapsulate/incapsulate.c: machine incapsulate parameter multiply invalid" },
- { -28721, "src/libfrozen/machines/data/incapsulate/incapsulate.c: calloc failed" },
  { -24726, "src/libfrozen/machines/data/structs/structs.c: struct_unpack failed" },
  { -24721, "src/libfrozen/machines/data/structs/structs.c: hash with keys not supplied" },
  { -24695, "src/libfrozen/machines/data/structs/structs.c: struct_pack failed" },

@@ -79,9 +79,6 @@
 #define HK_VALUE_key2 2400
 #define HK_VALUE_key3 2416
 #define HK_VALUE_key4 2432
-#define HK_VALUE_key_from 22189
-#define HK_VALUE_key_out 15791
-#define HK_VALUE_key_to 10016
 #define HK_VALUE_keyid 5780
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
@@ -244,9 +241,6 @@ typedef enum hashkey_t {
       HK_key2 = HK_VALUE_key2, 
       HK_key3 = HK_VALUE_key3, 
       HK_key4 = HK_VALUE_key4, 
-      HK_key_from = HK_VALUE_key_from, 
-      HK_key_out = HK_VALUE_key_out, 
-      HK_key_to = HK_VALUE_key_to, 
       HK_keyid = HK_VALUE_keyid, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
@@ -413,9 +407,6 @@ keypair_t hashkeys[] = {
       { "key2", HK_VALUE_key2 }, 
       { "key3", HK_VALUE_key3 }, 
       { "key4", HK_VALUE_key4 }, 
-      { "key_from", HK_VALUE_key_from }, 
-      { "key_out", HK_VALUE_key_out }, 
-      { "key_to", HK_VALUE_key_to }, 
       { "keyid", HK_VALUE_keyid }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 

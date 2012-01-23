@@ -6,7 +6,6 @@ extern machine_t cache_append_proto;
 extern machine_t kill_proto;
 extern machine_t thread_proto;
 extern machine_t convert_proto;
-extern machine_t incapsulate_proto;
 extern machine_t query_proto;
 extern machine_t regexp_proto;
 extern machine_t split_proto;
@@ -53,7 +52,6 @@ machine_t * machine_protos[] = {
    &kill_proto,
    &thread_proto,
    &convert_proto,
-   &incapsulate_proto,
    &query_proto,
    &regexp_proto,
    &split_proto,
