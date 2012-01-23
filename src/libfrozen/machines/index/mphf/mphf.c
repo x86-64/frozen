@@ -99,9 +99,9 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t               ret;
 	action_t              action;
 	data_t               *r_input;
+	data_t               *r_output;
 	uintmax_t             d_input;
-	uintmax_t            *d_output;
-	data_t               *data_output;
+	uintmax_t             d_output;
 	mphf_userdata        *userdata           = (mphf_userdata *)machine->userdata;
 	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
@@ -120,26 +120,28 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 		return -EBADF;
 	//
 	
-	if( (r_input = hash_data_find(request, userdata->input)) == NULL)
+	if( (r_input  = hash_data_find(request, userdata->input)) == NULL)
+		return -EINVAL;
+	if( (r_output = hash_data_find(request, userdata->output)) == NULL)
 		return -EINVAL;
 	
-	d_input = 0;
-	fastcall_read r_read = { { 5, ACTION_READ }, 0, &d_input, sizeof(d_input) };
-	if(data_query(r_input, &r_read) < 0)
+	d_input  = 0;
+	d_output = 0;
+	
+	fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &d_input, sizeof(d_input) };
+	if(data_query(r_input, &r_read1) < 0)
 		return -EINVAL;
 	
-	data_output = hash_data_find(request, userdata->output);
-	if(data_output == NULL)
+	fastcall_read r_read2 = { { 5, ACTION_READ }, 0, &d_output, sizeof(d_output) };
+	if(data_query(r_output, &r_read2) < 0)
 		return -EINVAL;
-	
-	d_output = data_output->ptr;
 	
 	switch(action){
 		case ACTION_CREATE:
 			if( (ret = userdata->mphf_proto->func_insert(
 				&userdata->mphf, 
 				d_input,
-				*d_output
+				d_output
 			)) < 0){
 				if(ret == -EBADF)
 					userdata->broken = 1;
@@ -150,7 +152,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 			if( (ret = userdata->mphf_proto->func_update(
 				&userdata->mphf, 
 				d_input,
-				*d_output
+				d_output
 			)) < 0){
 				if(ret == -EBADF)
 					userdata->broken = 1;
@@ -161,12 +163,17 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 			switch( (ret = userdata->mphf_proto->func_query(
 				&userdata->mphf,
 				d_input,
-				d_output
+				&d_output
 			))){
 				case MPHF_QUERY_NOTFOUND: return -ENOENT;
 				case MPHF_QUERY_FOUND:    break;
 				default:                  return ret;
 			};
+			
+			fastcall_write r_write = { { 5, ACTION_READ }, 0, &d_output, sizeof(d_output) };
+			if(data_query(r_output, &r_write) < 0)
+				return -EINVAL;
+			
 			break;
 		case ACTION_DELETE:
 			if( (ret = userdata->mphf_proto->func_delete(
