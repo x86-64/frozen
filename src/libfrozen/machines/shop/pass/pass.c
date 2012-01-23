@@ -30,6 +30,7 @@
 
 typedef struct pass_userdata {
 	data_t                 machine;
+	hashkey_t              return_to;
 } pass_userdata;
 
 static int pass_init(machine_t *machine){ // {{{
@@ -38,6 +39,7 @@ static int pass_init(machine_t *machine){ // {{{
 	if((userdata = machine->userdata = calloc(1, sizeof(pass_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->return_to = HK(return_to);
 	return 0;
 } // }}}
 static int pass_destroy(machine_t *machine){ // {{{
@@ -53,6 +55,7 @@ static int pass_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->return_to, config, HK(return_to));
 	hash_holder_consume(ret, userdata->machine, config, HK(shop));
 	if(ret != 0)
 		return error("shop parameter not supplied");
@@ -64,7 +67,7 @@ static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
 	request_t r_next[] = {
-		{ HK(return_to), DATA_NEXT_MACHINET(machine) },
+		{ userdata->return_to, DATA_NEXT_MACHINET(machine) },
 		hash_inline(request),
 		hash_end
 	};
