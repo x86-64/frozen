@@ -49,7 +49,7 @@ static ssize_t       data_slice_t_transfer      (data_t *src, fastcall_transfer 
 	
 	transfered = (fargs->header.nargs >= 4) ? &fargs->transfered : NULL;
 	
-	return default_transfer(src, fargs->dest, fdata->off, 0, fdata->size, transfered);
+	return default_transfer(fdata->data, fargs->dest, fdata->off, 0, fdata->size, transfered);
 } // }}}
 static ssize_t       data_slice_t_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	uintmax_t             *transfered;
@@ -63,7 +63,7 @@ static ssize_t       data_slice_t_convert_to    (data_t *src, fastcall_convert_t
 	
 	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;
 	
-	return default_transfer(src, fargs->dest, fdata->off, 0, fdata->size, transfered);
+	return default_transfer(fdata->data, fargs->dest, fdata->off, 0, fdata->size, transfered);
 } // }}}
 static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
