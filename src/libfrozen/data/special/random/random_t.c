@@ -30,6 +30,12 @@ static ssize_t data_random_t_handler (data_t *data, fastcall_header *hargs){ // 
 		case ACTION_CONVERT_FROM:
 			data->ptr = NULL;
 			return 0;
+		
+		case ACTION_PHYSICALLEN:;
+		case ACTION_LOGICALLEN:;
+			fastcall_len *r_len = (fastcall_len *)hargs;
+			r_len->length = ~0;
+			return 0;
 
 		default:
 			break;
