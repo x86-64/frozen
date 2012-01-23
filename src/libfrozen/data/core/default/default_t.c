@@ -2,6 +2,53 @@
 
 #include <core/string/string_t.h>
 #include <enum/format/format_t.h>
+	
+ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintmax_t write_offset, uintmax_t size, uintmax_t *ptransfered){ // {{{
+	ssize_t         ret;
+	uintmax_t       roffset                  = read_offset;
+	uintmax_t       woffset                  = write_offset;
+	uintmax_t       bytes_written            = 0;
+	uintmax_t       bytes_read;
+	char            buffer[DEF_BUFFER_SIZE];
+	
+	// first read
+	fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, MIN(size, sizeof(buffer)) };
+	if( (ret = data_query(src, &r_read)) < 0) // EOF return too
+		return ret;
+	
+	bytes_read   = r_read.buffer_size;
+	roffset     += r_read.buffer_size;
+	size        -= r_read.buffer_size;
+	
+	goto start;
+	do {
+		fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, MIN(size, sizeof(buffer)) };
+		if( (ret = data_query(src, &r_read)) < -1)
+			return ret;
+		
+		if(ret == -1) // EOF from read side
+			break;
+		
+		bytes_read  = r_read.buffer_size;
+		roffset    += r_read.buffer_size;
+		size       -= r_read.buffer_size;
+		
+	start:;
+		fastcall_write r_write = { { 5, ACTION_WRITE }, woffset, &buffer, bytes_read };
+		if( (ret = data_query(dest, &r_write)) < -1)
+			return ret;
+		
+		if(ret == -1) // EOF from write side
+			break;
+		
+		bytes_written += r_write.buffer_size;
+		woffset       += r_write.buffer_size;
+	}while(size > 0);
+	
+	if(ptransfered)
+		*ptransfered = bytes_written;
+	return 0;
+} // }}}
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
 	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
@@ -156,59 +203,22 @@ static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer 
 	return 0;
 } // }}}
 static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
-	char            buffer[DEF_BUFFER_SIZE];
-	ssize_t         rret, wret;
-	uintmax_t       roffset, woffset, transfered;
-	uintmax_t       read;
+	uintmax_t             *transfered;
 	
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
 	if(fargs->format != FORMAT(clean))
-		return -EINVAL;
-
-	roffset = woffset = transfered = 0;
+		return -ENOSYS;
 	
-	// first read
-	fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, sizeof(buffer) };
-	if( (rret = data_query(src, &r_read)) < 0) // EOF return too
-		return rret;
+	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;
 	
-	read     = r_read.buffer_size;
-	roffset += r_read.buffer_size;
-	
-	goto start;
-	do {
-		fastcall_read r_read = { { 5, ACTION_READ }, roffset, &buffer, sizeof(buffer) };
-		if( (rret = data_query(src, &r_read)) < -1)
-			return rret;
-		
-		if(rret == -1) // EOF from read side
-			break;
-		
-		read     = r_read.buffer_size;
-		roffset += r_read.buffer_size;
-
-	start:;
-		fastcall_write r_write = { { 5, ACTION_WRITE }, woffset, &buffer, read };
-		if( (wret = data_query(fargs->dest, &r_write)) < -1)
-			return wret;
-		
-		if(wret == -1) // EOF from write side
-			break;
-		
-		transfered += r_write.buffer_size;
-		woffset    += r_write.buffer_size;
-	}while(1);
-	
-	if(fargs->header.nargs >= 5)
-		fargs->transfered = transfered;
-	return 0;
+	return default_transfer(src, fargs->dest, 0, 0, ~0, transfered);
 } // }}}
-static ssize_t data_default_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
+static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs){ // {{{
 	switch(fargs->format){
 		case FORMAT(clean):;
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, data };
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, dest };
 			return data_query(fargs->src, &r_transfer);
 			
 		default:
