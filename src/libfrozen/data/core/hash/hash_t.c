@@ -123,21 +123,20 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	data_hash_t_append(ctx, buffer);
 	
 	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	data_query(&element->data, &r_ptr);
 	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
-	data_query(&element->data, &r_len);
-
-	for(k = 0; k < r_len.length; k++){
-		if((k % 32) == 0){
-			snprintf(buffer, sizeof(buffer), "   0x%.5x: ", k);
+	if(data_query(&element->data, &r_ptr) == 0 && data_query(&element->data, &r_len) == 0){
+		for(k = 0; k < r_len.length; k++){
+			if((k % 32) == 0){
+				snprintf(buffer, sizeof(buffer), "   0x%.5x: ", k);
+				
+				data_hash_t_append(ctx, "\n");
+				data_hash_t_append_pad(ctx);
+				data_hash_t_append(ctx, buffer);
+			}
 			
-			data_hash_t_append(ctx, "\n");
-			data_hash_t_append_pad(ctx);
+			snprintf(buffer, sizeof(buffer), "%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
 			data_hash_t_append(ctx, buffer);
 		}
-		
-		snprintf(buffer, sizeof(buffer), "%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
-		data_hash_t_append(ctx, buffer);
 	}
 	data_hash_t_append(ctx, "\n");
 	
