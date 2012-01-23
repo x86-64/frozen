@@ -98,6 +98,7 @@ static int mphf_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t               ret;
 	action_t              action;
+	data_t               *r_input;
 	uintmax_t             d_input;
 	uintmax_t            *d_output;
 	data_t               *data_output;
@@ -119,8 +120,12 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 		return -EBADF;
 	//
 	
-	hash_data_get(ret, TYPE_UINTT, d_input, request, userdata->input);
-	if(ret != 0)
+	if( (r_input = hash_data_find(request, userdata->input)) == NULL)
+		return -EINVAL;
+	
+	d_input = 0;
+	fastcall_read r_read = { { 5, ACTION_READ }, 0, &d_input, sizeof(d_input) };
+	if(data_query(r_input, &r_read) < 0)
 		return -EINVAL;
 	
 	data_output = hash_data_find(request, userdata->output);
