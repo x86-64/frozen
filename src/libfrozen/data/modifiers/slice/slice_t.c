@@ -5,25 +5,6 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 
-static ssize_t make_data_copy(data_t *src, data_t **dst){ // {{{
-	ssize_t                ret;
-	data_t                *hdst;
-	
-	if( (hdst = malloc(sizeof(data_t))) == NULL)
-		return -ENOMEM;
-	
-	hdst->type = src->type;
-	hdst->ptr  = NULL;
-	
-	fastcall_copy r_copy = { { 3, ACTION_COPY }, hdst };
-	if( (ret = data_query(src, &r_copy)) != 0){
-		free(hdst);
-		return ret;
-	}
-	*dst = hdst;
-	return 0;
-} // }}}
-
 static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {{{
 	ssize_t                   ret;
 	slice_t                  *fdata             = (slice_t *)data->ptr;
@@ -53,32 +34,31 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 			
 			switch(cargs->format){
 				case FORMAT(hash):;
+					data_t                 input;
 					hash_t                *config;
-					data_t                *input;
-					uintmax_t              offset     = 0;
-					uintmax_t              size       = ~0;
-					
+
 					data_get(ret, TYPE_HASHT, config, cargs->src);
 					if(ret != 0)
 						return -EINVAL;
 					
-					input = hash_data_find(config, HK(input));
-					hash_data_get(ret, TYPE_UINTT, offset, config, HK(offset));
-					hash_data_get(ret, TYPE_UINTT, size,   config, HK(size));
-					
-					if(input == NULL)
-						return -EINVAL;
-					
-					if( (ret = make_data_copy(input, &input)) != 0)
-						return ret;
-					
 					if(fdata == NULL){
 						if( (fdata = data->ptr = malloc(sizeof(slice_t))) == NULL)
 							return -ENOMEM;
+						
+						fdata->off  = 0;
+						fdata->size = ~0;
 					}
-					fdata->data  = input;
-					fdata->off   = offset;
-					fdata->size  = size;
+					
+					hash_data_get(ret, TYPE_UINTT, fdata->off,    config, HK(offset));
+					hash_data_get(ret, TYPE_UINTT, fdata->size,   config, HK(size));
+					hash_holder_consume(ret, input, config, HK(input));
+					if(ret != 0)
+						return -EINVAL;
+					
+					if( (fdata->data = malloc(sizeof(data_t))) == NULL)
+						return -ENOMEM;
+
+					*fdata->data = input;
 					return 0;
 
 				default:
@@ -86,7 +66,7 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 			}
 			return -ENOSYS;
 		
-		case ACTION_COPY:;
+/*		case ACTION_COPY:;
 			slice_t               *ddata;
 			data_t                *dhdata;
 			fastcall_copy         *cpargs            = (fastcall_copy *)fargs;
@@ -110,7 +90,7 @@ static ssize_t data_slice_t_handler (data_t *data, fastcall_header *fargs){ // {
 			
 			cpargs->dest->type = data->type;
 			cpargs->dest->ptr  = ddata;
-			return 0;
+			return 0; */
 
 		/*
 		case ACTION_GETDATAPTR:
