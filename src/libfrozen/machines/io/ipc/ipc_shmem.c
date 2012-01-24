@@ -277,7 +277,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 			fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT(binary) };
 			data_query(buffer, &r_convert_from);
 		}
-		ret = -EEXIST;
+		ret = 0;
 		
 		if(shmem_block_status(userdata, block, STATUS_EXEC_DONE, STATUS_FREE) < 0)
 			return error("strange error 3");

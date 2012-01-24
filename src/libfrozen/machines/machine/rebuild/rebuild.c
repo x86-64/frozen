@@ -276,16 +276,13 @@ static ssize_t rebuildmon_handler(machine_t *machine, request_t *request){ // {{
 retry:;
 	ret = machine_pass(machine, request);
 	if(ret == -EBADF){
-		rebuild_rebuild(userdata->reader, userdata->writer);
+		if( (ret = rebuild_rebuild(userdata->reader, userdata->writer)) < 0)
+			return ret;
+		
 		if(userdata->retry_request != 0)
 			goto retry;
-		
-		return -EEXIST;
 	}
-	if(ret < 0)
-		return ret;
-	
-	return -EEXIST;
+	return ret;
 } // }}}
 
 machine_t rebuild_monitor_proto = {

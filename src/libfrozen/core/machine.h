@@ -51,9 +51,6 @@
  *    @li pass any request to next machine(s) in shop
  *    @li etc...
  *  
- *  All of these actions is optional, even returning error or success. There is special error code -EEXIST, which indicates
- *  that machine don't want to modify current error code.
- *  
  *  Internally all requests flow into some kind of recursive processing there each step is next machine. So,
  *  there is no such thing as async requests. Request considered finished then first machine return control to caller. But,
  *  async requests is too good to discard them, so you can use queue to save all requests and process them later, returning
