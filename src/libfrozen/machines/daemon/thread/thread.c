@@ -29,7 +29,6 @@
 #define EMODULE 41
 
 typedef struct thread_userdata {
-	//api_t                apitype; // TODO api types
 	uintmax_t              paused;
 	uintmax_t              loop;
 	uintmax_t              ignore_errors;
@@ -45,19 +44,14 @@ static void *  thread_routine(machine_t *machine){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
-	
 	do{
-	//switch(apitype){
-	//     case API_HASH:;
-			request_t r_request[] = {
-				{ HK(ret), DATA_PTR_SIZET(&ret) },
-				hash_end
-			};
-			if( (machine_pass(machine, r_request) < 0 || ret < 0) && userdata->ignore_errors == 0)
+		request_t r_request[] = { hash_end };
+		if( (ret = machine_pass(machine, r_request)) < 0){
+			log_error("thread error: %d: %s\n", ret, describe_error(ret));
+			
+			if(userdata->ignore_errors == 0)
 				break;
-	//		break;
-	//     case API_FAST:;
-	//}
+		}
 	}while(userdata->loop);
 	
 	pthread_mutex_lock(&destroy_mtx); // TODO remove this..
