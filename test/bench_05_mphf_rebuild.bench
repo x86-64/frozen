@@ -16,7 +16,8 @@
 				key    => (slice_t){ input = (random_t)"", size = (uint_t)"10" },
 				buffer => (raw_t){ length = (uint_t)"0" }
 			}
-		}}
+		}},
+		{ class = "end" }
 	}
 }, count => (uint_t)'100000' },
 { class => "emitter", request = { machine = (machine_t)"mphf", request = { benchmark_function = "print_long" } } },
@@ -43,7 +44,8 @@ NULL,
 		{
 			request = { action = (action_t)"create" },
 			machine = (machine_t){
-				{ class = "data/query", data = (named_t)"mphf_data" }
+				{ class = "data/query", data = (named_t)"mphf_data" },
+				{ class = "end" }
 			}
 		},
 		{

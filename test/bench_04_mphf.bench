@@ -39,7 +39,8 @@ NULL,
 					structure = {
 						keyid = { default = (uint64_t)'0' }
 					}
-				}
+				},
+				{ class = "end" }
 			}
 		},
 		{
@@ -53,7 +54,8 @@ NULL,
 				},
 				{ class = "data/query", data = (named_t)"mphf_data" },
 				
-				{ class = "shop/pass",  shop = (machine_t)"mphf_index" }
+				{ class = "shop/pass",  shop = (machine_t)"mphf_index" },
+				{ class = "end" }
 			}
 		}
 	}
@@ -74,4 +76,4 @@ NULL,
 	input  = (hashkey_t)"keyid",
 	output = (hashkey_t)"offset"
 },
-{ class = "shop/pass", shop = (env_t)"return_to" }
+{ class = "shop/return" }
