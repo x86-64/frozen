@@ -39,9 +39,6 @@
 #define HK_VALUE_default 15471
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
-#define HK_VALUE_dns_domain 40645
-#define HK_VALUE_dns_ip 9752
-#define HK_VALUE_dns_tstamp 42056
 #define HK_VALUE_dump_last 31113
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
@@ -79,14 +76,10 @@
 #define HK_VALUE_key2 2400
 #define HK_VALUE_key3 2416
 #define HK_VALUE_key4 2432
-#define HK_VALUE_keyid 5780
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
 #define HK_VALUE_loop 3343
 #define HK_VALUE_machine 14586
-#define HK_VALUE_machine_e 28847
-#define HK_VALUE_machine_g 29009
-#define HK_VALUE_machine_v 30224
 #define HK_VALUE_marker 9864
 #define HK_VALUE_marker_data 52113
 #define HK_VALUE_max_global 39928
@@ -96,7 +89,6 @@
 #define HK_VALUE_mode_global 52254
 #define HK_VALUE_mode_perfork 70285
 #define HK_VALUE_mountpoint 42967
-#define HK_VALUE_multiply 23098
 #define HK_VALUE_multithread 52579
 #define HK_VALUE_n_initial 30097
 #define HK_VALUE_name 3095
@@ -113,7 +105,6 @@
 #define HK_VALUE_offset_out 42814
 #define HK_VALUE_offset_to 31048
 #define HK_VALUE_output 10516
-#define HK_VALUE_output_type 55817
 #define HK_VALUE_parameter 30821
 #define HK_VALUE_parameter_request 196377
 #define HK_VALUE_pass_first 42778
@@ -143,8 +134,8 @@
 #define HK_VALUE_return_to 31314
 #define HK_VALUE_role 3146
 #define HK_VALUE_rules 6045
-#define HK_VALUE_script 10193
 #define HK_VALUE_shop 3322
+#define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
@@ -201,9 +192,6 @@ typedef enum hashkey_t {
       HK_default = HK_VALUE_default, 
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
-      HK_dns_domain = HK_VALUE_dns_domain, 
-      HK_dns_ip = HK_VALUE_dns_ip, 
-      HK_dns_tstamp = HK_VALUE_dns_tstamp, 
       HK_dump_last = HK_VALUE_dump_last, 
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
@@ -241,14 +229,10 @@ typedef enum hashkey_t {
       HK_key2 = HK_VALUE_key2, 
       HK_key3 = HK_VALUE_key3, 
       HK_key4 = HK_VALUE_key4, 
-      HK_keyid = HK_VALUE_keyid, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
       HK_loop = HK_VALUE_loop, 
       HK_machine = HK_VALUE_machine, 
-      HK_machine_e = HK_VALUE_machine_e, 
-      HK_machine_g = HK_VALUE_machine_g, 
-      HK_machine_v = HK_VALUE_machine_v, 
       HK_marker = HK_VALUE_marker, 
       HK_marker_data = HK_VALUE_marker_data, 
       HK_max_global = HK_VALUE_max_global, 
@@ -258,7 +242,6 @@ typedef enum hashkey_t {
       HK_mode_global = HK_VALUE_mode_global, 
       HK_mode_perfork = HK_VALUE_mode_perfork, 
       HK_mountpoint = HK_VALUE_mountpoint, 
-      HK_multiply = HK_VALUE_multiply, 
       HK_multithread = HK_VALUE_multithread, 
       HK_n_initial = HK_VALUE_n_initial, 
       HK_name = HK_VALUE_name, 
@@ -275,7 +258,6 @@ typedef enum hashkey_t {
       HK_offset_out = HK_VALUE_offset_out, 
       HK_offset_to = HK_VALUE_offset_to, 
       HK_output = HK_VALUE_output, 
-      HK_output_type = HK_VALUE_output_type, 
       HK_parameter = HK_VALUE_parameter, 
       HK_parameter_request = HK_VALUE_parameter_request, 
       HK_pass_first = HK_VALUE_pass_first, 
@@ -305,8 +287,8 @@ typedef enum hashkey_t {
       HK_return_to = HK_VALUE_return_to, 
       HK_role = HK_VALUE_role, 
       HK_rules = HK_VALUE_rules, 
-      HK_script = HK_VALUE_script, 
       HK_shop = HK_VALUE_shop, 
+      HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
@@ -367,9 +349,6 @@ keypair_t hashkeys[] = {
       { "default", HK_VALUE_default }, 
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 
-      { "dns_domain", HK_VALUE_dns_domain }, 
-      { "dns_ip", HK_VALUE_dns_ip }, 
-      { "dns_tstamp", HK_VALUE_dns_tstamp }, 
       { "dump_last", HK_VALUE_dump_last }, 
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
@@ -407,14 +386,10 @@ keypair_t hashkeys[] = {
       { "key2", HK_VALUE_key2 }, 
       { "key3", HK_VALUE_key3 }, 
       { "key4", HK_VALUE_key4 }, 
-      { "keyid", HK_VALUE_keyid }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
       { "loop", HK_VALUE_loop }, 
       { "machine", HK_VALUE_machine }, 
-      { "machine_e", HK_VALUE_machine_e }, 
-      { "machine_g", HK_VALUE_machine_g }, 
-      { "machine_v", HK_VALUE_machine_v }, 
       { "marker", HK_VALUE_marker }, 
       { "marker_data", HK_VALUE_marker_data }, 
       { "max_global", HK_VALUE_max_global }, 
@@ -424,7 +399,6 @@ keypair_t hashkeys[] = {
       { "mode_global", HK_VALUE_mode_global }, 
       { "mode_perfork", HK_VALUE_mode_perfork }, 
       { "mountpoint", HK_VALUE_mountpoint }, 
-      { "multiply", HK_VALUE_multiply }, 
       { "multithread", HK_VALUE_multithread }, 
       { "n_initial", HK_VALUE_n_initial }, 
       { "name", HK_VALUE_name }, 
@@ -441,7 +415,6 @@ keypair_t hashkeys[] = {
       { "offset_out", HK_VALUE_offset_out }, 
       { "offset_to", HK_VALUE_offset_to }, 
       { "output", HK_VALUE_output }, 
-      { "output_type", HK_VALUE_output_type }, 
       { "parameter", HK_VALUE_parameter }, 
       { "parameter_request", HK_VALUE_parameter_request }, 
       { "pass_first", HK_VALUE_pass_first }, 
@@ -471,8 +444,8 @@ keypair_t hashkeys[] = {
       { "return_to", HK_VALUE_return_to }, 
       { "role", HK_VALUE_role }, 
       { "rules", HK_VALUE_rules }, 
-      { "script", HK_VALUE_script }, 
       { "shop", HK_VALUE_shop }, 
+      { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
