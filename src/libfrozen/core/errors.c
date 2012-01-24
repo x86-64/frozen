@@ -27,8 +27,10 @@ const char *       describe_error                (intmax_t errnum){ // {{{
 		errs_list_nelements, errs_list_size,
 		&err_bsearch_int)) == NULL
 	){
-		if( (ret->errmsg = strerror(errnum)) == NULL)
-			return "unknown error"; //NULL;
+		if( (key.errmsg = strerror(-errnum)) != NULL)
+			return key.errmsg;
+		
+		return "unknown error";
 	}
 	
 	return ret->errmsg;
