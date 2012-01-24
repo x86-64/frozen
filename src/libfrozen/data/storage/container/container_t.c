@@ -16,7 +16,6 @@
 		                                                            \
 		_call      = 1;                                             \
 		chunk_size = chunk_get_size(_chunk);                        \
-		chunk_size = MIN(chunk_size, _to_process);                  \
 		                                                            \
 		if(                                                         \
 			_start_offset >= _curr_offset               &&      \
@@ -28,11 +27,17 @@
 		}else{                                                      \
 			_call = 0;                                          \
 		}                                                           \
-		if(_call == 1){ chunk_data = &_chunk->data; _func; }        \
+		_curr_offset += chunk_size;                                 \
+		if(_call == 1){                                             \
+			chunk_data = &_chunk->data;                         \
+			chunk_size = chunk_size - chunk_offset;             \
+			chunk_size = MIN(chunk_size, _to_process);          \
+			_func;                                              \
+			                                                    \
+			_to_process  -= chunk_size;                         \
+		}                                                           \
 		(void)chunk_offset; (void)chunk_size; (void)chunk_data;     \
 		                                                            \
-		_curr_offset += chunk_size;                                 \
-		_to_process  -= chunk_size;                                 \
 		_chunk        = _chunk->cnext;                              \
 	}                                                                   \
 })
