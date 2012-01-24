@@ -41,6 +41,7 @@ typedef struct convert_ctx {
 	machine_t             *machine;
 	request_t             *request;
 	request_t             *new_request;
+	ssize_t                ret;
 } convert_ctx;
 
 static int convert_init(machine_t *machine){ // {{{
@@ -87,24 +88,28 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	hash_data_get(ret, TYPE_HASHKEYT,  output_hk,      item_cfg, HK(output));
 	//hash_data_get(ret, TYPE_UINTT,     return_result,  item_cfg, HK(return));
 	
-	if( (new_hash = hash_new(3)) == NULL)
+	if( (new_hash = hash_new(3)) == NULL){
+		ctx->ret = -ENOMEM;
 		return ITER_BREAK;
+	}
 	
 	new_hash[0].key       = input_hk;
 	new_hash[0].data.type = type;
 	new_hash[0].data.ptr  = NULL;
 	hash_assign_hash_inline(&new_hash[1], ctx->new_request);
 	
-	if( (input = hash_data_find(ctx->request, input_hk)) == NULL)
+	if( (input = hash_data_find(ctx->request, input_hk)) == NULL){
+		ctx->ret = error("input key not supplied");
 		goto error;
+	}
 	
 	if(from == 0){
 		fastcall_convert_to   r_convert = { { 4, ACTION_CONVERT_TO   }, &(new_hash[0].data), format };
-		if(data_query(input, &r_convert) != 0)
+		if( (ctx->ret = data_query(input, &r_convert)) < 0)
 			goto error;
 	}else{
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, input, format };
-		if(data_query(&(new_hash[0].data), &r_convert) != 0)
+		if( (ctx->ret = data_query(&(new_hash[0].data), &r_convert)) < 0)
 			goto error;
 	}
 	
@@ -122,7 +127,7 @@ static ssize_t convert_handler(machine_t *machine, request_t *request){ // {{{
 	
 	if(hash_iter(userdata->items, (hash_iterator)&convert_iterator, &ctx, 0) != ITER_OK){
 		hash_free(ctx.new_request);
-		return -EFAULT;
+		return ctx.ret;
 	}
 	
 	request_t r_next[] = {
