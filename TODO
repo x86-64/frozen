@@ -32,7 +32,6 @@
 
 - deprecate data/transfer as useless
 - deprecate cache, write cache_t instead
-- deprecate cache_append, use data/buffer instead
 
 - pcre
 - libev

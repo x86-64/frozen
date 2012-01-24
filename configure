@@ -822,7 +822,6 @@ enable_file_t
 enable_memory_t
 enable_raw_t
 enable_machinecache
-enable_machinecache_append
 enable_machinekill
 enable_machinethread
 enable_machineconvert
@@ -1585,8 +1584,6 @@ Optional Features:
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
   --disable-machine-cache disable machine cache
-  --disable-machine-cache-append
-                          disable machine cache-append
   --disable-machine-kill  disable machine kill
   --disable-machine-thread
                           disable machine thread
@@ -19331,43 +19328,6 @@ fi
 		MACHINE_MAKEFILE_cache_cache=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED cache/cache/libfrozen_machine_cache.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinecache_append was given.
-if test "${enable_machinecache_append+set}" = set; then :
-  enableval=$enable_machinecache_append;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinecache_append}" = "yes"; then
-			enable_machinecache_append="no"
-		else
-			enable_machinecache_append="yes"
-		fi
-	fi
-
-	if test "${enable_machinecache_append}" = "yes"; then
-		MACHINE_DIR_cache_append="cache/cache_append"
-		MACHINE_DEP_cache_append=""
-				MACHINE_SELECTED="$MACHINE_SELECTED cache_append"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_cache_cache_append" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/cache/cache_append/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS cache/cache_append"
-
-		MACHINE_MAKEFILE_cache_cache_append=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED cache/cache_append/libfrozen_machine_cache_append.la"
 
 	fi
 
