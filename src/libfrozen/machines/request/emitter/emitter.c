@@ -31,6 +31,7 @@
 typedef struct emitter_userdata {
 	emitter_t             *req;
 	uintmax_t              nreq;
+	uintmax_t              silent;
 } emitter_userdata;
 
 static int emitter_init(machine_t *machine){ // {{{
@@ -57,10 +58,12 @@ static int emitter_configure(machine_t *machine, config_t *config){ // {{{
 	
 	hash_data_convert (ret, TYPE_EMITTERT, userdata->req,       config, HK(request)); if(ret != 0) return ret;
 	hash_data_get     (ret, TYPE_UINTT,    userdata->nreq,      config, HK(count));
+	hash_data_get     (ret, TYPE_UINTT,    userdata->silent,    config, HK(silent));
 	return 0;
 } // }}}
 
 static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t              ret;
 	uintmax_t            i;
 	emitter_userdata    *userdata          = (emitter_userdata *)((machine_t *)machine)->userdata;
 	
@@ -68,8 +71,12 @@ static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
 		data_t           d_emitter = DATA_PTR_EMITTERT(userdata->req);
 		fastcall_execute r_exec    = { { 2, ACTION_EXECUTE } };
 		
-		for(i = 0; i < userdata->nreq; i++)
-			data_query(&d_emitter, &r_exec);
+		for(i = 0; i < userdata->nreq; i++){
+			if( (ret = data_query(&d_emitter, &r_exec)) < 0){
+				if(userdata->silent == 0)
+					log_error("emitter error: %d: %s\n", ret, describe_error(ret));
+			}
+		}
 	}
 	return machine_pass(machine, request);
 } // }}}
