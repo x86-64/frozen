@@ -168,6 +168,7 @@ error_mem:
 	return NULL;
 } // }}}
 static ssize_t     machine_ghost_resurrect(machine_t *machine, machine_t *class, hash_t *config){ // {{{
+	ssize_t                ret;
 	char                  *name = machine->name;
 	uintmax_t              refs = machine->refs;
 	
@@ -175,10 +176,10 @@ static ssize_t     machine_ghost_resurrect(machine_t *machine, machine_t *class,
 	machine->name = name;
 	machine->refs = refs;
 	
-	if(machine->func_init != NULL && machine->func_init(machine) != 0)
-		return -EFAULT;
+	if(machine->func_init != NULL && (ret = machine->func_init(machine)) < 0)
+		return ret;
 	
-	if(machine->func_configure != NULL && machine->func_configure(machine, config) != 0)
+	if(machine->func_configure != NULL && (ret = machine->func_configure(machine, config)) < 0)
 		goto error;
 	
 	return 0;
@@ -187,7 +188,7 @@ error:
 	if(machine->func_destroy != NULL)
 		machine->func_destroy(machine);
 	
-	return -EFAULT;
+	return ret;
 } // }}}
 static void        machine_ghost_free(machine_t *machine){ // {{{
 	machine_untop(machine);
@@ -312,7 +313,9 @@ static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
 	if(ret != 0)
 		goto error;
 	
-	if(machine_new(&machine, config) < 0){
+	if( (ret = machine_new(&machine, config)) < 0){
+		log_error("shop_new error: %d: %s\n", ret, describe_error(ret));
+		
 		hash_free(config);
 		return ITER_BREAK;
 	}
