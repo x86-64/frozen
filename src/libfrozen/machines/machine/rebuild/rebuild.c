@@ -90,6 +90,9 @@ static ssize_t rebuild_rebuild(machine_t *reader, machine_t *writer){ // {{{
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)reader->userdata;
 	//uintmax_t              rebuild_num = 0;
 	
+	if(strcmp(reader->class, "machine/rebuild_reader") != 0)
+		return error("not reader supplied");
+	
 redo:
 	//if(rebuild_num++ >= userdata->max_rebuilds)
 	//	return error("rebuild max rebuilds reached");
@@ -255,17 +258,10 @@ static int rebuildmon_configure(machine_t *machine, config_t *config){ // {{{
 	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)machine->userdata;
 	
 	hash_data_get    (ret, TYPE_UINTT,     userdata->retry_request,       config, HK(retry_request));
+	hash_data_consume(ret, TYPE_MACHINET,  userdata->writer,              config, HK(writer));
 	hash_data_consume(ret, TYPE_MACHINET,  userdata->reader,              config, HK(reader));
 	if(ret != 0)
 		return error("no reader supplied");
-	hash_data_consume(ret, TYPE_MACHINET,  userdata->writer,              config, HK(writer));
-	if(ret != 0)
-		return error("no writer supplied");
-	
-	if(strcmp(userdata->reader->class, "machine/rebuild_reader") != 0)
-		return error("not reader supplied");
-	if(strcmp(userdata->writer->class, "machine/rebuild_writer") != 0)
-		return error("not writer supplied");
 	
 	return 0;
 } // }}}
@@ -276,6 +272,13 @@ static ssize_t rebuildmon_handler(machine_t *machine, request_t *request){ // {{
 retry:;
 	ret = machine_pass(machine, request);
 	if(ret == -EBADF){
+		if(userdata->writer == NULL){
+			if(machine->cnext){
+				userdata->writer = machine->cnext;
+			}else{
+				return error("no writer exists");
+			}
+		}
 		if( (ret = rebuild_rebuild(userdata->reader, userdata->writer)) < 0)
 			return ret;
 		
