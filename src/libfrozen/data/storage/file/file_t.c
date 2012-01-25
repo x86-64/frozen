@@ -8,11 +8,19 @@
 
 typedef struct file_t {
 	int              handle;
+	
+	char            *path;
+	uintmax_t        temprorary;
 } file_t;
 
 static void    file_destroy(file_t *fdata){ // {{{
 	if(fdata->handle > 0){
 		close(fdata->handle);
+
+		if(fdata->temprorary != 0){
+			unlink(fdata->path);
+			free(fdata->path);
+		}
 	}
 	free(fdata);
 } // }}}
@@ -27,7 +35,7 @@ static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
 	uintmax_t              cfg_creat         = 1;
 	uintmax_t              cfg_retry         = 0;
 	uintmax_t              cfg_mode          = S_IRUSR | S_IWUSR;
-	
+
 	if( (fdata = calloc(1, sizeof(file_t))) == NULL)
 		return error("calloc returns null");
 	
@@ -36,6 +44,7 @@ static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
 	hash_data_get(ret, TYPE_UINTT, cfg_creat,    config, HK(create));
 	hash_data_get(ret, TYPE_UINTT, cfg_mode,     config, HK(mode));
 	hash_data_get(ret, TYPE_UINTT, cfg_retry,    config, HK(retry));
+	hash_data_get(ret, TYPE_UINTT, fdata->temprorary, config, HK(temprorary));
 	
 	if( (cfg_filename = hash_data_find(config, HK(filename))) == NULL){
 		ret = error("filename not supplied");
@@ -65,6 +74,10 @@ retry:;
 		
 		ret = error("file open() error");
 		goto error;
+	}
+	
+	if(fdata->temprorary != 0){
+		fdata->path = strdup(filepath);
 	}
 	
 	*pfdata = fdata;

@@ -142,6 +142,7 @@
 #define HK_VALUE_storage 14484
 #define HK_VALUE_string 9743
 #define HK_VALUE_structure 31338
+#define HK_VALUE_temprorary 43267
 #define HK_VALUE_test 3411
 #define HK_VALUE_tick_interval 88187
 #define HK_VALUE_type 3224
@@ -295,6 +296,7 @@ typedef enum hashkey_t {
       HK_storage = HK_VALUE_storage, 
       HK_string = HK_VALUE_string, 
       HK_structure = HK_VALUE_structure, 
+      HK_temprorary = HK_VALUE_temprorary, 
       HK_test = HK_VALUE_test, 
       HK_tick_interval = HK_VALUE_tick_interval, 
       HK_type = HK_VALUE_type, 
@@ -452,6 +454,7 @@ keypair_t hashkeys[] = {
       { "storage", HK_VALUE_storage }, 
       { "string", HK_VALUE_string }, 
       { "structure", HK_VALUE_structure }, 
+      { "temprorary", HK_VALUE_temprorary }, 
       { "test", HK_VALUE_test }, 
       { "tick_interval", HK_VALUE_tick_interval }, 
       { "type", HK_VALUE_type }, 
