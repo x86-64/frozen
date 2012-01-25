@@ -64,14 +64,10 @@ static ssize_t query_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
-	ret = data_hash_query(&userdata->data, request);
+	if( (ret = data_hash_query(&userdata->data, request)) < 0)
+		return ret;
 	
-	request_t r_next[] = {
-		{ HK(ret), DATA_PTR_SIZET(&ret) },
-		hash_inline(request),
-		hash_end
-	};
-	return machine_pass(machine, r_next);
+	return machine_pass(machine, request);
 } // }}}
 
 machine_t query_proto = {
