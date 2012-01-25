@@ -113,8 +113,9 @@ redo:
 				{ HK(buffer), DATA_PTR_UINTT(&count)          },
 				hash_next(userdata->req_count)
 			};
-			if( (ret = machine_pass(reader, r_count)) < 0 )
-				return ret;
+			//if( (ret = machine_pass(reader, r_count)) < 0 )
+			//	return ret;
+			machine_pass(reader, r_count); // ignore struct_unpack errors here..
 			
 			for(i=0; i<count; i++){
 				request_t r_read[] = {
@@ -125,8 +126,10 @@ redo:
 				ret = machine_pass(reader, r_read);
 				if( ret == -EBADF )
 					goto redo;   // start from beginning
-				if( ret < 0 )
+				if( ret < 0 ){
+					log_error("rebuild error - read: %d: %s\n", ret, describe_error(ret));
 					return ret;
+				}
 				
 				/*uintmax_t offset;
 				request_t r_create[] = {
@@ -148,8 +151,10 @@ redo:
 				ret = machine_query(writer, r_write);
 				if( ret == -EBADF )
 					goto redo;
-				if(ret < 0)
+				if( ret < 0 ){
+					log_error("rebuild error - write: %d: %s\n", ret, describe_error(ret));
 					return ret;
+				}
 			}
 			break;
 		case ENUM_CURSOR_ITERATE:
