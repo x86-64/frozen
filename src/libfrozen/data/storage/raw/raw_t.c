@@ -59,7 +59,7 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t le
 	}
 	dst_data = (raw_t *)(dst->ptr);
 	
-	if(src){
+	if(src && length > 0){
 		fastcall_read r_read = {
 			{ 5, ACTION_READ },
 			offset,
@@ -183,9 +183,19 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 } // }}}
 static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	uintmax_t              length;
+	uintmax_t              length            = 0;
 	
 	switch(fargs->format){
+		case FORMAT(clean):
+		case FORMAT(human):
+		case FORMAT(config):;
+			
+			fastcall_logicallen r_len1 = { { 3, ACTION_LOGICALLEN } };
+			if( (ret = data_query(fargs->src, &r_len1)) < 0)
+				return ret;
+			
+			return raw_read(dst, fargs->src, 0, r_len1.length);
+			
 		case FORMAT(hash):;
 			hash_t                *config;
 			data_t                *buffer;
@@ -195,7 +205,14 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 				return -EINVAL;
 			
 			buffer = hash_data_find(config, HK(buffer));
-			hash_data_get(ret, TYPE_UINTT, length, config, HK(length)); if(ret != 0) return -EINVAL;
+			if(buffer){
+				fastcall_logicallen r_len2 = { { 3, ACTION_LOGICALLEN } };
+				if( (ret = data_query(buffer, &r_len2)) < 0)
+					return ret;
+				
+				length = r_len2.length;
+			}
+			hash_data_get(ret, TYPE_UINTT, length, config, HK(length));
 			
 			return raw_read(dst, buffer, 0, length);
 
