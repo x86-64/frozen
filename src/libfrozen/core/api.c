@@ -155,6 +155,22 @@ ssize_t     action_transfer_from_hash(data_t *data, request_t *request){ // {{{
 	return data_query(data, &fargs);
 } // }}}
 
+ssize_t     action_resize_from_fast(machine_t *machine, fastcall_resize *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_resize_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	fastcall_resize        fargs             = { { 4, ACTION_RESIZE } };
+	
+	hash_data_get(ret, TYPE_UINTT, fargs.length, request, HK(size));
+	
+	return data_query(data, &fargs);
+} // }}}
 
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
@@ -222,6 +238,7 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_DELETE]       = (f_machine_from_fast)&action_delete_from_fast,
 	[ACTION_COUNT]        = (f_machine_from_fast)&action_count_from_fast,
 	[ACTION_TRANSFER]     = (f_machine_from_fast)&action_transfer_from_fast,
+	[ACTION_RESIZE]       = (f_machine_from_fast)&action_resize_from_fast,
 };
 
 f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
@@ -231,5 +248,6 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_DELETE]       = (f_data_from_hash)&action_delete_from_hash,
 	[ACTION_COUNT]        = (f_data_from_hash)&action_count_from_hash,
 	[ACTION_TRANSFER]     = (f_data_from_hash)&action_transfer_from_hash,
+	[ACTION_RESIZE]       = (f_data_from_hash)&action_resize_from_hash,
 };
 
