@@ -72,7 +72,23 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t le
 	}
 	return ret;
 } // }}}
-
+static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
+	if( (fdata->flags & RAW_RESIZEABLE) == 0)
+		return -EINVAL;
+	
+	if(new_size != 0){
+		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
+			fdata->size = 0;
+			return -ENOMEM;
+		}
+	}else{
+		if(fdata->ptr)
+			free(fdata->ptr);
+		fdata->ptr = NULL;
+	}
+	fdata->size = new_size;
+	return 0;
+} // }}}
 static ssize_t data_raw_len(data_t *data, fastcall_len *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
 	return 0;
@@ -249,14 +265,11 @@ static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
 	
 	new_size = fargs->offset + fargs->buffer_size; 
 	if(fdata->size < new_size){
-		if( (fdata->flags & RAW_RESIZEABLE) == 0)
-			goto not_resizeable;
-		
-		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
-			fdata->size = 0;
-			return -ENOMEM;
+		switch( (ret = raw_resize(fdata, new_size))){
+			case 0:       break;
+			case -EINVAL: goto not_resizeable;
+			default:      return ret;
 		}
-		fdata->size = new_size;
 	}
 
 not_resizeable:
@@ -267,6 +280,14 @@ not_resizeable:
 	
 	memcpy(fdata->ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
 	return 0;
+} // }}}
+static ssize_t data_raw_resize(data_t *data, fastcall_resize *fargs){ // {{{
+	raw_t                 *fdata             = ((raw_t *)data->ptr);
+	
+	if(fdata == NULL)
+		return raw_prepare(data, fargs->length);
+	
+	return raw_resize(fdata, fargs->length);
 } // }}}
 
 data_proto_t raw_t_proto = {
@@ -283,6 +304,7 @@ data_proto_t raw_t_proto = {
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_raw_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_raw_convert_from,
 		[ACTION_WRITE]       = (f_data_func)&data_raw_write,
+		[ACTION_RESIZE]      = (f_data_func)&data_raw_resize,
 	}
 };
 
