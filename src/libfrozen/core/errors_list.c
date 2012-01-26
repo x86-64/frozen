@@ -4,8 +4,8 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
- { -217146, "src/libfrozen/machines/data/query/query.c: data not supplied" },
- { -217127, "src/libfrozen/machines/data/query/query.c: calloc failed" },
+ { -217150, "src/libfrozen/machines/data/query/query.c: data not supplied" },
+ { -217129, "src/libfrozen/machines/data/query/query.c: calloc failed" },
  { -208993, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad underlying storage" },
  { -208986, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item size" },
  { -208979, "src/libfrozen/data/allocator/list/allocator_list_t.c: bad item_sample" },
