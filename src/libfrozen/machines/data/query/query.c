@@ -22,6 +22,7 @@
  *                                        (env_t)"data",         # - query data supplied in request
  *                                        (sometype_t)"",        # - custom data
  *                                        ....
+ *              request                 = { ... }                # request for data query, optional, default is incoming request
  * }
  * @endcode
  */
@@ -30,6 +31,7 @@
 
 typedef struct query_userdata {
 	data_t                 data;
+	request_t             *request;
 } query_userdata;
 
 static int query_init(machine_t *machine){ // {{{
@@ -46,6 +48,7 @@ static int query_destroy(machine_t *machine){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
 	data_query(&userdata->data, &r_free);
 	
+	hash_free(userdata->request);
 	free(userdata);
 	return 0;
 } // }}}
@@ -53,6 +56,7 @@ static int query_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
+	hash_data_consume(ret, TYPE_HASHT, userdata->request, config, HK(request));
 	hash_holder_consume(ret, userdata->data, config, HK(data));
 	if(ret != 0)
 		return error("data not supplied");
@@ -64,7 +68,12 @@ static ssize_t query_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
-	if( (ret = data_hash_query(&userdata->data, request)) < 0)
+	if( (ret = data_hash_query(
+		&userdata->data,
+		userdata->request ?
+			userdata->request :
+			request
+	)) < 0)
 		return ret;
 	
 	return machine_pass(machine, request);
