@@ -5,13 +5,11 @@
 
 * m4 macro collection
   - write m4 macro for balancer machine
-  - shop_pass
-  - shop_call
-  - shop_return
 
 - rename allocator_list_t to list_t
 - change push/pop api to accept data holders instead of plain data
 - rewrite allocator_fixed_t to use new list_t
+- list_t compare function, as multiselect_t would do
 - broken tcp
 
 - join physical and logical length into one
@@ -29,9 +27,8 @@
 - machine multi_request
 
 - new test suite, as benchmarks, deprecate check
-- data 'range_t', 'multiselect_t' and matching routines
+- data 'range_t'
 - machine queue
-- mphf nelements_step with percents + remove from mphf to another machine
 
 - deprecate data/transfer as useless
 - deprecate cache, write cache_t instead
