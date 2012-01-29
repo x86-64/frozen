@@ -10,6 +10,8 @@
 #include <dirent.h>
 #include <strings.h>
 
+char            defconfig_m4sdir[] = FROZEN_M4SDIR;
+
 /* global options */
 char            defopt_config_file[] = "frozen.conf";
 char            defopt_modules_dir[] = FROZEN_MODULESDIR;
@@ -340,6 +342,8 @@ void main_rest(void){
 	}
 		
 	modules_load();
+	
+	config_m4_incs = defconfig_m4sdir;
 	
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);                     // block all signals, main thread will handler that

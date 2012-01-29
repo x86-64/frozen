@@ -91,9 +91,11 @@ extern char *config_get_text(void);
 extern char *config_ext_file;
 
 char  defconfig_m4_path[] = M4PATH;
+char  defconfig_m4_incs[] = "";
 char  defconfig_m4_opts[] = "";
 
 char *config_m4_path      = defconfig_m4_path;
+char *config_m4_incs      = defconfig_m4_incs;
 char *config_m4_opts      = defconfig_m4_opts;
 
 #define emit_error(fmt, ...){                                           \
@@ -108,7 +110,7 @@ char *config_m4_opts      = defconfig_m4_opts;
 
 
 /* Line 268 of yacc.c  */
-#line 112 "configs/config_parser.tab.c"
+#line 114 "configs/config_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -149,7 +151,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 38 "configs/config_parser.y"
+#line 40 "configs/config_parser.y"
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
@@ -160,7 +162,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 164 "configs/config_parser.tab.c"
+#line 166 "configs/config_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -172,7 +174,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 176 "configs/config_parser.tab.c"
+#line 178 "configs/config_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -463,8 +465,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    54,    54,    57,    61,    66,    75,    79,    85,    86,
-      87,    99,   100,   101,   122
+       0,    56,    56,    59,    63,    68,    77,    81,    87,    88,
+      89,   101,   102,   103,   124
 };
 #endif
 
@@ -1407,14 +1409,14 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 54 "configs/config_parser.y"
+#line 56 "configs/config_parser.y"
     { *hash = (yyvsp[(1) - (1)].hash_items); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 57 "configs/config_parser.y"
+#line 59 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(sizeof(hash_t));
 		hash_assign_hash_end((yyval.hash_items));
@@ -1424,7 +1426,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 61 "configs/config_parser.y"
+#line 63 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(2 * sizeof(hash_t));
 		hash_assign_hash_t   (&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item));
@@ -1435,7 +1437,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 66 "configs/config_parser.y"
+#line 68 "configs/config_parser.y"
     {
 		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
 		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
@@ -1448,7 +1450,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 75 "configs/config_parser.y"
+#line 77 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
 		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
@@ -1458,7 +1460,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 79 "configs/config_parser.y"
+#line 81 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = hash_ptr_null;
 	}
@@ -1467,21 +1469,21 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 85 "configs/config_parser.y"
+#line 87 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 86 "configs/config_parser.y"
+#line 88 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 87 "configs/config_parser.y"
+#line 89 "configs/config_parser.y"
     {
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
 		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (2)].name));
@@ -1497,21 +1499,21 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 99 "configs/config_parser.y"
+#line 101 "configs/config_parser.y"
     { (yyval.data).type = TYPE_STRINGT; (yyval.data).ptr = (yyvsp[(1) - (1)].name); }
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 100 "configs/config_parser.y"
+#line 102 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 101 "configs/config_parser.y"
+#line 103 "configs/config_parser.y"
     {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
@@ -1538,7 +1540,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 122 "configs/config_parser.y"
+#line 124 "configs/config_parser.y"
     {
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
@@ -1565,7 +1567,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1569 "configs/config_parser.tab.c"
+#line 1571 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1796,7 +1798,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 144 "configs/config_parser.y"
+#line 146 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){ // {{{
@@ -1831,7 +1833,14 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	if(ext != NULL && strcmp(ext, ".m4") == 0){
 		char buffer[DEF_BUFFER_SIZE];
 		
-		if(snprintf(buffer, sizeof(buffer), "%s -s %s %s", config_m4_path, config_m4_opts, filename) > sizeof(buffer)) // -s for sync lines
+		if(snprintf(
+			buffer, sizeof(buffer),
+			"%s %s -s %s %s",
+			config_m4_path,
+			config_m4_incs,
+			config_m4_opts,
+			filename
+		) > sizeof(buffer)) // -s for sync lines
 			return NULL;
 		
 		if( (fd = popen(buffer, "r")) == NULL)

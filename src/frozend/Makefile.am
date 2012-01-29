@@ -11,5 +11,6 @@ frozend.c: paths.h
 paths.h: paths.h.in
 	cat paths.h.in > $@
 	sed "s#%modulesdir%#$(modulesdir)#g" -i $@
+	sed "s#%m4sdir%#$(m4sdir)#g" -i $@
 
 CLEANFILES=paths.h

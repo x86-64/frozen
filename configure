@@ -614,6 +614,7 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+m4sdir
 headersdir
 modulesdir
 HAVE_DEBUG
@@ -21077,10 +21078,12 @@ fi
 
 modulesdir=${libexecdir}/frozen/
 headersdir=${includedir}/frozen/
+m4sdir=${libexecdir}/frozen/m4/
 
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/machines/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
+
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/machines/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/m4/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -22218,6 +22221,7 @@ do
     "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;
     "src/lang/go/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/go/Makefile" ;;
     "src/lang/gogcc/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/gogcc/Makefile" ;;
+    "src/m4/Makefile") CONFIG_FILES="$CONFIG_FILES src/m4/Makefile" ;;
     "src/modules/Makefile") CONFIG_FILES="$CONFIG_FILES src/modules/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "$GEN_MAKEFILES") CONFIG_FILES="$CONFIG_FILES $GEN_MAKEFILES" ;;

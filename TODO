@@ -9,6 +9,9 @@
   - shop_call
   - shop_return
 
+- rename allocator_list_t to list_t
+- change push/pop api to accept data holders instead of plain data
+- rewrite allocator_fixed_t to use new list_t
 - broken tcp
 
 - join physical and logical length into one

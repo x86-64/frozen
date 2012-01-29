@@ -251,6 +251,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+m4sdir = @m4sdir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 modulesdir = @modulesdir@

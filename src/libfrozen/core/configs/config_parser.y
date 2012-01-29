@@ -14,9 +14,11 @@ extern char *config_get_text(void);
 extern char *config_ext_file;
 
 char  defconfig_m4_path[] = M4PATH;
+char  defconfig_m4_incs[] = "";
 char  defconfig_m4_opts[] = "";
 
 char *config_m4_path      = defconfig_m4_path;
+char *config_m4_incs      = defconfig_m4_incs;
 char *config_m4_opts      = defconfig_m4_opts;
 
 #define emit_error(fmt, ...){                                           \
@@ -175,7 +177,14 @@ hash_t *   configs_file_parse(char *filename){ // {{{
 	if(ext != NULL && strcmp(ext, ".m4") == 0){
 		char buffer[DEF_BUFFER_SIZE];
 		
-		if(snprintf(buffer, sizeof(buffer), "%s -s %s %s", config_m4_path, config_m4_opts, filename) > sizeof(buffer)) // -s for sync lines
+		if(snprintf(
+			buffer, sizeof(buffer),
+			"%s %s -s %s %s",
+			config_m4_path,
+			config_m4_incs,
+			config_m4_opts,
+			filename
+		) > sizeof(buffer)) // -s for sync lines
 			return NULL;
 		
 		if( (fd = popen(buffer, "r")) == NULL)

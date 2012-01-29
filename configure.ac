@@ -130,8 +130,10 @@ fi
 
 modulesdir=${libexecdir}/frozen/
 headersdir=${includedir}/frozen/
+m4sdir=${libexecdir}/frozen/m4/
 AC_SUBST(modulesdir)
 AC_SUBST(headersdir)
+AC_SUBST(m4sdir)
 
 AC_CONFIG_FILES([Makefile
 		doc/Makefile
@@ -144,6 +146,7 @@ AC_CONFIG_FILES([Makefile
 		src/lang/Makefile
 		src/lang/go/Makefile
 		src/lang/gogcc/Makefile
+		src/m4/Makefile
 		src/modules/Makefile
 		test/Makefile
 		$GEN_MAKEFILES
