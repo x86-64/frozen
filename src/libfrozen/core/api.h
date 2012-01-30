@@ -128,6 +128,7 @@ typedef enum api_types {
 
 typedef ssize_t (*f_crwd)      (machine_t *, request_t *);
 typedef ssize_t (*f_fast_func) (data_t *,    void *);
+typedef ssize_t (*f_callback)  (request_t *, void *);
 
 /*
 	ACTION(CREATE),
@@ -161,10 +162,12 @@ typedef ssize_t (*f_fast_func) (data_t *,    void *);
 	
 	ACTION(PUSH),
 	ACTION(POP),
+	ACTION(ENUM),
 	
 	ACTION(QUERY),
 
 	ACTION(GETDATAPTR),
+
 
 */
 
@@ -300,6 +303,12 @@ typedef struct fastcall_pop {
 	fastcall_header        header;
 	data_t                *data;
 } fastcall_pop;
+
+typedef struct fastcall_enum {
+	fastcall_header        header;
+	f_callback             callback;
+	void                  *userdata;
+} fastcall_enum;
 
 typedef struct fastcall_query {
 	fastcall_header        header;

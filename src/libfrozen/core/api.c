@@ -6,6 +6,20 @@ typedef ssize_t (*f_data_from_hash)     (data_t *, request_t *);
 extern f_machine_from_fast api_machine_from_fast [ACTION_INVALID];
 extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
 
+typedef struct enum_ctx {
+	machine_t             *shop;
+	request_t             *request;
+} enum_ctx;
+
+static ssize_t action_enum_callback(request_t *request, enum_ctx *ctx){ // {{{
+	request_t r_next[] = {
+		hash_inline(request),
+		hash_inline(ctx->request),
+		hash_end
+	};
+	return machine_query(ctx->shop, r_next);
+} // }}}
+
 ssize_t     action_create_from_fast(machine_t *machine, fastcall_create *fargs){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
@@ -172,6 +186,17 @@ ssize_t     action_resize_from_hash(data_t *data, request_t *request){ // {{{
 	return data_query(data, &fargs);
 } // }}}
 
+ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	machine_t             *shop;
+	
+	hash_data_get(ret, TYPE_MACHINET, shop, request, HK(shop));
+	
+	enum_ctx               ctx               = { shop, request };
+	fastcall_enum          fargs             = { { 4, ACTION_ENUM }, (f_callback)&action_enum_callback, &ctx };
+	return data_query(data, &fargs);
+} // }}}
+
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	action_t               action;
@@ -229,6 +254,7 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_POP] = 3,
 	[ACTION_RESIZE] = 3,
 	[ACTION_QUERY] = 3,
+	[ACTION_ENUM]  = 4,
 };
 
 f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
@@ -249,5 +275,6 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_COUNT]        = (f_data_from_hash)&action_count_from_hash,
 	[ACTION_TRANSFER]     = (f_data_from_hash)&action_transfer_from_hash,
 	[ACTION_RESIZE]       = (f_data_from_hash)&action_resize_from_hash,
+	[ACTION_ENUM]         = (f_data_from_hash)&action_enum_from_hash,
 };
 
