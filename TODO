@@ -6,7 +6,6 @@
 * m4 macro collection
   - write m4 macro for balancer machine
 
-- rename allocator_list_t to list_t
 - change push/pop api to accept data holders instead of plain data
 - rewrite allocator_fixed_t to use new list_t
 - list_t compare function, as multiselect_t would do

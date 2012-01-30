@@ -11,37 +11,52 @@ typedef struct allocator_fixed_t {
 	uintmax_t              last_id;
 	data_t                 storage;
 	data_t                 removed_items;
-	pthread_rwlock_t       last_id_mtx;
+	pthread_rwlock_t       rwlock;
 } allocator_fixed_t;
 
-static ssize_t   allocator_getnewid(allocator_fixed_t *fdata, uintmax_t *newid){ // {{{
-	register ssize_t       ret               = 0;
+static ssize_t allocator_getnewid(allocator_fixed_t *fdata, uintmax_t *newid){ // {{{
+	ssize_t                ret;
 	
-	pthread_rwlock_wrlock(&fdata->last_id_mtx);
-		
-		if(__MAX(uintmax_t) / fdata->item_size <= fdata->last_id){
-			ret = -ENOSPC;
-		}else{
-			*newid = fdata->last_id++;
-		}
-		
-	pthread_rwlock_unlock(&fdata->last_id_mtx);
-	return ret;
+	if(__MAX(uintmax_t) / fdata->item_size <= fdata->last_id)
+		return -ENOSPC;
+	
+	*newid = fdata->last_id++;
+	
+	fastcall_resize r_resize = {
+		{ 3, ACTION_RESIZE },
+		fdata->last_id * fdata->item_size
+	};
+	if( (ret = data_query(&fdata->storage, &r_resize)) < 0){
+		fdata->last_id--;
+		return ret;
+	}
+	return 0;
 } // }}}
-static uintmax_t allocator_getlastid(allocator_fixed_t *fdata){ // {{{
-	uintmax_t              last_id;
+/*static ssize_t allocator_removelastid(allocator_fixed_t *fdata){ // {{{
+	ssize_t                ret;
+	uintmax_t              id;
+	
+	if(fdata->last_id == 0)
+		return -EINVAL;
+	
+	id = --fdata->last_id;
+	
+	fastcall_resize r_resize = {
+		{ 3, ACTION_RESIZE },
+		id * fdata->item_size
+	};
+	if( (ret = data_query(&fdata->storage, &r_resize)) < 0){
+		fdata->last_id++;
+		return ret;
+	}
+	return 0;
+} // }}}*/
 
-	pthread_rwlock_rdlock(&fdata->last_id_mtx);
-		last_id = fdata->last_id;
-	pthread_rwlock_unlock(&fdata->last_id_mtx);
-	return last_id;
-} // }}}
-
-static void allocator_destroy(allocator_fixed_t *fdata){ // {{{
+static void    allocator_destroy(allocator_fixed_t *fdata){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
 	data_query(&fdata->storage, &r_free);
 	
-	pthread_rwlock_destroy(&fdata->last_id_mtx);
+	pthread_rwlock_destroy(&fdata->rwlock);
 	free(fdata);
 } // }}}
 static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
@@ -52,7 +67,7 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 	if((fdata = calloc(1, sizeof(allocator_fixed_t))) == NULL)
 		return error("calloc failed");
 	
-	pthread_rwlock_init(&fdata->last_id_mtx, NULL);
+	pthread_rwlock_init(&fdata->rwlock, NULL);
 	
 	// get removed items tracker
 	hash_holder_consume(ret, fdata->removed_items, config, HK(removed_items));
@@ -125,83 +140,170 @@ static ssize_t data_allocator_fixed_t_free(data_t *data, fastcall_free *fargs){ 
 	
 	return 0;
 } // }}}
-
-static ssize_t data_allocator_fixed_t_default(data_t *data, fastcall_header *hargs){ // {{{
+static ssize_t data_allocator_fixed_t_io(data_t *data, fastcall_io *fargs){ // {{{
+	ssize_t                ret;
 	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
 	
-	switch(hargs->action){
-		case ACTION_CREATE:;
-			fastcall_create *r_create = (fastcall_create *)hargs;
-			
-			if(fdata->removed_items.type){
-				fastcall_pop r_pop = {
-					{ 4, ACTION_POP },
-					&r_create->offset,
-					sizeof(r_create->offset)
-				};
-				if(data_query(&fdata->removed_items, &r_pop) == 0)
-					return 0;
-			}
-			
-			if(allocator_getnewid(fdata, &r_create->offset) != 0)
-				return -EFAULT;
-			
-			return 0;
-			
-		case ACTION_DELETE:;
-			fastcall_delete *r_delete = (fastcall_delete *)hargs;
-			
-			if(fdata->removed_items.type){
-				fastcall_push r_push = {
-					{ 4, ACTION_PUSH },
-					&r_delete->offset,
-					sizeof(r_delete->offset)
-				};
-				if(data_query(&fdata->removed_items, &r_push) != 0)
-					return -EFAULT;
-			}
-			return 0;
+	pthread_rwlock_rdlock(&fdata->rwlock);
+	
+		if(fargs->offset >= fdata->last_id){
+			ret = -EINVAL;
+			goto exit;
+		}
 		
-		case ACTION_COUNT:;
-			uintmax_t       in_removed = 0;
-			fastcall_count *r_count    = (fastcall_count *)hargs;
-			
-			if(fdata->removed_items.type){
-				fastcall_count r_count = { { 3, ACTION_COUNT } };
-				if(data_query(&fdata->removed_items, &r_count) == 0){
-					in_removed = r_count.nelements;
-				}
-			}
-			
-			r_count->nelements = allocator_getlastid(fdata) - in_removed - 1;
-			return 0;
+		if(safe_mul(&fargs->offset, fargs->offset, fdata->item_size) != 0){
+			ret = -EINVAL;
+			goto exit;
+		}
 		
-		case ACTION_READ:
-		case ACTION_WRITE:;
-			fastcall_io *r_io = (fastcall_io *)hargs;
-			
-			if(r_io->offset >= allocator_getlastid(fdata))
-				return -EINVAL;
-			
-			if(safe_mul(&r_io->offset, r_io->offset, fdata->item_size) != 0)
-				return -EINVAL;
-			
-			return data_query(&fdata->storage, r_io);
-		
-		default:
-			break;
-	}
-	return -ENOSYS;
+		ret = data_query(&fdata->storage, fargs);
+
+exit:
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
 } // }}}
+static ssize_t data_allocator_fixed_t_create(data_t *data, fastcall_create *fargs){ // {{{
+	ssize_t                ret;
+	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
+	
+	pthread_rwlock_wrlock(&fdata->rwlock);
+		
+		if(fdata->removed_items.type){
+			fastcall_pop r_pop = {
+				{ 4, ACTION_POP },
+				&fargs->offset,
+				sizeof(fargs->offset)
+			};
+			if(data_query(&fdata->removed_items, &r_pop) == 0){
+				ret = 0;
+				goto exit;
+			}
+		}
+		
+		ret = allocator_getnewid(fdata, &fargs->offset);
+exit:
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
+} // }}}
+static ssize_t data_allocator_fixed_t_delete(data_t *data, fastcall_delete *fargs){ // {{{
+	ssize_t                ret;
+	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
+	
+	pthread_rwlock_wrlock(&fdata->rwlock);
+		
+		if(fdata->removed_items.type){
+			fastcall_push r_push = {
+				{ 4, ACTION_PUSH },
+				&fargs->offset,
+				sizeof(fargs->offset)
+			};
+			if(data_query(&fdata->removed_items, &r_push) != 0){
+				ret = -EFAULT;
+				goto exit;
+			}
+		}
+		// TODO move items
+		//ret = allocator_removelastid(fdata);
+	
+exit:
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
+} // }}}
+static ssize_t data_allocator_fixed_t_count(data_t *data, fastcall_count *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              in_removed     = 0;
+	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
+	
+	pthread_rwlock_rdlock(&fdata->rwlock);
+	
+		if(fdata->removed_items.type){
+			fastcall_count fargs = { { 3, ACTION_COUNT } };
+			if(data_query(&fdata->removed_items, &fargs) == 0){
+				in_removed = fargs.nelements;
+			}
+		}
+	
+		fargs->nelements = fdata->last_id - in_removed - 1;
+		ret = 0;
+	
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
+} // }}}
+/*static ssize_t data_allocator_fixed_t_push(data_t *data, fastcall_push *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              id;
+	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
+	
+	pthread_rwlock_wrlock(&fdata->rwlock);
+		
+		if( (ret = allocator_getnewid(fdata, &id)) < 0)
+			goto exit;
+		
+		fastcall_write r_write = {
+			{ 5, ACTION_WRITE },
+			id * fdata->item_size,
+			fargs->buffer,
+			MIN(fargs->buffer_size, fdata->item_size)
+		};
+		if( (ret = data_query(&fdata->storage, &r_write)) < 0)
+			goto push_unwind;
+		
+		fargs->buffer_size = r_write.buffer_size;
+	
+exit:
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
+
+push_unwind:
+	fdata->last_id--;
+	goto exit;
+} // }}}
+static ssize_t data_allocator_fixed_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              id;
+	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
+	
+	pthread_rwlock_wrlock(&fdata->rwlock);
+		
+		if(fdata->last_id == 0){
+			ret = -EINVAL;
+			goto exit;
+		}
+		
+		id = fdata->last_id - 1;
+		
+		fastcall_read r_read = {
+			{ 5, ACTION_READ },
+			id * fdata->item_size,
+			fargs->buffer,
+			MIN(fargs->buffer_size, fdata->item_size)
+		};
+		if( (ret = data_query(&fdata->storage, &r_read)) < 0)
+			goto exit;
+		
+		fargs->buffer_size = r_read.buffer_size;
+		
+		ret = allocator_removelastid(fdata);
+
+exit:
+	pthread_rwlock_unlock(&fdata->rwlock);
+	return ret;
+} // }}}*/
 
 data_proto_t allocator_fixed_t_proto = {
         .type                   = TYPE_ALLOCATORFIXEDT,
         .type_str               = "allocator_fixed_t",
         .api_type               = API_HANDLERS,
-        .handler_default        = (f_data_func)&data_allocator_fixed_t_default,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_allocator_fixed_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_allocator_fixed_t_free,
+		[ACTION_READ]         = (f_data_func)&data_allocator_fixed_t_io,
+		[ACTION_WRITE]        = (f_data_func)&data_allocator_fixed_t_io,
+		[ACTION_CREATE]       = (f_data_func)&data_allocator_fixed_t_create,
+		[ACTION_DELETE]       = (f_data_func)&data_allocator_fixed_t_delete,
+		[ACTION_COUNT]        = (f_data_func)&data_allocator_fixed_t_count,
+		//[ACTION_PUSH]         = (f_data_func)&data_allocator_fixed_t_push,
+		//[ACTION_POP]          = (f_data_func)&data_allocator_fixed_t_pop,
 	}
 };
 

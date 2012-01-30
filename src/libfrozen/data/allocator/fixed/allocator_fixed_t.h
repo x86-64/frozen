@@ -17,9 +17,11 @@
  * some = (allocator_fixed_t){
  *              item_size               = (uint_t)'10',                            # specify size directly             OR
  *              item_sample             = (sometype_t)'',                          # sample item for size estimation
- *              removed_items           = (allocator_list_t){                      # removed items tracker, if not supplied - no tracking performed
+ *              removed_items           =                                          # removed items tracker, if not supplied - no tracking performed
+ *                                        (allocator_fixed_t){                     # - track with another allocator_fixed_t 
  *                   item_sample = (uint_t)"0"
  *              }
+ *                                        (list_t){ ... }                          # - track with in-memory list_t
  *
  * }
  * @endcode
