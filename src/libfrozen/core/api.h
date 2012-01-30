@@ -293,14 +293,12 @@ typedef struct fastcall_count {
 
 typedef struct fastcall_push {
 	fastcall_header        header;
-	void                  *buffer;
-	uintmax_t              buffer_size;
+	data_t                *data;
 } fastcall_push;
 
 typedef struct fastcall_pop {
 	fastcall_header        header;
-	void                  *buffer;
-	uintmax_t              buffer_size;
+	data_t                *data;
 } fastcall_pop;
 
 typedef struct fastcall_query {

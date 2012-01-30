@@ -169,15 +169,19 @@ static ssize_t data_allocator_fixed_t_create(data_t *data, fastcall_create *farg
 	pthread_rwlock_wrlock(&fdata->rwlock);
 		
 		if(fdata->removed_items.type){
-			fastcall_pop r_pop = {
-				{ 4, ACTION_POP },
-				&fargs->offset,
-				sizeof(fargs->offset)
+			data_t       d_offset = DATA_PTR_UINTT(&fargs->offset);
+			data_t       d_copy;
+			
+			fastcall_pop r_pop    = {
+				{ 3, ACTION_POP },
+				&d_copy
 			};
-			if(data_query(&fdata->removed_items, &r_pop) == 0){
-				ret = 0;
+			if( (ret = data_query(&fdata->removed_items, &r_pop)) == 0)
 				goto exit;
-			}
+			
+			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_offset };
+			ret = data_query(&d_copy, &r_transfer);
+			goto exit;
 		}
 		
 		ret = allocator_getnewid(fdata, &fargs->offset);
@@ -192,10 +196,16 @@ static ssize_t data_allocator_fixed_t_delete(data_t *data, fastcall_delete *farg
 	pthread_rwlock_wrlock(&fdata->rwlock);
 		
 		if(fdata->removed_items.type){
-			fastcall_push r_push = {
-				{ 4, ACTION_PUSH },
-				&fargs->offset,
-				sizeof(fargs->offset)
+			data_t        d_offset = DATA_PTR_UINTT(&fargs->offset);
+			data_t        d_copy;
+			
+			fastcall_copy r_copy = { { 3, ACTION_COPY }, &d_copy };
+			if( (ret = data_query(&d_offset, &r_copy)) < 0)
+				goto exit;
+			
+			fastcall_push r_push   = {
+				{ 3, ACTION_PUSH },
+				&d_copy
 			};
 			if(data_query(&fdata->removed_items, &r_push) != 0){
 				ret = -EFAULT;
