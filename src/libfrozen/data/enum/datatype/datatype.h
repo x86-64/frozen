@@ -40,9 +40,10 @@ typedef enum datatype_t {
    TYPE_RANDOMT = 33,
    TYPE_CONTAINERT = 34,
    TYPE_FILET = 35,
-   TYPE_LISTT = 36,
-   TYPE_MEMORYT = 37,
-   TYPE_RAWT = 38,
+   TYPE_FOLDERT = 36,
+   TYPE_LISTT = 37,
+   TYPE_MEMORYT = 38,
+   TYPE_RAWT = 39,
 } datatype_t;
 
 #endif

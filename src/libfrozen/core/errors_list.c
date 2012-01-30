@@ -4,6 +4,10 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -221226, "src/libfrozen/data/storage/folder/folder_t.c: path not exist" },
+ { -221220, "src/libfrozen/data/storage/folder/folder_t.c: path invalid" },
+ { -221214, "src/libfrozen/data/storage/folder/folder_t.c: path not supplied" },
+ { -221211, "src/libfrozen/data/storage/folder/folder_t.c: calloc returns null" },
  { -217150, "src/libfrozen/machines/data/query/query.c: data not supplied" },
  { -217129, "src/libfrozen/machines/data/query/query.c: calloc failed" },
  { -204903, "src/libfrozen/data/allocator/fixed/allocator_fixed_t.c: bad underlying storage" },

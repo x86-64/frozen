@@ -66,6 +66,7 @@
 #define HK_VALUE_identity 23282
 #define HK_VALUE_ignore_errors 90804
 #define HK_VALUE_index 6061
+#define HK_VALUE_inode 5669
 #define HK_VALUE_input 6325
 #define HK_VALUE_insert 10222
 #define HK_VALUE_item_sample 53559
@@ -118,6 +119,7 @@
 #define HK_VALUE_reader 9620
 #define HK_VALUE_readonly 22762
 #define HK_VALUE_real_offset 54467
+#define HK_VALUE_reclen 9622
 #define HK_VALUE_regexp 10093
 #define HK_VALUE_removed_items 88298
 #define HK_VALUE_req_count 31695
@@ -220,6 +222,7 @@ typedef enum hashkey_t {
       HK_identity = HK_VALUE_identity, 
       HK_ignore_errors = HK_VALUE_ignore_errors, 
       HK_index = HK_VALUE_index, 
+      HK_inode = HK_VALUE_inode, 
       HK_input = HK_VALUE_input, 
       HK_insert = HK_VALUE_insert, 
       HK_item_sample = HK_VALUE_item_sample, 
@@ -272,6 +275,7 @@ typedef enum hashkey_t {
       HK_reader = HK_VALUE_reader, 
       HK_readonly = HK_VALUE_readonly, 
       HK_real_offset = HK_VALUE_real_offset, 
+      HK_reclen = HK_VALUE_reclen, 
       HK_regexp = HK_VALUE_regexp, 
       HK_removed_items = HK_VALUE_removed_items, 
       HK_req_count = HK_VALUE_req_count, 
@@ -378,6 +382,7 @@ keypair_t hashkeys[] = {
       { "identity", HK_VALUE_identity }, 
       { "ignore_errors", HK_VALUE_ignore_errors }, 
       { "index", HK_VALUE_index }, 
+      { "inode", HK_VALUE_inode }, 
       { "input", HK_VALUE_input }, 
       { "insert", HK_VALUE_insert }, 
       { "item_sample", HK_VALUE_item_sample }, 
@@ -430,6 +435,7 @@ keypair_t hashkeys[] = {
       { "reader", HK_VALUE_reader }, 
       { "readonly", HK_VALUE_readonly }, 
       { "real_offset", HK_VALUE_real_offset }, 
+      { "reclen", HK_VALUE_reclen }, 
       { "regexp", HK_VALUE_regexp }, 
       { "removed_items", HK_VALUE_removed_items }, 
       { "req_count", HK_VALUE_req_count }, 

@@ -819,6 +819,7 @@ enable_env_t
 enable_random_t
 enable_container_t
 enable_file_t
+enable_folder_t
 enable_list_t
 enable_memory_t
 enable_raw_t
@@ -1580,6 +1581,7 @@ Optional Features:
   --disable-data-container_t
                           disable data container_t
   --disable-data-file_t   disable data file_t
+  --disable-data-folder_t disable data folder_t
   --disable-data-list_t   disable data list_t
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
@@ -19180,6 +19182,43 @@ fi
 		DATA_MAKEFILE_storage_file=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/file/libfrozen_data_file.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-folder_t was given.
+if test "${enable_folder_t+set}" = set; then :
+  enableval=$enable_folder_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_folder_t}" = "yes"; then
+			enable_folder_t="no"
+		else
+			enable_folder_t="yes"
+		fi
+	fi
+
+	if test "${enable_folder_t}" = "yes"; then
+		DATA_DIR_folder_t="storage/folder"
+		DATA_DEP_folder_t="hash_t format_t uint_t string_t"
+		DATA_ID_folder_t=""
+		DATA_SELECTED="$DATA_SELECTED folder_t"
+		DATA_HEADERS="$DATA_HEADERS storage/folder/folder_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_storage_folder" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/storage/folder/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS storage/folder"
+
+		DATA_MAKEFILE_storage_folder=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/folder/libfrozen_data_folder.la"
 
 	fi
 
