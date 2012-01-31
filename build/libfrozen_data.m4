@@ -69,10 +69,10 @@ AC_DEFUN([FROZEN_DATA_END],[
 	echo "#ifndef DATA_TYPE_H" >> $datatype_h
 	echo "#define DATA_TYPE_H" >> $datatype_h
 		echo "" >> $datatype_h
-		echo "typedef enum datatype_t {" >> $datatype_h
+		echo "enum datatype_t {" >> $datatype_h
 			echo "   TYPE_INVALID = 0," >> $datatype_h
 			cat $datatype_tmp1 >> $datatype_h
-		echo "} datatype_t;" >> $datatype_h
+		echo "};" >> $datatype_h
 		echo "" >> $datatype_h
 	echo "#endif" >> $datatype_h
 	
