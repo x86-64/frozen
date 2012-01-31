@@ -42,7 +42,6 @@
 #define HK_VALUE_dump_last 31113
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
-#define HK_VALUE_error 6209
 #define HK_VALUE_exclusive 31143
 #define HK_VALUE_extended 20940
 #define HK_VALUE_fatal 5786
@@ -54,14 +53,11 @@
 #define HK_VALUE_format 9917
 #define HK_VALUE_function 22303
 #define HK_VALUE_global 9415
-#define HK_VALUE_go_template 53785
 #define HK_VALUE_hash 3191
 #define HK_VALUE_hash_ptr_end 68083
 #define HK_VALUE_hash_ptr_inline 131665
 #define HK_VALUE_hash_ptr_null 89234
 #define HK_VALUE_headers 15245
-#define HK_VALUE_http_req 22064
-#define HK_VALUE_http_resp 31264
 #define HK_VALUE_icase 5739
 #define HK_VALUE_identity 23282
 #define HK_VALUE_ignore_errors 90804
@@ -148,7 +144,6 @@
 #define HK_VALUE_test 3411
 #define HK_VALUE_tick_interval 88187
 #define HK_VALUE_type 3224
-#define HK_VALUE_url 1545
 #define HK_VALUE_uuid 3130
 #define HK_VALUE_value 5875
 #define HK_VALUE_value_bits 41713
@@ -198,7 +193,6 @@ typedef enum hashkey_t {
       HK_dump_last = HK_VALUE_dump_last, 
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
-      HK_error = HK_VALUE_error, 
       HK_exclusive = HK_VALUE_exclusive, 
       HK_extended = HK_VALUE_extended, 
       HK_fatal = HK_VALUE_fatal, 
@@ -210,14 +204,11 @@ typedef enum hashkey_t {
       HK_format = HK_VALUE_format, 
       HK_function = HK_VALUE_function, 
       HK_global = HK_VALUE_global, 
-      HK_go_template = HK_VALUE_go_template, 
       HK_hash = HK_VALUE_hash, 
       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
       HK_headers = HK_VALUE_headers, 
-      HK_http_req = HK_VALUE_http_req, 
-      HK_http_resp = HK_VALUE_http_resp, 
       HK_icase = HK_VALUE_icase, 
       HK_identity = HK_VALUE_identity, 
       HK_ignore_errors = HK_VALUE_ignore_errors, 
@@ -304,7 +295,6 @@ typedef enum hashkey_t {
       HK_test = HK_VALUE_test, 
       HK_tick_interval = HK_VALUE_tick_interval, 
       HK_type = HK_VALUE_type, 
-      HK_url = HK_VALUE_url, 
       HK_uuid = HK_VALUE_uuid, 
       HK_value = HK_VALUE_value, 
       HK_value_bits = HK_VALUE_value_bits, 
@@ -358,7 +348,6 @@ keypair_t hashkeys[] = {
       { "dump_last", HK_VALUE_dump_last }, 
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
-      { "error", HK_VALUE_error }, 
       { "exclusive", HK_VALUE_exclusive }, 
       { "extended", HK_VALUE_extended }, 
       { "fatal", HK_VALUE_fatal }, 
@@ -370,14 +359,11 @@ keypair_t hashkeys[] = {
       { "format", HK_VALUE_format }, 
       { "function", HK_VALUE_function }, 
       { "global", HK_VALUE_global }, 
-      { "go_template", HK_VALUE_go_template }, 
       { "hash", HK_VALUE_hash }, 
       { "hash_ptr_end", HK_VALUE_hash_ptr_end }, 
       { "hash_ptr_inline", HK_VALUE_hash_ptr_inline }, 
       { "hash_ptr_null", HK_VALUE_hash_ptr_null }, 
       { "headers", HK_VALUE_headers }, 
-      { "http_req", HK_VALUE_http_req }, 
-      { "http_resp", HK_VALUE_http_resp }, 
       { "icase", HK_VALUE_icase }, 
       { "identity", HK_VALUE_identity }, 
       { "ignore_errors", HK_VALUE_ignore_errors }, 
@@ -464,7 +450,6 @@ keypair_t hashkeys[] = {
       { "test", HK_VALUE_test }, 
       { "tick_interval", HK_VALUE_tick_interval }, 
       { "type", HK_VALUE_type }, 
-      { "url", HK_VALUE_url }, 
       { "uuid", HK_VALUE_uuid }, 
       { "value", HK_VALUE_value }, 
       { "value_bits", HK_VALUE_value_bits }, 

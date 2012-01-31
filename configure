@@ -626,12 +626,6 @@ MACHINE_DIST_DIRS
 DATA_LIBS_SELECTED
 DATA_DIST_DIRS
 MODULE_DIST_DIRS
-HAVE_SWIG_FALSE
-HAVE_SWIG_TRUE
-SWIG
-HAVE_GCCGO_FALSE
-HAVE_GCCGO_TRUE
-GCCGO
 PERL
 FLEX
 BISON
@@ -781,8 +775,6 @@ enable_modulec_zmq
 enable_moduledata_ipv4_t
 enable_moduledata_null_t
 enable_moduledata_time_t
-enable_modulego_http
-enable_modulego_template
 enable_allocator_fixed_t
 enable_dataptr_t
 enable_default_t
@@ -1531,10 +1523,6 @@ Optional Features:
                           disable module data-null-t
   --disable-module-data-time-t
                           disable module data-time-t
-  --disable-module-go-http
-                          disable module go-http
-  --disable-module-go-template
-                          disable module go-template
   --disable-data-allocator_fixed_t
                           disable data allocator_fixed_t
   --disable-data-dataptr_t
@@ -17439,116 +17427,6 @@ done
 test -n "$PERL" || PERL="no"
 
 
-for ac_prog in gccgo
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_GCCGO+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $GCCGO in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_GCCGO="$GCCGO" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_GCCGO="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-GCCGO=$ac_cv_path_GCCGO
-if test -n "$GCCGO"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GCCGO" >&5
-$as_echo "$GCCGO" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$GCCGO" && break
-done
-test -n "$GCCGO" || GCCGO="no"
-
- if test "$GCCGO" != "no"; then
-  HAVE_GCCGO_TRUE=
-  HAVE_GCCGO_FALSE='#'
-else
-  HAVE_GCCGO_TRUE='#'
-  HAVE_GCCGO_FALSE=
-fi
-
-
-for ac_prog in swig
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_SWIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $SWIG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_SWIG="$SWIG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_SWIG="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-SWIG=$ac_cv_path_SWIG
-if test -n "$SWIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG" >&5
-$as_echo "$SWIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$SWIG" && break
-done
-test -n "$SWIG" || SWIG="no"
-
- if test "$SWIG" != "no"; then
-  HAVE_SWIG_TRUE=
-  HAVE_SWIG_FALSE='#'
-else
-  HAVE_SWIG_TRUE='#'
-  HAVE_SWIG_FALSE=
-fi
-
-
 
 cat >>confdefs.h <<_ACEOF
 #define M4PATH "${M4}"
@@ -17798,68 +17676,6 @@ fi
 		MODULE_DIST_DIRS="$MODULE_DIST_DIRS data_time_t"
 
 		MODULE_MAKEFILE_data_time_t=yes
-	fi
-
-
-
-
-
-	# Check whether --enable-modulego_http was given.
-if test "${enable_modulego_http+set}" = set; then :
-  enableval=$enable_modulego_http;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_modulego_http}" = "yes"; then
-			enable_modulego_http="no"
-		else
-			enable_modulego_http="yes"
-		fi
-	fi
-
-	if test "${enable_modulego_http}" = "yes"; then
-		MODULE_DIR_go_http="go_http"
-		MODULE_DEP_go_http=""
-		MODULE_SELECTED="$MODULE_SELECTED go_http"
-	fi
-
-	if test "$MODULE_MAKEFILE_go_http" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/go_http/Makefile"
-		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_http"
-
-		MODULE_MAKEFILE_go_http=yes
-	fi
-
-
-
-
-
-	# Check whether --enable-modulego_template was given.
-if test "${enable_modulego_template+set}" = set; then :
-  enableval=$enable_modulego_template;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_modulego_template}" = "yes"; then
-			enable_modulego_template="no"
-		else
-			enable_modulego_template="yes"
-		fi
-	fi
-
-	if test "${enable_modulego_template}" = "yes"; then
-		MODULE_DIR_go_template="go_template"
-		MODULE_DEP_go_template=""
-		MODULE_SELECTED="$MODULE_SELECTED go_template"
-	fi
-
-	if test "$MODULE_MAKEFILE_go_template" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/go_template/Makefile"
-		MODULE_DIST_DIRS="$MODULE_DIST_DIRS go_template"
-
-		MODULE_MAKEFILE_go_template=yes
 	fi
 
 
@@ -21121,7 +20937,7 @@ m4sdir=${libexecdir}/frozen/m4/
 
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/machines/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/lang/Makefile src/lang/go/Makefile src/lang/gogcc/Makefile src/m4/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
+ac_config_files="$ac_config_files Makefile doc/Makefile src/Makefile src/libfrozen/Makefile src/libfrozen/core/Makefile src/libfrozen/machines/Makefile src/libfrozen/data/Makefile src/frozend/Makefile src/m4/Makefile src/modules/Makefile test/Makefile $GEN_MAKEFILES"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -21254,14 +21070,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_DL_TRUE}" && test -z "${HAVE_DL_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_DL\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${HAVE_GCCGO_TRUE}" && test -z "${HAVE_GCCGO_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_GCCGO\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${HAVE_SWIG_TRUE}" && test -z "${HAVE_SWIG_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_SWIG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -22256,9 +22064,6 @@ do
     "src/libfrozen/machines/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/machines/Makefile" ;;
     "src/libfrozen/data/Makefile") CONFIG_FILES="$CONFIG_FILES src/libfrozen/data/Makefile" ;;
     "src/frozend/Makefile") CONFIG_FILES="$CONFIG_FILES src/frozend/Makefile" ;;
-    "src/lang/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/Makefile" ;;
-    "src/lang/go/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/go/Makefile" ;;
-    "src/lang/gogcc/Makefile") CONFIG_FILES="$CONFIG_FILES src/lang/gogcc/Makefile" ;;
     "src/m4/Makefile") CONFIG_FILES="$CONFIG_FILES src/m4/Makefile" ;;
     "src/modules/Makefile") CONFIG_FILES="$CONFIG_FILES src/modules/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;

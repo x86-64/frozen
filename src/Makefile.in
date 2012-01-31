@@ -48,8 +48,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_ipv4_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
-	$(top_srcdir)/./src/modules/go_http/config.m4 \
-	$(top_srcdir)/./src/modules/go_template/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/allocator/fixed/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
@@ -136,7 +134,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = libfrozen frozend m4 lang modules
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -201,7 +199,6 @@ FGREP = @FGREP@
 FLEX = @FLEX@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
-GCCGO = @GCCGO@
 GREP = @GREP@
 HAVE_DEBUG = @HAVE_DEBUG@
 INSTALL = @INSTALL@
@@ -251,7 +248,6 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-SWIG = @SWIG@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -309,8 +305,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@HAVE_SWIG_TRUE@OPTIONAL = lang
-SUBDIRS = libfrozen frozend m4 $(OPTIONAL) modules
+SUBDIRS = libfrozen frozend m4 modules
 all: all-recursive
 
 .SUFFIXES:

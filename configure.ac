@@ -74,12 +74,6 @@ AC_PATH_PROGS(BISON, [bison], no)
 AC_PATH_PROGS(FLEX, [flex], no)
 AC_PATH_PROGS(PERL, [perl perl5], no)
 
-AC_PATH_PROGS(GCCGO, [gccgo], no)
-AM_CONDITIONAL([HAVE_GCCGO], [test "$GCCGO" != "no"])
-
-AC_PATH_PROGS(SWIG, [swig], no)
-AM_CONDITIONAL([HAVE_SWIG], [test "$SWIG" != "no"])
-
 AC_DEFINE_UNQUOTED([M4PATH], "${M4}", [Define m4 path])
 
 sinclude(./build/libfrozen_machines.m4)
@@ -143,9 +137,6 @@ AC_CONFIG_FILES([Makefile
 		src/libfrozen/machines/Makefile
 		src/libfrozen/data/Makefile
 		src/frozend/Makefile
-		src/lang/Makefile
-		src/lang/go/Makefile
-		src/lang/gogcc/Makefile
 		src/m4/Makefile
 		src/modules/Makefile
 		test/Makefile
