@@ -199,9 +199,17 @@ ssize_t     action_push_from_fast(machine_t *machine, fastcall_push *fargs){ // 
 } // }}}
 ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
+	data_t                *pointer;
 	data_t                 holder;
 	
-	hash_holder_consume(ret, holder, request, HK(data));
+	if( (pointer = hash_data_find(request, HK(data))) == NULL)
+		return -EINVAL;
+	
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(pointer, &r_getdata)) < 0)
+		return ret;
+	
+	holder_consume(ret, holder, r_getdata.data);
 	if(ret != 0)
 		return -EINVAL;
 	
@@ -221,12 +229,17 @@ ssize_t     action_pop_from_fast(machine_t *machine, fastcall_pop *fargs){ // {{
 	return machine_query(machine, r_next);
 } // }}}
 ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
-	data_t                *holder;
+	ssize_t                ret;
+	data_t                *pointer;
 	
-	if( (holder = hash_data_find(request, HK(data))) == NULL)
+	if( (pointer = hash_data_find(request, HK(data))) == NULL)
 		return -EINVAL;
 	
-	fastcall_pop           fargs             = { { 3, ACTION_POP }, holder };
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(pointer, &r_getdata)) < 0)
+		return ret;
+	
+	fastcall_pop           fargs             = { { 3, ACTION_POP }, r_getdata.data };
 	return data_query(data, &fargs);
 } // }}}
 

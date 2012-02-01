@@ -167,7 +167,7 @@ typedef ssize_t (*f_callback)  (request_t *, void *);
 	ACTION(QUERY),
 
 	ACTION(GETDATAPTR),
-
+	ACTION(GETDATA),
 
 */
 
@@ -271,6 +271,10 @@ typedef struct fastcall_getdataptr {
 	fastcall_header        header;
 	void                  *ptr;
 } fastcall_getdataptr;
+typedef struct fastcall_getdata {
+	fastcall_header        header;
+	data_t                *data;
+} fastcall_getdata;
 
 typedef struct fastcall_is_null {
 	fastcall_header        header;

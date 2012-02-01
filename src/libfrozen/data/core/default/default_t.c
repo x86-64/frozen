@@ -186,6 +186,10 @@ static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdatap
 	fargs->ptr = data->ptr;
 	return 0;
 } // }}}
+static ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs){ // {{{
+	fargs->data = data;
+	return 0;
+} // }}}
 static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
@@ -241,6 +245,7 @@ data_proto_t default_t_proto = {
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
 		[ACTION_FREE]        = (f_data_func)&data_default_free,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
+		[ACTION_GETDATA]     = (f_data_func)&data_default_getdata,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
 	}
 };
