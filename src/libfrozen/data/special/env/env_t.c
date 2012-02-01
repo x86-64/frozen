@@ -61,7 +61,7 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t data_env_t_handler (data_t *data, fastcall_header *hargs){ // {{{
+static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	data_t                *real_data;
 	request_t             *curr_request;
 	env_t                 *fdata             = (env_t *)data->ptr;
@@ -77,9 +77,6 @@ static ssize_t data_env_t_handler (data_t *data, fastcall_header *hargs){ // {{{
 	
 	return data_query(real_data, hargs);
 } // }}}
-static ssize_t data_env_t_nosys(data_t *data, void *hargs){ // {{{
-	return -ENOSYS;
-} // }}}
 
 data_proto_t env_t_proto = {
 	.type_str               = "env_t",
@@ -90,6 +87,5 @@ data_proto_t env_t_proto = {
 		[ACTION_COPY]         = (f_data_func)&data_env_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_env_t_convert_from,
-		[ACTION_GETDATAPTR]   = (f_data_func)&data_env_t_nosys,
 	}
 };
