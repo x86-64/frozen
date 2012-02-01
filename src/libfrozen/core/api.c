@@ -186,6 +186,160 @@ ssize_t     action_resize_from_hash(data_t *data, request_t *request){ // {{{
 	return data_query(data, &fargs);
 } // }}}
 
+ssize_t     action_push_from_fast(machine_t *machine, fastcall_push *fargs){ // {{{
+	if(fargs->data == NULL)
+		return -EINVAL;
+	
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(data),       *fargs->data                                         },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	data_t                 holder;
+	
+	hash_holder_consume(ret, holder, request, HK(data));
+	if(ret != 0)
+		return -EINVAL;
+	
+	fastcall_push          fargs             = { { 3, ACTION_PUSH }, &holder };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_pop_from_fast(machine_t *machine, fastcall_pop *fargs){ // {{{
+	if(fargs->data == NULL)
+		return -EINVAL;
+	
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(data),       *fargs->data                                         },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
+	data_t                *holder;
+	
+	if( (holder = hash_data_find(request, HK(data))) == NULL)
+		return -EINVAL;
+	
+	fastcall_pop           fargs             = { { 3, ACTION_POP }, holder };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_start_from_fast(machine_t *machine, fastcall_start *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_start_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_start           fargs             = { { 2, ACTION_START } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_stop_from_fast(machine_t *machine, fastcall_stop *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_stop_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_stop           fargs             = { { 2, ACTION_STOP } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_free_from_fast(machine_t *machine, fastcall_free *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_free_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_free           fargs             = { { 2, ACTION_FREE } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_increment_from_fast(machine_t *machine, fastcall_increment *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_increment_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_increment           fargs             = { { 2, ACTION_INCREMENT } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_decrement_from_fast(machine_t *machine, fastcall_decrement *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_decrement_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_decrement           fargs             = { { 2, ACTION_DECREMENT } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_execute_from_fast(machine_t *machine, fastcall_execute *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_execute_from_hash(data_t *data, request_t *request){ // {{{
+	fastcall_execute           fargs             = { { 2, ACTION_EXECUTE } };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_copy_from_fast(machine_t *machine, fastcall_copy *fargs){ // {{{
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(data),       *fargs->dest                                         },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_copy_from_hash(data_t *data, request_t *request){ // {{{
+	data_t                *holder;
+	
+	if( (holder = hash_data_find(request, HK(data))) == NULL)
+		return -EINVAL;
+	
+	fastcall_copy           fargs             = { { 3, ACTION_COPY }, holder };
+	return data_query(data, &fargs);
+} // }}}
+
+ssize_t     action_alloc_from_fast(machine_t *machine, fastcall_alloc *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_alloc_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	fastcall_alloc         fargs             = { { 4, ACTION_ALLOC } };
+	
+	hash_data_get(ret, TYPE_UINTT, fargs.length, request, HK(size));
+	
+	return data_query(data, &fargs);
+} // }}}
+
 ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	machine_t             *shop;
@@ -225,36 +379,37 @@ ssize_t     machine_fast_query(machine_t *machine, void *hargs){ // {{{
 } // }}}
 
 uintmax_t fastcall_nargs[ACTION_INVALID] = {
+	[ACTION_CREATE] = 4,
 	[ACTION_READ] = 5,
 	[ACTION_WRITE] = 5,
+	[ACTION_DELETE] = 4,
+	[ACTION_COUNT] = 3,
+	[ACTION_TRANSFER] = 3,
+	[ACTION_RESIZE] = 3,
+	[ACTION_ENUM]  = 4,
+	[ACTION_PUSH] = 3,
+	[ACTION_POP] = 3,
+	[ACTION_START] = 2,
+	[ACTION_STOP] = 2,
+	[ACTION_FREE] = 2,
+	[ACTION_INCREMENT] = 2,
+	[ACTION_DECREMENT] = 2,
+	[ACTION_EXECUTE] = 2,
+	[ACTION_COPY] = 3,
+	[ACTION_ALLOC] = 3,
+	
 	[ACTION_PHYSICALLEN] = 3,
 	[ACTION_LOGICALLEN] = 3,
-	[ACTION_COPY] = 3,
 	[ACTION_CONVERT_TO] = 4,
 	[ACTION_CONVERT_FROM] = 4,
 	[ACTION_COMPARE] = 3,
-	[ACTION_ALLOC] = 3,
-	[ACTION_FREE] = 2,
 	[ACTION_ADD] = 3,
 	[ACTION_SUB] = 3,
 	[ACTION_MULTIPLY] = 3,
 	[ACTION_DIVIDE] = 3,
-	[ACTION_INCREMENT] = 2,
-	[ACTION_DECREMENT] = 2,
-	[ACTION_TRANSFER]  = 3,
 	[ACTION_GETDATAPTR] = 3,
 	[ACTION_IS_NULL] = 3,
-	[ACTION_CREATE] = 4,
-	[ACTION_DELETE] = 4,
-	[ACTION_COUNT] = 3,
-	[ACTION_EXECUTE] = 2,
-	[ACTION_START] = 2,
-	[ACTION_STOP] = 2,
-	[ACTION_PUSH] = 3,
-	[ACTION_POP] = 3,
-	[ACTION_RESIZE] = 3,
 	[ACTION_QUERY] = 3,
-	[ACTION_ENUM]  = 4,
 };
 
 f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
@@ -265,6 +420,16 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_COUNT]        = (f_machine_from_fast)&action_count_from_fast,
 	[ACTION_TRANSFER]     = (f_machine_from_fast)&action_transfer_from_fast,
 	[ACTION_RESIZE]       = (f_machine_from_fast)&action_resize_from_fast,
+	[ACTION_PUSH]         = (f_machine_from_fast)&action_push_from_fast,
+	[ACTION_POP]          = (f_machine_from_fast)&action_pop_from_fast,
+	[ACTION_START]        = (f_machine_from_fast)&action_start_from_fast,
+	[ACTION_STOP]         = (f_machine_from_fast)&action_stop_from_fast,
+	[ACTION_FREE]         = (f_machine_from_fast)&action_free_from_fast,
+	[ACTION_INCREMENT]    = (f_machine_from_fast)&action_increment_from_fast,
+	[ACTION_DECREMENT]    = (f_machine_from_fast)&action_decrement_from_fast,
+	[ACTION_EXECUTE]      = (f_machine_from_fast)&action_execute_from_fast,
+	[ACTION_COPY]         = (f_machine_from_fast)&action_copy_from_fast,
+	[ACTION_ALLOC]        = (f_machine_from_fast)&action_alloc_from_fast,
 };
 
 f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
@@ -276,5 +441,15 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_TRANSFER]     = (f_data_from_hash)&action_transfer_from_hash,
 	[ACTION_RESIZE]       = (f_data_from_hash)&action_resize_from_hash,
 	[ACTION_ENUM]         = (f_data_from_hash)&action_enum_from_hash,
+	[ACTION_PUSH]         = (f_data_from_hash)&action_push_from_hash,
+	[ACTION_POP]          = (f_data_from_hash)&action_pop_from_hash,
+	[ACTION_START]        = (f_data_from_hash)&action_start_from_hash,
+	[ACTION_STOP]         = (f_data_from_hash)&action_stop_from_hash,
+	[ACTION_FREE]         = (f_data_from_hash)&action_free_from_hash,
+	[ACTION_INCREMENT]    = (f_data_from_hash)&action_increment_from_hash,
+	[ACTION_DECREMENT]    = (f_data_from_hash)&action_decrement_from_hash,
+	[ACTION_EXECUTE]      = (f_data_from_hash)&action_execute_from_hash,
+	[ACTION_COPY]         = (f_data_from_hash)&action_copy_from_hash,
+	[ACTION_ALLOC]        = (f_data_from_hash)&action_alloc_from_hash,
 };
 
