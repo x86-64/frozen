@@ -2,7 +2,7 @@
 #ifndef DATA_TYPE_H
 #define DATA_TYPE_H
 
-typedef enum datatype_t {
+enum datatype_t {
    TYPE_INVALID = 0,
    TYPE_ALLOCATORFIXEDT = 0,
    TYPE_DATAPTRT = 1,
@@ -44,6 +44,6 @@ typedef enum datatype_t {
    TYPE_LISTT = 37,
    TYPE_MEMORYT = 38,
    TYPE_RAWT = 39,
-} datatype_t;
+};
 
 #endif
