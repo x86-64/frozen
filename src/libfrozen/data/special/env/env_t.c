@@ -61,6 +61,21 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t data_env_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
+	request_t             *curr_request;
+	env_t                 *fdata             = (env_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if( (curr_request = request_get_current()) == NULL)
+		return -EINVAL;
+	
+	if( (fargs->data = hash_data_find(curr_request, fdata->key)) == NULL)
+		return -EINVAL;
+	
+	return 0;
+} // }}}
 static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	data_t                *real_data;
 	request_t             *curr_request;
@@ -87,5 +102,6 @@ data_proto_t env_t_proto = {
 		[ACTION_COPY]         = (f_data_func)&data_env_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_env_t_convert_from,
+		[ACTION_GETDATA]      = (f_data_func)&data_env_t_getdata,
 	}
 };
