@@ -43,6 +43,7 @@ extern machine_t null_proto;
 extern machine_t switch_proto;
 extern machine_t pass_proto;
 extern machine_t return_proto;
+extern machine_t try_proto;
 extern machine_t mutex_proto;
 #ifdef MACHINE_C
 machine_t * machine_protos[] = {
@@ -88,6 +89,7 @@ machine_t * machine_protos[] = {
    &switch_proto,
    &pass_proto,
    &return_proto,
+   &try_proto,
    &mutex_proto,
 };
 size_t machine_protos_size = (sizeof(machine_protos)/sizeof(machine_protos[0]));

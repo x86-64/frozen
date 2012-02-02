@@ -857,6 +857,7 @@ enable_machinenull
 enable_machineswitch
 enable_machinepass
 enable_machinereturn
+enable_machinetry
 enable_machinemutex
 enable_coverage
 enable_debug
@@ -1641,6 +1642,7 @@ Optional Features:
   --disable-machine-pass  disable machine pass
   --disable-machine-return
                           disable machine return
+  --disable-machine-try   disable machine try
   --disable-machine-mutex disable machine mutex
   --enable-coverage       enable coverage testing
   --enable-debug          compile with debug symbols
@@ -20821,6 +20823,43 @@ fi
 		MACHINE_MAKEFILE_shop_return=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/return/libfrozen_machine_return.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinetry was given.
+if test "${enable_machinetry+set}" = set; then :
+  enableval=$enable_machinetry;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinetry}" = "yes"; then
+			enable_machinetry="no"
+		else
+			enable_machinetry="yes"
+		fi
+	fi
+
+	if test "${enable_machinetry}" = "yes"; then
+		MACHINE_DIR_try="shop/try"
+		MACHINE_DEP_try=""
+				MACHINE_SELECTED="$MACHINE_SELECTED try"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_shop_try" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/shop/try/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS shop/try"
+
+		MACHINE_MAKEFILE_shop_try=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/try/libfrozen_machine_try.la"
 
 	fi
 

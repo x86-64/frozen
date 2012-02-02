@@ -4,6 +4,8 @@ typedef struct err_item {
         const char *errmsg;
 } err_item;
 static err_item errs_list[] = {
+ { -225342, "src/libfrozen/machines/shop/try/try.c: shop parameter not supplied" },
+ { -225321, "src/libfrozen/machines/shop/try/try.c: calloc failed" },
  { -221226, "src/libfrozen/data/storage/folder/folder_t.c: path not exist" },
  { -221220, "src/libfrozen/data/storage/folder/folder_t.c: path invalid" },
  { -221214, "src/libfrozen/data/storage/folder/folder_t.c: path not supplied" },
