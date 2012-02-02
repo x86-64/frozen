@@ -93,7 +93,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 		return ITER_BREAK;
 	}
 	
-	new_hash[0].key       = input_hk;
+	new_hash[0].key       = output_hk;
 	new_hash[0].data.type = type;
 	new_hash[0].data.ptr  = NULL;
 	hash_assign_hash_inline(&new_hash[1], ctx->new_request);
