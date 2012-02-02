@@ -103,6 +103,27 @@ static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_conver
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t       data_slice_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if( (fargs->dest->ptr = slice_t_copy(fdata)) == NULL)
+		return -EFAULT;
+	
+	fargs->dest->type = data->type;
+	return 0;
+} // }}}
+static ssize_t       data_slice_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	slice_t_free(fdata);
+	return 0;
+} // }}}
 
 data_proto_t slice_t_proto = {
 	.type                   = TYPE_SLICET,
@@ -117,5 +138,32 @@ data_proto_t slice_t_proto = {
 		[ACTION_WRITE]        = (f_data_func)&data_slice_t_io,
 		[ACTION_PHYSICALLEN]  = (f_data_func)&data_slice_t_len,
 		[ACTION_LOGICALLEN]   = (f_data_func)&data_slice_t_len,
+		[ACTION_COPY]         = (f_data_func)&data_slice_t_copy,
+		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
 	}
 };
+
+slice_t *       slice_t_alloc               (data_t *data, uintmax_t offset, uintmax_t size){ // {{{
+	slice_t                *slice;
+
+	if( (slice = malloc(sizeof(slice_t))) == NULL)
+		return NULL;
+	
+	slice->data = data;
+	slice->off  = offset;
+	slice->size = size;
+	return slice;
+} // }}}
+slice_t *       slice_t_copy                (slice_t *slice){ // {{{
+	slice_t                *new_slice;
+
+	if( (new_slice = malloc(sizeof(slice_t))) == NULL)
+		return NULL;
+	
+	memcpy(new_slice, slice, sizeof(slice_t));
+	return new_slice;
+} // }}}
+void            slice_t_free                (slice_t *slice){ // {{{
+	free(slice);
+} // }}}
+

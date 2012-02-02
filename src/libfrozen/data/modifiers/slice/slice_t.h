@@ -23,7 +23,8 @@
  *  @endcode
  */
 
-#define DATA_SLICET(_data,_off,_size)  {TYPE_SLICET, (slice_t []){ { _data, _off, _size } }}
+#define DATA_SLICET(_data,_off,_size)       { TYPE_SLICET, (slice_t []){{ _data, _off, _size }} }
+#define DATA_HEAP_SLICET(_data,_off,_size)  { TYPE_SLICET, slice_t_alloc(_data, _off, _size)    }
 #define DEREF_TYPE_SLICET(_data) (slice_t *)((_data)->ptr)
 #define REF_TYPE_SLICET(_dt) _dt
 #define HAVEBUFF_TYPE_SLICET 0
@@ -33,5 +34,9 @@ typedef struct slice_t {
 	uintmax_t              off;
 	uintmax_t              size;
 } slice_t;
+
+API slice_t *       slice_t_alloc               (data_t *data, uintmax_t offset, uintmax_t size);
+API slice_t *       slice_t_copy                (slice_t *list);
+API void            slice_t_free                (slice_t *list);
 
 #endif
