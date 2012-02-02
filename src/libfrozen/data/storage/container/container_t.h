@@ -18,12 +18,12 @@
  *  @endcode
  */
 
-#define DATA_CONTAINERT(_flags)      { TYPE_CONTAINERT, (container_t []){ { NULL, NULL, _flags } }
-#define DATA_PTR_CONTAINERT(_buff)   { TYPE_CONTAINERT, (void *)_buff }
+#define DATA_CONTAINERT()           { TYPE_CONTAINERT, (container_t []){{ NULL, NULL }} }
+#define DATA_HEAP_CONTAINERT()      { TYPE_CONTAINERT, container_alloc()                }
+#define DATA_PTR_CONTAINERT(_buff)  { TYPE_CONTAINERT, (void *)_buff                    }
 #define DEREF_TYPE_CONTAINERT(_data) (container_t *)((_data)->ptr)
 #define REF_TYPE_CONTAINERT(_dt) _dt
 #define HAVEBUFF_TYPE_CONTAINERT 0
-
 
 /** @file container.h */
 

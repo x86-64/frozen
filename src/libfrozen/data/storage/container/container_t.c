@@ -70,6 +70,13 @@ static ssize_t data_container_t_write(data_t *data, fastcall_write *fargs){ // {
 		&fargs->buffer_size
 	);
 } // }}}
+static ssize_t data_container_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	if(data->ptr == NULL)
+		return -EINVAL;
+	
+	container_free((container_t *)data->ptr);
+	return 0;
+} // }}}
 
 data_proto_t container_t_proto = {
 	.type                   = TYPE_CONTAINERT,
@@ -80,6 +87,7 @@ data_proto_t container_t_proto = {
 		[ACTION_LOGICALLEN]  = (f_data_func)&data_container_t_len,
 		[ACTION_READ]        = (f_data_func)&data_container_t_read,
 		[ACTION_WRITE]       = (f_data_func)&data_container_t_write,
+		[ACTION_FREE]        = (f_data_func)&data_container_t_free,
 	}
 };
 
