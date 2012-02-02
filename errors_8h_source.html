@@ -68,15 +68,19 @@
 <a name="l00012"></a>00012 <span class="preprocessor"></span><span class="preprocessor">#define warning(...) handle_error(EFLAG_WARNING, -(EBASE + EMODULE * ESTEP + ECOUNTER))</span>
 <a name="l00013"></a>00013 <span class="preprocessor"></span><span class="preprocessor">#define error(...)   handle_error(EFLAG_ERROR,   -(EBASE + EMODULE * ESTEP + ECOUNTER))</span>
 <a name="l00014"></a>00014 <span class="preprocessor"></span>
-<a name="l00015"></a>00015     intmax_t           handle_error             (uintmax_t eflag, intmax_t errnum);
-<a name="l00016"></a>00016 API <span class="keyword">const</span> <span class="keywordtype">char</span> *       describe_error           (intmax_t errnum);
-<a name="l00017"></a>00017 
+<a name="l00015"></a>00015 <span class="keyword">typedef</span> void (*log_func)(<span class="keywordtype">char</span> *format, va_list args);
+<a name="l00016"></a>00016 
+<a name="l00017"></a>00017     intmax_t           handle_error             (uintmax_t eflag, intmax_t errnum);
+<a name="l00018"></a>00018 API <span class="keyword">const</span> <span class="keywordtype">char</span> *       describe_error           (intmax_t errnum);
+<a name="l00019"></a>00019 API <span class="keywordtype">void</span>               log_error                (<span class="keywordtype">char</span> *format, ...);
+<a name="l00020"></a>00020 API <span class="keywordtype">void</span>               set_log_func             (log_func func);
+<a name="l00021"></a>00021 
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

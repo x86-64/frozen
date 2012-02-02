@@ -55,21 +55,22 @@
 <h3><a class="anchor" id="page_assign_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment">        {
                 <span class="keyword">class      </span>= &quot;request/assign&quot;,
-                before     = {                            # <span class="keyword">this</span> key-values <span class="keyword">override</span> existing key-values with same key, optional
+                before     = {                            <span class="comment">// this key-values override existing key-values with same key, optional</span>
                       buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
                 },
-                after      = {                            # <span class="keyword">this</span> key-values would be used <span class="keywordflow">if</span> there is no other with such key, optional
+                after      = {                            <span class="comment">// this key-values would be used if there is no other with such key, optional</span>
                       buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
                 },
-                request    = {                            # <span class="keyword">override</span> whole request with <span class="keyword">this</span> one (before and after not taken in account), optional
+                request    = {                            <span class="comment">// override whole request with this one (before and after not taken in account), optional</span>
                       buffer = (string_t)<span class="stringliteral">&#39;hello&#39;</span>
-                }
+                },
+              copy       = (uint_t)<span class="stringliteral">&quot;1&quot;</span>                  <span class="comment">// copy request on each call, default 0</span>
         }
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:47 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

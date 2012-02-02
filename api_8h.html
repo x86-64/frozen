@@ -84,12 +84,14 @@ Data Structures</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__arith.html">fastcall_arith</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__getdataptr.html">fastcall_getdataptr</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__getdata.html">fastcall_getdata</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__is__null.html">fastcall_is_null</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__create.html">fastcall_create</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__delete.html">fastcall_delete</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__count.html">fastcall_count</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__push.html">fastcall_push</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__pop.html">fastcall_pop</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__enum.html">fastcall_enum</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfastcall__query.html">fastcall_query</a></td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -99,6 +101,8 @@ typedef enum api_types&#160;</td><td class="memItemRight" valign="bottom"><b>api
 typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_crwd</b> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">request_t</a> *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a89043a1956ac518d0738debded83e8"></a><!-- doxytag: member="api.h::f_fast_func" ref="a3a89043a1956ac518d0738debded83e8" args=")(data_t *, void *)" -->
 typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_fast_func</b> )(<a class="el" href="structdata__t.html">data_t</a> *, void *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa5c753ef6f084bc3a5615e9309c1c18f"></a><!-- doxytag: member="api.h::f_callback" ref="aa5c753ef6f084bc3a5615e9309c1c18f" args=")(request_t *, void *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_callback</b> )(<a class="el" href="structhash__t.html">request_t</a> *, void *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab63eda70fadf826403195b6ea44e970b"></a><!-- doxytag: member="api.h::fastcall_header" ref="ab63eda70fadf826403195b6ea44e970b" args="" -->
 typedef struct <a class="el" href="structfastcall__header.html">fastcall_header</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_header</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a82686459eeab59bb0d911538addd4278"></a><!-- doxytag: member="api.h::fastcall_io" ref="a82686459eeab59bb0d911538addd4278" args="" -->
@@ -159,6 +163,8 @@ typedef struct <br class="typebreak"/>
 <a class="el" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_decrement</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a533de501c86e85fdf6c38e5d2f4c0c05"></a><!-- doxytag: member="api.h::fastcall_getdataptr" ref="a533de501c86e85fdf6c38e5d2f4c0c05" args="" -->
 typedef struct <a class="el" href="structfastcall__getdataptr.html">fastcall_getdataptr</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_getdataptr</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad364d6e9cb3675e82636921c633ca852"></a><!-- doxytag: member="api.h::fastcall_getdata" ref="ad364d6e9cb3675e82636921c633ca852" args="" -->
+typedef struct <a class="el" href="structfastcall__getdata.html">fastcall_getdata</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_getdata</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a24c462f57fc039e3050dd74d0ea704f7"></a><!-- doxytag: member="api.h::fastcall_is_null" ref="a24c462f57fc039e3050dd74d0ea704f7" args="" -->
 typedef struct <a class="el" href="structfastcall__is__null.html">fastcall_is_null</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_is_null</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a723da5006e09dd71a2c9661c789420f5"></a><!-- doxytag: member="api.h::fastcall_create" ref="a723da5006e09dd71a2c9661c789420f5" args="" -->
@@ -171,6 +177,8 @@ typedef struct <a class="el" href="structfastcall__count.html">fastcall_count</a
 typedef struct <a class="el" href="structfastcall__push.html">fastcall_push</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_push</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe808ea29bb6451ed0618f3bcc92763f"></a><!-- doxytag: member="api.h::fastcall_pop" ref="abe808ea29bb6451ed0618f3bcc92763f" args="" -->
 typedef struct <a class="el" href="structfastcall__pop.html">fastcall_pop</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_pop</b></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a397e8b25a96e84231692c799a5aa9356"></a><!-- doxytag: member="api.h::fastcall_enum" ref="a397e8b25a96e84231692c799a5aa9356" args="" -->
+typedef struct <a class="el" href="structfastcall__enum.html">fastcall_enum</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_enum</b></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a964f08d90086795ff038b077b1474a63"></a><!-- doxytag: member="api.h::fastcall_query" ref="a964f08d90086795ff038b077b1474a63" args="" -->
 typedef struct <a class="el" href="structfastcall__query.html">fastcall_query</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_query</b></td></tr>
 <tr><td colspan="2"><h2><a name="enum-members"></a>
@@ -195,7 +203,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_nargs</
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

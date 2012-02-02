@@ -73,17 +73,17 @@
               nelements_min           = (uint_t)<span class="stringliteral">&#39;1000&#39;</span>,    # starting index size, <span class="keywordflow">default</span> 256
               nelements_step          = (uint_t)<span class="stringliteral">&#39;500&#39;</span>,     # index expanding step size, <span class="keywordflow">default</span> 256
               nelements_mul           = (uint_t)<span class="charliteral">&#39;2&#39;</span>,       # index expanding multiply coefficient, <span class="keywordflow">default</span> 1
-              value_bits              = (uint_t)<span class="stringliteral">&#39;32&#39;</span>,      # value size in bits
-              readonly                = (uint_t)<span class="charliteral">&#39;0&#39;</span>,       # index in read-only mode
-              machine_g               = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&#39;name&#39;</span>, # machine <span class="keywordflow">for</span> storing g-array
-              machine_v               = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&#39;name&#39;</span>, # machine <span class="keywordflow">for</span> storing v-array
-              machine_e               = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&#39;name&#39;</span>  # machine <span class="keywordflow">for</span> storing e-array
+              value_size              = (uint_t)<span class="charliteral">&#39;4&#39;</span>,       # value size in bytes, <span class="keywordflow">default</span> 4
+              readonly                = (uint_t)<span class="charliteral">&#39;0&#39;</span>,       # index in read-only mode, <span class="keywordflow">default</span> 0
+              data_g                  = (<a class="code" href="structfile__t.html">file_t</a>){ ... },   # data <span class="keywordflow">for</span> storing g-array
+              data_v                  = (<a class="code" href="structfile__t.html">file_t</a>){ ... },   # data <span class="keywordflow">for</span> storing v-array, optional <span class="keywordflow">for</span> read-only mode
+              data_e                  = (<a class="code" href="structfile__t.html">file_t</a>){ ... },   # data <span class="keywordflow">for</span> storing e-array, optional <span class="keywordflow">for</span> read-only mode
  }
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:47 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

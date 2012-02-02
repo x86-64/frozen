@@ -51,17 +51,17 @@
 <div class="contents">
 <div class="textblock"><h2><a class="anchor" id="intro"></a>
 Introduction</h2>
-<p>Frozen is data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data for web or local clients.</p>
+<p>Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing. It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things. Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data for web or local clients.</p>
 <p>There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.</p>
 <p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places. If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.</p>
 <h2><a class="anchor" id="caps"></a>
 Capabilities</h2>
 <ul>
-<li>Zero-copy everywhere it possible </li>
+<li>Web development related modules: mongrel2, mustache, leveldb </li>
 <li>Processing modules: regular expressions, switches, structures and many more </li>
 <li>IO modules: fuse, ZeroMQ, file, memory, sockets </li>
-<li>Can be used to construct common data structures: cache, index, lookup tables </li>
-<li>Load balancing modules </li>
+<li>Zero-copy everywhere it possible </li>
+<li>M4 macro in configuration files </li>
 <li>Benchmarking and measurements</li>
 </ul>
 <h2><a class="anchor" id="links"></a>
@@ -77,7 +77,7 @@ Useful links</h2>
 <h2><a class="anchor" id="rationale"></a>
 Rationale</h2>
 <ul>
-<li>Model-oriented programming</li>
+<li>Flow-based programming</li>
 </ul>
 <p>There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all. Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach it is easy to make changes, maintain and test things. Why not use this in general programming? So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram which in realtime show load to every computer in your cluster and you could change any parameter on fly, add some more workers and so on.</p>
 <ul>
@@ -92,7 +92,7 @@ Rationale</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

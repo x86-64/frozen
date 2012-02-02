@@ -57,24 +57,29 @@
 <div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_SLICE_T</span>
 <a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_SLICE_T</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00026"></a>00026 <span class="preprocessor">#define DATA_SLICET(_data,_off,_size)  {TYPE_SLICET, (slice_t []){ { _data, _off, _size } }}</span>
-<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_SLICET(_data) (slice_t *)((_data)-&gt;ptr)</span>
-<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_SLICET(_dt) _dt</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_SLICET 0</span>
-<a name="l00030"></a>00030 <span class="preprocessor"></span>
-<a name="l00031"></a><a class="code" href="structslice__t.html">00031</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structslice__t.html">slice_t</a> {
-<a name="l00032"></a>00032         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
-<a name="l00033"></a>00033         uintmax_t              off;
-<a name="l00034"></a>00034         uintmax_t              size;
-<a name="l00035"></a>00035 } <a class="code" href="structslice__t.html">slice_t</a>;
-<a name="l00036"></a>00036 
-<a name="l00037"></a>00037 <span class="preprocessor">#endif</span>
+<a name="l00026"></a>00026 <span class="preprocessor">#define DATA_SLICET(_data,_off,_size)       { TYPE_SLICET, (slice_t []){{ _data, _off, _size }} }</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define DATA_HEAP_SLICET(_data,_off,_size)  { TYPE_SLICET, slice_t_alloc(_data, _off, _size)    }</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_SLICET(_data) (slice_t *)((_data)-&gt;ptr)</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_SLICET(_dt) _dt</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_SLICET 0</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a><a class="code" href="structslice__t.html">00032</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structslice__t.html">slice_t</a> {
+<a name="l00033"></a>00033         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00034"></a>00034         uintmax_t              off;
+<a name="l00035"></a>00035         uintmax_t              size;
+<a name="l00036"></a>00036 } <a class="code" href="structslice__t.html">slice_t</a>;
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 API <a class="code" href="structslice__t.html">slice_t</a> *       slice_t_alloc               (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, uintmax_t offset, uintmax_t size);
+<a name="l00039"></a>00039 API <a class="code" href="structslice__t.html">slice_t</a> *       slice_t_copy                (<a class="code" href="structslice__t.html">slice_t</a> *<a class="code" href="structlist.html">list</a>);
+<a name="l00040"></a>00040 API <span class="keywordtype">void</span>            slice_t_free                (<a class="code" href="structslice__t.html">slice_t</a> *<a class="code" href="structlist.html">list</a>);
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

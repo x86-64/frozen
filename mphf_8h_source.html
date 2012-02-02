@@ -68,66 +68,60 @@
 <a name="l00012"></a>00012 
 <a name="l00013"></a>00013 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structmphf__t.html">mphf_t</a>             <a class="code" href="structmphf__t.html">mphf_t</a>;
 <a name="l00014"></a>00014 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structmphf__proto__t.html">mphf_proto_t</a>       <a class="code" href="structmphf__proto__t.html">mphf_proto_t</a>;
-<a name="l00015"></a>00015 <span class="keyword">typedef</span> <span class="keyword">struct </span>mphf_hash_proto_t  mphf_hash_proto_t;
-<a name="l00016"></a>00016 
-<a name="l00017"></a>00017 <span class="keyword">typedef</span> ssize_t  (*mphf_func_load)        (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
-<a name="l00018"></a>00018 <span class="keyword">typedef</span> ssize_t  (*mphf_func_unload)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
-<a name="l00019"></a>00019 <span class="keyword">typedef</span> ssize_t  (*mphf_func_rebuild)     (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
-<a name="l00020"></a>00020 <span class="keyword">typedef</span> ssize_t  (*mphf_func_fork)        (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
-<a name="l00021"></a>00021 <span class="keyword">typedef</span> ssize_t  (*mphf_func_destroy)     (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
-<a name="l00022"></a>00022 <span class="keyword">typedef</span> ssize_t  (*mphf_func_insert)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t  value);
-<a name="l00023"></a>00023 <span class="keyword">typedef</span> ssize_t  (*mphf_func_update)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t  value);
-<a name="l00024"></a>00024 <span class="keyword">typedef</span> ssize_t  (*mphf_func_query)       (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t *value);
-<a name="l00025"></a>00025 <span class="keyword">typedef</span> ssize_t  (*mphf_func_delete)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key);
-<a name="l00026"></a>00026 
-<a name="l00027"></a><a class="code" href="structmphf__t.html">00027</a> <span class="keyword">struct </span><a class="code" href="structmphf__t.html">mphf_t</a> {
-<a name="l00028"></a>00028         <a class="code" href="structhash__t.html" title="Hash item.">config_t</a>                *config;
-<a name="l00029"></a>00029         <span class="keywordtype">void</span>                    *build_data;
-<a name="l00030"></a>00030         mphf_hash_proto_t       *hash;
-<a name="l00031"></a>00031         
-<a name="l00032"></a>00032         <span class="keywordtype">char</span>                     data[20*<span class="keyword">sizeof</span>(<span class="keywordtype">void</span> *)];
-<a name="l00033"></a>00033 };
-<a name="l00034"></a>00034 
-<a name="l00035"></a><a class="code" href="structmphf__proto__t.html">00035</a> <span class="keyword">struct </span><a class="code" href="structmphf__proto__t.html">mphf_proto_t</a> {
-<a name="l00036"></a>00036         mphf_func_load           func_load;
-<a name="l00037"></a>00037         mphf_func_unload         func_unload;
-<a name="l00038"></a>00038         mphf_func_fork           func_fork;
-<a name="l00039"></a>00039         mphf_func_rebuild        func_rebuild;
-<a name="l00040"></a>00040         mphf_func_destroy        func_destroy;
-<a name="l00041"></a>00041         
-<a name="l00042"></a>00042         mphf_func_insert         func_insert;
-<a name="l00043"></a>00043         mphf_func_update         func_update;
-<a name="l00044"></a>00044         mphf_func_query          func_query;
-<a name="l00045"></a>00045         mphf_func_delete         func_delete;
-<a name="l00046"></a>00046 };
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 <span class="preprocessor">#ifdef MPHF_C</span>
-<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#include &lt;mphf_chm_imp.h&gt;</span>
-<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;mphf_bdz_imp.h&gt;</span>
-<a name="l00051"></a>00051 
-<a name="l00052"></a>00052 <span class="keyword">static</span> <a class="code" href="structmphf__proto__t.html">mphf_proto_t</a> mphf_protos[] = {
-<a name="l00053"></a>00053         [MPHF_TYPE_CHM_IMP] = {
-<a name="l00054"></a>00054                 .func_load          = mphf_chm_imp_load,
-<a name="l00055"></a>00055                 .func_unload        = mphf_chm_imp_unload,
-<a name="l00056"></a>00056                 .func_fork          = mphf_chm_imp_fork,
-<a name="l00057"></a>00057                 .func_rebuild       = mphf_chm_imp_rebuild,
-<a name="l00058"></a>00058                 .func_destroy       = mphf_chm_imp_destroy,
-<a name="l00059"></a>00059                 .func_insert        = mphf_chm_imp_insert,
-<a name="l00060"></a>00060                 .func_update        = mphf_chm_imp_update,
-<a name="l00061"></a>00061                 .func_query         = mphf_chm_imp_query,
-<a name="l00062"></a>00062                 .func_delete        = mphf_chm_imp_delete
-<a name="l00063"></a>00063         }
-<a name="l00064"></a>00064 };
-<a name="l00065"></a>00065 <span class="comment">//static size_t mphf_protos_size = sizeof(mphf_protos) / sizeof(mphf_protos[0]);</span>
-<a name="l00066"></a>00066 
-<a name="l00067"></a>00067 <span class="preprocessor">#endif</span>
-<a name="l00068"></a>00068 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00015"></a>00015 
+<a name="l00016"></a>00016 <span class="keyword">typedef</span> ssize_t  (*mphf_func_load)        (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config);
+<a name="l00017"></a>00017 <span class="keyword">typedef</span> ssize_t  (*mphf_func_unload)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
+<a name="l00018"></a>00018 <span class="keyword">typedef</span> ssize_t  (*mphf_func_rebuild)     (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
+<a name="l00019"></a>00019 <span class="keyword">typedef</span> ssize_t  (*mphf_func_destroy)     (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf);
+<a name="l00020"></a>00020 <span class="keyword">typedef</span> ssize_t  (*mphf_func_insert)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t  value);
+<a name="l00021"></a>00021 <span class="keyword">typedef</span> ssize_t  (*mphf_func_update)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t  value);
+<a name="l00022"></a>00022 <span class="keyword">typedef</span> ssize_t  (*mphf_func_query)       (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key, uint64_t *value);
+<a name="l00023"></a>00023 <span class="keyword">typedef</span> ssize_t  (*mphf_func_delete)      (<a class="code" href="structmphf__t.html">mphf_t</a> *mphf, uint64_t key);
+<a name="l00024"></a>00024 
+<a name="l00025"></a><a class="code" href="structmphf__t.html">00025</a> <span class="keyword">struct </span><a class="code" href="structmphf__t.html">mphf_t</a> {
+<a name="l00026"></a>00026         <span class="keywordtype">void</span>                    *build_data;
+<a name="l00027"></a>00027         
+<a name="l00028"></a>00028         <span class="keywordtype">char</span>                     data[20*<span class="keyword">sizeof</span>(<span class="keywordtype">void</span> *)];
+<a name="l00029"></a>00029 };
+<a name="l00030"></a>00030 
+<a name="l00031"></a><a class="code" href="structmphf__proto__t.html">00031</a> <span class="keyword">struct </span><a class="code" href="structmphf__proto__t.html">mphf_proto_t</a> {
+<a name="l00032"></a>00032         mphf_func_load           func_load;
+<a name="l00033"></a>00033         mphf_func_unload         func_unload;
+<a name="l00034"></a>00034         mphf_func_rebuild        func_rebuild;
+<a name="l00035"></a>00035         mphf_func_destroy        func_destroy;
+<a name="l00036"></a>00036         
+<a name="l00037"></a>00037         mphf_func_insert         func_insert;
+<a name="l00038"></a>00038         mphf_func_update         func_update;
+<a name="l00039"></a>00039         mphf_func_query          func_query;
+<a name="l00040"></a>00040         mphf_func_delete         func_delete;
+<a name="l00041"></a>00041 };
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifdef MPHF_C</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#include &lt;mphf_chm_imp.h&gt;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &lt;mphf_bdz_imp.h&gt;</span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="keyword">static</span> <a class="code" href="structmphf__proto__t.html">mphf_proto_t</a> mphf_protos[] = {
+<a name="l00048"></a>00048         [MPHF_TYPE_CHM_IMP] = {
+<a name="l00049"></a>00049                 .func_load          = mphf_chm_imp_load,
+<a name="l00050"></a>00050                 .func_unload        = mphf_chm_imp_unload,
+<a name="l00051"></a>00051                 .func_rebuild       = mphf_chm_imp_rebuild,
+<a name="l00052"></a>00052                 .func_destroy       = mphf_chm_imp_destroy,
+<a name="l00053"></a>00053                 .func_insert        = mphf_chm_imp_insert,
+<a name="l00054"></a>00054                 .func_update        = mphf_chm_imp_update,
+<a name="l00055"></a>00055                 .func_query         = mphf_chm_imp_query,
+<a name="l00056"></a>00056                 .func_delete        = mphf_chm_imp_delete
+<a name="l00057"></a>00057         }
+<a name="l00058"></a>00058 };
+<a name="l00059"></a>00059 <span class="comment">//static size_t mphf_protos_size = sizeof(mphf_protos) / sizeof(mphf_protos[0]);</span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 <span class="preprocessor">#endif</span>
+<a name="l00062"></a>00062 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

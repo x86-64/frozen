@@ -58,9 +58,11 @@
 <div class="fragment"><pre class="fragment"> some = (<a class="code" href="structallocator__fixed__t.html">allocator_fixed_t</a>){
               item_size               = (uint_t)<span class="stringliteral">&#39;10&#39;</span>,                            # specify size directly             OR
               item_sample             = (sometype_t)<span class="stringliteral">&#39;&#39;</span>,                          # sample item <span class="keywordflow">for</span> size estimation
-              removed_items           = (<a class="code" href="structallocator__list__t.html">allocator_list_t</a>){                      # removed items tracker, <span class="keywordflow">if</span> not supplied - no tracking performed
+              removed_items           =                                          # removed items tracker, <span class="keywordflow">if</span> not supplied - no tracking performed
+                                        (<a class="code" href="structallocator__fixed__t.html">allocator_fixed_t</a>){                     # - track with another <a class="code" href="structallocator__fixed__t.html">allocator_fixed_t</a> 
                    item_sample = (uint_t)<span class="stringliteral">&quot;0&quot;</span>
               }
+                                        (<a class="code" href="structlist__t.html" title="list_t structure">list_t</a>){ ... }                          # - track with in-memory <a class="code" href="structlist__t.html" title="list_t structure">list_t</a>
 
  }
 </pre></div> </div>
@@ -74,7 +76,7 @@
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 21 2012 13:37:12 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
