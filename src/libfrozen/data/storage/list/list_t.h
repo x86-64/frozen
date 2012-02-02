@@ -44,9 +44,11 @@ API void            list_t_init                (list_t *list);
 API void            list_t_destroy             (list_t *list);
 
 API list_t *        list_t_alloc               (void);
+API list_t *        list_t_copy                (list_t *list);
 API void            list_t_free                (list_t *list);
 
 API ssize_t         list_t_push                (list_t *list, data_t *data);
 API ssize_t         list_t_pop                 (list_t *list, data_t *data);
+API ssize_t         list_t_unshift             (list_t *list, data_t *data);;;
 
 #endif

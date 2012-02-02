@@ -104,7 +104,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 				
 				data_slider_t_unfreeze(&d_sl_data);
 				
-				if( (ret = list_t_push(fdata, &item)) < 0)
+				if( (ret = list_t_unshift(fdata, &item)) < 0)
 					break;
 			}
 			break;
@@ -141,6 +141,18 @@ static ssize_t data_list_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
 	
 	return list_t_pop(fdata, fargs->data);
 } // }}}
+static ssize_t data_list_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
+	list_t                *fdata             = (list_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if( (fargs->dest->ptr = list_t_copy(fdata)) == NULL)
+		return -EFAULT;
+	
+	fargs->dest->type = data->type;
+	return 0;
+} // }}}
 
 data_proto_t list_t_proto = {
 	.type                   = TYPE_LISTT,
@@ -153,6 +165,7 @@ data_proto_t list_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_list_t_free,
 		[ACTION_PUSH]         = (f_data_func)&data_list_t_push,
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
+		[ACTION_COPY]         = (f_data_func)&data_list_t_copy,
 	}
 };
 
@@ -204,11 +217,45 @@ list_t *        list_t_alloc               (void){ // {{{
 	list_t_init(list);
 	return list;
 } // }}}
+list_t *        list_t_copy                (list_t *list){ // {{{
+	list_t                *new_list;
+	list_chunk_t          *chunk;
+	data_t                 data_copy;
+	
+	new_list = list_t_alloc();
+	for(chunk = list->head; chunk; chunk = chunk->cnext){
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &data_copy };
+		if(data_query(&chunk->data, &r_copy) < 0)
+			goto error;
+		
+		list_t_unshift(new_list, &data_copy);
+	}
+	return new_list;
+error:
+	list_t_free(new_list);
+	return NULL;
+} // }}}
 void            list_t_free                (list_t *list){ // {{{
 	list_t_destroy(list);
 	free(list);
 } // }}}
 
+ssize_t         list_t_unshift             (list_t *list, data_t *data){ // {{{
+	list_chunk_t     *chunk;
+	list_chunk_t     *curr;
+	
+	if( (chunk = chunk_alloc(data)) == NULL)
+		return -ENOMEM;
+	
+	for(curr = list->head; curr; curr = curr->cnext){
+		if(curr->cnext == NULL){
+			curr->cnext = chunk;
+			return 0;
+		}
+	}
+	list->head = chunk;
+	return 0;
+} // }}}
 ssize_t         list_t_push                (list_t *list, data_t *data){ // {{{
 	list_chunk_t     *chunk;
 	
