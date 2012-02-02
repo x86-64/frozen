@@ -24,7 +24,7 @@ static err_item errs_list[] = {
  { -184362, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_settype failed" },
  { -184359, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_init failed" },
  { -184356, "src/libfrozen/machines/sync/mutex/mutex.c: calloc failed" },
- { -180264, "src/libfrozen/machines/request/assign/assign.c: calloc returns null" },
+ { -180266, "src/libfrozen/machines/request/assign/assign.c: calloc returns null" },
  { -176296, "src/libfrozen/machines/io/tcp/tcp.c: pthread_setspecific error" },
  { -176289, "src/libfrozen/machines/io/tcp/tcp.c: calloc failed" },
  { -176268, "src/libfrozen/machines/io/tcp/tcp.c: shop_new error" },

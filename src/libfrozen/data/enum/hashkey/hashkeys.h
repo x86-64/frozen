@@ -30,6 +30,7 @@
 #define HK_VALUE_config 9498
 #define HK_VALUE_connect 15066
 #define HK_VALUE_convert_from 70603
+#define HK_VALUE_copy 3487
 #define HK_VALUE_count 6256
 #define HK_VALUE_create 9552
 #define HK_VALUE_data 3084
@@ -181,6 +182,7 @@ typedef enum hashkey_t {
       HK_config = HK_VALUE_config, 
       HK_connect = HK_VALUE_connect, 
       HK_convert_from = HK_VALUE_convert_from, 
+      HK_copy = HK_VALUE_copy, 
       HK_count = HK_VALUE_count, 
       HK_create = HK_VALUE_create, 
       HK_data = HK_VALUE_data, 
@@ -336,6 +338,7 @@ keypair_t hashkeys[] = {
       { "config", HK_VALUE_config }, 
       { "connect", HK_VALUE_connect }, 
       { "convert_from", HK_VALUE_convert_from }, 
+      { "copy", HK_VALUE_copy }, 
       { "count", HK_VALUE_count }, 
       { "create", HK_VALUE_create }, 
       { "data", HK_VALUE_data }, 
