@@ -6,8 +6,6 @@
 * m4 macro collection
   - write m4 macro for balancer machine
 
-- data/split push copy of slice_t
-
 - write allocator_fixed_t push/pop same as for list_t
 - list_t compare function, as multiselect_t would do
 - broken tcp

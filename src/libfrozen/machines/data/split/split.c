@@ -43,7 +43,7 @@ typedef struct split_threaddata {
 	char                  *buffer;
 
 	uintmax_t              last_part_filled;
-	container_t            last_part;
+	container_t           *last_part;
 } split_threaddata;
 
 static void * split_threaddata_create(split_userdata *userdata){ // {{{
@@ -55,8 +55,7 @@ static void * split_threaddata_create(split_userdata *userdata){ // {{{
 	if( (threaddata->buffer = malloc(userdata->buffer_size)) == NULL)
 		goto error2;
 	
-	container_init(&threaddata->last_part);
-	
+	threaddata->last_part        = container_alloc();
 	threaddata->last_part_filled = 0;
 	return threaddata;
 
@@ -66,7 +65,7 @@ error1:
 	return NULL;
 } // }}}
 static void   split_threaddata_destroy(split_threaddata *threaddata){ // {{{
-	container_destroy(&threaddata->last_part);
+	container_destroy(threaddata->last_part);
 	free(threaddata->buffer);
 	free(threaddata);
 } // }}}
@@ -166,20 +165,23 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 			
 			if(memcmp(match, userdata->split_str, userdata->split_len) == 0){
 				uintmax_t       match_offset     = original_offset + (match - threaddata->buffer) + userdata->split_len;
-				data_t          hslice           = DATA_SLICET(input, lmatch_offset, match_offset - lmatch_offset);
+				data_t          hslice           = DATA_HEAP_SLICET(input, lmatch_offset, match_offset - lmatch_offset);
 				
 				if(threaddata->last_part_filled == 1){
-					container_add_tail_data(&threaddata->last_part, &hslice, CHUNK_ADOPT_DATA | CHUNK_DONT_FREE);
+					container_add_tail_data(threaddata->last_part, &hslice, CHUNK_ADOPT_DATA);
 					
 					request_t r_next[] = {
-						{ userdata->input, DATA_PTR_CONTAINERT(&threaddata->last_part) },
+						{ userdata->input, DATA_PTR_CONTAINERT(threaddata->last_part) },
 						hash_inline(request),
 						hash_end
 					};
 					if( (ret = machine_pass(machine, r_next)) < 0)
 						return ret;
 					
-					container_clean(&threaddata->last_part);
+					fastcall_free r_free = { { 2, ACTION_FREE } };
+					data_query(&r_next[0].data, &r_free);
+					
+					threaddata->last_part        = container_alloc();
 					threaddata->last_part_filled = 0;
 				}else{
 					request_t r_next[] = {
@@ -189,6 +191,9 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 					};
 					if( (ret = machine_pass(machine, r_next)) < 0)
 						return ret;
+					
+					fastcall_free r_free = { { 2, ACTION_FREE } };
+					data_query(&r_next[0].data, &r_free);
 				}
 				
 				lmatch_offset = match_offset;
@@ -200,23 +205,28 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 		
 		original_offset = original_eoffset;
 	}
-	data_t    hslice           = DATA_SLICET(input, lmatch_offset, ~0);
 	
 	if(userdata->dump_last != 0){
+		data_t         hslice            = DATA_HEAP_SLICET(input, lmatch_offset, ~0);
+		
 		request_t r_next[] = {
 			{ userdata->input, hslice },
 			hash_inline(request),
 			hash_end
 		};
-		if( (ret = machine_pass(machine, r_next)) < 0)
-			return ret;
+		ret = machine_pass(machine, r_next);
+		
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&r_next[0].data, &r_free);
+		return ret;
 	}else{
 		// save end of buffer to use in next request
+		data_t         hslice            = DATA_SLICET(input, lmatch_offset, ~0);
 		data_t         last_part         = { TYPE_RAWT, NULL };
 		
 		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &last_part };
 		if(data_query(&hslice, &r_transfer) >= 0){
-			container_add_tail_data(&threaddata->last_part, &last_part, CHUNK_ADOPT_DATA);
+			container_add_tail_data(threaddata->last_part, &last_part, CHUNK_ADOPT_DATA);
 			threaddata->last_part_filled = 1;
 		}
 	}
