@@ -6,7 +6,7 @@
 /** @mainpage Frozen
  *
  *  @section intro Introduction
- *    Frozen is data processing daemon. It contain several modules for input, output and data processing.
+ *    Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing.
  *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
  *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data
  *    for web or local clients.
@@ -20,11 +20,11 @@
  *    library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.
  *
  *  @section caps Capabilities
- *    @li Zero-copy everywhere it possible
+ *    @li Web development related modules: mongrel2, mustache, leveldb
  *    @li Processing modules: regular expressions, switches, structures and many more
  *    @li IO modules: fuse, ZeroMQ, file, memory, sockets
- *    @li Can be used to construct common data structures: cache, index, lookup tables
- *    @li Load balancing modules
+ *    @li Zero-copy everywhere it possible
+ *    @li M4 macro in configuration files
  *    @li Benchmarking and measurements
  *
  *  @section links Useful links
@@ -37,7 +37,7 @@
  *  @li <a href="https://github.com/x86-64/frozen/tarball/master">Download as .tar.gz</a>
  *
  *  @section rationale Rationale
- *    @li Model-oriented programming
+ *    @li Flow-based programming
  *
  *        There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of 
  *        incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
