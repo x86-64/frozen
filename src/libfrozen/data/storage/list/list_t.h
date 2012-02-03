@@ -30,6 +30,8 @@
 typedef struct list_t       list_t;
 typedef struct list_chunk_t list_chunk_t;
 
+typedef ssize_t  (*list_t_callback)(data_t *data, void *userdata);
+
 struct list_chunk_t {
 	list_chunk_t          *cnext;         ///< Next chunk ptr
 	data_t                 data;          ///< Data holder
@@ -49,6 +51,7 @@ API void            list_t_free                (list_t *list);
 
 API ssize_t         list_t_push                (list_t *list, data_t *data);
 API ssize_t         list_t_pop                 (list_t *list, data_t *data);
-API ssize_t         list_t_unshift             (list_t *list, data_t *data);;;
+API ssize_t         list_t_unshift             (list_t *list, data_t *data);
+API ssize_t         list_t_enum                (list_t *list, list_t_callback callback, void *userdata);
 
 #endif

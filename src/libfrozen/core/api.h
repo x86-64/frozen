@@ -249,7 +249,7 @@ typedef struct fastcall_convert_from  fastcall_convert_from;
 typedef struct fastcall_compare {
 	fastcall_header        header;
 	data_t                *data2;
-	uintmax_t              result;
+	uintmax_t              result; // 0 - equal, 1 - data1 is less, 2 - data2 is less
 } fastcall_compare;
 
 typedef struct fastcall_arith {

@@ -7,6 +7,20 @@
 
 #define DATATYPE_BIN uint16_t
 
+static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{{
+	ssize_t                ret;
+	
+	fastcall_compare r_compare = { { 4, ACTION_COMPARE }, fargs->data2 };
+	if( (ret = data_query(data, &r_compare)) < 0)
+		return ret;
+	
+	if(r_compare.result == 0){ // if equal - exit
+		fargs->result = 0;
+		return 1;
+	}
+	return 0;
+} // }}}
+
 static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = list_t_alloc()) == NULL)
 		return -ENOMEM;
@@ -153,6 +167,18 @@ static ssize_t data_list_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
 	fargs->dest->type = data->type;
 	return 0;
 } // }}}
+static ssize_t data_list_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
+	list_t                *fdata             = (list_t *)data1->ptr;
+	
+	if(fargs->data2->type != TYPE_LISTT){
+		// compare item with list, behave like list is multiselect list
+		fargs->result = 2; // not equal, data2 is less
+		return list_t_enum(fdata, (list_t_callback)&iter_list_t_compare, fargs);
+	}
+	
+	// compare lists
+	return -ENOSYS;
+} // }}}
 
 data_proto_t list_t_proto = {
 	.type                   = TYPE_LISTT,
@@ -166,6 +192,7 @@ data_proto_t list_t_proto = {
 		[ACTION_PUSH]         = (f_data_func)&data_list_t_push,
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
 		[ACTION_COPY]         = (f_data_func)&data_list_t_copy,
+		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
 	}
 };
 
@@ -286,3 +313,16 @@ ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
 	chunk_free(chunk);
 	return 0;
 } // }}}
+
+ssize_t         list_t_enum                (list_t *list, list_t_callback callback, void *userdata){ // {{{
+	ssize_t           ret;
+	list_chunk_t     *curr;
+	
+	for(curr = list->head; curr; curr = curr->cnext){
+		if( (ret = callback(&curr->data, userdata)) != 0)
+			return ret;
+	}
+	return 0;
+} // }}}
+
+
