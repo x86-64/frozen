@@ -20,6 +20,13 @@ static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{
 	}
 	return 0;
 } // }}}
+static ssize_t iter_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	request_t r_next[] = {
+		{ HK(data), *data },
+		hash_end
+	};
+	return fargs->callback(r_next, fargs->userdata);
+} // }}}
 
 static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = list_t_alloc()) == NULL)
@@ -179,6 +186,11 @@ static ssize_t data_list_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 	// compare lists
 	return -ENOSYS;
 } // }}}
+static ssize_t data_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	list_t                *fdata             = (list_t *)data->ptr;
+	
+	return list_t_enum(fdata, (list_t_callback)&iter_list_t_enum, fargs);
+} // }}}
 
 data_proto_t list_t_proto = {
 	.type                   = TYPE_LISTT,
@@ -193,6 +205,7 @@ data_proto_t list_t_proto = {
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
 		[ACTION_COPY]         = (f_data_func)&data_list_t_copy,
 		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
+		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
 	}
 };
 

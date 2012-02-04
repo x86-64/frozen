@@ -7,7 +7,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- list_t compare function, as multiselect_t would do
 - unique_t for list_t
 - mustache list_t enum
 - leveldb enum db
