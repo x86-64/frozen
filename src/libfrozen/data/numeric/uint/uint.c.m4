@@ -27,7 +27,8 @@ static ssize_t data_[]NAME()_compare(data_t *data1, fastcall_compare *fargs){ //
 	else if(data1_val <  data2_val){ cret =  1; }
 	else                           { cret =  2; }
 	
-	return cret;
+	fargs->result = cret;
+	return 0;
 } // }}}
 static ssize_t data_[]NAME()_arith(data_t *data1, fastcall_arith *fargs){ // {{{
 	int           ret = 0;

@@ -7,7 +7,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- unique_t for list_t
 - mustache list_t enum
 - leveldb enum db
 - modules error codes table registration

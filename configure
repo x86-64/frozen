@@ -809,6 +809,7 @@ enable_counter_t
 enable_emitter_t
 enable_env_t
 enable_random_t
+enable_unique_t
 enable_container_t
 enable_file_t
 enable_folder_t
@@ -1567,6 +1568,7 @@ Optional Features:
                           disable data emitter_t
   --disable-data-env_t    disable data env_t
   --disable-data-random_t disable data random_t
+  --disable-data-unique_t disable data unique_t
   --disable-data-container_t
                           disable data container_t
   --disable-data-file_t   disable data file_t
@@ -19052,6 +19054,43 @@ fi
 		DATA_MAKEFILE_special_random=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/random/libfrozen_data_random.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-unique_t was given.
+if test "${enable_unique_t+set}" = set; then :
+  enableval=$enable_unique_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_unique_t}" = "yes"; then
+			enable_unique_t="no"
+		else
+			enable_unique_t="yes"
+		fi
+	fi
+
+	if test "${enable_unique_t}" = "yes"; then
+		DATA_DIR_unique_t="special/unique"
+		DATA_DEP_unique_t=""
+		DATA_ID_unique_t="30"
+		DATA_SELECTED="$DATA_SELECTED unique_t"
+		DATA_HEADERS="$DATA_HEADERS special/unique/unique_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_special_unique" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/special/unique/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS special/unique"
+
+		DATA_MAKEFILE_special_unique=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/unique/libfrozen_data_unique.la"
 
 	fi
 
