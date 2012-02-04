@@ -131,7 +131,8 @@ static ssize_t data_ipv4_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 	      if(data1_val == data2_val){ cret = 0;
 	}else if(data1_val  < data2_val){ cret = 1;
 	}else{                            cret = 2; }
-	return cret;
+	fargs->result = cret;
+	return 0;
 } // }}}
 static ssize_t data_ipv4_t_arith_no_arg(data_t *data, fastcall_arith_no_arg *fargs){ // {{{
 	ssize_t                ret               = 0;
