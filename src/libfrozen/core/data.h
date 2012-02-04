@@ -119,6 +119,14 @@ API ssize_t              data_register          (data_proto_t *proto);
 */
 API ssize_t              data_query             (data_t *data, void *args);
 
+/** Void data. Can be used after free or data consuming.
+ * @param _src Data to be void
+ */
+#define data_set_void(_src){       \
+	(_src)->type = TYPE_VOIDT; \
+	(_src)->ptr  = NULL;       \
+}
+
 /** Read value from holder to supplied buffer
  * @param _ret  Return value (ssize_t)
  * @param _type Destination data type: one of TYPE_*. Only constants allowed
@@ -152,8 +160,7 @@ API ssize_t              data_query             (data_t *data, void *args);
 #define data_consume(_ret,_type,_dt,_src){                                     \
 	data_get(_ret,_type,_dt,_src);                                         \
 	if(_ret == 0){                                                         \
-		_src->type = TYPE_VOIDT;                                       \
-		_src->ptr  = NULL;                                             \
+		data_set_void(_src);                                           \
 	}                                                                      \
 }
 
@@ -167,8 +174,7 @@ API ssize_t              data_query             (data_t *data, void *args);
 #define holder_consume(_ret,_dt,_src){                                         \
 	if( (_src) != NULL){                                                   \
 		_dt = *(_src);                                                 \
-		(_src)->type = TYPE_VOIDT;                                     \
-		(_src)->ptr  = NULL;                                           \
+		data_set_void(_src);                                           \
 		_ret = 0;                                                      \
 	}else{                                                                 \
 		_ret = -EINVAL;                                                \
