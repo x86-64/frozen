@@ -95,7 +95,6 @@ static ssize_t data_folder_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	if(
 		fdata       == NULL                   ||
 		fdata->path == NULL                   ||
-		fargs->callback == NULL               ||
 		(dir = opendir(fdata->path)) == NULL
 	)
 		return -EINVAL;
@@ -122,10 +121,11 @@ static ssize_t data_folder_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		#ifdef _DIRENT_HAVE_D_OFF
 			{ HK(offset),   DATA_UINTT(dir_item->d_off)    },
 		#endif
+			hash_inline(fargs->context),
 			hash_end
 		};
 		
-		if( (ret = fargs->callback(r_next, fargs->userdata)) < 0)
+		if( (ret = machine_query(fargs->shop, r_next)) < 0)
 			break;
 	}
 	closedir(dir);

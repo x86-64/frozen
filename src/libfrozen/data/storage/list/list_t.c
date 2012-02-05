@@ -23,9 +23,10 @@ static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{
 static ssize_t iter_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	request_t r_next[] = {
 		{ HK(data), *data },
+		hash_inline(fargs->context),
 		hash_end
 	};
-	return fargs->callback(r_next, fargs->userdata);
+	return machine_query(fargs->shop, r_next);
 } // }}}
 
 static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
