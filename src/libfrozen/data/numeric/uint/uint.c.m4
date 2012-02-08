@@ -101,6 +101,7 @@ static ssize_t data_[]NAME()_arith_no_arg(data_t *data1, fastcall_arith_no_arg *
 static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              transfered        = 0;
+	char                   buffer[[DEF_BUFFER_SIZE]];
 	
 	if(fargs->dest == NULL)
 		return -EINVAL;
@@ -113,6 +114,20 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 			transfered = r_write.buffer_size;
 			break;
 		
+		case FORMAT(human):
+		case FORMAT(config):
+			if( (transfered = snprintf(
+				buffer, sizeof(buffer),
+				"%" PRINTFORMAT,
+				*(TYPE *)src->ptr
+			)) >= sizeof(buffer))
+				return -ENOMEM;
+			
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, buffer, transfered };
+			ret        = data_query(fargs->dest, &r_write2);
+			transfered = r_write2.buffer_size;
+			break;
+			
 		default:
 			return -ENOSYS;
 	};
