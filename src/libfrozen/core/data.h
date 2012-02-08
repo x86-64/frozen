@@ -30,8 +30,8 @@
  *  which in turn rise complexity of whole program and can introduce more problems in future than help. So, default_t was introduced.
  *  It consist of safe functions to work with memory chunks.
  *  
- *  To use this data type in your data handlers, you need to supply several helper routines. This includes ACTION_PHYSICALLEN,
- *  ACTION_LOGICALLEN and ACTION_GETDATAPTR. They describe properties of memory chunk you want to process. Default_t itself
+ *  To use this data type in your data handlers, you need to supply several helper routines. This includes ACTION_LENGTH,
+ *  and ACTION_GETDATAPTR. They describe properties of memory chunk you want to process. Default_t itself
  *  know nothing about data it process. You also can't create clean default_t data, routines will return errors.
  */
 /** @ingroup data

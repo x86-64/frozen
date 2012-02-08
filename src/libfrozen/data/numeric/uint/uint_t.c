@@ -16,7 +16,7 @@
 #include <uint_t.h>
 #include <enum/format/format_t.h>
 
-static ssize_t data_uint_t_len(data_t *data, fastcall_len *fargs){ // {{{
+static ssize_t data_uint_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = sizeof(uintmax_t);
 	return 0;
 } // }}}
@@ -182,8 +182,7 @@ data_proto_t uint_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handlers               = {
 		[ACTION_ALLOC]          = (f_data_func)&data_uint_t_alloc,
-		[ACTION_PHYSICALLEN]    = (f_data_func)&data_uint_t_len,
-		[ACTION_LOGICALLEN]     = (f_data_func)&data_uint_t_len,
+		[ACTION_LENGTH]         = (f_data_func)&data_uint_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_uint_t_compare,
 		[ACTION_ADD]            = (f_data_func)&data_uint_t_arith,
 		[ACTION_SUB]            = (f_data_func)&data_uint_t_arith,

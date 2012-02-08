@@ -51,8 +51,8 @@ ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintm
 } // }}}
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
-	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EFAULT;
 	
@@ -71,8 +71,8 @@ static ssize_t       data_default_read          (data_t *data, fastcall_read *fa
 	return 0;
 } // }}}
 static ssize_t       data_default_write         (data_t *data, fastcall_write *fargs){ // {{{
-	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EFAULT;
 	
@@ -99,7 +99,7 @@ static ssize_t       data_default_copy          (data_t *src, fastcall_copy *far
 		return -EINVAL;
 	
 	if(r_ptr.ptr != NULL){
-		fastcall_physicallen r_len = { { 3, ACTION_PHYSICALLEN } };
+		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 		if( data_query(src, &r_len) != 0)
 			return -EFAULT;
 		

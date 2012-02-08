@@ -123,7 +123,7 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	data_hash_t_append(ctx, buffer);
 	
 	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	fastcall_length     r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if(data_query(&element->data, &r_ptr) == 0 && data_query(&element->data, &r_len) == 0){
 		for(k = 0; k < r_len.length; k++){
 			if((k % 32) == 0){

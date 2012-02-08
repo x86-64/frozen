@@ -70,7 +70,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	hashkey_t              input_hk;
 	hashkey_t              output_hk;
 	datatype_t             type              = TYPE_INVALID;
-	uintmax_t              format            = FORMAT(clean);
+	format_t               format            = FORMAT(clean);
 	uintmax_t              from              = 0;
 	//uintmax_t              return_result     = 0;
 	data_t                *input;
@@ -83,7 +83,7 @@ static ssize_t convert_iterator(hash_t *item, convert_ctx *ctx){ // {{{
 	input_hk = output_hk = item->key;
 	
 	hash_data_get(ret, TYPE_DATATYPET, type,           item_cfg, HK(type));
-	hash_data_get(ret, TYPE_UINTT,     format,         item_cfg, HK(format));
+	hash_data_get(ret, TYPE_FORMATT,   format,         item_cfg, HK(format));
 	hash_data_get(ret, TYPE_UINTT,     from,           item_cfg, HK(convert_from));
 	hash_data_get(ret, TYPE_HASHKEYT,  output_hk,      item_cfg, HK(output));
 	//hash_data_get(ret, TYPE_UINTT,     return_result,  item_cfg, HK(return));

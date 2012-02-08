@@ -3,9 +3,12 @@
 
 #include <enum/format/format_t.h>
 
-static ssize_t data_dataptr_t_len(data_t *data, fastcall_len *fargs){ // {{{
-	fargs->length = sizeof(data_t);
-	return 0;
+static ssize_t data_dataptr_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	if(fargs->format == FORMAT(binary)){
+		fargs->length = sizeof(data_t);
+		return 0;
+	}
+	return -ENOSYS;
 } // }}}
 static ssize_t data_dataptr_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	if(fargs->src == NULL)
@@ -32,8 +35,7 @@ data_proto_t dataptr_t_proto = {
 	.type_str               = "dataptr_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_dataptr_t_len,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_dataptr_t_len,
+		[ACTION_LENGTH]       = (f_data_func)&data_dataptr_t_len,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_dataptr_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_dataptr_t_free,
 	}

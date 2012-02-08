@@ -161,7 +161,7 @@ redo_write:
 	fargs->buffer_size = ret;
 	return 0;
 } // }}}
-static ssize_t data_file_t_len(data_t *data, fastcall_len *fargs){ // {{{
+static ssize_t data_file_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	ssize_t                ret;
 	struct stat            stat;
 	file_t                *fdata             = (file_t *)data->ptr;
@@ -212,8 +212,7 @@ data_proto_t file_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_file_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_file_t_free,
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_file_t_len,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_file_t_len,
+		[ACTION_LENGTH]       = (f_data_func)&data_file_t_len,
 		[ACTION_CREATE]       = (f_data_func)&data_file_t_create,
 		[ACTION_READ]         = (f_data_func)&data_file_t_read,
 		[ACTION_WRITE]        = (f_data_func)&data_file_t_write,

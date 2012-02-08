@@ -89,8 +89,19 @@ static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
 	fdata->size = new_size;
 	return 0;
 } // }}}
-static ssize_t data_raw_len(data_t *data, fastcall_len *fargs){ // {{{
+static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
+	switch(fargs->format){
+		case FORMAT(clean):
+		case FORMAT(human):
+		case FORMAT(config):
+			break;
+		case FORMAT(binary):
+			fargs->length += sizeof(((raw_t *)data->ptr)->size);
+			break;
+		default:
+			return -ENOSYS;
+	}
 	return 0;
 } // }}}
 static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
@@ -206,7 +217,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 		case FORMAT(human):
 		case FORMAT(config):;
 			
-			fastcall_logicallen r_len1 = { { 3, ACTION_LOGICALLEN } };
+			fastcall_length r_len1 = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 			if( (ret = data_query(fargs->src, &r_len1)) < 0)
 				return ret;
 			
@@ -222,7 +233,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			
 			buffer = hash_data_find(config, HK(buffer));
 			if(buffer){
-				fastcall_logicallen r_len2 = { { 3, ACTION_LOGICALLEN } };
+				fastcall_length r_len2 = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 				if( (ret = data_query(buffer, &r_len2)) < 0)
 					return ret;
 				
@@ -295,8 +306,7 @@ data_proto_t raw_t_proto = {
 	.type_str      = "raw_t",
 	.api_type      = API_HANDLERS,
 	.handlers      = {
-		[ACTION_PHYSICALLEN] = (f_data_func)&data_raw_len,
-		[ACTION_LOGICALLEN]  = (f_data_func)&data_raw_len,
+		[ACTION_LENGTH]      = (f_data_func)&data_raw_len,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
 		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
 		[ACTION_ALLOC]       = (f_data_func)&data_raw_alloc,

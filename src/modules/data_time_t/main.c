@@ -59,9 +59,12 @@ static ssize_t timestamp_to_string(time_t time, char *string, size_t *string_siz
 	return -ENOSYS;
 } // }}}
 
-static ssize_t data_timestamp_t_len(data_t *data, fastcall_len *fargs){ // {{{
-	fargs->length = sizeof(timestamp_t);
-	return 0;
+static ssize_t data_timestamp_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	if(fargs->format == FORMAT(binary)){
+		fargs->length = sizeof(timestamp_t);
+		return 0;
+	}
+	return -ENOSYS;
 } // }}}
 static ssize_t data_timestamp_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = malloc(sizeof(timestamp_t))) == NULL)
@@ -182,8 +185,7 @@ data_proto_t timestamp_proto = {
 	.api_type               = API_HANDLERS,
 	.handlers               = {
 		[ACTION_ALLOC]          = (f_data_func)&data_timestamp_t_alloc,
-		[ACTION_PHYSICALLEN]    = (f_data_func)&data_timestamp_t_len,
-		[ACTION_LOGICALLEN]     = (f_data_func)&data_timestamp_t_len,
+		[ACTION_LENGTH]         = (f_data_func)&data_timestamp_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_timestamp_t_compare,
 		[ACTION_INCREMENT]      = (f_data_func)&data_timestamp_t_arith_no_arg,
 		[ACTION_DECREMENT]      = (f_data_func)&data_timestamp_t_arith_no_arg,

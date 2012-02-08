@@ -77,9 +77,12 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	return ret;
 } // }}}		
-static ssize_t data_action_t_len(data_t *data, fastcall_len *fargs){ // {{{
-	fargs->length = sizeof(action_t);
-	return 0;
+static ssize_t data_action_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	if(fargs->format == FORMAT(binary)){
+		fargs->length = sizeof(action_t);
+		return 0;
+	}
+	return -ENOSYS;
 } // }}}
 
 data_proto_t action_t_proto = {
@@ -88,7 +91,6 @@ data_proto_t action_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_action_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_action_t_convert_from,
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_action_t_len,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_action_t_len,
+		[ACTION_LENGTH]       = (f_data_func)&data_action_t_len,
 	}
 };

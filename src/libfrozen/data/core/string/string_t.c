@@ -2,12 +2,20 @@
 #include <string_t.h>
 #include <enum/format/format_t.h>
 
-static ssize_t data_string_t_physlen(data_t *data, fastcall_physicallen *fargs){ // {{{
-	fargs->length = strlen((char *)data->ptr) + 1;
-	return 0;
-} // }}}
-static ssize_t data_string_t_loglen(data_t *data, fastcall_logicallen *fargs){ // {{{
+static ssize_t data_string_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = strlen((char *)data->ptr);
+	
+	switch(fargs->format){
+		case FORMAT(clean):
+		case FORMAT(human):
+		case FORMAT(config):
+			break;
+		case FORMAT(binary):
+			fargs->length++;
+			break;
+		default:
+			return -ENOSYS;
+	}
 	return 0;
 } // }}}
 static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
@@ -15,7 +23,7 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	char                  *buffer            = NULL;
 	uintmax_t              buffer_size       = 0;
 	uintmax_t              malloc_size;
-	uintmax_t              format            = FORMAT(clean);
+	format_t               format            = FORMAT(clean);
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -37,7 +45,7 @@ static ssize_t data_string_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	}
 	
 	// get external buffer size
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if(data_query(fargs->src, &r_len) != 0)
 		goto unknown_size;
 	
@@ -126,8 +134,7 @@ data_proto_t string_t_proto = {
 	.type_str      = "string_t",
 	.api_type      = API_HANDLERS,
 	.handlers      = {
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_string_t_physlen,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_string_t_loglen,
+		[ACTION_LENGTH]       = (f_data_func)&data_string_t_len,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_string_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_string_t_convert_from,
 	}

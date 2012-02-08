@@ -11,7 +11,7 @@ static ssize_t       data_slice_t_handler  (data_t *data, fastcall_header *fargs
 	
 	return data_query(fdata->data, fargs);
 } // }}}
-static ssize_t       data_slice_t_len      (data_t *data, fastcall_len *fargs){ // {{{
+static ssize_t       data_slice_t_len      (data_t *data, fastcall_length *fargs){ // {{{
 	ssize_t                ret;
 	slice_t               *fdata             = (slice_t *)data->ptr;
 	
@@ -136,8 +136,7 @@ data_proto_t slice_t_proto = {
 		[ACTION_TRANSFER]     = (f_data_func)&data_slice_t_transfer,
 		[ACTION_READ]         = (f_data_func)&data_slice_t_io,
 		[ACTION_WRITE]        = (f_data_func)&data_slice_t_io,
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_slice_t_len,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_slice_t_len,
+		[ACTION_LENGTH]       = (f_data_func)&data_slice_t_len,
 		[ACTION_COPY]         = (f_data_func)&data_slice_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
 	}

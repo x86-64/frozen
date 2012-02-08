@@ -1,6 +1,8 @@
 #include <libfrozen.h>
 #include <container_t.h>
 
+#include <enum/format/format_t.h>
+
 #define container_process(_container,_start_offset,_size,_func)  ({         \
 	data_t                *chunk_data;                                  \
 	uintmax_t              chunk_offset;                                \
@@ -42,9 +44,12 @@
 	}                                                                   \
 })
 
-static ssize_t data_container_t_len(data_t *data, fastcall_len *fargs){ // {{{
-	fargs->length = container_size( (container_t *)data->ptr );
-	return 0;
+static ssize_t data_container_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	if(fargs->format == FORMAT(clean)){
+		fargs->length = container_size( (container_t *)data->ptr );
+		return 0;
+	}
+	return -ENOSYS;
 } // }}}
 static ssize_t data_container_t_read(data_t *data, fastcall_read *fargs){ // {{{
 	if(data->ptr == NULL)
@@ -83,8 +88,7 @@ data_proto_t container_t_proto = {
 	.type_str               = "container_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_PHYSICALLEN] = (f_data_func)&data_container_t_len,
-		[ACTION_LOGICALLEN]  = (f_data_func)&data_container_t_len,
+		[ACTION_LENGTH]      = (f_data_func)&data_container_t_len,
 		[ACTION_READ]        = (f_data_func)&data_container_t_read,
 		[ACTION_WRITE]       = (f_data_func)&data_container_t_write,
 		[ACTION_FREE]        = (f_data_func)&data_container_t_free,
@@ -132,7 +136,7 @@ static uintmax_t         chunk_get_size(container_chunk_t *chunk){ // {{{
 			return chunk->cached_size;
 	}
 	
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if(data_query(&chunk->data, &r_len) < 0)
 		return 0;
 	

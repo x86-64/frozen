@@ -109,9 +109,12 @@ static ssize_t ipv4_to_string(uint32_t ip, char *string, size_t *string_size, fo
 	return -ENOSYS;
 } // }}}
 
-static ssize_t data_ipv4_t_len(data_t *data, fastcall_len *fargs){ // {{{
-	fargs->length = sizeof(ipv4_t);
-	return 0;
+static ssize_t data_ipv4_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	if(fargs->format == FORMAT(binary)){
+		fargs->length = sizeof(ipv4_t);
+		return 0;
+	}
+	return -ENOSYS;
 } // }}}
 static ssize_t data_ipv4_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = malloc(sizeof(ipv4_t))) == NULL)
@@ -231,8 +234,7 @@ data_proto_t ipv4_proto = {
 	.api_type               = API_HANDLERS,
 	.handlers               = {
 		[ACTION_ALLOC]          = (f_data_func)&data_ipv4_t_alloc,
-		[ACTION_PHYSICALLEN]    = (f_data_func)&data_ipv4_t_len,
-		[ACTION_LOGICALLEN]     = (f_data_func)&data_ipv4_t_len,
+		[ACTION_LENGTH]         = (f_data_func)&data_ipv4_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_ipv4_t_compare,
 		[ACTION_INCREMENT]      = (f_data_func)&data_ipv4_t_arith_no_arg,
 		[ACTION_DECREMENT]      = (f_data_func)&data_ipv4_t_arith_no_arg,

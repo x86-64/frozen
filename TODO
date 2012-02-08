@@ -7,29 +7,27 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- leveldb enum db
+- machine thread_pool
+- machine queue
+- data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
 - modules error codes table registration
 - wrap -E* errors in error func, to mark source of error
 - error backtrace
 - cache_t for file_t
+- list_t convert_from hash with data array
+- machine/rebuild deprecate?
 
 - write allocator_fixed_t push/pop same as for list_t
 - broken tcp
 
-- join physical and logical length into one
 - machine 'data/buffer'
-
-- review indexes and caches (+ data free routines)
-- data 'refcount_t'
-- data 'timerange_t'
 
 - fix broken slice_t hash_dump's
 - rewrite file_t to use fd_t
 
 - review code for multi-threading support, document machine's thread-safety capabilities
-- machine thread_pool
-- machine queue
 - machine multi_request
+  - action BATCH
 
 - new test suite, as benchmarks, deprecate check
 - data 'range_t'

@@ -28,7 +28,7 @@ unsigned int MurmurHash2 ( data_t *data, unsigned int seed )
 
 	// Initialize the hash to a 'random' value
 	
-	fastcall_logicallen r_len = { { 3, ACTION_LOGICALLEN } };
+	fastcall_length r_len = { { 3, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if(data_query(data, &r_len) != 0)
 		return 0;
 	len = r_len.length;

@@ -51,7 +51,7 @@ check:
 	
 	return -EFAULT;
 } // }}}
-static ssize_t data_machine_t_len(data_t *data, fastcall_len *fargs){ // {{{
+static ssize_t data_machine_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = 0;
 	return 0;
 } // }}}
@@ -98,8 +98,7 @@ data_proto_t machine_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_machine_t_default,
 	.handlers = {
-		[ACTION_PHYSICALLEN]  = (f_data_func)&data_machine_t_len,
-		[ACTION_LOGICALLEN]   = (f_data_func)&data_machine_t_len,
+		[ACTION_LENGTH]       = (f_data_func)&data_machine_t_len,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_machine_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_machine_t_free,
 		[ACTION_ALLOC]        = (f_data_func)&data_machine_t_alloc,

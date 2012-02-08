@@ -178,8 +178,8 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ /
 		return -EINVAL;
 	
 	// little hack here, parsing real data would be difficult, so we accept only "plain" memory chunks
-	fastcall_physicallen r_len = { { 3, ACTION_LOGICALLEN } };
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if( data_query(buffer, &r_len) != 0 || data_query(buffer, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EINVAL;
 	

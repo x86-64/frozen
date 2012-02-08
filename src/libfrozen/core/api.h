@@ -143,8 +143,7 @@ typedef ssize_t (*f_callback)  (request_t *, void *);
 	ACTION(ALLOC),
 	ACTION(RESIZE),
 	ACTION(FREE),
-	ACTION(PHYSICALLEN),
-	ACTION(LOGICALLEN),
+	ACTION(LENGTH),
 	ACTION(COMPARE),
 	ACTION(INCREMENT),
 	ACTION(DECREMENT),
@@ -185,12 +184,11 @@ typedef struct fastcall_io {
 typedef struct fastcall_io     fastcall_read;
 typedef struct fastcall_io     fastcall_write;
 
-typedef struct fastcall_len {
+typedef struct fastcall_length {
 	fastcall_header        header;
 	uintmax_t              length;
-} fastcall_len;
-typedef struct fastcall_len    fastcall_physicallen;
-typedef struct fastcall_len    fastcall_logicallen;
+	uintmax_t              format;
+} fastcall_length;
 
 typedef struct fastcall_alloc {
 	fastcall_header        header;
