@@ -359,10 +359,12 @@ ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
 } // }}}
 
 ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){ // {{{
+	format_t               format            = fargs->format;
+	
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
-		{ HK(format),     DATA_PTR_UINTT( &fargs->format                     ) },
+		{ HK(format),     DATA_PTR_FORMATT( &format                          ) },
 		hash_end
 	};
 	return machine_query(machine, r_next);
@@ -374,7 +376,14 @@ ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
 	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
 	
 	fastcall_length        fargs             = { { 4, ACTION_LENGTH }, 0, format };
-	return data_query(data, &fargs);
+	ret = data_query(data, &fargs);
+	
+	data_t                *buffer            = hash_data_find(request, HK(size));
+	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.length, sizeof(fargs.length) };
+	if(buffer)
+		data_query(buffer, &r_write);
+	
+	return ret;
 } // }}}
 
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
