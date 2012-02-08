@@ -358,6 +358,25 @@ ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
 	return data_query(data, &fargs);
 } // }}}
 
+ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
+		{ HK(format),     DATA_PTR_UINTT( &fargs->format                     ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	format_t               format            = FORMAT(clean);
+	
+	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
+	
+	fastcall_length        fargs             = { { 4, ACTION_LENGTH }, 0, format };
+	return data_query(data, &fargs);
+} // }}}
+
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	action_t               action;
@@ -436,6 +455,7 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_EXECUTE]      = (f_machine_from_fast)&action_execute_from_fast,
 	[ACTION_COPY]         = (f_machine_from_fast)&action_copy_from_fast,
 	[ACTION_ALLOC]        = (f_machine_from_fast)&action_alloc_from_fast,
+	[ACTION_LENGTH]       = (f_machine_from_fast)&action_length_from_fast,
 };
 
 f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
@@ -457,5 +477,6 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_EXECUTE]      = (f_data_from_hash)&action_execute_from_hash,
 	[ACTION_COPY]         = (f_data_from_hash)&action_copy_from_hash,
 	[ACTION_ALLOC]        = (f_data_from_hash)&action_alloc_from_hash,
+	[ACTION_LENGTH]       = (f_data_from_hash)&action_length_from_hash,
 };
 
