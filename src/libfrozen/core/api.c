@@ -435,6 +435,64 @@ ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
 	fastcall_query         fargs             = { { 3, ACTION_QUERY }, q_request_clean };
 	return data_query(data, &fargs);
 } // }}}
+	
+ssize_t     action_convert_to_from_fast(machine_t *machine, fastcall_convert_to *fargs){ // {{{
+	format_t               format            = fargs->format;
+	
+	request_t  r_next[] = {
+		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(destination), *fargs->dest                                         },
+		{ HK(format),      DATA_PTR_FORMATT( &format                          ) },
+		{ HK(size),        DATA_PTR_UINTT( &fargs->transfered                 ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	data_t                *output;
+	format_t               format            = FORMAT(clean);
+	
+	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
+	
+	if( (output = hash_data_find(request, HK(destination))) == NULL)
+		return -EINVAL;
+	
+	fastcall_convert_to    fargs             = { { 4, ACTION_CONVERT_TO }, output, format };
+	ret = data_query(data, &fargs);
+	
+	data_t                *buffer            = hash_data_find(request, HK(size));
+	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.transfered, sizeof(fargs.transfered) };
+	if(buffer)
+		data_query(buffer, &r_write);
+	
+	return ret;
+} // }}}
+
+ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_from *fargs){ // {{{
+	format_t               format            = fargs->format;
+	
+	request_t  r_next[] = {
+		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(source),     *fargs->src                                           },
+		{ HK(format),      DATA_PTR_FORMATT( &format                          ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	data_t                *input;
+	format_t               format            = FORMAT(clean);
+	
+	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
+	
+	if( (input = hash_data_find(request, HK(source))) == NULL)
+		return -EINVAL;
+	
+	fastcall_convert_from    fargs             = { { 4, ACTION_CONVERT_FROM }, input, format };
+	return data_query(data, &fargs);
+} // }}}
 
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
@@ -483,9 +541,9 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_COPY] = 3,
 	[ACTION_ALLOC] = 3,
 	[ACTION_QUERY] = 3,
-	
 	[ACTION_CONVERT_TO] = 4,
 	[ACTION_CONVERT_FROM] = 4,
+	
 	[ACTION_COMPARE] = 3,
 	[ACTION_ADD] = 3,
 	[ACTION_SUB] = 3,
@@ -516,6 +574,8 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_ALLOC]        = (f_machine_from_fast)&action_alloc_from_fast,
 	[ACTION_LENGTH]       = (f_machine_from_fast)&action_length_from_fast,
 	[ACTION_QUERY]        = (f_machine_from_fast)&action_query_from_fast,
+	[ACTION_CONVERT_TO]   = (f_machine_from_fast)&action_convert_to_from_fast,
+	[ACTION_CONVERT_FROM] = (f_machine_from_fast)&action_convert_from_from_fast,
 };
 
 f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
@@ -539,5 +599,7 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_ALLOC]        = (f_data_from_hash)&action_alloc_from_hash,
 	[ACTION_LENGTH]       = (f_data_from_hash)&action_length_from_hash,
 	[ACTION_QUERY]        = (f_data_from_hash)&action_query_from_hash,
+	[ACTION_CONVERT_TO]   = (f_data_from_hash)&action_convert_to_from_hash,
+	[ACTION_CONVERT_FROM] = (f_data_from_hash)&action_convert_from_from_hash,
 };
 

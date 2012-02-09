@@ -4,7 +4,6 @@
 extern machine_t cache_proto;
 extern machine_t kill_proto;
 extern machine_t thread_proto;
-extern machine_t convert_proto;
 extern machine_t query_proto;
 extern machine_t regexp_proto;
 extern machine_t split_proto;
@@ -50,7 +49,6 @@ machine_t * machine_protos[] = {
    &cache_proto,
    &kill_proto,
    &thread_proto,
-   &convert_proto,
    &query_proto,
    &regexp_proto,
    &split_proto,

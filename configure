@@ -820,7 +820,6 @@ enable_raw_t
 enable_machinecache
 enable_machinekill
 enable_machinethread
-enable_machineconvert
 enable_machinequery
 enable_machineregexp
 enable_machinesplit
@@ -1582,8 +1581,6 @@ Optional Features:
   --disable-machine-kill  disable machine kill
   --disable-machine-thread
                           disable machine thread
-  --disable-machine-convert
-                          disable machine convert
   --disable-machine-query disable machine query
   --disable-machine-regexp
                           disable machine regexp
@@ -19463,43 +19460,6 @@ fi
 		MACHINE_MAKEFILE_daemon_thread=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED daemon/thread/libfrozen_machine_thread.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machineconvert was given.
-if test "${enable_machineconvert+set}" = set; then :
-  enableval=$enable_machineconvert;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machineconvert}" = "yes"; then
-			enable_machineconvert="no"
-		else
-			enable_machineconvert="yes"
-		fi
-	fi
-
-	if test "${enable_machineconvert}" = "yes"; then
-		MACHINE_DIR_convert="data/convert"
-		MACHINE_DEP_convert=""
-				MACHINE_SELECTED="$MACHINE_SELECTED convert"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_data_convert" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/convert/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/convert"
-
-		MACHINE_MAKEFILE_data_convert=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/convert/libfrozen_machine_convert.la"
 
 	fi
 

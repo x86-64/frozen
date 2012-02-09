@@ -33,7 +33,6 @@
 - data 'range_t'
 
 - deprecate data/transfer as useless
-- deprecate data/convert, write conversion funcs for convert_to and convert_from
 
 - pcre
 - libev
