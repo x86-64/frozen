@@ -11,6 +11,7 @@
 #define HASH_INITIAL_SIZE 8
 
 typedef struct hash_t_ctx {
+	hash_t                *hash;
 	uintmax_t              step;
 	uintmax_t              buffer_data_offset;
 	data_t                *sl_holder;
@@ -55,6 +56,9 @@ not_equal:
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	ssize_t                ret;
 	hash_portable_t        portable;
+	
+	if(hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
+		return ITER_CONTINUE;
 	
 	switch(ctx->step){
 		case 0:; // step one: count all elements
@@ -189,11 +193,11 @@ static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 } // }}}
 
 static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
-	hash_t_ctx             ctx               = {};
+	hash_t_ctx             ctx               = { .hash = src->ptr };
 	
 	switch(fargs->format){
 		case FORMAT(binary):
-			if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
+			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
 				return -EFAULT;
 			
 			ctx.buffer_data_offset += sizeof(hash_portable_t); // hash_end 
@@ -205,7 +209,7 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			ctx.sl_holder = &d_sl_holder;
 			ctx.sl_data   = &d_sl_data;
 			
-			if(hash_iter((hash_t *)src->ptr, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
+			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
 				return -EFAULT;
 			
 			hash_portable_t h_end   = { hash_ptr_end, TYPE_HASHT };
