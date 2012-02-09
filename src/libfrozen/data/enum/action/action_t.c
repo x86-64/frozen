@@ -33,6 +33,9 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 				}
 			}
 			return -EINVAL;
+		case FORMAT(binary):;
+			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(action_t) };
+			return data_query(fargs->src, &r_read2);
 		
 		default:
 			break;
@@ -69,6 +72,12 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 			transfered = r_write.buffer_size;
 			break;
 		
+		case FORMAT(binary):;
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &value, sizeof(value) };
+			ret        = data_query(fargs->dest, &r_write2);
+			transfered = r_write.buffer_size;
+			break;
+			
 		default:
 			return -ENOSYS;
 	}
