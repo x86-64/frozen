@@ -6,6 +6,25 @@ typedef ssize_t (*f_data_from_hash)     (data_t *, request_t *);
 extern f_machine_from_fast api_machine_from_fast [ACTION_INVALID];
 extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
 
+static ssize_t remove_symlinks(hash_t *hash_item, hash_t **new_hash){ // {{{
+	hash_t                *new_hash_item;
+	
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( data_query(&hash_item->data, &r_getdata) < 0)
+		return ITER_BREAK;
+	
+	if( (new_hash_item = hash_new(3)) == NULL)
+		return ITER_BREAK;
+	
+	new_hash_item[0].key       = hash_item->key;
+	new_hash_item[0].data.type = r_getdata.data->type;
+	new_hash_item[0].data.ptr  = r_getdata.data->ptr;
+	hash_assign_hash_inline(&new_hash_item[1], *new_hash);
+	
+	*new_hash = new_hash_item;
+	return ITER_CONTINUE;
+} // }}}
+
 ssize_t     action_create_from_fast(machine_t *machine, fastcall_create *fargs){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
@@ -386,6 +405,37 @@ ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
 	return ret;
 } // }}}
 
+ssize_t     action_query_from_fast(machine_t *machine, fastcall_query *fargs){ // {{{
+	request_t  r_next[] = {
+		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
+		{ HK(request),    DATA_PTR_HASHT( fargs->request                     ) },
+		hash_end
+	};
+	return machine_query(machine, r_next);
+} // }}}
+ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	request_t             *q_request;
+	request_t             *q_request_clean   = NULL;
+	
+	hash_data_get(ret, TYPE_HASHT, q_request, request, HK(request));
+	if(ret != 0)
+		return -EINVAL;
+	
+	if(hash_iter(q_request, (hash_iterator)&remove_symlinks, &q_request_clean, 0) != ITER_OK){
+		hash_t *t, *n;
+		for(t = q_request_clean; t; t = n){
+			n = t[1].data.ptr; // inline hash
+			
+			free(t);
+		}
+		return -EFAULT;
+	}
+	
+	fastcall_query         fargs             = { { 3, ACTION_QUERY }, q_request_clean };
+	return data_query(data, &fargs);
+} // }}}
+
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	action_t               action;
@@ -432,6 +482,7 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_EXECUTE] = 2,
 	[ACTION_COPY] = 3,
 	[ACTION_ALLOC] = 3,
+	[ACTION_QUERY] = 3,
 	
 	[ACTION_CONVERT_TO] = 4,
 	[ACTION_CONVERT_FROM] = 4,
@@ -442,7 +493,6 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_DIVIDE] = 3,
 	[ACTION_GETDATAPTR] = 3,
 	[ACTION_IS_NULL] = 3,
-	[ACTION_QUERY] = 3,
 };
 
 f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
@@ -465,6 +515,7 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_COPY]         = (f_machine_from_fast)&action_copy_from_fast,
 	[ACTION_ALLOC]        = (f_machine_from_fast)&action_alloc_from_fast,
 	[ACTION_LENGTH]       = (f_machine_from_fast)&action_length_from_fast,
+	[ACTION_QUERY]        = (f_machine_from_fast)&action_query_from_fast,
 };
 
 f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
@@ -487,5 +538,6 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_COPY]         = (f_data_from_hash)&action_copy_from_hash,
 	[ACTION_ALLOC]        = (f_data_from_hash)&action_alloc_from_hash,
 	[ACTION_LENGTH]       = (f_data_from_hash)&action_length_from_hash,
+	[ACTION_QUERY]        = (f_data_from_hash)&action_query_from_hash,
 };
 
