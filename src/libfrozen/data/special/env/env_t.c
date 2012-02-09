@@ -6,6 +6,22 @@
 
 #include <env_t.h>
 
+static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
+	data_t                *real_data;
+	request_t             *curr_request;
+	env_t                 *fdata             = (env_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if( (curr_request = request_get_current()) == NULL)
+		return -EINVAL;
+	
+	if( (real_data = hash_data_find(curr_request, fdata->key)) == NULL)
+		return -EINVAL;
+	
+	return data_query(real_data, hargs);
+} // }}}
 static ssize_t data_env_t_alloc(data_t *data, fastcall_alloc *hargs){ // {{{
 	if( (data->ptr = malloc(sizeof(env_t))) == NULL)
 		return -ENOMEM;
@@ -39,13 +55,15 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	ssize_t                ret;
 	env_t                 *fdata;
 	
+	if(dst->ptr != NULL)
+		return data_env_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
+	
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
-	if(dst->ptr == NULL){
-		if( (ret = data_env_t_alloc(dst, NULL)) != 0)
-			return ret;
-	}
+	if( (ret = data_env_t_alloc(dst, NULL)) != 0)
+		return ret;
+	
 	fdata = (env_t *)dst->ptr;
 	
 	switch(fargs->format){
@@ -75,22 +93,6 @@ static ssize_t data_env_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
 		return -EINVAL;
 	
 	return 0;
-} // }}}
-static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
-	data_t                *real_data;
-	request_t             *curr_request;
-	env_t                 *fdata             = (env_t *)data->ptr;
-	
-	if(fdata == NULL)
-		return -EINVAL;
-	
-	if( (curr_request = request_get_current()) == NULL)
-		return -EINVAL;
-	
-	if( (real_data = hash_data_find(curr_request, fdata->key)) == NULL)
-		return -EINVAL;
-	
-	return data_query(real_data, hargs);
 } // }}}
 
 data_proto_t env_t_proto = {
