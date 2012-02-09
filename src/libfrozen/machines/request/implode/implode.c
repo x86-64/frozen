@@ -37,7 +37,7 @@
  *
  * This machine unpack new request from current request. Useful for ipc. See @ref mod_machine_implode for packing.
  *
- * Unpacking process use data _CONVERT_FROM functions. All data types used in request have to support it.
+ * It do nothing with incoming buffer. Buffer is expected to be hash_t type already.
  */
 /**
  * @ingroup mod_machine_explode
@@ -90,27 +90,16 @@ static ssize_t implode_request(machine_t *machine, request_t *request){ // {{{
 	return machine_pass(machine, r_next);
 } // }}}
 static ssize_t explode_request(machine_t *machine, request_t *request){ // {{{
-	ssize_t                ret;
-	data_t                *buffer;
-	data_t                 r_hash            = DATA_PTR_HASHT(NULL);
+	data_t                *ex_request;
 	plode_userdata        *userdata          = (plode_userdata *)machine->userdata;
 	
-	if( (buffer = hash_data_find(request, userdata->buffer)) == NULL)
+	if( (ex_request = hash_data_find(request, userdata->buffer)) == NULL)
 		return -EINVAL;
 	
-	fastcall_convert_from  r_convert_from = { { 4, ACTION_CONVERT_FROM }, buffer, FORMAT(binary) };
-	if( (ret = data_query(&r_hash, &r_convert_from)) < 0)
-		return -EFAULT;
+	if(ex_request->type != TYPE_HASHT)
+		return -EINVAL;
 	
-	if(r_hash.ptr == NULL)
-		return -EFAULT;
-	
-	ret = machine_pass(machine, r_hash.ptr);
-	
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&r_hash, &r_free);
-	
-	return ret;
+	return machine_pass(machine, (request_t *)ex_request->ptr);
 } // }}}
 
 machine_t implode_proto = {
