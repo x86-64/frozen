@@ -240,8 +240,17 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	data_t                 sl_src            = DATA_SLIDERT(fargs->src, 0);
 	list                   freeit            = LIST_INITIALIZER;
 	
-	if(fargs->format != FORMAT(binary))
-		return -ENOSYS;
+	switch(fargs->format){
+		case FORMAT(binary): break;
+		case FORMAT(clean):
+		case FORMAT(human):
+		case FORMAT(config):
+		case FORMAT(hash):
+			dst->ptr = NULL;
+			return 0;
+		default:
+			return -ENOSYS;
+	}
 	
 	hash_nelements = HASH_INITIAL_SIZE;
 	hash           = hash_new(hash_nelements);
