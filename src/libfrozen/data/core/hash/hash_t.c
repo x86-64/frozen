@@ -53,6 +53,7 @@ not_equal:
 	return ITER_BREAK;
 } // }}}
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
+	ssize_t                ret;
 	hash_portable_t        portable;
 	
 	switch(ctx->step){
@@ -72,11 +73,10 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			data_slider_t_freeze(ctx->sl_data);
 				
 				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
-				if(data_query(&hash_item->data, &r_convert) < 0)
-					return ITER_BREAK;
+				ret = data_query(&hash_item->data, &r_convert);
 			
 			data_slider_t_unfreeze(ctx->sl_data);
-			break;
+			return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
 	};
 	return ITER_CONTINUE;
 } // }}}
@@ -268,6 +268,9 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		curr->key       = portable.key;
 		curr->data.type = portable.datatype;
 		
+		if(curr->key == hash_ptr_end)
+			break;
+		
 		// redata data holders if any
 		if(dst->ptr != NULL){
 			if( (old_data = hash_data_find((hash_t *)dst->ptr, curr->key)) != NULL){
@@ -293,9 +296,6 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			hash = new_hash;
 			curr = new_hash + (curr - hash);
 		}
-
-		if(curr->key == hash_ptr_end)
-			break;
 	}
 	
 	// redata data
