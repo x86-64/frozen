@@ -5,6 +5,23 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 
+static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
+	if( (fdata->flags & RAW_RESIZEABLE) == 0)
+		return -EINVAL;
+	
+	if(new_size != 0){
+		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
+			fdata->size = 0;
+			return -ENOMEM;
+		}
+	}else{
+		if(fdata->ptr)
+			free(fdata->ptr);
+		fdata->ptr = NULL;
+	}
+	fdata->size = new_size;
+	return 0;
+} // }}}
 static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 	raw_t                 *raw_data;
 	
@@ -43,8 +60,10 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 		return 0;
 	}
 	
-	if(raw_data->size < new_size) // too less space?
-		return -ENOSPC;
+	if(raw_data->size < new_size){ // too less space?
+		if(raw_resize(raw_data, new_size) < 0)
+			return -ENOSPC;
+	}
 	
 	return 0;
 } // }}}
@@ -72,23 +91,7 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t le
 	}
 	return ret;
 } // }}}
-static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
-	if( (fdata->flags & RAW_RESIZEABLE) == 0)
-		return -EINVAL;
-	
-	if(new_size != 0){
-		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
-			fdata->size = 0;
-			return -ENOMEM;
-		}
-	}else{
-		if(fdata->ptr)
-			free(fdata->ptr);
-		fdata->ptr = NULL;
-	}
-	fdata->size = new_size;
-	return 0;
-} // }}}
+
 static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
 	switch(fargs->format){
