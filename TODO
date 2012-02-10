@@ -7,6 +7,10 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
+- mongrel_reply pack config parameter
+- mustache {{name:format}} support
+- zmq req\rep helper machine
+- zmq patterns
 - machine thread_pool
 - machine queue
 - data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
