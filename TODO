@@ -7,7 +7,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- mustache {{name:format}} support
 - zmq req\rep helper machine
 - zmq patterns
 - machine thread_pool
