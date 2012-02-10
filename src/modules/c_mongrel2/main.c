@@ -26,9 +26,10 @@
  * @code
  * {
  *              class                   = "modules/c_mongrel2_reply",
- *              buffer                  = (hashkey_t)'buffer',                 # output buffer hashkey name, default "buffer"
- *              body                    = (hashkey_t)'body',                   # input http request body hashkey name, default "body"
- *              close                   = (uint_t)'0'                          # close connection after reply, default 1
+ *              buffer                  = (hashkey_t)'buffer',                 // output buffer hashkey name, default "buffer"
+ *              body                    = (hashkey_t)'body',                   // input http request body hashkey name, default "body"
+ *              close                   = (uint_t)'0',                         // close connection after reply, default 1
+ *              lazy                    = (uint_t)'1'                          // lazy packing (pass structure instead of ready-to-use buffer), default 0
  * }
  * @endcode
  */
@@ -40,28 +41,28 @@
  * @code
  * {
  *              action                  = (action_t)"write",
- *              uuid                    = (raw_t)"<server uuid>",              # server uuid, use it for reply
- *              clientid                = (raw_t)"<clientid>",                 # mongrel client connection id
- *              path                    = (raw_t)"/",                          # request url
- *              headers                 = (raw_t)"{<json headers>}",           # request headers in form of json string, not parsed
- *              body                    = (raw_t)"<body>"                      # request body
+ *              uuid                    = (raw_t)"<server uuid>",              // server uuid, use it for reply
+ *              clientid                = (raw_t)"<clientid>",                 // mongrel client connection id
+ *              path                    = (raw_t)"/",                          // request url
+ *              headers                 = (raw_t)"{<json headers>}",           // request headers in form of json string, not parsed
+ *              body                    = (raw_t)"<body>"                      // request body
  * }
  * @endcode
  *
  * c_mongrel2_reply expect following minimum request for input:
  * @code
  * {
- *              uuid                    = (raw_t)"<server uuid>",              # server uuid to reply for
- *              clinetid                = (raw_t)"<clientid>",                 # mongrel client connection id, or list of id's
- *             [config->body]           =                                      # reply for client
- *                                        (raw_t)"<body>"                      # - full request body, including "HTTP/1.1 ..."
- *                                        (void_t)""                           # - ask mongrel to close connection
+ *              uuid                    = (raw_t)"<server uuid>",              // server uuid to reply for
+ *              clinetid                = (raw_t)"<clientid>",                 // mongrel client connection id, or list of id's
+ *             [config->body]           =                                      // reply for client
+ *                                        (raw_t)"<body>"                      // - full request body, including "HTTP/1.1 ..."
+ *                                        (void_t)""                           // - ask mongrel to close connection
  * } 
  * @endcode
  * c_mongrel2_reply emit following request:
  * @code
  * {
- *             [config->buffer]         = (struct_t)"",                        # constructed reply
+ *             [config->buffer]         = (struct_t)"",                        // constructed reply
  *             ...
  * }
  * @endcode
@@ -73,6 +74,7 @@ typedef struct mongrel2_userdata {
 	hashkey_t              buffer;
 	hashkey_t              body;
 	uintmax_t              close_conn;
+	uintmax_t              lazy;
 } mongrel2_userdata;
 
 static int mongrel2_init(machine_t *machine){ // {{{
@@ -99,10 +101,11 @@ static int mongrel2_configure(machine_t *machine, config_t *config){ // {{{
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,     config, HK(buffer));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->body,       config, HK(body));
 	hash_data_get(ret, TYPE_UINTT,    userdata->close_conn, config, HK(close));
+	hash_data_get(ret, TYPE_UINTT,    userdata->lazy,       config, HK(lazy));
 	return 0;
 } // }}}
 
-static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ // {{{
+static ssize_t send_reply(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
@@ -132,12 +135,44 @@ static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ /
 		hash_end
 	};
 	
-	request_t r_reply[] = {
-		{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
-		hash_inline(request),
-		hash_end
-	};
-	if( (ret = machine_pass(machine, r_reply)) < 0 )
+	if(userdata->lazy != 0){
+		request_t r_reply[] = {
+			{ userdata->buffer, DATA_STRUCTT(reply_struct, request) },
+			hash_inline(request),
+			hash_end
+		};
+		if( (ret = machine_pass(machine, r_reply)) < 0 )
+			return ret;
+	}else{
+		data_t                 d_struct          = DATA_STRUCTT(reply_struct, request);
+		data_t                 d_raw             = { TYPE_RAWT, NULL };
+		
+		fastcall_convert_to r_convert = {
+			{ 4, ACTION_CONVERT_TO },
+			&d_raw,
+			FORMAT(clean)
+		};
+		if( (ret = data_query(&d_struct, &r_convert)) < 0)
+			return ret;
+		
+		request_t r_reply[] = {
+			{ userdata->buffer, d_raw },
+			hash_inline(request),
+			hash_end
+		};
+		ret = machine_pass(machine, r_reply);
+		
+		fastcall_free r_free = { { 2, ACTION_FREE } };
+		data_query(&r_reply[0].data, &r_free);           // buffer can be consumed
+	}
+	return ret;
+} // }}}
+
+static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
+	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
+	
+	if( (ret = send_reply(machine, request)) < 0)
 		return ret;
 	
 	if(userdata->close_conn == 1){
@@ -146,13 +181,7 @@ static ssize_t mongrel2_reply_handler(machine_t *machine, request_t *request){ /
 			hash_inline(request),
 			hash_end
 		};
-		
-		request_t r_close[] = {
-			{ userdata->buffer, DATA_STRUCTT(reply_struct, r_voidbody) },
-			hash_inline(r_voidbody),
-			hash_end
-		};
-		if( (ret = machine_pass(machine, r_close)) < 0 )
+		if( (ret = send_reply(machine, r_voidbody)) < 0)
 			return ret;
 	}
 	return 0;
