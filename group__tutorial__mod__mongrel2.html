@@ -54,8 +54,13 @@ Overview</h2>
 <p>With frozen you can easily create custom handlers for mongrel2. To make one we need <a class="el" href="group__zeromq__t.html">zeromq_t</a> and <a class="el" href="group__mod__machine__mongrel2.html">module/c_mongrel2</a>. Mongrel create two ZeroMQ sockets, one for pushing client's request to handler and one for getting reply from handler. So, we too need create two sockets. Request will flow from one socket, pass through set of machines and end up in second socket.</p>
 <h2><a class="anchor" id="tutorial_mod_example"></a>
 Example configuration</h2>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
-{ <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;daemon/thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
+{ <span class="keyword">class </span>= &quot;data/query&quot;,
+        data = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                type     = <span class="stringliteral">&quot;pull&quot;</span>,
+                identity = <span class="stringliteral">&quot;82209006-86FF-4982-B5EA-D1E29E55D481&quot;</span>,
+                connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9999&quot;</span>
+        },
         request = {
                 action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
@@ -75,9 +80,6 @@ Example configuration</h2>
                         }},
                         
                         { <span class="keyword">class </span>= &quot;modules/c_mongrel2_reply&quot; },                         <span class="comment">// pack our reply according mongrel2 protocol</span>
-                        { <span class="keyword">class </span>= &quot;convert&quot;, items = {                                  <span class="comment">// convert buffer to raw_t, because zeromq data do not work with structures</span>
-                                buffer = { type = (datatype_t)<span class="stringliteral">&quot;raw_t&quot;</span> }
-                        }},
                         
                         { <span class="keyword">class </span>= &quot;data/query&quot;,
                                 data = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
@@ -87,17 +89,8 @@ Example configuration</h2>
                         },
                         { <span class="keyword">class </span>= &quot;end&quot; }
                 }
-        },
-        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                { <span class="keyword">class </span>= &quot;data/query&quot;,
-                        data = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
-                                type     = <span class="stringliteral">&quot;pull&quot;</span>,
-                                identity = <span class="stringliteral">&quot;82209006-86FF-4982-B5EA-D1E29E55D481&quot;</span>,
-                                connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9999&quot;</span>
-                        }
-                }
         }
-}},
+},
 { <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>Here we have single-threaded handler which only send simple "hello!" string back to client.</p>
 <h2><a class="anchor" id="tutorial_mod_bench_data"></a>
@@ -280,7 +273,7 @@ Benchmarking results</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 2 2012 16:35:47 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 10 2012 21:54:36 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

@@ -86,7 +86,9 @@ Modules</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__counter__t.html">counter_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__emitter__t.html">emitter_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__env__t.html">env_t</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__length__t.html">length_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__random__t.html">random_t</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__unique__t.html">unique_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__container__t.html">container_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__file__t.html">file_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__folder__t.html">folder_t</a></td></tr>
@@ -105,7 +107,7 @@ Modules</h2></td></tr>
 </div>
 
 <h3><a class="anchor" id="data_default"></a>Default data type (default_t)</h3><div class="textblock"><p>This data type is special. Then you create new data type it can inherit some common functions. For example, data type TYPE_RAWT internally consist of simple structure with pointer to actual data. There is no reasons to copy-and-paste such code as _READ, _WRITE routines. Also, this problem can be solved with complex inheritance support, which in turn rise complexity of whole program and can introduce more problems in future than help. So, default_t was introduced. It consist of safe functions to work with memory chunks.</p>
-<p>To use this data type in your data handlers, you need to supply several helper routines. This includes ACTION_PHYSICALLEN, ACTION_LOGICALLEN and ACTION_GETDATAPTR. They describe properties of memory chunk you want to process. Default_t itself know nothing about data it process. You also can't create clean default_t data, routines will return errors. </p>
+<p>To use this data type in your data handlers, you need to supply several helper routines. This includes ACTION_LENGTH, and ACTION_GETDATAPTR. They describe properties of memory chunk you want to process. Default_t itself know nothing about data it process. You also can't create clean default_t data, routines will return errors. </p>
 </div>
 
 <h3><a class="anchor" id="data_memorymanagment"></a>Memory managment</h3><div class="textblock"><p>Almost every data can exist in three variations: within data section, within stack and within heap. Data api itself should not resist any of this representation. However, it is worth to mention, than some of data actions can produce only allocated data. This includes: ACTION_COPY, ACTION_ALLOC, ACTION_CONVERT_FROM and can be more. After calling this actions user is responsible to free allocated data.</p>
@@ -125,7 +127,7 @@ Modules</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 10 2012 21:54:35 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

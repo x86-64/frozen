@@ -153,21 +153,20 @@
 <a name="l00235"></a>00235 <span class="preprocessor">}</span>
 <a name="l00236"></a>00236 <span class="preprocessor"></span><span class="preprocessor">#define hash_assign_hash_null(_dst) {  \</span>
 <a name="l00237"></a>00237 <span class="preprocessor">        (_dst)-&gt;key = hash_ptr_null;   \</span>
-<a name="l00238"></a>00238 <span class="preprocessor">        (_dst)-&gt;data.type = TYPE_VOIDT;\</span>
-<a name="l00239"></a>00239 <span class="preprocessor">        (_dst)-&gt;data.ptr = NULL;       \</span>
-<a name="l00240"></a>00240 <span class="preprocessor">}</span>
-<a name="l00241"></a>00241 <span class="preprocessor"></span><span class="preprocessor">#define hash_assign_hash_end(_dst) {  \</span>
-<a name="l00242"></a>00242 <span class="preprocessor">        (_dst)-&gt;key = hash_ptr_end;   \</span>
-<a name="l00243"></a>00243 <span class="preprocessor">        (_dst)-&gt;data.ptr = NULL;      \</span>
-<a name="l00244"></a>00244 <span class="preprocessor">}</span>
-<a name="l00245"></a>00245 <span class="preprocessor"></span>
-<a name="l00246"></a>00246 <span class="preprocessor">#endif</span>
+<a name="l00238"></a>00238 <span class="preprocessor">        data_set_void(&amp;((_dst)-&gt;data));\</span>
+<a name="l00239"></a>00239 <span class="preprocessor">}</span>
+<a name="l00240"></a>00240 <span class="preprocessor"></span><span class="preprocessor">#define hash_assign_hash_end(_dst) {  \</span>
+<a name="l00241"></a>00241 <span class="preprocessor">        (_dst)-&gt;key = hash_ptr_end;   \</span>
+<a name="l00242"></a>00242 <span class="preprocessor">        (_dst)-&gt;data.ptr = NULL;      \</span>
+<a name="l00243"></a>00243 <span class="preprocessor">}</span>
+<a name="l00244"></a>00244 <span class="preprocessor"></span>
+<a name="l00245"></a>00245 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 10 2012 21:54:35 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

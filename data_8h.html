@@ -76,6 +76,7 @@ Data Structures</h2></td></tr>
 Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab945901d008f6641e11b33e8d45723a5"></a><!-- doxytag: member="data.h::DEF_BUFFER_SIZE" ref="ab945901d008f6641e11b33e8d45723a5" args="" -->
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DEF_BUFFER_SIZE</b>&#160;&#160;&#160;1024</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a3b081bded509dd69a544b7a4e8aaab94">data_set_void</a>(_src)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a37c1b4e629c69b58746ca9e2f7b10935">data_get</a>(_ret, _type, _dt, _src)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a418ba9c2e3050d3403c1f40272a83d47">data_consume</a>(_ret, _type, _dt, _src)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a3e4322607c859246bdfc7f656822e160">holder_consume</a>(_ret, _dt, _src)</td></tr>
@@ -148,8 +149,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 <b>Value:</b><div class="fragment"><pre class="fragment">{                                     \
         data_get(_ret,_type,_dt,_src);                                         \
         if(_ret == 0){                                                         \
-                _src-&gt;type = TYPE_VOIDT;                                       \
-                _src-&gt;ptr  = NULL;                                             \
+                data_set_void(_src);                                           \
         }                                                                      \
 }
 </pre></div><p>Consume value from holder to supplied buffer </p>
@@ -366,6 +366,34 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 </div>
 </div>
+<a class="anchor" id="a3b081bded509dd69a544b7a4e8aaab94"></a><!-- doxytag: member="data.h::data_set_void" ref="a3b081bded509dd69a544b7a4e8aaab94" args="(_src)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define data_set_void</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">_src</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment">{       \
+        (_src)-&gt;type = TYPE_VOIDT; \
+        (_src)-&gt;ptr  = NULL;       \
+}
+</pre></div><p>Void data. Can be used after free or data consuming. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_src</td><td>Data to be void </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a3e4322607c859246bdfc7f656822e160"></a><!-- doxytag: member="data.h::holder_consume" ref="a3e4322607c859246bdfc7f656822e160" args="(_ret, _dt, _src)" -->
 <div class="memitem">
 <div class="memproto">
@@ -399,8 +427,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 <b>Value:</b><div class="fragment"><pre class="fragment">{                                         \
         if( (_src) != NULL){                                                   \
                 _dt = *(_src);                                                 \
-                (_src)-&gt;type = TYPE_VOIDT;                                     \
-                (_src)-&gt;ptr  = NULL;                                           \
+                data_set_void(_src);                                           \
                 _ret = 0;                                                      \
         }<span class="keywordflow">else</span>{                                                                 \
                 _ret = -EINVAL;                                                \
@@ -505,7 +532,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 2 2012 16:35:46 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 10 2012 21:54:35 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
