@@ -24,7 +24,10 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 	
 	hash_data_get(ret, TYPE_FORMATT, format, element_params, HK(format));
 	
-	if( (value = hash_data_find(iter_ctx->values, element->key)) == NULL){      // find value for current key
+	if(
+		element->key == 0 ||                                                // non anonymous key
+		(value = hash_data_find(iter_ctx->values, element->key)) == NULL    // find value for current key
+	){
 		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // get default value
 			return ITER_BREAK;
 	}
