@@ -34,6 +34,7 @@
 typedef struct try_userdata {
 	data_t                 machine;
 	hashkey_t              return_to;
+	machine_t             *try_end;
 	
 	thread_data_ctx_t      thread_data;
 } try_userdata;
@@ -80,6 +81,14 @@ static int try_init(machine_t *machine){ // {{{
 		return error("calloc failed");
 	
 	userdata->return_to = HK(return_to);
+	
+	if((userdata->try_end = malloc(sizeof(machine_t))) == NULL){
+		free(userdata);
+		return error("malloc failed");
+	}
+	memcpy(userdata->try_end, &try_end_proto, sizeof(machine_t));
+	userdata->try_end->userdata = userdata;
+	
 	return thread_data_init(
 		&userdata->thread_data, 
 		(f_thread_create)&try_threaddata_create,
@@ -92,6 +101,8 @@ static int try_destroy(machine_t *machine){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
 	data_query(&userdata->machine, &r_free);
 	
+	thread_data_destroy(&userdata->thread_data);
+	free(userdata->try_end);
 	free(userdata);
 	return 0;
 } // }}}
@@ -116,7 +127,7 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	threaddata->real_ret = 0;
 	
 	request_t r_next[] = {
-		{ userdata->return_to, DATA_MACHINET(&try_end_proto) },
+		{ userdata->return_to, DATA_MACHINET(userdata->try_end) },
 		hash_inline(request),
 		hash_end
 	};
