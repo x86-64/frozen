@@ -8,7 +8,9 @@
  * @ingroup mod_machine_try
  * @page page_try_info Description
  *
- * This machine try pass current request to user-supplied machine. Even if error occured - it pass request with error number to next machine.
+ * This machine try pass current request to user-supplied shop. Request will reach next machine in two cases:
+ * @li User-supplied shop successfully process request and ends up with shop/return
+ * @li If error occured - shop/try pass current request with HK(ret) key with error number.
  */
 /**
  * @ingroup mod_machine_try
@@ -32,7 +34,44 @@
 typedef struct try_userdata {
 	data_t                 machine;
 	hashkey_t              return_to;
+	
+	thread_data_ctx_t      thread_data;
 } try_userdata;
+
+typedef struct try_threaddata {
+	machine_t             *parent;
+	ssize_t                real_ret;
+} try_threaddata;
+
+static ssize_t try_end_handler(machine_t *machine, request_t *request){ // {{{
+	try_userdata         *userdata          = (try_userdata *)machine->userdata;
+	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
+	
+	threaddata->real_ret = machine_pass(threaddata->parent, request);
+	return 0;
+} // }}}
+
+machine_t try_end_proto = {
+	.supported_api  = API_HASH,
+	.machine_type_hash = {
+		.func_handler = &try_end_handler
+	}
+};
+
+static void * try_threaddata_create(try_userdata *userdata){ // {{{
+	try_threaddata      *threaddata;
+	
+	if( (threaddata = malloc(sizeof(try_threaddata))) == NULL)
+		goto error1;
+	
+	return threaddata;
+
+error1:
+	return NULL;
+} // }}}
+static void   try_threaddata_destroy(try_threaddata *threaddata){ // {{{
+	free(threaddata);
+} // }}}
 
 static int try_init(machine_t *machine){ // {{{
 	try_userdata         *userdata;
@@ -41,7 +80,11 @@ static int try_init(machine_t *machine){ // {{{
 		return error("calloc failed");
 	
 	userdata->return_to = HK(return_to);
-	return 0;
+	return thread_data_init(
+		&userdata->thread_data, 
+		(f_thread_create)&try_threaddata_create,
+		(f_thread_destroy)&try_threaddata_destroy,
+		userdata);
 } // }}}
 static int try_destroy(machine_t *machine){ // {{{
 	try_userdata      *userdata = (try_userdata *)machine->userdata;
@@ -67,22 +110,27 @@ static int try_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t               ret;
 	try_userdata         *userdata          = (try_userdata *)machine->userdata;
+	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
+	
+	threaddata->parent   = machine;
+	threaddata->real_ret = 0;
 	
 	request_t r_next[] = {
-		{ userdata->return_to, DATA_NEXT_MACHINET(machine) },
+		{ userdata->return_to, DATA_MACHINET(&try_end_proto) },
 		hash_inline(request),
 		hash_end
 	};
 	
 	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-	ret = data_query(&userdata->machine, &r_query);
-	
-	request_t r_pass[] = {
-		{ HK(ret), DATA_PTR_SIZET(&ret) },
-		hash_inline(request),
-		hash_end
-	};
-	return machine_pass(machine, r_pass);
+	if( (ret = data_query(&userdata->machine, &r_query)) < 0){
+		request_t r_pass[] = {
+			{ HK(ret), DATA_PTR_SIZET(&ret) },
+			hash_inline(request),
+			hash_end
+		};
+		return machine_pass(machine, r_pass);
+	}
+	return threaddata->real_ret;
 } // }}}
 
 machine_t try_proto = {
