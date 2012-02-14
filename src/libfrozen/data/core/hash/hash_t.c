@@ -59,7 +59,10 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	
 	if(hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
 		return ITER_CONTINUE;
-	
+
+	if(hash_item->key == 0) // skip deleted keys
+		return ITER_CONTINUE;
+
 	switch(ctx->step){
 		case 0:; // step one: count all elements
 			ctx->buffer_data_offset += sizeof(hash_portable_t);
