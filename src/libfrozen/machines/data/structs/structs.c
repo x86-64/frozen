@@ -101,7 +101,7 @@ static ssize_t struct_machine_pack(machine_t *machine, request_t *request){
 		case STRUCT_VALUES_ONE:
 			hash_data_get(ret, TYPE_HASHT, values, request, userdata->key_values);
 			if(ret != 0)
-				return warning("hash with keys not supplied");
+				return error("hash with keys not supplied");
 			break;
 	};
 	
@@ -142,7 +142,7 @@ static ssize_t struct_machine_unpack(machine_t *machine, request_t *request){
 			case STRUCT_VALUES_ONE:
 				hash_data_get(ret, TYPE_HASHT, values, request, userdata->key_values);
 				if(ret != 0)
-					return warning("hash with keys not supplied");
+					return error("hash with keys not supplied");
 				break;
 		};
 		

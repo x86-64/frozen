@@ -23,6 +23,7 @@ AC_DEFUN([FROZEN_MODULE],[
 		AC_SUBST([MODULE_DIST_DIRS])
 		MODULE_MAKEFILE_$1=yes
 	fi
+	esyscmd(./build/build_errors.pl src/modules/$1/)
 ])
 
 AC_DEFUN([FROZEN_MODULE_END],[

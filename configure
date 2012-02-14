@@ -17610,6 +17610,7 @@ fi
 
 
 
+
 	# Check whether --enable-modulec_null was given.
 if test "${enable_modulec_null+set}" = set; then :
   enableval=$enable_modulec_null;
@@ -17636,6 +17637,7 @@ fi
 
 		MODULE_MAKEFILE_c_null=yes
 	fi
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for zmq_init in -lzmq" >&5
@@ -17713,6 +17715,7 @@ fi
 	fi
 
 
+
 fi
 
 
@@ -17749,6 +17752,7 @@ fi
 
 
 
+
 	# Check whether --enable-moduledata_null_t was given.
 if test "${enable_moduledata_null_t+set}" = set; then :
   enableval=$enable_moduledata_null_t;
@@ -17780,6 +17784,7 @@ fi
 
 
 
+
 	# Check whether --enable-moduledata_time_t was given.
 if test "${enable_moduledata_time_t+set}" = set; then :
   enableval=$enable_moduledata_time_t;
@@ -17806,6 +17811,7 @@ fi
 
 		MODULE_MAKEFILE_data_time_t=yes
 	fi
+
 
 
 

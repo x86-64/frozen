@@ -1,8 +1,4 @@
 
-typedef struct err_item {
-        intmax_t    errnum;
-        const char *errmsg;
-} err_item;
 static err_item errs_list[] = {
  { -225396, "src/libfrozen/machines/shop/try/try.c: shop parameter not supplied" },
  { -225367, "src/libfrozen/machines/shop/try/try.c: malloc failed" },

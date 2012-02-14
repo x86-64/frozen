@@ -1,6 +1,6 @@
 #include <libfrozen.h>
 
-#define EMODULE 100       // emodule for errors, pick up non-used number
+#include <errors_list.c>
 
 typedef struct null_userdata {       // machine userdata structure
 	uintmax_t              testparam;
@@ -48,6 +48,7 @@ static machine_t c_null_proto = {
 };
 
 int main(void){
+	errors_register((err_item *)errs_list, &emodule);
 	class_register(&c_null_proto);
 	return 0;
 }

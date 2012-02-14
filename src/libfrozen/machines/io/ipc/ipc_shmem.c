@@ -152,7 +152,7 @@ void *  ipc_shmem_listen  (void *ipc){ // {{{
 		) < 0)
 			break;
 	}
-	error("ipc_shmem_listen dead\n");
+	//error("ipc_shmem_listen dead\n");
 	return NULL;
 } // }}}
 ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
@@ -170,8 +170,8 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	userdata->buffer        = HK(buffer);
 	userdata->return_result = 1;
 	
-	hash_data_get(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return warning("no key supplied");
-	hash_data_get(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return warning("no role supplied");
+	hash_data_get(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return error("no key supplied");
+	hash_data_get(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return error("no role supplied");
 	hash_data_get(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
 	hash_data_get(ret, TYPE_SIZET,   nitems,     config, HK(size));
 	hash_data_get(ret, TYPE_UINTT,   f_async,    config, HK(force_async));

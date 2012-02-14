@@ -4,16 +4,8 @@ use File::Find;
 
 my ($ebase, $estep, @allerrs);
 
-my $errors_h="src/libfrozen/core/errors.h";
-my $main_dir="src/libfrozen/";
-my $errors_list_c="src/libfrozen/core/errors_list.c";
-
-open FH, "<$errors_h";
-while(my $line = <FH>){
-        $ebase = int($1) if $line =~ /#\s*define\s+EBASE\s+(\d+)/;
-        $estep = int($1) if $line =~ /#\s*define\s+ESTEP\s+(\d+)/;
-}
-close FH;
+my $main_dir=@ARGV[0];
+my $errors_list_c=@ARGV[0]."/errors_list.c";
 
 my @files_list;
 find(
@@ -29,12 +21,12 @@ foreach my $file (@files_list){
         
         open FH, "<$file";
         while(my $line = <FH>){
-                $emod = $1 if $line =~ /#\s*define\s+EMODULE\s*(\d+)/;
+                $emod = 0; #$1 if $line =~ /#\s*define\s+EMODULE\s*(\d+)/;
                 
                 if($line =~ /(?:debug|notice|warning|error)\s*\("([^"]+)"\)/){
                         $errmsg = $1;
                         $errmsg =~ s/\\n//g;
-			$errnum = -($ebase + $estep * $emod + $linen);
+			$errnum = -($linen);
                         
                         push @allerrs, { errnum => $errnum, errmsg => $errmsg, errfile => $file };
                         $ecount++;
@@ -56,8 +48,7 @@ foreach my $e (@allerrs){
 }
 
 print FH q!
+	{ 0, NULL }
 };
-#define            errs_list_size      sizeof(errs_list[0])
-#define            errs_list_nelements sizeof(errs_list) / errs_list_size
 !;
 

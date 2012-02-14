@@ -2,7 +2,8 @@
 #include <zmq.h>
 #include <zeromq_t.h>
 
-#define EMODULE 101
+#include <errors_list.c>
+
 #define ZMQ_NTHREADS        1
 
 typedef struct zeromq_t {
@@ -227,6 +228,7 @@ data_proto_t zmq_proto = {
 };
 
 int main(void){
+	errors_register((err_item *)&errs_list, &emodule);
 	data_register(&zmq_proto);
 	return 0;
 }

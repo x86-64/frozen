@@ -1,5 +1,7 @@
 #include <libfrozen.h>
 
+#include <errors_list.c>
+
 /**
  * @ingroup machine
  * @addtogroup mod_machine_mongrel2 module/c_mongrel2
@@ -67,8 +69,6 @@
  * }
  * @endcode
  */
-
-#define EMODULE 102
 
 typedef struct mongrel2_userdata {
 	hashkey_t              buffer;
@@ -252,6 +252,7 @@ static machine_t mongrel2_parse_proto = {
 };
 
 int main(void){
+	errors_register((err_item *)&errs_list, &emodule);
 	class_register(&mongrel2_reply_proto);
 	class_register(&mongrel2_parse_proto);
 	return 0;

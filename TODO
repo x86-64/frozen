@@ -12,7 +12,6 @@
 - machine thread_pool
 - machine queue
 - data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
-- modules error codes table registration
 - wrap -E* errors in error func, to mark source of error
 - error backtrace
 - cache_t for file_t

@@ -77,12 +77,12 @@ void *alloca (size_t);
 #define __MAX(type) ((type)~__MIN(type))
 
 /* Own headers */
+#include <list.h>
 #include <errors.h>
 #include <public.h>
 
 #include <configs/config.h>
 #include <enums.h>
-#include <list.h>
 
 #include <api.h>
 #include <data.h>
