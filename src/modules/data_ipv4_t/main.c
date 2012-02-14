@@ -119,6 +119,30 @@ static ssize_t data_ipv4_t_len(data_t *data, fastcall_length *fargs){ // {{{
 static ssize_t data_ipv4_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = malloc(sizeof(ipv4_t))) == NULL)
 		return -ENOMEM;
+	
+	memset(data->ptr, 0, sizeof(ipv4_t));
+	return 0;
+} // }}}
+static ssize_t data_ipv4_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
+	ipv4_t                *new_fdata;
+	ipv4_t                *fdata             = (ipv4_t *)data->ptr;
+	
+	if( (new_fdata = malloc(sizeof(ipv4_t))) == NULL)
+		return -ENOMEM;
+	
+	if(fdata != NULL){
+		memcpy(new_fdata, fdata, sizeof(ipv4_t));
+	}else{
+		memset(new_fdata, 0, sizeof(ipv4_t));
+	}
+	fargs->dest->type = data->type;
+	fargs->dest->ptr  = new_fdata;
+	return 0;
+} // }}}
+static ssize_t data_ipv4_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	ipv4_t                *fdata             = (ipv4_t *)data->ptr;
+	
+	free(fdata);
 	return 0;
 } // }}}
 static ssize_t data_ipv4_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
@@ -234,6 +258,8 @@ data_proto_t ipv4_proto = {
 	.api_type               = API_HANDLERS,
 	.handlers               = {
 		[ACTION_ALLOC]          = (f_data_func)&data_ipv4_t_alloc,
+		[ACTION_COPY]           = (f_data_func)&data_ipv4_t_copy,
+		[ACTION_FREE]           = (f_data_func)&data_ipv4_t_free,
 		[ACTION_LENGTH]         = (f_data_func)&data_ipv4_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_ipv4_t_compare,
 		[ACTION_INCREMENT]      = (f_data_func)&data_ipv4_t_arith_no_arg,
