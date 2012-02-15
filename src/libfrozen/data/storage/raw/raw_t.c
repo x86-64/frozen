@@ -120,6 +120,7 @@ static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
 		return -EINVAL;
 	
 	fargs->dest->type = TYPE_RAWT;
+	fargs->dest->ptr  = NULL;
 	
 	switch( (ret = raw_prepare(fargs->dest, src_data->size)) ){
 		case 0:       break;
