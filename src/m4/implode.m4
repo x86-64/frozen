@@ -17,7 +17,7 @@ define(`IMPLODE',
 		source      = (env_t)"$1",
 		format      = (format_t)"binary"
 	}},
-	{ class = "end" }
+	{ class = "shop/return" }
 }}')dnl
 define(`EXPLODE',
 `{ class = "assign", before = { request = (hash_t){} }, copy = (uint_t)"1" },
