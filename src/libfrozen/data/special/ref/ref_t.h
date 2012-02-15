@@ -14,11 +14,18 @@
  *
  *  Possible defines:
  *  @code
- *       data_t ref = DATA_REFT(data);
+ *       data_t  ref = DATA_REFT(data);
+ *
+ *       ref_t  *ref = ref_t_alloc(data);
+ *       data_t dref = DATA_PTR_REFT(ref);
+ *
+ *       ref_t_acquire(ref);
+ *       ref_t_destroy(ref);
  *  @endcode
  */
 
-#define DATA_REFT(_data)  { TYPE_REFT, ref_t_alloc(_data) }}
+#define DATA_REFT(_data)    { TYPE_REFT, ref_t_alloc(_data) }}
+#define DATA_PTR_REFT(_ref) { TYPE_REFT, _ref }
 #define DEREF_TYPE_REFT(_data) (ref_t *)((_data)->ptr)
 #define REF_TYPE_REFT(_dt) _dt
 #define HAVEBUFF_TYPE_REFT 0
