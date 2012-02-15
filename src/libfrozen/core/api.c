@@ -373,19 +373,18 @@ ssize_t     action_alloc_from_hash(data_t *data, request_t *request){ // {{{
 ssize_t     action_enum_from_fast(machine_t *machine, fastcall_enum *fargs){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		{ HK(shop),       DATA_MACHINET( fargs->shop                         ) },
-		hash_inline(fargs->context),
+		{ HK(data),      *fargs->dest                                          },
 		hash_end
 	};
 	return machine_query(machine, r_next);
 } // }}}
 ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
-	ssize_t                ret;
-	machine_t             *shop;
+	data_t                *dest_data;
 	
-	hash_data_get(ret, TYPE_MACHINET, shop, request, HK(shop));
+	if( (dest_data = hash_data_find(request, HK(data))) == NULL)
+		return -EINVAL;
 	
-	fastcall_enum          fargs             = { { 4, ACTION_ENUM }, shop, request };
+	fastcall_enum          fargs             = { { 4, ACTION_ENUM }, dest_data };
 	return data_query(data, &fargs);
 } // }}}
 

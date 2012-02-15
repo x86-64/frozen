@@ -4,6 +4,7 @@
 #include <enum/format/format_t.h>
 #include <core/hash/hash_t.h>
 #include <modifiers/slider/slider_t.h>
+#include <special/ref/ref_t.h>
 
 #define DATATYPE_BIN uint16_t
 
@@ -21,12 +22,11 @@ static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{
 	return 0;
 } // }}}
 static ssize_t iter_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
-	request_t r_next[] = {
-		{ HK(data), *data },
-		hash_inline(fargs->context),
-		hash_end
-	};
-	return machine_query(fargs->shop, r_next);
+	fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } };
+	data_query(data, &r_acquire);
+	
+	fastcall_push r_push = { { 3, ACTION_PUSH }, data };
+	return data_query(fargs->dest, &r_push);
 } // }}}
 
 static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
@@ -47,7 +47,12 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			DATATYPE_BIN           type;
 			
 			for(chunk = fdata->head; chunk; chunk = chunk->cnext){
-				type = (DATATYPE_BIN)chunk->data.type;
+				// strip refs
+				fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+				if( (ret = data_query(&chunk->data, &r_getdata)) < 0)
+					break;
+				
+				type = (DATATYPE_BIN)r_getdata.data->type;
 				
 				// write type
 				fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &type, sizeof(type) };
@@ -211,21 +216,23 @@ data_proto_t list_t_proto = {
 };
 
 static list_chunk_t *    chunk_alloc(data_t *data){ // {{{
-	list_chunk_t     *chunk;
+	list_chunk_t          *chunk;
+	ref_t                 *ref               = ref_t_alloc(data);
+	data_t                 d_ref             = DATA_PTR_REFT(ref);
 	
-	if(data == NULL)
+	if(data == NULL || ref == NULL)
 		return NULL;
 	
 	if( (chunk = malloc(sizeof(list_chunk_t))) == NULL)
 		return NULL;
 	
 	chunk->cnext       = NULL;
-	memcpy(&chunk->data, data, sizeof(data_t));
+	memcpy(&chunk->data, &d_ref, sizeof(data_t));
 	return chunk;
 } // }}}
 static void              chunk_free(list_chunk_t *chunk){ // {{{
-	//fastcall_free r_free = { { 2, ACTION_FREE } };
-	//data_query(&chunk->data, &r_free);
+	fastcall_free r_free = { { 2, ACTION_FREE } };
+	data_query(&chunk->data, &r_free);
 	
 	free(chunk);
 } // }}}
@@ -240,9 +247,6 @@ void            list_t_destroy             (list_t *list){ // {{{
 	
 	for(chunk = list->head; chunk; chunk = next){
 		next = chunk->cnext;
-		
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(&chunk->data, &r_free);
 		
 		chunk_free(chunk);
 	}

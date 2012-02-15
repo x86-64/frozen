@@ -313,8 +313,7 @@ typedef struct fastcall_pop {
 
 typedef struct fastcall_enum {
 	fastcall_header        header;
-	machine_t             *shop;
-	request_t             *context;
+	data_t                *dest;
 } fastcall_enum;
 
 typedef struct fastcall_query {

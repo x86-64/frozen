@@ -121,11 +121,17 @@ static ssize_t data_folder_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		#ifdef _DIRENT_HAVE_D_OFF
 			{ HK(offset),   DATA_UINTT(dir_item->d_off)    },
 		#endif
-			hash_inline(fargs->context),
 			hash_end
 		};
+		data_t                 d_next            = DATA_PTR_HASHT(r_next);
+		data_t                 d_copy;
 		
-		if( (ret = machine_query(fargs->shop, r_next)) < 0)
+		fastcall_copy r_copy = { { 3, ACTION_COPY }, &d_copy };
+		if( (ret = data_query(&d_next, &r_copy)) < 0)
+			break;
+		
+		fastcall_push r_push = { { 3, ACTION_PUSH }, &d_copy };
+		if( (ret = data_query(fargs->dest, &r_push)) < 0)
 			break;
 	}
 	closedir(dir);

@@ -7,8 +7,8 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- enum call push, not machines
-- ref_t
+- datatype and hashkey convert to/from binary
+- list_t and hash_t use datatype convert instead of portable types
 - zmq req\rep helper machine
 - zmq patterns
 - machine thread_pool
@@ -16,7 +16,6 @@
 - data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
 - wrap -E* errors in error func, to mark source of error
 - error backtrace
-- cache_t for file_t
 - list_t convert_from hash with data array
 - machine/rebuild deprecate?
 
