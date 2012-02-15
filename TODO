@@ -7,6 +7,8 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
+- enum call push, not machines
+- ref_t
 - zmq req\rep helper machine
 - zmq patterns
 - machine thread_pool
