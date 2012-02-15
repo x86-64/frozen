@@ -164,10 +164,11 @@ typedef ssize_t (*f_callback)  (request_t *, void *);
 	ACTION(ENUM),
 	
 	ACTION(QUERY),
-
+	
 	ACTION(GETDATAPTR),
 	ACTION(GETDATA),
-
+	
+	ACTION(ACQUIRE)
 */
 
 typedef struct fastcall_header {
@@ -203,6 +204,10 @@ typedef struct fastcall_resize {
 typedef struct fastcall_free {
 	fastcall_header        header;
 } fastcall_free;
+
+typedef struct fastcall_acquire {
+	fastcall_header        header;
+} fastcall_acquire;
 
 typedef struct fastcall_execute {
 	fastcall_header        header;
