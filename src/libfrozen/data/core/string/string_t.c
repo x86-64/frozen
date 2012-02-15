@@ -128,6 +128,14 @@ static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	return ret;
 } // }}}
+static ssize_t data_string_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
+	if(src->ptr){
+		if( (fargs->dest->ptr = strdup(src->ptr)) == NULL)
+			return -ENOMEM;
+	}
+	fargs->dest->type = src->type;
+	return 0;
+} // }}}
 
 data_proto_t string_t_proto = {
 	.type          = TYPE_STRINGT,
@@ -137,5 +145,6 @@ data_proto_t string_t_proto = {
 		[ACTION_LENGTH]       = (f_data_func)&data_string_t_len,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_string_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_string_t_convert_from,
+		[ACTION_COPY]         = (f_data_func)&data_string_t_copy,
 	}
 };
