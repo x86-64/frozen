@@ -20,8 +20,7 @@ void              ref_t_acquire(ref_t *ref){ // {{{
 } // }}}
 void              ref_t_destroy(ref_t *ref){ // {{{
 	if(ref->refs-- == 1){
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(&ref->data, &r_free);
+		data_free(&ref->data);
 	}
 } // }}}
 

@@ -119,6 +119,25 @@ API ssize_t              data_register          (data_proto_t *proto);
 */
 API ssize_t              data_query             (data_t *data, void *args);
 
+/** Helper routine to get continious in memory data. It first try to get native pointers (if supplied by data), if not - 
+ * it start converting this data to raw_t type in clean format (which is slow btw)
+ * @param data Data to get
+ * @param freeme Data to free after call
+ * @param ptr      Pointer to void *
+ * @param ptr_size Pointer to uintmax_t
+ * @retval <0 Conversion to raw_t failed
+ * @retval 0       Call successful
+*/
+API ssize_t              data_get_continious    (data_t *data, data_t *freeme, void **ptr, uintmax_t *ptr_size);
+
+/** Free data
+ * @param _data Data to be freed
+ */
+#define data_free(_data){                                      \
+	static fastcall_free _r_free = { { 2, ACTION_FREE } }; \
+	data_query(_data, &_r_free);                           \
+}
+
 /** Void data. Can be used after free or data consuming.
  * @param _src Data to be void
  */
