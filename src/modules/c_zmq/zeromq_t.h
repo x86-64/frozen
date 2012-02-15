@@ -18,7 +18,7 @@
  * Accepted configuration:
  * @code
  * some = (zeromq_t){
- *              type                    =                     # socket type to create, see man zmq_socket
+ *              type                    =                     // socket type to create, see man zmq_socket
  *                                        "req",
  *                                        "rep",
  *                                        "dealer",
@@ -28,9 +28,24 @@
  *                                        "push",
  *                                        "pull",
  *                                        "pair",
- *              identity                = "ident",            # set socket identity
- *              bind                    = "tcp://",           # bind socket to            OR
- *              connect                 = "tcp://".           # connect socket to
+ *              identity                = "ident",            // set socket identity
+ *              bind                    = "tcp://",           // bind socket to            OR
+ *              connect                 = "tcp://".           // connect socket to
+ *              subscribe               = "filter",           // see zmq_setsockopt manual
+ *              unsubscribe             = "filter",           // see zmq_setsockopt manual
+ *              hwm                     = (uint64_t)"0",      // see zmq_setsockopt manual
+ *              affinity                = (uint64_t)"0",      // see zmq_setsockopt manual
+ *              sndbuf_size             = (uint64_t)"0",      // see zmq_setsockopt manual
+ *              rcvbuf_size             = (uint64_t)"0",      // see zmq_setsockopt manual
+ *              swap                    = (int64_t)"0",       // see zmq_setsockopt manual
+ *              rate                    = (int64_t)"0",       // see zmq_setsockopt manual
+ *              recovery_ivl            = (int64_t)"0",       // see zmq_setsockopt manual
+ *              recovery_ivl_msec       = (int64_t)"0",       // see zmq_setsockopt manual
+ *              mcast_loop              = (int64_t)"0",       // see zmq_setsockopt manual
+ *              linger                  = (int_t)"0",         // see zmq_setsockopt manual
+ *              reconnect_ivl           = (int_t)"0",         // see zmq_setsockopt manual
+ *              reconnect_ivl_max       = (int_t)"0",         // see zmq_setsockopt manual
+ *              backlog                 = (int_t)"0"          // see zmq_setsockopt manual
  * }
  * @endcode
  */

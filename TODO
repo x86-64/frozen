@@ -9,6 +9,8 @@
 
 - datatype and hashkey convert to/from binary
 - list_t and hash_t use datatype convert instead of portable types
+- zmq convert to/from
+- zmq push/pull/enum
 - zmq req\rep helper machine
 - zmq patterns
 - machine thread_pool

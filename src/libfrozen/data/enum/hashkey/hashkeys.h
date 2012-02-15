@@ -10,9 +10,11 @@
 #define HK_VALUE_action_request_one 226561
 #define HK_VALUE_action_request_perfork 411712
 #define HK_VALUE_addr 3221
+#define HK_VALUE_affinity 23061
 #define HK_VALUE_after 6015
 #define HK_VALUE_async 5881
 #define HK_VALUE_backend 14474
+#define HK_VALUE_backlog 14832
 #define HK_VALUE_before 9682
 #define HK_VALUE_benchmark_function 227699
 #define HK_VALUE_bind 3108
@@ -58,6 +60,7 @@
 #define HK_VALUE_hash_ptr_inline 131665
 #define HK_VALUE_hash_ptr_null 89234
 #define HK_VALUE_headers 15245
+#define HK_VALUE_hwm 1561
 #define HK_VALUE_icase 5739
 #define HK_VALUE_identity 23282
 #define HK_VALUE_ignore_errors 90804
@@ -75,6 +78,7 @@
 #define HK_VALUE_key4 2432
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
+#define HK_VALUE_linger 9795
 #define HK_VALUE_loop 3343
 #define HK_VALUE_machine 14586
 #define HK_VALUE_marker 9864
@@ -82,6 +86,7 @@
 #define HK_VALUE_max_global 39928
 #define HK_VALUE_max_perfork 54985
 #define HK_VALUE_max_perinstance 130972
+#define HK_VALUE_mcast_loop 42125
 #define HK_VALUE_mode 3069
 #define HK_VALUE_mode_global 52254
 #define HK_VALUE_mode_perfork 70285
@@ -111,11 +116,17 @@
 #define HK_VALUE_pool_interval 88331
 #define HK_VALUE_port 3438
 #define HK_VALUE_random 9791
+#define HK_VALUE_rate 3162
+#define HK_VALUE_rcvbuf_size 54678
 #define HK_VALUE_read_size 30640
 #define HK_VALUE_reader 9620
 #define HK_VALUE_readonly 22762
 #define HK_VALUE_real_offset 54467
 #define HK_VALUE_reclen 9622
+#define HK_VALUE_reconnect_ivl 88025
+#define HK_VALUE_reconnect_ivl_max 190682
+#define HK_VALUE_recovery_ivl 71126
+#define HK_VALUE_recovery_ivl_msec 188887
 #define HK_VALUE_regexp 10093
 #define HK_VALUE_removed_items 88298
 #define HK_VALUE_req_count 31695
@@ -135,15 +146,19 @@
 #define HK_VALUE_shop 3322
 #define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
+#define HK_VALUE_sndbuf_size 54561
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
 #define HK_VALUE_storage 14484
 #define HK_VALUE_string 9743
 #define HK_VALUE_structure 31338
+#define HK_VALUE_subscribe 29482
+#define HK_VALUE_swap 3256
 #define HK_VALUE_temprorary 43267
 #define HK_VALUE_test 3411
 #define HK_VALUE_tick_interval 88187
 #define HK_VALUE_type 3224
+#define HK_VALUE_unsubscribe 52727
 #define HK_VALUE_uuid 3130
 #define HK_VALUE_value 5875
 #define HK_VALUE_value_bits 41713
@@ -161,9 +176,11 @@ typedef enum hashkey_t {
       HK_action_request_one = HK_VALUE_action_request_one, 
       HK_action_request_perfork = HK_VALUE_action_request_perfork, 
       HK_addr = HK_VALUE_addr, 
+      HK_affinity = HK_VALUE_affinity, 
       HK_after = HK_VALUE_after, 
       HK_async = HK_VALUE_async, 
       HK_backend = HK_VALUE_backend, 
+      HK_backlog = HK_VALUE_backlog, 
       HK_before = HK_VALUE_before, 
       HK_benchmark_function = HK_VALUE_benchmark_function, 
       HK_bind = HK_VALUE_bind, 
@@ -209,6 +226,7 @@ typedef enum hashkey_t {
       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
       HK_headers = HK_VALUE_headers, 
+      HK_hwm = HK_VALUE_hwm, 
       HK_icase = HK_VALUE_icase, 
       HK_identity = HK_VALUE_identity, 
       HK_ignore_errors = HK_VALUE_ignore_errors, 
@@ -226,6 +244,7 @@ typedef enum hashkey_t {
       HK_key4 = HK_VALUE_key4, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
+      HK_linger = HK_VALUE_linger, 
       HK_loop = HK_VALUE_loop, 
       HK_machine = HK_VALUE_machine, 
       HK_marker = HK_VALUE_marker, 
@@ -233,6 +252,7 @@ typedef enum hashkey_t {
       HK_max_global = HK_VALUE_max_global, 
       HK_max_perfork = HK_VALUE_max_perfork, 
       HK_max_perinstance = HK_VALUE_max_perinstance, 
+      HK_mcast_loop = HK_VALUE_mcast_loop, 
       HK_mode = HK_VALUE_mode, 
       HK_mode_global = HK_VALUE_mode_global, 
       HK_mode_perfork = HK_VALUE_mode_perfork, 
@@ -262,11 +282,17 @@ typedef enum hashkey_t {
       HK_pool_interval = HK_VALUE_pool_interval, 
       HK_port = HK_VALUE_port, 
       HK_random = HK_VALUE_random, 
+      HK_rate = HK_VALUE_rate, 
+      HK_rcvbuf_size = HK_VALUE_rcvbuf_size, 
       HK_read_size = HK_VALUE_read_size, 
       HK_reader = HK_VALUE_reader, 
       HK_readonly = HK_VALUE_readonly, 
       HK_real_offset = HK_VALUE_real_offset, 
       HK_reclen = HK_VALUE_reclen, 
+      HK_reconnect_ivl = HK_VALUE_reconnect_ivl, 
+      HK_reconnect_ivl_max = HK_VALUE_reconnect_ivl_max, 
+      HK_recovery_ivl = HK_VALUE_recovery_ivl, 
+      HK_recovery_ivl_msec = HK_VALUE_recovery_ivl_msec, 
       HK_regexp = HK_VALUE_regexp, 
       HK_removed_items = HK_VALUE_removed_items, 
       HK_req_count = HK_VALUE_req_count, 
@@ -286,15 +312,19 @@ typedef enum hashkey_t {
       HK_shop = HK_VALUE_shop, 
       HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
+      HK_sndbuf_size = HK_VALUE_sndbuf_size, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
       HK_storage = HK_VALUE_storage, 
       HK_string = HK_VALUE_string, 
       HK_structure = HK_VALUE_structure, 
+      HK_subscribe = HK_VALUE_subscribe, 
+      HK_swap = HK_VALUE_swap, 
       HK_temprorary = HK_VALUE_temprorary, 
       HK_test = HK_VALUE_test, 
       HK_tick_interval = HK_VALUE_tick_interval, 
       HK_type = HK_VALUE_type, 
+      HK_unsubscribe = HK_VALUE_unsubscribe, 
       HK_uuid = HK_VALUE_uuid, 
       HK_value = HK_VALUE_value, 
       HK_value_bits = HK_VALUE_value_bits, 
@@ -316,9 +346,11 @@ keypair_t hashkeys[] = {
       { "action_request_one", HK_VALUE_action_request_one }, 
       { "action_request_perfork", HK_VALUE_action_request_perfork }, 
       { "addr", HK_VALUE_addr }, 
+      { "affinity", HK_VALUE_affinity }, 
       { "after", HK_VALUE_after }, 
       { "async", HK_VALUE_async }, 
       { "backend", HK_VALUE_backend }, 
+      { "backlog", HK_VALUE_backlog }, 
       { "before", HK_VALUE_before }, 
       { "benchmark_function", HK_VALUE_benchmark_function }, 
       { "bind", HK_VALUE_bind }, 
@@ -364,6 +396,7 @@ keypair_t hashkeys[] = {
       { "hash_ptr_inline", HK_VALUE_hash_ptr_inline }, 
       { "hash_ptr_null", HK_VALUE_hash_ptr_null }, 
       { "headers", HK_VALUE_headers }, 
+      { "hwm", HK_VALUE_hwm }, 
       { "icase", HK_VALUE_icase }, 
       { "identity", HK_VALUE_identity }, 
       { "ignore_errors", HK_VALUE_ignore_errors }, 
@@ -381,6 +414,7 @@ keypair_t hashkeys[] = {
       { "key4", HK_VALUE_key4 }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
+      { "linger", HK_VALUE_linger }, 
       { "loop", HK_VALUE_loop }, 
       { "machine", HK_VALUE_machine }, 
       { "marker", HK_VALUE_marker }, 
@@ -388,6 +422,7 @@ keypair_t hashkeys[] = {
       { "max_global", HK_VALUE_max_global }, 
       { "max_perfork", HK_VALUE_max_perfork }, 
       { "max_perinstance", HK_VALUE_max_perinstance }, 
+      { "mcast_loop", HK_VALUE_mcast_loop }, 
       { "mode", HK_VALUE_mode }, 
       { "mode_global", HK_VALUE_mode_global }, 
       { "mode_perfork", HK_VALUE_mode_perfork }, 
@@ -417,11 +452,17 @@ keypair_t hashkeys[] = {
       { "pool_interval", HK_VALUE_pool_interval }, 
       { "port", HK_VALUE_port }, 
       { "random", HK_VALUE_random }, 
+      { "rate", HK_VALUE_rate }, 
+      { "rcvbuf_size", HK_VALUE_rcvbuf_size }, 
       { "read_size", HK_VALUE_read_size }, 
       { "reader", HK_VALUE_reader }, 
       { "readonly", HK_VALUE_readonly }, 
       { "real_offset", HK_VALUE_real_offset }, 
       { "reclen", HK_VALUE_reclen }, 
+      { "reconnect_ivl", HK_VALUE_reconnect_ivl }, 
+      { "reconnect_ivl_max", HK_VALUE_reconnect_ivl_max }, 
+      { "recovery_ivl", HK_VALUE_recovery_ivl }, 
+      { "recovery_ivl_msec", HK_VALUE_recovery_ivl_msec }, 
       { "regexp", HK_VALUE_regexp }, 
       { "removed_items", HK_VALUE_removed_items }, 
       { "req_count", HK_VALUE_req_count }, 
@@ -441,15 +482,19 @@ keypair_t hashkeys[] = {
       { "shop", HK_VALUE_shop }, 
       { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
+      { "sndbuf_size", HK_VALUE_sndbuf_size }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
       { "storage", HK_VALUE_storage }, 
       { "string", HK_VALUE_string }, 
       { "structure", HK_VALUE_structure }, 
+      { "subscribe", HK_VALUE_subscribe }, 
+      { "swap", HK_VALUE_swap }, 
       { "temprorary", HK_VALUE_temprorary }, 
       { "test", HK_VALUE_test }, 
       { "tick_interval", HK_VALUE_tick_interval }, 
       { "type", HK_VALUE_type }, 
+      { "unsubscribe", HK_VALUE_unsubscribe }, 
       { "uuid", HK_VALUE_uuid }, 
       { "value", HK_VALUE_value }, 
       { "value_bits", HK_VALUE_value_bits }, 
