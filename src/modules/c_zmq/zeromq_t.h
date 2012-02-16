@@ -45,7 +45,8 @@
  *              linger                  = (int_t)"0",         // see zmq_setsockopt manual
  *              reconnect_ivl           = (int_t)"0",         // see zmq_setsockopt manual
  *              reconnect_ivl_max       = (int_t)"0",         // see zmq_setsockopt manual
- *              backlog                 = (int_t)"0"          // see zmq_setsockopt manual
+ *              backlog                 = (int_t)"0",         // see zmq_setsockopt manual
+ *              lazy                    = (uint_t)"1"         // do not create socket until it actually need
  * }
  * @endcode
  */
