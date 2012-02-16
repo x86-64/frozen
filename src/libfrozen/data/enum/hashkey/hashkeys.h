@@ -147,6 +147,7 @@
 #define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
 #define HK_VALUE_sndbuf_size 54561
+#define HK_VALUE_socket 9863
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
 #define HK_VALUE_storage 14484
@@ -313,6 +314,7 @@ typedef enum hashkey_t {
       HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
+      HK_socket = HK_VALUE_socket, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
       HK_storage = HK_VALUE_storage, 
@@ -483,6 +485,7 @@ keypair_t hashkeys[] = {
       { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
       { "sndbuf_size", HK_VALUE_sndbuf_size }, 
+      { "socket", HK_VALUE_socket }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
       { "storage", HK_VALUE_storage }, 
