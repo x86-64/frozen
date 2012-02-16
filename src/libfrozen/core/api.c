@@ -344,12 +344,17 @@ ssize_t     action_copy_from_fast(machine_t *machine, fastcall_copy *fargs){ // 
 	return machine_query(machine, r_next);
 } // }}}
 ssize_t     action_copy_from_hash(data_t *data, request_t *request){ // {{{
-	data_t                *holder;
+	ssize_t                ret;
+	data_t                *pointer;
 	
-	if( (holder = hash_data_find(request, HK(data))) == NULL)
+	if( (pointer = hash_data_find(request, HK(data))) == NULL)
 		return -EINVAL;
 	
-	fastcall_copy           fargs             = { { 3, ACTION_COPY }, holder };
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(pointer, &r_getdata)) < 0)
+		return ret;
+	
+	fastcall_copy           fargs             = { { 3, ACTION_COPY }, r_getdata.data };
 	return data_query(data, &fargs);
 } // }}}
 
