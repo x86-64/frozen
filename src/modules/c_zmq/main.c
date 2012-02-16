@@ -422,6 +422,7 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 		data_free(&freeme);
 		return -ENOMEM;
 	}
+	data_set_void(fargs->data);
 	
 	if(zmq_msg_init_data(&zmq_msg, msg_data, msg_size, &zeromq_t_msg_free, freehint) != 0)
 		return -errno;

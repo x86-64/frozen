@@ -135,6 +135,7 @@
 #define HK_VALUE_req_rebuild_destination 464804
 #define HK_VALUE_req_rebuild_enable 216394
 #define HK_VALUE_request 15756
+#define HK_VALUE_request_out 56563
 #define HK_VALUE_ret 1562
 #define HK_VALUE_retry 6411
 #define HK_VALUE_retry_request 91119
@@ -302,6 +303,7 @@ typedef enum hashkey_t {
       HK_req_rebuild_destination = HK_VALUE_req_rebuild_destination, 
       HK_req_rebuild_enable = HK_VALUE_req_rebuild_enable, 
       HK_request = HK_VALUE_request, 
+      HK_request_out = HK_VALUE_request_out, 
       HK_ret = HK_VALUE_ret, 
       HK_retry = HK_VALUE_retry, 
       HK_retry_request = HK_VALUE_retry_request, 
@@ -473,6 +475,7 @@ keypair_t hashkeys[] = {
       { "req_rebuild_destination", HK_VALUE_req_rebuild_destination }, 
       { "req_rebuild_enable", HK_VALUE_req_rebuild_enable }, 
       { "request", HK_VALUE_request }, 
+      { "request_out", HK_VALUE_request_out }, 
       { "ret", HK_VALUE_ret }, 
       { "retry", HK_VALUE_retry }, 
       { "retry_request", HK_VALUE_retry_request }, 

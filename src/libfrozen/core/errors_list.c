@@ -1,8 +1,8 @@
 
 static err_item errs_list[] = {
- { -225396, "src/libfrozen/machines/shop/try/try.c: shop parameter not supplied" },
- { -225367, "src/libfrozen/machines/shop/try/try.c: malloc failed" },
- { -225361, "src/libfrozen/machines/shop/try/try.c: calloc failed" },
+ { -225417, "src/libfrozen/machines/shop/try/try.c: shop parameter not supplied" },
+ { -225382, "src/libfrozen/machines/shop/try/try.c: malloc failed" },
+ { -225374, "src/libfrozen/machines/shop/try/try.c: calloc failed" },
  { -221226, "src/libfrozen/data/storage/folder/folder_t.c: path not exist" },
  { -221220, "src/libfrozen/data/storage/folder/folder_t.c: path invalid" },
  { -221214, "src/libfrozen/data/storage/folder/folder_t.c: path not supplied" },

@@ -18,11 +18,10 @@ include(implode.m4)
 	request = {
 		action = (action_t)"read",
 		key    = (raw_t)"testkey",
-		value  = (raw_t)"1"
+		value  = (raw_t)"error\n"
 	},
 	machine = (machine_t){
 		SHOP_QUERY(`leveldb'),
-		{ class = "debug" },
 		{ class = "data/query", data = (fd_t)"stdout", request = {
 			action = (action_t)"write",
 			buffer = (env_t)"value"
