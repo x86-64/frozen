@@ -34,7 +34,7 @@ static ssize_t data_env_t_free(data_t *data, fastcall_free *hargs){ // {{{
 	data->ptr = NULL;
 	return 0;
 } // }}}
-static ssize_t data_env_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
+/*static ssize_t data_env_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	env_t                 *fdata             = (env_t *)src->ptr;
 	env_t                 *new_fdata         = NULL;
 	
@@ -50,7 +50,7 @@ static ssize_t data_env_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
 	fargs->dest->type = src->type;
 	fargs->dest->ptr  = new_fdata;
 	return 0;
-} // }}}
+} // }}}*/
 static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	env_t                 *fdata;
@@ -101,7 +101,7 @@ data_proto_t env_t_proto = {
 	.handler_default        = (f_data_func)&data_env_t_handler,
 	.handlers               = {
 		[ACTION_ALLOC]        = (f_data_func)&data_env_t_alloc,
-		[ACTION_COPY]         = (f_data_func)&data_env_t_copy,
+		//[ACTION_COPY]         = (f_data_func)&data_env_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_env_t_convert_from,
 		[ACTION_GETDATA]      = (f_data_func)&data_env_t_getdata,
