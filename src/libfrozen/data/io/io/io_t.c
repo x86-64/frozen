@@ -11,14 +11,10 @@ static ssize_t data_io_t_handler (data_t *data, fastcall_header *hargs){ // {{{
 			if(fargs->dest == NULL)
 				return -EINVAL;
 			
-			fargs->dest->ptr  = malloc( sizeof(io_t) );
-			
-			if(fargs->dest->ptr == NULL)
+			if( (fargs->dest->ptr = memdup(fdata, sizeof(io_t))) == NULL)
 				return -ENOMEM;
 			
 			fargs->dest->type = data->type;
-			
-			memcpy(fargs->dest->ptr, fdata, sizeof(io_t));
 			break;
 		case ACTION_FREE:
 			if(data->ptr)

@@ -103,10 +103,8 @@ static ssize_t       data_default_copy          (data_t *src, fastcall_copy *far
 		if( data_query(src, &r_len) != 0)
 			return -EFAULT;
 		
-		if( (fargs->dest->ptr = malloc(r_len.length)) == NULL)
+		if( (fargs->dest->ptr = memdup(r_ptr.ptr, r_len.length)) == NULL)
 			return -EFAULT;
-		
-		memcpy(fargs->dest->ptr, r_ptr.ptr, r_len.length);
 	}else{
 		fargs->dest->ptr = NULL;
 	}

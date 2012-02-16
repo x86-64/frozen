@@ -83,3 +83,11 @@ intmax_t safe_div(uintmax_t *res, uintmax_t x, uintmax_t y){
 	return 0;
 }
 
+void * memdup(void *ptr, uintmax_t size){
+	void                  *new_ptr;
+
+	if( (new_ptr = malloc(size)) == NULL)
+		return NULL;
+	memcpy(new_ptr, ptr, size);
+	return new_ptr;
+}

@@ -154,13 +154,7 @@ slice_t *       slice_t_alloc               (data_t *data, uintmax_t offset, uin
 	return slice;
 } // }}}
 slice_t *       slice_t_copy                (slice_t *slice){ // {{{
-	slice_t                *new_slice;
-
-	if( (new_slice = malloc(sizeof(slice_t))) == NULL)
-		return NULL;
-	
-	memcpy(new_slice, slice, sizeof(slice_t));
-	return new_slice;
+	return memdup(slice, sizeof(slice_t));
 } // }}}
 void            slice_t_free                (slice_t *slice){ // {{{
 	free(slice);
