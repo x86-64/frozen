@@ -525,7 +525,11 @@ ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	)
 		return -ENOSYS;
 	
-	return func(data, request);
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(data, &r_getdata)) < 0)
+		return ret;
+	
+	return func(r_getdata.data, request);
 } // }}}
 ssize_t     machine_fast_query(machine_t *machine, void *hargs){ // {{{
 	f_machine_from_fast    func;
