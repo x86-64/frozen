@@ -854,7 +854,6 @@ enable_machinedebug
 enable_machineemitter
 enable_machineend
 enable_machineimplode
-enable_machineexplode
 enable_machinenull
 enable_machineswitch
 enable_machinepass
@@ -1637,8 +1636,6 @@ Optional Features:
   --disable-machine-end   disable machine end
   --disable-machine-implode
                           disable machine implode
-  --disable-machine-explode
-                          disable machine explode
   --disable-machine-null  disable machine null
   --disable-machine-switch
                           disable machine switch
@@ -20712,42 +20709,6 @@ fi
 		MACHINE_DIR_implode="request/implode"
 		MACHINE_DEP_implode=""
 				MACHINE_SELECTED="$MACHINE_SELECTED implode"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_request_implode" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/implode/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/implode"
-
-		MACHINE_MAKEFILE_request_implode=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/implode/libfrozen_machine_implode.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-machineexplode was given.
-if test "${enable_machineexplode+set}" = set; then :
-  enableval=$enable_machineexplode;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machineexplode}" = "yes"; then
-			enable_machineexplode="no"
-		else
-			enable_machineexplode="yes"
-		fi
-	fi
-
-	if test "${enable_machineexplode}" = "yes"; then
-		MACHINE_DIR_explode="request/implode"
-		MACHINE_DEP_explode=""
-				MACHINE_SELECTED="$MACHINE_SELECTED explode"
 
 			fi
 

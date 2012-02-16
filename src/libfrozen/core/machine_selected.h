@@ -37,7 +37,6 @@ extern machine_t debug_proto;
 extern machine_t emitter_proto;
 extern machine_t end_proto;
 extern machine_t implode_proto;
-extern machine_t explode_proto;
 extern machine_t null_proto;
 extern machine_t switch_proto;
 extern machine_t pass_proto;
@@ -82,7 +81,6 @@ machine_t * machine_protos[] = {
    &emitter_proto,
    &end_proto,
    &implode_proto,
-   &explode_proto,
    &null_proto,
    &switch_proto,
    &pass_proto,

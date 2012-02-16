@@ -1,6 +1,5 @@
 define(`IMPLODE',
 `{ class = "try", shop = (machine_t){
-	{ class = "assign", before = { return_to = (void_t)"" } },
 	{ class = "implode" },
 	
 	{ class = "assign", before = { packed = (raw_t)"" }, copy = (uint_t)"1" },

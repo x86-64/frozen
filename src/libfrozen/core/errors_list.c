@@ -44,7 +44,7 @@ static err_item errs_list[] = {
  { -155684, "src/libfrozen/machines/request/end/end.c: calloc failed" },
  { -147589, "src/libfrozen/machines/data/split/split.c: no input string in request" },
  { -147533, "src/libfrozen/machines/data/split/split.c: calloc failed" },
- { -143424, "src/libfrozen/machines/request/implode/implode.c: calloc failed" },
+ { -143399, "src/libfrozen/machines/request/implode/implode.c: calloc failed" },
  { -139323, "src/libfrozen/machines/machine/factory/factory.c: child creation error" },
  { -139296, "src/libfrozen/machines/machine/factory/factory.c: HK(config) not supplied" },
  { -139277, "src/libfrozen/machines/machine/factory/factory.c: calloc failed" },
