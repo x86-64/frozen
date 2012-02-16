@@ -102,6 +102,7 @@ ssize_t              data_get_continious(data_t *data, data_t *freeme, void **pt
 	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
 	if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0 && r_ptr.ptr != NULL){
 		data_set_void(freeme);
+		ret = 0;
 		goto ok;
 	}
 	
@@ -113,13 +114,15 @@ ssize_t              data_get_continious(data_t *data, data_t *freeme, void **pt
 	if( (ret = data_query(data, &r_convert)) < 0)
 		return ret;
 	
-	if( data_query(freeme, &r_len) == 0 && data_query(freeme, &r_ptr) == 0 && r_ptr.ptr != NULL)
+	if( data_query(freeme, &r_len) == 0 && data_query(freeme, &r_ptr) == 0 && r_ptr.ptr != NULL){
+		ret = 1;
 		goto ok;
+	}
 	
 	return -EFAULT;
 ok:
 	*ptr      = r_ptr.ptr;
 	*ptr_size = r_len.length;
-	return 0;
+	return ret;
 } // }}}
 
