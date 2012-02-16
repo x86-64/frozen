@@ -51,9 +51,13 @@
  * @endcode
  */
 
-#define ZEROMQT_NAME  "zeromq_t"
-#define TYPE_ZEROMQT  data_getid(ZEROMQT_NAME, NULL)
+#define ZEROMQT_NAME       "zeromq_t"
+#define ZEROMQ_MSGT_NAME   "zeromq_msg_t"
 
+#define TYPE_ZEROMQT      data_getid(ZEROMQT_NAME,     NULL)
+#define TYPE_ZEROMQ_MSGT  data_getid(ZEROMQ_MSGT_NAME, NULL)
+
+#define DATA_PTR_ZEROMQ_MSGT(_msg) { TYPE_ZEROMQ_MSGT, _msg } 
 #define DEREF_TYPE_ZEROMQT(_data) (ipv4_t *)((_data)->ptr) 
 #define REF_TYPE_ZEROMQT(_dt) _dt 
 #define HAVEBUFF_TYPE_ZEROMQT 0

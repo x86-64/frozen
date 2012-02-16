@@ -255,6 +255,11 @@ static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
 	return 0;
 } // }}}
 
+static void    zeromq_t_msg_free(void *data, void *hint){ // {{{
+	data_free(hint);
+	free(hint);
+} // }}}
+
 static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
@@ -385,6 +390,78 @@ static ssize_t data_zeromq_t_transfer(data_t *data, fastcall_transfer *fargs){ /
 	zmq_msg_close(&zmq_msg);
 	return ret;
 } // }}}
+static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 freeme, *freehint;
+	void                  *msg_data;
+	uintmax_t              msg_size;
+	zmq_msg_t              zmq_msg;
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	
+	if( (ret = zeromq_t_prepare(fdata)) < 0)
+		return ret;
+	
+	// convert data to continious memory space
+	switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) < 0){
+		case 0: // use old data, it is ok!
+			freehint = fargs->data;
+			break;
+		case 1: // use converted data, and free old one
+			freehint = &freeme;
+			data_free(fargs->data);
+			break;
+		default:
+			return ret;
+	}
+	if( (freehint = memdup(freehint, sizeof(data_t))) == NULL){
+		data_free(&freeme);
+		return -ENOMEM;
+	}
+	
+	if(zmq_msg_init_data(&zmq_msg, msg_data, msg_size, &zeromq_t_msg_free, freehint) != 0)
+		return -errno;
+	
+	if( zmq_send(fdata->zmq_socket, &zmq_msg, 0) != 0)
+		return -errno;
+	
+	return 0;
+} // }}}
+static ssize_t data_zeromq_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
+	ssize_t                ret;
+	zmq_msg_t             *zmq_msg;
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	
+	if( (ret = zeromq_t_prepare(fdata)) < 0)
+		return ret;
+	
+	if( (zmq_msg = malloc(sizeof(zmq_msg_t))) == NULL)
+		return -ENOMEM;
+	
+	if( zmq_msg_init(zmq_msg) != 0)
+		return error("zmq_msg_init failed");
+	
+	if( zmq_recv(fdata->zmq_socket, zmq_msg, 0) != 0)
+		return -errno;
+	
+	data_t                 d_zmq_msg         = DATA_PTR_ZEROMQ_MSGT(zmq_msg);
+	memcpy(fargs->data, &d_zmq_msg, sizeof(data_t));
+	return 0;
+} // }}}
+static ssize_t data_zeromq_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 item;
+	
+	while(1){
+		fastcall_pop  r_pop  = { { 3, ACTION_POP  }, &item };
+		if( (ret = data_zeromq_t_pop(data, &r_pop)) < 0)
+			break;
+		
+		fastcall_push r_push = { { 3, ACTION_PUSH }, &item };
+		if( (ret = data_query(fargs->dest, &r_push)) < 0)
+			break;
+	}
+	return ret;
+} // }}}
 
 data_proto_t zmq_proto = {
 	.type_str               = ZEROMQT_NAME,
@@ -396,11 +473,62 @@ data_proto_t zmq_proto = {
 		[ACTION_READ]           = (f_data_func)&data_zeromq_t_read,
 		[ACTION_WRITE]          = (f_data_func)&data_zeromq_t_write,
 		[ACTION_TRANSFER]       = (f_data_func)&data_zeromq_t_transfer,
+		[ACTION_PUSH]           = (f_data_func)&data_zeromq_t_push,
+		[ACTION_POP]            = (f_data_func)&data_zeromq_t_pop,
+		[ACTION_ENUM]           = (f_data_func)&data_zeromq_t_enum,
+	}
+};
+
+static ssize_t data_zeromq_msg_t_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
+	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
+	
+	fargs->ptr = zmq_msg_data(fdata);
+	return 0;
+} // }}}
+static ssize_t data_zeromq_msg_t_length(data_t *data, fastcall_length *fargs){ // {{{
+	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
+	
+	fargs->length = zmq_msg_size(fdata);
+	return 0;
+} // }}}
+static ssize_t data_zeromq_msg_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
+	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
+	
+	fastcall_write r_write = {
+		{ 5, ACTION_WRITE },
+		0,
+		zmq_msg_data(fdata),
+		zmq_msg_size(fdata)
+	};
+	return data_query(fargs->dest, &r_write);
+} // }}}
+static ssize_t data_zeromq_msg_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
+	
+	zmq_msg_close(fdata);
+	free(fdata);
+	return 0;
+} // }}}
+static ssize_t data_zeromq_msg_t_nosys(data_t *data, fastcall_header *hargs){ // {{{
+	return -ENOSYS;
+} // }}}
+
+data_proto_t zmq_msg_proto = {
+	.type_str               = ZEROMQ_MSGT_NAME,
+	.api_type               = API_HANDLERS,
+	.handlers               = {
+		[ACTION_GETDATAPTR]     = (f_data_func)&data_zeromq_msg_t_getdataptr,
+		[ACTION_LENGTH]         = (f_data_func)&data_zeromq_msg_t_length,
+		[ACTION_CONVERT_TO]     = (f_data_func)&data_zeromq_msg_t_convert_to,
+		[ACTION_CONVERT_FROM]   = (f_data_func)&data_zeromq_msg_t_nosys,
+		[ACTION_FREE]           = (f_data_func)&data_zeromq_msg_t_free,
+		[ACTION_COPY]           = (f_data_func)&data_zeromq_msg_t_nosys,
 	}
 };
 
 int main(void){
 	errors_register((err_item *)&errs_list, &emodule);
 	data_register(&zmq_proto);
+	data_register(&zmq_msg_proto);
 	return 0;
 }
