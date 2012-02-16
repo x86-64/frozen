@@ -85,6 +85,7 @@ static ssize_t implode_request(machine_t *machine, request_t *request){ // {{{
 	
 	request_t r_next[] = {
 		{ userdata->buffer, DATA_PTR_HASHT(request) },
+		hash_inline(request),
 		hash_end
 	};
 	return machine_pass(machine, r_next);
