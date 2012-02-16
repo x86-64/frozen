@@ -87,9 +87,13 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	return ret;
 } // }}}		
 static ssize_t data_action_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
-		fargs->length = sizeof(action_t);
-		return 0;
+	switch(fargs->format){
+		case FORMAT(binary):
+		case FORMAT(clean):
+			fargs->length = sizeof(action_t);
+			return 0;
+		default:
+			break;
 	}
 	return -ENOSYS;
 } // }}}
