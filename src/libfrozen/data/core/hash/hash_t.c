@@ -199,6 +199,7 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	hash_t_ctx             ctx               = { .hash = src->ptr };
 	
 	switch(fargs->format){
+		case FORMAT(clean):
 		case FORMAT(binary):
 			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
 				return -EFAULT;
@@ -248,8 +249,8 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	list                   freeit            = LIST_INITIALIZER;
 	
 	switch(fargs->format){
-		case FORMAT(binary): break;
 		case FORMAT(clean):
+		case FORMAT(binary): break;
 		case FORMAT(human):
 		case FORMAT(config):
 		case FORMAT(hash):
