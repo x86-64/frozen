@@ -120,8 +120,8 @@ typedef ssize_t  (*hash_iterator)(hash_t *hash, void *arg); ///< Callback routin
 
 #define hash_null         {hash_ptr_null,    {0, NULL}}            ///< Mark null item here
 #define hash_inline(hash) {hash_ptr_inline,  DATA_PTR_HASHT(hash)} ///< Mark inline hash here
-#define hash_next(hash)   {hash_ptr_end,     {0, (void *)hash}} ///< Mark next hash  // TODO deprecate
-#define hash_end          hash_next(NULL)    ///< Mark hash end
+#define hash_end          {hash_ptr_end, {0,NULL}}                 ///< Mark hash end
+#define hash_next(hash)   hash_inline(hash), hash_end              ///< Mark next hash
 
 API hash_t *           hash_new                     (size_t nelements);  ///< Allocate new hash filled with hash_null
 API hash_t *           hash_copy                    (hash_t *hash);      ///< Make copy of supplied hash

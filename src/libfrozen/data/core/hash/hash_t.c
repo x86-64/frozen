@@ -388,7 +388,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		el_new++;
 	}
 	el_new->key      = hash_ptr_end;
-	el_new->data.ptr = (el->data.ptr != NULL) ? hash_copy(el->data.ptr) : NULL;
+	el_new->data.ptr = NULL;
 	
 	return new_hash;
 } // }}}
@@ -405,7 +405,6 @@ void               hash_free                    (hash_t *hash){ // {{{
 		fastcall_free r_free = { { 2, ACTION_FREE } };
 		data_query(&el->data, &r_free);
 	}
-	hash_free(el->data.ptr);
 	
 	free(hash);
 } // }}}
@@ -469,10 +468,6 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 		curr++;
 	}while(1);
 	
-	// hash_next
-	if(curr->data.ptr != NULL)
-		return hash_iter((hash_t *)curr->data.ptr, func, arg, flags);
-	
 	if((flags & HASH_ITER_END) != 0){
 		if( (ret = func(curr, arg)) != ITER_CONTINUE)
 			return ret;
@@ -500,7 +495,7 @@ data_t *           hash_data_find               (hash_t *hash, hashkey_t key){ /
 } // }}}
 
 void               hash_dump                    (hash_t *hash){ // {{{
-	char                   buffer[DEF_BUFFER_SIZE*20];
+	char                   buffer[DEF_BUFFER_SIZE*20] = { 0 };
 	data_t                 d_hash            = DATA_PTR_HASHT(hash);
 	data_t                 d_buffer          = DATA_RAW(buffer, sizeof(buffer));
 	
