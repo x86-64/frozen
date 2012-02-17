@@ -44,7 +44,7 @@ static void *  thread_routine(machine_t *machine){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
-	sleep(0); // BUG improper fix for too fast thread creation, before machine connected to chain
+	usleep(300000); // BUG improper fix for too fast thread creation, before machine connected to chain
 	do{
 		request_t r_request[] = { hash_end };
 		if( (ret = machine_pass(machine, r_request)) < 0){
