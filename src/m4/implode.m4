@@ -1,5 +1,7 @@
 define(`IMPLODE', dnl IMPLODE(input, output, func)
-`{ class = "try", shop = (machine_t){
+`
+{ class = "assign", before = { ret = (uint_t)"0" }, copy = (uint_t)"1" },
+{ class = "try", shop = (machine_t){
 	{ class = "implode", buffer = (hashkey_t)"$1" },
 	
 	$3,
