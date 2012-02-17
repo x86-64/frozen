@@ -261,8 +261,10 @@ static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
 } // }}}
 
 static void    zeromq_t_msg_free(void *data, void *hint){ // {{{
-	data_free(hint);
-	free(hint);
+	if(hint){
+		data_free(hint);
+		free(hint);
+	}
 } // }}}
 
 static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
@@ -397,34 +399,37 @@ static ssize_t data_zeromq_t_transfer(data_t *data, fastcall_transfer *fargs){ /
 } // }}}
 static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	ssize_t                ret;
-	data_t                 freeme, *freehint;
-	void                  *msg_data;
-	uintmax_t              msg_size;
+	data_t                 freeme;
+	data_t                *freehint          = NULL;
+	void                  *msg_data          = NULL;
+	uintmax_t              msg_size          = 0;
 	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
 	if( (ret = zeromq_t_prepare(fdata)) < 0)
 		return ret;
 	
-	// convert data to continious memory space
-	switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) ){
-		case 0: // use old data, it is ok!
-			if( (freehint = memdup(fargs->data, sizeof(data_t))) == NULL){
-				data_free(&freeme);
-				return -ENOMEM;
-			}
-			data_set_void(fargs->data);    // we need current data, so consume it
-			break;
-		case 1: // use converted data, and free old one
-			if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
-				data_free(&freeme);
-				return -ENOMEM;
-			}
-			break;
-		default:
-			return ret;
+	if(fargs->data){
+		// convert data to continious memory space
+		switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) ){
+			case 0: // use old data, it is ok!
+				if( (freehint = memdup(fargs->data, sizeof(data_t))) == NULL){
+					data_free(&freeme);
+					return -ENOMEM;
+				}
+				data_set_void(fargs->data);    // we need current data, so consume it
+				break;
+			case 1: // use converted data, and free old one
+				if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
+					data_free(&freeme);
+					return -ENOMEM;
+				}
+				break;
+			default:
+				return ret;
+		}
 	}
-	
+
 	if(zmq_msg_init_data(&zmq_msg, msg_data, msg_size, &zeromq_t_msg_free, freehint) != 0)
 		return -errno;
 	
@@ -463,10 +468,17 @@ static ssize_t data_zeromq_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		if( (ret = data_zeromq_t_pop(data, &r_pop)) < 0)
 			break;
 		
+		if(zmq_msg_size(item.ptr) == 0){
+			data_free(&item);
+			break;
+		}
+		
 		fastcall_push r_push = { { 3, ACTION_PUSH }, &item };
 		if( (ret = data_query(fargs->dest, &r_push)) < 0)
 			break;
 	}
+	fastcall_push r_push = { { 3, ACTION_PUSH }, NULL }; // EOF
+	data_query(fargs->dest, &r_push);
 	return ret;
 } // }}}
 data_proto_t zmq_proto = { // {{{

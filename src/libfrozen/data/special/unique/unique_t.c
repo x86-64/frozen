@@ -44,6 +44,9 @@ static ssize_t data_unique_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	ssize_t                ret;
 	unique_t              *fdata             = (unique_t *)data->ptr;
 	
+	if(fargs->data == NULL) // EOF
+		return 0;
+	
 	// compare list with single data - if same item exist in list r_compare.result would be 0
 	fastcall_compare r_compare = { { 4, ACTION_COMPARE }, fargs->data };
 	if( (ret = data_query(&fdata->data, &r_compare)) < 0)

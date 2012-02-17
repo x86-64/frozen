@@ -1,11 +1,11 @@
 
 static err_item errs_list[] = {
- { -604, "src/modules/c_zmq/main.c: socket parameter not supplied" },
- { -582, "src/modules/c_zmq/main.c: malloc failed" },
- { -575, "src/modules/c_zmq/main.c: calloc failed" },
- { -448, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
- { -379, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
- { -327, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
+ { -616, "src/modules/c_zmq/main.c: socket parameter not supplied" },
+ { -594, "src/modules/c_zmq/main.c: malloc failed" },
+ { -587, "src/modules/c_zmq/main.c: calloc failed" },
+ { -453, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
+ { -381, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
+ { -329, "src/modules/c_zmq/main.c: zmq_msg_init failed" },
  { -211, "src/modules/c_zmq/main.c: no bind nor connect supplied in zmq options" },
  { -205, "src/modules/c_zmq/main.c: zmq_connect failed" },
  { -196, "src/modules/c_zmq/main.c: zmq_bind failed" },

@@ -153,6 +153,9 @@ static ssize_t data_list_t_free(data_t *data, fastcall_free *fargs){ // {{{
 static ssize_t data_list_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	list_t                *fdata             = (list_t *)data->ptr;
 	
+	if(fargs->data == NULL) // EOF
+		return 0;
+	
 	if(fdata == NULL){
 		if( (fdata = data->ptr = list_t_alloc()) == NULL)
 			return -ENOMEM;
@@ -193,9 +196,15 @@ static ssize_t data_list_t_compare(data_t *data1, fastcall_compare *fargs){ // {
 	return -ENOSYS;
 } // }}}
 static ssize_t data_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	ssize_t                ret;
 	list_t                *fdata             = (list_t *)data->ptr;
 	
-	return list_t_enum(fdata, (list_t_callback)&iter_list_t_enum, fargs);
+	ret = list_t_enum(fdata, (list_t_callback)&iter_list_t_enum, fargs);
+	
+	fastcall_push r_push = { { 3, ACTION_PUSH }, NULL }; // EOF
+	data_query(fargs->dest, &r_push);
+	
+	return ret;
 } // }}}
 
 data_proto_t list_t_proto = {

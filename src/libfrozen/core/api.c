@@ -206,19 +206,22 @@ ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                *pointer;
 	data_t                 holder;
+	data_t                *holder_ptr        = NULL;
 	
-	if( (pointer = hash_data_find(request, HK(data))) == NULL)
-		return -EINVAL;
+	if( (pointer = hash_data_find(request, HK(data))) != NULL){
+		fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+		if( (ret = data_query(pointer, &r_getdata)) < 0)
+			return ret;
+		
+		holder_consume(ret, holder, r_getdata.data);
+		if(ret != 0)
+			return -EINVAL;
+		
+		if(holder.type != TYPE_VOIDT) // same as missing HK(data)
+			holder_ptr = &holder;
+	}
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(pointer, &r_getdata)) < 0)
-		return ret;
-	
-	holder_consume(ret, holder, r_getdata.data);
-	if(ret != 0)
-		return -EINVAL;
-	
-	fastcall_push          fargs             = { { 3, ACTION_PUSH }, &holder };
+	fastcall_push          fargs             = { { 3, ACTION_PUSH }, holder_ptr };
 	return data_query(data, &fargs);
 } // }}}
 

@@ -134,6 +134,9 @@ static ssize_t data_folder_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		if( (ret = data_query(fargs->dest, &r_push)) < 0)
 			break;
 	}
+	fastcall_push r_push = { { 3, ACTION_PUSH }, NULL };
+	data_query(fargs->dest, &r_push);
+	
 	closedir(dir);
 	return ret;
 } // }}}
