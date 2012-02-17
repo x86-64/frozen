@@ -1,8 +1,9 @@
 include(shop.m4)
 include(implode.m4)
 
+// we are here
 { class = "thread" },
-{ class = "emitter", request = {
+{ class = "emitter", request = {                        // write key to db
 	request = {
 		action = (action_t)"write",
 		key    = (raw_t)"testkey",
@@ -14,7 +15,7 @@ include(implode.m4)
 	}
 }},
 
-{ class = "emitter", request = {
+{ class = "emitter", request = {                        // read key from db
 	request = {
 		action = (action_t)"read",
 		key    = (raw_t)"testkey",
@@ -29,12 +30,11 @@ include(implode.m4)
 		{ class = "end" }
 	}
 }},
-//}, count = (uint_t)"100000"},
 
-{ class = "emitter", request = {
+{ class = "emitter", request = {                        // enumerate db
 	request = {
 		action = (action_t)"enum",
-		data   = (zeromq_t){
+		data   = (zeromq_t){                    // our zeromq socket, we pass it to db, so it could use it
 			type    = "push",
 			connect = "tcp://127.0.0.1:8887",
 			lazy    = (uint_t)"1"
@@ -43,7 +43,7 @@ include(implode.m4)
 	machine = (machine_t){
 		SHOP_QUERY(`leveldb'),
 		{ class = "assign", before = {
-			myenum = (zeromq_t){
+			myenum = (zeromq_t){            // this socket we use to get data
 				type = "pull",
 				bind = "tcp://127.0.0.1:8887"
 			},
@@ -61,7 +61,7 @@ include(implode.m4)
 { class = "kill" },
 NULL,
 
-// client
+// helper routines
 SHOP(`leveldb',
 `       IMPLODE(`input', `output',
 	`{
@@ -75,7 +75,9 @@ SHOP(`leveldb',
 	}')
 ')
 
-// server
+// -----------------------------------------------------------
+// leveldb server
+
 { class = "thread", loop = (uint_t)"1" },
 {
 	class  = "modules/zeromq",
@@ -94,6 +96,4 @@ SHOP(`leveldb',
 	}
 },
 { class = "end" }
-
-
 
