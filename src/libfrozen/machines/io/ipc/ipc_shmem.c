@@ -164,21 +164,26 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	size_t                 item_size         = ITEM_SIZE_DEFAULT;
 	uintmax_t              f_async           = 0;
 	uintmax_t              f_sync            = 0;
-	char                  *role_str;
+	char                  *role_str          = NULL;
 	ipc_shmem_userdata    *userdata          = (ipc_shmem_userdata *)ipc->userdata;
 	
 	userdata->buffer        = HK(buffer);
 	userdata->return_result = 1;
 	
 	hash_data_get(ret, TYPE_UINT32T, shmkey,     config, HK(key));  if(ret != 0) return error("no key supplied");
-	hash_data_get(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return error("no role supplied");
+	hash_data_convert(ret, TYPE_STRINGT, role_str,   config, HK(role)); if(ret != 0) return error("no role supplied");
 	hash_data_get(ret, TYPE_SIZET,   item_size,  config, HK(item_size));
 	hash_data_get(ret, TYPE_SIZET,   nitems,     config, HK(size));
 	hash_data_get(ret, TYPE_UINTT,   f_async,    config, HK(force_async));
 	hash_data_get(ret, TYPE_UINTT,   f_sync,     config, HK(force_sync));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->buffer,   config, HK(buffer));
 	hash_data_get(ret, TYPE_UINTT,    userdata->return_result, config, HK(return_result));
-
+	
+	if( (userdata->role = ipc_string_to_role(role_str)) == ROLE_INVALID)
+		return error("invalid role supplied");
+	
+	free(role_str);
+	
 	shmsize = nitems * sizeof(ipc_shmem_block) + nitems * item_size + sizeof(ipc_shmem_header); 
 	
 	if( (shmid = shmget(shmkey, shmsize, IPC_CREAT | 0666)) < 0)
@@ -186,9 +191,6 @@ ssize_t ipc_shmem_init    (ipc_t *ipc, config_t *config){ // {{{
 	
 	if( (userdata->shmaddr = shmat(shmid, NULL, 0)) == (void *)-1)
 		return error("shmat failed");
-	
-	if( (userdata->role = ipc_string_to_role(role_str)) == ROLE_INVALID)
-		return error("invalid role supplied");
 	
 	if( (f_async != 0 && f_sync != 0) )
 		return error("force_async with force_sync");

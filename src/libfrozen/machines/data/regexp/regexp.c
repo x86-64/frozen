@@ -142,7 +142,7 @@ static int regexp_destroy(machine_t *machine){ // {{{
 static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	data_t                *marker_data;
-	char                  *regexp_str;
+	char                  *regexp_str        = NULL;
 	regexp_userdata       *userdata          = (regexp_userdata *)machine->userdata;
 	
 	config_updateflag(config, HK(extended), REG_EXTENDED, &userdata->cflags);
@@ -163,10 +163,10 @@ static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->marker,  config, HK(marker));
 	
-	hash_data_get(ret, TYPE_STRINGT,  regexp_str,        config, HK(regexp));
+	hash_data_convert(ret, TYPE_STRINGT,  regexp_str,    config, HK(regexp));
 	if(ret == 0){
 		free(userdata->regexp_str);
-		userdata->regexp_str = strdup(regexp_str);
+		userdata->regexp_str = regexp_str;
 	}
 	
 	config_freeregexp(userdata);

@@ -99,17 +99,17 @@ static int split_destroy(machine_t *machine){ // {{{
 } // }}}
 static int split_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
-	char                  *split_str;
+	char                  *split_str         = NULL;
 	split_userdata        *userdata          = (split_userdata *)machine->userdata;
 	
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,        config, HK(input));
 	hash_data_get(ret, TYPE_UINTT,    userdata->buffer_size,  config, HK(buffer_size));
 	hash_data_get(ret, TYPE_UINTT,    userdata->dump_last,    config, HK(dump_last));
 	
-	hash_data_get(ret, TYPE_STRINGT,  split_str,              config, HK(split));
+	hash_data_convert(ret, TYPE_STRINGT,  split_str,          config, HK(split));
 	if(ret == 0){
 		free(userdata->split_str);
-		userdata->split_str = strdup(split_str);
+		userdata->split_str = split_str;
 		userdata->split_len = strlen(split_str);
 	}
 	

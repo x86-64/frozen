@@ -98,7 +98,18 @@ hash_name :
 	};
 
 hash_value :
-	  STRING             { $$.type = TYPE_STRINGT; $$.ptr = $1; }
+	  STRING             {
+		data_t                 d_initstr    = DATA_PTR_STRING($1);
+		
+		$$.type = TYPE_RAWT;
+		$$.ptr  = NULL;
+		
+		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if(data_query(&$$, &r_init_str) != 0)
+			emit_error("data string init failed");
+
+		free($1);
+	}
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
 		datatype_t             type;

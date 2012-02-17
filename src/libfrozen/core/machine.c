@@ -207,20 +207,30 @@ ssize_t            machine_new(machine_t **pmachine, hash_t *config){ // {{{
 	char                  *machine_name      = NULL;
 	char                  *machine_class     = NULL;
 	
-	hash_data_get(ret, TYPE_STRINGT, machine_name,  config, HK(name));
-	hash_data_get(ret, TYPE_STRINGT, machine_class, config, HK(class));
+	hash_data_convert(ret, TYPE_STRINGT, machine_name,  config, HK(name));
+	hash_data_convert(ret, TYPE_STRINGT, machine_class, config, HK(class));
 	
-	if(machine_class == NULL || (class = class_find(machine_class)) == NULL)
-		return -EINVAL;
+	if(machine_class == NULL || (class = class_find(machine_class)) == NULL){
+		ret = -EINVAL;
+		goto exit;
+	}
 	
 	if( (machine = machine_find(machine_name)) == NULL ){
-		if( (machine = machine_ghost_new(NULL)) == NULL)
-			return -ENOMEM;
+		if( (machine = machine_ghost_new(NULL)) == NULL){
+			ret = -ENOMEM;
+			goto exit;
+		}
 	}
 	
 	ret = machine_ghost_resurrect(machine, class, config);
 	
 	*pmachine = machine;
+
+exit:
+	if(machine_name)
+		free(machine_name);
+	if(machine_class)
+		free(machine_class);
 	return ret;
 } // }}}
 machine_t *        machine_find(char *name){ // {{{

@@ -560,7 +560,7 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root){ // {{{
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		
-		hash_data_get    (ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
+		hash_data_convert(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));   if(ret != 0) return ITER_BREAK;
 		hash_data_get    (ret, TYPE_UINTT,    item_type,    item_config, HK(folder));
 		hash_data_consume(ret, TYPE_MACHINET, item_machine, item_config, HK(machine));
 		
@@ -570,6 +570,8 @@ static ssize_t fuseb_item_configure(hash_t *hash, vfs_item *root){ // {{{
 			(item_type == 0) ? VFS_FILE : VFS_FOLDER,
 			item_machine
 		);
+
+		free(item_path);
 	}
 	return ITER_CONTINUE;
 } // }}}
@@ -584,12 +586,15 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	if( data->type == TYPE_HASHT ){
 		item_config = (hash_t *)(data->ptr);
 		
-		hash_data_get(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
+		hash_data_convert(ret, TYPE_STRINGT,  item_path,    item_config, HK(path));
 		
-		if( (vfs_item = vfs_item_find(root, item_path, ~0)) == NULL)
+		if( (vfs_item = vfs_item_find(root, item_path, ~0)) == NULL){
+			free(item_path);
 			return ITER_CONTINUE;
+		}
 		
 		vfs_item_destroy(root, vfs_item);
+		free(item_path);
 	}
 	return ITER_CONTINUE;
 } // }}}
@@ -626,7 +631,7 @@ static int fuseb_configure(machine_t *machine, config_t *config){ // {{{
 	fuseb_userdata        *userdata          = machine->userdata;
 	
 	hash_data_get    (ret, TYPE_UINTT,   multithreaded,        config, HK(multithread));
-	hash_data_consume(ret, TYPE_STRINGT, userdata->mountpoint, config, HK(mountpoint));
+	hash_data_convert(ret, TYPE_STRINGT, userdata->mountpoint, config, HK(mountpoint));
 	hash_data_consume(ret, TYPE_HASHT,   userdata->items,      config, HK(items));
 	
 	if(userdata->mountpoint == NULL)
@@ -636,7 +641,8 @@ static int fuseb_configure(machine_t *machine, config_t *config){ // {{{
 		if( (root = vfs_create(userdata->mountpoint, multithreaded)) == NULL)
 			return error("fuse fs creation failed");
 	
-	hash_iter(userdata->items, (hash_iterator)&fuseb_item_configure, (void *)root, 0);
+	if(hash_iter(userdata->items, (hash_iterator)&fuseb_item_configure, (void *)root, 0) != ITER_OK)
+		return error("fuse items confguration failed");
 	return 0;
 } // }}}
 

@@ -141,7 +141,7 @@ static int benchmark_destroy(machine_t *machine){ // {{{
 
 static ssize_t benchmark_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	char                  *function;
+	char                  *function          = NULL;
 	data_t                *value;
 	data_t                *string;
 	char                   buffer[1024];
@@ -149,7 +149,7 @@ static ssize_t benchmark_handler(machine_t *machine, request_t *request){ // {{{
 	
 	userdata->ticks++;
 	
-	hash_data_get(ret, TYPE_STRINGT,  function,  request, HK(benchmark_function));
+	hash_data_convert(ret, TYPE_STRINGT,  function,  request, HK(benchmark_function));
 	if(ret == 0)
 		goto custom;
 	
@@ -161,12 +161,12 @@ custom:
 	
 	if(strcmp(function, "restart") == 0){
 		benchmark_control_restart(machine);
-		return 0;
+		goto exit;
 	}
 	if(strcmp(function, "print_long") == 0){
 		ret = benchmark_control_query_long  (machine, buffer, sizeof(buffer) );
 		printf("%s\n", buffer);
-		return ret;
+		goto exit;
 	}
 	
 	if(string != NULL){
@@ -183,21 +183,24 @@ custom:
 	if(value != NULL && value->type == TYPE_UINTT){
 		if(strcmp(function, "ticks") == 0){
 			benchmark_control_query_ticks(machine, value->ptr );
-			return 0;
+			goto exit;
 		}
 		if(strcmp(function, "ms") == 0){
 			benchmark_control_query_ms(machine, value->ptr );
-			return 0;
+			goto exit;
 		}
 		if(strcmp(function, "us") == 0){
 			benchmark_control_query_us(machine, value->ptr );
-			return 0;
+			goto exit;
 		}
 	}
 	return machine_pass(machine, request);
 write:;
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &buffer, sizeof(buffer) };	
 	data_query(string, &r_write);
+
+exit:
+	free(function);
 	return ret;
 } // }}}
 

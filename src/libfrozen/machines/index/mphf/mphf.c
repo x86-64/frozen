@@ -80,13 +80,18 @@ static int mphf_configure(machine_t *machine, config_t *config){ // {{{
 	char                  *mphf_type_str     = NULL;
 	mphf_userdata         *userdata          = (mphf_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,  config, HK(input));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->output, config, HK(output));
+	
+	hash_data_convert(ret, TYPE_STRINGT,  mphf_type_str,    config, HK(type));
+	if(ret != 0)
+		return error("mphf mphf_type not supplied");
 	
 	if( (userdata->mphf_proto = mphf_string_to_proto(mphf_type_str)) == NULL)
 		return error("machine mphf parameter mphf_type invalid or not supplied");
 	
+	free(mphf_type_str);
+
 	memset(&userdata->mphf, 0, sizeof(userdata->mphf));
 	userdata->broken          = 0;
 	

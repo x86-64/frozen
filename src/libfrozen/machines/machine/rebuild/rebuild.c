@@ -193,10 +193,10 @@ static int rebuildread_configure(machine_t *machine, config_t *config){ // {{{
 	char                  *enum_method_str   = NULL;
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_STRINGT,  enum_method_str,                config, HK(enum_method));
+	hash_data_convert(ret, TYPE_STRINGT,  enum_method_str,                config, HK(enum_method)); if(ret != 0) return error("enum_method");
+	hash_data_convert(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_offset,            config, HK(offset_key));
 	hash_data_get(ret, TYPE_UINTT,   req_rebuild_enable,              config, HK(req_rebuild_enable));
-	hash_data_get(ret, TYPE_STRINGT, req_rebuild_dest,                config, HK(req_rebuild_destination));
 	hash_data_consume(ret, TYPE_HASHT,   req_count,                       config, HK(req_count));
 	hash_data_consume(ret, TYPE_HASHT,   req_read,                        config, HK(req_read));
 	hash_data_consume(ret, TYPE_HASHT,   req_rebuild,                     config, HK(req_rebuild));
@@ -224,6 +224,9 @@ static int rebuildread_configure(machine_t *machine, config_t *config){ // {{{
 	userdata->req_count   = req_count;
 	userdata->req_read    = req_read;
 
+	if(req_rebuild_dest)
+		free(req_rebuild_dest);
+	free(enum_method_str);
 	return 0;
 } // }}}
 
