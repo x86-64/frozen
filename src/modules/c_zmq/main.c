@@ -187,7 +187,7 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 	}
 	if(ret != 0)
 		goto error;
-
+	
 	get_opt(HK(bind),
 		do{
 			if(zmq_bind(fdata->zmq_socket, opt_binary_ptr) == 0){
@@ -206,7 +206,8 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 			}
 		}while(0)
 	);
-	
+	if(ret != 0)
+		goto error;
 	if(ready != 2)
 		ret = error("no bind nor connect supplied in zmq options");
 	
@@ -227,10 +228,18 @@ static void    zeromq_t_destroy(zeromq_t *fdata){ // {{{
 	
 	free(fdata);
 } // }}}
-static ssize_t zeromq_t_prepare(zeromq_t *fdata){ // {{{
+static ssize_t zeromq_t_prepare(zeromq_t *fdata, uintmax_t force){ // {{{
 	ssize_t                ret;
 	
-	if(fdata->zmq_socket == NULL && fdata->lazy == 0){ // if no socket yet created and in lazy mode
+	if(
+		fdata->zmq_socket == NULL &&
+		(
+			force       == 1 ||
+			fdata->lazy == 1
+		)
+	){ // if no socket yet created and in lazy mode
+		fdata->lazy = 0; // drop lazy (don't affect global settings stored in hash)
+		
 		if( (ret = zeromq_t_global_increment()) < 0)
 			return ret;
 		
@@ -252,7 +261,7 @@ static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
 	
 	hash_data_get(ret, TYPE_UINTT, fdata->lazy, fdata->config, HK(lazy));
 	if(fdata->lazy == 0){
-		if( (ret = zeromq_t_prepare(fdata)) < 0)
+		if( (ret = zeromq_t_prepare(fdata, 1)) < 0)
 			return ret;
 	}
 	
@@ -272,7 +281,7 @@ static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs
 	
 	switch(fargs->format){
 		case FORMAT(binary):;
-			data_t             packed           = DATA_PTR_HASHT(&fdata->config);
+			data_t             packed           = DATA_PTR_HASHT(fdata->config);
 			return data_query(&packed, fargs);
 			
 		default:
@@ -282,6 +291,9 @@ static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs
 } // }}}
 static ssize_t data_zeromq_t_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	
+	if(data->ptr != NULL)
+		return 0;
 	
 	switch(fargs->format){
 		case FORMAT(hash):;
@@ -322,7 +334,7 @@ static ssize_t data_zeromq_t_read(data_t *data, fastcall_read *fargs){ // {{{
 	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
-	if( (ret = zeromq_t_prepare(fdata)) < 0)
+	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
 		return ret;
 	
 	if( zmq_msg_init(&zmq_msg) != 0)
@@ -353,7 +365,7 @@ static ssize_t data_zeromq_t_write(data_t *data, fastcall_write *fargs){ // {{{
 	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
-	if( (ret = zeromq_t_prepare(fdata)) < 0)
+	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
 		return ret;
 	
 	if( zmq_msg_init_size(&zmq_msg, fargs->buffer_size) != 0)
@@ -374,7 +386,7 @@ static ssize_t data_zeromq_t_transfer(data_t *data, fastcall_transfer *fargs){ /
 	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
-	if( (ret = zeromq_t_prepare(fdata)) < 0)
+	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
 		return ret;
 	
 	if( zmq_msg_init(&zmq_msg) != 0)
@@ -406,7 +418,7 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
-	if( (ret = zeromq_t_prepare(fdata)) < 0)
+	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
 		return ret;
 	
 	if(fargs->data){
@@ -443,7 +455,7 @@ static ssize_t data_zeromq_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
 	zmq_msg_t             *zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
-	if( (ret = zeromq_t_prepare(fdata)) < 0)
+	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
 		return ret;
 	
 	if( (zmq_msg = malloc(sizeof(zmq_msg_t))) == NULL)
@@ -510,6 +522,7 @@ static ssize_t data_zeromq_msg_t_length(data_t *data, fastcall_length *fargs){ /
 	return 0;
 } // }}}
 static ssize_t data_zeromq_msg_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
 	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
 	
 	fastcall_write r_write = {
@@ -518,7 +531,12 @@ static ssize_t data_zeromq_msg_t_convert_to(data_t *data, fastcall_convert_to *f
 		zmq_msg_data(fdata),
 		zmq_msg_size(fdata)
 	};
-	return data_query(fargs->dest, &r_write);
+	ret = data_query(fargs->dest, &r_write);
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = r_write.buffer_size;
+	
+	return ret;
 } // }}}
 static ssize_t data_zeromq_msg_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;

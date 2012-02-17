@@ -30,6 +30,34 @@ include(implode.m4)
 	}
 }},
 //}, count = (uint_t)"100000"},
+
+{ class = "emitter", request = {
+	request = {
+		action = (action_t)"enum",
+		data   = (zeromq_t){
+			type    = "push",
+			connect = "tcp://127.0.0.1:8887",
+			lazy    = (uint_t)"1"
+		}
+	},
+	machine = (machine_t){
+		SHOP_QUERY(`leveldb'),
+		{ class = "assign", before = {
+			myenum = (zeromq_t){
+				type = "pull",
+				bind = "tcp://127.0.0.1:8887"
+			},
+			buffer = (raw_t){}
+		}},
+		
+		{ class = "modules/mustache", template = "Items list:\n{{#myenum}} - {{data}}\n{{/myenum}}", output = (hashkey_t)"buffer" },
+		{ class = "data/query", data = (fd_t)"stdout", request = {
+			action = (action_t)"write",
+			buffer = (env_t)"buffer"
+		}},
+		{ class = "end" }
+	}
+}},
 { class = "kill" },
 NULL,
 
@@ -60,8 +88,12 @@ SHOP(`leveldb',
 		`{
 			class = "modules/leveldb",
 			path  = "test_leveldb/"
-		}'),
+		}
+		'),
 		{ class = "shop/return" }
 	}
 },
 { class = "end" }
+
+
+

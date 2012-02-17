@@ -147,7 +147,6 @@ static err_item errs_list[] = {
  { -8250, "src/libfrozen/data/storage/file/file_t.c: filename invalid" },
  { -8242, "src/libfrozen/data/storage/file/file_t.c: filename not supplied" },
  { -8232, "src/libfrozen/data/storage/file/file_t.c: calloc returns null" },
- { -5607, "src/libfrozen/core/configs/config_parser.tab.c: data string init failed" },
  { -4222, "src/libfrozen/machines/index/mphf/mphf_bdz_imp.c: mphf g_free" },
 
 };
