@@ -409,20 +409,21 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	// convert data to continious memory space
 	switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) ){
 		case 0: // use old data, it is ok!
-			freehint = fargs->data;
+			if( (freehint = memdup(fargs->data, sizeof(data_t))) == NULL){
+				data_free(&freeme);
+				return -ENOMEM;
+			}
+			data_set_void(fargs->data);    // we need current data, so consume it
 			break;
 		case 1: // use converted data, and free old one
-			freehint = &freeme;
-			data_free(fargs->data);
+			if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
+				data_free(&freeme);
+				return -ENOMEM;
+			}
 			break;
 		default:
 			return ret;
 	}
-	if( (freehint = memdup(freehint, sizeof(data_t))) == NULL){
-		data_free(&freeme);
-		return -ENOMEM;
-	}
-	data_set_void(fargs->data);
 	
 	if(zmq_msg_init_data(&zmq_msg, msg_data, msg_size, &zeromq_t_msg_free, freehint) != 0)
 		return -errno;
@@ -512,6 +513,7 @@ static ssize_t data_zeromq_msg_t_free(data_t *data, fastcall_free *fargs){ // {{
 	
 	zmq_msg_close(fdata);
 	free(fdata);
+	data_set_void(data);
 	return 0;
 } // }}}
 static ssize_t data_zeromq_msg_t_nosys(data_t *data, fastcall_header *hargs){ // {{{
@@ -533,7 +535,8 @@ data_proto_t zmq_msg_proto = { // {{{
 typedef struct zeromq_userdata {
 	data_t                 socket;
 	data_t                 shop;
-	hashkey_t              hk_buffer;
+	hashkey_t              hk_input;
+	hashkey_t              hk_output;
 	machine_t             *zmq_end;
 } zeromq_userdata;
 
@@ -549,7 +552,7 @@ static ssize_t zmq_end_handler(machine_t *machine, request_t *request){ // {{{
 	if(r_getdata.data->type != TYPE_ZEROMQT)
 		return -EINVAL;
 	
-	if( (buffer = hash_data_find(request, userdata->hk_buffer)) == NULL )
+	if( (buffer = hash_data_find(request, userdata->hk_input)) == NULL )
 		return -EINVAL;
 	
 	fastcall_push r_push = { { 3, ACTION_PUSH }, buffer };
@@ -571,7 +574,8 @@ static int zeromq_init(machine_t *machine){ // {{{
 	if((userdata = machine->userdata = calloc(1, sizeof(zeromq_userdata))) == NULL)
 		return error("calloc failed");
 	
-	userdata->hk_buffer = HK(buffer);
+	userdata->hk_input  = HK(buffer);
+	userdata->hk_output = HK(buffer);
 	
 	if( (userdata->zmq_end = memdup(&zmq_end_proto, sizeof(machine_t))) == NULL){
 		free(userdata);
@@ -592,7 +596,8 @@ static int zeromq_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_buffer, config, HK(buffer));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_input,  config, HK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_output, config, HK(output));
 	hash_holder_consume(ret, userdata->shop,    config, HK(shop));
 	hash_holder_consume(ret, userdata->socket,  config, HK(socket));
 	if(ret != 0)
@@ -603,7 +608,8 @@ static int zeromq_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	data_t                *buffer;
+	data_t                 item;
+	data_t                *input;
 	zeromq_t              *socket_fdata;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
@@ -618,34 +624,45 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
-			if( (buffer = hash_data_find(request, userdata->hk_buffer)) == NULL )
+			if( (input = hash_data_find(request, userdata->hk_input)) == NULL )
 				return -EINVAL;
 			
-			fastcall_push r_req_push = { { 3, ACTION_PUSH }, buffer };
-			if( (ret = data_query(r_getdata.data, &r_req_push)) < 0)
+			fastcall_push r_req_push = { { 3, ACTION_PUSH }, input };
+			if( (ret = data_query(r_getdata.data, &r_req_push)) < 0)          // input buffer consumed here
 				return ret;
 			
-			fastcall_pop  r_req_pop  = { { 3, ACTION_POP  }, buffer };
-			if( (ret = data_query(r_getdata.data, &r_req_pop)) < 0)
+			fastcall_pop  r_req_pop  = { { 3, ACTION_POP  }, &item };
+			if( (ret = data_query(r_getdata.data, &r_req_pop)) < 0)           // new message allocated here
 				return ret;
+			
+			request_t r_req_next[] = {
+				{ userdata->hk_output, item                              },
+				hash_inline(request),
+				hash_end
+			};
+			ret = machine_pass(machine, r_req_next);
+			data_free(&r_req_next[0].data);                                   // new message free'd here, if not consumed
+			return ret;
 			
 			break;
 			
 		case ZMQ_REP:;
-			data_t            item;
 			
 			fastcall_pop  r_rep_pop  = { { 3, ACTION_POP  }, &item };
-			if( (ret = data_query(r_getdata.data, &r_rep_pop)) < 0)
+			if( (ret = data_query(r_getdata.data, &r_rep_pop)) < 0)           // message allocated here
 				return ret;
 			
 			request_t r_next[] = {
+				{ userdata->hk_output,  item                             },
 				{ HK(return_to),        DATA_MACHINET(userdata->zmq_end) },
-				{ userdata->hk_buffer,  item                             },
 				hash_inline(request),
 				hash_end
 			};
 			fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-			return data_query(&userdata->shop, &r_query);
+			ret = data_query(&userdata->shop, &r_query);
+			
+			data_free(&r_next[0].data);                                       // message free'd here, if not consumed
+			return ret;
 
 		default:
 			

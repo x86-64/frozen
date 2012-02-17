@@ -29,19 +29,21 @@ include(implode.m4)
 		{ class = "end" }
 	}
 }},
+//}, count = (uint_t)"100000"},
 { class = "kill" },
 NULL,
 
 // client
 SHOP(`leveldb',
-`       IMPLODE(`packed',
+`       IMPLODE(`input', `output',
 	`{
 		class  = "modules/zeromq",
 		socket = (zeromq_t){
 			type = "req",
 			connect = "tcp://127.0.0.1:8888"
 		},
-		buffer = (hashkey_t)"packed"
+		input  = (hashkey_t)"input",
+		output = (hashkey_t)"output"
 	}')
 ')
 
@@ -54,7 +56,7 @@ SHOP(`leveldb',
 		bind = "tcp://127.0.0.1:8888"
 	},
 	shop = (machine_t){
-		EXPLODE(`buffer',
+		EXPLODE(`buffer', `buffer',
 		`{
 			class = "modules/leveldb",
 			path  = "test_leveldb/"
