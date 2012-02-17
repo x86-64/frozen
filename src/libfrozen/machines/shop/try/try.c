@@ -192,12 +192,28 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	
 	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
 	if( (ret = data_query(&userdata->machine, &r_query)) < 0){
-		request_t r_pass[] = {
-			{ HK(ret), DATA_PTR_SIZET(&ret) },
-			hash_inline(request),
-			hash_end
-		};
-		threaddata->ret = machine_pass(machine, r_pass);
+		if(userdata->request == 0){
+			request_t r_pass[] = {
+				{ HK(ret), DATA_PTR_SIZET(&ret) },
+				hash_inline(request),
+				hash_end
+			};
+			threaddata->ret = machine_pass(machine, r_pass);
+		}else{
+			request_t r_pass[] = {
+				{ HK(ret), DATA_PTR_SIZET(&ret) },
+				hash_inline(try_request),
+				hash_end
+			};
+			
+			request_t r_next[] = {
+				{ HK(ret),               DATA_PTR_SIZET(&ret)   },
+				{ userdata->request_out, DATA_PTR_HASHT(r_pass) },
+				hash_inline(request),
+				hash_end
+			};
+			threaddata->ret = machine_pass(machine, r_next);
+		}
 	}
 	
 	data_free(&freeme);
