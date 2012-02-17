@@ -58,118 +58,121 @@
 <a name="l00002"></a>00002 <span class="preprocessor">#ifndef ACTIONS_H</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span><span class="preprocessor">#define ACTIONS_H</span>
 <a name="l00004"></a>00004 <span class="preprocessor"></span><span class="preprocessor">#define ACT ION(value)         ACTION_VALUE_##value</span>
-<a name="l00005"></a>00005 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ADD 0</span>
-<a name="l00006"></a>00006 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ALLOC 1</span>
-<a name="l00007"></a>00007 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COMPARE 2</span>
-<a name="l00008"></a>00008 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CONVERT_FROM 3</span>
-<a name="l00009"></a>00009 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CONVERT_TO 4</span>
-<a name="l00010"></a>00010 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COPY 5</span>
-<a name="l00011"></a>00011 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COUNT 6</span>
-<a name="l00012"></a>00012 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CREATE 7</span>
-<a name="l00013"></a>00013 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CUSTOM 8</span>
-<a name="l00014"></a>00014 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DECREMENT 9</span>
-<a name="l00015"></a>00015 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DELETE 10</span>
-<a name="l00016"></a>00016 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DIVIDE 11</span>
-<a name="l00017"></a>00017 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ENUM 12</span>
-<a name="l00018"></a>00018 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_EXECUTE 13</span>
-<a name="l00019"></a>00019 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_FREE 14</span>
-<a name="l00020"></a>00020 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_GETDATA 15</span>
-<a name="l00021"></a>00021 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_GETDATAPTR 16</span>
-<a name="l00022"></a>00022 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_INCREMENT 17</span>
-<a name="l00023"></a>00023 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_IS_NULL 18</span>
-<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_LENGTH 19</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_MULTIPLY 20</span>
-<a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_POP 21</span>
-<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_PUSH 22</span>
-<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_QUERY 23</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_READ 24</span>
-<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_REBUILD 25</span>
-<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_RESIZE 26</span>
-<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_START 27</span>
-<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_STOP 28</span>
-<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_SUB 29</span>
-<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_TRANSFER 30</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_WRITE 31</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> action_t {
-<a name="l00038"></a>00038       ACTION_ADD = ACTION_VALUE_ADD, 
-<a name="l00039"></a>00039       ACTION_ALLOC = ACTION_VALUE_ALLOC, 
-<a name="l00040"></a>00040       ACTION_COMPARE = ACTION_VALUE_COMPARE, 
-<a name="l00041"></a>00041       ACTION_CONVERT_FROM = ACTION_VALUE_CONVERT_FROM, 
-<a name="l00042"></a>00042       ACTION_CONVERT_TO = ACTION_VALUE_CONVERT_TO, 
-<a name="l00043"></a>00043       ACTION_COPY = ACTION_VALUE_COPY, 
-<a name="l00044"></a>00044       ACTION_COUNT = ACTION_VALUE_COUNT, 
-<a name="l00045"></a>00045       ACTION_CREATE = ACTION_VALUE_CREATE, 
-<a name="l00046"></a>00046       ACTION_CUSTOM = ACTION_VALUE_CUSTOM, 
-<a name="l00047"></a>00047       ACTION_DECREMENT = ACTION_VALUE_DECREMENT, 
-<a name="l00048"></a>00048       ACTION_DELETE = ACTION_VALUE_DELETE, 
-<a name="l00049"></a>00049       ACTION_DIVIDE = ACTION_VALUE_DIVIDE, 
-<a name="l00050"></a>00050       ACTION_ENUM = ACTION_VALUE_ENUM, 
-<a name="l00051"></a>00051       ACTION_EXECUTE = ACTION_VALUE_EXECUTE, 
-<a name="l00052"></a>00052       ACTION_FREE = ACTION_VALUE_FREE, 
-<a name="l00053"></a>00053       ACTION_GETDATA = ACTION_VALUE_GETDATA, 
-<a name="l00054"></a>00054       ACTION_GETDATAPTR = ACTION_VALUE_GETDATAPTR, 
-<a name="l00055"></a>00055       ACTION_INCREMENT = ACTION_VALUE_INCREMENT, 
-<a name="l00056"></a>00056       ACTION_IS_NULL = ACTION_VALUE_IS_NULL, 
-<a name="l00057"></a>00057       ACTION_LENGTH = ACTION_VALUE_LENGTH, 
-<a name="l00058"></a>00058       ACTION_MULTIPLY = ACTION_VALUE_MULTIPLY, 
-<a name="l00059"></a>00059       ACTION_POP = ACTION_VALUE_POP, 
-<a name="l00060"></a>00060       ACTION_PUSH = ACTION_VALUE_PUSH, 
-<a name="l00061"></a>00061       ACTION_QUERY = ACTION_VALUE_QUERY, 
-<a name="l00062"></a>00062       ACTION_READ = ACTION_VALUE_READ, 
-<a name="l00063"></a>00063       ACTION_REBUILD = ACTION_VALUE_REBUILD, 
-<a name="l00064"></a>00064       ACTION_RESIZE = ACTION_VALUE_RESIZE, 
-<a name="l00065"></a>00065       ACTION_START = ACTION_VALUE_START, 
-<a name="l00066"></a>00066       ACTION_STOP = ACTION_VALUE_STOP, 
-<a name="l00067"></a>00067       ACTION_SUB = ACTION_VALUE_SUB, 
-<a name="l00068"></a>00068       ACTION_TRANSFER = ACTION_VALUE_TRANSFER, 
-<a name="l00069"></a>00069       ACTION_WRITE = ACTION_VALUE_WRITE, 
-<a name="l00070"></a>00070       ACTION_INVALID = 32
-<a name="l00071"></a>00071 } action_t;
-<a name="l00072"></a>00072 <span class="preprocessor">#endif</span>
-<a name="l00073"></a>00073 <span class="preprocessor"></span>
-<a name="l00074"></a>00074 <span class="preprocessor">#ifdef ACTION_C</span>
-<a name="l00075"></a>00075 <span class="preprocessor"></span><a class="code" href="structkeypair__t.html">keypair_t</a> actions[] = {
-<a name="l00076"></a>00076       { <span class="stringliteral">&quot;ADD&quot;</span>, ACTION_VALUE_ADD }, 
-<a name="l00077"></a>00077       { <span class="stringliteral">&quot;ALLOC&quot;</span>, ACTION_VALUE_ALLOC }, 
-<a name="l00078"></a>00078       { <span class="stringliteral">&quot;COMPARE&quot;</span>, ACTION_VALUE_COMPARE }, 
-<a name="l00079"></a>00079       { <span class="stringliteral">&quot;CONVERT_FROM&quot;</span>, ACTION_VALUE_CONVERT_FROM }, 
-<a name="l00080"></a>00080       { <span class="stringliteral">&quot;CONVERT_TO&quot;</span>, ACTION_VALUE_CONVERT_TO }, 
-<a name="l00081"></a>00081       { <span class="stringliteral">&quot;COPY&quot;</span>, ACTION_VALUE_COPY }, 
-<a name="l00082"></a>00082       { <span class="stringliteral">&quot;COUNT&quot;</span>, ACTION_VALUE_COUNT }, 
-<a name="l00083"></a>00083       { <span class="stringliteral">&quot;CREATE&quot;</span>, ACTION_VALUE_CREATE }, 
-<a name="l00084"></a>00084       { <span class="stringliteral">&quot;CUSTOM&quot;</span>, ACTION_VALUE_CUSTOM }, 
-<a name="l00085"></a>00085       { <span class="stringliteral">&quot;DECREMENT&quot;</span>, ACTION_VALUE_DECREMENT }, 
-<a name="l00086"></a>00086       { <span class="stringliteral">&quot;DELETE&quot;</span>, ACTION_VALUE_DELETE }, 
-<a name="l00087"></a>00087       { <span class="stringliteral">&quot;DIVIDE&quot;</span>, ACTION_VALUE_DIVIDE }, 
-<a name="l00088"></a>00088       { <span class="stringliteral">&quot;ENUM&quot;</span>, ACTION_VALUE_ENUM }, 
-<a name="l00089"></a>00089       { <span class="stringliteral">&quot;EXECUTE&quot;</span>, ACTION_VALUE_EXECUTE }, 
-<a name="l00090"></a>00090       { <span class="stringliteral">&quot;FREE&quot;</span>, ACTION_VALUE_FREE }, 
-<a name="l00091"></a>00091       { <span class="stringliteral">&quot;GETDATA&quot;</span>, ACTION_VALUE_GETDATA }, 
-<a name="l00092"></a>00092       { <span class="stringliteral">&quot;GETDATAPTR&quot;</span>, ACTION_VALUE_GETDATAPTR }, 
-<a name="l00093"></a>00093       { <span class="stringliteral">&quot;INCREMENT&quot;</span>, ACTION_VALUE_INCREMENT }, 
-<a name="l00094"></a>00094       { <span class="stringliteral">&quot;IS_NULL&quot;</span>, ACTION_VALUE_IS_NULL }, 
-<a name="l00095"></a>00095       { <span class="stringliteral">&quot;LENGTH&quot;</span>, ACTION_VALUE_LENGTH }, 
-<a name="l00096"></a>00096       { <span class="stringliteral">&quot;MULTIPLY&quot;</span>, ACTION_VALUE_MULTIPLY }, 
-<a name="l00097"></a>00097       { <span class="stringliteral">&quot;POP&quot;</span>, ACTION_VALUE_POP }, 
-<a name="l00098"></a>00098       { <span class="stringliteral">&quot;PUSH&quot;</span>, ACTION_VALUE_PUSH }, 
-<a name="l00099"></a>00099       { <span class="stringliteral">&quot;QUERY&quot;</span>, ACTION_VALUE_QUERY }, 
-<a name="l00100"></a>00100       { <span class="stringliteral">&quot;READ&quot;</span>, ACTION_VALUE_READ }, 
-<a name="l00101"></a>00101       { <span class="stringliteral">&quot;REBUILD&quot;</span>, ACTION_VALUE_REBUILD }, 
-<a name="l00102"></a>00102       { <span class="stringliteral">&quot;RESIZE&quot;</span>, ACTION_VALUE_RESIZE }, 
-<a name="l00103"></a>00103       { <span class="stringliteral">&quot;START&quot;</span>, ACTION_VALUE_START }, 
-<a name="l00104"></a>00104       { <span class="stringliteral">&quot;STOP&quot;</span>, ACTION_VALUE_STOP }, 
-<a name="l00105"></a>00105       { <span class="stringliteral">&quot;SUB&quot;</span>, ACTION_VALUE_SUB }, 
-<a name="l00106"></a>00106       { <span class="stringliteral">&quot;TRANSFER&quot;</span>, ACTION_VALUE_TRANSFER }, 
-<a name="l00107"></a>00107       { <span class="stringliteral">&quot;WRITE&quot;</span>, ACTION_VALUE_WRITE }, 
-<a name="l00108"></a>00108       { NULL, 0 }  
-<a name="l00109"></a>00109 };
-<a name="l00110"></a>00110 <span class="preprocessor">#endif</span>
+<a name="l00005"></a>00005 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ACQUIRE 0</span>
+<a name="l00006"></a>00006 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ADD 1</span>
+<a name="l00007"></a>00007 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ALLOC 2</span>
+<a name="l00008"></a>00008 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COMPARE 3</span>
+<a name="l00009"></a>00009 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CONVERT_FROM 4</span>
+<a name="l00010"></a>00010 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CONVERT_TO 5</span>
+<a name="l00011"></a>00011 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COPY 6</span>
+<a name="l00012"></a>00012 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_COUNT 7</span>
+<a name="l00013"></a>00013 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CREATE 8</span>
+<a name="l00014"></a>00014 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_CUSTOM 9</span>
+<a name="l00015"></a>00015 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DECREMENT 10</span>
+<a name="l00016"></a>00016 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DELETE 11</span>
+<a name="l00017"></a>00017 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_DIVIDE 12</span>
+<a name="l00018"></a>00018 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_ENUM 13</span>
+<a name="l00019"></a>00019 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_EXECUTE 14</span>
+<a name="l00020"></a>00020 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_FREE 15</span>
+<a name="l00021"></a>00021 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_GETDATA 16</span>
+<a name="l00022"></a>00022 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_GETDATAPTR 17</span>
+<a name="l00023"></a>00023 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_INCREMENT 18</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_IS_NULL 19</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_LENGTH 20</span>
+<a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_MULTIPLY 21</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_POP 22</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_PUSH 23</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_QUERY 24</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_READ 25</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_REBUILD 26</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_RESIZE 27</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_START 28</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_STOP 29</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_SUB 30</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_TRANSFER 31</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define ACTION_VALUE_WRITE 32</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> action_t {
+<a name="l00039"></a>00039       ACTION_ACQUIRE = ACTION_VALUE_ACQUIRE, 
+<a name="l00040"></a>00040       ACTION_ADD = ACTION_VALUE_ADD, 
+<a name="l00041"></a>00041       ACTION_ALLOC = ACTION_VALUE_ALLOC, 
+<a name="l00042"></a>00042       ACTION_COMPARE = ACTION_VALUE_COMPARE, 
+<a name="l00043"></a>00043       ACTION_CONVERT_FROM = ACTION_VALUE_CONVERT_FROM, 
+<a name="l00044"></a>00044       ACTION_CONVERT_TO = ACTION_VALUE_CONVERT_TO, 
+<a name="l00045"></a>00045       ACTION_COPY = ACTION_VALUE_COPY, 
+<a name="l00046"></a>00046       ACTION_COUNT = ACTION_VALUE_COUNT, 
+<a name="l00047"></a>00047       ACTION_CREATE = ACTION_VALUE_CREATE, 
+<a name="l00048"></a>00048       ACTION_CUSTOM = ACTION_VALUE_CUSTOM, 
+<a name="l00049"></a>00049       ACTION_DECREMENT = ACTION_VALUE_DECREMENT, 
+<a name="l00050"></a>00050       ACTION_DELETE = ACTION_VALUE_DELETE, 
+<a name="l00051"></a>00051       ACTION_DIVIDE = ACTION_VALUE_DIVIDE, 
+<a name="l00052"></a>00052       ACTION_ENUM = ACTION_VALUE_ENUM, 
+<a name="l00053"></a>00053       ACTION_EXECUTE = ACTION_VALUE_EXECUTE, 
+<a name="l00054"></a>00054       ACTION_FREE = ACTION_VALUE_FREE, 
+<a name="l00055"></a>00055       ACTION_GETDATA = ACTION_VALUE_GETDATA, 
+<a name="l00056"></a>00056       ACTION_GETDATAPTR = ACTION_VALUE_GETDATAPTR, 
+<a name="l00057"></a>00057       ACTION_INCREMENT = ACTION_VALUE_INCREMENT, 
+<a name="l00058"></a>00058       ACTION_IS_NULL = ACTION_VALUE_IS_NULL, 
+<a name="l00059"></a>00059       ACTION_LENGTH = ACTION_VALUE_LENGTH, 
+<a name="l00060"></a>00060       ACTION_MULTIPLY = ACTION_VALUE_MULTIPLY, 
+<a name="l00061"></a>00061       ACTION_POP = ACTION_VALUE_POP, 
+<a name="l00062"></a>00062       ACTION_PUSH = ACTION_VALUE_PUSH, 
+<a name="l00063"></a>00063       ACTION_QUERY = ACTION_VALUE_QUERY, 
+<a name="l00064"></a>00064       ACTION_READ = ACTION_VALUE_READ, 
+<a name="l00065"></a>00065       ACTION_REBUILD = ACTION_VALUE_REBUILD, 
+<a name="l00066"></a>00066       ACTION_RESIZE = ACTION_VALUE_RESIZE, 
+<a name="l00067"></a>00067       ACTION_START = ACTION_VALUE_START, 
+<a name="l00068"></a>00068       ACTION_STOP = ACTION_VALUE_STOP, 
+<a name="l00069"></a>00069       ACTION_SUB = ACTION_VALUE_SUB, 
+<a name="l00070"></a>00070       ACTION_TRANSFER = ACTION_VALUE_TRANSFER, 
+<a name="l00071"></a>00071       ACTION_WRITE = ACTION_VALUE_WRITE, 
+<a name="l00072"></a>00072       ACTION_INVALID = 33
+<a name="l00073"></a>00073 } action_t;
+<a name="l00074"></a>00074 <span class="preprocessor">#endif</span>
+<a name="l00075"></a>00075 <span class="preprocessor"></span>
+<a name="l00076"></a>00076 <span class="preprocessor">#ifdef ACTION_C</span>
+<a name="l00077"></a>00077 <span class="preprocessor"></span><a class="code" href="structkeypair__t.html">keypair_t</a> actions[] = {
+<a name="l00078"></a>00078       { <span class="stringliteral">&quot;ACQUIRE&quot;</span>, ACTION_VALUE_ACQUIRE }, 
+<a name="l00079"></a>00079       { <span class="stringliteral">&quot;ADD&quot;</span>, ACTION_VALUE_ADD }, 
+<a name="l00080"></a>00080       { <span class="stringliteral">&quot;ALLOC&quot;</span>, ACTION_VALUE_ALLOC }, 
+<a name="l00081"></a>00081       { <span class="stringliteral">&quot;COMPARE&quot;</span>, ACTION_VALUE_COMPARE }, 
+<a name="l00082"></a>00082       { <span class="stringliteral">&quot;CONVERT_FROM&quot;</span>, ACTION_VALUE_CONVERT_FROM }, 
+<a name="l00083"></a>00083       { <span class="stringliteral">&quot;CONVERT_TO&quot;</span>, ACTION_VALUE_CONVERT_TO }, 
+<a name="l00084"></a>00084       { <span class="stringliteral">&quot;COPY&quot;</span>, ACTION_VALUE_COPY }, 
+<a name="l00085"></a>00085       { <span class="stringliteral">&quot;COUNT&quot;</span>, ACTION_VALUE_COUNT }, 
+<a name="l00086"></a>00086       { <span class="stringliteral">&quot;CREATE&quot;</span>, ACTION_VALUE_CREATE }, 
+<a name="l00087"></a>00087       { <span class="stringliteral">&quot;CUSTOM&quot;</span>, ACTION_VALUE_CUSTOM }, 
+<a name="l00088"></a>00088       { <span class="stringliteral">&quot;DECREMENT&quot;</span>, ACTION_VALUE_DECREMENT }, 
+<a name="l00089"></a>00089       { <span class="stringliteral">&quot;DELETE&quot;</span>, ACTION_VALUE_DELETE }, 
+<a name="l00090"></a>00090       { <span class="stringliteral">&quot;DIVIDE&quot;</span>, ACTION_VALUE_DIVIDE }, 
+<a name="l00091"></a>00091       { <span class="stringliteral">&quot;ENUM&quot;</span>, ACTION_VALUE_ENUM }, 
+<a name="l00092"></a>00092       { <span class="stringliteral">&quot;EXECUTE&quot;</span>, ACTION_VALUE_EXECUTE }, 
+<a name="l00093"></a>00093       { <span class="stringliteral">&quot;FREE&quot;</span>, ACTION_VALUE_FREE }, 
+<a name="l00094"></a>00094       { <span class="stringliteral">&quot;GETDATA&quot;</span>, ACTION_VALUE_GETDATA }, 
+<a name="l00095"></a>00095       { <span class="stringliteral">&quot;GETDATAPTR&quot;</span>, ACTION_VALUE_GETDATAPTR }, 
+<a name="l00096"></a>00096       { <span class="stringliteral">&quot;INCREMENT&quot;</span>, ACTION_VALUE_INCREMENT }, 
+<a name="l00097"></a>00097       { <span class="stringliteral">&quot;IS_NULL&quot;</span>, ACTION_VALUE_IS_NULL }, 
+<a name="l00098"></a>00098       { <span class="stringliteral">&quot;LENGTH&quot;</span>, ACTION_VALUE_LENGTH }, 
+<a name="l00099"></a>00099       { <span class="stringliteral">&quot;MULTIPLY&quot;</span>, ACTION_VALUE_MULTIPLY }, 
+<a name="l00100"></a>00100       { <span class="stringliteral">&quot;POP&quot;</span>, ACTION_VALUE_POP }, 
+<a name="l00101"></a>00101       { <span class="stringliteral">&quot;PUSH&quot;</span>, ACTION_VALUE_PUSH }, 
+<a name="l00102"></a>00102       { <span class="stringliteral">&quot;QUERY&quot;</span>, ACTION_VALUE_QUERY }, 
+<a name="l00103"></a>00103       { <span class="stringliteral">&quot;READ&quot;</span>, ACTION_VALUE_READ }, 
+<a name="l00104"></a>00104       { <span class="stringliteral">&quot;REBUILD&quot;</span>, ACTION_VALUE_REBUILD }, 
+<a name="l00105"></a>00105       { <span class="stringliteral">&quot;RESIZE&quot;</span>, ACTION_VALUE_RESIZE }, 
+<a name="l00106"></a>00106       { <span class="stringliteral">&quot;START&quot;</span>, ACTION_VALUE_START }, 
+<a name="l00107"></a>00107       { <span class="stringliteral">&quot;STOP&quot;</span>, ACTION_VALUE_STOP }, 
+<a name="l00108"></a>00108       { <span class="stringliteral">&quot;SUB&quot;</span>, ACTION_VALUE_SUB }, 
+<a name="l00109"></a>00109       { <span class="stringliteral">&quot;TRANSFER&quot;</span>, ACTION_VALUE_TRANSFER }, 
+<a name="l00110"></a>00110       { <span class="stringliteral">&quot;WRITE&quot;</span>, ACTION_VALUE_WRITE }, 
+<a name="l00111"></a>00111       { NULL, 0 }  
+<a name="l00112"></a>00112 };
+<a name="l00113"></a>00113 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 10 2012 21:54:35 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

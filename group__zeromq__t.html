@@ -56,7 +56,7 @@
 
 <h3><a class="anchor" id="page_zmq_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> some = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
-              type                    =                     # socket type to create, see man zmq_socket
+              type                    =                     <span class="comment">// socket type to create, see man zmq_socket</span>
                                         <span class="stringliteral">&quot;req&quot;</span>,
                                         <span class="stringliteral">&quot;rep&quot;</span>,
                                         <span class="stringliteral">&quot;dealer&quot;</span>,
@@ -66,15 +66,31 @@
                                         <span class="stringliteral">&quot;push&quot;</span>,
                                         <span class="stringliteral">&quot;pull&quot;</span>,
                                         <span class="stringliteral">&quot;pair&quot;</span>,
-              identity                = <span class="stringliteral">&quot;ident&quot;</span>,            # <span class="keyword">set</span> socket identity
-              bind                    = <span class="stringliteral">&quot;tcp://&quot;</span>,           # bind socket to            OR
-              connect                 = <span class="stringliteral">&quot;tcp://&quot;</span>.           # connect socket to
+              identity                = <span class="stringliteral">&quot;ident&quot;</span>,            <span class="comment">// set socket identity</span>
+              bind                    = <span class="stringliteral">&quot;tcp://&quot;</span>,           <span class="comment">// bind socket to            OR</span>
+              connect                 = <span class="stringliteral">&quot;tcp://&quot;</span>.           <span class="comment">// connect socket to</span>
+              subscribe               = <span class="stringliteral">&quot;filter&quot;</span>,           <span class="comment">// see zmq_setsockopt manual</span>
+              unsubscribe             = <span class="stringliteral">&quot;filter&quot;</span>,           <span class="comment">// see zmq_setsockopt manual</span>
+              hwm                     = (uint64_t)<span class="stringliteral">&quot;0&quot;</span>,      <span class="comment">// see zmq_setsockopt manual</span>
+              affinity                = (uint64_t)<span class="stringliteral">&quot;0&quot;</span>,      <span class="comment">// see zmq_setsockopt manual</span>
+              sndbuf_size             = (uint64_t)<span class="stringliteral">&quot;0&quot;</span>,      <span class="comment">// see zmq_setsockopt manual</span>
+              rcvbuf_size             = (uint64_t)<span class="stringliteral">&quot;0&quot;</span>,      <span class="comment">// see zmq_setsockopt manual</span>
+              swap                    = (int64_t)<span class="stringliteral">&quot;0&quot;</span>,       <span class="comment">// see zmq_setsockopt manual</span>
+              rate                    = (int64_t)<span class="stringliteral">&quot;0&quot;</span>,       <span class="comment">// see zmq_setsockopt manual</span>
+              recovery_ivl            = (int64_t)<span class="stringliteral">&quot;0&quot;</span>,       <span class="comment">// see zmq_setsockopt manual</span>
+              recovery_ivl_msec       = (int64_t)<span class="stringliteral">&quot;0&quot;</span>,       <span class="comment">// see zmq_setsockopt manual</span>
+              mcast_loop              = (int64_t)<span class="stringliteral">&quot;0&quot;</span>,       <span class="comment">// see zmq_setsockopt manual</span>
+              linger                  = (int_t)<span class="stringliteral">&quot;0&quot;</span>,         <span class="comment">// see zmq_setsockopt manual</span>
+              reconnect_ivl           = (int_t)<span class="stringliteral">&quot;0&quot;</span>,         <span class="comment">// see zmq_setsockopt manual</span>
+              reconnect_ivl_max       = (int_t)<span class="stringliteral">&quot;0&quot;</span>,         <span class="comment">// see zmq_setsockopt manual</span>
+              backlog                 = (int_t)<span class="stringliteral">&quot;0&quot;</span>,         <span class="comment">// see zmq_setsockopt manual</span>
+              lazy                    = (uint_t)<span class="stringliteral">&quot;1&quot;</span>         <span class="comment">// do not create socket until it actually need</span>
  }
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 10 2012 21:54:36 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

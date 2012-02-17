@@ -86,8 +86,8 @@
 <a name="l00120"></a>00120 <span class="preprocessor"></span>
 <a name="l00121"></a>00121 <span class="preprocessor">#define hash_null         {hash_ptr_null,    {0, NULL}}            ///&lt; Mark null item here</span>
 <a name="l00122"></a>00122 <span class="preprocessor"></span><span class="preprocessor">#define hash_inline(hash) {hash_ptr_inline,  DATA_PTR_HASHT(hash)} ///&lt; Mark inline hash here</span>
-<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="preprocessor">#define hash_next(hash)   {hash_ptr_end,     {0, (void *)hash}} ///&lt; Mark next hash  // TODO deprecate</span>
-<a name="l00124"></a>00124 <span class="preprocessor"></span><span class="preprocessor">#define hash_end          hash_next(NULL)    ///&lt; Mark hash end</span>
+<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="preprocessor">#define hash_end          {hash_ptr_end, {0,NULL}}                 ///&lt; Mark hash end</span>
+<a name="l00124"></a>00124 <span class="preprocessor"></span><span class="preprocessor">#define hash_next(hash)   hash_inline(hash), hash_end              ///&lt; Mark next hash</span>
 <a name="l00125"></a>00125 <span class="preprocessor"></span>
 <a name="l00126"></a>00126 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *           hash_new                     (<span class="keywordtype">size_t</span> nelements);  
 <a name="l00127"></a>00127 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *           hash_copy                    (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *hash);      
@@ -166,7 +166,7 @@
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 10 2012 21:54:35 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

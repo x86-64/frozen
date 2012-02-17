@@ -51,23 +51,28 @@
 <div class="contents">
 
 
-<h3><a class="anchor" id="page_try_info"></a>Description</h3><div class="textblock"><p>This machine try pass current request to user-supplied machine. Even if error occured - it pass request with error number to next machine. </p>
+<h3><a class="anchor" id="page_try_info"></a>Description</h3><div class="textblock"><p>This machine try pass current request to user-supplied shop. Request will reach next machine in two cases: </p>
+<ul>
+<li>User-supplied shop successfully process request and ends up with shop/return </li>
+<li>If error occured - shop/try pass current request with HK(ret) key with error number. </li>
+</ul>
 </div>
 
 <h3><a class="anchor" id="page_try_config"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> {
               <span class="keyword">class                   </span>= &quot;shop/try&quot;,
-              shop                    =                         # <span class="keywordflow">try</span> to <span class="keyword">this</span> shop
-                                        (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&#39;machine&#39;</span>,       #  - to shop supplied in user request under <span class="stringliteral">&quot;machine&quot;</span> hashkey 
-                                        (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&#39;name&#39;</span>,      #  - to shop named <span class="stringliteral">&quot;name&quot;</span>
+              shop                    =                         <span class="comment">// try to this shop</span>
+                                        (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&#39;machine&#39;</span>,       <span class="comment">//  - to shop supplied in user request under &quot;machine&quot; hashkey </span>
+                                        (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&#39;name&#39;</span>,      <span class="comment">//  - to shop named &quot;name&quot;</span>
                                         ...
-              return_to               = (hashkey_t)<span class="stringliteral">&quot;return_to&quot;</span>  # return_to hash key, <span class="keywordflow">default</span> <span class="stringliteral">&quot;return_to&quot;</span>
+              request                 = (hashkey_t)<span class="stringliteral">&quot;request&quot;</span>,   <span class="comment">// request to try, default current request</span>
+              return_to               = (hashkey_t)<span class="stringliteral">&quot;return_to&quot;</span>  <span class="comment">// return_to hash key, default &quot;return_to&quot;</span>
  }
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 10 2012 21:54:36 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
