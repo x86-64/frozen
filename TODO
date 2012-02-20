@@ -8,7 +8,6 @@
   - index + file_t as store macro set
 
 - machine 'exec'
-- log_error for config_
 - datatype and hashkey convert to/from binary
 - list_t and hash_t use datatype convert instead of portable types
 - zmq patterns

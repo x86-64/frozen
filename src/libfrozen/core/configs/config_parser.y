@@ -21,13 +21,14 @@ char *config_m4_path      = defconfig_m4_path;
 char *config_m4_incs      = defconfig_m4_incs;
 char *config_m4_opts      = defconfig_m4_opts;
 
-#define emit_error(fmt, ...){                                           \
-	do {                                                            \
-		char _buffer[DEF_BUFFER_SIZE];                          \
-		                                                        \
-		snprintf(_buffer, sizeof(_buffer), fmt, ##__VA_ARGS__); \
-		yyerror(hash, _buffer);                                 \
-		YYERROR;                                                \
+#define emit_error(fmt, ...){                                               \
+	do {                                                                \
+		char _buffer[DEF_BUFFER_SIZE];                              \
+		                                                            \
+		snprintf(_buffer, sizeof(_buffer) - 1, fmt, ##__VA_ARGS__); \
+		_buffer[sizeof(_buffer) - 1] = '\0';                        \
+		yyerror(hash, _buffer);                                     \
+		YYERROR;                                                    \
 	}while(0); }
 
 %}
@@ -87,68 +88,72 @@ hash_name :
           /* empty */  { $$ = 0; }
 	| TNULL ASSIGN { $$ = 0; }
 	| NAME  ASSIGN {
+		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&$$);
 		data_t                 d_initstr         = DATA_PTR_STRING($1);
 
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if(data_query(&d_key, &r_convert) != 0)
-			emit_error("unknown hashkey_t (%s)", $1);
+		if( (ret = data_query(&d_key, &r_convert)) < 0)
+			emit_error("unknown hashkey_t \"%s\" (ret: %s)", $1, describe_error(ret));
 		
 		free($1);
 	};
 
 hash_value :
 	  STRING             {
+		ssize_t                ret;
 		data_t                 d_initstr    = DATA_PTR_STRING($1);
 		
 		$$.type = TYPE_RAWT;
 		$$.ptr  = NULL;
 		
 		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if(data_query(&$$, &r_init_str) != 0)
-			emit_error("data string init failed");
+		if( (ret = data_query(&$$, &r_init_str)) < 0)
+			emit_error("data string init failed (ret: %s)", describe_error(ret));
 
 		free($1);
 	}
 	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
 	| '(' NAME ')' STRING {
+		ssize_t                ret;
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
 		data_t                 d_val_initstr     = DATA_PTR_STRING($4);
 		
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if(data_query(&d_type, &r_init1) != 0)
-			emit_error("unknown datatype_t (%s)", $2);
+		if( (ret = data_query(&d_type, &r_init1)) < 0)
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", $2, describe_error(ret));
 		
 		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
-		if(data_query(&$$, &r_init2) != 0)
-			emit_error("data init failed (%s)", $2);
+		if( (ret = data_query(&$$, &r_init2)) < 0)
+			emit_error("data init failed \"%s\" (ret: %s)", $2, describe_error(ret));
 		
 		free($2);
 		free($4);
 	}
 	| '(' NAME ')' '{' hash_items '}' {
+		ssize_t                ret;
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
 		data_t                 d_hash            = DATA_PTR_HASHT($5);
 
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if(data_query(&d_type, &r_init1) != 0)
-			emit_error("unknown datatype_t (%s)", $2);
+		if( (ret = data_query(&d_type, &r_init1)) < 0)
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", $2, describe_error(ret));
 		
 		$$.type = type;
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
-		if(data_query(&$$, &r_convert) != 0)
-			emit_error("data init failed (%s)", $2);
+		if( (ret = data_query(&$$, &r_convert)) < 0)
+			emit_error("data init failed \"%s\" (ret: %s)", $2, describe_error(ret));
 		
 		free($2);
 		hash_free($5);
@@ -162,7 +167,7 @@ void yyerror(hash_t **hash, const char *msg){ // {{{
 	if(!file)
 		file = "-";
 	
-	fprintf(stderr, "%s: error: %d: %s near '%s'\n", file, config_get_lineno(), msg, config_get_text());
+	fprintf(stderr, "%s: error: %d: %s\n", file, config_get_lineno(), msg);
 	(void)hash;
 } // }}}
 

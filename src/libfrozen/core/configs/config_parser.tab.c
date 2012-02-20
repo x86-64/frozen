@@ -98,19 +98,20 @@ char *config_m4_path      = defconfig_m4_path;
 char *config_m4_incs      = defconfig_m4_incs;
 char *config_m4_opts      = defconfig_m4_opts;
 
-#define emit_error(fmt, ...){                                           \
-	do {                                                            \
-		char _buffer[DEF_BUFFER_SIZE];                          \
-		                                                        \
-		snprintf(_buffer, sizeof(_buffer), fmt, ##__VA_ARGS__); \
-		yyerror(hash, _buffer);                                 \
-		YYERROR;                                                \
+#define emit_error(fmt, ...){                                               \
+	do {                                                                \
+		char _buffer[DEF_BUFFER_SIZE];                              \
+		                                                            \
+		snprintf(_buffer, sizeof(_buffer) - 1, fmt, ##__VA_ARGS__); \
+		_buffer[sizeof(_buffer) - 1] = '\0';                        \
+		yyerror(hash, _buffer);                                     \
+		YYERROR;                                                    \
 	}while(0); }
 
 
 
 /* Line 268 of yacc.c  */
-#line 114 "configs/config_parser.tab.c"
+#line 115 "configs/config_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -151,7 +152,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 40 "configs/config_parser.y"
+#line 41 "configs/config_parser.y"
 
 	hash_t     *hash_items;
 	hash_t      hash_item;
@@ -162,7 +163,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 166 "configs/config_parser.tab.c"
+#line 167 "configs/config_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -174,7 +175,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 178 "configs/config_parser.tab.c"
+#line 179 "configs/config_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -465,8 +466,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    56,    56,    59,    63,    68,    77,    81,    87,    88,
-      89,   101,   113,   114,   135
+       0,    57,    57,    60,    64,    69,    78,    82,    88,    89,
+      90,   103,   116,   117,   139
 };
 #endif
 
@@ -1409,14 +1410,14 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 56 "configs/config_parser.y"
+#line 57 "configs/config_parser.y"
     { *hash = (yyvsp[(1) - (1)].hash_items); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 59 "configs/config_parser.y"
+#line 60 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(sizeof(hash_t));
 		hash_assign_hash_end((yyval.hash_items));
@@ -1426,7 +1427,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 63 "configs/config_parser.y"
+#line 64 "configs/config_parser.y"
     {
 		(yyval.hash_items) = malloc(2 * sizeof(hash_t));
 		hash_assign_hash_t   (&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item));
@@ -1437,7 +1438,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 68 "configs/config_parser.y"
+#line 69 "configs/config_parser.y"
     {
 		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
 		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
@@ -1450,7 +1451,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 77 "configs/config_parser.y"
+#line 78 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
 		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
@@ -1460,7 +1461,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 81 "configs/config_parser.y"
+#line 82 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = hash_ptr_null;
 	}
@@ -1469,28 +1470,29 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 87 "configs/config_parser.y"
+#line 88 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 88 "configs/config_parser.y"
+#line 89 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 89 "configs/config_parser.y"
+#line 90 "configs/config_parser.y"
     {
+		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
 		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (2)].name));
 
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if(data_query(&d_key, &r_convert) != 0)
-			emit_error("unknown hashkey_t (%s)", (yyvsp[(1) - (2)].name));
+		if( (ret = data_query(&d_key, &r_convert)) < 0)
+			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (2)].name), describe_error(ret));
 		
 		free((yyvsp[(1) - (2)].name));
 	}
@@ -1499,16 +1501,17 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 101 "configs/config_parser.y"
+#line 103 "configs/config_parser.y"
     {
+		ssize_t                ret;
 		data_t                 d_initstr    = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
 		
 		(yyval.data).type = TYPE_RAWT;
 		(yyval.data).ptr  = NULL;
 		
 		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if(data_query(&(yyval.data), &r_init_str) != 0)
-			emit_error("data string init failed");
+		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
+			emit_error("data string init failed (ret: %s)", describe_error(ret));
 
 		free((yyvsp[(1) - (1)].name));
 	}
@@ -1517,31 +1520,32 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 113 "configs/config_parser.y"
+#line 116 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 114 "configs/config_parser.y"
+#line 117 "configs/config_parser.y"
     {
+		ssize_t                ret;
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (4)].name));
 		data_t                 d_val_initstr     = DATA_PTR_STRING((yyvsp[(4) - (4)].name));
 		
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if(data_query(&d_type, &r_init1) != 0)
-			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (4)].name));
+		if( (ret = data_query(&d_type, &r_init1)) < 0)
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), describe_error(ret));
 		
 		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
-		if(data_query(&(yyval.data), &r_init2) != 0)
-			emit_error("data init failed (%s)", (yyvsp[(2) - (4)].name));
+		if( (ret = data_query(&(yyval.data), &r_init2)) < 0)
+			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), describe_error(ret));
 		
 		free((yyvsp[(2) - (4)].name));
 		free((yyvsp[(4) - (4)].name));
@@ -1551,24 +1555,25 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 135 "configs/config_parser.y"
+#line 139 "configs/config_parser.y"
     {
+		ssize_t                ret;
 		datatype_t             type;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (6)].name));
 		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
 
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if(data_query(&d_type, &r_init1) != 0)
-			emit_error("unknown datatype_t (%s)", (yyvsp[(2) - (6)].name));
+		if( (ret = data_query(&d_type, &r_init1)) < 0)
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), describe_error(ret));
 		
 		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
-		if(data_query(&(yyval.data), &r_convert) != 0)
-			emit_error("data init failed (%s)", (yyvsp[(2) - (6)].name));
+		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
+			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), describe_error(ret));
 		
 		free((yyvsp[(2) - (6)].name));
 		hash_free((yyvsp[(5) - (6)].hash_items));
@@ -1578,7 +1583,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1582 "configs/config_parser.tab.c"
+#line 1587 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1809,7 +1814,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 157 "configs/config_parser.y"
+#line 162 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){ // {{{
@@ -1818,7 +1823,7 @@ void yyerror(hash_t **hash, const char *msg){ // {{{
 	if(!file)
 		file = "-";
 	
-	fprintf(stderr, "%s: error: %d: %s near '%s'\n", file, config_get_lineno(), msg, config_get_text());
+	fprintf(stderr, "%s: error: %d: %s\n", file, config_get_lineno(), msg);
 	(void)hash;
 } // }}}
 
