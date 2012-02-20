@@ -18,11 +18,6 @@ typedef struct hash_t_ctx {
 	data_t                *sl_data;
 } hash_t_ctx;
 
-typedef struct hash_portable_t {
-	uint32_t               key;
-	uint32_t               datatype;
-} hash_portable_t;
-
 static void data_hash_t_append_pad(hash_t_ctx *ctx){ // {{{
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", ctx->step };
 	data_query(ctx->sl_data, &r_write);
@@ -55,8 +50,9 @@ not_equal:
 } // }}}
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	ssize_t                ret;
-	hash_portable_t        portable;
-
+	data_t                 d_key             = DATA_PTR_HASHKEYT(&hash_item->key);
+	data_t                 d_type            = DATA_PTR_DATATYPET(&hash_item->data.type);
+	
 	if(hash_item->key == 0) // skip deleted keys
 		return ITER_CONTINUE;
 	
@@ -68,21 +64,30 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	
 	switch(ctx->step){
 		case 0:; // step one: count all elements
-			ctx->buffer_data_offset += sizeof(hash_portable_t);
-			break;
-		case 1:; // step two: write to buffer
-			portable.key      = hash_item->key;
-			portable.datatype = hash_item->data.type;
+			fastcall_length r_length = { { 4, ACTION_LENGTH }, 0, FORMAT(binary) };
 			
-			// write holder
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &portable, sizeof(portable) };
-			if(data_query(ctx->sl_holder, &r_write) < 0)
-				return ITER_BREAK;
+			if( (ret = data_query(&d_key,  &r_length)) < 0)
+				return ret;
+			ctx->buffer_data_offset += r_length.length;
+			
+			if( (ret = data_query(&d_type, &r_length)) < 0)
+				return ret;
+			ctx->buffer_data_offset += r_length.length;
+			
+			break;
+
+		case 1:; // step two: write to buffer
+			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
+			
+			// write header
+			if( (ret = data_query(&d_key,  &r_convert)) < 0)
+				return ret;
+			if( (ret = data_query(&d_type, &r_convert)) < 0)
+				return ret;
 			
 			// write data
 			data_slider_t_freeze(ctx->sl_data);
 				
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
 				ret = data_query(&hash_item->data, &r_convert);
 			
 			data_slider_t_unfreeze(ctx->sl_data);
@@ -204,10 +209,8 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	switch(fargs->format){
 		case FORMAT(clean):
 		case FORMAT(binary):
-			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
+			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
 				return -EFAULT;
-			
-			ctx.buffer_data_offset += sizeof(hash_portable_t); // hash_end 
 			
 			data_t                 d_sl_holder       = DATA_SLIDERT(fargs->dest, 0);
 			data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, ctx.buffer_data_offset);
@@ -216,13 +219,8 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			ctx.sl_holder = &d_sl_holder;
 			ctx.sl_data   = &d_sl_data;
 			
-			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL) != ITER_OK)
+			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
 				return -EFAULT;
-			
-			hash_portable_t h_end   = { hash_ptr_end, TYPE_HASHT };
-			fastcall_write  r_write = { { 5, ACTION_WRITE }, 0, &h_end, sizeof(h_end) };
-			if(data_query(ctx.sl_holder, &r_write) < 0)
-				return ITER_BREAK;
 			
 			break;
 			
@@ -242,9 +240,9 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	return 0;
 } // }}}
 static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	hash_t                *hash;
 	hash_t                *curr;
-	hash_portable_t        portable;
 	data_t                *old_data;
 	uintmax_t              nelements         = 0;
 	uintmax_t              hash_nelements    = 0;
@@ -266,18 +264,16 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	hash_nelements = HASH_INITIAL_SIZE;
 	hash           = hash_new(hash_nelements);
 	
-	for(curr = hash;; curr++){ 
-		fastcall_read r_read = {
-			{ 5, ACTION_READ },
-			0,
-			&portable,
-			sizeof(portable)
-		};
-		if(data_query(&sl_src, &r_read) < 0)
-			return -EFAULT;
+	for(curr = hash;; curr++){
+		data_t       d_key          = DATA_PTR_HASHKEYT(&curr->key);
+		data_t       d_type         = DATA_PTR_DATATYPET(&curr->data.type);
+
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(binary) };
 		
-		curr->key       = portable.key;
-		curr->data.type = portable.datatype;
+		if( (ret = data_query(&d_key, &r_convert)) < 0)
+			return ret;
+		if( (ret = data_query(&d_type, &r_convert)) < 0)
+			return ret;
 		
 		if(curr->key == hash_ptr_end)
 			break;
@@ -451,7 +447,12 @@ ssize_t            hash_iter                    (hash_t *hash, hash_iterator fun
 					return ret;
 			}
 
-			if( (ret = hash_iter((hash_t *)curr->data.ptr, func, arg, flags)) != ITER_OK)
+			if( (ret = hash_iter(
+				(hash_t *)curr->data.ptr,
+				func,
+				arg,
+				flags & ~HASH_ITER_END            // don't show hash_end in inline hashes 
+			)) != ITER_OK)
 				return ret;
 			
 			goto next;

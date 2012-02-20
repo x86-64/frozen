@@ -8,7 +8,6 @@
   - index + file_t as store macro set
 
 - machine 'exec'
-- list_t and hash_t use datatype convert instead of portable types
 - zmq patterns
   - proxy pattern
   - replace machines and stuff in request with proxy
