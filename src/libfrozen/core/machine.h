@@ -90,21 +90,9 @@ struct machine_t {
 	f_fork                 func_fork;        ///< Machine fork function. Optional
 	f_destroy              func_destroy;     ///< Machine destroy function. Optional
 	
-	struct {      // TODO deprecate this
-		f_crwd         func_create;
-		f_crwd         func_set;
-		f_crwd         func_get;
-		f_crwd         func_delete;
-		f_crwd         func_move;
-		f_crwd         func_count;
-		f_crwd         func_custom;
-	} machine_type_crwd;
 	struct {
-		f_crwd         func_handler;     ///< Handler for API_HASH
+		f_hash         func_handler;     ///< Handler for API_HASH
 	} machine_type_hash;
-	struct {
-		f_fast_func    func_handler;     ///< Handler for API_FAST
-	} machine_type_fast;
 
 	void *                 userdata;         ///< Pointer to userdata for machine
 

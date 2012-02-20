@@ -156,12 +156,12 @@ static action_method     pool_string_to_action(char *string){ // {{{
 	return ACTION_DEFAULT;
 } // }}}
 
-static void pool_set_handler(machine_t *machine, f_crwd func){ // {{{
+static void pool_set_handler(machine_t *machine, f_hash func){ // {{{
 	machine->machine_type_hash.func_handler = func;
 } // }}}
 uintmax_t   pool_parameter_get(machine_t *machine, pool_userdata *userdata){ // {{{
 	switch(userdata->parameter){
-		case PARAMETER_ONE:   return (machine->machine_type_crwd.func_create == &pool_machine_request_died) ? 0 : 1;
+		case PARAMETER_ONE:   return (machine->machine_type_hash.func_handler == &pool_machine_request_died) ? 0 : 1;
 		case PARAMETER_TICKS: return userdata->usage_ticks_last;
 		case PARAMETER_REQUEST:;
 			uintmax_t buffer    = 0;

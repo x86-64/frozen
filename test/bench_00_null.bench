@@ -1,6 +1,6 @@
 { class => "daemon/thread" },
 { class => "emitter", request = { machine = (machine_t)"null", request = { benchmark_function = "restart" } } },
-{ class => "emitter", request = { machine = (machine_t)"null", request = { action = (action_t)"create" } }, count => (uint_t)'30000000' },
+{ class => "emitter", request = { machine = (machine_t)"null", request = { action = (action_t)"create" } }, count => (uint_t)'300000' },
 { class => "emitter", request = { machine = (machine_t)"null", request = { benchmark_function = "print_long" } } },
 { class => "kill"                                              },
 NULL,

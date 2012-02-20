@@ -6,6 +6,13 @@ typedef ssize_t (*f_data_from_hash)     (data_t *, request_t *);
 extern f_machine_from_fast api_machine_from_fast [ACTION_INVALID];
 extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
 
+ssize_t api_machine_nosys(machine_t *machine, request_t *request){ // {{{
+	return -ENOSYS;
+} // }}}
+ssize_t api_data_nosys(data_t *data, fastcall_header *hargs){ // {{{
+	return -ENOSYS;
+} // }}}
+
 static ssize_t remove_symlinks(hash_t *hash_item, hash_t **new_hash){ // {{{
 	hash_t                *new_hash_item;
 	

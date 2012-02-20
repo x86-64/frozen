@@ -15,6 +15,12 @@ typedef struct machine_new_ctx {
 	machine_t             *machine_next;
 } machine_new_ctx;
 
+static machine_t machine_dummy = { // {{{
+	.machine_type_hash = {
+		.func_handler = &api_machine_nosys
+	}
+}; // }}}
+
 static int         class_strcmp            (char *class_str1, char *class_str2){ // {{{
 	char                  *class_str1_name;
 	char                  *class_str2_name;
@@ -124,7 +130,7 @@ static void        machine_untop(machine_t *machine){ // {{{
 } // }}}
 static void        machine_connect(machine_t *parent, machine_t *child){ // {{{
 	if(parent){
-		parent->cnext = child;
+		parent->cnext = child ? child : &machine_dummy;
 		machine_top(parent);
 	}
 	if(child){
@@ -135,11 +141,20 @@ static void        machine_connect(machine_t *parent, machine_t *child){ // {{{
 static void        machine_disconnect(machine_t *parent, machine_t *child){ // {{{
 	if(parent){
 		machine_untop(parent);
-		parent->cnext = NULL;
+		parent->cnext = &machine_dummy;
 	}
 	if(child){
 		machine_top(child);
 		child->cprev  = NULL;
+	}
+} // }}}
+static void        machine_fill_blanks(machine_t *machine){ // {{{
+	if( (machine->supported_api & API_HASH) != 0){
+		if(machine->machine_type_hash.func_handler == NULL)
+			machine->machine_type_hash.func_handler = &machine_pass;
+	}
+	if(machine->cnext == NULL){
+		machine->cnext = &machine_dummy;
 	}
 } // }}}
 
@@ -182,6 +197,7 @@ static ssize_t     machine_ghost_resurrect(machine_t *machine, machine_t *class,
 	if(machine->func_configure != NULL && (ret = machine->func_configure(machine, config)) < 0)
 		goto error;
 	
+	machine_fill_blanks(machine);
 	return 0;
 	
 error:
@@ -360,29 +376,19 @@ void               shop_destroy      (machine_t *machine){ // {{{
 	machine_t             *curr;
 	machine_t             *next;
 	
-	for(curr = machine; curr; curr = next){
+	for(curr = machine; curr != &machine_dummy; curr = next){
 		next = curr->cnext;
 		machine_destroy(curr);
 	}
 } // }}}
 
 ssize_t            machine_query        (machine_t *machine, request_t *request){ // {{{
-	f_crwd                 func              = NULL;
-	
-	if(machine == NULL || request == NULL)
-		return -ENOSYS;
-	
-	if( (machine->supported_api & API_HASH) != 0){
-		func = machine->machine_type_hash.func_handler;
-	}
-	
-	if(func == NULL)
-		return machine_query(machine->cnext, request);
-	
 	pthread_setspecific(key_curr_request, request);
-	
-	return func(machine, request);
+		
+	return machine->machine_type_hash.func_handler(machine, request);
 } // }}}
 ssize_t            machine_pass         (machine_t *machine, request_t *request){ // {{{
-	return machine_query(machine->cnext, request);
+	pthread_setspecific(key_curr_request, request);
+		
+	return machine->cnext->machine_type_hash.func_handler(machine->cnext, request);
 } // }}}

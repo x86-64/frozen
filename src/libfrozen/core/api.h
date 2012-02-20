@@ -119,7 +119,7 @@ typedef enum api_types {
 	API_FAST = 4
 } api_types;
 
-typedef ssize_t (*f_crwd)      (machine_t *, request_t *);
+typedef ssize_t (*f_hash)      (machine_t *, request_t *);
 typedef ssize_t (*f_fast_func) (data_t *,    void *);
 typedef ssize_t (*f_callback)  (request_t *, void *);
 
@@ -319,4 +319,6 @@ extern uintmax_t fastcall_nargs[];
 ssize_t     data_hash_query(data_t *data, request_t *request);
 ssize_t     machine_fast_query(machine_t *machine, void *hargs);
 
+ssize_t     api_machine_nosys  (machine_t *machine, request_t *request);
+ssize_t     api_data_nosys     (data_t *data, fastcall_header *hargs);
 #endif
