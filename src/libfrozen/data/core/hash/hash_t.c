@@ -132,11 +132,11 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	}
 
 	data_t              d_key     = DATA_HASHKEYT(element->key);
-	fastcall_convert_to r_convert1 = { { 5, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(clean) };
+	fastcall_convert_to r_convert1 = { { 5, ACTION_CONVERT_TO }, &d_s_key,  FORMAT(human) };
 	data_query(&d_key, &r_convert1);
 	
 	data_t              d_type    = DATA_DATATYPET(element->data.type);
-	fastcall_convert_to r_convert2 = { { 5, ACTION_CONVERT_TO }, &d_s_type, FORMAT(clean) };
+	fastcall_convert_to r_convert2 = { { 5, ACTION_CONVERT_TO }, &d_s_type, FORMAT(human) };
 	data_query(&d_type, &r_convert2);
 	
 	snprintf(buffer, sizeof(buffer),
