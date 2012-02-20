@@ -368,35 +368,13 @@ void               shop_destroy      (machine_t *machine){ // {{{
 
 ssize_t            machine_query        (machine_t *machine, request_t *request){ // {{{
 	f_crwd                 func              = NULL;
-	ssize_t                ret;
 	
 	if(machine == NULL || request == NULL)
 		return -ENOSYS;
 	
-	do {
-		if( (machine->supported_api & API_HASH) != 0){
-			func = machine->machine_type_hash.func_handler;
-			break;
-		}
-		
-		if( (machine->supported_api & API_CRWD) != 0){
-			action_t               r_action;
-			
-			hash_data_get(ret, TYPE_ACTIONT, r_action, request, HK(action)); if(ret != 0) return -ENOSYS;
-			
-			switch(r_action){
-				case ACTION_CREATE: func = machine->machine_type_crwd.func_create; break;
-				case ACTION_READ:   func = machine->machine_type_crwd.func_get   ; break;
-				case ACTION_WRITE:  func = machine->machine_type_crwd.func_set   ; break;
-				case ACTION_DELETE: func = machine->machine_type_crwd.func_delete; break;
-				case ACTION_COUNT:  func = machine->machine_type_crwd.func_count ; break;
-				case ACTION_CUSTOM: func = machine->machine_type_crwd.func_custom; break;
-				default:
-					return -EINVAL;
-			};
-			break;
-		}
-	}while(0);
+	if( (machine->supported_api & API_HASH) != 0){
+		func = machine->machine_type_hash.func_handler;
+	}
 	
 	if(func == NULL)
 		return machine_query(machine->cnext, request);

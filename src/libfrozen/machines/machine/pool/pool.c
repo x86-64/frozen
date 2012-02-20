@@ -157,12 +157,7 @@ static action_method     pool_string_to_action(char *string){ // {{{
 } // }}}
 
 static void pool_set_handler(machine_t *machine, f_crwd func){ // {{{
-	machine->machine_type_crwd.func_create = func;
-	machine->machine_type_crwd.func_set    = func;
-	machine->machine_type_crwd.func_get    = func;
-	machine->machine_type_crwd.func_delete = func;
-	machine->machine_type_crwd.func_move   = func;
-	machine->machine_type_crwd.func_count  = func;
+	machine->machine_type_hash.func_handler = func;
 } // }}}
 uintmax_t   pool_parameter_get(machine_t *machine, pool_userdata *userdata){ // {{{
 	switch(userdata->parameter){
@@ -497,7 +492,7 @@ static ssize_t pool_machine_request_died(machine_t *machine, request_t *request)
 
 machine_t pool_proto = {
 	.class          = "machine/pool",
-	.supported_api  = API_CRWD,
+	.supported_api  = API_HASH,
 	.func_init      = &pool_init,
 	.func_configure = &pool_configure,
 	.func_destroy   = &pool_destroy

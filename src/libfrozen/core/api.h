@@ -93,12 +93,6 @@
  *  @li No freedom in parameter defines
  */
 /** @ingroup api
- *  @page api_crwd API_CRWD
- *  
- *  Api crwd is same as api hash, but all requests splitted to flow into different handlers. This api would be transformed in
- *  same api as used in data processing. Don't use it for a while.
- */
-/** @ingroup api
  *  @page api_downgrade Downgrading
  *  
  *  Currenly machine code have support for so called "request downgrading". This process occurs then some API_FAST-capable
@@ -122,7 +116,6 @@
 
 typedef enum api_types {
 	API_HASH = 1,
-	API_CRWD = 2,
 	API_FAST = 4
 } api_types;
 
