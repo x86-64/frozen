@@ -313,7 +313,7 @@ void *      pool_main_thread(void *null){ // {{{
 	return NULL;
 } // }}}
 
-static int pool_init(machine_t *machine){ // {{{
+static ssize_t pool_init(machine_t *machine){ // {{{
 	ssize_t                ret               = 0;
 	pool_userdata         *userdata          = machine->userdata = calloc(1, sizeof(pool_userdata));
 	if(userdata == NULL)
@@ -333,7 +333,7 @@ static int pool_init(machine_t *machine){ // {{{
 	
 	return ret;
 } // }}}
-static int pool_destroy(machine_t *machine){ // {{{
+static ssize_t pool_destroy(machine_t *machine){ // {{{
 	void                  *res;
 	ssize_t                ret               = 0;
 	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
@@ -374,7 +374,7 @@ exit:
 	
 	return ret;
 } // }}}
-static int pool_configure_any(machine_t *machine, machine_t *parent, config_t *config){ // {{{
+static ssize_t pool_configure_any(machine_t *machine, machine_t *parent, config_t *config){ // {{{
 	ssize_t                ret;
 	uintmax_t              cfg_limit_one     = __MAX(uintmax_t);
 	uintmax_t              cfg_limit_fork    = __MAX(uintmax_t);
@@ -460,7 +460,7 @@ static int pool_configure_any(machine_t *machine, machine_t *parent, config_t *c
 	
 	return 0;
 } // }}}
-static int pool_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t pool_configure(machine_t *machine, config_t *config){ // {{{
 	pool_userdata        *userdata          = (pool_userdata *)machine->userdata;
 	
 	// no fork, so use own data

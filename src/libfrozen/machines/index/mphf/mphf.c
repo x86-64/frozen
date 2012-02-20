@@ -54,7 +54,7 @@ static mphf_proto_t *   mphf_string_to_proto(char *string){ // {{{
 	return NULL;
 } // }}}
 
-static int mphf_init(machine_t *machine){ // {{{
+static ssize_t mphf_init(machine_t *machine){ // {{{
 	mphf_userdata         *userdata          = machine->userdata = calloc(1, sizeof(mphf_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
@@ -63,7 +63,7 @@ static int mphf_init(machine_t *machine){ // {{{
 	userdata->output = HK(offset);
 	return 0;
 } // }}}
-static int mphf_destroy(machine_t *machine){ // {{{
+static ssize_t mphf_destroy(machine_t *machine){ // {{{
 	ssize_t                ret;
 	mphf_userdata         *userdata          = (mphf_userdata *)machine->userdata;
 	
@@ -75,7 +75,7 @@ static int mphf_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int mphf_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t mphf_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	char                  *mphf_type_str     = NULL;
 	mphf_userdata         *userdata          = (mphf_userdata *)machine->userdata;

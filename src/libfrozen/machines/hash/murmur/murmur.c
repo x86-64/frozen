@@ -36,19 +36,19 @@ typedef struct murmur_userdata {
 	uintmax_t              fatal;
 } murmur_userdata;
 
-static int murmur_init(machine_t *machine){ // {{{
+static ssize_t murmur_init(machine_t *machine){ // {{{
 	if((machine->userdata = calloc(1, sizeof(murmur_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int murmur_destroy(machine_t *machine){ // {{{
+static ssize_t murmur_destroy(machine_t *machine){ // {{{
 	murmur_userdata       *userdata = (murmur_userdata *)machine->userdata;
 
 	free(userdata);
 	return 0;
 } // }}}
-static int murmur_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t murmur_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	murmur_userdata       *userdata          = (murmur_userdata *)machine->userdata;
 	

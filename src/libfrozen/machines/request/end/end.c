@@ -46,7 +46,7 @@ static ssize_t end_handler_default(machine_t *machine, request_t *request){ // {
 	return 0;
 } // }}}
 
-static int end_init(machine_t *machine){ // {{{
+static ssize_t end_init(machine_t *machine){ // {{{
 	end_userdata         *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(end_userdata))) == NULL)
@@ -55,14 +55,14 @@ static int end_init(machine_t *machine){ // {{{
 	data_set_void(&userdata->ret);
 	return 0;
 } // }}}
-static int end_destroy(machine_t *machine){ // {{{
+static ssize_t end_destroy(machine_t *machine){ // {{{
 	end_userdata      *userdata = (end_userdata *)machine->userdata;
 	
 	data_free(&userdata->ret);
 	free(userdata);
 	return 0;
 } // }}}
-static int end_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t end_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	end_userdata          *userdata          = (end_userdata *)machine->userdata;
 	

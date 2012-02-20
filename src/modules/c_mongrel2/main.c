@@ -77,7 +77,7 @@ typedef struct mongrel2_userdata {
 	uintmax_t              lazy;
 } mongrel2_userdata;
 
-static int mongrel2_init(machine_t *machine){ // {{{
+static ssize_t mongrel2_init(machine_t *machine){ // {{{
 	mongrel2_userdata     *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(mongrel2_userdata))) == NULL)
@@ -88,13 +88,13 @@ static int mongrel2_init(machine_t *machine){ // {{{
 	userdata->close_conn = 1;
 	return 0;
 } // }}}
-static int mongrel2_destroy(machine_t *machine){ // {{{
+static ssize_t mongrel2_destroy(machine_t *machine){ // {{{
 	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int mongrel2_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t mongrel2_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	mongrel2_userdata     *userdata          = (mongrel2_userdata *)machine->userdata;
 	

@@ -599,7 +599,7 @@ static ssize_t fuseb_item_destroy(hash_t *hash, vfs_item *root){ // {{{
 	return ITER_CONTINUE;
 } // }}}
 
-static int fuseb_init(machine_t *machine){ // {{{
+static ssize_t fuseb_init(machine_t *machine){ // {{{
 	ssize_t                ret               = 0;
 	fuseb_userdata        *userdata          = machine->userdata = calloc(1, sizeof(fuseb_userdata));
 	if(userdata == NULL)
@@ -607,7 +607,7 @@ static int fuseb_init(machine_t *machine){ // {{{
 	
 	return ret;
 } // }}}
-static int fuseb_destroy(machine_t *machine){ // {{{
+static ssize_t fuseb_destroy(machine_t *machine){ // {{{
 	vfs_item              *root;
 	fuseb_userdata        *userdata          = machine->userdata;
 	
@@ -624,7 +624,7 @@ static int fuseb_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int fuseb_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t fuseb_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	vfs_item              *root;
 	uintmax_t              multithreaded     = 0;

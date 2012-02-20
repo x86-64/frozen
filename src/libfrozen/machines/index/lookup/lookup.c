@@ -31,20 +31,20 @@ typedef struct lookup_userdata {
 	machine_t             *machine_index;
 } lookup_userdata;
 
-static int lookup_init(machine_t *machine){ // {{{
+static ssize_t lookup_init(machine_t *machine){ // {{{
 	if((machine->userdata = calloc(1, sizeof(lookup_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int lookup_destroy(machine_t *machine){ // {{{
+static ssize_t lookup_destroy(machine_t *machine){ // {{{
 	lookup_userdata       *userdata = (lookup_userdata *)machine->userdata;
 	
 	shop_destroy(userdata->machine_index);
 	free(userdata);
 	return 0;
 } // }}}
-static int lookup_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t lookup_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	lookup_userdata       *userdata          = (lookup_userdata *)machine->userdata;
 	

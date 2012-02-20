@@ -34,7 +34,7 @@ typedef struct morph_userdata {
 	config_t              *machine_config;
 } morph_userdata;
 
-static int morph_init(machine_t *machine){ // {{{
+static ssize_t morph_init(machine_t *machine){ // {{{
 	morph_userdata      *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(morph_userdata))) == NULL)
@@ -43,14 +43,14 @@ static int morph_init(machine_t *machine){ // {{{
 	userdata->pass_first = 1;
 	return 0;
 } // }}}
-static int morph_destroy(machine_t *machine){ // {{{
+static ssize_t morph_destroy(machine_t *machine){ // {{{
 	morph_userdata      *userdata = (morph_userdata *)machine->userdata;
 	
 	hash_free(userdata->machine_config);
 	free(userdata);
 	return 0;
 } // }}}
-static int morph_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t morph_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	morph_userdata      *userdata          = (morph_userdata *)machine->userdata;
 	

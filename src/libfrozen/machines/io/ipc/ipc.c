@@ -45,13 +45,13 @@ static ipc_proto_t *   ipc_string_to_proto(char *string){ // {{{
 	return ROLE_INVALID;
 } // }}}
 
-static int ipc_init(machine_t *machine){ // {{{
+static ssize_t ipc_init(machine_t *machine){ // {{{
 	if((machine->userdata = calloc(1, sizeof(ipc_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int ipc_destroy(machine_t *machine){ // {{{
+static ssize_t ipc_destroy(machine_t *machine){ // {{{
 	ipc_userdata *userdata = (ipc_userdata *)machine->userdata;
 	
 	userdata->ipc_proto->func_destroy(&userdata->ipc);
@@ -59,7 +59,7 @@ static int ipc_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int ipc_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t ipc_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t          ret;
 	char            *ipc_type_str  = NULL;
 	ipc_userdata    *userdata      = (ipc_userdata *)machine->userdata;

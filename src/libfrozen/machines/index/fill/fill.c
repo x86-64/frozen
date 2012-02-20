@@ -46,7 +46,7 @@ typedef struct fill_userdata {
 	machine_t             *machine_index;
 } fill_userdata;
 
-static int fill_init(machine_t *machine){ // {{{
+static ssize_t fill_init(machine_t *machine){ // {{{
 	fill_userdata         *userdata;
 
 	if((userdata = machine->userdata = calloc(1, sizeof(fill_userdata))) == NULL)
@@ -55,14 +55,14 @@ static int fill_init(machine_t *machine){ // {{{
 	userdata->action = ACTION_WRITE;
 	return 0;
 } // }}}
-static int fill_destroy(machine_t *machine){ // {{{
+static ssize_t fill_destroy(machine_t *machine){ // {{{
 	fill_userdata       *userdata = (fill_userdata *)machine->userdata;
 	
 	shop_destroy(userdata->machine_index);
 	free(userdata);
 	return 0;
 } // }}}
-static int fill_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t fill_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	fill_userdata         *userdata          = (fill_userdata *)machine->userdata;
 	

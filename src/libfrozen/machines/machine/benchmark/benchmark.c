@@ -126,13 +126,13 @@ static void benchmark_control_query_ticks(machine_t *machine, uintmax_t *value){
 	*value = userdata->ticks;
 } // }}}
 
-static int benchmark_init(machine_t *machine){ // {{{
+static ssize_t benchmark_init(machine_t *machine){ // {{{
 	benchmark_userdata    *userdata          = machine->userdata = calloc(1, sizeof(benchmark_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
 	return 0;
 } // }}}
-static int benchmark_destroy(machine_t *machine){ // {{{
+static ssize_t benchmark_destroy(machine_t *machine){ // {{{
 	benchmark_userdata    *userdata          = (benchmark_userdata *)machine->userdata;
 	
 	free(userdata);

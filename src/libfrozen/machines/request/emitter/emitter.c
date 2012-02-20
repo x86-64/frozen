@@ -34,7 +34,7 @@ typedef struct emitter_userdata {
 	uintmax_t              silent;
 } emitter_userdata;
 
-static int emitter_init(machine_t *machine){ // {{{
+static ssize_t emitter_init(machine_t *machine){ // {{{
 	emitter_userdata    *userdata          = machine->userdata = calloc(1, sizeof(emitter_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
@@ -42,7 +42,7 @@ static int emitter_init(machine_t *machine){ // {{{
 	userdata->nreq = N_REQUESTS_DEFAULT;
 	return 0;
 } // }}}
-static int emitter_destroy(machine_t *machine){ // {{{
+static ssize_t emitter_destroy(machine_t *machine){ // {{{
 	emitter_userdata      *userdata          = (emitter_userdata *)machine->userdata;
 	
 	data_t           d_emitter = DATA_PTR_EMITTERT(userdata->req);
@@ -52,7 +52,7 @@ static int emitter_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int emitter_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t emitter_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	emitter_userdata      *userdata          = (emitter_userdata *)machine->userdata;
 	

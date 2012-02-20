@@ -598,7 +598,7 @@ machine_t zmq_end_proto = { // {{{
 	}
 }; // }}}
 
-static int zeromq_init(machine_t *machine){ // {{{
+static ssize_t zeromq_init(machine_t *machine){ // {{{
 	zeromq_userdata       *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(zeromq_userdata))) == NULL)
@@ -614,7 +614,7 @@ static int zeromq_init(machine_t *machine){ // {{{
 	userdata->zmq_end->userdata = userdata;
 	return 0;
 } // }}}
-static int zeromq_destroy(machine_t *machine){ // {{{
+static ssize_t zeromq_destroy(machine_t *machine){ // {{{
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
 	data_free(&userdata->socket);
@@ -622,7 +622,7 @@ static int zeromq_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int zeromq_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t zeromq_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	

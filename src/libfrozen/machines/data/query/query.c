@@ -34,7 +34,7 @@ typedef struct query_userdata {
 	request_t             *request;
 } query_userdata;
 
-static int query_init(machine_t *machine){ // {{{
+static ssize_t query_init(machine_t *machine){ // {{{
 	query_userdata       *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(query_userdata))) == NULL)
@@ -42,7 +42,7 @@ static int query_init(machine_t *machine){ // {{{
 	
 	return 0;
 } // }}}
-static int query_destroy(machine_t *machine){ // {{{
+static ssize_t query_destroy(machine_t *machine){ // {{{
 	query_userdata       *userdata          = (query_userdata *)machine->userdata;
 	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
@@ -52,7 +52,7 @@ static int query_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int query_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t query_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	

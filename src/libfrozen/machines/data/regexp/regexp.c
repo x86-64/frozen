@@ -111,7 +111,7 @@ static void    config_freemarkerdata(regexp_userdata *userdata){ // {{{
 	}
 } // }}}
 
-static int regexp_init(machine_t *machine){ // {{{
+static ssize_t regexp_init(machine_t *machine){ // {{{
 	regexp_userdata       *userdata;
 
 	if((userdata = machine->userdata = calloc(1, sizeof(regexp_userdata))) == NULL)
@@ -123,7 +123,7 @@ static int regexp_init(machine_t *machine){ // {{{
 	userdata->regexp_str  = strdup(".*");
 	return 0;
 } // }}}
-static int regexp_destroy(machine_t *machine){ // {{{
+static ssize_t regexp_destroy(machine_t *machine){ // {{{
 	regexp_userdata       *userdata          = (regexp_userdata *)machine->userdata;
 	
 	config_freeregexp(userdata);
@@ -139,7 +139,7 @@ static int regexp_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int regexp_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	data_t                *marker_data;
 	char                  *regexp_str        = NULL;

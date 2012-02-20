@@ -164,7 +164,7 @@ redo:
 	return 0;
 } // }}}
 
-static int rebuildread_init(machine_t *machine){ // {{{
+static ssize_t rebuildread_init(machine_t *machine){ // {{{
 	rebuildread_userdata  *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(rebuildread_userdata))) == NULL)
@@ -173,7 +173,7 @@ static int rebuildread_init(machine_t *machine){ // {{{
 	userdata->hk_offset = HK(offset);
 	return 0;
 } // }}}
-static int rebuildread_destroy(machine_t *machine){ // {{{
+static ssize_t rebuildread_destroy(machine_t *machine){ // {{{
 	rebuildread_userdata  *userdata          = (rebuildread_userdata *)machine->userdata;
 	
 	hash_free(userdata->req_rebuild);
@@ -183,7 +183,7 @@ static int rebuildread_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int rebuildread_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t rebuildread_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	uintmax_t              req_rebuild_enable= 1;
 	char                  *req_rebuild_dest  = NULL;
@@ -243,7 +243,7 @@ machine_t rebuild_writer_proto = {
 	.supported_api  = API_HASH,
 };
 
-static int rebuildmon_init(machine_t *machine){ // {{{
+static ssize_t rebuildmon_init(machine_t *machine){ // {{{
 	rebuildmon_userdata   *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(rebuildmon_userdata))) == NULL)
@@ -252,7 +252,7 @@ static int rebuildmon_init(machine_t *machine){ // {{{
 	userdata->retry_request = 1;
 	return 0;
 } // }}}
-static int rebuildmon_destroy(machine_t *machine){ // {{{
+static ssize_t rebuildmon_destroy(machine_t *machine){ // {{{
 	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)machine->userdata;
 	
 	shop_destroy(userdata->reader);
@@ -261,7 +261,7 @@ static int rebuildmon_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int rebuildmon_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t rebuildmon_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	rebuildmon_userdata   *userdata          = (rebuildmon_userdata *)machine->userdata;
 	

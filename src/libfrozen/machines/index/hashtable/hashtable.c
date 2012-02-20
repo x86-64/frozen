@@ -34,7 +34,7 @@ typedef struct hashtable_userdata {
 	uintmax_t              hashtable_size;
 } hashtable_userdata;
 
-static int hashtable_init(machine_t *machine){ // {{{
+static ssize_t hashtable_init(machine_t *machine){ // {{{
 	hashtable_userdata    *userdata = machine->userdata = calloc(1, sizeof(hashtable_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
@@ -42,13 +42,13 @@ static int hashtable_init(machine_t *machine){ // {{{
 	userdata->input = HK(key);
 	return 0;
 } // }}}
-static int hashtable_destroy(machine_t *machine){ // {{{
+static ssize_t hashtable_destroy(machine_t *machine){ // {{{
 	hashtable_userdata    *userdata = (hashtable_userdata *)machine->userdata;
 
 	free(userdata);
 	return 0;
 } // }}}
-static int hashtable_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t hashtable_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	hashtable_userdata    *userdata        = (hashtable_userdata *)machine->userdata;
 	

@@ -29,7 +29,7 @@ typedef struct return_userdata {
 	hashkey_t              return_to;
 } return_userdata;
 
-static int return_init(machine_t *machine){ // {{{
+static ssize_t return_init(machine_t *machine){ // {{{
 	return_userdata       *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(return_userdata))) == NULL)
@@ -38,13 +38,13 @@ static int return_init(machine_t *machine){ // {{{
 	userdata->return_to = HK(return_to);
 	return 0;
 } // }}}
-static int return_destroy(machine_t *machine){ // {{{
+static ssize_t return_destroy(machine_t *machine){ // {{{
 	return_userdata       *userdata = (return_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int return_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t return_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	return_userdata       *userdata          = (return_userdata *)machine->userdata;
 	

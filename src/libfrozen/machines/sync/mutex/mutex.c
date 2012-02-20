@@ -29,7 +29,7 @@ typedef struct mutex_userdata {
 	pthread_mutex_t        mutex;
 } mutex_userdata;
 
-static int mutex_init(machine_t *machine){ // {{{
+static ssize_t mutex_init(machine_t *machine){ // {{{
 	pthread_mutexattr_t    attr;
 	mutex_userdata        *userdata          = machine->userdata = calloc(1, sizeof(mutex_userdata));
 	if(userdata == NULL)
@@ -47,7 +47,7 @@ static int mutex_init(machine_t *machine){ // {{{
 	pthread_mutexattr_destroy(&attr);
 	return 0;
 } // }}}
-static int mutex_destroy(machine_t *machine){ // {{{
+static ssize_t mutex_destroy(machine_t *machine){ // {{{
 	mutex_userdata          *userdata          = (mutex_userdata *)machine->userdata;
 	
 	pthread_mutex_destroy(&userdata->mutex);

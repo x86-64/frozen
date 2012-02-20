@@ -6,7 +6,7 @@ typedef struct null_userdata {       // machine userdata structure
 	uintmax_t              testparam;
 } null_userdata;
 
-static int null_init(machine_t *machine){ // {{{
+static ssize_t null_init(machine_t *machine){ // {{{
 	null_userdata         *userdata;
 
 	if((userdata = machine->userdata = calloc(1, sizeof(null_userdata))) == NULL)
@@ -16,13 +16,13 @@ static int null_init(machine_t *machine){ // {{{
 	userdata->testparam = 10;
 	return 0;
 } // }}}
-static int null_destroy(machine_t *machine){ // {{{
+static ssize_t null_destroy(machine_t *machine){ // {{{
 	null_userdata         *userdata          = (null_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int null_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t null_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	null_userdata         *userdata          = (null_userdata *)machine->userdata;
 	

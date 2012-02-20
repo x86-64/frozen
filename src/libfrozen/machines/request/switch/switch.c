@@ -93,14 +93,14 @@ pass:
 	return 0;
 } // }}}
 
-static int switch_init(machine_t *machine){ // {{{
+static ssize_t switch_init(machine_t *machine){ // {{{
 	if( (machine->userdata = calloc(1, sizeof(switch_userdata))) == NULL)
 		return error("calloc returns null");
 	
 	list_init(& ((switch_userdata *)machine->userdata)->rules);
 	return 0;
 } // }}}
-static int switch_destroy(machine_t *machine){ // {{{
+static ssize_t switch_destroy(machine_t *machine){ // {{{
 	switch_userdata       *userdata          = (switch_userdata *)machine->userdata;
 	switch_rule           *rule;
 	
@@ -114,7 +114,7 @@ static int switch_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int switch_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t switch_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	hash_t                *rules             = NULL;
 	

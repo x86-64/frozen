@@ -33,7 +33,7 @@ typedef struct implode_userdata {
 	hashkey_t              buffer;
 } implode_userdata;
 
-static int implode_init(machine_t *machine){ // {{{
+static ssize_t implode_init(machine_t *machine){ // {{{
 	implode_userdata      *userdata          = machine->userdata = calloc(1, sizeof(implode_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
@@ -41,13 +41,13 @@ static int implode_init(machine_t *machine){ // {{{
 	userdata->buffer        = HK(buffer);
 	return 0;
 } // }}}
-static int implode_destroy(machine_t *machine){ // {{{
+static ssize_t implode_destroy(machine_t *machine){ // {{{
 	implode_userdata      *userdata          = (implode_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int implode_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t implode_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	implode_userdata      *userdata          = (implode_userdata *)machine->userdata;
 	

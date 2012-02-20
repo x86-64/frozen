@@ -87,7 +87,7 @@ static void   try_threaddata_destroy(try_threaddata *threaddata){ // {{{
 	free(threaddata);
 } // }}}
 
-static int try_init(machine_t *machine){ // {{{
+static ssize_t try_init(machine_t *machine){ // {{{
 	try_userdata         *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(try_userdata))) == NULL)
@@ -110,7 +110,7 @@ static int try_init(machine_t *machine){ // {{{
 		(f_thread_destroy)&try_threaddata_destroy,
 		userdata);
 } // }}}
-static int try_destroy(machine_t *machine){ // {{{
+static ssize_t try_destroy(machine_t *machine){ // {{{
 	try_userdata      *userdata = (try_userdata *)machine->userdata;
 	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
@@ -121,7 +121,7 @@ static int try_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int try_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t try_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	try_userdata          *userdata          = (try_userdata *)machine->userdata;
 	

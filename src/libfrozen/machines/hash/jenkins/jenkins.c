@@ -36,19 +36,19 @@ typedef struct jenkins_userdata {
 	uintmax_t              fatal;
 } jenkins_userdata;
 
-static int jenkins_init(machine_t *machine){ // {{{
+static ssize_t jenkins_init(machine_t *machine){ // {{{
 	if((machine->userdata = calloc(1, sizeof(jenkins_userdata))) == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int jenkins_destroy(machine_t *machine){ // {{{
+static ssize_t jenkins_destroy(machine_t *machine){ // {{{
 	jenkins_userdata       *userdata = (jenkins_userdata *)machine->userdata;
 
 	free(userdata);
 	return 0;
 } // }}}
-static int jenkins_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t jenkins_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	jenkins_userdata      *userdata          = (jenkins_userdata *)machine->userdata;
 	

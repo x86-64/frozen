@@ -113,7 +113,7 @@ static data_t stdin_io  = DATA_IOT(&stdin,  (f_io_func)&stdin_io_handler);
 static data_t stdout_io = DATA_IOT(&stdout, (f_io_func)&stdout_io_handler);
 static data_t stderr_io = DATA_IOT(&stderr, (f_io_func)&stdout_io_handler);
 
-static int std_init(machine_t *machine){ // {{{
+static ssize_t std_init(machine_t *machine){ // {{{
 	std_userdata        *userdata;
 
 	if((userdata = machine->userdata = calloc(1, sizeof(std_userdata))) == NULL)
@@ -122,21 +122,21 @@ static int std_init(machine_t *machine){ // {{{
 	userdata->key       = HK(buffer);
 	return 0;
 } // }}}
-static int std_destroy(machine_t *machine){ // {{{
+static ssize_t std_destroy(machine_t *machine){ // {{{
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 
 	free(userdata);
 	return 0;
 } // }}}
 
-static int stdin_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t stdin_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 	
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->key,      config, HK(output));
 	return 0;
 } // }}}
-static int stdout_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t stdout_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 	

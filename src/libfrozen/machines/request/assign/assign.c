@@ -37,13 +37,13 @@ typedef struct assign_userdata {
 	uintmax_t              copy;
 } assign_userdata;
 
-static int assign_init(machine_t *machine){ // {{{
+static ssize_t assign_init(machine_t *machine){ // {{{
 	if( (machine->userdata = calloc(1, sizeof(assign_userdata))) == NULL)
 		return error("calloc returns null");
 	
 	return 0;
 } // }}}
-static int assign_destroy(machine_t *machine){ // {{{
+static ssize_t assign_destroy(machine_t *machine){ // {{{
 	assign_userdata       *userdata          = (assign_userdata *)machine->userdata;
 	
 	hash_free(userdata->before);
@@ -52,7 +52,7 @@ static int assign_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int assign_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t assign_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	assign_userdata       *userdata          = (assign_userdata *)machine->userdata;
 	

@@ -108,7 +108,7 @@ static ssize_t thread_control_stop(machine_t *machine){ // {{{
 	return 0;
 } // }}}
 
-static int thread_init(machine_t *machine){ // {{{
+static ssize_t thread_init(machine_t *machine){ // {{{
 	pthread_mutexattr_t    attr;
 	thread_userdata       *userdata;
 	
@@ -129,7 +129,7 @@ static int thread_init(machine_t *machine){ // {{{
 	userdata->destroy_on_exit = 1;
 	return 0;
 } // }}}
-static int thread_destroy(machine_t *machine){ // {{{
+static ssize_t thread_destroy(machine_t *machine){ // {{{
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
 	if(userdata->self_termination == 1)
@@ -141,7 +141,7 @@ static int thread_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int thread_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t thread_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	

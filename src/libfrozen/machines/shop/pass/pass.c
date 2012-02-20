@@ -34,7 +34,7 @@ typedef struct pass_userdata {
 	hashkey_t              return_to;
 } pass_userdata;
 
-static int pass_init(machine_t *machine){ // {{{
+static ssize_t pass_init(machine_t *machine){ // {{{
 	pass_userdata         *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(pass_userdata))) == NULL)
@@ -43,7 +43,7 @@ static int pass_init(machine_t *machine){ // {{{
 	userdata->return_to = HK(return_to);
 	return 0;
 } // }}}
-static int pass_destroy(machine_t *machine){ // {{{
+static ssize_t pass_destroy(machine_t *machine){ // {{{
 	pass_userdata      *userdata = (pass_userdata *)machine->userdata;
 	
 	fastcall_free r_free = { { 2, ACTION_FREE } };
@@ -52,7 +52,7 @@ static int pass_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int pass_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t pass_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	

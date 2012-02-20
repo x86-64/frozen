@@ -7,7 +7,7 @@ typedef struct factory_userdata {
 	hashkey_t              output;
 } factory_userdata;
 
-static int factory_init(machine_t *machine){ // {{{
+static ssize_t factory_init(machine_t *machine){ // {{{
 	factory_userdata      *userdata;
 	if((userdata = machine->userdata = calloc(1, sizeof(factory_userdata))) == NULL)
 		return error("calloc failed");
@@ -15,14 +15,14 @@ static int factory_init(machine_t *machine){ // {{{
 	userdata->output = HK(machine);
 	return 0;
 } // }}}
-static int factory_destroy(machine_t *machine){ // {{{
+static ssize_t factory_destroy(machine_t *machine){ // {{{
 	factory_userdata      *userdata = (factory_userdata *)machine->userdata;
 	
 	hash_free(userdata->machine_config);
 	free(userdata);
 	return 0;
 } // }}}
-static int factory_configure(machine_t *machine, config_t *config){ // {{{
+static ssize_t factory_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	factory_userdata      *userdata          = (factory_userdata *)machine->userdata;
 	

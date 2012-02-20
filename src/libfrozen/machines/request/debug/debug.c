@@ -52,20 +52,20 @@ static void debug_do(machine_t *machine, request_t *request, debug_flags flag){ 
 	}
 } // }}}
 
-static int debug_init(machine_t *machine){ // {{{
+static ssize_t debug_init(machine_t *machine){ // {{{
 	debug_userdata        *userdata          = machine->userdata = calloc(1, sizeof(debug_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
 	
 	return 0;
 } // }}}
-static int debug_destroy(machine_t *machine){ // {{{
+static ssize_t debug_destroy(machine_t *machine){ // {{{
 	debug_userdata        *userdata          = (debug_userdata *)machine->userdata;
 	
 	free(userdata);
 	return 0;
 } // }}}
-static int debug_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t debug_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	uintmax_t              cfg_showdump      = 1;
 	uintmax_t              cfg_before        = 1;

@@ -70,7 +70,7 @@ static void   split_threaddata_destroy(split_threaddata *threaddata){ // {{{
 	free(threaddata);
 } // }}}
 
-static int split_init(machine_t *machine){ // {{{
+static ssize_t split_init(machine_t *machine){ // {{{
 	split_userdata       *userdata;
 
 	if((userdata = machine->userdata = calloc(1, sizeof(split_userdata))) == NULL)
@@ -88,7 +88,7 @@ static int split_init(machine_t *machine){ // {{{
 		(f_thread_destroy)&split_threaddata_destroy,
 		userdata);
 } // }}}
-static int split_destroy(machine_t *machine){ // {{{
+static ssize_t split_destroy(machine_t *machine){ // {{{
 	split_userdata        *userdata          = (split_userdata *)machine->userdata;
 	
 	thread_data_destroy(&userdata->thread_data);
@@ -97,7 +97,7 @@ static int split_destroy(machine_t *machine){ // {{{
 	free(userdata);
 	return 0;
 } // }}}
-static int split_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t split_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	char                  *split_str         = NULL;
 	split_userdata        *userdata          = (split_userdata *)machine->userdata;

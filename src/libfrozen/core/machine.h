@@ -71,10 +71,9 @@
  */
 
 
-typedef int     (*f_init)      (machine_t *);                         ///< Init function for machine. Allocate userdata and init default values here.
-typedef int     (*f_fork)      (machine_t *, machine_t *, hash_t *);  ///< Fork function for machine. Make fork of current machine here.
-typedef int     (*f_configure) (machine_t *, hash_t *);               ///< Configure function for machine. Try to make it reentrant. Assign configuration values and validate it here.
-typedef int     (*f_destroy)   (machine_t *);                         ///< Destroy function for machine. Free all allocated resources here.
+typedef ssize_t (*f_init)      (machine_t *);                         ///< Init function for machine. Allocate userdata and init default values here.
+typedef ssize_t (*f_configure) (machine_t *, hash_t *);               ///< Configure function for machine. Try to make it reentrant. Assign configuration values and validate it here.
+typedef ssize_t (*f_destroy)   (machine_t *);                         ///< Destroy function for machine. Free all allocated resources here.
 
 /** @brief Machine structure
  *  
@@ -87,7 +86,6 @@ struct machine_t {
 	api_types              supported_api;    ///< Supported apis. For example (API_HASH | API_FAST). Required
 	f_init                 func_init;        ///< Machine init function. Optional
 	f_configure            func_configure;   ///< Machine configure function. Optional
-	f_fork                 func_fork;        ///< Machine fork function. Optional
 	f_destroy              func_destroy;     ///< Machine destroy function. Optional
 	
 	struct {

@@ -52,7 +52,7 @@ typedef struct struct_userdata {
 	uintmax_t              lazy;
 } struct_userdata;
 
-static int struct_init(machine_t *machine){ // {{{
+static ssize_t struct_init(machine_t *machine){ // {{{
 	struct_userdata       *userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(struct_userdata))) == NULL)
@@ -62,14 +62,14 @@ static int struct_init(machine_t *machine){ // {{{
 	
 	return 0;
 } // }}}
-static int struct_destroy(machine_t *machine){ // {{{
+static ssize_t struct_destroy(machine_t *machine){ // {{{
 	struct_userdata *userdata = (struct_userdata *)machine->userdata;
 	
 	hash_free(userdata->structure);
 	free(userdata);
 	return 0;
 } // }}}
-static int struct_configure(machine_t *machine, hash_t *config){ // {{{
+static ssize_t struct_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	struct_userdata       *userdata      = (struct_userdata *)machine->userdata;
 	
