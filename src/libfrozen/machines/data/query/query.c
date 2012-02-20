@@ -68,6 +68,8 @@ static ssize_t query_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
+	request_set_current(request);
+	
 	if( (ret = data_hash_query(
 		&userdata->data,
 		userdata->request ?

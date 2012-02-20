@@ -171,6 +171,8 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	try_userdata         *userdata          = (try_userdata *)machine->userdata;
 	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
 	
+	request_set_current(request);
+	
 	threaddata->machine  = machine;
 	threaddata->request  = request;
 	threaddata->ret      = 0;

@@ -643,6 +643,8 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	zeromq_t              *socket_fdata;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
+	request_set_current(request);
+	
 	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
 	if( (ret = data_query(&userdata->socket, &r_getdata)) < 0)
 		return ret;

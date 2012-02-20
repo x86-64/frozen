@@ -62,6 +62,8 @@ static ssize_t end_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret2;
 	end_userdata          *userdata          = (end_userdata *)machine->userdata;
 	
+	request_set_current(request);
+	
 	fastcall_read r_read = { { 5, ACTION_READ }, 0, &ret, sizeof(ret) };
 	if( (ret2 = data_query(&userdata->ret, &r_read)) < 0)
 		return ret2;

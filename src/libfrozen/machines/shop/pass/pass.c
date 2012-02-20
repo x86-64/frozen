@@ -67,6 +67,8 @@ static int pass_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
+	request_set_current(request);
+	
 	request_t r_next[] = {
 		{ userdata->return_to, DATA_NEXT_MACHINET(machine) },
 		hash_inline(request),

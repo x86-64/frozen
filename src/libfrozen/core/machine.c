@@ -79,6 +79,9 @@ void               class_unregister        (machine_t *proto){ // {{{
 request_t *        request_get_current(void){ // {{{
 	return (request_t *)pthread_getspecific(key_curr_request);
 } // }}}
+void               request_set_current(request_t *request){ // {{{
+	pthread_setspecific(key_curr_request, request);
+} // }}}
 
 ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
 	if(thread_data->inited == 0){
@@ -383,12 +386,8 @@ void               shop_destroy      (machine_t *machine){ // {{{
 } // }}}
 
 ssize_t            machine_query        (machine_t *machine, request_t *request){ // {{{
-	pthread_setspecific(key_curr_request, request);
-		
 	return machine->machine_type_hash.func_handler(machine, request);
 } // }}}
 ssize_t            machine_pass         (machine_t *machine, request_t *request){ // {{{
-	pthread_setspecific(key_curr_request, request);
-		
 	return machine->cnext->machine_type_hash.func_handler(machine->cnext, request);
 } // }}}
