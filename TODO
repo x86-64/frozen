@@ -1,6 +1,5 @@
 * flow-based architecture for machine, request-based architecture for data:
   - machine/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
-  - cache/cache: get machine length not flow-based (not important, subject for deprecation)
   - machine/pool: pool get parameter not flow-based (not important for now, another approach?)
 
 * m4 macro collection
