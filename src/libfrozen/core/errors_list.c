@@ -35,8 +35,6 @@ static err_item errs_list[] = {
  { -172148, "src/libfrozen/machines/daemon/thread/thread.c: calloc failed" },
  { -172124, "src/libfrozen/machines/daemon/thread/thread.c: pthread_create failed" },
  { -167976, "src/libfrozen/machines/request/emitter/emitter.c: calloc failed" },
- { -163896, "src/libfrozen/machines/data/transfer/transfer.c: source or destination machine invalid" },
- { -163876, "src/libfrozen/machines/data/transfer/transfer.c: calloc failed" },
  { -159930, "src/libfrozen/machines/io/console/console.c: input key not supplied" },
  { -159916, "src/libfrozen/machines/io/console/console.c: input key not supplied" },
  { -159902, "src/libfrozen/machines/io/console/console.c: output key not supplied" },

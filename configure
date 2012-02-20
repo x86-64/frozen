@@ -827,7 +827,6 @@ enable_machineregexp
 enable_machinesplit
 enable_machinestruct_pack
 enable_machinestruct_unpack
-enable_machinetransfer
 enable_machinejenkins32
 enable_machinejenkins64
 enable_machinemurmur2_32
@@ -1593,8 +1592,6 @@ Optional Features:
                           disable machine struct-pack
   --disable-machine-struct-unpack
                           disable machine struct-unpack
-  --disable-machine-transfer
-                          disable machine transfer
   --disable-machine-jenkins32
                           disable machine jenkins32
   --disable-machine-jenkins64
@@ -19725,43 +19722,6 @@ fi
 		MACHINE_MAKEFILE_data_structs=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/structs/libfrozen_machine_structs.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinetransfer was given.
-if test "${enable_machinetransfer+set}" = set; then :
-  enableval=$enable_machinetransfer;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinetransfer}" = "yes"; then
-			enable_machinetransfer="no"
-		else
-			enable_machinetransfer="yes"
-		fi
-	fi
-
-	if test "${enable_machinetransfer}" = "yes"; then
-		MACHINE_DIR_transfer="data/transfer"
-		MACHINE_DEP_transfer=""
-				MACHINE_SELECTED="$MACHINE_SELECTED transfer"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_data_transfer" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/transfer/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/transfer"
-
-		MACHINE_MAKEFILE_data_transfer=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/transfer/libfrozen_machine_transfer.la"
 
 	fi
 
