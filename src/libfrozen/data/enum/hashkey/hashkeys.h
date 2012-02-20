@@ -83,6 +83,7 @@
 #define HK_VALUE_machine 14586
 #define HK_VALUE_marker 9864
 #define HK_VALUE_marker_data 52113
+#define HK_VALUE_master 10017
 #define HK_VALUE_max_global 39928
 #define HK_VALUE_max_perfork 54985
 #define HK_VALUE_max_perinstance 130972
@@ -147,6 +148,7 @@
 #define HK_VALUE_shop 3322
 #define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
+#define HK_VALUE_slave 5833
 #define HK_VALUE_sndbuf_size 54561
 #define HK_VALUE_socket 9863
 #define HK_VALUE_source 9547
@@ -251,6 +253,7 @@ typedef enum hashkey_t {
       HK_machine = HK_VALUE_machine, 
       HK_marker = HK_VALUE_marker, 
       HK_marker_data = HK_VALUE_marker_data, 
+      HK_master = HK_VALUE_master, 
       HK_max_global = HK_VALUE_max_global, 
       HK_max_perfork = HK_VALUE_max_perfork, 
       HK_max_perinstance = HK_VALUE_max_perinstance, 
@@ -315,6 +318,7 @@ typedef enum hashkey_t {
       HK_shop = HK_VALUE_shop, 
       HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
+      HK_slave = HK_VALUE_slave, 
       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
       HK_socket = HK_VALUE_socket, 
       HK_source = HK_VALUE_source, 
@@ -423,6 +427,7 @@ keypair_t hashkeys[] = {
       { "machine", HK_VALUE_machine }, 
       { "marker", HK_VALUE_marker }, 
       { "marker_data", HK_VALUE_marker_data }, 
+      { "master", HK_VALUE_master }, 
       { "max_global", HK_VALUE_max_global }, 
       { "max_perfork", HK_VALUE_max_perfork }, 
       { "max_perinstance", HK_VALUE_max_perinstance }, 
@@ -487,6 +492,7 @@ keypair_t hashkeys[] = {
       { "shop", HK_VALUE_shop }, 
       { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
+      { "slave", HK_VALUE_slave }, 
       { "sndbuf_size", HK_VALUE_sndbuf_size }, 
       { "socket", HK_VALUE_socket }, 
       { "source", HK_VALUE_source }, 

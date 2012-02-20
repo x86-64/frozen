@@ -7,7 +7,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
 - machine 'exec'
 - log_error for config_
 - datatype and hashkey convert to/from binary
