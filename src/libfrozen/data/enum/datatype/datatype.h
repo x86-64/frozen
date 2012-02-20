@@ -46,8 +46,9 @@ enum datatype_t {
    TYPE_FILET = 39,
    TYPE_FOLDERT = 40,
    TYPE_LISTT = 41,
-   TYPE_MEMORYT = 42,
-   TYPE_RAWT = 43,
+   TYPE_LISTENDT = 42,
+   TYPE_MEMORYT = 43,
+   TYPE_RAWT = 44,
 };
 
 #endif

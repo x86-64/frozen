@@ -44,7 +44,8 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	
 	switch(fargs->format){
 		case FORMAT(binary):;
-			DATATYPE_BIN           type;
+			datatype_t             type;
+			data_t                 item_type          = DATA_PTR_DATATYPET(&type);
 			
 			for(chunk = fdata->head; chunk; chunk = chunk->cnext){
 				// strip refs
@@ -52,11 +53,11 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 				if( (ret = data_query(&chunk->data, &r_getdata)) < 0)
 					break;
 				
-				type = (DATATYPE_BIN)r_getdata.data->type;
+				type = r_getdata.data->type;
 				
 				// write type
-				fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &type, sizeof(type) };
-				if( (ret = data_query(&d_sl_data, &r_write)) < 0)
+				fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(binary) };
+				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
 					break;
 				
 				data_slider_t_freeze(&d_sl_data);
@@ -70,9 +71,10 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			}
 			
 			// terminate list
-			type = __MAX(DATATYPE_BIN);
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &type, sizeof(type) };
-			if( (qret = data_query(&d_sl_data, &r_write)) < 0)
+			type = TYPE_LISTENDT;
+			
+			fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(binary) };
+			if( (qret = data_query(&item_type, &r_convert_type)) < 0)
 				ret = qret;
 			break;
 			
@@ -102,7 +104,8 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			return data_list_t_alloc(dst, NULL);
 			
 		case FORMAT(binary):;
-			DATATYPE_BIN           type;
+			datatype_t             type;
+			data_t                 item_type = DATA_PTR_DATATYPET(&type);
 			data_t                 item;
 			
 			if((fdata = dst->ptr) == NULL){
@@ -111,12 +114,11 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			}
 			
 			while(1){
-				// read type
-				fastcall_read r_read = { { 5, ACTION_READ }, 0, &type, sizeof(type) };
-				if( (ret = data_query(&d_sl_data, &r_read)) < 0)
+				fastcall_convert_from r_convert_type = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(binary) };
+				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
 					break;
 				
-				if(type == __MAX(DATATYPE_BIN))
+				if(type == TYPE_LISTENDT)
 					break;
 				
 				item.type = type;
@@ -206,8 +208,7 @@ static ssize_t data_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	
 	return ret;
 } // }}}
-
-data_proto_t list_t_proto = {
+data_proto_t list_t_proto = { // {{{
 	.type                   = TYPE_LISTT,
 	.type_str               = "list_t",
 	.api_type               = API_HANDLERS,
@@ -222,7 +223,17 @@ data_proto_t list_t_proto = {
 		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
 		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
 	}
-};
+}; // }}}
+
+static ssize_t data_list_end_t_nosys(data_t *data, fastcall_header *hargs){ // {{{
+	return -ENOSYS;
+} // }}}
+data_proto_t list_end_t_proto = { // {{{
+	.type                   = TYPE_LISTENDT,
+	.type_str               = "list_end_t",
+	.api_type               = API_DEFAULT_HANDLER,
+	.handler_default        = (f_data_func)&data_list_end_t_nosys
+}; // }}}
 
 static list_chunk_t *    chunk_alloc(data_t *data){ // {{{
 	list_chunk_t          *chunk;

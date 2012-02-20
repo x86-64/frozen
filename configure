@@ -817,6 +817,7 @@ enable_container_t
 enable_file_t
 enable_folder_t
 enable_list_t
+enable_list_end_t
 enable_memory_t
 enable_raw_t
 enable_machinecache
@@ -1578,6 +1579,8 @@ Optional Features:
   --disable-data-file_t   disable data file_t
   --disable-data-folder_t disable data folder_t
   --disable-data-list_t   disable data list_t
+  --disable-data-list_end_t
+                          disable data list_end_t
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
   --disable-machine-cache disable machine cache
@@ -19347,6 +19350,42 @@ fi
 		DATA_ID_list_t=""
 		DATA_SELECTED="$DATA_SELECTED list_t"
 		DATA_HEADERS="$DATA_HEADERS storage/list/list_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_storage_list" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/storage/list/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS storage/list"
+
+		DATA_MAKEFILE_storage_list=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/list/libfrozen_data_list.la"
+
+	fi
+
+
+
+
+
+	# Check whether --enable-list_end_t was given.
+if test "${enable_list_end_t+set}" = set; then :
+  enableval=$enable_list_end_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_list_end_t}" = "yes"; then
+			enable_list_end_t="no"
+		else
+			enable_list_end_t="yes"
+		fi
+	fi
+
+	if test "${enable_list_end_t}" = "yes"; then
+		DATA_DIR_list_end_t="storage/list"
+		DATA_DEP_list_end_t=""
+		DATA_ID_list_end_t=""
+		DATA_SELECTED="$DATA_SELECTED list_end_t"
+		DATA_HEADERS="$DATA_HEADERS storage/list/list_end_t.h"
 	fi
 
 	if test "$DATA_MAKEFILE_storage_list" = ""; then
