@@ -7,17 +7,26 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
+- data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
+- machine 'exec'
 - log_error for config_
 - datatype and hashkey convert to/from binary
 - list_t and hash_t use datatype convert instead of portable types
 - zmq patterns
+  - proxy pattern
+  - replace machines and stuff in request with proxy
 - machine thread_pool
+- data perthread_t wrapper
 - machine queue
-- data bind_t (master and slave data, write and read from master, read from slave on creation, write on destroy)
 - wrap -E* errors in error func, to mark source of error
 - error backtrace
 - list_t convert_from hash with data array
 - machine/rebuild deprecate?
+- bug in datatype packing - dynamic data types can not match on different machines
+- portable action_t binary format
+- machine rate-limit, delay
+- deprecate api_crwd
+- fast machine_query and _pass, maybe in macro
 
 - write allocator_fixed_t push/pop same as for list_t
 - broken tcp
