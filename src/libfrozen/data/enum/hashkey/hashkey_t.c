@@ -5,12 +5,14 @@
 #include <enum/format/format_t.h>
 
 #define EMODULE 46
+#define HASHKEY_PORTABLE uint32_t
 
 #if defined DYNAMIC_KEYS_CHECK || defined RESOLVE_DYNAMIC_KEYS
 static list                    dynamic_keys   = LIST_INITIALIZER;
 #endif
 
 static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	uintmax_t              i                       = 1;
 	char                   c;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
@@ -30,8 +32,8 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 		case FORMAT(config):;
 		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
-			if(data_query(fargs->src, &r_read) != 0)
-				return -EFAULT;
+			if( (ret = data_query(fargs->src, &r_read)) < 0)
+				return ret;
 			
 			while((c = *p++)){
 				key_val += c * i * i;
@@ -70,6 +72,16 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 			*(hashkey_t *)(dst->ptr) = key_val;
 			return 0;
 		
+		case FORMAT(binary):;
+			HASHKEY_PORTABLE  key_port = 0;
+			
+			fastcall_read r_binary = { { 5, ACTION_READ }, 0, &key_port, sizeof(key_port) };
+			if( (ret = data_query(fargs->src, &r_binary)) < 0)
+				return ret;
+			
+			*(hashkey_t *)(dst->ptr) = key_port;
+			return 0;
+			
 		default:
 			break;
 	}
@@ -125,6 +137,14 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 			transfered = r_write.buffer_size;
 			break;
 		
+		case FORMAT(binary):;
+			HASHKEY_PORTABLE key_port = (HASHKEY_PORTABLE)value;
+
+			fastcall_write r_binary = { { 5, ACTION_WRITE }, 0, &key_port, sizeof(key_port) };
+			ret        = data_query(fargs->dest, &r_binary);
+			transfered = r_binary.buffer_size;
+			break;
+
 		default:
 			return -ENOSYS;
 	}
@@ -134,11 +154,12 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 	return ret;
 } // }}}		
 static ssize_t data_hashkey_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
-		fargs->length = sizeof(hashkey_t);
-		return 0;
+	switch(fargs->format){
+		case FORMAT(binary): fargs->length = sizeof(HASHKEY_PORTABLE); break;
+		default:
+			return -ENOSYS;
 	}
-	return -ENOSYS;
+	return 0;
 } // }}}
 
 data_proto_t hashkey_t_proto = {

@@ -16,7 +16,7 @@ static err_item errs_list[] = {
  { -204876, "src/libfrozen/data/allocator/fixed/allocator_fixed_t.c: invalid storage supplied" },
  { -204868, "src/libfrozen/data/allocator/fixed/allocator_fixed_t.c: calloc failed" },
  { -196688, "src/libfrozen/data/enum/format/format_t.c: format collision" },
- { -192594, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
+ { -192606, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -184365, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutex_init failed" },
  { -184362, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_settype failed" },
  { -184359, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_init failed" },
@@ -147,7 +147,6 @@ static err_item errs_list[] = {
  { -8250, "src/libfrozen/data/storage/file/file_t.c: filename invalid" },
  { -8242, "src/libfrozen/data/storage/file/file_t.c: filename not supplied" },
  { -8232, "src/libfrozen/data/storage/file/file_t.c: calloc returns null" },
- { -5607, "src/libfrozen/core/configs/config_parser.tab.c: data string init failed" },
  { -4222, "src/libfrozen/machines/index/mphf/mphf_bdz_imp.c: mphf g_free" },
 
 };
