@@ -151,10 +151,13 @@ static void        machine_disconnect(machine_t *parent, machine_t *child){ // {
 		child->cprev  = NULL;
 	}
 } // }}}
+static ssize_t     machine_dummy_pass(machine_t *machine, request_t *request){ // {{{
+	return machine_pass(machine, request);
+} // }}}
 static void        machine_fill_blanks(machine_t *machine){ // {{{
 	if( (machine->supported_api & API_HASH) != 0){
 		if(machine->machine_type_hash.func_handler == NULL)
-			machine->machine_type_hash.func_handler = &machine_pass;
+			machine->machine_type_hash.func_handler = &machine_dummy_pass;
 	}
 	if(machine->cnext == NULL){
 		machine->cnext = &machine_dummy;
@@ -384,10 +387,11 @@ void               shop_destroy      (machine_t *machine){ // {{{
 		machine_destroy(curr);
 	}
 } // }}}
-
+/*
 ssize_t            machine_query        (machine_t *machine, request_t *request){ // {{{
 	return machine->machine_type_hash.func_handler(machine, request);
 } // }}}
 ssize_t            machine_pass         (machine_t *machine, request_t *request){ // {{{
 	return machine->cnext->machine_type_hash.func_handler(machine->cnext, request);
 } // }}}
+*/

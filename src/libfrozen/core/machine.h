@@ -113,8 +113,11 @@ API machine_t *     machine_find            (char *name); ///< Find machine by n
 API void            machine_destroy         (machine_t *machine); ///< Destroy machine
 API ssize_t         machine_is_ghost        (machine_t *machine);
 
-API ssize_t         machine_query           (machine_t *machine, request_t *request); ///< Query machine with hash request
-API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
+//API ssize_t         machine_query           (machine_t *machine, request_t *request); ///< Query machine with hash request
+//API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///< Pass hash request to next machines in shop. @param machine Current machine
+
+#define machine_query(_machine,_request)  (_machine)->machine_type_hash.func_handler(_machine, _request)
+#define machine_pass(_machine,_request)   (_machine)->cnext->machine_type_hash.func_handler((_machine)->cnext, _request)
 
 /** @brief Create new shop.
  *

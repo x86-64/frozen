@@ -22,10 +22,14 @@
  * @endcode
  */
 
+static ssize_t null_handler(machine_t *machine, request_t *request){ // {{{
+	return machine_pass(machine, request);
+} // }}}
+
 machine_t null_proto = {
 	.class          = "request/null",
 	.supported_api  = API_HASH,
 	.machine_type_hash = {
-		.func_handler = &machine_pass
+		.func_handler = &null_handler
 	}
 };
