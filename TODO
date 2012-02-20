@@ -8,7 +8,7 @@
   - index + file_t as store macro set
 
 - machine 'exec'
-- datatype and hashkey convert to/from binary
+- hashkey convert to/from binary
 - list_t and hash_t use datatype convert instead of portable types
 - zmq patterns
   - proxy pattern

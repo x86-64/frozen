@@ -3,6 +3,8 @@
 #include <enum/format/format_t.h>
 #include <core/void/void_t.h>
 
+#define DATATYPE_PORTABLE uint16_t
+
 datatype_t     data_getid(char *name, ssize_t *pret){ // {{{
 	uintmax_t              i;
 	ssize_t                ret               = -EINVAL;
@@ -40,14 +42,31 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 		case FORMAT(config):;
 		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, sizeof(buffer) - 1 };
-			if(data_query(fargs->src, &r_read) < 0)
-				return -EINVAL;
+			if( ( ret = data_query(fargs->src, &r_read)) < 0)
+				return ret;
 			
 			buffer[r_read.buffer_size] = '\0';
 			
 			*(datatype_t *)(dst->ptr) = data_getid(buffer, &ret);
 			return ret;
 
+		case FORMAT(clean):;
+			fastcall_read r_clean = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(datatype_t) };
+			if( (ret = data_query(fargs->src, &r_clean)) < 0)
+				return ret;
+			
+			return ret;
+		
+		case FORMAT(binary):;
+			DATATYPE_PORTABLE type_port = 0;
+
+			fastcall_read r_binary = { { 5, ACTION_READ }, 0, &type_port, sizeof(type_port) };
+			if( (ret = data_query(fargs->src, &r_binary)) < 0)
+				return 0;
+			
+			*(datatype_t *)(dst->ptr) = (datatype_t)type_port;
+			return 0;
+			
 		default:
 			break;
 	};
@@ -57,30 +76,57 @@ static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *farg
 	ssize_t                ret;
 	datatype_t             type;
 	char                  *string            = "INVALID";
+	uintmax_t              transfered;
 	
 	if(src->ptr == NULL)
 		return -EINVAL;
 	
 	type = *(datatype_t *)(src->ptr);
 	
-	if(type != TYPE_INVALID && (unsigned)type < data_protos_nitems){
-		string = data_protos[type]->type_str;
+	switch(fargs->format){
+		case FORMAT(config):
+		case FORMAT(human):
+			if((unsigned)type < data_protos_nitems){
+				string = data_protos[type]->type_str;
+			}
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
+			ret        = data_query(fargs->dest, &r_write);
+			transfered = r_write.buffer_size;
+			break;
+			
+		case FORMAT(clean):;
+			fastcall_write r_clean = { { 5, ACTION_WRITE }, 0, &type, sizeof(type) };
+			ret        = data_query(fargs->dest, &r_clean);
+			transfered = r_clean.buffer_size;
+			break;
+			
+		case FORMAT(binary):;
+			DATATYPE_PORTABLE  type_port = (DATATYPE_PORTABLE)type;
+			
+			fastcall_write r_binary = { { 5, ACTION_WRITE }, 0, &type_port, sizeof(type_port) };
+			ret        = data_query(fargs->dest, &r_binary);
+			transfered = r_binary.buffer_size;
+			break;
+			
+		default:
+			return -ENOSYS;
 	}
-	
-	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
-	ret        = data_query(fargs->dest, &r_write);
-	
 	if(fargs->header.nargs >= 5)
-		fargs->transfered = r_write.buffer_size;
+		fargs->transfered = transfered;
 	
 	return ret;
 } // }}}		
 static ssize_t data_datatype_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
-		fargs->length = sizeof(datatype_t);
-		return 0;
+	switch(fargs->format){
+		case FORMAT(clean):  fargs->length = sizeof(datatype_t);        break;
+		case FORMAT(binary): fargs->length = sizeof(DATATYPE_PORTABLE); break;
+		case FORMAT(config):
+		case FORMAT(human):
+			// TODO convert and measure
+		default:
+			return -ENOSYS;
 	}
-	return -ENOSYS;
+	return 0;
 } // }}}
 
 data_proto_t datatype_t_proto = {
