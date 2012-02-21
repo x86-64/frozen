@@ -56,16 +56,20 @@ static ssize_t       data_default_read          (data_t *data, fastcall_read *fa
 	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EFAULT;
 	
-	if(r_len.length == 0)
+	if(r_len.length == 0){
+		fargs->buffer_size = 0;
 		return -1; // EOF
+	}
 	
 	if(fargs->buffer == NULL || fargs->offset > r_len.length)
 		return -EINVAL; // invalid range
 	
 	fargs->buffer_size = MIN(fargs->buffer_size, r_len.length - fargs->offset);
 	
-	if(fargs->buffer_size == 0)
+	if(fargs->buffer_size == 0){
+		fargs->buffer_size = 0;
 		return -1; // EOF
+	}
 	
 	memcpy(fargs->buffer, r_ptr.ptr + fargs->offset, fargs->buffer_size);
 	return 0;

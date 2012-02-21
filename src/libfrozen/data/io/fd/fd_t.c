@@ -26,8 +26,10 @@ redo_read:
 		if(errno == EINTR) goto redo_read;
 		return -errno;
 	}
-	if(ret == 0 && fargs->buffer_size != 0)
+	if(ret == 0 && fargs->buffer_size != 0){
+		fargs->buffer_size = 0;
 		return -1; // EOF
+	}
 	
 	fargs->buffer_size = ret;
 	return 0;
