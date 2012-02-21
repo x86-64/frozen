@@ -50,6 +50,34 @@
  * }
  * @endcode
  */
+/**
+ * @ingroup machine
+ * @addtogroup mod_machine_zeromq modules/zeromq
+ */
+/**
+ * @ingroup mod_machine_zeromq
+ * @page page_zeromq_info Description
+ *
+ * This machine help to deal with zeromq sockets using common pattern. 
+ */
+/**
+ * @ingroup mod_machine_zeromq
+ * @page page_zeromq_config Configuration
+ * 
+ * Accepted configuration:
+ * @code
+ * {
+ *              class                   = "modules/zeromq",
+ *              socket                  =                        // zeromq socket
+ *                                        (env_t)"data",         // - zeromq socket supplied in current request
+ *                                        (zeromq_t)"",          // - embedded in configuration
+ *              shop                    = (machine_t){ ... },    // shop for processing rep socket's incoming request
+ *              input                   = (hashkey_t)"input",    // input hashkey, default "buffer"
+ *              output                  = (hashkey_t)"output",   // output hashkey, default "buffer"
+ *              convert                 = (uint_t)"1"            // convert input data to raw_t (use for non-consumable data), default 0
+ * }
+ * @endcode
+ */
 
 #define ZEROMQT_NAME       "zeromq_t"
 #define ZEROMQ_MSGT_NAME   "zeromq_msg_t"
