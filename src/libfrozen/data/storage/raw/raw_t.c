@@ -264,6 +264,9 @@ static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
 	uintmax_t              new_size;
 	raw_t                 *fdata;
 	
+	if(fargs->buffer_size == 0)
+		return 0;
+	
 	if(fargs->buffer == NULL)
 		return -EINVAL;
 	
