@@ -11,13 +11,14 @@ slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
 	if( (fdata = malloc(sizeof(slider_t))) == NULL )
 		return NULL;
 	
-	fdata->data       = *data;
+	fdata->holder     = *data;
+	fdata->data       = &fdata->holder;
 	fdata->off        = offset;
 	fdata->frozen_off = ~0;
 	return fdata;
 } // }}}
 void              slider_t_destroy(slider_t *slider){ // {{{
-	data_free(&slider->data);
+	data_free(&slider->holder);
 } // }}}
 
 uintmax_t data_slider_t_get_offset(data_t *data){ // {{{
@@ -50,7 +51,7 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			else
 				ioargs->offset      += fdata->off;
 
-			if( (ret = data_query(&fdata->data, fargs)) >= 0)
+			if( (ret = data_query(fdata->data, fargs)) >= 0)
 				fdata->off += ioargs->buffer_size;
 
 			return ret;
@@ -63,7 +64,7 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 		default:
 			break;
 	};
-	return data_query(&fdata->data, fargs);
+	return data_query(fdata->data, fargs);
 } // }}}
 static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;

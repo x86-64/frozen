@@ -19,15 +19,16 @@
  *  @endcode
  */
 
-#define DATA_SLIDERT(_data,_off)  {TYPE_SLIDERT, (slider_t []){ { *(_data), _off, ~0 } }}
+#define DATA_SLIDERT(_data,_off)  {TYPE_SLIDERT, (slider_t []){ { _data, _off, ~0, DATA_VOID } }}
 #define DEREF_TYPE_SLIDERT(_data) (slider_t *)((_data)->ptr)
 #define REF_TYPE_SLIDERT(_dt) _dt
 #define HAVEBUFF_TYPE_SLIDERT 0
 
 typedef struct slider_t {
-	data_t                 data;
+	data_t                *data;
 	uintmax_t              off;
 	uintmax_t              frozen_off;
+	data_t                 holder;
 } slider_t;
 
 uintmax_t data_slider_t_get_offset(data_t *data);
