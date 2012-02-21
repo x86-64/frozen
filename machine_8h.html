@@ -53,6 +53,7 @@
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
+<a href="#define-members">Defines</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
@@ -69,19 +70,22 @@ Data Structures</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Machine structure.  <a href="structmachine__t.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structthread__data__ctx__t.html">thread_data_ctx_t</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread data context.  <a href="structthread__data__ctx__t.html#details">More...</a><br/></td></tr>
+<tr><td colspan="2"><h2><a name="define-members"></a>
+Defines</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a929faecd261c5a9f04b31b25b5560927"></a><!-- doxytag: member="machine.h::machine_query" ref="a929faecd261c5a9f04b31b25b5560927" args="(_machine, _request)" -->
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>machine_query</b>(_machine, _request)&#160;&#160;&#160;(_machine)-&gt;machine_type_hash.func_handler(_machine, _request)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af705d518371bfaefad1f67cb0a3d5106"></a><!-- doxytag: member="machine.h::machine_pass" ref="af705d518371bfaefad1f67cb0a3d5106" args="(_machine, _request)" -->
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>machine_pass</b>(_machine, _request)&#160;&#160;&#160;(_machine)-&gt;cnext-&gt;machine_type_hash.func_handler((_machine)-&gt;cnext, _request)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5d135ed68af15a23fdb2a0ad13e23c58"></a><!-- doxytag: member="machine.h::f_init" ref="a5d135ed68af15a23fdb2a0ad13e23c58" args=")(machine_t *)" -->
-typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a5d135ed68af15a23fdb2a0ad13e23c58">f_init</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d435b539269066ebae1cc607f69dc27"></a><!-- doxytag: member="machine.h::f_init" ref="a4d435b539269066ebae1cc607f69dc27" args=")(machine_t *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a4d435b539269066ebae1cc607f69dc27">f_init</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Init function for machine. Allocate userdata and init default values here. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aea9e42f4a19b719bcfa4d13d89d87326"></a><!-- doxytag: member="machine.h::f_fork" ref="aea9e42f4a19b719bcfa4d13d89d87326" args=")(machine_t *, machine_t *, hash_t *)" -->
-typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#aea9e42f4a19b719bcfa4d13d89d87326">f_fork</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">hash_t</a> *)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Fork function for machine. Make fork of current machine here. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a06c51d95cb277ba2ca8de55ef7495f51"></a><!-- doxytag: member="machine.h::f_configure" ref="a06c51d95cb277ba2ca8de55ef7495f51" args=")(machine_t *, hash_t *)" -->
-typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a06c51d95cb277ba2ca8de55ef7495f51">f_configure</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">hash_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af86c6bf57b7ea61c85ccf278539caa0e"></a><!-- doxytag: member="machine.h::f_configure" ref="af86c6bf57b7ea61c85ccf278539caa0e" args=")(machine_t *, hash_t *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#af86c6bf57b7ea61c85ccf278539caa0e">f_configure</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">hash_t</a> *)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure function for machine. Try to make it reentrant. Assign configuration values and validate it here. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac63b6a7db408494ba2b2048e473d0a87"></a><!-- doxytag: member="machine.h::f_destroy" ref="ac63b6a7db408494ba2b2048e473d0a87" args=")(machine_t *)" -->
-typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#ac63b6a7db408494ba2b2048e473d0a87">f_destroy</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a324f84689490de5e5890148a2d3bf437"></a><!-- doxytag: member="machine.h::f_destroy" ref="a324f84689490de5e5890148a2d3bf437" args=")(machine_t *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a324f84689490de5e5890148a2d3bf437">f_destroy</a> )(<a class="el" href="structmachine__t.html">machine_t</a> *)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy function for machine. Free all allocated resources here. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a32fea2034c914567993e916e5f5cfb38"></a><!-- doxytag: member="machine.h::f_thread_create" ref="a32fea2034c914567993e916e5f5cfb38" args=")(void *)" -->
 typedef void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38">f_thread_create</a> )(void *)</td></tr>
@@ -103,6 +107,9 @@ API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae6fe5195e120048429c5643a39644dd9"></a><!-- doxytag: member="machine.h::request_get_current" ref="ae6fe5195e120048429c5643a39644dd9" args="(void)" -->
 API <a class="el" href="structhash__t.html">request_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#ae6fe5195e120048429c5643a39644dd9">request_get_current</a> (void)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current request. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a343d1783ae457d1f0c3d9b15de52124c"></a><!-- doxytag: member="machine.h::request_set_current" ref="a343d1783ae457d1f0c3d9b15de52124c" args="(request_t *request)" -->
+API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a343d1783ae457d1f0c3d9b15de52124c">request_set_current</a> (<a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Set current request. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a919ddfbb7d88803326c0f2edd2df38e2"></a><!-- doxytag: member="machine.h::machine_new" ref="a919ddfbb7d88803326c0f2edd2df38e2" args="(machine_t **pmachine, hash_t *config)" -->
 API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a919ddfbb7d88803326c0f2edd2df38e2">machine_new</a> (<a class="el" href="structmachine__t.html">machine_t</a> **pmachine, <a class="el" href="structhash__t.html">hash_t</a> *config)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Create machine. <br/></td></tr>
@@ -117,11 +124,6 @@ API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy machine. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a69e42e6e96dcbad8213e30585b7cedad"></a><!-- doxytag: member="machine.h::machine_is_ghost" ref="a69e42e6e96dcbad8213e30585b7cedad" args="(machine_t *machine)" -->
 API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>machine_is_ghost</b> (<a class="el" href="structmachine__t.html">machine_t</a> *machine)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2812659c0991df87e6e6dd61a32b46a"></a><!-- doxytag: member="machine.h::machine_query" ref="ac2812659c0991df87e6e6dd61a32b46a" args="(machine_t *machine, request_t *request)" -->
-API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#ac2812659c0991df87e6e6dd61a32b46a">machine_query</a> (<a class="el" href="structmachine__t.html">machine_t</a> *machine, <a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Query machine with hash request. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a433e5ab9b4c4c59d3859145364df5a81">machine_pass</a> (<a class="el" href="structmachine__t.html">machine_t</a> *machine, <a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Pass hash request to next machines in shop.  <a href="#a433e5ab9b4c4c59d3859145364df5a81"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">API <a class="el" href="structmachine__t.html">machine_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#ad2a788f53f1c2a4432e51b2c395302da">shop_new</a> (<a class="el" href="structhash__t.html">hash_t</a> *config)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Create new shop.  <a href="#ad2a788f53f1c2a4432e51b2c395302da"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a824afd2b87d732053afac198fedc7c89"></a><!-- doxytag: member="machine.h::shop_destroy" ref="a824afd2b87d732053afac198fedc7c89" args="(machine_t *machine)" -->
@@ -141,41 +143,6 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"></div><hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a433e5ab9b4c4c59d3859145364df5a81"></a><!-- doxytag: member="machine.h::machine_pass" ref="a433e5ab9b4c4c59d3859145364df5a81" args="(machine_t *machine, request_t *request)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">API ssize_t machine_pass </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structmachine__t.html">machine_t</a> *&#160;</td>
-          <td class="paramname"><em>machine</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structhash__t.html">request_t</a> *&#160;</td>
-          <td class="paramname"><em>request</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Pass hash request to next machines in shop. </p>
-<dl><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">machine</td><td>Current machine </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a class="anchor" id="ad2a788f53f1c2a4432e51b2c395302da"></a><!-- doxytag: member="machine.h::shop_new" ref="ad2a788f53f1c2a4432e51b2c395302da" args="(hash_t *config)" -->
 <div class="memitem">
 <div class="memproto">
@@ -332,7 +299,7 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

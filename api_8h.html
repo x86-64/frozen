@@ -98,8 +98,8 @@ Data Structures</h2></td></tr>
 Typedefs</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7404e11ee62f218dd5cf67817996d4f0"></a><!-- doxytag: member="api.h::api_types" ref="a7404e11ee62f218dd5cf67817996d4f0" args="" -->
 typedef enum api_types&#160;</td><td class="memItemRight" valign="bottom"><b>api_types</b></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4dbc8b67dccd0118363780e21e1e53a2"></a><!-- doxytag: member="api.h::f_crwd" ref="a4dbc8b67dccd0118363780e21e1e53a2" args=")(machine_t *, request_t *)" -->
-typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_crwd</b> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">request_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abd4f78b6a3adcbae520fb79083f2d274"></a><!-- doxytag: member="api.h::f_hash" ref="abd4f78b6a3adcbae520fb79083f2d274" args=")(machine_t *, request_t *)" -->
+typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_hash</b> )(<a class="el" href="structmachine__t.html">machine_t</a> *, <a class="el" href="structhash__t.html">request_t</a> *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a89043a1956ac518d0738debded83e8"></a><!-- doxytag: member="api.h::f_fast_func" ref="a3a89043a1956ac518d0738debded83e8" args=")(data_t *, void *)" -->
 typedef ssize_t(*&#160;</td><td class="memItemRight" valign="bottom"><b>f_fast_func</b> )(<a class="el" href="structdata__t.html">data_t</a> *, void *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa5c753ef6f084bc3a5615e9309c1c18f"></a><!-- doxytag: member="api.h::f_callback" ref="aa5c753ef6f084bc3a5615e9309c1c18f" args=")(request_t *, void *)" -->
@@ -183,7 +183,6 @@ typedef struct <a class="el" href="structfastcall__query.html">fastcall_query</a
 <tr><td colspan="2"><h2><a name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>api_types</b> { <b>API_HASH</b> =  1, 
-<b>API_CRWD</b> =  2, 
 <b>API_FAST</b> =  4
  }</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
@@ -192,6 +191,10 @@ Functions</h2></td></tr>
 ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_hash_query</b> (<a class="el" href="structdata__t.html">data_t</a> *data, <a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af28f98099fff38cd89f457c633d868a7"></a><!-- doxytag: member="api.h::machine_fast_query" ref="af28f98099fff38cd89f457c633d868a7" args="(machine_t *machine, void *hargs)" -->
 ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>machine_fast_query</b> (<a class="el" href="structmachine__t.html">machine_t</a> *machine, void *hargs)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a63270aacebeb4e89c7a8696edd0e20f9"></a><!-- doxytag: member="api.h::api_machine_nosys" ref="a63270aacebeb4e89c7a8696edd0e20f9" args="(machine_t *machine, request_t *request)" -->
+ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>api_machine_nosys</b> (<a class="el" href="structmachine__t.html">machine_t</a> *machine, <a class="el" href="structhash__t.html">request_t</a> *request)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f107a837692d607ddc561138f4d614f"></a><!-- doxytag: member="api.h::api_data_nosys" ref="a1f107a837692d607ddc561138f4d614f" args="(data_t *data, fastcall_header *hargs)" -->
+ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>api_data_nosys</b> (<a class="el" href="structdata__t.html">data_t</a> *data, <a class="el" href="structfastcall__header.html">fastcall_header</a> *hargs)</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aece7e89a23da58dae667f0f42358ecae"></a><!-- doxytag: member="api.h::fastcall_nargs" ref="aece7e89a23da58dae667f0f42358ecae" args="[]" -->
@@ -202,7 +205,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>fastcall_nargs</
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Feb 17 2012 21:44:05 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
