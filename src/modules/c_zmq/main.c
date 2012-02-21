@@ -695,7 +695,33 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			
 			data_free(&r_next[0].data);                                       // message free'd here, if not consumed
 			return ret;
-
+		
+		case ZMQ_PUB:;
+		case ZMQ_PUSH:;
+			if( (input = hash_data_find(request, userdata->hk_input)) == NULL )
+				return -EINVAL;
+			
+			fastcall_push r_pub_push = { { 3, ACTION_PUSH }, input };
+			if( (ret = data_query(r_getdata.data, &r_pub_push)) < 0)          // input buffer consumed here
+				return ret;
+			
+			break;
+			
+		case ZMQ_SUB:;
+		case ZMQ_PULL:;
+			fastcall_pop  r_sub_pop  = { { 3, ACTION_POP  }, &item };
+			if( (ret = data_query(r_getdata.data, &r_sub_pop)) < 0)           // new message allocated here
+				return ret;
+			
+			request_t r_sub_next[] = {
+				{ userdata->hk_output, item                              },
+				hash_inline(request),
+				hash_end
+			};
+			ret = machine_pass(machine, r_sub_next);
+			data_free(&r_sub_next[0].data);                                   // new message free'd here, if not consumed
+			return ret;
+			
 		default:
 			
 			break;
