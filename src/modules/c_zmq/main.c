@@ -568,6 +568,7 @@ typedef struct zeromq_userdata {
 	hashkey_t              hk_input;
 	hashkey_t              hk_output;
 	machine_t             *zmq_end;
+	uintmax_t              force_convert;
 } zeromq_userdata;
 
 static ssize_t zmq_end_handler(machine_t *machine, request_t *request){ // {{{
@@ -606,6 +607,7 @@ static ssize_t zeromq_init(machine_t *machine){ // {{{
 	
 	userdata->hk_input  = HK(buffer);
 	userdata->hk_output = HK(buffer);
+	userdata->force_convert = 0;
 	
 	if( (userdata->zmq_end = memdup(&zmq_end_proto, sizeof(machine_t))) == NULL){
 		free(userdata);
@@ -628,6 +630,7 @@ static ssize_t zeromq_configure(machine_t *machine, config_t *config){ // {{{
 	
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_input,  config, HK(input));
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->hk_output, config, HK(output));
+	hash_data_get(ret, TYPE_UINTT,    userdata->force_convert, config, HK(convert));
 	hash_holder_consume(ret, userdata->shop,    config, HK(shop));
 	hash_holder_consume(ret, userdata->socket,  config, HK(socket));
 	if(ret != 0)
@@ -639,6 +642,7 @@ static ssize_t zeromq_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                 item;
+	data_t                 input_convert     = DATA_VOID;
 	data_t                *input;
 	zeromq_t              *socket_fdata;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
@@ -656,16 +660,37 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
+		case ZMQ_PUB:;
+		case ZMQ_PUSH:;
 			if( (input = hash_data_find(request, userdata->hk_input)) == NULL )
 				return -EINVAL;
 			
+			if(userdata->force_convert != 0){
+				input_convert.type = TYPE_RAWT;
+				input_convert.ptr  = NULL;
+				
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &input_convert, FORMAT(clean) };
+				if( (ret = data_query(input, &r_convert)) < 0)
+					return ret;
+				
+				data_set_void(input);
+				input = &input_convert;
+			}
+			break;
+		
+		default:
+			break;
+	};
+
+	switch(socket_fdata->zmq_type){
+		case ZMQ_REQ:;
 			fastcall_push r_req_push = { { 3, ACTION_PUSH }, input };
 			if( (ret = data_query(r_getdata.data, &r_req_push)) < 0)          // input buffer consumed here
-				return ret;
+				goto exit;
 			
 			fastcall_pop  r_req_pop  = { { 3, ACTION_POP  }, &item };
 			if( (ret = data_query(r_getdata.data, &r_req_pop)) < 0)           // new message allocated here
-				return ret;
+				goto exit;
 			
 			request_t r_req_next[] = {
 				{ userdata->hk_output, item                              },
@@ -674,12 +699,9 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			};
 			ret = machine_pass(machine, r_req_next);
 			data_free(&r_req_next[0].data);                                   // new message free'd here, if not consumed
-			return ret;
-			
-			break;
+			goto exit;
 			
 		case ZMQ_REP:;
-			
 			fastcall_pop  r_rep_pop  = { { 3, ACTION_POP  }, &item };
 			if( (ret = data_query(r_getdata.data, &r_rep_pop)) < 0)           // message allocated here
 				return ret;
@@ -698,12 +720,9 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 		
 		case ZMQ_PUB:;
 		case ZMQ_PUSH:;
-			if( (input = hash_data_find(request, userdata->hk_input)) == NULL )
-				return -EINVAL;
-			
 			fastcall_push r_pub_push = { { 3, ACTION_PUSH }, input };
 			if( (ret = data_query(r_getdata.data, &r_pub_push)) < 0)          // input buffer consumed here
-				return ret;
+				goto exit;
 			
 			break;
 			
@@ -726,7 +745,10 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			
 			break;
 	};
-	return machine_pass(machine, request);
+	ret = machine_pass(machine, request);
+exit:
+	data_free(&input_convert);
+	return ret;
 } // }}}
 static machine_t zmq_helper_proto = { // {{{
 	.class          = "modules/zeromq",
