@@ -85,6 +85,10 @@ static ssize_t data_machine_t_transfer(data_t *data, fastcall_transfer *fargs){ 
 static ssize_t data_machine_t_query(data_t *data, fastcall_query *fargs){ // {{{
 	return machine_query( (machine_t *)data->ptr, fargs->request );
 } // }}}
+static ssize_t data_machine_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
+	fargs->data = data;
+	return 0;
+} // }}}
 
 // temprorary
 static ssize_t data_machine_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
@@ -105,5 +109,6 @@ data_proto_t machine_t_proto = {
 		[ACTION_TRANSFER]     = (f_data_func)&data_machine_t_transfer,
 		[ACTION_QUERY]        = (f_data_func)&data_machine_t_query,
 		[ACTION_COPY]         = (f_data_func)&data_machine_t_copy,
+		[ACTION_GETDATA]      = (f_data_func)&data_machine_t_getdata,
 	}
 };
