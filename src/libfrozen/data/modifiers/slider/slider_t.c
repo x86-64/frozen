@@ -1,6 +1,25 @@
 #include <libfrozen.h>
 #include <slider_t.h>
 
+#include <enum/format/format_t.h>
+#include <core/hash/hash_t.h>
+#include <numeric/uint/uint_t.h>
+
+slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
+	slider_t                 *fdata;
+
+	if( (fdata = malloc(sizeof(slider_t))) == NULL )
+		return NULL;
+	
+	fdata->data       = *data;
+	fdata->off        = offset;
+	fdata->frozen_off = ~0;
+	return fdata;
+} // }}}
+void              slider_t_destroy(slider_t *slider){ // {{{
+	data_free(&slider->data);
+} // }}}
+
 uintmax_t data_slider_t_get_offset(data_t *data){ // {{{
 	slider_t                  *fdata             = (slider_t *)data->ptr;
 	
@@ -31,27 +50,63 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			else
 				ioargs->offset      += fdata->off;
 
-			if( (ret = data_query(fdata->data, fargs)) >= 0)
+			if( (ret = data_query(&fdata->data, fargs)) >= 0)
 				fdata->off += ioargs->buffer_size;
 
 			return ret;
 		
 		case ACTION_TRANSFER:
 		case ACTION_CONVERT_TO:
+		case ACTION_GETDATA:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ fargs->action ](data, fargs);
-
-		case ACTION_CONVERT_FROM:
-			return -ENOSYS;
 
 		default:
 			break;
 	};
-	return data_query(fdata->data, fargs);
+	return data_query(&fdata->data, fargs);
+} // }}}
+static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	
+	if(dst->ptr != NULL)
+		return data_slider_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
+	
+	switch(fargs->format){
+		case FORMAT(hash):;
+			hash_t                *config;
+			data_t                 data;
+			uintmax_t              offset          = 0;
+			
+			data_get(ret, TYPE_HASHT, config, fargs->src);
+			if(ret != 0)
+				return -EINVAL;
+			
+			hash_data_get(ret, TYPE_UINTT, offset, config, HK(offset));
+			hash_holder_consume(ret, data, config, HK(data));
+			if(ret != 0)
+				return -EINVAL;
+			
+			return ( (dst->ptr = slider_t_alloc(&data, offset)) == NULL ) ? -EFAULT : 0;
+
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
+static ssize_t data_slider_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	slider_t                  *fdata             = (slider_t *)data->ptr;
+	
+	slider_t_destroy(fdata);
+	return 0;
 } // }}}
 
 data_proto_t slider_t_proto = {
 	.type                   = TYPE_SLIDERT,
 	.type_str               = "slider_t",
-	.api_type               = API_DEFAULT_HANDLER,
+	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_slider_t_handler,
+	.handlers               = {
+		[ACTION_CONVERT_FROM] = (f_data_func)&data_slider_t_convert_from,
+		[ACTION_FREE]         = (f_data_func)&data_slider_t_free,
+	}
 };

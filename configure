@@ -18427,8 +18427,8 @@ fi
 
 	if test "${enable_slider_t}" = "yes"; then
 		DATA_DIR_slider_t="modifiers/slider"
-		DATA_DEP_slider_t=""
-		DATA_ID_slider_t="27"
+		DATA_DEP_slider_t="uint_t hash_t format_t"
+		DATA_ID_slider_t=""
 		DATA_SELECTED="$DATA_SELECTED slider_t"
 		DATA_HEADERS="$DATA_HEADERS modifiers/slider/slider_t.h"
 	fi
