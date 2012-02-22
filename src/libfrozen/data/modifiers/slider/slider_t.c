@@ -51,7 +51,7 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			else
 				ioargs->offset      += fdata->off;
 
-			if( (ret = data_query(fdata->data, fargs)) >= 0)
+			if( (ret = data_query(fdata->data, ioargs)) >= 0)
 				fdata->off += ioargs->buffer_size;
 
 			return ret;
