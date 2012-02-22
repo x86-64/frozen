@@ -27,7 +27,8 @@
  * @endcode
  */
 
-#define EMODULE              31
+#define ERRORS_MODULE_ID              31
+#define ERRORS_MODULE_NAME "index/hashtable"
 
 typedef struct hashtable_userdata {
 	hashkey_t              input;

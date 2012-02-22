@@ -38,7 +38,8 @@
  *
  */
 
-#define EMODULE 29
+#define ERRORS_MODULE_ID 29
+#define ERRORS_MODULE_NAME "index/fill"
 
 typedef struct fill_userdata {
 	uintmax_t              fatal;

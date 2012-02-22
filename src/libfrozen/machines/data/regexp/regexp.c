@@ -40,7 +40,8 @@
  * @endcode
  */
 
-#define EMODULE 27
+#define ERRORS_MODULE_ID 27
+#define ERRORS_MODULE_NAME "data/regexp"
 
 // HK(global) - for global capture name
 
@@ -91,7 +92,7 @@ static ssize_t config_newmarkerdata(regexp_userdata *userdata, data_t *marker_da
 	data_t                *new_data;
 	
 	if( (new_data = malloc(sizeof(data_t))) == NULL)
-		return -ENOMEM;
+		return errorn(ENOMEM);
 	
 	fastcall_copy r_copy = { { 3, ACTION_COPY }, new_data };
 	if(data_query(marker_data, &r_copy) != 0){
@@ -157,7 +158,7 @@ static ssize_t regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	if(userdata->ncaptures > 1){
 		userdata->ncaptures--;
 		if( (userdata->regmatch = malloc(sizeof(regmatch_t) * userdata->ncaptures)) == NULL)
-			return -ENOMEM;
+			return errorn(ENOMEM);
 	}
 	
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));

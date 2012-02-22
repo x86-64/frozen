@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 
-#define EMODULE 33
+#define ERRORS_MODULE_ID 33
+#define ERRORS_MODULE_NAME "machine/factory"
 
 typedef struct factory_userdata {
 	config_t              *machine_config;
@@ -40,10 +41,10 @@ static ssize_t factory_handler(machine_t *machine, request_t *request){ // {{{
 	factory_userdata      *userdata = (factory_userdata *)machine->userdata;
 	
 	if( (output = hash_data_find(request, userdata->output)) == NULL)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	if( output->type != TYPE_MACHINET )
-		return -EINVAL;
+		return errorn(EINVAL);
 
 	config_t  child_config[] = {
 		{ 0, DATA_HASHT(

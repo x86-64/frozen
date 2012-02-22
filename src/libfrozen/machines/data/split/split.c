@@ -27,7 +27,8 @@
  * @endcode
  */
 
-#define EMODULE 35
+#define ERRORS_MODULE_ID 35
+#define ERRORS_MODULE_NAME "data/split"
 
 typedef struct split_userdata {
 	char                  *split_str;

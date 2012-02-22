@@ -28,7 +28,8 @@
  * @endcode
  */
 
-#define EMODULE 22
+#define ERRORS_MODULE_ID 22
+#define ERRORS_MODULE_NAME "hash/murmur"
 
 typedef struct murmur_userdata {
 	hashkey_t             input;

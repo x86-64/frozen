@@ -23,7 +23,8 @@
  * @endcode
  */
 
-#define EMODULE 26
+#define ERRORS_MODULE_ID 26
+#define ERRORS_MODULE_NAME "shop/return"
 
 typedef struct return_userdata {
 	hashkey_t              return_to;
@@ -58,7 +59,7 @@ static ssize_t return_handler(machine_t *machine, request_t *request){ // {{{
 	return_userdata         *userdata          = (return_userdata *)machine->userdata;
 	
 	if( (return_hash = hash_find(request, userdata->return_to)) == NULL)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	return_hash->key = 0; // remove this hash item from hash, so other return_to keys would be visible
 	

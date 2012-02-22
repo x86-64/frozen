@@ -15,14 +15,12 @@ find(
         }, $main_dir);
 
 foreach my $file (@files_list){
-        my ($emod, $errnum, $errmsg);
+        my ($errnum, $errmsg);
         my $ecount = 0;
 	my $linen = 1;
         
         open FH, "<$file";
         while(my $line = <FH>){
-                $emod = 0; #$1 if $line =~ /#\s*define\s+EMODULE\s*(\d+)/;
-                
                 if($line =~ /(?:debug|notice|warning|error)\s*\("([^"]+)"\)/){
                         $errmsg = $1;
                         $errmsg =~ s/\\n//g;

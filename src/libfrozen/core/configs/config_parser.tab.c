@@ -1492,7 +1492,7 @@ yyreduce:
 
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
-			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (2)].name), describe_error(ret));
+			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (2)].name), errors_describe(ret));
 		
 		free((yyvsp[(1) - (2)].name));
 	}
@@ -1511,7 +1511,7 @@ yyreduce:
 		
 		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
-			emit_error("data string init failed (ret: %s)", describe_error(ret));
+			emit_error("data string init failed (ret: %s)", errors_describe(ret));
 
 		free((yyvsp[(1) - (1)].name));
 	}
@@ -1537,7 +1537,7 @@ yyreduce:
 		
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
-			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), describe_error(ret));
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
 		
 		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
@@ -1545,7 +1545,7 @@ yyreduce:
 		/* convert string to needed data */
 		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&(yyval.data), &r_init2)) < 0)
-			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), describe_error(ret));
+			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
 		
 		free((yyvsp[(2) - (4)].name));
 		free((yyvsp[(4) - (4)].name));
@@ -1565,7 +1565,7 @@ yyreduce:
 
 		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
-			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), describe_error(ret));
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
 		
 		(yyval.data).type = type;
 		(yyval.data).ptr  = NULL;
@@ -1573,7 +1573,7 @@ yyreduce:
 		/* convert string to needed data */
 		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
 		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
-			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), describe_error(ret));
+			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
 		
 		free((yyvsp[(2) - (6)].name));
 		hash_free((yyvsp[(5) - (6)].hash_items));

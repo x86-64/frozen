@@ -28,7 +28,8 @@
  * @endcode
  */
 
-#define EMODULE         43
+#define ERRORS_MODULE_ID         43
+#define ERRORS_MODULE_NAME "request/assign"
 
 typedef struct assign_userdata {
 	hash_t                *before;
@@ -75,7 +76,7 @@ static ssize_t assign_handler(machine_t *machine, request_t *request){ // {{{
 			req = userdata->request;
 			
 			if( req && (req = hash_copy(req)) == NULL)
-				return -ENOMEM;
+				return errorn(ENOMEM);
 			
 			ret = machine_pass(machine, userdata->request);
 			hash_free(req);
@@ -91,7 +92,7 @@ static ssize_t assign_handler(machine_t *machine, request_t *request){ // {{{
 				(req_before && (req_before = hash_copy(req_before)) == NULL) ||
 				(req_after  && (req_after  = hash_copy(req_after))  == NULL)
 			)
-				return -ENOMEM;
+				return errorn(ENOMEM);
 		}
 		
 		hash_t r_next[] = {

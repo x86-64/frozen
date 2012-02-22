@@ -28,7 +28,8 @@
  * @endcode
  */
 
-#define EMODULE 23
+#define ERRORS_MODULE_ID 23
+#define ERRORS_MODULE_NAME "hash/jenkins"
 
 typedef struct jenkins_userdata {
 	hashkey_t             input;

@@ -27,7 +27,8 @@
  * @endcode
  */
 
-#define EMODULE 34
+#define ERRORS_MODULE_ID 34
+#define ERRORS_MODULE_NAME "request/implode"
 
 typedef struct implode_userdata {
 	hashkey_t              buffer;

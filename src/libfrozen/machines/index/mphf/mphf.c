@@ -36,7 +36,8 @@
  *               http://cmph.sourceforge.net/papers/chm92.pdf
  */ 
 
-#define EMODULE              10
+#define ERRORS_MODULE_ID              10
+#define ERRORS_MODULE_NAME "index/mphf"
 
 typedef struct mphf_userdata {
 	mphf_t               mphf;
@@ -111,7 +112,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(ret != 0)
-		return -ENOSYS;
+		return errorn(ENOSYS);
 	
 	// rebuilds
 	if(action == ACTION_REBUILD){
@@ -119,27 +120,27 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 			return ret;
 		
 		userdata->broken = 0;
-		return -EBADF;
+		return errorn(EBADF);
 	}
 	if(userdata->broken != 0)
-		return -EBADF;
+		return errorn(EBADF);
 	//
 	
 	if( (r_input  = hash_data_find(request, userdata->input)) == NULL)
-		return -EINVAL;
+		return errorn(EINVAL);
 	if( (r_output = hash_data_find(request, userdata->output)) == NULL)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	d_input  = 0;
 	d_output = 0;
 	
 	fastcall_read r_read1 = { { 5, ACTION_READ }, 0, &d_input, sizeof(d_input) };
 	if(data_query(r_input, &r_read1) < 0)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	fastcall_read r_read2 = { { 5, ACTION_READ }, 0, &d_output, sizeof(d_output) };
 	if(data_query(r_output, &r_read2) < 0)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	switch(action){
 		case ACTION_CREATE:
@@ -148,7 +149,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 				d_input,
 				d_output
 			)) < 0){
-				if(ret == -EBADF)
+				if(errors_is_unix(ret, EBADF))
 					userdata->broken = 1;
 				return ret;
 			}
@@ -159,7 +160,7 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 				d_input,
 				d_output
 			)) < 0){
-				if(ret == -EBADF)
+				if(errors_is_unix(ret, EBADF))
 					userdata->broken = 1;
 				return ret;
 			}
@@ -170,14 +171,14 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 				d_input,
 				&d_output
 			))){
-				case MPHF_QUERY_NOTFOUND: return -ENOENT;
+				case MPHF_QUERY_NOTFOUND: return errorn(ENOENT);
 				case MPHF_QUERY_FOUND:    break;
 				default:                  return ret;
 			};
 			
 			fastcall_write r_write = { { 5, ACTION_READ }, 0, &d_output, sizeof(d_output) };
 			if(data_query(r_output, &r_write) < 0)
-				return -EINVAL;
+				return errorn(EINVAL);
 			
 			break;
 		case ACTION_DELETE:
@@ -185,14 +186,14 @@ static ssize_t mphf_handler(machine_t *machine, request_t *request){ // {{{
 				&userdata->mphf, 
 				d_input
 			)) < 0){
-				if(ret == -EBADF)
+				if(errors_is_unix(ret, EBADF))
 					userdata->broken = 1;
 				return ret;
 			}
 			
 			break;
 		default:
-			return -ENOSYS;
+			return errorn(ENOSYS);
 	}
 	return machine_pass(machine, request);
 } // }}}

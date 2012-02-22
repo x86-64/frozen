@@ -31,7 +31,8 @@
  *
  */
 
-#define EMODULE         30
+#define ERRORS_MODULE_ID         30
+#define ERRORS_MODULE_NAME "request/switch"
 
 typedef struct switch_userdata {
 	list                   rules;

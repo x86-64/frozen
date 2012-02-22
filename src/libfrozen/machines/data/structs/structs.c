@@ -36,7 +36,8 @@
  * @endcode
  */
 
-#define EMODULE 5
+#define ERRORS_MODULE_ID 5
+#define ERRORS_MODULE_NAME "data/structs"
 
 typedef enum struct_values {
 	STRUCT_VALUES_WHOLE,

@@ -4,7 +4,8 @@
 #include <enum/format/format_t.h>
 #include <numeric/uint/uint_t.h>
 
-#define EMODULE 49
+#define ERRORS_MODULE_ID 49
+#define ERRORS_MODULE_NAME "allocator/fixed"
 
 typedef struct allocator_fixed_t {
 	uintmax_t              item_size;

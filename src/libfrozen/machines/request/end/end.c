@@ -23,7 +23,8 @@
  * @endcode
  */
 
-#define EMODULE 37
+#define ERRORS_MODULE_ID 37
+#define ERRORS_MODULE_NAME "request/end"
 
 typedef struct end_userdata {
 	data_t                 ret;

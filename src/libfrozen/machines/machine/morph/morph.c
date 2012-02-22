@@ -26,7 +26,8 @@
  * @endcode
  */
 
-#define EMODULE 20
+#define ERRORS_MODULE_ID 20
+#define ERRORS_MODULE_NAME "machine/morph"
 
 typedef struct morph_userdata {
 	uintmax_t              running;

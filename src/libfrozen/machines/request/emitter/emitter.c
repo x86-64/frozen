@@ -25,7 +25,8 @@
  * @endcode
  */
 
-#define EMODULE 40
+#define ERRORS_MODULE_ID 40
+#define ERRORS_MODULE_NAME "request/emitter"
 #define N_REQUESTS_DEFAULT 1
 
 typedef struct emitter_userdata {
@@ -74,7 +75,7 @@ static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
 		for(i = 0; i < userdata->nreq; i++){
 			if( (ret = data_query(&d_emitter, &r_exec)) < 0){
 				if(userdata->silent == 0)
-					log_error("emitter error: %d: %s\n", ret, describe_error(ret));
+					errors_log("emitter error: %d: %s\n", ret, errors_describe(ret));
 			}
 		}
 	}

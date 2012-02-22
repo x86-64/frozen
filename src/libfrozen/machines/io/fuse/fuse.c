@@ -39,7 +39,8 @@
  * @endcode
  */
 
-#define EMODULE 28
+#define ERRORS_MODULE_ID 28
+#define ERRORS_MODULE_NAME "io/fuse"
 
 typedef struct fuseb_userdata {
 	char                  *mountpoint;
@@ -297,7 +298,7 @@ static int fuseh_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
 	if( (folder = vfs_item_find(root, (char *)path, ~0)) == NULL)
-		return -ENOENT;
+		return errorn(ENOENT);
 	
 	filler(buf, ".",  NULL, 0);
 	filler(buf, "..", NULL, 0);
@@ -322,7 +323,7 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
 	if( (item = vfs_item_find(root, (char *)path, ~0)) == NULL)
-		return -ENOENT;
+		return errorn(ENOENT);
 	
 	if(item->type == VFS_FILE){
 		// updating size
@@ -348,7 +349,7 @@ static int fuseh_open(const char *path, struct fuse_file_info *fi){ // {{{
 	vfs_item              *root              = (vfs_item *)fctx->private_data;
 	
 	if( (item = vfs_item_find(root, (char *)path, ~0)) == NULL)
-		return -ENOENT;
+		return errorn(ENOENT);
 	
 	// TODO check access
 	// TODO lock item
@@ -398,7 +399,7 @@ static int fuseh_release(const char *path, struct fuse_file_info *fi){ // {{{
 /* }}} */
 /* stubs {{{
 static int fuseh_flush(const char *path, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_statfs(const char *path, struct statvfs *stat){
@@ -406,99 +407,99 @@ static int fuseh_statfs(const char *path, struct statvfs *stat){
 }
 
 static int fuseh_readlink(const char *path, char *buf, size_t size){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_mknod(const char *path, mode_t mode, dev_t dev){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_mkdir(const char *path, mode_t mode){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_unlink(const char *path){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_rmdir(const char *path){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_symlink(const char *from, const char *to){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_rename(const char *from, const char *to){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_link(const char *from, const char *to){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_chmod(const char *path, mode_t mode){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_chown(const char *path, uid_t uid, gid_t gid){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_truncate(const char *path, off_t off){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_fsync(const char *path, int datasync, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_setxattr(const char *path, const char *name, const char *value, size_t size, int pos){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_getxattr(const char *path, const char *name, char *value, size_t size){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_listxattr(const char *path, char *list, size_t size){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_removexattr(const char *path, const char *name){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_access(const char *path, int mask){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_create(const char *path, mode_t mode, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_ftruncate(const char *path, off_t off, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_fgetattr(const char *path, struct stat *buf, struct fuse_file_info *fi){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_lock(const char *path, struct fuse_file_info *fi, int cmd, struct flock *lock){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_utimens(const char *path, const struct timespec tv[2]){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_bmap(const char *path, size_t blocksize, uint64_t *idx){
-	return -ENOSYS;
+	return errorn(ENOSYS);
 }
 
 static int fuseh_opendir(const char *path, struct fuse_file_info *fi){
@@ -603,7 +604,7 @@ static ssize_t fuseb_init(machine_t *machine){ // {{{
 	ssize_t                ret               = 0;
 	fuseb_userdata        *userdata          = machine->userdata = calloc(1, sizeof(fuseb_userdata));
 	if(userdata == NULL)
-		return -ENOMEM;
+		return errorn(ENOMEM);
 	
 	return ret;
 } // }}}

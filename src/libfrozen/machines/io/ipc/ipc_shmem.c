@@ -31,7 +31,8 @@
  * @endcode
  */
 
-#define EMODULE           9
+#define ERRORS_MODULE_ID           9
+#define ERRORS_MODULE_NAME "io/ipc"
 #define NITEMS_DEFAULT    100
 #define ITEM_SIZE_DEFAULT 1000
 
@@ -86,7 +87,7 @@ static ssize_t shmem_init(ipc_shmem_userdata *userdata){ // {{{
 	sem_init(&userdata->shmaddr->sem_free,    1, userdata->shmaddr->nitems);
 	for(i=0; i<userdata->shmaddr->nitems; i++){
 		if(sem_init(&userdata->shmblocks[i].sem_done, 1, 0) != 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		userdata->shmblocks[i].data_rel_ptr = i * userdata->shmaddr->item_size;
 	}
 	return 0;
@@ -111,7 +112,7 @@ static ssize_t shmem_block_status(ipc_shmem_userdata *userdata, ipc_shmem_block 
 		}
 		return 0;
 	}
-	return -EFAULT;
+	return errorn(EFAULT);
 } // }}}
 static ipc_shmem_block * shmem_get_block(ipc_shmem_userdata *userdata, size_t old_status, size_t new_status){ // {{{
 	size_t           i;

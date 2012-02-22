@@ -25,7 +25,8 @@
  * @endcode
  */
 
-#define EMODULE 21
+#define ERRORS_MODULE_ID 21
+#define ERRORS_MODULE_NAME "index/lookup"
 
 typedef struct lookup_userdata {
 	machine_t             *machine_index;

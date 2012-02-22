@@ -23,7 +23,8 @@
  * @endcode
  */
 
-#define EMODULE 44
+#define ERRORS_MODULE_ID 44
+#define ERRORS_MODULE_NAME "sync/mutex"
 
 typedef struct mutex_userdata {
 	pthread_mutex_t        mutex;

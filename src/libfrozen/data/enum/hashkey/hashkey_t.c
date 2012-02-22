@@ -4,7 +4,8 @@
 
 #include <enum/format/format_t.h>
 
-#define EMODULE 46
+#define ERRORS_MODULE_ID 46
+#define ERRORS_MODULE_NAME "enum/hashkey"
 #define HASHKEY_PORTABLE uint32_t
 
 #if defined DYNAMIC_KEYS_CHECK || defined RESOLVE_DYNAMIC_KEYS

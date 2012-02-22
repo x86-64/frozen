@@ -69,7 +69,8 @@
  * @endcode
  */
 
-#define EMODULE 38
+#define ERRORS_MODULE_ID 38
+#define ERRORS_MODULE_NAME "io/console"
 
 typedef struct std_userdata {
 	hashkey_t             key;
@@ -93,7 +94,7 @@ static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs)
 		default:
 			break;
 	}
-	return -ENOSYS;
+	return errorn(ENOSYS);
 } // }}}
 static ssize_t stdout_io_handler(data_t *data, FILE **fd, fastcall_header *hargs){ // {{{
 	switch(hargs->action){
@@ -106,7 +107,7 @@ static ssize_t stdout_io_handler(data_t *data, FILE **fd, fastcall_header *hargs
 		default:
 			break;
 	}
-	return -ENOSYS;
+	return errorn(ENOSYS);
 } // }}}
 
 static data_t stdin_io  = DATA_IOT(&stdin,  (f_io_func)&stdin_io_handler);
@@ -152,7 +153,7 @@ static ssize_t stdin_handler(machine_t *machine, request_t *request){ // {{{
 	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(ret == 0 && action == ACTION_TRANSFER)
-		return -ENOSYS;
+		return errorn(ENOSYS);
 	
 	if( (output = hash_data_find(request, userdata->key)) == NULL)
 		return error("output key not supplied");

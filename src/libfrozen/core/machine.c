@@ -346,7 +346,7 @@ static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
 		goto error;
 	
 	if( (ret = machine_new(&machine, config)) < 0){
-		log_error("shop_new error: %d: %s\n", ret, describe_error(ret));
+		errors_log("shop_new error: %d: %s\n", ret, errors_describe(ret));
 		
 		hash_free(config);
 		return ITER_BREAK;

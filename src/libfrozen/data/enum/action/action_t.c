@@ -3,7 +3,8 @@
 #include <action_t.h>
 #include <enum/format/format_t.h>
 
-#define EMODULE 51
+#define ERRORS_MODULE_ID 51
+#define ERRORS_MODULE_NAME "enum/action"
 
 static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	keypair_t             *kp;

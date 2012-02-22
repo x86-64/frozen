@@ -2,7 +2,8 @@
 #include <libfrozen.h>
 #include <enum/format/format_t.h>
 
-#define EMODULE 47
+#define ERRORS_MODULE_ID 47
+#define ERRORS_MODULE_NAME "enum/format"
 
 #if defined DYNAMIC_KEYS_CHECK || defined RESOLVE_DYNAMIC_KEYS
 static list                    dynamic_formats   = LIST_INITIALIZER;

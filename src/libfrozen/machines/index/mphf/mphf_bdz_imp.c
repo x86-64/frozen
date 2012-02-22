@@ -55,17 +55,17 @@ ssize_t mphf_bdz_imp_new    (mphf_t *mphf, config_t *config){
 	data.value_bytes   = value_bytes;
 	
 	if(__MAX(uint64_t) / 3 <= g_size)
-		return -EINVAL;
+		return errorn(EINVAL);
 	g_size *= 3;
 	
 	//printf("mphf new nelem: %lld hashelem: %lld g_size: %lld\n", nelements, data.r, g_size);
 	
 	if(__MAX(uint64_t) / value_bytes <= g_size)
-		return -EINVAL;
+		return errorn(EINVAL);
 	g_size *= value_bytes;
 	
-	if(mphf_data_new(mphf, BDZ_IMP_DATA_PARAMS, sizeof(bdz_imp_t) ) < 0) return -EFAULT;
-	if(mphf_data_new(mphf, BDZ_IMP_DATA_G,      g_size            ) < 0) return -EFAULT;
+	if(mphf_data_new(mphf, BDZ_IMP_DATA_PARAMS, sizeof(bdz_imp_t) ) < 0) return errorn(EFAULT);
+	if(mphf_data_new(mphf, BDZ_IMP_DATA_G,      g_size            ) < 0) return errorn(EFAULT);
 	
 	mphf_data_write (mphf, BDZ_IMP_DATA_PARAMS, 0, &data, sizeof(bdz_imp_t));
 	
@@ -124,7 +124,7 @@ ssize_t mphf_bdz_imp_insert (mphf_t *mphf, char *key, size_t key_len, uint64_t  
 	}else{
 		// call rebuild
 		//return error("mphf g_free");
-		return -EFAULT;
+		return errorn(EFAULT);
 	}
 	
 	*g_free = value - (array[0].value + array[1].value + array[2].value);

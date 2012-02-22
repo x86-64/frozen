@@ -45,7 +45,8 @@
  * @endcode
  */
 
-#define EMODULE 17
+#define ERRORS_MODULE_ID 17
+#define ERRORS_MODULE_NAME "machine/benchmark"
 #define N_REQUESTS_DEFAULT 10000
 
 typedef struct benchmark_userdata {

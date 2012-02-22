@@ -26,7 +26,8 @@
  * @threadcode
  */
 
-#define EMODULE 41
+#define ERRORS_MODULE_ID 41
+#define ERRORS_MODULE_NAME "daemon/thread"
 
 typedef struct thread_userdata {
 	uintmax_t              paused;
@@ -48,7 +49,7 @@ static void *  thread_routine(machine_t *machine){ // {{{
 	do{
 		request_t r_request[] = { hash_end };
 		if( (ret = machine_pass(machine, r_request)) < 0){
-			log_error("thread error: %d: %s\n", ret, describe_error(ret));
+			errors_log("thread error: %d: %s\n", ret, errors_describe(ret));
 			
 			if(userdata->ignore_errors == 0)
 				break;
@@ -116,13 +117,13 @@ static ssize_t thread_init(machine_t *machine){ // {{{
 		return error("calloc failed");
 	
 	if(pthread_mutexattr_init(&attr) != 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 		
 	if(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE) != 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	if(pthread_mutex_init(&userdata->thread_mutex, &attr) != 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	pthread_mutexattr_destroy(&attr);
 
@@ -168,7 +169,7 @@ static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
 		default:
 			break;
 	}
-	return -ENOSYS;
+	return errorn(ENOSYS);
 } // }}}
 
 machine_t thread_proto = {

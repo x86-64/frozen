@@ -55,7 +55,8 @@
  * 
  */
 
-#define EMODULE 24
+#define ERRORS_MODULE_ID 24
+#define ERRORS_MODULE_NAME "machine/rebuild"
 
 typedef enum enum_method {
 	ENUM_COUNT_AND_READ_ITERATE,
@@ -99,7 +100,8 @@ redo:
 	
 	if(userdata->req_rebuild != NULL){
 		// NOTE rebuild request must return -EBADF as good result
-		if( (ret = machine_query(writer, userdata->req_rebuild)) != -EBADF)
+		ret = machine_query(writer, userdata->req_rebuild);
+		if(!errors_is_unix(ret, EBADF))
 			return ret;
 	}
 	
@@ -124,10 +126,10 @@ redo:
 					hash_next(userdata->req_read)
 				};
 				ret = machine_pass(reader, r_read);
-				if( ret == -EBADF )
+				if( errors_is_unix(ret, EBADF) )
 					goto redo;   // start from beginning
 				if( ret < 0 ){
-					log_error("rebuild error - read: %d: %s\n", ret, describe_error(ret));
+					errors_log("rebuild error - read: %d: %s\n", ret, errors_describe(ret));
 					return ret;
 				}
 				
@@ -138,7 +140,7 @@ redo:
 					hash_next(r_read)
 				};
 				ret = machine_query(writer, r_create);
-				if( ret == -EBADF )
+				if( errors_is_unix(ret, EBADF) )
 					goto redo;
 				if(ret < 0)
 					return ret;*/
@@ -149,10 +151,10 @@ redo:
 					hash_next(r_read)
 				};
 				ret = machine_query(writer, r_write);
-				if( ret == -EBADF )
+				if( errors_is_unix(ret, EBADF) )
 					goto redo;
 				if( ret < 0 ){
-					log_error("rebuild error - write: %d: %s\n", ret, describe_error(ret));
+					errors_log("rebuild error - write: %d: %s\n", ret, errors_describe(ret));
 					return ret;
 				}
 			}
@@ -279,7 +281,7 @@ static ssize_t rebuildmon_handler(machine_t *machine, request_t *request){ // {{
 
 retry:;
 	ret = machine_pass(machine, request);
-	if(ret == -EBADF){
+	if(errors_is_unix(ret, EBADF)){
 		if(userdata->writer == NULL){
 			if(machine->cnext){
 				userdata->writer = machine->cnext;

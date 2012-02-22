@@ -27,7 +27,8 @@
  * @endcode
  */
 
-#define EMODULE 25
+#define ERRORS_MODULE_ID 25
+#define ERRORS_MODULE_NAME "shop/pass"
 
 typedef struct pass_userdata {
 	data_t                 machine;

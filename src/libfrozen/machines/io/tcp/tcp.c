@@ -29,7 +29,8 @@
  * @endcode
  */
 
-#define EMODULE 42
+#define ERRORS_MODULE_ID 42
+#define ERRORS_MODULE_NAME "io/tcp"
 
 typedef struct tcp_userdata {
 	int                    socket;
@@ -86,9 +87,9 @@ static ssize_t tcp_init(machine_t *machine){ // {{{
 	
 	if(tcp_global_inited == 0){
 		if(pthread_key_create(&tcp_socket_key, NULL) != 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		if(pthread_key_create(&tcp_primary_key, NULL) != 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		tcp_global_inited = 1;
 	}
@@ -125,7 +126,7 @@ static ssize_t tcp_handler(machine_t *machine, request_t *request){ // {{{
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
 	
 	if(userdata->tcp_running == 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	if( (socket = accept(userdata->socket, NULL, 0)) < 0)
 		return error("accept error");
@@ -161,7 +162,7 @@ static ssize_t tcp_child_init(machine_t *machine){ // {{{
 		return error("calloc failed");
 	
 	if( (socket = pthread_getspecific(tcp_socket_key)) == NULL)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	if(pthread_getspecific(tcp_primary_key) == NULL){
 		if(pthread_setspecific(tcp_primary_key, userdata) != 0)

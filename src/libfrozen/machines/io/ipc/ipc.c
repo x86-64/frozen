@@ -24,7 +24,8 @@
  * }
  * @endcode
  */
-#define EMODULE 8
+#define ERRORS_MODULE_ID 8
+#define ERRORS_MODULE_NAME "io/ipc"
 
 typedef struct ipc_userdata {
 	ipc_t            ipc;

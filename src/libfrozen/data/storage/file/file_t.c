@@ -4,7 +4,8 @@
 #include <enum/format/format_t.h>
 #include <numeric/uint/uint_t.h>
 
-#define EMODULE         1
+#define ERRORS_MODULE_ID         1
+#define ERRORS_MODULE_NAME "storage/file"
 
 typedef struct file_t {
 	int              handle;

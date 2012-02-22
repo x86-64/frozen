@@ -25,7 +25,8 @@
  * @endcode
  */
 
-#define EMODULE 16
+#define ERRORS_MODULE_ID 16
+#define ERRORS_MODULE_NAME "request/debug"
 
 typedef enum debug_flags {
 	DEBUG_BEFORE = 1,

@@ -53,7 +53,8 @@ typedef struct vertex_list_t {
 	struct vertex_list_t  *next;
 } vertex_list_t;
 
-#define EMODULE               11
+#define ERRORS_MODULE_ID               11
+#define ERRORS_MODULE_NAME "index/mphf"
 #define CHM_CONST             209
 #define REBUILD_CONST         80     // in case of rebuild if array size is <REBUILD_CONST>% of capacity of array - it expands
 #define CAPACITY_MIN_DEFAULT  256
@@ -88,7 +89,7 @@ static ssize_t chm_imp_param_read (mphf_t *mphf){ // {{{
 	fastcall_read r_read = { { 5, ACTION_READ }, 0, &data->params, sizeof(data->params) };
 	if(data_query(&data->be_g, &r_read) < 0){
 		memset(&data->params, 0, sizeof(data->params));
-		return -EFAULT;
+		return errorn(EFAULT);
 	}
 	
 	return 0;
@@ -295,7 +296,7 @@ static ssize_t graph_get_edge(chm_imp_t *data, uintmax_t id, graph_edge_t *edge)
 		sizeof_edge
 	};
 	if(data_query(&data->be_e, &r_read) < 0)
-		return -ENOENT; //error("get_edge failed");
+		return errorn(ENOENT); //error("get_edge failed");
 	
 	edge->vertex[0] = (*(uintmax_t *)(buffer                                           )) & vertex_mask;
 	edge->vertex[1] = (*(uintmax_t *)(buffer +  data->bt_vertex                        )) & vertex_mask;
@@ -332,7 +333,7 @@ static ssize_t graph_find_edge(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 	graph_edge_t  curr_edge;
 	
 	if(nvertex != 2)
-		return -EINVAL;
+		return errorn(EINVAL);
 	
 	curr_edge_id = 0;
 	if( (ret = graph_get_first(data, 1, (uintmax_t *)&vertex[0], &curr_edge_id)) < 0)
@@ -352,7 +353,7 @@ static ssize_t graph_find_edge(chm_imp_t *data, size_t nvertex, uintmax_t *verte
 		}else return error("find_edge db inconsistency");
 	}while(curr_edge_id != 0);
 	
-	return -ENOENT;
+	return errorn(ENOENT);
 } // }}}
 static ssize_t graph_getg(chm_imp_t *data, size_t nvertex, uintmax_t *vertex, uintmax_t *g){ // {{{
 	size_t                 i;
@@ -400,7 +401,7 @@ static ssize_t graph_recalc(chm_imp_t *data, vertex_list_t *vertex, uintmax_t g_
 	
 	for(curr = vertex->next; curr; curr = curr->next){
 		if(curr->vertex == vertex->vertex){
-			return -EBADF;
+			return errorn(EBADF);
 		}
 	}
 	
@@ -577,7 +578,7 @@ ssize_t mphf_chm_imp_insert (mphf_t *mphf, uintmax_t key, uintmax_t value){ // {
 	vertex[1] = ((key ^ (uintmax_t)data->params.hash2) % data->nvertex);
 	
 	if(vertex[0] == vertex[1])
-		return -EBADF;
+		return errorn(EBADF);
 	
 #ifdef MPHF_DEBUG
 	printf("mphf: insert: %lx value: %.8lx v:{%lx,%lx:%lx:%lx}\n",
@@ -675,12 +676,12 @@ static ssize_t graph_new_edge_id(mphf_t *mphf, uintmax_t *new_id){ // {{{
 	build_data = mphf->build_data;
 	
 	if(machine_stdcall_read  (build_data->machine, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	*new_id = gparams.last_edge++;
 	
 	if(machine_stdcall_write (build_data->machine, build_data->gp_offset, &gparams, sizeof(gparams)) < 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	return 0;
 } // }}}
@@ -701,7 +702,7 @@ static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax
 			&buffer,
 			data->bt_gv
 		) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		t = *(uintmax_t *)(buffer);
 		k = (t & (edgebit_mask - 1));
@@ -720,7 +721,7 @@ static ssize_t graph_get_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax
 				&buffer,
 				sizeof_edge
 			) < 0)
-				return -EFAULT;
+				return errorn(EFAULT);
 			
 			edge[i].second_vertex   = (*(uintmax_t *)(buffer                         )) & vertex_mask;
 			edge[i].own_vertex_list = (*(uintmax_t *)(buffer +  data->bt_vertex      )) & vertex_mask;
@@ -742,7 +743,7 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax
 			// create new edge if not exist
 			if(edge[i].edge_id == __MAX(uintmax_t)){
 				if(graph_new_edge_id(data, &edge[i].edge_id) < 0)
-					return -EFAULT;
+					return errorn(EFAULT);
 			}
 			
 			*(uintmax_t *)(buffer                         ) = edge[i].second_vertex;
@@ -755,7 +756,7 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax
 				&buffer,
 				edge_size
 			) < 0)
-				return -EFAULT;
+				return errorn(EFAULT);
 			
 			*(uintmax_t *)(buffer)  = edge[i].edge_id;
 			*(uintmax_t *)(buffer) |= ( 1 << data->bi_vertex );
@@ -770,7 +771,7 @@ static ssize_t graph_set_edge(mphf_t *mphf, chm_imp_t *data, size_t nid, uintmax
 			&buffer,
 			data->bt_gv
 		) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 	}
 	return 0;
 } // }}}
@@ -786,7 +787,7 @@ static ssize_t graph_getg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uintmax
 			&g[i],
 			data->bt_value
 		) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 	}
 	return 0;
 } // }}}
@@ -800,7 +801,7 @@ static ssize_t graph_setg(mphf_t *mphf, chm_imp_t *data, size_t nvertex, uintmax
 			&new_g[i],
 			data->bt_value
 		) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 	}
 	return 0;
 } // }}}
@@ -816,23 +817,23 @@ static ssize_t graph_recalc(mphf_t *mphf, chm_imp_t *data, uintmax_t initial_ver
 		printf("%llx <> %llx\n", child_vertex, from_vertex);
 
 		//if(child_vertex == initial_vertex)
-		//	return -EBADF;
+		//	return errorn(EBADF);
 		
 		if(graph_get_edge(data, data, 1, &child_vertex, &child) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		printf("child:  %llx -> { %llx, %llx, %llx }\n", child_vertex, child.second_vertex, child.own_vertex_list, child.frn_vertex_list);
 		
 		if(graph_getg(data, data, 1, &child.second_vertex, &child_g_old) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		child_g_new = g_old + child_g_old - g_new;
 		
 		if(graph_recalc(data, data, initial_vertex, child.own_vertex_list, (graph_edge_t *)&child, child_g_old, child_g_new) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		if(graph_setg(data, data, 1, &child.second_vertex, &child_g_new) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 		
 		child_vertex = child.frn_vertex_list;
 		printf("next\n");
@@ -845,7 +846,7 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 	
 	if(graph_get_edge(data, data, 2, vertex, (graph_edge_t *)&edges) < 0){
 		printf("get_edge failed\n");
-		return -EFAULT;
+		return errorn(EFAULT);
 	}
 	
 	edges[0].frn_vertex_list = edges[1].own_vertex_list = edges[1].second_vertex;
@@ -855,7 +856,7 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 	
 	if(graph_set_edge(data, data, 2, vertex, (graph_edge_t *)&edges) < 0){
 		printf("set_edge failed\n");
-		return -EFAULT;
+		return errorn(EFAULT);
 	}
 	
 	uintmax_t g[2], g_new, g_free = __MAX(uintmax_t);
@@ -865,7 +866,7 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 		g[0]   = 0;
 	}else{
 		if(graph_getg(data, data, 1, &vertex[0], &g[0]) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 	}
 	
 	if(edges[1].own_vertex_list == 0){
@@ -873,7 +874,7 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 		g[1]   = 0;
 	}else{
 		if(graph_getg(data, data, 1, &vertex[1], &g[1]) < 0)
-			return -EFAULT;
+			return errorn(EFAULT);
 	}
 	
 	if(g_free == __MAX(uintmax_t)){
@@ -887,7 +888,7 @@ static ssize_t graph_add_edge(mphf_t *mphf, chm_imp_t *data, uintmax_t *vertex, 
 	}
 	
 	if(graph_setg(data, data, 1, &vertex[g_free], &g_new) < 0)
-		return -EFAULT;
+		return errorn(EFAULT);
 	
 	return 0;
 } // }}}

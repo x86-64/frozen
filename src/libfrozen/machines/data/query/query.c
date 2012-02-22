@@ -27,7 +27,8 @@
  * @endcode
  */
 
-#define EMODULE 52
+#define ERRORS_MODULE_ID 52
+#define ERRORS_MODULE_NAME "data/query"
 
 typedef struct query_userdata {
 	data_t                 data;

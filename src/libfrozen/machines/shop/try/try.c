@@ -30,7 +30,8 @@
  * @endcode
  */
 
-#define EMODULE 54
+#define ERRORS_MODULE_ID 54
+#define ERRORS_MODULE_NAME "shop/try"
 
 typedef struct try_userdata {
 	data_t                 machine;

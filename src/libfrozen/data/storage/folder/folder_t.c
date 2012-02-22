@@ -6,7 +6,8 @@
 #include <numeric/uint/uint_t.h>
 #include <core/string/string_t.h>
 
-#define EMODULE 53
+#define ERRORS_MODULE_ID 53
+#define ERRORS_MODULE_NAME "storage/folder"
 
 typedef struct folder_t {
 	char                  *path;

@@ -13,7 +13,6 @@
 - machine thread_pool
 - data perthread_t wrapper
 - machine queue
-- wrap -E* errors in error func, to mark source of error
 - error backtrace
 - list_t convert_from hash with data array
 - machine/rebuild deprecate?

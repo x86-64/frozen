@@ -62,7 +62,8 @@
  * @endcode
  */
 
-#define EMODULE 15
+#define ERRORS_MODULE_ID 15
+#define ERRORS_MODULE_NAME "machine/pool"
 #define POOL_INTERVAL_DEFAULT 5
 #define TICK_INTERVAL_DEFAULT 5
 
@@ -487,7 +488,7 @@ static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *reques
 	return machine_pass(machine, request);
 } // }}}
 static ssize_t pool_machine_request_died(machine_t *machine, request_t *request){ // {{{
-	return -EBADF;
+	return errorn(EBADF);
 } // }}}
 
 machine_t pool_proto = {
