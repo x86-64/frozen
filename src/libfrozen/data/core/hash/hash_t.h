@@ -238,9 +238,9 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
 	(_dst)->key = hash_ptr_null;   \
 	data_set_void(&((_dst)->data));\
 }
-#define hash_assign_hash_end(_dst) {  \
-	(_dst)->key = hash_ptr_end;   \
-	(_dst)->data.ptr = NULL;      \
+#define hash_assign_hash_end(_dst) {   \
+	(_dst)->key = hash_ptr_end;    \
+	data_set_void(&((_dst)->data));\
 }
 
 #endif

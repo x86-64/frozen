@@ -59,7 +59,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	if(hash_item->data.type == TYPE_MACHINET) // HACK HACK HACK
 		return ITER_CONTINUE;
 	
-	if(hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
+	if(hash_item->key != hash_ptr_end && hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
 		return ITER_CONTINUE;
 	
 	switch(ctx->step){
@@ -77,7 +77,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			break;
 
 		case 1:; // step two: write to buffer
-			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
+			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_holder, FORMAT(binary) };
 			
 			// write header
 			if( (ret = data_query(&d_key,  &r_convert)) < 0)
@@ -88,7 +88,8 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			// write data
 			data_slider_t_freeze(ctx->sl_data);
 				
-				ret = data_query(&hash_item->data, &r_convert);
+				fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
+				ret = data_query(&hash_item->data, &r_convert2);
 			
 			data_slider_t_unfreeze(ctx->sl_data);
 			return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
@@ -383,8 +384,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		
 		el_new++;
 	}
-	el_new->key      = hash_ptr_end;
-	el_new->data.ptr = NULL;
+	hash_assign_hash_end(el_new);
 	
 	return new_hash;
 } // }}}
