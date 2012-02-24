@@ -24,7 +24,7 @@
 #define HAVEBUFF_TYPE_COUNTERT 0
 
 typedef struct counter_t {
-	uintmax_t              counter;
+	data_t                 counter;
 } counter_t;
 
 #endif
