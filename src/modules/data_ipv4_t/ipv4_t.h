@@ -11,7 +11,7 @@
  */
 
 #define IPV4T_NAME  "ipv4_t"
-#define TYPE_IPV4T  data_getid(IPV4T_NAME, NULL)
+#define TYPE_IPV4T  datatype_t_getid_byname(IPV4T_NAME, NULL)
 
 #define DATA_IPV4T(value) { TYPE_IPV4T, (ipv4_t []){ value } } 
 #define DATA_PTR_IPV4T(value) { TYPE_IPV4T, value } 

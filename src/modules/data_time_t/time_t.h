@@ -11,7 +11,7 @@
  */
 
 #define TIMESTAMPT_NAME  "timestamp_t"
-#define TYPE_TIMESTAMPT  data_getid(TIMESTAMPT_NAME, NULL)
+#define TYPE_TIMESTAMPT  datatype_t_getid_byname(TIMESTAMPT_NAME, NULL)
 
 #define DATA_TIMESTAMPT(value) { TYPE_TIMESTAMPT, (timestamp_t []){ value } } 
 #define DATA_PTR_TIMESTAMPT(value) { TYPE_TIMESTAMPT, value } 

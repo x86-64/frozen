@@ -16,7 +16,6 @@
 - error backtrace
 - list_t convert_from hash with data array
 - machine/rebuild deprecate?
-- bug in datatype packing - dynamic data types can not match on different machines
 - portable action_t binary format
 - machine rate-limit, delay
 - benchmark functions remove from main request flow, need new approach for machine parameters, for machine/pool too

@@ -3,9 +3,9 @@
 #include <enum/format/format_t.h>
 #include <core/void/void_t.h>
 
-#define DATATYPE_PORTABLE uint16_t
+#define DATATYPE_PORTABLE uint32_t
 
-datatype_t     data_getid(char *name, ssize_t *pret){ // {{{
+datatype_t     datatype_t_getid_byname(char *name, ssize_t *pret){ // {{{
 	uintmax_t              i;
 	ssize_t                ret               = -EINVAL;
 	datatype_t             type              = TYPE_VOIDT;
@@ -16,6 +16,26 @@ datatype_t     data_getid(char *name, ssize_t *pret){ // {{{
 			continue;
 		
 		if(strcasecmp(proto->type_str, name) == 0){
+			type = i;
+			ret  = 0;
+			break;
+		}
+	}
+	if(pret)
+		*pret = ret;
+	return type;
+} // }}}
+datatype_t     datatype_t_getid_byport(DATATYPE_PORTABLE port, ssize_t *pret){ // {{{
+	uintmax_t              i;
+	ssize_t                ret               = -EINVAL;
+	datatype_t             type              = TYPE_VOIDT;
+	data_proto_t          *proto;
+	
+	for(i=0; i<data_protos_nitems; i++){
+		if( (proto = data_protos[i]) == NULL)
+			continue;
+		
+		if(proto->type_port == port){
 			type = i;
 			ret  = 0;
 			break;
@@ -47,7 +67,7 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			*(datatype_t *)(dst->ptr) = data_getid(buffer, &ret);
+			*(datatype_t *)(dst->ptr) = datatype_t_getid_byname(buffer, &ret);
 			return ret;
 
 		case FORMAT(clean):;
@@ -62,10 +82,10 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 
 			fastcall_read r_binary = { { 5, ACTION_READ }, 0, &type_port, sizeof(type_port) };
 			if( (ret = data_query(fargs->src, &r_binary)) < 0)
-				return 0;
+				return ret;
 			
-			*(datatype_t *)(dst->ptr) = (datatype_t)type_port;
-			return 0;
+			*(datatype_t *)(dst->ptr) = datatype_t_getid_byport(type_port, &ret);
+			return ret;
 			
 		default:
 			break;
@@ -101,7 +121,10 @@ static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *farg
 			break;
 			
 		case FORMAT(binary):;
-			DATATYPE_PORTABLE  type_port = (DATATYPE_PORTABLE)type;
+			if((unsigned)type > data_protos_nitems)
+				return -EINVAL;
+			
+			DATATYPE_PORTABLE  type_port = data_protos[type]->type_port;
 			
 			fastcall_write r_binary = { { 5, ACTION_WRITE }, 0, &type_port, sizeof(type_port) };
 			ret        = data_query(fargs->dest, &r_binary);

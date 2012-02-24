@@ -88,8 +88,9 @@ struct data_t {
 };
 
 struct data_proto_t {
-	char                  *type_str;
 	datatype_t             type;
+	uint32_t               type_port;
+	char                  *type_str;
 	data_api_type          api_type;
 	
 	f_data_func            handler_default;

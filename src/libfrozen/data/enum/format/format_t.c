@@ -10,12 +10,9 @@ static list                    dynamic_formats   = LIST_INITIALIZER;
 #endif
 
 static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	uintmax_t              i                       = 1;
-	char                   c;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
-	char                  *p                       = buffer;
 	keypair_t             *kp;
-	format_t               key_val                 = 0;
+	format_t               key_val;
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -32,10 +29,7 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
 			
-			while((c = *p++)){
-				key_val += c * i * i;
-				i++;
-			}
+			key_val = portable_hash(buffer);
 	
 	#ifdef COLLISION_CHECK
 		#ifdef STATIC_KEYS_CHECK

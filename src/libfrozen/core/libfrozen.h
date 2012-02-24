@@ -96,5 +96,6 @@ API int       frozen_destroy(void);
     intmax_t  safe_mul(uintmax_t *res, uintmax_t x, uintmax_t y);
     intmax_t  safe_div(uintmax_t *res, uintmax_t x, uintmax_t y);
 API void *    memdup(void *ptr, uintmax_t size);
+API uintmax_t portable_hash(char *p);
 
 #endif

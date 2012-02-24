@@ -13,6 +13,7 @@ static void    data_fill_blanks(data_proto_t *p){ // {{{
 	uintmax_t              j;
 	f_data_func            func;
 	
+	p->type_port = portable_hash(p->type_str);
 	switch(p->api_type){
 		case API_DEFAULT_HANDLER:
 			func = p->handler_default;

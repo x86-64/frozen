@@ -14,12 +14,9 @@ static list                    dynamic_keys   = LIST_INITIALIZER;
 
 static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	uintmax_t              i                       = 1;
-	char                   c;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
-	char                  *p                       = buffer;
 	keypair_t             *kp;
-	hashkey_t              key_val                 = 0;
+	hashkey_t              key_val;
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -36,10 +33,7 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 			if( (ret = data_query(fargs->src, &r_read)) < 0)
 				return ret;
 			
-			while((c = *p++)){
-				key_val += c * i * i;
-				i++;
-			}
+			key_val = portable_hash(buffer);
 	
 	#ifdef COLLISION_CHECK
 		#ifdef STATIC_KEYS_CHECK

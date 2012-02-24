@@ -91,3 +91,15 @@ void * memdup(void *ptr, uintmax_t size){
 	memcpy(new_ptr, ptr, size);
 	return new_ptr;
 }
+
+uintmax_t portable_hash(char *p){
+	register char          c;
+	register uintmax_t     i                 = 1;
+	register uintmax_t     key_val           = 0;
+	
+	while((c = *p++)){
+		key_val += c * i * i;
+		i++;
+	}
+	return key_val;
+}

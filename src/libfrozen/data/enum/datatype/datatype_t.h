@@ -26,6 +26,6 @@
 #define REF_TYPE_DATATYPET(_dt) (&(_dt))
 #define HAVEBUFF_TYPE_DATATYPET 1
 
-API datatype_t     data_getid(char *name, ssize_t *pret);
+API datatype_t     datatype_t_getid_byname(char *name, ssize_t *pret);
 
 #endif

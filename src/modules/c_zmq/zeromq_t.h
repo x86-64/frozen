@@ -82,8 +82,8 @@
 #define ZEROMQT_NAME       "zeromq_t"
 #define ZEROMQ_MSGT_NAME   "zeromq_msg_t"
 
-#define TYPE_ZEROMQT      data_getid(ZEROMQT_NAME,     NULL)
-#define TYPE_ZEROMQ_MSGT  data_getid(ZEROMQ_MSGT_NAME, NULL)
+#define TYPE_ZEROMQT      datatype_t_getid_byname(ZEROMQT_NAME,     NULL)
+#define TYPE_ZEROMQ_MSGT  datatype_t_getid_byname(ZEROMQ_MSGT_NAME, NULL)
 
 #define DATA_PTR_ZEROMQ_MSGT(_msg) { TYPE_ZEROMQ_MSGT, _msg } 
 #define DEREF_TYPE_ZEROMQT(_data) (ipv4_t *)((_data)->ptr) 
