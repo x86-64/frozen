@@ -34,7 +34,7 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 				}
 			}
 			return -EINVAL;
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(action_t) };
 			return data_query(fargs->src, &r_read2);
 		
@@ -57,7 +57,7 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	switch(fargs->format){
 		case FORMAT(config):;
-		case FORMAT(clean):;
+		case FORMAT(native):;
 		case FORMAT(human):;
 			// find in static keys first
 			for(kp = &actions[0]; kp->key_str != NULL; kp++){
@@ -73,7 +73,7 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 			transfered = r_write.buffer_size;
 			break;
 		
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &value, sizeof(value) };
 			ret        = data_query(fargs->dest, &r_write2);
 			transfered = r_write.buffer_size;
@@ -89,8 +89,8 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 } // }}}		
 static ssize_t data_action_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	switch(fargs->format){
-		case FORMAT(binary):
-		case FORMAT(clean):
+		case FORMAT(packed):
+		case FORMAT(native):
 			fargs->length = sizeof(action_t);
 			return 0;
 		default:

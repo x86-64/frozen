@@ -16,7 +16,7 @@
  *
  *  Possible defines:
  *  @code
- *       data_t hkey = DATA_FORMATT( FORMAT(clean) );
+ *       data_t hkey = DATA_FORMATT( FORMAT(native) );
  *  @endcode
  */
 

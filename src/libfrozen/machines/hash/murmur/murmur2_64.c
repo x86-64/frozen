@@ -11,7 +11,7 @@
 // 64-bit hash for 64-bit platforms
 
 uint64_t MurmurHash64A ( data_t *data, unsigned int seed ){
-	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(data, &r_len) != 0 )
 		return 0;
 	

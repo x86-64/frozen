@@ -43,7 +43,7 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, 0);
 	
 	switch(fargs->format){
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			datatype_t             type;
 			data_t                 item_type          = DATA_PTR_DATATYPET(&type);
 			
@@ -56,14 +56,14 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 				type = r_getdata.data->type;
 				
 				// write type
-				fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(binary) };
+				fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
 				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
 					break;
 				
 				data_slider_t_freeze(&d_sl_data);
 					
 					// write data
-					fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(binary) };
+					fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
 					if( (ret = data_query(&chunk->data, &r_convert)) < 0)
 						break;
 				
@@ -73,7 +73,7 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			// terminate list
 			type = TYPE_LISTENDT;
 			
-			fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(binary) };
+			fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
 			if( (qret = data_query(&item_type, &r_convert_type)) < 0)
 				ret = qret;
 			break;
@@ -89,7 +89,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	data_t                 d_sl_data         = DATA_SLIDERT(fargs->src, 0);
 	
 	switch(fargs->format){
-		case FORMAT(clean):
+		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
 			return data_list_t_alloc(dst, NULL);
@@ -103,7 +103,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			
 			return data_list_t_alloc(dst, NULL);
 			
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			datatype_t             type;
 			data_t                 item_type = DATA_PTR_DATATYPET(&type);
 			data_t                 item;
@@ -114,7 +114,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			}
 			
 			while(1){
-				fastcall_convert_from r_convert_type = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(binary) };
+				fastcall_convert_from r_convert_type = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(packed) };
 				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
 					break;
 				
@@ -127,7 +127,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 				data_slider_t_freeze(&d_sl_data);
 					
 					// read data
-					fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(binary) };
+					fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(packed) };
 					if( (ret = data_query(&item, &r_convert)) < 0)
 						break;
 				

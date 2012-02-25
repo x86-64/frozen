@@ -111,11 +111,11 @@ static ssize_t send_reply(machine_t *machine, request_t *request){ // {{{
 	
 	hash_t reply_struct[] = {
 		{ HK(uuid), DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(format),  DATA_FORMATT(FORMAT(native))     },
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(format),  DATA_FORMATT(FORMAT(native))     },
 			{ HK(default), DATA_STRING(" ")                },
 			hash_end
 		)},
@@ -124,12 +124,12 @@ static ssize_t send_reply(machine_t *machine, request_t *request){ // {{{
 			hash_end
 		)},
 		{ 0, DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(format),  DATA_FORMATT(FORMAT(native))     },
 			{ HK(default), DATA_STRING(" ")                },
 			hash_end
 		)},
 		{ userdata->body, DATA_HASHT(
-			{ HK(format),  DATA_FORMATT(FORMAT(clean))     },
+			{ HK(format),  DATA_FORMATT(FORMAT(native))     },
 			hash_end
 		)},
 		hash_end
@@ -150,7 +150,7 @@ static ssize_t send_reply(machine_t *machine, request_t *request){ // {{{
 		fastcall_convert_to r_convert = {
 			{ 4, ACTION_CONVERT_TO },
 			&d_raw,
-			FORMAT(clean)
+			FORMAT(native)
 		};
 		if( (ret = data_query(&d_struct, &r_convert)) < 0)
 			return ret;
@@ -208,7 +208,7 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ /
 	
 	// little hack here, parsing real data would be difficult, so we accept only "plain" memory chunks
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(buffer, &r_len) != 0 || data_query(buffer, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EINVAL;
 	

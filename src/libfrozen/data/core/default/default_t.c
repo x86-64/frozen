@@ -52,7 +52,7 @@ ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintm
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EFAULT;
 	
@@ -76,7 +76,7 @@ static ssize_t       data_default_read          (data_t *data, fastcall_read *fa
 } // }}}
 static ssize_t       data_default_write         (data_t *data, fastcall_write *fargs){ // {{{
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
 		return -EFAULT;
 	
@@ -103,7 +103,7 @@ static ssize_t       data_default_copy          (data_t *src, fastcall_copy *far
 		return -EINVAL;
 	
 	if(r_ptr.ptr != NULL){
-		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 		if( data_query(src, &r_len) != 0)
 			return -EFAULT;
 		
@@ -199,7 +199,7 @@ static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null 
 static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
 	ssize_t                ret;
 	
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(clean) };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(native) };
 	if( (ret = data_query(src, &r_convert)) != 0)
 		return ret;
 	
@@ -214,7 +214,7 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	if(fargs->format != FORMAT(clean))
+	if(fargs->format != FORMAT(native))
 		return -ENOSYS;
 	
 	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;
@@ -223,7 +223,7 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 } // }}}
 static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs){ // {{{
 	switch(fargs->format){
-		case FORMAT(clean):;
+		case FORMAT(native):;
 			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, dest };
 			return data_query(fargs->src, &r_transfer);
 			

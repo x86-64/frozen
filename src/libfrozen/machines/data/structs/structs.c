@@ -25,11 +25,11 @@
  *              size                    = (hashkey_t)'size',   # if supplied - add size of packed structure to request with key
  *              lazy                    = (uint_t)'1',         # use lazy packing (no size would be avaliable), default 0
  *              structure               = {                     # structure to pack/unpack to/from
- *                     keyname = {                              # - first field is keyname with default value of 10 and FORMAT(clean)
+ *                     keyname = {                              # - first field is keyname with default value of 10 and FORMAT(native)
  *                                  default = (uint_t)'10',
- *                                  format  = (format_t)'clean'
+ *                                  format  = (format_t)'native'
  *                               }
- *                     key2    = { },                           # - second field is anything without default value and FORMAT(binary)
+ *                     key2    = { },                           # - second field is anything without default value and FORMAT(packed)
  *                     ...
  *              }
  * }

@@ -45,7 +45,7 @@
 })
 
 static ssize_t data_container_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(clean)){
+	if(fargs->format == FORMAT(native)){
 		fargs->length = container_size( (container_t *)data->ptr );
 		return 0;
 	}
@@ -136,7 +136,7 @@ static uintmax_t         chunk_get_size(container_chunk_t *chunk){ // {{{
 			return chunk->cached_size;
 	}
 	
-	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if(data_query(&chunk->data, &r_len) < 0)
 		return 0;
 	

@@ -64,7 +64,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	
 	switch(ctx->step){
 		case 0:; // step one: count all elements
-			fastcall_length r_length = { { 4, ACTION_LENGTH }, 0, FORMAT(binary) };
+			fastcall_length r_length = { { 4, ACTION_LENGTH }, 0, FORMAT(packed) };
 			
 			if( (ret = data_query(&d_key,  &r_length)) < 0)
 				return ret;
@@ -77,7 +77,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			break;
 
 		case 1:; // step two: write to buffer
-			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_holder, FORMAT(binary) };
+			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_holder, FORMAT(packed) };
 			
 			// write header
 			if( (ret = data_query(&d_key,  &r_convert)) < 0)
@@ -88,7 +88,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			// write data
 			data_slider_t_freeze(ctx->sl_data);
 				
-				fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(binary) };
+				fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
 				ret = data_query(&hash_item->data, &r_convert2);
 			
 			data_slider_t_unfreeze(ctx->sl_data);
@@ -101,7 +101,7 @@ static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx)
 	
 	data_slider_t_freeze(ctx->sl_data);
 	
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT(binary) };
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT(packed) };
 		ret = data_query(&hash_item->data, &r_convert);
 	
 	data_slider_t_unfreeze(ctx->sl_data);
@@ -155,7 +155,7 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	data_hash_t_append(ctx, buffer);
 	
 	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length     r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length     r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if(data_query(&element->data, &r_ptr) == 0 && data_query(&element->data, &r_len) == 0){
 		for(k = 0; k < r_len.length; k++){
 			if((k % 32) == 0){
@@ -208,8 +208,8 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	hash_t_ctx             ctx               = { .hash = src->ptr };
 	
 	switch(fargs->format){
-		case FORMAT(clean):
-		case FORMAT(binary):
+		case FORMAT(native):
+		case FORMAT(packed):
 			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
 				return -EFAULT;
 			
@@ -251,8 +251,8 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	list                   freeit            = LIST_INITIALIZER;
 	
 	switch(fargs->format){
-		case FORMAT(clean):
-		case FORMAT(binary): break;
+		case FORMAT(native):
+		case FORMAT(packed): break;
 		case FORMAT(human):
 		case FORMAT(config):
 		case FORMAT(hash):
@@ -269,7 +269,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		data_t       d_key          = DATA_PTR_HASHKEYT(&curr->key);
 		data_t       d_type         = DATA_PTR_DATATYPET(&curr->data.type);
 
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(binary) };
+		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(packed) };
 		
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
 			return ret;

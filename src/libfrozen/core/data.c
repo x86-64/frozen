@@ -100,7 +100,7 @@ ssize_t              data_get_continious(data_t *data, data_t *freeme, void **pt
 	
 	// direct pointers
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0 && r_ptr.ptr != NULL){
 		data_set_void(freeme);
 		ret = 0;
@@ -111,7 +111,7 @@ ssize_t              data_get_continious(data_t *data, data_t *freeme, void **pt
 	freeme->ptr  = NULL;
 	
 	// strange types
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, freeme, FORMAT(clean) };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, freeme, FORMAT(native) };
 	if( (ret = data_query(data, &r_convert)) < 0)
 		return ret;
 	

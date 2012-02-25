@@ -9,7 +9,7 @@ define(`IMPLODE', dnl IMPLODE(input, output, func)
 	{ class = "query", data = (env_t)"$1", request = {
 		action      = (action_t)"convert_from",
 		source      = (env_t)"$2",
-		format      = (format_t)"binary"
+		format      = (format_t)"packed"
 	}},
 	{ class = "shop/return" }
 }}')dnl

@@ -62,7 +62,7 @@ static ssize_t data_length_t_convert_from(data_t *dst, fastcall_convert_from *fa
 				return -EINVAL;
 			}
 			
-			fdata->format = FORMAT(clean);
+			fdata->format = FORMAT(native);
 			hash_data_get(ret, TYPE_FORMATT, fdata->format, config, HK(format));
 			
 			dst->ptr = fdata;

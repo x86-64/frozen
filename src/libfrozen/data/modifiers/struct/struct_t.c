@@ -13,7 +13,7 @@ typedef struct struct_iter_ctx {
 
 static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 	ssize_t                ret;
-	format_t               format            = FORMAT(binary);
+	format_t               format            = FORMAT(packed);
 	hash_t                *element_params;
 	data_t                *value;
 	struct_iter_ctx       *iter_ctx          = (struct_iter_ctx *)p_ctx;
@@ -46,7 +46,7 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 
 static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 	ssize_t                ret;
-	format_t               format            = FORMAT(binary);
+	format_t               format            = FORMAT(packed);
 	hash_t                *element_params;
 	data_t                *value;
 	data_t                 need_data;
@@ -140,7 +140,7 @@ static ssize_t   data_struct_t_convert_to(data_t *data, fastcall_convert_to *far
 	if(fargs->dest == NULL || fdata == NULL || fdata->values == NULL || fdata->structure == NULL)
 		return -EINVAL;
 	
-	if(fargs->format != FORMAT(clean))
+	if(fargs->format != FORMAT(native))
 		return -EINVAL;
 	
 	data_t                 sl_buffer         = DATA_SLIDERT(fargs->dest, 0);

@@ -85,7 +85,7 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 			goto error;
 		}
 		
-		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(binary) };
+		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(packed) };
 		if( data_query(sample, &r_len) != 0 ){
 			ret = error("bad item_sample");
 			goto error;
@@ -99,7 +99,7 @@ static ssize_t allocator_new(allocator_fixed_t **pfdata, hash_t *config){ // {{{
 	}
 	
 	// get last id
-	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+	fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 	if( data_query(&fdata->storage, &r_len) != 0){
 		ret = error("bad underlying storage");
 		goto error;

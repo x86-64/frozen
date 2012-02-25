@@ -31,7 +31,7 @@ static ssize_t data_counter_t_convert_to(data_t *data, fastcall_convert_to *farg
 	ssize_t                ret;
 	counter_t             *fdata             = (counter_t *)data->ptr;
 	
-	if(fargs->format != FORMAT(binary)){ // binary means packed, so no increments
+	if(fargs->format != FORMAT(packed)){ // binary means packed, so no increments
 		fastcall_increment r_inc = { { 2, ACTION_INCREMENT } };
 		if( (ret = data_query(&fdata->counter, &r_inc)) < 0)
 			return ret;

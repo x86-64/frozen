@@ -107,8 +107,8 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(TYPE) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
@@ -159,8 +159,8 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
 			return 0;
 
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
 			if(data_query(fargs->src, &r_read) != 0){
 				// TODO memleak

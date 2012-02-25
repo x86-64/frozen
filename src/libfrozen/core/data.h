@@ -230,7 +230,7 @@ API ssize_t              data_get_continious    (data_t *data, data_t *freeme, v
  */
 #define data_convert(_ret, _type, _dst, _src) {                                          \
 	data_t __data_dst = { _type, REF_##_type(_dst) };                                \
-	fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(clean) };  \
+	fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(native) };  \
 	_ret = data_query(&__data_dst, &_r_convert);                                     \
 	_dst = DEREF_##_type(&__data_dst);                                               \
 	(void)_ret;                                                                      \

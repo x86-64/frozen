@@ -23,7 +23,7 @@
  *  {
  *        master        = (some_t)"",         // master data, would be used in runtime
  *        slave         = (some_t)"",         // slave data, used to save and load information
- *        format        = (format_t)"clean",  // format in which data would be stored, default FORMAT(binary)
+ *        format        = (format_t)"native",  // format in which data would be stored, default FORMAT(packed)
  *        fatal         = (uint_t)"1"         // do not ignore load errors, default 0
  *  }
  *  @endcode

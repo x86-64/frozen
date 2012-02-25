@@ -95,11 +95,11 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t le
 static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = ((raw_t *)data->ptr)->size;
 	switch(fargs->format){
-		case FORMAT(clean):
+		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):
 			break;
-		case FORMAT(binary):
+		case FORMAT(packed):
 			fargs->length += sizeof(((raw_t *)data->ptr)->size);
 			break;
 		default:
@@ -160,7 +160,7 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 		return -EINVAL;
 	
 	switch(fargs->format){
-		case FORMAT(clean):;
+		case FORMAT(native):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src_data->ptr, src_data->size };
 			ret = data_query(fargs->dest, &r_write);
 			
@@ -168,7 +168,7 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 			
 			break;
 
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0,                     &src_data->size, sizeof(src_data->size) };
 			ret         = data_query(fargs->dest, &r_write1);
 			transfered += r_write1.buffer_size;
@@ -217,11 +217,11 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 	uintmax_t              length            = 0;
 	
 	switch(fargs->format){
-		case FORMAT(clean):
+		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
 			
-			fastcall_length r_len1 = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+			fastcall_length r_len1 = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 			if( (ret = data_query(fargs->src, &r_len1)) < 0)
 				return ret;
 			
@@ -237,7 +237,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			
 			buffer = hash_data_find(config, HK(buffer));
 			if(buffer){
-				fastcall_length r_len2 = { { 4, ACTION_LENGTH }, 0, FORMAT(clean) };
+				fastcall_length r_len2 = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 				if( (ret = data_query(buffer, &r_len2)) < 0)
 					return ret;
 				
@@ -247,7 +247,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			
 			return raw_read(dst, buffer, 0, length);
 
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &length, sizeof(length) };
 			if( (ret = data_query(fargs->src, &r_read)) < 0)
 				return ret;

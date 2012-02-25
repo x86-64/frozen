@@ -4,7 +4,7 @@
 #include <enum/format/format_t.h>
 
 static ssize_t data_dataptr_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
+	if(fargs->format == FORMAT(packed)){
 		fargs->length = sizeof(data_t);
 		return 0;
 	}

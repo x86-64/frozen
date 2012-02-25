@@ -261,7 +261,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 	
 	// write data to ipc memory
 	data_t               d_ipcmem  = DATA_RAW(userdata->shmdata + block->data_rel_ptr, userdata->shmaddr->item_size);
-	fastcall_convert_to  r_convert = { { 4, ACTION_CONVERT_TO }, &d_ipcmem, FORMAT(binary) };
+	fastcall_convert_to  r_convert = { { 4, ACTION_CONVERT_TO }, &d_ipcmem, FORMAT(packed) };
 	if( (ret = data_query(buffer, &r_convert)) < 0)
 		return error("can not write buffer to ipc memory");
 	
@@ -277,7 +277,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		
 		// read request back
 		if(userdata->return_result != 0){
-			fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT(binary) };
+			fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT(packed) };
 			data_query(buffer, &r_convert_from);
 		}
 		ret = 0;

@@ -89,7 +89,7 @@ static ssize_t data_format_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	switch(fargs->format){
 		case FORMAT(config):;
-		case FORMAT(clean):;
+		case FORMAT(native):;
 		case FORMAT(human):;
 			// find in static keys first
 			for(kp = &formats[0]; kp->key_str != NULL; kp++){
@@ -127,7 +127,7 @@ static ssize_t data_format_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	return ret;
 } // }}}		
 static ssize_t data_format_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
+	if(fargs->format == FORMAT(packed)){
 		fargs->length = sizeof(format_t);
 		return 0;
 	}

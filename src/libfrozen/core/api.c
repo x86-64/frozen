@@ -416,7 +416,7 @@ ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){
 } // }}}
 ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
-	format_t               format            = FORMAT(clean);
+	format_t               format            = FORMAT(native);
 	
 	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
 	
@@ -479,7 +479,7 @@ ssize_t     action_convert_to_from_fast(machine_t *machine, fastcall_convert_to 
 ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                *output;
-	format_t               format            = FORMAT(clean);
+	format_t               format            = FORMAT(native);
 	
 	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
 	
@@ -511,7 +511,7 @@ ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_f
 ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
 	data_t                *input;
-	format_t               format            = FORMAT(clean);
+	format_t               format            = FORMAT(native);
 	
 	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
 	

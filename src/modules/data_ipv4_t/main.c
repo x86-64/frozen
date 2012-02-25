@@ -110,7 +110,7 @@ static ssize_t ipv4_to_string(uint32_t ip, char *string, size_t *string_size, fo
 } // }}}
 
 static ssize_t data_ipv4_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
+	if(fargs->format == FORMAT(packed)){
 		fargs->length = sizeof(ipv4_t);
 		return 0;
 	}
@@ -194,8 +194,8 @@ static ssize_t data_ipv4_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &fdata->ip, sizeof(fdata->ip) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
@@ -236,8 +236,8 @@ static ssize_t data_ipv4_t_convert_from(data_t *dst, fastcall_convert_from *farg
 				return -EFAULT;
 			return ipv4_from_string(&fdata->ip, buffer, r_read_str.buffer_size);
 		
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &fdata->ip, sizeof(fdata->ip) };
 			return data_query(fargs->src, &r_read);
 		

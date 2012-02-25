@@ -58,7 +58,7 @@ static ssize_t       data_slice_t_convert_to    (data_t *src, fastcall_convert_t
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	if(fargs->format != FORMAT(clean))
+	if(fargs->format != FORMAT(native))
 		return -ENOSYS;
 	
 	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;

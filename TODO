@@ -6,8 +6,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- binary -> packed
-- clean -> native
 - leveldb write in value
 - leveldb save type
 - leveldb strict type

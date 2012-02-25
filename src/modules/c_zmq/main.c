@@ -280,7 +280,7 @@ static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
 	switch(fargs->format){
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			data_t             packed           = DATA_PTR_HASHT(fdata->config);
 			return data_query(&packed, fargs);
 			
@@ -308,7 +308,7 @@ static ssize_t data_zeromq_t_convert_from(data_t *data, fastcall_convert_from *f
 			
 			return zeromq_t_new((zeromq_t **)&data->ptr, config);
 			
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			data_t             packed           = DATA_PTR_HASHT(NULL); // don't free result, used internally 
 			
 			if( (ret = data_query(&packed, fargs) < 0))
@@ -669,7 +669,7 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 				input_convert.type = TYPE_RAWT;
 				input_convert.ptr  = NULL;
 				
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &input_convert, FORMAT(clean) };
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &input_convert, FORMAT(native) };
 				if( (ret = data_query(input, &r_convert)) < 0)
 					return ret;
 				

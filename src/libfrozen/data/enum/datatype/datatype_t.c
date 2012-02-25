@@ -70,14 +70,14 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			*(datatype_t *)(dst->ptr) = datatype_t_getid_byname(buffer, &ret);
 			return ret;
 
-		case FORMAT(clean):;
+		case FORMAT(native):;
 			fastcall_read r_clean = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(datatype_t) };
 			if( (ret = data_query(fargs->src, &r_clean)) < 0)
 				return ret;
 			
 			return ret;
 		
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			DATATYPE_PORTABLE type_port = 0;
 
 			fastcall_read r_binary = { { 5, ACTION_READ }, 0, &type_port, sizeof(type_port) };
@@ -114,13 +114,13 @@ static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *farg
 			transfered = r_write.buffer_size;
 			break;
 			
-		case FORMAT(clean):;
+		case FORMAT(native):;
 			fastcall_write r_clean = { { 5, ACTION_WRITE }, 0, &type, sizeof(type) };
 			ret        = data_query(fargs->dest, &r_clean);
 			transfered = r_clean.buffer_size;
 			break;
 			
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			if((unsigned)type > data_protos_nitems)
 				return -EINVAL;
 			
@@ -141,8 +141,8 @@ static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *farg
 } // }}}		
 static ssize_t data_datatype_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	switch(fargs->format){
-		case FORMAT(clean):  fargs->length = sizeof(datatype_t);        break;
-		case FORMAT(binary): fargs->length = sizeof(DATATYPE_PORTABLE); break;
+		case FORMAT(native):  fargs->length = sizeof(datatype_t);        break;
+		case FORMAT(packed): fargs->length = sizeof(DATATYPE_PORTABLE); break;
 		case FORMAT(config):
 		case FORMAT(human):
 			// TODO convert and measure

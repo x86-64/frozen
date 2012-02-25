@@ -47,7 +47,7 @@ static ssize_t data_bind_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			hash_t                *config;
 			data_t                 master;
 			data_t                 slave;
-			format_t               format              = FORMAT(binary);
+			format_t               format              = FORMAT(packed);
 			uintmax_t              fatal               = 0;
 
 			data_get(ret, TYPE_HASHT, config, fargs->src);

@@ -60,7 +60,7 @@ static ssize_t timestamp_to_string(time_t time, char *string, size_t *string_siz
 } // }}}
 
 static ssize_t data_timestamp_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	if(fargs->format == FORMAT(binary)){
+	if(fargs->format == FORMAT(packed)){
 		fargs->length = sizeof(timestamp_t);
 		return 0;
 	}
@@ -120,8 +120,8 @@ static ssize_t data_timestamp_t_convert_to(data_t *src, fastcall_convert_to *far
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fdata->time = 0;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &fdata->time, sizeof(fdata->time) };
 			ret        = data_query(fargs->dest, &r_write);
@@ -163,8 +163,8 @@ static ssize_t data_timestamp_t_convert_from(data_t *dst, fastcall_convert_from 
 				return -EFAULT;
 			return timestamp_from_string(&fdata->time, buffer, r_read_str.buffer_size);
 		
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &fdata->time, sizeof(fdata->time) };
 			return data_query(fargs->src, &r_read);
 		

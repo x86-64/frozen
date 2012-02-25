@@ -33,7 +33,7 @@ static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *f
 			goto check;
 		
 		case FORMAT(config):;
-		case FORMAT(human):;      // TODO data_convert call with FORMAT(clean) :(
+		case FORMAT(human):;      // TODO data_convert call with FORMAT(native) :(
 		default:;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) != 0)
@@ -74,7 +74,7 @@ static ssize_t data_machine_t_transfer(data_t *data, fastcall_transfer *fargs){ 
 	if(errors_is_unix(ret, ENOSYS)){
 		// no fastcall transfer support avaliable, use default_t handler
 		
-		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(clean) };
+		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(native) };
 		if( (ret = data_protos[ TYPE_DEFAULTT ]->handlers[ ACTION_CONVERT_TO ](data, &r_convert)) != 0)
 			return ret;
 		

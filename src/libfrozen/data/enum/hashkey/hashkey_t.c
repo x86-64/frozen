@@ -67,7 +67,7 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 			*(hashkey_t *)(dst->ptr) = key_val;
 			return 0;
 		
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			HASHKEY_PORTABLE  key_port = 0;
 			
 			fastcall_read r_binary = { { 5, ACTION_READ }, 0, &key_port, sizeof(key_port) };
@@ -103,7 +103,7 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 	
 	switch(fargs->format){
 		case FORMAT(config):;
-		case FORMAT(clean):;
+		case FORMAT(native):;
 		case FORMAT(human):;
 			// find in static keys first
 			for(kp = &hashkeys[0]; kp->key_str != NULL; kp++){
@@ -132,7 +132,7 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 			transfered = r_write.buffer_size;
 			break;
 		
-		case FORMAT(binary):;
+		case FORMAT(packed):;
 			HASHKEY_PORTABLE key_port = (HASHKEY_PORTABLE)value;
 
 			fastcall_write r_binary = { { 5, ACTION_WRITE }, 0, &key_port, sizeof(key_port) };
@@ -150,7 +150,7 @@ static ssize_t data_hashkey_t_convert_to(data_t *src, fastcall_convert_to *fargs
 } // }}}		
 static ssize_t data_hashkey_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	switch(fargs->format){
-		case FORMAT(binary): fargs->length = sizeof(HASHKEY_PORTABLE); break;
+		case FORMAT(packed): fargs->length = sizeof(HASHKEY_PORTABLE); break;
 		default:
 			return -ENOSYS;
 	}

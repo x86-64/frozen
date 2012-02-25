@@ -132,8 +132,8 @@ static ssize_t data_int16_t_convert_to(data_t *src, fastcall_convert_to *fargs){
 		return -EINVAL;
 	
 	switch( fargs->format ){
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(int16_t) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
@@ -184,8 +184,8 @@ static ssize_t data_int16_t_convert_from(data_t *dst, fastcall_convert_from *far
 			*(int16_t *)(dst->ptr) = (int16_t )strtoul(buffer, NULL, 10);
 			return 0;
 
-		case FORMAT(clean):;
-		case FORMAT(binary):;
+		case FORMAT(native):;
+		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(int16_t) };
 			if(data_query(fargs->src, &r_read) != 0){
 				// TODO memleak

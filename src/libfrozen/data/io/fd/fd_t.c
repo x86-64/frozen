@@ -72,7 +72,7 @@ static ssize_t data_fd_t_convert_from(data_t *dst, fastcall_convert_from *fargs)
 	}
 	
 	switch(fargs->format){
-		case FORMAT(clean):
+		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer, sizeof(buffer) };
