@@ -159,6 +159,7 @@
 #define HK_VALUE_structure 31338
 #define HK_VALUE_subscribe 29482
 #define HK_VALUE_swap 3256
+#define HK_VALUE_sync 3173
 #define HK_VALUE_temprorary 43267
 #define HK_VALUE_test 3411
 #define HK_VALUE_tick_interval 88187
@@ -330,6 +331,7 @@ typedef enum hashkey_t {
       HK_structure = HK_VALUE_structure, 
       HK_subscribe = HK_VALUE_subscribe, 
       HK_swap = HK_VALUE_swap, 
+      HK_sync = HK_VALUE_sync, 
       HK_temprorary = HK_VALUE_temprorary, 
       HK_test = HK_VALUE_test, 
       HK_tick_interval = HK_VALUE_tick_interval, 
@@ -505,6 +507,7 @@ keypair_t hashkeys[] = {
       { "structure", HK_VALUE_structure }, 
       { "subscribe", HK_VALUE_subscribe }, 
       { "swap", HK_VALUE_swap }, 
+      { "sync", HK_VALUE_sync }, 
       { "temprorary", HK_VALUE_temprorary }, 
       { "test", HK_VALUE_test }, 
       { "tick_interval", HK_VALUE_tick_interval }, 
