@@ -1,6 +1,6 @@
 #!/bin/sh
 
-keys=`grep "FORMAT([a-z0-9_]*)" -roha ./ | sed "s/FORMAT(//g" | sed "s/)//g"  | LC_ALL=C sort -u`
+keys=`grep "FORMAT([a-z0-9_]*)" -roha ./src/ | sed "s/FORMAT(//g" | sed "s/)//g"  | LC_ALL=C sort -u`
 
 folder=src/libfrozen/data/enum/format
 format_h=$folder/format.h
