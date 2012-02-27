@@ -122,7 +122,9 @@ static ssize_t tcp_configure(machine_t *machine, hash_t *config){ // {{{
 } // }}}
 
 static ssize_t tcp_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
 	int                    socket;
+	list                  *shops;
 	tcp_userdata          *userdata          = (tcp_userdata *)machine->userdata;
 	
 	if(userdata->tcp_running == 0)
@@ -137,9 +139,10 @@ static ssize_t tcp_handler(machine_t *machine, request_t *request){ // {{{
 	if(pthread_setspecific(tcp_primary_key, NULL) != 0)
 		return error("pthread_setspecific error");
 	
-	if(shop_new(userdata->machine) == NULL)
-		return error("shop_new error");
+	if( (ret = shop_new(userdata->machine, &shops)) < 0)
+		return ret;
 	
+	// TODO memleak shops
 	return 0;
 } // }}}
 

@@ -16,20 +16,21 @@ static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *f
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
-	switch( fargs->src->type ){
-		case TYPE_HASHT: dst->ptr = shop_new( (hash_t *)fargs->src->ptr ); goto check;
-		default:
-			break;
-	}
 	switch(fargs->format){
 		case FORMAT(hash):;
 			hash_t                *config;
+			list                  *shops;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
 				return -EINVAL;
 			
-			dst->ptr = shop_new(config);
+			if( (ret = shop_new(config, &shops)) < 0)
+				return ret;
+			
+			dst->ptr = list_pop(shops);
+			
+			shop_list_destroy(shops); // destroy rest, no splitted machines in machine_t for now
 			goto check;
 		
 		case FORMAT(config):;

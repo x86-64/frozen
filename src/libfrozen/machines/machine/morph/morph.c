@@ -32,6 +32,7 @@
 typedef struct morph_userdata {
 	uintmax_t              running;
 	uintmax_t              pass_first;
+	machine_t             *machine;
 	config_t              *machine_config;
 } morph_userdata;
 
@@ -65,7 +66,8 @@ static ssize_t morph_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
-	machine_t             *child;
+	ssize_t                ret;
+	list                  *shops;
 	morph_userdata        *userdata = (morph_userdata *)machine->userdata;
 
 	if(userdata->running == 0){
@@ -77,19 +79,19 @@ static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 			)},
 			hash_end
 		};
-		child = shop_new(child_config);
+		if( (ret = shop_new(child_config, &shops)) < 0)
+			return ret;
 		
-		if(child == NULL)
-			return error("child creation error");
-
-		//machine_connect(machine, child); // on destroy - no need to disconnect or call _destory, core will automatically do it
+		userdata->machine = list_pop(shops);
 		userdata->running = 1;
-
+		
+		shop_list_destroy(shops);
+		
 		if(userdata->pass_first == 0)
 			return 0;
 	}
 
-	return machine_pass(machine, request);
+	return machine_pass(userdata->machine, request);
 } // }}}
 
 machine_t morph_proto = {

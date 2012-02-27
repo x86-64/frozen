@@ -140,7 +140,8 @@ API ssize_t         machine_is_ghost        (machine_t *machine);
  *  @retval NULL     Creation failed
  *  @retval non-NULL Creation success
  */
-API machine_t *     shop_new               (hash_t *config);
+API ssize_t         shop_new               (hash_t *config, list **shops);
+API void            shop_list_destroy      (list *machine);      ///< Destroy list of shops
 API void            shop_destroy           (machine_t *machine); ///< Destroy shop
 
     ssize_t         frozen_machine_init     (void);

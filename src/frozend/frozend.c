@@ -327,6 +327,7 @@ void main_cleanup(void){
 	remove_pidfile(opt_pidfile);
 }
 void main_rest(void){
+	ssize_t                ret;
 	int                    sig;
 	sigset_t               set;
 	
@@ -349,19 +350,30 @@ void main_rest(void){
 	sigprocmask(SIG_BLOCK, &set, NULL);                     // block all signals, main thread will handler that
 	
 	config_t *config = configs_file_parse(opt_config_file);
-	if(config != NULL && shop_new(config) != NULL){
-		sigprocmask(SIG_UNBLOCK, &set, NULL);           // enable all signals for this thread
-		
-		while(sigwait(&set, &sig) == 0){
-			switch(sig) {
-				case SIGHUP:  break;
-				case SIGINT:
-				case SIGTERM: main_cleanup(); exit(0); break;
-			}
-		}
-	}else{
+	if(config == NULL){
 		fprintf(stderr, "config file not exist, empty or invalid\n");
 		exit(255);
+	}
+	
+	list *shops;
+	
+	if( (ret = shop_new(config, &shops)) < 0){
+		errors_log("shop_new error: %d: %s\n", ret, errors_describe(ret));
+		exit(255);
+	}
+	hash_free(config);
+	
+	sigprocmask(SIG_UNBLOCK, &set, NULL);           // enable all signals for this thread
+	
+	while(sigwait(&set, &sig) == 0){
+		switch(sig) {
+			case SIGHUP:  break;
+			case SIGINT:
+			case SIGTERM:
+				shop_list_destroy(shops);
+				main_cleanup();
+				exit(0);
+		}
 	}
 }
 
