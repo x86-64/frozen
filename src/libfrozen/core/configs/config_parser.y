@@ -69,8 +69,8 @@ hash_items :
 	| hash_items ',' hash_item {
 		size_t nelements = hash_nelements($1);
 		$1 = realloc($1, (nelements + 1) * sizeof(hash_t));
-		memmove(&$1[1], &$1[0], nelements * sizeof(hash_t));
-		hash_assign_hash_t(&$1[0], &$3);
+		hash_assign_hash_t   (&$1[nelements-1], &$3);
+		hash_assign_hash_end (&$1[nelements  ]);
 		$$ = $1;
 	}
 	;

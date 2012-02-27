@@ -1442,8 +1442,8 @@ yyreduce:
     {
 		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
 		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
-		memmove(&(yyvsp[(1) - (3)].hash_items)[1], &(yyvsp[(1) - (3)].hash_items)[0], nelements * sizeof(hash_t));
-		hash_assign_hash_t(&(yyvsp[(1) - (3)].hash_items)[0], &(yyvsp[(3) - (3)].hash_item));
+		hash_assign_hash_t   (&(yyvsp[(1) - (3)].hash_items)[nelements-1], &(yyvsp[(3) - (3)].hash_item));
+		hash_assign_hash_end (&(yyvsp[(1) - (3)].hash_items)[nelements  ]);
 		(yyval.hash_items) = (yyvsp[(1) - (3)].hash_items);
 	}
     break;

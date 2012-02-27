@@ -11,8 +11,9 @@ pthread_mutex_t                destroy_mtx;
 pthread_key_t                  key_curr_request;
 
 typedef struct machine_new_ctx {
-	list                   machines;
-	machine_t             *machine_next;
+	list                   shops;
+	machine_t             *machine_prev;
+	ssize_t                ret;
 } machine_new_ctx;
 
 static machine_t machine_dummy = { // {{{
@@ -341,42 +342,43 @@ static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
 	if(item->key == hash_ptr_null)
 		goto error;
 	
-	data_consume(ret, TYPE_HASHT, config, (&(item->data)));
+	data_get(ret, TYPE_HASHT, config, &(item->data));
 	if(ret != 0)
 		goto error;
 	
-	if( (ret = machine_new(&machine, config)) < 0){
-		errors_log("shop_new error: %d: %s\n", ret, errors_describe(ret));
-		
-		hash_free(config);
+	if( (ctx->ret = machine_new(&machine, config)) < 0)
 		return ITER_BREAK;
+	
+	if(ctx->machine_prev == NULL){
+		list_add(&ctx->shops, machine);
+	}else{
+		machine_connect(ctx->machine_prev, machine);
 	}
+	ctx->machine_prev = machine;
 	
-	machine_connect(machine, ctx->machine_next);
-	ctx->machine_next = machine;
-	
-	list_add(&ctx->machines, machine);
-	hash_free(config);
 	return ITER_CONTINUE;
 
 error:
-	ctx->machine_next = NULL;
+	ctx->machine_prev = NULL;
 	return ITER_CONTINUE;
 } // }}}
 
 machine_t *        shop_new          (hash_t *config){ // {{{
-	machine_t             *machine;
-	machine_new_ctx        ctx               = { LIST_INITIALIZER, NULL };
+	machine_t             *shop;
+	machine_new_ctx        ctx               = { LIST_INITIALIZER, NULL, 0 };
 	
 	if(hash_iter(config, (hash_iterator)&shop_new_iter, &ctx, HASH_ITER_NULL) != ITER_OK){
-		while( (machine = list_pop(&ctx.machines)) )
-			machine_destroy(machine);
+		errors_log("shop_new error: %d: %s\n", ctx.ret, errors_describe(ctx.ret));
 		
-		ctx.machine_next = NULL;
+		while( (shop = list_pop(&ctx.shops)) )
+			shop_destroy(shop);
+		
+		ctx.machine_prev = NULL;
 	}
 	
-	list_destroy(&ctx.machines);
-	return ctx.machine_next;
+	shop = list_pop(&ctx.shops);
+	list_destroy(&ctx.shops);
+	return shop;
 } // }}}
 void               shop_destroy      (machine_t *machine){ // {{{
 	machine_t             *curr;

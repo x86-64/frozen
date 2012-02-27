@@ -119,22 +119,22 @@ API ssize_t         machine_is_ghost        (machine_t *machine);
 
 /** @brief Create new shop.
  *
- *  Configuration is hash with items in reverse order. For example:
+ *  Configuration is hash with items. For example:
  *  @code
  *       hash_t example_cfg[] = {
  *             { 0, DATA_HASHT(
- *                   { HK(class), DATA_STRING("storage/file") },
+ *                   { HK(class), DATA_STRING("request/debug") },
  *                   hash_end
  *             )},
  *             { 0, DATA_HASHT(
- *                   { HK(class), DATA_STRING("request/debug") },
+ *                   { HK(class), DATA_STRING("storage/file") },
  *                   hash_end
  *             )},
  *             hash_end
  *       };
  *  @endcode
  *  This config produce two machines: debug and file. Debug will have one child - file and will pass
- *  all requests to it. machine_new will return pointer to last created machine. In this case - this is debug.
+ *  all requests to it. shop_new will return pointer to first created machine. In this case - this is debug.
  *  
  *  @li Use hash_null to avoid linkage between machine.
  *  @retval NULL     Creation failed
