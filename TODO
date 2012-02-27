@@ -6,7 +6,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- shop_new return hash with all shops returned
 - leveldb write in value
 - leveldb save type
 - leveldb strict type
