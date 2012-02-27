@@ -1,6 +1,19 @@
 #include <libfrozen.h>
 #include <list.h>
 
+list *     list_alloc(void){ // {{{
+	list                  *new_list;
+	
+	if( (new_list = malloc(sizeof(list))) == NULL)
+		return NULL;
+	
+	list_init(new_list);
+	return new_list;
+} // }}}
+void       list_free(list *list){ // {{{
+	list_destroy(list);
+	free(list);
+} // }}}
 void       list_init(list *clist){ // {{{
 	clist->items = NULL;
 	pthread_rwlock_init(&clist->lock, NULL);

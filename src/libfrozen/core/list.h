@@ -14,6 +14,8 @@ typedef struct list {
 #define ITER_BREAK    1
 #define ITER_CONTINUE 2
 
+list *     list_alloc         (void);
+void       list_free          (list *list);
 void       list_init          (list *clist);
 void       list_destroy       (list *clist);
 void       list_add           (list *clist, void *item);
