@@ -18,7 +18,6 @@
 - data perthread_t wrapper
 - machine queue
 - error backtrace
-- list_t convert_from hash with data array
 - machine/rebuild deprecate?
 - portable action_t binary format
 - machine rate-limit, delay

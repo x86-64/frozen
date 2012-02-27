@@ -28,6 +28,15 @@ static ssize_t iter_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	fastcall_push r_push = { { 3, ACTION_PUSH }, data };
 	return data_query(fargs->dest, &r_push);
 } // }}}
+static ssize_t iter_list_t_convert_from(hash_t *hash_item, data_t *ctx){ // {{{
+	ssize_t                ret;
+	list_t                *fdata             = (list_t *)ctx->ptr;
+	
+	ret = list_t_unshift(fdata, &hash_item->data);
+	data_set_void(&hash_item->data);
+	
+	return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
+} // }}}
 
 static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
 	if( (data->ptr = list_t_alloc()) == NULL)
@@ -101,7 +110,14 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			if(ret != 0)
 				return -EINVAL;
 			
-			return data_list_t_alloc(dst, NULL);
+			if( (ret = data_list_t_alloc(dst, NULL)) < 0)
+				return ret;
+
+			if(hash_iter(config, (hash_iterator)&iter_list_t_convert_from, dst, 0) != ITER_OK){
+				list_t_free(dst->ptr);
+				return -EFAULT;
+			}
+			return 0;
 			
 		case FORMAT(packed):;
 			datatype_t             type;
