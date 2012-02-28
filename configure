@@ -777,6 +777,7 @@ enable_moduledata_null_t
 enable_moduledata_time_t
 enable_allocator_fixed_t
 enable_anything_t
+enable_data_t
 enable_dataptr_t
 enable_default_t
 enable_hash_t
@@ -1530,6 +1531,7 @@ Optional Features:
                           disable data allocator_fixed_t
   --disable-data-anything_t
                           disable data anything_t
+  --disable-data-data_t   disable data data_t
   --disable-data-dataptr_t
                           disable data dataptr_t
   --disable-data-default_t
@@ -17886,6 +17888,43 @@ fi
 		DATA_MAKEFILE_compare_anything=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} compare/anything/libfrozen_data_anything.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-data_t was given.
+if test "${enable_data_t+set}" = set; then :
+  enableval=$enable_data_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_data_t}" = "yes"; then
+			enable_data_t="no"
+		else
+			enable_data_t="yes"
+		fi
+	fi
+
+	if test "${enable_data_t}" = "yes"; then
+		DATA_DIR_data_t="core/data"
+		DATA_DEP_data_t=""
+		DATA_ID_data_t="20"
+		DATA_SELECTED="$DATA_SELECTED data_t"
+		DATA_HEADERS="$DATA_HEADERS core/data/data_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_core_data" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/core/data/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS core/data"
+
+		DATA_MAKEFILE_core_data=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/data/libfrozen_data_data.la"
 
 	fi
 
