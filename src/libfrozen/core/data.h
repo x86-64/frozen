@@ -73,6 +73,7 @@
 
 #include <enum/action/action_t.h>
 #include <enum/datatype/datatype_t.h>
+#include <enum/format/format_t.h>
 
 typedef enum data_api_type {
 	API_DEFAULT_HANDLER,
@@ -133,6 +134,21 @@ API ssize_t              data_query             (data_t *data, void *args);
  * @retval 1       Call successful, data converted to raw_t (need free)
 */
 API ssize_t              data_get_continious    (data_t *data, data_t *freeme, void **ptr, uintmax_t *ptr_size);
+
+/** Helper routine to get continious in memory data view with for given format. It first try to get native pointers (if supplied by data), if not - 
+ * it start converting this data to raw_t.
+ *
+ * Caller must free freeme data if conversion to raw_t was made. It is safe to free it in any way, without checking ret value.
+ * @param data Data to get
+ * @param format Format in which get flat view
+ * @param freeme Data to free after call
+ * @param ptr      Pointer to void *
+ * @param ptr_size Pointer to uintmax_t
+ * @retval <0 Conversion to raw_t failed
+ * @retval 0       Call successful, no conversion was made
+ * @retval 1       Call successful, data converted to raw_t (need free)
+*/
+API ssize_t              data_make_flat         (data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size);
 
 /** Free data
  * @param _data Data to be freed

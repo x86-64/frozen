@@ -127,3 +127,38 @@ ok:
 	return ret;
 } // }}}
 
+ssize_t              data_make_flat(data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
+	ssize_t                ret;
+	data_t                 temp;
+	
+	// native format speed-up
+	if(format == FORMAT(native)){
+		// try direct pointers
+		fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+		fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
+		if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0 && r_ptr.ptr != NULL){
+			data_set_void(freeme);
+			*ptr      = r_ptr.ptr;
+			*ptr_size = r_len.length;
+			return 0;
+		}
+	}
+	
+	temp.type = TYPE_RAWT;
+	temp.ptr  = NULL;
+	
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &temp, format };
+	if( (ret = data_query(data, &r_convert)) < 0)
+		return ret;
+	
+	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
+	if( data_query(&temp, &r_len) == 0 && data_query(&temp, &r_ptr) == 0 && r_ptr.ptr != NULL){
+		*freeme   = temp;
+		*ptr      = r_ptr.ptr;
+		*ptr_size = r_len.length;
+		return 1;
+	}
+	return -EFAULT;
+} // }}}
+
