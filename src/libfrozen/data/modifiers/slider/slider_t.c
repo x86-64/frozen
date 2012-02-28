@@ -100,6 +100,29 @@ static ssize_t data_slider_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	slider_t_destroy(fdata);
 	return 0;
 } // }}}
+static ssize_t data_slider_t_length(data_t *data, fastcall_length *fargs){ // {{{
+	ssize_t                    ret;
+	slider_t                  *fdata             = (slider_t *)data->ptr;
+	
+	switch(fargs->format){
+		case FORMAT(native):
+			if( (ret = data_query(fdata->data, fargs)) < 0)
+				return ret;
+			
+			if( fdata->off > fargs->length ){
+				fargs->length = 0;
+				return ret;
+			}
+			
+			fargs->length -= fdata->off;
+			return ret;
+			
+		default: // we don't mess with other formats
+			break;
+		
+	}
+	return data_query(fdata->data, fargs);
+} // }}}
 
 data_proto_t slider_t_proto = {
 	.type                   = TYPE_SLIDERT,
@@ -109,5 +132,6 @@ data_proto_t slider_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_slider_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_slider_t_free,
+		[ACTION_LENGTH]       = (f_data_func)&data_slider_t_length,
 	}
 };
