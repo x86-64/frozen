@@ -6,9 +6,6 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
-- leveldb write in value
-- leveldb save type
-- leveldb strict type
 - machine 'exec'
 - zmq patterns
   - proxy pattern
