@@ -18,6 +18,7 @@
 - portable action_t binary format
 - machine rate-limit, delay
 - benchmark functions remove from main request flow, need new approach for machine parameters, for machine/pool too
+- hash_t, list_t use data_t to pack data, remove refs stripping
 
 - write allocator_fixed_t push/pop same as for list_t
 - broken tcp

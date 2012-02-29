@@ -50,13 +50,21 @@ not_equal:
 } // }}}
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	ssize_t                ret;
+	datatype_t             type;
 	data_t                 d_key             = DATA_PTR_HASHKEYT(&hash_item->key);
-	data_t                 d_type            = DATA_PTR_DATATYPET(&hash_item->data.type);
+	data_t                 d_type            = DATA_PTR_DATATYPET(&type);
 	
 	if(hash_item->key == 0) // skip deleted keys
 		return ITER_CONTINUE;
 	
-	if(hash_item->data.type == TYPE_MACHINET) // HACK HACK HACK
+	// strip refs
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(&hash_item->data, &r_getdata)) < 0)
+		return ITER_BREAK;
+	
+	type = r_getdata.data->type;
+	
+	if(type == TYPE_MACHINET) // HACK HACK HACK
 		return ITER_CONTINUE;
 	
 	if(hash_item->key != hash_ptr_end && hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
@@ -89,7 +97,7 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 			data_slider_t_freeze(ctx->sl_data);
 				
 				fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
-				ret = data_query(&hash_item->data, &r_convert2);
+				ret = data_query(r_getdata.data, &r_convert2);
 			
 			data_slider_t_unfreeze(ctx->sl_data);
 			return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
