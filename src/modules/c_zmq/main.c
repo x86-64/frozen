@@ -673,7 +673,6 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 				if( (ret = data_query(input, &r_convert)) < 0)
 					return ret;
 				
-				data_set_void(input);
 				input = &input_convert;
 			}
 			break;
