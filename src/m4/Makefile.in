@@ -293,7 +293,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-m4s_DATA = shop.m4 implode.m4 daemon.m4
+m4s_DATA = shop.m4 implode.m4 daemon.m4 zeromq.m4
 all: all-am
 
 .SUFFIXES:
