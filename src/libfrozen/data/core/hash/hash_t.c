@@ -308,13 +308,12 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	
 	// redata data
 	hash_t_ctx ctx = { .sl_data = &sl_src };
-	if(hash_iter(hash, (hash_iterator)&data_hash_t_convert_from_iter, &ctx, 0) != ITER_OK){
-		hash_free(hash);
-		return -EFAULT;
-	}
+	ret = (hash_iter(hash, (hash_iterator)&data_hash_t_convert_from_iter, &ctx, 0) == ITER_OK) ?
+		0 :
+		-EFAULT;
 	
 	if(dst->ptr == NULL){
-		dst->ptr = hash; // return hash
+		dst->ptr = (ret == 0) ? hash : NULL; // return hash if status ok
 	}else{
 		fastcall_free r_free = { { 3, ACTION_FREE } };
 		while( (old_data = list_pop(&freeit)) != NULL)
@@ -322,7 +321,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		
 		free(hash);      // no need for this hash - we redata data in old one
 	}
-	return 0;
+	return ret;
 } // }}}
 
 data_proto_t hash_t_proto = {
