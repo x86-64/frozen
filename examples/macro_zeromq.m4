@@ -2,7 +2,7 @@ include(shop.m4)
 include(daemon.m4)
 include(zeromq.m4)
 
-ZEROMQ_SERVICE(`zmq_test1',  `127.0.0.1', `8888')
+ZEROMQ_SERVICE(`zmq_test1',  `127.0.0.1', `8888', `1000')
 ZEROMQ_SERVICE(`zmq_test2',  `127.0.0.1', `8889')
 
 { class = "thread" },
