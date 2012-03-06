@@ -765,5 +765,8 @@ int main(void){
 	data_register(&zmq_proto);
 	data_register(&zmq_msg_proto);
 	class_register(&zmq_helper_proto);
+	
+	type_zeromqt     = datatype_t_getid_byname(ZEROMQT_NAME,     NULL);
+	type_zeromq_msgt = datatype_t_getid_byname(ZEROMQ_MSGT_NAME, NULL);
 	return 0;
 }
