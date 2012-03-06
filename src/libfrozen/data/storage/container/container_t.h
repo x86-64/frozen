@@ -14,11 +14,14 @@
  *
  *  Possible defines:
  *  @code
- *       data_t hcontainer = DATA_CONTAINERT(container);
+ *       data_t hcontainer = DATA_CONTAINERT;
+ *       data_t hcontainer = DATA_HEAP_CONTAINERT;
  *  @endcode
  */
 
-#define DATA_CONTAINERT()           { TYPE_CONTAINERT, (container_t []){{ NULL, NULL }} }
+#include <storage/list/list_t.h>
+
+#define DATA_CONTAINERT()           { TYPE_CONTAINERT, (container_t []){ LIST_INITIALIZER } }
 #define DATA_HEAP_CONTAINERT()      { TYPE_CONTAINERT, container_alloc()                }
 #define DATA_PTR_CONTAINERT(_buff)  { TYPE_CONTAINERT, (void *)_buff                    }
 #define DEREF_TYPE_CONTAINERT(_data) (container_t *)((_data)->ptr)
@@ -27,44 +30,11 @@
 
 /** @file container.h */
 
-typedef struct container_t container_t;
-typedef struct container_chunk_t container_chunk_t;
-
-typedef enum chunk_flags_t {
-	CHUNK_CACHE_SIZE = 1,
-	CHUNK_ADOPT_DATA = 2,
-	CHUNK_DONT_FREE  = 4,
-
-	INTERNAL_CACHED  = 16
-} chunk_flags_t;
-
-/// chunk_t structure
-struct container_chunk_t {
-	container_chunk_t     *cnext;         ///< Next chunk ptr
-	data_t                 data;          ///< Data holder
-	uintmax_t              cached_size;   ///< Chunk size
-	chunk_flags_t          flags;         ///< Chunk flags
-};
-
 /// container_t structure
-struct container_t {
-	container_chunk_t     *head;          ///< First container chunk
-	container_chunk_t     *tail;          ///< Last container chunk
-};
+typedef struct container_t {
+	list_t                 chunks;        ///< Container chunks
+} container_t;
 
-API void            container_init                (container_t *container);
-API void            container_destroy             (container_t *container);
-
-API container_t *   container_alloc               (void);
-API void            container_free                (container_t *container);
-
-API ssize_t         container_add_head_data       (container_t *container, data_t *data, chunk_flags_t flags);
-API ssize_t         container_add_tail_data       (container_t *container, data_t *data, chunk_flags_t flags);
-
-API void            container_clean               (container_t *container);
-API uintmax_t       container_size                (container_t *container);
-
-API ssize_t         container_write               (container_t *container, uintmax_t offset, void *buf, uintmax_t buf_size, uintmax_t *written);
-API ssize_t         container_read                (container_t *container, uintmax_t offset, void *buf, uintmax_t buf_size, uintmax_t *read);
+container_t *   container_alloc               (void);
 
 #endif

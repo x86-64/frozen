@@ -110,8 +110,10 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			if(ret != 0)
 				return -EINVAL;
 			
-			if( (ret = data_list_t_alloc(dst, NULL)) < 0)
-				return ret;
+			if((fdata = dst->ptr) == NULL){
+				if( (fdata = dst->ptr = list_t_alloc()) == NULL)
+					return -ENOMEM;
+			}
 
 			if(hash_iter(config, (hash_iterator)&iter_list_t_convert_from, dst, 0) != ITER_OK){
 				list_t_free(dst->ptr);

@@ -44,7 +44,7 @@ typedef struct split_threaddata {
 	char                  *buffer;
 
 	uintmax_t              last_part_filled;
-	container_t           *last_part;
+	data_t                 last_part;
 } split_threaddata;
 
 static void * split_threaddata_create(split_userdata *userdata){ // {{{
@@ -56,7 +56,8 @@ static void * split_threaddata_create(split_userdata *userdata){ // {{{
 	if( (threaddata->buffer = malloc(userdata->buffer_size)) == NULL)
 		goto error2;
 	
-	threaddata->last_part        = container_alloc();
+	data_t                 container = DATA_HEAP_CONTAINERT();
+	threaddata->last_part        = container;
 	threaddata->last_part_filled = 0;
 	return threaddata;
 
@@ -66,7 +67,7 @@ error1:
 	return NULL;
 } // }}}
 static void   split_threaddata_destroy(split_threaddata *threaddata){ // {{{
-	container_destroy(threaddata->last_part);
+	data_free(&threaddata->last_part);
 	free(threaddata->buffer);
 	free(threaddata);
 } // }}}
@@ -169,20 +170,25 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 				data_t          hslice           = DATA_HEAP_SLICET(input, lmatch_offset, match_offset - lmatch_offset);
 				
 				if(threaddata->last_part_filled == 1){
-					container_add_tail_data(threaddata->last_part, &hslice, CHUNK_ADOPT_DATA);
+					fastcall_push r_push = {
+						{ 3, ACTION_PUSH },
+						&hslice
+					};
+					if( (ret = data_query(&threaddata->last_part, &r_push)) < 0)
+						return ret;
 					
 					request_t r_next[] = {
-						{ userdata->input, DATA_PTR_CONTAINERT(threaddata->last_part) },
+						{ userdata->input, threaddata->last_part },
 						hash_inline(request),
 						hash_end
 					};
 					if( (ret = machine_pass(machine, r_next)) < 0)
 						return ret;
 					
-					fastcall_free r_free = { { 2, ACTION_FREE } };
-					data_query(&r_next[0].data, &r_free);
+					data_free(&r_next[0].data);
 					
-					threaddata->last_part        = container_alloc();
+					data_t                   container        = DATA_HEAP_CONTAINERT();
+					threaddata->last_part        = container;
 					threaddata->last_part_filled = 0;
 				}else{
 					request_t r_next[] = {
@@ -226,8 +232,18 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 		data_t         last_part         = { TYPE_RAWT, NULL };
 		
 		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &last_part };
-		if(data_query(&hslice, &r_transfer) >= 0){
-			container_add_tail_data(threaddata->last_part, &last_part, CHUNK_ADOPT_DATA);
+		if( (ret = data_query(&hslice, &r_transfer)) < -1)
+			return ret;
+		
+		if(ret != -1){
+			fastcall_push r_push = {
+				{ 3, ACTION_PUSH },
+				&last_part
+			};
+			if( (ret = data_query(&threaddata->last_part, &r_push)) < 0)
+				return ret;
+			
+			//data_free(&last_part);
 			threaddata->last_part_filled = 1;
 		}
 	}

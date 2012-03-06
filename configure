@@ -19309,7 +19309,7 @@ fi
 
 	if test "${enable_container_t}" = "yes"; then
 		DATA_DIR_container_t="storage/container"
-		DATA_DEP_container_t="uint_t"
+		DATA_DEP_container_t="uint_t list_t"
 		DATA_ID_container_t=""
 		DATA_SELECTED="$DATA_SELECTED container_t"
 		DATA_HEADERS="$DATA_HEADERS storage/container/container_t.h"
