@@ -99,38 +99,39 @@
 <a name="l00117"></a>00117 <span class="preprocessor">#define machine_query(_machine,_request)  (_machine)-&gt;machine_type_hash.func_handler(_machine, _request)</span>
 <a name="l00118"></a>00118 <span class="preprocessor"></span><span class="preprocessor">#define machine_pass(_machine,_request)   (_machine)-&gt;cnext-&gt;machine_type_hash.func_handler((_machine)-&gt;cnext, _request)</span>
 <a name="l00119"></a>00119 <span class="preprocessor"></span>
-<a name="l00143"></a>00143 API <a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *     shop_new               (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config);
-<a name="l00144"></a>00144 API <span class="keywordtype">void</span>            shop_destroy           (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
-<a name="l00145"></a>00145 
-<a name="l00146"></a>00146     ssize_t         frozen_machine_init     (<span class="keywordtype">void</span>);
-<a name="l00147"></a>00147     <span class="keywordtype">void</span>            frozen_machine_destroy  (<span class="keywordtype">void</span>);
-<a name="l00148"></a>00148 
-<a name="l00149"></a>00149 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
-<a name="l00150"></a>00150 
-<a name="l00151"></a>00151 <span class="comment">// Thread-specific userdata functions</span>
-<a name="l00152"></a><a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38">00152</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (<span class="keywordtype">void</span> *);        
-<a name="l00153"></a><a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">00153</a> <span class="keyword">typedef</span> void     (*<a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a>)   (<span class="keywordtype">void</span> *);        
-<a name="l00154"></a>00154 
-<a name="l00156"></a><a class="code" href="structthread__data__ctx__t.html">00156</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
-<a name="l00157"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00157</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
-<a name="l00158"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00158</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
-<a name="l00159"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00159</a>         <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a>        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
-<a name="l00160"></a><a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834">00160</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834" title="User data.">userdata</a>;                
-<a name="l00161"></a>00161 } <a class="code" href="machine_8h.html#a8305ea7d017c23448a8f2226f07176d9" title="Thread data context.">thread_data_ctx_t</a>;
-<a name="l00162"></a>00162 
-<a name="l00171"></a>00171 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a> func_create, <a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a> func_destroy, <span class="keywordtype">void</span> *userdata);
-<a name="l00172"></a>00172 
-<a name="l00176"></a>00176 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00177"></a>00177 
-<a name="l00182"></a>00182 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00183"></a>00183 
-<a name="l00184"></a>00184 <span class="preprocessor">#endif // MACHINE_H</span>
+<a name="l00143"></a>00143 API ssize_t         shop_new               (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config, <a class="code" href="structlist.html">list</a> **shops);
+<a name="l00144"></a>00144 API <span class="keywordtype">void</span>            shop_list_destroy      (<a class="code" href="structlist.html">list</a> *machine);      
+<a name="l00145"></a>00145 API <span class="keywordtype">void</span>            shop_destroy           (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
+<a name="l00146"></a>00146 
+<a name="l00147"></a>00147     ssize_t         frozen_machine_init     (<span class="keywordtype">void</span>);
+<a name="l00148"></a>00148     <span class="keywordtype">void</span>            frozen_machine_destroy  (<span class="keywordtype">void</span>);
+<a name="l00149"></a>00149 
+<a name="l00150"></a>00150 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152 <span class="comment">// Thread-specific userdata functions</span>
+<a name="l00153"></a><a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38">00153</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (<span class="keywordtype">void</span> *);        
+<a name="l00154"></a><a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">00154</a> <span class="keyword">typedef</span> void     (*<a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a>)   (<span class="keywordtype">void</span> *);        
+<a name="l00155"></a>00155 
+<a name="l00157"></a><a class="code" href="structthread__data__ctx__t.html">00157</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
+<a name="l00158"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00158</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
+<a name="l00159"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00159</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
+<a name="l00160"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00160</a>         <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a>        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
+<a name="l00161"></a><a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834">00161</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834" title="User data.">userdata</a>;                
+<a name="l00162"></a>00162 } <a class="code" href="machine_8h.html#a8305ea7d017c23448a8f2226f07176d9" title="Thread data context.">thread_data_ctx_t</a>;
+<a name="l00163"></a>00163 
+<a name="l00172"></a>00172 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a> func_create, <a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a> func_destroy, <span class="keywordtype">void</span> *userdata);
+<a name="l00173"></a>00173 
+<a name="l00177"></a>00177 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00178"></a>00178 
+<a name="l00183"></a>00183 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185 <span class="preprocessor">#endif // MACHINE_H</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

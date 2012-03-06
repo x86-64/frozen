@@ -57,26 +57,28 @@
 <div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_BIND_T</span>
 <a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_BIND_T</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00035"></a>00035 <span class="preprocessor">#define DATA_BINDT(_master,_slave,_format)  { TYPE_BINDT, bind_t_alloc(_master,_slave,_format,_fatal) }</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_BINDT(_data) (bind_t *)((_data)-&gt;ptr)</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_BINDT(_dt) _dt</span>
-<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_BINDT 0</span>
-<a name="l00039"></a>00039 <span class="preprocessor"></span>
-<a name="l00040"></a><a class="code" href="structbind__t.html">00040</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structbind__t.html">bind_t</a> {
-<a name="l00041"></a>00041         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 master;
-<a name="l00042"></a>00042         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 slave;
-<a name="l00043"></a>00043         format_t               format;
-<a name="l00044"></a>00044 } <a class="code" href="structbind__t.html">bind_t</a>;
-<a name="l00045"></a>00045 
-<a name="l00046"></a>00046 <a class="code" href="structbind__t.html">bind_t</a> *      bind_t_alloc(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *master, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *slave, format_t format, uintmax_t fatal);
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 <span class="preprocessor">#endif</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#define DATA_BINDT(_master,_slave,_format,_fatal,_sync)  { TYPE_BINDT, bind_t_alloc(_master,_slave,_format,_fatal) }</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_BINDT(_data) (bind_t *)((_data)-&gt;ptr)</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_BINDT(_dt) _dt</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_BINDT 0</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00041"></a><a class="code" href="structbind__t.html">00041</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structbind__t.html">bind_t</a> {
+<a name="l00042"></a>00042         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 master;
+<a name="l00043"></a>00043         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 slave;
+<a name="l00044"></a>00044         format_t               format;
+<a name="l00045"></a>00045         uintmax_t              sync;
+<a name="l00046"></a>00046         uintmax_t              sync_curr;
+<a name="l00047"></a>00047 } <a class="code" href="structbind__t.html">bind_t</a>;
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <a class="code" href="structbind__t.html">bind_t</a> *      bind_t_alloc(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *master, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *slave, format_t format, uintmax_t fatal, uintmax_t sync);
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

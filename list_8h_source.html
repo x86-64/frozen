@@ -70,27 +70,29 @@
 <a name="l00014"></a>00014 <span class="preprocessor"></span><span class="preprocessor">#define ITER_BREAK    1</span>
 <a name="l00015"></a>00015 <span class="preprocessor"></span><span class="preprocessor">#define ITER_CONTINUE 2</span>
 <a name="l00016"></a>00016 <span class="preprocessor"></span>
-<a name="l00017"></a>00017 <span class="keywordtype">void</span>       list_init          (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00018"></a>00018 <span class="keywordtype">void</span>       list_destroy       (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00019"></a>00019 <span class="keywordtype">void</span>       list_add           (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
-<a name="l00020"></a>00020 <span class="keywordtype">size_t</span>     list_delete        (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
-<a name="l00021"></a>00021 intmax_t   list_is_empty      (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00022"></a>00022 uintmax_t  list_count         (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00023"></a>00023 <span class="keywordtype">void</span>       list_flatten       (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> **memory, <span class="keywordtype">size_t</span> items);
-<a name="l00024"></a>00024 <span class="keywordtype">void</span>       list_rdlock        (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00025"></a>00025 <span class="keywordtype">void</span>       list_wrlock        (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00026"></a>00026 <span class="keywordtype">void</span>       list_unlock        (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00027"></a>00027 <span class="keywordtype">void</span> *     list_iter_next     (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> **iter);
-<a name="l00028"></a>00028 <span class="keywordtype">void</span>       list_push          (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
-<a name="l00029"></a>00029 <span class="keywordtype">void</span> *     list_pop           (<a class="code" href="structlist.html">list</a> *clist);
-<a name="l00030"></a>00030 
-<a name="l00031"></a>00031 <span class="preprocessor">#endif // LIST_H</span>
+<a name="l00017"></a>00017 <a class="code" href="structlist.html">list</a> *     list_alloc         (<span class="keywordtype">void</span>);
+<a name="l00018"></a>00018 <span class="keywordtype">void</span>       list_free          (<a class="code" href="structlist.html">list</a> *<a class="code" href="structlist.html">list</a>);
+<a name="l00019"></a>00019 <span class="keywordtype">void</span>       list_init          (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00020"></a>00020 <span class="keywordtype">void</span>       list_destroy       (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00021"></a>00021 <span class="keywordtype">void</span>       list_add           (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
+<a name="l00022"></a>00022 <span class="keywordtype">size_t</span>     list_delete        (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
+<a name="l00023"></a>00023 intmax_t   list_is_empty      (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00024"></a>00024 uintmax_t  list_count         (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00025"></a>00025 <span class="keywordtype">void</span>       list_flatten       (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> **memory, <span class="keywordtype">size_t</span> items);
+<a name="l00026"></a>00026 <span class="keywordtype">void</span>       list_rdlock        (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00027"></a>00027 <span class="keywordtype">void</span>       list_wrlock        (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00028"></a>00028 <span class="keywordtype">void</span>       list_unlock        (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00029"></a>00029 <span class="keywordtype">void</span> *     list_iter_next     (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> **iter);
+<a name="l00030"></a>00030 <span class="keywordtype">void</span>       list_push          (<a class="code" href="structlist.html">list</a> *clist, <span class="keywordtype">void</span> *item);
+<a name="l00031"></a>00031 <span class="keywordtype">void</span> *     list_pop           (<a class="code" href="structlist.html">list</a> *clist);
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 <span class="preprocessor">#endif // LIST_H</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

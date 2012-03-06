@@ -55,13 +55,14 @@
 </div>
 
 <h3><a class="anchor" id="bind_t_define"></a>Define</h3><div class="textblock"><p>Possible defines in C code: </p>
-<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> bind = DATA_BINDT(_master,_slave,_format,_fatal);
+<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> bind = DATA_BINDT(_master,_slave,_format,_fatal,_sync);
 </pre></div><p>In configuration <a href="file:">file:</a> </p>
 <div class="fragment"><pre class="fragment">  {
         master        = (some_t)<span class="stringliteral">&quot;&quot;</span>,         <span class="comment">// master data, would be used in runtime</span>
         slave         = (some_t)<span class="stringliteral">&quot;&quot;</span>,         <span class="comment">// slave data, used to save and load information</span>
-        format        = (format_t)<span class="stringliteral">&quot;clean&quot;</span>,  <span class="comment">// format in which data would be stored, default FORMAT(binary)</span>
-        fatal         = (uint_t)<span class="stringliteral">&quot;1&quot;</span>         <span class="comment">// do not ignore load errors, default 0</span>
+        format        = (format_t)<span class="stringliteral">&quot;native&quot;</span>,  <span class="comment">// format in which data would be stored, default FORMAT(packed)</span>
+        fatal         = (uint_t)<span class="stringliteral">&quot;1&quot;</span>,        <span class="comment">// do not ignore load errors, default 0</span>
+        sync          = (uint_t)<span class="stringliteral">&quot;100&quot;</span>       <span class="comment">// sync interval in number of actions, default 0 (no sync)</span>
   }
 </pre></div><ul>
 <li>Master data should support convert_to and convert_from with given format </li>
@@ -71,7 +72,7 @@
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:59 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

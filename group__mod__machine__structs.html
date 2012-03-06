@@ -64,11 +64,11 @@
               size                    = (hashkey_t)<span class="stringliteral">&#39;size&#39;</span>,   # <span class="keywordflow">if</span> supplied - add size of packed structure to request with key
               lazy                    = (uint_t)<span class="charliteral">&#39;1&#39;</span>,         # use lazy packing (no size would be avaliable), <span class="keywordflow">default</span> 0
               structure               = {                     # structure to pack/unpack to/from
-                     keyname = {                              # - first field is keyname with <span class="keywordflow">default</span> value of 10 and FORMAT(clean)
+                     keyname = {                              # - first field is keyname with <span class="keywordflow">default</span> value of 10 and FORMAT(native)
                                   default = (uint_t)&#39;10&#39;,
-                                  format  = (format_t)&#39;clean&#39;
+                                  format  = (format_t)&#39;native&#39;
                                }
-                     key2    = { },                           # - second field is anything without <span class="keywordflow">default</span> value and FORMAT(binary)
+                     key2    = { },                           # - second field is anything without <span class="keywordflow">default</span> value and FORMAT(packed)
                      ...
               }
  }
@@ -76,7 +76,7 @@
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:59 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

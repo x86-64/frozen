@@ -59,21 +59,22 @@
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
 <a name="l00021"></a>00021 <span class="preprocessor">#include &lt;enum/hashkey/hashkeys.h&gt;</span>
 <a name="l00022"></a>00022 
-<a name="l00023"></a>00023 <span class="preprocessor">#define HK(value)         HK_VALUE_##value   ///&lt; Shortcut for registed hash keys. Also used in key registration process.</span>
-<a name="l00024"></a>00024 <span class="preprocessor"></span>
-<a name="l00025"></a>00025 <span class="preprocessor">#define DATA_HASHKEYT(...)  { TYPE_HASHKEYT, (hashkey_t []){ __VA_ARGS__ } }</span>
-<a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define DATA_PTR_HASHKEYT(...)  { TYPE_HASHKEYT, __VA_ARGS__ }</span>
-<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_HASHKEYT(_data) *(hashkey_t *)((_data)-&gt;ptr)</span>
-<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_HASHKEYT(_dt) (&amp;(_dt))</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_HASHKEYT 1</span>
-<a name="l00030"></a>00030 <span class="preprocessor"></span>
-<a name="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00023"></a>00023 <span class="preprocessor">#define HK(value)    HK_VALUE_##value   ///&lt; Shortcut for registed hash keys. Also used in key registration process.</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define HDK(value)   portable_hash(#value)</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span>
+<a name="l00026"></a>00026 <span class="preprocessor">#define DATA_HASHKEYT(...)  { TYPE_HASHKEYT, (hashkey_t []){ __VA_ARGS__ } }</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define DATA_PTR_HASHKEYT(...)  { TYPE_HASHKEYT, __VA_ARGS__ }</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_HASHKEYT(_data) *(hashkey_t *)((_data)-&gt;ptr)</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_HASHKEYT(_dt) (&amp;(_dt))</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_HASHKEYT 1</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

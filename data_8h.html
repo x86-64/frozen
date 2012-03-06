@@ -64,6 +64,7 @@
 <div class="contents">
 <div class="textblock"><code>#include &lt;enum/action/action_t.h&gt;</code><br/>
 <code>#include &lt;enum/datatype/datatype_t.h&gt;</code><br/>
+<code>#include &lt;enum/format/format_t.h&gt;</code><br/>
 </div>
 <p><a href="data_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -103,6 +104,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>frozen_data_destroy</
 <tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a5496d03e1327817232eb6ebc3d8cb5e3">data_register</a> (<a class="el" href="structdata__proto__t.html">data_proto_t</a> *proto)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a7a428cd48115cf6fcb1f1679fe34960c">data_query</a> (<a class="el" href="structdata__t.html">data_t</a> *data, void *args)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#a544bb4189feafa18a2f696f471da41bc">data_get_continious</a> (<a class="el" href="structdata__t.html">data_t</a> *data, <a class="el" href="structdata__t.html">data_t</a> *freeme, void **ptr, uintmax_t *ptr_size)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="data_8h.html#aacf8d7b58e323ed3955582bed09c5159">data_make_flat</a> (<a class="el" href="structdata__t.html">data_t</a> *data, format_t format, <a class="el" href="structdata__t.html">data_t</a> *freeme, void **ptr, uintmax_t *ptr_size)</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a15c4f21c546cc0eae92134bd56406c3f"></a><!-- doxytag: member="data.h::data_protos" ref="a15c4f21c546cc0eae92134bd56406c3f" args="" -->
@@ -212,7 +214,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment">{                                          \
         data_t __data_dst = { _type, REF_##_type(_dst) };                                \
-        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(clean) };  \
+        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(native) };  \
         _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \
         _dst = DEREF_##_type(&amp;__data_dst);                                               \
         (void)_ret;                                                                      \
@@ -541,6 +543,71 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 </div>
 </div>
+<a class="anchor" id="aacf8d7b58e323ed3955582bed09c5159"></a><!-- doxytag: member="data.h::data_make_flat" ref="aacf8d7b58e323ed3955582bed09c5159" args="(data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">API ssize_t data_make_flat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structdata__t.html">data_t</a> *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">format_t&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structdata__t.html">data_t</a> *&#160;</td>
+          <td class="paramname"><em>freeme</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void **&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uintmax_t *&#160;</td>
+          <td class="paramname"><em>ptr_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Helper routine to get continious in memory data view with for given format. It first try to get native pointers (if supplied by data), if not - it start converting this data to <a class="el" href="structraw__t.html">raw_t</a>.</p>
+<p>Caller must free freeme data if conversion to <a class="el" href="structraw__t.html">raw_t</a> was made. It is safe to free it in any way, without checking ret value. </p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>Data to get </td></tr>
+    <tr><td class="paramname">format</td><td>Format in which get flat view </td></tr>
+    <tr><td class="paramname">freeme</td><td>Data to free after call </td></tr>
+    <tr><td class="paramname">ptr</td><td>Pointer to void * </td></tr>
+    <tr><td class="paramname">ptr_size</td><td>Pointer to uintmax_t </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl><dt><b>Return values:</b></dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">&lt;0</td><td>Conversion to <a class="el" href="structraw__t.html">raw_t</a> failed </td></tr>
+    <tr><td class="paramname">0</td><td>Call successful, no conversion was made </td></tr>
+    <tr><td class="paramname">1</td><td>Call successful, data converted to <a class="el" href="structraw__t.html">raw_t</a> (need free) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a7a428cd48115cf6fcb1f1679fe34960c"></a><!-- doxytag: member="data.h::data_query" ref="a7a428cd48115cf6fcb1f1679fe34960c" args="(data_t *data, void *args)" -->
 <div class="memitem">
 <div class="memproto">
@@ -620,7 +687,7 @@ uintmax_t&#160;</td><td class="memItemRight" valign="bottom"><b>data_protos_nite
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

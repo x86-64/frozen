@@ -124,8 +124,11 @@ API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy machine. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a69e42e6e96dcbad8213e30585b7cedad"></a><!-- doxytag: member="machine.h::machine_is_ghost" ref="a69e42e6e96dcbad8213e30585b7cedad" args="(machine_t *machine)" -->
 API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><b>machine_is_ghost</b> (<a class="el" href="structmachine__t.html">machine_t</a> *machine)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">API <a class="el" href="structmachine__t.html">machine_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#ad2a788f53f1c2a4432e51b2c395302da">shop_new</a> (<a class="el" href="structhash__t.html">hash_t</a> *config)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Create new shop.  <a href="#ad2a788f53f1c2a4432e51b2c395302da"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">API ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a406072efa567ba2c3805c7946cb810bf">shop_new</a> (<a class="el" href="structhash__t.html">hash_t</a> *config, <a class="el" href="structlist.html">list</a> **shops)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Create new shop.  <a href="#a406072efa567ba2c3805c7946cb810bf"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2305f6c365799ed5c69e2de9d2933e51"></a><!-- doxytag: member="machine.h::shop_list_destroy" ref="a2305f6c365799ed5c69e2de9d2933e51" args="(list *machine)" -->
+API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a2305f6c365799ed5c69e2de9d2933e51">shop_list_destroy</a> (<a class="el" href="structlist.html">list</a> *machine)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy list of shops. <br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a824afd2b87d732053afac198fedc7c89"></a><!-- doxytag: member="machine.h::shop_destroy" ref="a824afd2b87d732053afac198fedc7c89" args="(machine_t *machine)" -->
 API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="machine_8h.html#a824afd2b87d732053afac198fedc7c89">shop_destroy</a> (<a class="el" href="structmachine__t.html">machine_t</a> *machine)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy shop. <br/></td></tr>
@@ -143,35 +146,45 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"></div><hr/><h2>Function Documentation</h2>
-<a class="anchor" id="ad2a788f53f1c2a4432e51b2c395302da"></a><!-- doxytag: member="machine.h::shop_new" ref="ad2a788f53f1c2a4432e51b2c395302da" args="(hash_t *config)" -->
+<a class="anchor" id="a406072efa567ba2c3805c7946cb810bf"></a><!-- doxytag: member="machine.h::shop_new" ref="a406072efa567ba2c3805c7946cb810bf" args="(hash_t *config, list **shops)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">API <a class="el" href="structmachine__t.html">machine_t</a>* shop_new </td>
+          <td class="memname">API ssize_t shop_new </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structhash__t.html">hash_t</a> *&#160;</td>
-          <td class="paramname"><em>config</em></td><td>)</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="structlist.html">list</a> **&#160;</td>
+          <td class="paramname"><em>shops</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>Create new shop. </p>
-<p>Configuration is hash with items in reverse order. For example: </p>
+<p>Configuration is hash with items. For example: </p>
 <div class="fragment"><pre class="fragment">       <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> example_cfg[] = {
-             { 0, DATA_HASHT(
-                   { HK(<span class="keyword">class</span>), DATA_STRING(<span class="stringliteral">&quot;storage/file&quot;</span>) },
-                   hash_end
-             )},
              { 0, DATA_HASHT(
                    { HK(<span class="keyword">class</span>), DATA_STRING(<span class="stringliteral">&quot;request/debug&quot;</span>) },
                    hash_end
              )},
+             { 0, DATA_HASHT(
+                   { HK(<span class="keyword">class</span>), DATA_STRING(<span class="stringliteral">&quot;storage/file&quot;</span>) },
+                   hash_end
+             )},
              hash_end
        };
-</pre></div><p> This config produce two machines: debug and file. Debug will have one child - file and will pass all requests to it. machine_new will return pointer to last created machine. In this case - this is debug.</p>
+</pre></div><p> This config produce two machines: debug and file. Debug will have one child - file and will pass all requests to it. shop_new will return pointer to first created machine. In this case - this is debug.</p>
 <ul>
 <li>Use hash_null to avoid linkage between machine. <dl><dt><b>Return values:</b></dt><dd>
   <table class="retval">
@@ -299,7 +312,7 @@ pthread_mutex_t&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_mt
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

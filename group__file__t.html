@@ -56,18 +56,22 @@
 
 <h3><a class="anchor" id="file_t_define"></a>Configuration</h3><div class="textblock"><p>Accepted configuration: </p>
 <div class="fragment"><pre class="fragment"> some = (<a class="code" href="structfile__t.html">file_t</a>){
-              filename    = <span class="stringliteral">&quot;somefilename.dat&quot;</span>,     # simple file path
-              readonly    = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            # make file read-only, <span class="keywordflow">default</span> is read-write
-              exclusive   = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            # pass O_EXCL <span class="keywordflow">for</span> open, see man page
-              create      = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            # pass O_CREAT <span class="keywordflow">for</span> open, see man page
-              mode        = (uint_t)<span class="stringliteral">&#39;0777&#39;</span>,         # file mode on creation
-              retry       = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            # regen filename and retry open. usefull <span class="keywordflow">for</span> example <span class="keywordflow">for</span> tmpname generation
+              filename    = <span class="stringliteral">&quot;somefilename.dat&quot;</span>,     <span class="comment">// simple file path</span>
+              readonly    = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            <span class="comment">// make file read-only, default is read-write</span>
+              exclusive   = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            <span class="comment">// pass O_EXCL for open, see man page, default 0</span>
+              create      = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            <span class="comment">// pass O_CREAT for open, see man page, default 1</span>
+              mode        = (uint_t)<span class="stringliteral">&#39;0777&#39;</span>,         <span class="comment">// file mode on creation, default 600</span>
+              retry       = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            <span class="comment">// regen filename and retry open. useful for example for tmpname generation, default 0</span>
+              append      = (uint_t)<span class="charliteral">&#39;1&#39;</span>,            <span class="comment">// append mode, default 0</span>
+              truncate    = (uint_t)<span class="charliteral">&#39;1&#39;</span>             <span class="comment">// truncate file on open, default 0</span>
  }
+
+ some = (<a class="code" href="structfile__t.html">file_t</a>)<span class="stringliteral">&quot;FILENAME&quot;</span>                          <span class="comment">// open file with default parameters</span>
 </pre></div> </div></div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:59 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

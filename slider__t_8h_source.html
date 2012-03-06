@@ -57,28 +57,32 @@
 <div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_SLIDER_T</span>
 <a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_SLIDER_T</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00022"></a>00022 <span class="preprocessor">#define DATA_SLIDERT(_data,_off)  {TYPE_SLIDERT, (slider_t []){ { *(_data), _off, ~0 } }}</span>
-<a name="l00023"></a>00023 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_SLIDERT(_data) (slider_t *)((_data)-&gt;ptr)</span>
-<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_SLIDERT(_dt) _dt</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_SLIDERT 0</span>
-<a name="l00026"></a>00026 <span class="preprocessor"></span>
-<a name="l00027"></a><a class="code" href="structslider__t.html">00027</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structslider__t.html">slider_t</a> {
-<a name="l00028"></a>00028         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 data;
-<a name="l00029"></a>00029         uintmax_t              off;
-<a name="l00030"></a>00030         uintmax_t              frozen_off;
-<a name="l00031"></a>00031 } <a class="code" href="structslider__t.html">slider_t</a>;
-<a name="l00032"></a>00032 
-<a name="l00033"></a>00033 uintmax_t data_slider_t_get_offset(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
-<a name="l00034"></a>00034 <span class="keywordtype">void</span>      data_slider_t_freeze(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
-<a name="l00035"></a>00035 <span class="keywordtype">void</span>      data_slider_t_unfreeze(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
+<a name="l00023"></a>00023 <span class="preprocessor">#define DATA_SLIDERT(_data,_off)       { TYPE_SLIDERT, (slider_t []){ { _data, _off, ~0, DATA_VOID } }}</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define DATA_HEAP_SLIDERT(_data,_off)  { TYPE_SLIDERT,  slider_t_alloc(_data, _off)                   }</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_SLIDERT(_data) (slider_t *)((_data)-&gt;ptr)</span>
+<a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_SLIDERT(_dt) _dt</span>
+<a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_SLIDERT 0</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span>
+<a name="l00029"></a><a class="code" href="structslider__t.html">00029</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structslider__t.html">slider_t</a> {
+<a name="l00030"></a>00030         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00031"></a>00031         uintmax_t              off;
+<a name="l00032"></a>00032         uintmax_t              frozen_off;
+<a name="l00033"></a>00033         
+<a name="l00034"></a>00034         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 freeit;
+<a name="l00035"></a>00035 } <a class="code" href="structslider__t.html">slider_t</a>;
 <a name="l00036"></a>00036 
-<a name="l00037"></a>00037 <span class="preprocessor">#endif</span>
+<a name="l00037"></a>00037 uintmax_t       data_slider_t_get_offset     (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
+<a name="l00038"></a>00038 <span class="keywordtype">void</span>            data_slider_t_freeze         (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
+<a name="l00039"></a>00039 <span class="keywordtype">void</span>            data_slider_t_unfreeze       (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data);
+<a name="l00040"></a>00040 <a class="code" href="structslider__t.html">slider_t</a> *      slider_t_alloc               (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, uintmax_t offset);
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Feb 21 2012 13:13:58 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
