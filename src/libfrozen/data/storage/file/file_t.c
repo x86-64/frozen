@@ -102,6 +102,15 @@ static ssize_t data_file_t_convert_from(data_t *data, fastcall_convert_from *far
 		return -EINVAL; 
 		
 	switch(fargs->format){
+		case FORMAT(config):;
+		case FORMAT(human):;
+		case FORMAT(native):;
+			request_t r_config[] = {
+				{ HK(filename), *fargs->src },
+				hash_end
+			};
+			return file_new((file_t **)&data->ptr, r_config);
+
 		case FORMAT(hash):;
 			hash_t            *config;
 			

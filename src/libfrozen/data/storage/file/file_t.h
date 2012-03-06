@@ -17,13 +17,15 @@
  * some = (file_t){
  *              filename    = "somefilename.dat",     // simple file path
  *              readonly    = (uint_t)'1',            // make file read-only, default is read-write
- *              exclusive   = (uint_t)'1',            // pass O_EXCL for open, see man page
- *              create      = (uint_t)'1',            // pass O_CREAT for open, see man page
- *              mode        = (uint_t)'0777',         // file mode on creation
- *              retry       = (uint_t)'1',            // regen filename and retry open. usefull for example for tmpname generation
+ *              exclusive   = (uint_t)'1',            // pass O_EXCL for open, see man page, default 0
+ *              create      = (uint_t)'1',            // pass O_CREAT for open, see man page, default 1
+ *              mode        = (uint_t)'0777',         // file mode on creation, default 600
+ *              retry       = (uint_t)'1',            // regen filename and retry open. useful for example for tmpname generation, default 0
  *              append      = (uint_t)'1',            // append mode, default 0
  *              truncate    = (uint_t)'1'             // truncate file on open, default 0
  * }
+ *
+ * some = (file_t)"FILENAME"                          // open file with default parameters
  * @endcode
  */
 
