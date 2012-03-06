@@ -21,6 +21,7 @@ void              ref_t_acquire(ref_t *ref){ // {{{
 void              ref_t_destroy(ref_t *ref){ // {{{
 	if(ref->refs-- == 1){
 		data_free(&ref->data);
+		free(ref);
 	}
 } // }}}
 
