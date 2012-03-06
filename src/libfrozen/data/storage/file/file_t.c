@@ -35,6 +35,8 @@ static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
 	uintmax_t              cfg_excl          = 0;
 	uintmax_t              cfg_creat         = 1;
 	uintmax_t              cfg_retry         = 0;
+	uintmax_t              cfg_append        = 0;
+	uintmax_t              cfg_trunc         = 0;
 	uintmax_t              cfg_mode          = S_IRUSR | S_IWUSR;
 
 	if( (fdata = calloc(1, sizeof(file_t))) == NULL)
@@ -45,6 +47,8 @@ static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
 	hash_data_get(ret, TYPE_UINTT, cfg_creat,    config, HK(create));
 	hash_data_get(ret, TYPE_UINTT, cfg_mode,     config, HK(mode));
 	hash_data_get(ret, TYPE_UINTT, cfg_retry,    config, HK(retry));
+	hash_data_get(ret, TYPE_UINTT, cfg_append,   config, HK(append));
+	hash_data_get(ret, TYPE_UINTT, cfg_trunc,    config, HK(truncate));
 	hash_data_get(ret, TYPE_UINTT, fdata->temprorary, config, HK(temprorary));
 	
 	if( (cfg_filename = hash_data_find(config, HK(filename))) == NULL){
@@ -65,6 +69,8 @@ retry:;
 	flags |= cfg_rdonly == 1 ? O_RDONLY : O_RDWR;
 	flags |= cfg_excl   == 1 ? O_EXCL   : 0;
 	flags |= cfg_creat  == 1 ? O_CREAT  : 0;
+	flags |= cfg_append == 1 ? O_APPEND : 0;
+	flags |= cfg_trunc  == 1 ? O_TRUNC  : 0;
 	#ifdef O_LARGEFILE
 	flags |= O_LARGEFILE;
 	#endif

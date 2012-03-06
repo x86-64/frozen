@@ -12,6 +12,7 @@
 #define HK_VALUE_addr 3221
 #define HK_VALUE_affinity 23061
 #define HK_VALUE_after 6015
+#define HK_VALUE_append 9519
 #define HK_VALUE_async 5881
 #define HK_VALUE_backend 14474
 #define HK_VALUE_backlog 14832
@@ -163,6 +164,7 @@
 #define HK_VALUE_temprorary 43267
 #define HK_VALUE_test 3411
 #define HK_VALUE_tick_interval 88187
+#define HK_VALUE_truncate 21500
 #define HK_VALUE_type 3224
 #define HK_VALUE_unsubscribe 52727
 #define HK_VALUE_uuid 3130
@@ -184,6 +186,7 @@ typedef enum hashkey_t {
       HK_addr = HK_VALUE_addr, 
       HK_affinity = HK_VALUE_affinity, 
       HK_after = HK_VALUE_after, 
+      HK_append = HK_VALUE_append, 
       HK_async = HK_VALUE_async, 
       HK_backend = HK_VALUE_backend, 
       HK_backlog = HK_VALUE_backlog, 
@@ -335,6 +338,7 @@ typedef enum hashkey_t {
       HK_temprorary = HK_VALUE_temprorary, 
       HK_test = HK_VALUE_test, 
       HK_tick_interval = HK_VALUE_tick_interval, 
+      HK_truncate = HK_VALUE_truncate, 
       HK_type = HK_VALUE_type, 
       HK_unsubscribe = HK_VALUE_unsubscribe, 
       HK_uuid = HK_VALUE_uuid, 
@@ -360,6 +364,7 @@ keypair_t hashkeys[] = {
       { "addr", HK_VALUE_addr }, 
       { "affinity", HK_VALUE_affinity }, 
       { "after", HK_VALUE_after }, 
+      { "append", HK_VALUE_append }, 
       { "async", HK_VALUE_async }, 
       { "backend", HK_VALUE_backend }, 
       { "backlog", HK_VALUE_backlog }, 
@@ -511,6 +516,7 @@ keypair_t hashkeys[] = {
       { "temprorary", HK_VALUE_temprorary }, 
       { "test", HK_VALUE_test }, 
       { "tick_interval", HK_VALUE_tick_interval }, 
+      { "truncate", HK_VALUE_truncate }, 
       { "type", HK_VALUE_type }, 
       { "unsubscribe", HK_VALUE_unsubscribe }, 
       { "uuid", HK_VALUE_uuid }, 
