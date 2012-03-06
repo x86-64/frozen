@@ -16,10 +16,12 @@
  *  Possible defines:
  *  @code
  *       data_t slider = DATA_SLIDERT(data, starting_offset);
+ *       data_t slider = DATA_HEAP_SLIDERT(data, starting_offset);
  *  @endcode
  */
 
-#define DATA_SLIDERT(_data,_off)  {TYPE_SLIDERT, (slider_t []){ { _data, _off, ~0, DATA_VOID } }}
+#define DATA_SLIDERT(_data,_off)       { TYPE_SLIDERT, (slider_t []){ { _data, _off, ~0, DATA_VOID } }}
+#define DATA_HEAP_SLIDERT(_data,_off)  { TYPE_SLIDERT,  slider_t_alloc(_data, _off)                   }
 #define DEREF_TYPE_SLIDERT(_data) (slider_t *)((_data)->ptr)
 #define REF_TYPE_SLIDERT(_dt) _dt
 #define HAVEBUFF_TYPE_SLIDERT 0
@@ -28,11 +30,13 @@ typedef struct slider_t {
 	data_t                *data;
 	uintmax_t              off;
 	uintmax_t              frozen_off;
-	data_t                 holder;
+	
+	data_t                 freeit;
 } slider_t;
 
-uintmax_t data_slider_t_get_offset(data_t *data);
-void      data_slider_t_freeze(data_t *data);
-void      data_slider_t_unfreeze(data_t *data);
+uintmax_t       data_slider_t_get_offset     (data_t *data);
+void            data_slider_t_freeze         (data_t *data);
+void            data_slider_t_unfreeze       (data_t *data);
+slider_t *      slider_t_alloc               (data_t *data, uintmax_t offset);
 
 #endif

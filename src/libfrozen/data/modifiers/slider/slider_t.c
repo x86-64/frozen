@@ -7,18 +7,19 @@
 
 slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
 	slider_t                 *fdata;
-
+	
 	if( (fdata = malloc(sizeof(slider_t))) == NULL )
 		return NULL;
 	
-	fdata->holder     = *data;
-	fdata->data       = &fdata->holder;
+	fdata->data       = data;
 	fdata->off        = offset;
 	fdata->frozen_off = ~0;
+	
+	data_set_void(&fdata->freeit);
 	return fdata;
 } // }}}
 void              slider_t_destroy(slider_t *slider){ // {{{
-	data_free(&slider->holder);
+	data_free(&slider->freeit);
 } // }}}
 
 uintmax_t data_slider_t_get_offset(data_t *data){ // {{{
@@ -68,6 +69,7 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 } // }}}
 static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	slider_t              *fdata;
 	
 	if(dst->ptr != NULL)
 		return data_slider_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
@@ -87,8 +89,15 @@ static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(ret != 0)
 				return -EINVAL;
 			
-			return ( (dst->ptr = slider_t_alloc(&data, offset)) == NULL ) ? -EFAULT : 0;
-
+			if( (fdata = dst->ptr = slider_t_alloc(&data, offset)) == NULL){
+				data_free(&data);
+				return -ENOMEM;
+			}
+			
+			fdata->freeit = data;
+			fdata->data   = &fdata->freeit;
+			return 0;
+			
 		default:
 			break;
 	}
