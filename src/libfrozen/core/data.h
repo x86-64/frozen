@@ -119,7 +119,8 @@ API ssize_t              data_register          (data_proto_t *proto);
  * @retval <0      Another error related to data implementation
  * @retval 0       Call successful
 */
-API ssize_t              data_query             (data_t *data, void *args);
+#define data_query(_data, _args) data_protos[ ((data_t *)(_data))->type ]->handlers[ ((fastcall_header *)(_args))->action ](_data, _args)
+//API ssize_t              data_query             (data_t *data, void *args);
 
 /** Helper routine to get continious in memory data. It first try to get native pointers (if supplied by data), if not - 
  * it start converting this data to raw_t type in clean format (which is slow btw).

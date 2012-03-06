@@ -86,14 +86,14 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 	return 0;
 } // }}}
 
-ssize_t              data_query         (data_t *data, void *args){ // {{{
+/*ssize_t              data_query         (data_t *data, void *args){ // {{{
 	register fastcall_header       *fargs             = (fastcall_header *)args;
 	
 	if(data == NULL || data->type >= data_protos_nitems || fargs->action >= ACTION_INVALID)
 		return -EINVAL;
 	
 	return data_protos[ data->type ]->handlers[ fargs->action ](data, args);
-} // }}}
+} // }}}*/
 
 ssize_t              data_get_continious(data_t *data, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
 	ssize_t                ret;
