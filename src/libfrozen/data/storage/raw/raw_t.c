@@ -5,6 +5,7 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 
+
 static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
 	if( (fdata->flags & RAW_RESIZEABLE) == 0)
 		return -EINVAL;
@@ -90,6 +91,15 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t le
 		
 	}
 	return ret;
+} // }}}
+
+raw_t *        raw_t_alloc(uintmax_t size){ // {{{
+	data_t                 new_raw           = { TYPE_RAWT, NULL };
+	
+	if(raw_prepare(&new_raw, size) < 0)
+		return NULL;
+	
+	return new_raw.ptr;
 } // }}}
 
 static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{

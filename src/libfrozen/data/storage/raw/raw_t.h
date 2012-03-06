@@ -18,8 +18,9 @@
  *  @endcode
  */
 
-#define DATA_RAW(_buf,_size) {TYPE_RAWT, (raw_t []){ { _buf, _size, 0 } }}
-#define DATA_RAWT(_buf,_size,_flags) {TYPE_RAWT, (raw_t []){ { _buf, _size, _flags } }}
+#define DATA_RAW(_buf,_size)         { TYPE_RAWT, (raw_t []){ { _buf, _size, 0 }      }}
+#define DATA_RAWT(_buf,_size,_flags) { TYPE_RAWT, (raw_t []){ { _buf, _size, _flags } }}
+#define DATA_HEAP_RAWT(_size)        { TYPE_RAWT, raw_t_alloc(_size)                   }
 #define DEREF_TYPE_RAWT(_data) (raw_t *)((_data)->ptr)
 #define REF_TYPE_RAWT(_dt) _dt
 #define HAVEBUFF_TYPE_RAWT 0
@@ -33,5 +34,7 @@ typedef struct raw_t {
 	uintmax_t              size;
 	raw_flags_t            flags;
 } raw_t;
+
+raw_t *          raw_t_alloc             (uintmax_t size);
 
 #endif
