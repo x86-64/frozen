@@ -192,28 +192,6 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 	
 			break;
 		
-		case FORMAT(netstring):;
-			char                   buffer[100];
-			intmax_t               buffer_size;
-			
-			if( (buffer_size = snprintf(buffer, sizeof(buffer), "%" SCNuMAX ":", src_data->size)) <= 0)
-				return -EINVAL;
-			
-			fastcall_write r_net_write1 = { { 5, ACTION_WRITE }, 0,            buffer,         buffer_size };
-			ret         = data_query(fargs->dest, &r_net_write1);
-			transfered += r_net_write1.buffer_size;	
-			if(ret < 0) break;
-			
-			fastcall_write r_net_write2 = { { 5, ACTION_WRITE }, buffer_size,  src_data->ptr,  src_data->size };
-			ret         = data_query(fargs->dest, &r_net_write2);
-			transfered += r_net_write2.buffer_size;
-			if(ret < 0) break;
-			
-			fastcall_write r_net_write3 = { { 5, ACTION_WRITE }, buffer_size + src_data->size, ",", 1 };
-			ret         = data_query(fargs->dest, &r_net_write3);
-			transfered += r_net_write3.buffer_size;
-			
-			break;
 		default:
 			return -ENOSYS;
 	};

@@ -789,6 +789,7 @@ enable_datatype_t
 enable_format_t
 enable_hashkey_t
 enable_named_t
+enable_netstring_t
 enable_fd_t
 enable_io_t
 enable_go_interface_t
@@ -1548,6 +1549,8 @@ Optional Features:
   --disable-data-hashkey_t
                           disable data hashkey_t
   --disable-data-named_t  disable data named_t
+  --disable-data-netstring_t
+                          disable data netstring_t
   --disable-data-fd_t     disable data fd_t
   --disable-data-io_t     disable data io_t
   --disable-data-go_interface_t
@@ -18334,6 +18337,43 @@ fi
 		DATA_MAKEFILE_enum_named=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} enum/named/libfrozen_data_named.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-netstring_t was given.
+if test "${enable_netstring_t+set}" = set; then :
+  enableval=$enable_netstring_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_netstring_t}" = "yes"; then
+			enable_netstring_t="no"
+		else
+			enable_netstring_t="yes"
+		fi
+	fi
+
+	if test "${enable_netstring_t}" = "yes"; then
+		DATA_DIR_netstring_t="format/netstring"
+		DATA_DEP_netstring_t="uint_t hash_t slider_t format_t"
+		DATA_ID_netstring_t=""
+		DATA_SELECTED="$DATA_SELECTED netstring_t"
+		DATA_HEADERS="$DATA_HEADERS format/netstring/netstring_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_format_netstring" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/format/netstring/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS format/netstring"
+
+		DATA_MAKEFILE_format_netstring=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} format/netstring/libfrozen_data_netstring.la"
 
 	fi
 
