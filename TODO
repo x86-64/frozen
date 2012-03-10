@@ -36,7 +36,6 @@
 
 - data 'range_t'
 
-- pcre
 - libev
 - co-routines
 - error backtrace

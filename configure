@@ -775,6 +775,7 @@ enable_modulec_zmq
 enable_moduledata_ipv4_t
 enable_moduledata_null_t
 enable_moduledata_time_t
+enable_modulepcre
 enable_moduleregexp
 enable_allocator_fixed_t
 enable_anything_t
@@ -1528,6 +1529,7 @@ Optional Features:
                           disable module data-null-t
   --disable-module-data-time-t
                           disable module data-time-t
+  --disable-module-pcre   disable module pcre
   --disable-module-regexp disable module regexp
   --disable-data-allocator_fixed_t
                           disable data allocator_fixed_t
@@ -17819,6 +17821,84 @@ fi
 	fi
 
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcre_exec in -lpcre" >&5
+$as_echo_n "checking for pcre_exec in -lpcre... " >&6; }
+if ${ac_cv_lib_pcre_pcre_exec+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpcre  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcre_exec ();
+int
+main ()
+{
+return pcre_exec ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pcre_pcre_exec=yes
+else
+  ac_cv_lib_pcre_pcre_exec=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre_pcre_exec" >&5
+$as_echo "$ac_cv_lib_pcre_pcre_exec" >&6; }
+if test "x$ac_cv_lib_pcre_pcre_exec" = xyes; then :
+  HAVE_PCRE=1
+else
+  HAVE_PCRE=0
+fi
+
+if test "x$HAVE_PCRE" = "x1"; then :
+
+
+
+
+	# Check whether --enable-modulepcre was given.
+if test "${enable_modulepcre+set}" = set; then :
+  enableval=$enable_modulepcre;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_modulepcre}" = "yes"; then
+			enable_modulepcre="no"
+		else
+			enable_modulepcre="yes"
+		fi
+	fi
+
+	if test "${enable_modulepcre}" = "yes"; then
+		MODULE_DIR_pcre="pcre"
+		MODULE_DEP_pcre=""
+		MODULE_SELECTED="$MODULE_SELECTED pcre"
+	fi
+
+	if test "$MODULE_MAKEFILE_pcre" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/pcre/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS pcre"
+
+		MODULE_MAKEFILE_pcre=yes
+	fi
+
+
+
+fi
 
 
 
