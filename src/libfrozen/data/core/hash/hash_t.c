@@ -3,9 +3,8 @@
 
 #include <enum/format/format_t.h>
 #include <enum/datatype/datatype_t.h>
-#include <core/string/string_t.h>
 #include <storage/raw/raw_t.h>
-
+#include <io/fd/fd_t.h>
 #include <modifiers/slider/slider_t.h>
 
 #define HASH_INITIAL_SIZE 8
@@ -17,6 +16,11 @@ typedef struct hash_t_ctx {
 	data_t                *sl_holder;
 	data_t                *sl_data;
 } hash_t_ctx;
+
+typedef struct hash_t_rebuild_ctx {
+	uintmax_t              nelements;
+	hash_t                *hash;
+} hash_t_rebuild_ctx;
 
 static void data_hash_t_append_pad(hash_t_ctx *ctx){ // {{{
 	fastcall_write r_write = { { 5, ACTION_WRITE }, 0, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", ctx->step };
@@ -345,6 +349,23 @@ data_proto_t hash_t_proto = {
 	}
 };
 
+static ssize_t hash_rebuild_iter(hash_t *item, hash_t_rebuild_ctx *ctx){ // {{{
+	ssize_t                ret;
+	
+	ctx->nelements++;
+	ctx->hash         = realloc(ctx->hash, sizeof(hash_t) * (ctx->nelements + 1));
+	if(ctx->hash == NULL)
+		return ITER_BREAK;
+	
+	ctx->hash[ctx->nelements - 1].key = item->key;
+	holder_consume(ret, ctx->hash[ctx->nelements - 1].data, &item->data);
+	if(ret != 0)
+		return ITER_BREAK;
+	
+	hash_assign_hash_end(&ctx->hash[ctx->nelements]);
+	return ITER_CONTINUE;
+} // }}}
+
 hash_t *           hash_new                     (size_t nelements){ // {{{
 	size_t  i;
 	hash_t *hash;
@@ -394,6 +415,17 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 	hash_assign_hash_end(el_new);
 	
 	return new_hash;
+} // }}}
+hash_t *           hash_rebuild                 (hash_t *hash){ // {{{
+	hash_t_rebuild_ctx ctx = {
+		.nelements = 0,
+		.hash      = NULL
+	};
+	
+	if(hash_iter(hash, (hash_iterator)&hash_rebuild_iter, &ctx, 0) != ITER_OK){
+		return NULL;
+	}
+	return ctx.hash;
 } // }}}
 void               hash_free                    (hash_t *hash){ // {{{
 	hash_t       *el;
@@ -503,14 +535,10 @@ data_t *           hash_data_find               (hash_t *hash, hashkey_t key){ /
 } // }}}
 
 void               hash_dump                    (hash_t *hash){ // {{{
-	char                   buffer[DEF_BUFFER_SIZE*20] = { 0 };
 	data_t                 d_hash            = DATA_PTR_HASHT(hash);
-	data_t                 d_buffer          = DATA_RAW(buffer, sizeof(buffer));
+	data_t                 d_stderr          = DATA_FDT(2, 0);
 	
-	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_buffer, FORMAT(debug) };
-	if(data_query(&d_hash, &r_convert) < 0)
-		return;
-	
-	fprintf(stderr, "%s", buffer);
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_stderr, FORMAT(debug) };
+	data_query(&d_hash, &r_convert);
 } // }}}
 
