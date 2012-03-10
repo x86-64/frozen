@@ -9,6 +9,14 @@ static ssize_t data_void_t_convert_from(data_t *dst, fastcall_convert_from *farg
 static ssize_t data_void_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	return 0;
 } // }}}
+static ssize_t data_void_t_push(data_t *data, fastcall_push *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_void_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	fastcall_push r_push = { { 3, ACTION_PUSH }, NULL };
+	data_query(fargs->dest, &r_push);
+	return 0;
+} // }}}
 
 data_proto_t void_t_proto = {
 	.type          = TYPE_VOIDT,
@@ -17,6 +25,8 @@ data_proto_t void_t_proto = {
 	.handlers      = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_void_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_void_t_convert_from,
+		[ACTION_PUSH]         = (f_data_func)&data_void_t_push,
+		[ACTION_ENUM]         = (f_data_func)&data_void_t_enum,
 	}
 };
 
