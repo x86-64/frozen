@@ -775,6 +775,7 @@ enable_modulec_zmq
 enable_moduledata_ipv4_t
 enable_moduledata_null_t
 enable_moduledata_time_t
+enable_moduleregexp
 enable_allocator_fixed_t
 enable_anything_t
 enable_data_t
@@ -826,7 +827,6 @@ enable_raw_t
 enable_machinekill
 enable_machinethread
 enable_machinequery
-enable_machineregexp
 enable_machinesplit
 enable_machinestruct_pack
 enable_machinestruct_unpack
@@ -1528,6 +1528,7 @@ Optional Features:
                           disable module data-null-t
   --disable-module-data-time-t
                           disable module data-time-t
+  --disable-module-regexp disable module regexp
   --disable-data-allocator_fixed_t
                           disable data allocator_fixed_t
   --disable-data-anything_t
@@ -1593,8 +1594,6 @@ Optional Features:
   --disable-machine-thread
                           disable machine thread
   --disable-machine-query disable machine query
-  --disable-machine-regexp
-                          disable machine regexp
   --disable-machine-split disable machine split
   --disable-machine-struct-pack
                           disable machine struct-pack
@@ -17824,6 +17823,38 @@ fi
 
 
 
+	# Check whether --enable-moduleregexp was given.
+if test "${enable_moduleregexp+set}" = set; then :
+  enableval=$enable_moduleregexp;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_moduleregexp}" = "yes"; then
+			enable_moduleregexp="no"
+		else
+			enable_moduleregexp="yes"
+		fi
+	fi
+
+	if test "${enable_moduleregexp}" = "yes"; then
+		MODULE_DIR_regexp="regexp"
+		MODULE_DEP_regexp=""
+		MODULE_SELECTED="$MODULE_SELECTED regexp"
+	fi
+
+	if test "$MODULE_MAKEFILE_regexp" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/modules/regexp/Makefile"
+		MODULE_DIST_DIRS="$MODULE_DIST_DIRS regexp"
+
+		MODULE_MAKEFILE_regexp=yes
+	fi
+
+
+
+
+
+
 
 	# Check whether --enable-allocator_fixed_t was given.
 if test "${enable_allocator_fixed_t+set}" = set; then :
@@ -19694,43 +19725,6 @@ fi
 		MACHINE_MAKEFILE_data_query=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/query/libfrozen_machine_query.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machineregexp was given.
-if test "${enable_machineregexp+set}" = set; then :
-  enableval=$enable_machineregexp;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machineregexp}" = "yes"; then
-			enable_machineregexp="no"
-		else
-			enable_machineregexp="yes"
-		fi
-	fi
-
-	if test "${enable_machineregexp}" = "yes"; then
-		MACHINE_DIR_regexp="data/regexp"
-		MACHINE_DEP_regexp=""
-				MACHINE_SELECTED="$MACHINE_SELECTED regexp"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_data_regexp" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/regexp/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/regexp"
-
-		MACHINE_MAKEFILE_data_regexp=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/regexp/libfrozen_machine_regexp.la"
 
 	fi
 

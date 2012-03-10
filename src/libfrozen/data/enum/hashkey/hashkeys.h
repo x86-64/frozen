@@ -26,7 +26,6 @@
 #define HK_VALUE_body 3378
 #define HK_VALUE_buffer 9745
 #define HK_VALUE_buffer_size 54686
-#define HK_VALUE_capture 15329
 #define HK_VALUE_class 6119
 #define HK_VALUE_clientid 21563
 #define HK_VALUE_close 5895
@@ -47,7 +46,6 @@
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
 #define HK_VALUE_exclusive 31143
-#define HK_VALUE_extended 20940
 #define HK_VALUE_fatal 5786
 #define HK_VALUE_field 5659
 #define HK_VALUE_filename 21157
@@ -56,14 +54,12 @@
 #define HK_VALUE_force_sync 41290
 #define HK_VALUE_format 9917
 #define HK_VALUE_function 22303
-#define HK_VALUE_global 9415
 #define HK_VALUE_hash 3191
 #define HK_VALUE_hash_ptr_end 68083
 #define HK_VALUE_hash_ptr_inline 131665
 #define HK_VALUE_hash_ptr_null 89234
 #define HK_VALUE_headers 15245
 #define HK_VALUE_hwm 1561
-#define HK_VALUE_icase 5739
 #define HK_VALUE_identity 23282
 #define HK_VALUE_ignore_errors 90804
 #define HK_VALUE_index 6061
@@ -83,8 +79,6 @@
 #define HK_VALUE_linger 9795
 #define HK_VALUE_loop 3343
 #define HK_VALUE_machine 14586
-#define HK_VALUE_marker 9864
-#define HK_VALUE_marker_data 52113
 #define HK_VALUE_master 10017
 #define HK_VALUE_max_global 39928
 #define HK_VALUE_max_perfork 54985
@@ -101,9 +95,6 @@
 #define HK_VALUE_nelements_min 87991
 #define HK_VALUE_nelements_mul 89381
 #define HK_VALUE_nelements_step 110732
-#define HK_VALUE_newline 14847
-#define HK_VALUE_notbol 9829
-#define HK_VALUE_noteol 9877
 #define HK_VALUE_offset 9978
 #define HK_VALUE_offset_from 54684
 #define HK_VALUE_offset_key 41762
@@ -130,7 +121,6 @@
 #define HK_VALUE_reconnect_ivl_max 190682
 #define HK_VALUE_recovery_ivl 71126
 #define HK_VALUE_recovery_ivl_msec 188887
-#define HK_VALUE_regexp 10093
 #define HK_VALUE_removed_items 88298
 #define HK_VALUE_req_count 31695
 #define HK_VALUE_req_read 20694
@@ -200,7 +190,6 @@ typedef enum hashkey_t {
       HK_body = HK_VALUE_body, 
       HK_buffer = HK_VALUE_buffer, 
       HK_buffer_size = HK_VALUE_buffer_size, 
-      HK_capture = HK_VALUE_capture, 
       HK_class = HK_VALUE_class, 
       HK_clientid = HK_VALUE_clientid, 
       HK_close = HK_VALUE_close, 
@@ -221,7 +210,6 @@ typedef enum hashkey_t {
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
       HK_exclusive = HK_VALUE_exclusive, 
-      HK_extended = HK_VALUE_extended, 
       HK_fatal = HK_VALUE_fatal, 
       HK_field = HK_VALUE_field, 
       HK_filename = HK_VALUE_filename, 
@@ -230,14 +218,12 @@ typedef enum hashkey_t {
       HK_force_sync = HK_VALUE_force_sync, 
       HK_format = HK_VALUE_format, 
       HK_function = HK_VALUE_function, 
-      HK_global = HK_VALUE_global, 
       HK_hash = HK_VALUE_hash, 
       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
       HK_headers = HK_VALUE_headers, 
       HK_hwm = HK_VALUE_hwm, 
-      HK_icase = HK_VALUE_icase, 
       HK_identity = HK_VALUE_identity, 
       HK_ignore_errors = HK_VALUE_ignore_errors, 
       HK_index = HK_VALUE_index, 
@@ -257,8 +243,6 @@ typedef enum hashkey_t {
       HK_linger = HK_VALUE_linger, 
       HK_loop = HK_VALUE_loop, 
       HK_machine = HK_VALUE_machine, 
-      HK_marker = HK_VALUE_marker, 
-      HK_marker_data = HK_VALUE_marker_data, 
       HK_master = HK_VALUE_master, 
       HK_max_global = HK_VALUE_max_global, 
       HK_max_perfork = HK_VALUE_max_perfork, 
@@ -275,9 +259,6 @@ typedef enum hashkey_t {
       HK_nelements_min = HK_VALUE_nelements_min, 
       HK_nelements_mul = HK_VALUE_nelements_mul, 
       HK_nelements_step = HK_VALUE_nelements_step, 
-      HK_newline = HK_VALUE_newline, 
-      HK_notbol = HK_VALUE_notbol, 
-      HK_noteol = HK_VALUE_noteol, 
       HK_offset = HK_VALUE_offset, 
       HK_offset_from = HK_VALUE_offset_from, 
       HK_offset_key = HK_VALUE_offset_key, 
@@ -304,7 +285,6 @@ typedef enum hashkey_t {
       HK_reconnect_ivl_max = HK_VALUE_reconnect_ivl_max, 
       HK_recovery_ivl = HK_VALUE_recovery_ivl, 
       HK_recovery_ivl_msec = HK_VALUE_recovery_ivl_msec, 
-      HK_regexp = HK_VALUE_regexp, 
       HK_removed_items = HK_VALUE_removed_items, 
       HK_req_count = HK_VALUE_req_count, 
       HK_req_read = HK_VALUE_req_read, 
@@ -378,7 +358,6 @@ keypair_t hashkeys[] = {
       { "body", HK_VALUE_body }, 
       { "buffer", HK_VALUE_buffer }, 
       { "buffer_size", HK_VALUE_buffer_size }, 
-      { "capture", HK_VALUE_capture }, 
       { "class", HK_VALUE_class }, 
       { "clientid", HK_VALUE_clientid }, 
       { "close", HK_VALUE_close }, 
@@ -399,7 +378,6 @@ keypair_t hashkeys[] = {
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
       { "exclusive", HK_VALUE_exclusive }, 
-      { "extended", HK_VALUE_extended }, 
       { "fatal", HK_VALUE_fatal }, 
       { "field", HK_VALUE_field }, 
       { "filename", HK_VALUE_filename }, 
@@ -408,14 +386,12 @@ keypair_t hashkeys[] = {
       { "force_sync", HK_VALUE_force_sync }, 
       { "format", HK_VALUE_format }, 
       { "function", HK_VALUE_function }, 
-      { "global", HK_VALUE_global }, 
       { "hash", HK_VALUE_hash }, 
       { "hash_ptr_end", HK_VALUE_hash_ptr_end }, 
       { "hash_ptr_inline", HK_VALUE_hash_ptr_inline }, 
       { "hash_ptr_null", HK_VALUE_hash_ptr_null }, 
       { "headers", HK_VALUE_headers }, 
       { "hwm", HK_VALUE_hwm }, 
-      { "icase", HK_VALUE_icase }, 
       { "identity", HK_VALUE_identity }, 
       { "ignore_errors", HK_VALUE_ignore_errors }, 
       { "index", HK_VALUE_index }, 
@@ -435,8 +411,6 @@ keypair_t hashkeys[] = {
       { "linger", HK_VALUE_linger }, 
       { "loop", HK_VALUE_loop }, 
       { "machine", HK_VALUE_machine }, 
-      { "marker", HK_VALUE_marker }, 
-      { "marker_data", HK_VALUE_marker_data }, 
       { "master", HK_VALUE_master }, 
       { "max_global", HK_VALUE_max_global }, 
       { "max_perfork", HK_VALUE_max_perfork }, 
@@ -453,9 +427,6 @@ keypair_t hashkeys[] = {
       { "nelements_min", HK_VALUE_nelements_min }, 
       { "nelements_mul", HK_VALUE_nelements_mul }, 
       { "nelements_step", HK_VALUE_nelements_step }, 
-      { "newline", HK_VALUE_newline }, 
-      { "notbol", HK_VALUE_notbol }, 
-      { "noteol", HK_VALUE_noteol }, 
       { "offset", HK_VALUE_offset }, 
       { "offset_from", HK_VALUE_offset_from }, 
       { "offset_key", HK_VALUE_offset_key }, 
@@ -482,7 +453,6 @@ keypair_t hashkeys[] = {
       { "reconnect_ivl_max", HK_VALUE_reconnect_ivl_max }, 
       { "recovery_ivl", HK_VALUE_recovery_ivl }, 
       { "recovery_ivl_msec", HK_VALUE_recovery_ivl_msec }, 
-      { "regexp", HK_VALUE_regexp }, 
       { "removed_items", HK_VALUE_removed_items }, 
       { "req_count", HK_VALUE_req_count }, 
       { "req_read", HK_VALUE_req_read }, 

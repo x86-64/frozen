@@ -51,6 +51,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_ipv4_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
+	$(top_srcdir)/./src/modules/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/allocator/fixed/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/compare/anything/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/data/config.m4 \
@@ -90,7 +91,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/query/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/data/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \

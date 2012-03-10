@@ -1,5 +1,8 @@
 #include <libfrozen.h>
 #include <regex.h>
+#include <regexp_t.h>
+
+#include <errors_list.c>
 
 /**
  * @ingroup machine
@@ -40,19 +43,14 @@
  * @endcode
  */
 
-#define ERRORS_MODULE_ID 27
-#define ERRORS_MODULE_NAME "data/regexp"
-
-// HK(global) - for global capture name
-
 typedef struct regexp_userdata {
 	char                  *regexp_str;
 	uintmax_t              cflags;
 	uintmax_t              eflags;
 	regmatch_t            *regmatch;
 	hash_t                *capture;
-	hashkey_t             input;
-	hashkey_t             marker;
+	hashkey_t              input;
+	hashkey_t              marker;
 	data_t                *marker_data;
 
 	uintmax_t              compiled;
@@ -118,8 +116,8 @@ static ssize_t regexp_init(machine_t *machine){ // {{{
 	if((userdata = machine->userdata = calloc(1, sizeof(regexp_userdata))) == NULL)
 		return error("calloc failed");
 	
-	userdata->input       = HK(buffer);
-	userdata->marker      = HK(marker);
+	userdata->input       = HDK(buffer);
+	userdata->marker      = HDK(marker);
 	userdata->marker_data = &marker_default;
 	userdata->regexp_str  = strdup(".*");
 	return 0;
@@ -146,14 +144,14 @@ static ssize_t regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	char                  *regexp_str        = NULL;
 	regexp_userdata       *userdata          = (regexp_userdata *)machine->userdata;
 	
-	config_updateflag(config, HK(extended), REG_EXTENDED, &userdata->cflags);
-	config_updateflag(config, HK(icase),    REG_ICASE,    &userdata->cflags);
-	config_updateflag(config, HK(newline),  REG_NEWLINE,  &userdata->cflags);
+	config_updateflag(config, HDK(extended), REG_EXTENDED, &userdata->cflags);
+	config_updateflag(config, HDK(icase),    REG_ICASE,    &userdata->cflags);
+	config_updateflag(config, HDK(newline),  REG_NEWLINE,  &userdata->cflags);
 	
-	config_updateflag(config, HK(notbol),   REG_NOTBOL,   &userdata->eflags);
-	config_updateflag(config, HK(noteol),   REG_NOTEOL,   &userdata->eflags);
+	config_updateflag(config, HDK(notbol),   REG_NOTBOL,   &userdata->eflags);
+	config_updateflag(config, HDK(noteol),   REG_NOTEOL,   &userdata->eflags);
 	
-	hash_data_consume(ret, TYPE_HASHT,    userdata->capture, config, HK(capture));
+	hash_data_consume(ret, TYPE_HASHT,    userdata->capture, config, HDK(capture));
 	userdata->ncaptures = hash_nelements(userdata->capture); // nelements return 0 on null hash, 1 on hash_end, 2 on element + hash_end, so on
 	if(userdata->ncaptures > 1){
 		userdata->ncaptures--;
@@ -161,10 +159,10 @@ static ssize_t regexp_configure(machine_t *machine, hash_t *config){ // {{{
 			return errorn(ENOMEM);
 	}
 	
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,   config, HK(input));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->marker,  config, HK(marker));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->input,   config, HDK(input));
+	hash_data_get(ret, TYPE_HASHKEYT, userdata->marker,  config, HDK(marker));
 	
-	hash_data_convert(ret, TYPE_STRINGT,  regexp_str,    config, HK(regexp));
+	hash_data_convert(ret, TYPE_STRINGT,  regexp_str,    config, HDK(regexp));
 	if(ret == 0){
 		free(userdata->regexp_str);
 		userdata->regexp_str = regexp_str;
@@ -174,7 +172,7 @@ static ssize_t regexp_configure(machine_t *machine, hash_t *config){ // {{{
 	if( (ret = config_newregexp(userdata)) != 0)
 		return ret;
 	
-	if( (marker_data = hash_data_find(config, HK(marker_data))) != NULL){
+	if( (marker_data = hash_data_find(config, HDK(marker_data))) != NULL){
 		config_freemarkerdata(userdata);
 		if( (ret = config_newmarkerdata(userdata, marker_data)) != 0)
 			return ret;
@@ -250,4 +248,13 @@ machine_t regexp_proto = {
 		.func_handler = &regexp_handler
 	}
 };
+
+int main(void){
+	errors_register((err_item *)&errs_list, &emodule);
+	//data_register(&regexp_t_proto);
+	class_register(&regexp_proto);
+	
+	type_regexpt = datatype_t_getid_byname(REGEXPT_NAME, NULL);
+	return 0;
+}
 
