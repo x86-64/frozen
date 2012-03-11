@@ -6,13 +6,19 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
+- raw_t move packing code to another datatype
+- raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
+- data_t use new packing datatype as primary method
+- hash_t, list_t use data_t to pack data, remove refs stripping
+- env_t nested contexts, not replace. request_enter_context, request_leave_context funcs
+- zmq device machine
+- pcre_t compare func
 - new test suite, as benchmarks, deprecate check
 - machine 'exec'
 - machine/rebuild deprecate?
 - portable action_t packed format
 - machine rate-limit, delay
 - benchmark functions remove from main request flow, need new approach for machine parameters, for machine/pool too
-- hash_t, list_t use data_t to pack data, remove refs stripping
 - slider_t set position func
 - netstring_t parse (get code from mongrel for parsing)
 - rewrite mongrel send\parse routines to use netstring_t, container_t types
@@ -27,6 +33,7 @@
 
 - rewrite file_t to use fd_t
 
+- document data packing abillity: uint_t, list_t, hash_t is packable, container_t depend on data in it, raw_t not packable
 - review code for multi-threading support, document machine's thread-safety capabilities
 - machine thread_pool
 - data perthread_t wrapper
