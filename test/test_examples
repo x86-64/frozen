@@ -1,0 +1,24 @@
+#!/bin/sh
+
+exit_err=0
+
+for f in `ls example_*.out`; do
+	cfg=`echo $f | sed "s/example_//" | sed "s/\.out//"`
+	
+	echo -n "testing $cfg: "
+	../src/frozend/frozend -c ../examples/$cfg >tmp_$cfg.out 2>&1
+	
+	diff -u example_$cfg.out tmp_$cfg.out >tmp_$cfg.diff 2>&1
+	err=$?
+	if [ $err != 0 ]; then
+		exit_err=$err
+		
+		echo "failed"
+		cat tmp_$cfg.diff 
+	else
+		echo "OK"
+		rm  tmp_$cfg.out
+		rm  tmp_$cfg.diff
+	fi;
+done;
+exit $exit_err;

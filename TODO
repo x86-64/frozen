@@ -12,7 +12,6 @@
 - hash_t, list_t use data_t to pack data, remove refs stripping
 - zmq device machine
 - pcre_t compare func
-- new test suite, as benchmarks, deprecate check
 - machine 'exec'
 - machine/rebuild deprecate?
 - portable action_t packed format

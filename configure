@@ -633,8 +633,6 @@ LS
 M4
 FUSE_LIBS
 FUSE_CFLAGS
-CHECK_LIBS
-CHECK_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
@@ -888,8 +886,6 @@ CXXCPP
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
-CHECK_CFLAGS
-CHECK_LIBS
 FUSE_CFLAGS
 FUSE_LIBS'
 
@@ -1695,9 +1691,6 @@ Some influential environment variables:
               directories to add to pkg-config's search path
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
-  CHECK_CFLAGS
-              C compiler flags for CHECK, overriding pkg-config
-  CHECK_LIBS  linker flags for CHECK, overriding pkg-config
   FUSE_CFLAGS C compiler flags for FUSE, overriding pkg-config
   FUSE_LIBS   linker flags for FUSE, overriding pkg-config
 
@@ -16879,6 +16872,14 @@ fi
 
 
 
+# Check whether --with-fuse was given.
+if test "${with_fuse+set}" = set; then :
+  withval=$with_fuse;
+else
+  with_fuse=check
+fi
+
+
 
 
 
@@ -16997,104 +16998,6 @@ $as_echo "no" >&6; }
 		PKG_CONFIG=""
 	fi
 fi
-
-pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for CHECK" >&5
-$as_echo_n "checking for CHECK... " >&6; }
-
-if test -n "$CHECK_CFLAGS"; then
-    pkg_cv_CHECK_CFLAGS="$CHECK_CFLAGS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"check >= 0.8.2\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "check >= 0.8.2") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_CHECK_CFLAGS=`$PKG_CONFIG --cflags "check >= 0.8.2" 2>/dev/null`
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-if test -n "$CHECK_LIBS"; then
-    pkg_cv_CHECK_LIBS="$CHECK_LIBS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"check >= 0.8.2\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "check >= 0.8.2") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_CHECK_LIBS=`$PKG_CONFIG --libs "check >= 0.8.2" 2>/dev/null`
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-
-
-
-if test $pkg_failed = yes; then
-   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        _pkg_short_errors_supported=yes
-else
-        _pkg_short_errors_supported=no
-fi
-        if test $_pkg_short_errors_supported = yes; then
-	        CHECK_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "check >= 0.8.2" 2>&1`
-        else
-	        CHECK_PKG_ERRORS=`$PKG_CONFIG --print-errors "check >= 0.8.2" 2>&1`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$CHECK_PKG_ERRORS" >&5
-
-	as_fn_error $? "Package requirements (check >= 0.8.2) were not met:
-
-$CHECK_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables CHECK_CFLAGS
-and CHECK_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
-elif test $pkg_failed = untried; then
-     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables CHECK_CFLAGS
-and CHECK_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
-else
-	CHECK_CFLAGS=$pkg_cv_CHECK_CFLAGS
-	CHECK_LIBS=$pkg_cv_CHECK_LIBS
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-fi
-
-
-# Check whether --with-fuse was given.
-if test "${with_fuse+set}" = set; then :
-  withval=$with_fuse;
-else
-  with_fuse=check
-fi
-
 case "$with_fuse" in #(
   yes) :
 

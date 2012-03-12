@@ -54,8 +54,6 @@ AC_CHECK_LIB(pthreads, pthread_create, [],
 AC_CHECK_LIB(dl, dlopen, [DL=1], [DL=0])
 AM_CONDITIONAL([HAVE_DL], [test "$DL" = 1])
 
-PKG_CHECK_MODULES([CHECK], [check >= 0.8.2])
-
 AC_ARG_WITH([fuse],
   [AS_HELP_STRING([--with-fuse],
     [support fuse filesystem @<:@default=check@:>@])],

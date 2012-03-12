@@ -1,19 +1,8 @@
-TESTS          = test
-check_PROGRAMS = test
+TESTS          = test_examples
+#check_PROGRAMS = test_e
 
-test_CFLAGS       = @CHECK_CFLAGS@ -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
-test_LDADD        = @CHECK_LIBS@ $(top_srcdir)/src/libfrozen/libfrozen.la
-
-EXTRA_DIST        = test_valgrind test_gdb test_coverage test_frozenfs test.c.m4 test_*.c test_*.conf
-
-test.c.m4: tests.m4
-test.c: test.c.m4
-	${M4} -sP test.c.m4 > $@
-tests.m4:
-	${LS} test_*.c | ${AWK} '{print "m4_include(" $$0 ")" }' > $@
+EXTRA_DIST        = test_valgrind test_gdb test_coverage test_frozenfs
 
 clean-local:
 	rm -rf data_*.dat
-
-CLEANFILES= tests.m4 test.c
 

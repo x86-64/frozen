@@ -72,7 +72,6 @@
 #define HK_VALUE_key 1600
 #define HK_VALUE_key1 2384
 #define HK_VALUE_key2 2400
-#define HK_VALUE_key3 2416
 #define HK_VALUE_key4 2432
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
@@ -109,7 +108,6 @@
 #define HK_VALUE_perlevel 21904
 #define HK_VALUE_pool_interval 88331
 #define HK_VALUE_port 3438
-#define HK_VALUE_random 9791
 #define HK_VALUE_rate 3162
 #define HK_VALUE_rcvbuf_size 54678
 #define HK_VALUE_read_size 30640
@@ -236,7 +234,6 @@ typedef enum hashkey_t {
       HK_key = HK_VALUE_key, 
       HK_key1 = HK_VALUE_key1, 
       HK_key2 = HK_VALUE_key2, 
-      HK_key3 = HK_VALUE_key3, 
       HK_key4 = HK_VALUE_key4, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
@@ -273,7 +270,6 @@ typedef enum hashkey_t {
       HK_perlevel = HK_VALUE_perlevel, 
       HK_pool_interval = HK_VALUE_pool_interval, 
       HK_port = HK_VALUE_port, 
-      HK_random = HK_VALUE_random, 
       HK_rate = HK_VALUE_rate, 
       HK_rcvbuf_size = HK_VALUE_rcvbuf_size, 
       HK_read_size = HK_VALUE_read_size, 
@@ -404,7 +400,6 @@ keypair_t hashkeys[] = {
       { "key", HK_VALUE_key }, 
       { "key1", HK_VALUE_key1 }, 
       { "key2", HK_VALUE_key2 }, 
-      { "key3", HK_VALUE_key3 }, 
       { "key4", HK_VALUE_key4 }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
@@ -441,7 +436,6 @@ keypair_t hashkeys[] = {
       { "perlevel", HK_VALUE_perlevel }, 
       { "pool_interval", HK_VALUE_pool_interval }, 
       { "port", HK_VALUE_port }, 
-      { "random", HK_VALUE_random }, 
       { "rate", HK_VALUE_rate }, 
       { "rcvbuf_size", HK_VALUE_rcvbuf_size }, 
       { "read_size", HK_VALUE_read_size }, 
