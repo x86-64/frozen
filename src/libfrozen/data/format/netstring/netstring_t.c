@@ -22,7 +22,7 @@ void                 netstring_t_destroy(netstring_t *netstring){ // {{{
 
 static ssize_t data_netstring_t_handler (data_t *data, fastcall_header *fargs){ // {{{
 	netstring_t               *fdata             = (netstring_t *)data->ptr;
-	
+
 	return data_query(fdata->data, fargs);
 } // }}}
 static ssize_t data_netstring_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
@@ -30,11 +30,8 @@ static ssize_t data_netstring_t_convert_to(data_t *src, fastcall_convert_to *far
 	char                   buffer[100];
 	intmax_t               buffer_size;
 	uintmax_t              transfered        = 0;
-	netstring_t           *fdata             = ((netstring_t *)src->ptr);
+	netstring_t           *fdata             = (netstring_t *)src->ptr;
 	data_t                 sl_dest           = DATA_SLIDERT(fargs->dest, 0);
-	
-	if(!fdata)
-		return -EINVAL;
 	
 	switch(fargs->format){
 		case FORMAT(packed):;
@@ -79,10 +76,7 @@ static ssize_t data_netstring_t_convert_to(data_t *src, fastcall_convert_to *far
 } // }}}
 static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	netstring_t           *fdata;
-	
-	if(dst->ptr != NULL)
-		return data_netstring_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
+	netstring_t           *fdata             = (netstring_t *)dst->ptr;
 	
 	switch(fargs->format){
 		case FORMAT(hash):;
@@ -93,6 +87,9 @@ static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from 
 			if(ret != 0)
 				return -EINVAL;
 			
+			if(fdata != NULL) // we already inited - pass
+				break;
+
 			hash_holder_consume(ret, data, config, HK(data));
 			if(ret != 0)
 				return -EINVAL;
@@ -108,11 +105,13 @@ static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from 
 
 		case FORMAT(netstring):
 		case FORMAT(packed):
-			break;
+			// TODO unpack
+			return -ENOSYS;
+
 		default:
 			break;
 	}
-	return -ENOSYS;
+	return data_netstring_t_handler(dst, (fastcall_header *)fargs);
 } // }}}
 static ssize_t data_netstring_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	netstring_t                  *fdata             = (netstring_t *)data->ptr;
@@ -125,7 +124,7 @@ static ssize_t data_netstring_t_length(data_t *data, fastcall_length *fargs){ //
 	char                       buffer[30];
 	intmax_t                   buffer_size;
 	netstring_t               *fdata             = (netstring_t *)data->ptr;
-		
+	
 	switch(fargs->format){
 		case FORMAT(packed):;
 		case FORMAT(netstring):;
