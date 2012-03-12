@@ -4,54 +4,76 @@
 #include <core/void/void_t.h>
 #include <enum/format/format_t.h>
 #include <modifiers/slider/slider_t.h>
+#include <format/binstring/binstring_t.h>
 
 static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	datatype_t             datatype;
-	data_t                 sl_input          = DATA_SLIDERT(fargs->src, 0);
-	data_t                 d_datatype        = DATA_PTR_DATATYPET(&datatype);
-	fastcall_convert_from  r_convert1        = { { 4, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
-	fastcall_convert_from  r_convert2        = { { 4, ACTION_CONVERT_FROM }, &sl_input, fargs->format };
 	data_t                *fdata             = dst->ptr;
+	data_t                 sl_input          = DATA_SLIDERT(fargs->src, 0);
 	
-	if(dst->ptr == NULL)
+	if(fdata == NULL)
 		return -EINVAL;
 	
-	// get datatype
-	if( (ret = data_query(&d_datatype, &r_convert1)) < 0)
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(fdata, &r_getdata)) < 0)
 		return ret;
 	
-	// accept datatype only eq void_t or datatype same as passed
-	if(fdata->type == TYPE_VOIDT){
-		fdata->type = datatype;
-	}else if(fdata->type != datatype){
-		return -EINVAL;
-	}
+	fdata = r_getdata.data;
 	
+	data_t                 new_data          = DATA_VOID;
+	data_t                 d_datatype        = DATA_PTR_DATATYPET(&new_data.type);
+	data_t                 d_binstring       = DATA_BINSTRINGT(&new_data);
+	fastcall_convert_from  r_convert         = { { 4, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
+	// get datatype
+	if( (ret = data_query(&d_datatype, &r_convert)) < 0)
+		return ret;
+	
+	// get data
 	data_slider_t_freeze(&sl_input);
-	
-		ret = data_query(fdata, &r_convert2);
+		
+		ret = data_query(&new_data, &r_convert);
+		if(errors_is_unix(ret, ENOSYS)){
+			ret = data_query(&d_binstring, &r_convert);
+		}
 	
 	data_slider_t_unfreeze(&sl_input);
-	return ret;
+	
+	// accept data only eq void_t or datatype same as passed
+	if(fdata->type == TYPE_VOIDT || fdata->type == new_data.type){
+		*fdata = new_data;
+		return ret;
+	}
+	return -EINVAL;
 } // }}}
 static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
 	data_t                *fdata              = src->ptr;
 	data_t                 sl_output          = DATA_SLIDERT(fargs->dest, 0);
-	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
-	fastcall_convert_to    r_convert1         = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
-	fastcall_convert_to    r_convert2         = { { 4, ACTION_CONVERT_TO }, &sl_output, fargs->format  };
 	
 	if(src->ptr == NULL)
 		return -EINVAL;
 	
-	if( (ret = data_query(&d_datatype, &r_convert1)) < 0)
+	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
+	if( (ret = data_query(fdata, &r_getdata)) < 0)
 		return ret;
 	
+	fdata = r_getdata.data;
+	
+	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
+	data_t                 d_binstring        = DATA_BINSTRINGT(fdata);
+	fastcall_convert_to    r_convert          = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+	
+	// write datatype
+	if( (ret = data_query(&d_datatype, &r_convert)) < 0)
+		return ret;
+	
+	// write data
 	data_slider_t_freeze(&sl_output);
 		
-		ret = data_query(fdata, &r_convert2);
+		ret = data_query(fdata, &r_convert);
+		if(errors_is_unix(ret, ENOSYS)){
+			ret = data_query(&d_binstring, &r_convert);
+		}
 		
 	data_slider_t_unfreeze(&sl_output);
 	return ret;
