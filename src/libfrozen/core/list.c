@@ -51,18 +51,27 @@ found:
 void       list_push   (list *clist, void *item){ // {{{
 	void                 **list;
 	void                  *curr;
-	size_t                 lsz      = 0;
+	uintmax_t              is_found  = 0;
+	size_t                 found_lsz = 0;
+	size_t                 lsz       = 0;
 	
 	pthread_rwlock_wrlock(&clist->lock);
 	
 	if( (list = clist->items) != NULL){
 		while( (curr = list[lsz]) != LIST_END){
-			if(curr == LIST_FREE_ITEM)
-				goto found;
+			if(curr == LIST_FREE_ITEM){
+				found_lsz = lsz;
+				is_found  = 1;
+			}
 			
 			lsz++;
 		}
 	}
+	if(is_found == 1){
+		lsz = found_lsz;
+		goto found;
+	}
+	
 	list = clist->items = realloc(list, sizeof(void *) * (lsz + 2));
 	memmove(list + 1, list, sizeof(void *) * (lsz + 1));
 	list[lsz + 1] = LIST_END;
