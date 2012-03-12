@@ -365,6 +365,9 @@ ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
 	//if(list->tail == chunk)
 	//	list->tail = NULL;
 	
+	fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } }; // caller will use it
+	data_query(&chunk->data, &r_acquire);
+	
 	memcpy(data, &chunk->data, sizeof(data_t));
 	chunk_free(chunk);
 	return 0;
