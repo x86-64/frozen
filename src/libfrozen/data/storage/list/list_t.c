@@ -5,8 +5,7 @@
 #include <core/hash/hash_t.h>
 #include <modifiers/slider/slider_t.h>
 #include <special/ref/ref_t.h>
-
-#define DATATYPE_BIN uint16_t
+#include <core/data/data_t.h>
 
 static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{{
 	ssize_t                ret;
@@ -49,41 +48,36 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	ssize_t                qret;
 	list_chunk_t          *chunk;
 	list_t                *fdata             = (list_t *)src->ptr;
-	data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, 0);
+	data_t                 sl_output         = DATA_SLIDERT(fargs->dest, 0);
 	
 	switch(fargs->format){
 		case FORMAT(packed):;
-			datatype_t             type;
-			data_t                 item_type          = DATA_PTR_DATATYPET(&type);
-			
 			for(chunk = fdata->head; chunk; chunk = chunk->cnext){
-				// strip refs
-				fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-				if( (ret = data_query(&chunk->data, &r_getdata)) < 0)
+				data_t         d_data             = DATA_PTR_DATAT(&chunk->data);
+				
+				data_slider_t_freeze(&sl_output);
+				
+					fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+					ret = data_query(&d_data, &r_convert);
+
+				data_slider_t_unfreeze(&sl_output);
+				
+				if(ret < 0)
 					break;
-				
-				type = r_getdata.data->type;
-				
-				// write type
-				fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
-				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
-					break;
-				
-				data_slider_t_freeze(&d_sl_data);
-					
-					// write data
-					fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
-					if( (ret = data_query(&chunk->data, &r_convert)) < 0)
-						break;
-				
-				data_slider_t_unfreeze(&d_sl_data);
 			}
 			
 			// terminate list
-			type = TYPE_LISTENDT;
+			data_t                 terminator         = { TYPE_LISTENDT, NULL };
+			data_t                 d_data             = DATA_PTR_DATAT(&terminator);
+				
+			data_slider_t_freeze(&sl_output);
+				
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+				qret = data_query(&d_data, &r_convert);
+				
+			data_slider_t_unfreeze(&sl_output);
 			
-			fastcall_convert_to r_convert_type = { { 4, ACTION_CONVERT_TO }, &d_sl_data, FORMAT(packed) };
-			if( (qret = data_query(&item_type, &r_convert_type)) < 0)
+			if(qret < 0)
 				ret = qret;
 			break;
 			
@@ -95,7 +89,7 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret               = 0;
 	list_t                *fdata;
-	data_t                 d_sl_data         = DATA_SLIDERT(fargs->src, 0);
+	data_t                 sl_input         = DATA_SLIDERT(fargs->src, 0);
 	
 	switch(fargs->format){
 		case FORMAT(native):
@@ -122,9 +116,8 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			return 0;
 			
 		case FORMAT(packed):;
-			datatype_t             type;
-			data_t                 item_type = DATA_PTR_DATATYPET(&type);
 			data_t                 item;
+			data_t                 d_item    = DATA_PTR_DATAT(&item);
 			
 			if((fdata = dst->ptr) == NULL){
 				if( (fdata = dst->ptr = list_t_alloc()) == NULL)
@@ -132,24 +125,20 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			}
 			
 			while(1){
-				fastcall_convert_from r_convert_type = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(packed) };
-				if( (ret = data_query(&item_type, &r_convert_type)) < 0)
+				data_set_void(&item);
+				
+				data_slider_t_freeze(&sl_input);
+				
+					fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
+					ret = data_query(&d_item, &r_convert);
+				
+				data_slider_t_unfreeze(&sl_input);
+				
+				if(ret < 0)
 					break;
 				
-				if(type == TYPE_LISTENDT)
+				if(item.type == TYPE_LISTENDT)
 					break;
-				
-				item.type = type;
-				item.ptr  = NULL;
-				
-				data_slider_t_freeze(&d_sl_data);
-					
-					// read data
-					fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_sl_data, FORMAT(packed) };
-					if( (ret = data_query(&item, &r_convert)) < 0)
-						break;
-				
-				data_slider_t_unfreeze(&d_sl_data);
 				
 				if( (ret = list_t_unshift(fdata, &item)) < 0)
 					break;
@@ -246,11 +235,26 @@ data_proto_t list_t_proto = { // {{{
 static ssize_t data_list_end_t_nosys(data_t *data, fastcall_header *hargs){ // {{{
 	return -ENOSYS;
 } // }}}
+static ssize_t data_list_end_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_list_end_t_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_list_end_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
+	fargs->data = data;
+	return 0;
+} // }}}
 data_proto_t list_end_t_proto = { // {{{
 	.type                   = TYPE_LISTENDT,
 	.type_str               = "list_end_t",
-	.api_type               = API_DEFAULT_HANDLER,
-	.handler_default        = (f_data_func)&data_list_end_t_nosys
+	.api_type               = API_HANDLERS,
+	.handler_default        = (f_data_func)&data_list_end_t_nosys,
+	.handlers               = {
+		[ACTION_CONVERT_TO]    = (f_data_func)&data_list_end_t_convert_to,
+		[ACTION_CONVERT_FROM]  = (f_data_func)&data_list_end_t_convert_from,
+		[ACTION_GETDATA]       = (f_data_func)&data_list_end_t_getdata,
+	}
 }; // }}}
 
 static list_chunk_t *    chunk_alloc(data_t *data){ // {{{

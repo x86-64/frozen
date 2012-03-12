@@ -7,7 +7,7 @@
   - index + file_t as store macro set
 
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
-- hash_t, list_t use data_t to pack data, remove refs stripping
+- hash_t, use data_t to pack data, remove refs stripping
 - zmq device machine
 - pcre_t compare func
 - machine 'exec'
