@@ -172,7 +172,6 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	try_userdata         *userdata          = (try_userdata *)machine->userdata;
 	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
 	
-	request_set_current(request);
 	
 	threaddata->machine  = machine;
 	threaddata->request  = request;
@@ -192,6 +191,8 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 		hash_inline(try_request),
 		hash_end
 	};
+	
+	request_enter_context(request);
 	
 	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
 	if( (ret = data_query(&userdata->machine, &r_query)) < 0){
@@ -218,6 +219,8 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 			threaddata->ret = machine_pass(machine, r_next);
 		}
 	}
+	
+	request_leave_context();
 	
 	data_free(&freeme);
 	return threaddata->ret;

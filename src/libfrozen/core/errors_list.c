@@ -56,7 +56,7 @@ static err_item errs_list[] = {
  { -155969, "src/libfrozen/machines/io/console/console.c: calloc failed" },
  { -155686, "src/libfrozen/machines/io/console/console.c: ENOSYS in module io/console" },
  { -155648, "unknown error in module io/console" },
- { -151806, "src/libfrozen/machines/request/end/end.c: calloc failed" },
+ { -151809, "src/libfrozen/machines/request/end/end.c: calloc failed" },
  { -151552, "unknown error in module request/end" },
  { -143695, "src/libfrozen/machines/data/split/split.c: no input string in request" },
  { -143639, "src/libfrozen/machines/data/split/split.c: calloc failed" },

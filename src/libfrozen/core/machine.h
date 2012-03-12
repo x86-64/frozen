@@ -102,8 +102,9 @@ struct machine_t {
 API ssize_t         class_register          (machine_t *proto); ///< Register new dynamic class
 API void            class_unregister        (machine_t *proto); ///< Unregister dynamic class
 
-API request_t *     request_get_current(void);               ///< Get current request
-API void            request_set_current(request_t *request); ///< Set current request
+API list *          request_get_stack(void);                   ///< Get current stack
+API void            request_enter_context(request_t *request); ///< Push current request in stack
+API void            request_leave_context(void);               ///< Pop request from stack
 
 API ssize_t         machine_new             (machine_t **pmachine, hash_t *config); ///< Create machine
 API void            machine_acquire         (machine_t *machine); ///< Increment ref counter of machine. Use shop_destroy to free.

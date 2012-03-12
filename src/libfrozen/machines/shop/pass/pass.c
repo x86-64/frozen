@@ -66,18 +66,22 @@ static ssize_t pass_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t pass_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
 	pass_userdata         *userdata          = (pass_userdata *)machine->userdata;
 	
-	request_set_current(request);
+	request_enter_context(request);
 	
-	request_t r_next[] = {
-		{ userdata->return_to, DATA_NEXT_MACHINET(machine) },
-		hash_inline(request),
-		hash_end
-	};
-	
-	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-	return data_query(&userdata->machine, &r_query);
+		request_t r_next[] = {
+			{ userdata->return_to, DATA_NEXT_MACHINET(machine) },
+			hash_inline(request),
+			hash_end
+		};
+		
+		fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
+		ret = data_query(&userdata->machine, &r_query);
+
+	request_leave_context();
+	return ret;
 } // }}}
 
 machine_t pass_proto = {

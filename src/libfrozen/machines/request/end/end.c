@@ -35,10 +35,13 @@ static ssize_t end_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret2;
 	end_userdata          *userdata          = (end_userdata *)machine->userdata;
 	
-	request_set_current(request);
+	request_enter_context(request);
 	
-	fastcall_read r_read = { { 5, ACTION_READ }, 0, &ret, sizeof(ret) };
-	if( (ret2 = data_query(&userdata->ret, &r_read)) < 0)
+		fastcall_read r_read = { { 5, ACTION_READ }, 0, &ret, sizeof(ret) };
+		ret2 = data_query(&userdata->ret, &r_read);
+	
+	request_leave_context();
+	if(ret2 < 0)
 		return ret2;
 	
 	return ret;

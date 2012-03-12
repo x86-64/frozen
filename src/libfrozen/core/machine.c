@@ -77,11 +77,29 @@ void               class_unregister        (machine_t *proto){ // {{{
 	list_delete(&classes, proto);
 } // }}}
 
-request_t *        request_get_current(void){ // {{{
-	return (request_t *)pthread_getspecific(key_curr_request);
+list *             request_get_stack(void){ // {{{
+	return (list *)pthread_getspecific(key_curr_request);
 } // }}}
-void               request_set_current(request_t *request){ // {{{
-	pthread_setspecific(key_curr_request, request);
+void               request_enter_context(request_t *request){ // {{{
+	list                  *stack;
+	
+	if( (stack = pthread_getspecific(key_curr_request)) == NULL){
+		stack = list_alloc();
+		pthread_setspecific(key_curr_request, stack);
+	}
+	
+	list_push(stack, request);
+} // }}}
+void               request_leave_context(void){ // {{{
+	list                  *stack;
+	
+	if( (stack = pthread_getspecific(key_curr_request)) == NULL)
+		return;
+	
+	list_pop(stack);
+} // }}}
+static void        request_stack_destructor(void *stack){ // {{{
+	list_free(stack);
 } // }}}
 
 ssize_t            thread_data_init(thread_data_ctx_t *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, void *userdata){ // {{{
@@ -316,7 +334,7 @@ ssize_t            frozen_machine_init(void){ // {{{
 	
 	pthread_mutexattr_destroy(&attr);
 	
-	if(pthread_key_create(&key_curr_request, NULL) != 0)
+	if(pthread_key_create(&key_curr_request, &request_stack_destructor) != 0)
 		return -EFAULT;
 	
 	return 0;
