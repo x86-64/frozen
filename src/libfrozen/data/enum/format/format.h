@@ -2,6 +2,7 @@
 #ifndef FORMATS_H
 #define FORMATS_H
 #define FORMAT(value)         FORMAT_VALUE_##value
+#define FORMAT_VALUE_binstring 30880
 #define FORMAT_VALUE_config 9498
 #define FORMAT_VALUE_debug 5833
 #define FORMAT_VALUE_hash 3191
@@ -25,6 +26,7 @@
 #define FORMAT_VALUE_time_unix 31550
 #define FORMAT_VALUE_value 5875
 typedef enum format_t {
+      FORMAT_binstring = FORMAT_VALUE_binstring, 
       FORMAT_config = FORMAT_VALUE_config, 
       FORMAT_debug = FORMAT_VALUE_debug, 
       FORMAT_hash = FORMAT_VALUE_hash, 
@@ -52,6 +54,7 @@ typedef enum format_t {
 
 #ifdef FORMAT_C
 keypair_t formats[] = {
+      { "binstring", FORMAT_VALUE_binstring }, 
       { "config", FORMAT_VALUE_config }, 
       { "debug", FORMAT_VALUE_debug }, 
       { "hash", FORMAT_VALUE_hash }, 
