@@ -5,7 +5,6 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 
-
 static ssize_t raw_resize(raw_t *fdata, uintmax_t new_size){ // {{{
 	if( (fdata->flags & RAW_RESIZEABLE) == 0)
 		return -EINVAL;
@@ -109,9 +108,6 @@ static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
 		case FORMAT(human):
 		case FORMAT(config):
 			break;
-		case FORMAT(packed):
-			fargs->length += sizeof(((raw_t *)data->ptr)->size);
-			break;
 		default:
 			return -ENOSYS;
 	}
@@ -177,20 +173,6 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 			transfered = r_write.buffer_size;
 			
 			break;
-
-		case FORMAT(packed):;
-			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0,                     &src_data->size, sizeof(src_data->size) };
-			ret         = data_query(fargs->dest, &r_write1);
-			transfered += r_write1.buffer_size;
-			
-			if(ret < 0)
-				break;
-			
-			fastcall_write r_write2 = { { 5, ACTION_WRITE }, sizeof(src_data->size), src_data->ptr,  src_data->size };
-			ret         = data_query(fargs->dest, &r_write2);
-			transfered += r_write2.buffer_size;
-	
-			break;
 		
 		default:
 			return -ENOSYS;
@@ -234,13 +216,6 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			hash_data_get(ret, TYPE_UINTT, length, config, HK(length));
 			
 			return raw_read(dst, buffer, 0, length);
-
-		case FORMAT(packed):;
-			fastcall_read r_read = { { 5, ACTION_READ }, 0, &length, sizeof(length) };
-			if( (ret = data_query(fargs->src, &r_read)) < 0)
-				return ret;
-			
-			return raw_read(dst, fargs->src, sizeof(length), length);
 			
 		default:
 			break;
