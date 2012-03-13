@@ -231,9 +231,6 @@ static ssize_t data_container_t_convert_to(data_t *data, fastcall_convert_to *fa
 	if(fdata == NULL)
 		return -EINVAL;
 	
-	if(fargs->format == FORMAT(packed))
-		return data_container_t_pass(data, (fastcall_header *)fargs);
-	
 	data_t                 sl_dest = DATA_SLIDERT(fargs->dest, 0);
 	container_convert_ctx  convert_ctx = {
 		.sl_dest      = &sl_dest,
