@@ -167,15 +167,13 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 	
 	switch(fargs->format){
 		case FORMAT(native):;
+		default:;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src_data->ptr, src_data->size };
 			ret = data_query(fargs->dest, &r_write);
 			
 			transfered = r_write.buffer_size;
 			
 			break;
-		
-		default:
-			return -ENOSYS;
 	};
 	if(fargs->header.nargs >= 5)
 		fargs->transfered = transfered;
@@ -190,6 +188,7 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
+		default:;
 			
 			fastcall_length r_len1 = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
 			if( (ret = data_query(fargs->src, &r_len1)) < 0)
@@ -216,9 +215,6 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			hash_data_get(ret, TYPE_UINTT, length, config, HK(length));
 			
 			return raw_read(dst, buffer, 0, length);
-			
-		default:
-			break;
 	};
 	return -ENOSYS;
 } // }}}
