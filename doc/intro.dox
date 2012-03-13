@@ -3,7 +3,7 @@
 /** @defgroup data Data */
 /** @defgroup tutorial Tutorials */
 
-/** @mainpage Frozen
+/** @mainpage
  *
  *  @section intro Introduction
  *    Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing.
