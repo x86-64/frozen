@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>zeromq_t.h Source File | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -46,7 +46,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>Globals</span></a></li>
     </ul>
   </div>
 <div class="header">
@@ -60,21 +59,24 @@
 <a name="l00082"></a>00082 <span class="preprocessor">#define ZEROMQT_NAME       &quot;zeromq_t&quot;</span>
 <a name="l00083"></a>00083 <span class="preprocessor"></span><span class="preprocessor">#define ZEROMQ_MSGT_NAME   &quot;zeromq_msg_t&quot;</span>
 <a name="l00084"></a>00084 <span class="preprocessor"></span>
-<a name="l00085"></a>00085 <span class="preprocessor">#define TYPE_ZEROMQT      datatype_t_getid_byname(ZEROMQT_NAME,     NULL)</span>
-<a name="l00086"></a>00086 <span class="preprocessor"></span><span class="preprocessor">#define TYPE_ZEROMQ_MSGT  datatype_t_getid_byname(ZEROMQ_MSGT_NAME, NULL)</span>
-<a name="l00087"></a>00087 <span class="preprocessor"></span>
-<a name="l00088"></a>00088 <span class="preprocessor">#define DATA_PTR_ZEROMQ_MSGT(_msg) { TYPE_ZEROMQ_MSGT, _msg } </span>
-<a name="l00089"></a>00089 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_ZEROMQT(_data) (ipv4_t *)((_data)-&gt;ptr) </span>
-<a name="l00090"></a>00090 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_ZEROMQT(_dt) _dt </span>
-<a name="l00091"></a>00091 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_ZEROMQT 0</span>
-<a name="l00092"></a>00092 <span class="preprocessor"></span>
-<a name="l00093"></a>00093 <span class="preprocessor">#endif</span>
+<a name="l00085"></a>00085 datatype_t                type_zeromqt; 
+<a name="l00086"></a>00086 datatype_t                type_zeromq_msgt;
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088 <span class="preprocessor">#define TYPE_ZEROMQT      type_zeromqt</span>
+<a name="l00089"></a>00089 <span class="preprocessor"></span><span class="preprocessor">#define TYPE_ZEROMQ_MSGT  type_zeromq_msgt</span>
+<a name="l00090"></a>00090 <span class="preprocessor"></span>
+<a name="l00091"></a>00091 <span class="preprocessor">#define DATA_PTR_ZEROMQ_MSGT(_msg) { TYPE_ZEROMQ_MSGT, _msg } </span>
+<a name="l00092"></a>00092 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_ZEROMQT(_data) (ipv4_t *)((_data)-&gt;ptr) </span>
+<a name="l00093"></a>00093 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_ZEROMQT(_dt) _dt </span>
+<a name="l00094"></a>00094 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_ZEROMQT 0</span>
+<a name="l00095"></a>00095 <span class="preprocessor"></span>
+<a name="l00096"></a>00096 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

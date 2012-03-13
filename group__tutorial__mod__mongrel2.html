@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>Tutorial: mongrel2 handlers | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -55,7 +55,7 @@ Overview</h2>
 <h2><a class="anchor" id="tutorial_mod_example"></a>
 Example configuration</h2>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;daemon/thread&quot;, loop = (uint_t)<span class="charliteral">&#39;1&#39;</span> },
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type     = <span class="stringliteral">&quot;pull&quot;</span>,
         identity = <span class="stringliteral">&quot;82209006-86FF-4982-B5EA-D1E29E55D481&quot;</span>,
         connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9999&quot;</span>
@@ -77,7 +77,7 @@ Example configuration</h2>
 
 { <span class="keyword">class </span>= &quot;modules/c_mongrel2_reply&quot; },                         <span class="comment">// pack our reply according to mongrel2 protocol</span>
 
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type     = <span class="stringliteral">&quot;pub&quot;</span>,
         connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9998&quot;</span>
 }},
@@ -263,7 +263,7 @@ Benchmarking results</h2>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

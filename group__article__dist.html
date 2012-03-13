@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>Building distributed data processing pipeline | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -57,7 +57,7 @@ Goal</h2>
 Step 1: read data</h2>
 <p>To read data we use following config: </p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot; },
-{ <span class="keyword">class </span>= &quot;query&quot;, data = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;/var/log/messages&quot;</span>, readonly = (uint_t)<span class="stringliteral">&quot;1&quot;</span> }, request = {
+{ <span class="keyword">class </span>= &quot;query&quot;, data = (file_t){ filename = <span class="stringliteral">&quot;/var/log/messages&quot;</span>, readonly = (uint_t)<span class="stringliteral">&quot;1&quot;</span> }, request = {
         action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
         destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 
@@ -65,7 +65,7 @@ Step 1: read data</h2>
                 { <span class="keyword">class </span>= &quot;split&quot; },
                 
                 <span class="comment">// send to next process</span>
-                { <span class="keyword">class </span>= &quot;modules/zeromq&quot;, convert = (uint_t)<span class="stringliteral">&quot;1&quot;</span>, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                { <span class="keyword">class </span>= &quot;modules/zeromq&quot;, convert = (uint_t)<span class="stringliteral">&quot;1&quot;</span>, socket = (zeromq_t){
                         type    = <span class="stringliteral">&quot;push&quot;</span>,
                         connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8800&quot;</span>
                 }},
@@ -80,7 +80,7 @@ Step 2: categorize data</h2>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
 
 <span class="comment">// get message</span>
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type    = <span class="stringliteral">&quot;pull&quot;</span>,
         bind    = <span class="stringliteral">&quot;tcp://127.0.0.1:8800&quot;</span>
 }},
@@ -89,7 +89,7 @@ Step 2: categorize data</h2>
 { <span class="keyword">class </span>= &quot;query&quot;, data = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdout&quot;</span>, request = { action = (action_t)<span class="stringliteral">&quot;write&quot;</span>, buffer = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;buffer&quot;</span> } },
 
 <span class="comment">// send to next process</span>
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type    = <span class="stringliteral">&quot;push&quot;</span>,
         connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8801&quot;</span>
 }},
@@ -98,7 +98,7 @@ Step 2: categorize data</h2>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
 
 <span class="comment">// get message</span>
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type    = <span class="stringliteral">&quot;pull&quot;</span>,
         bind    = <span class="stringliteral">&quot;tcp://127.0.0.1:8800&quot;</span>
 }},
@@ -114,7 +114,7 @@ Step 2: categorize data</h2>
                         { <span class="keyword">class </span>= &quot;query&quot;, data = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdout&quot;</span>, request = { action = (action_t)<span class="stringliteral">&quot;write&quot;</span>, buffer = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;buffer&quot;</span> } },
                         
                         <span class="comment">// send to next process</span>
-                        { <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                        { <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
                                 type    = <span class="stringliteral">&quot;push&quot;</span>,
                                 connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8801&quot;</span>
                         }},
@@ -129,13 +129,13 @@ Step 2: categorize data</h2>
 Step 3: save results</h2>
 <p>After processing we want to save results, lets save it to simple file. </p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
-{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+{ <span class="keyword">class </span>= &quot;modules/zeromq&quot;, socket = (zeromq_t){
         type = <span class="stringliteral">&quot;pull&quot;</span>,
         bind = <span class="stringliteral">&quot;tcp://127.0.0.1:8801&quot;</span>
 }},
 { <span class="keyword">class </span>= &quot;query&quot;,
         data = (<a class="code" href="structslider__t.html">slider_t</a>){
-                data = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;result.dat&quot;</span> }
+                data = (file_t){ filename = <span class="stringliteral">&quot;result.dat&quot;</span> }
         },
         request = {
                 action = (action_t)<span class="stringliteral">&quot;write&quot;</span>,
@@ -177,7 +177,7 @@ Problem: not flexible processing. Solutions: if you have some very complex proce
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>hashkeys.h Source File | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -46,7 +46,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>Globals</span></a></li>
     </ul>
   </div>
 <div class="header">
@@ -82,515 +81,479 @@
 <a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_body 3378</span>
 <a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_buffer 9745</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_buffer_size 54686</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_capture 15329</span>
-<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_class 6119</span>
-<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_clientid 21563</span>
-<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_close 5895</span>
-<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_config 9498</span>
-<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_connect 15066</span>
-<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_convert 15734</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_copy 3487</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_count 6256</span>
-<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_create 9552</span>
-<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data 3084</span>
-<a name="l00040"></a>00040 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_e 9095</span>
-<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_g 9167</span>
-<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_v 9707</span>
-<a name="l00043"></a>00043 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_default 15471</span>
-<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_destination 55072</span>
-<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_destroy 16170</span>
-<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_dump_last 31113</span>
-<a name="l00047"></a>00047 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_engine 9534</span>
-<a name="l00048"></a>00048 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_enum_method 53634</span>
-<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_exclusive 31143</span>
-<a name="l00050"></a>00050 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_extended 20940</span>
-<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_fatal 5786</span>
-<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_field 5659</span>
-<a name="l00053"></a>00053 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_filename 21157</span>
-<a name="l00054"></a>00054 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_folder 9747</span>
-<a name="l00055"></a>00055 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_force_async 53994</span>
-<a name="l00056"></a>00056 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_force_sync 41290</span>
-<a name="l00057"></a>00057 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_format 9917</span>
-<a name="l00058"></a>00058 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_function 22303</span>
-<a name="l00059"></a>00059 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_global 9415</span>
-<a name="l00060"></a>00060 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash 3191</span>
-<a name="l00061"></a>00061 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_end 68083</span>
-<a name="l00062"></a>00062 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_inline 131665</span>
-<a name="l00063"></a>00063 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_null 89234</span>
-<a name="l00064"></a>00064 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_headers 15245</span>
-<a name="l00065"></a>00065 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hwm 1561</span>
-<a name="l00066"></a>00066 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_icase 5739</span>
-<a name="l00067"></a>00067 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_identity 23282</span>
-<a name="l00068"></a>00068 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_ignore_errors 90804</span>
-<a name="l00069"></a>00069 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_index 6061</span>
-<a name="l00070"></a>00070 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_inode 5669</span>
-<a name="l00071"></a>00071 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_input 6325</span>
-<a name="l00072"></a>00072 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_insert 10222</span>
-<a name="l00073"></a>00073 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_item_sample 53559</span>
-<a name="l00074"></a>00074 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_item_size 30871</span>
-<a name="l00075"></a>00075 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_items 6097</span>
-<a name="l00076"></a>00076 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key 1600</span>
-<a name="l00077"></a>00077 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key1 2384</span>
-<a name="l00078"></a>00078 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key2 2400</span>
-<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key3 2416</span>
-<a name="l00080"></a>00080 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key4 2432</span>
-<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_lazy 3530</span>
-<a name="l00082"></a>00082 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_length 9794</span>
-<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_linger 9795</span>
-<a name="l00084"></a>00084 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_loop 3343</span>
-<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_machine 14586</span>
-<a name="l00086"></a>00086 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_marker 9864</span>
-<a name="l00087"></a>00087 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_marker_data 52113</span>
-<a name="l00088"></a>00088 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_master 10017</span>
-<a name="l00089"></a>00089 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_global 39928</span>
-<a name="l00090"></a>00090 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_perfork 54985</span>
-<a name="l00091"></a>00091 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_perinstance 130972</span>
-<a name="l00092"></a>00092 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mcast_loop 42125</span>
-<a name="l00093"></a>00093 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode 3069</span>
-<a name="l00094"></a>00094 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode_global 52254</span>
-<a name="l00095"></a>00095 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode_perfork 70285</span>
-<a name="l00096"></a>00096 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mountpoint 42967</span>
-<a name="l00097"></a>00097 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_multithread 52579</span>
-<a name="l00098"></a>00098 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_n_initial 30097</span>
-<a name="l00099"></a>00099 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_name 3095</span>
-<a name="l00100"></a>00100 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements 31592</span>
-<a name="l00101"></a>00101 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_min 87991</span>
-<a name="l00102"></a>00102 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_mul 89381</span>
-<a name="l00103"></a>00103 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_step 110732</span>
-<a name="l00104"></a>00104 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_newline 14847</span>
-<a name="l00105"></a>00105 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_notbol 9829</span>
-<a name="l00106"></a>00106 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_noteol 9877</span>
-<a name="l00107"></a>00107 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset 9978</span>
-<a name="l00108"></a>00108 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_from 54684</span>
-<a name="l00109"></a>00109 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_key 41762</span>
-<a name="l00110"></a>00110 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_out 42814</span>
-<a name="l00111"></a>00111 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_to 31048</span>
-<a name="l00112"></a>00112 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_output 10516</span>
-<a name="l00113"></a>00113 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_parameter 30821</span>
-<a name="l00114"></a>00114 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_parameter_request 196377</span>
-<a name="l00115"></a>00115 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_pass_first 42778</span>
-<a name="l00116"></a>00116 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_path 3208</span>
-<a name="l00117"></a>00117 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_paused 9518</span>
-<a name="l00118"></a>00118 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_perlevel 21904</span>
-<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_pool_interval 88331</span>
-<a name="l00120"></a>00120 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_port 3438</span>
-<a name="l00121"></a>00121 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_random 9791</span>
-<a name="l00122"></a>00122 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rate 3162</span>
-<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rcvbuf_size 54678</span>
-<a name="l00124"></a>00124 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_read_size 30640</span>
-<a name="l00125"></a>00125 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reader 9620</span>
-<a name="l00126"></a>00126 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_readonly 22762</span>
-<a name="l00127"></a>00127 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_real_offset 54467</span>
-<a name="l00128"></a>00128 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reclen 9622</span>
-<a name="l00129"></a>00129 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reconnect_ivl 88025</span>
-<a name="l00130"></a>00130 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reconnect_ivl_max 190682</span>
-<a name="l00131"></a>00131 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_recovery_ivl 71126</span>
-<a name="l00132"></a>00132 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_recovery_ivl_msec 188887</span>
-<a name="l00133"></a>00133 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_regexp 10093</span>
-<a name="l00134"></a>00134 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_removed_items 88298</span>
-<a name="l00135"></a>00135 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_count 31695</span>
-<a name="l00136"></a>00136 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_read 20694</span>
-<a name="l00137"></a>00137 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild 53236</span>
-<a name="l00138"></a>00138 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild_destination 464804</span>
-<a name="l00139"></a>00139 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild_enable 216394</span>
-<a name="l00140"></a>00140 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_request 15756</span>
-<a name="l00141"></a>00141 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_request_out 56563</span>
-<a name="l00142"></a>00142 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_ret 1562</span>
-<a name="l00143"></a>00143 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_retry 6411</span>
-<a name="l00144"></a>00144 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_retry_request 91119</span>
-<a name="l00145"></a>00145 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return 10244</span>
-<a name="l00146"></a>00146 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return_result 91189</span>
-<a name="l00147"></a>00147 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return_to 31314</span>
-<a name="l00148"></a>00148 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_role 3146</span>
-<a name="l00149"></a>00149 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rules 6045</span>
-<a name="l00150"></a>00150 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_shop 3322</span>
-<a name="l00151"></a>00151 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_silent 10049</span>
-<a name="l00152"></a>00152 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_size 3249</span>
-<a name="l00153"></a>00153 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_slave 5833</span>
-<a name="l00154"></a>00154 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_sndbuf_size 54561</span>
-<a name="l00155"></a>00155 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_socket 9863</span>
-<a name="l00156"></a>00156 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_source 9547</span>
-<a name="l00157"></a>00157 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_split 6115</span>
-<a name="l00158"></a>00158 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_storage 14484</span>
-<a name="l00159"></a>00159 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_string 9743</span>
-<a name="l00160"></a>00160 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_structure 31338</span>
-<a name="l00161"></a>00161 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_subscribe 29482</span>
-<a name="l00162"></a>00162 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_swap 3256</span>
-<a name="l00163"></a>00163 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_sync 3173</span>
-<a name="l00164"></a>00164 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_temprorary 43267</span>
-<a name="l00165"></a>00165 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_test 3411</span>
-<a name="l00166"></a>00166 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_tick_interval 88187</span>
-<a name="l00167"></a>00167 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_truncate 21500</span>
-<a name="l00168"></a>00168 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_type 3224</span>
-<a name="l00169"></a>00169 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_unsubscribe 52727</span>
-<a name="l00170"></a>00170 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_uuid 3130</span>
-<a name="l00171"></a>00171 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value 5875</span>
-<a name="l00172"></a>00172 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value_bits 41713</span>
-<a name="l00173"></a>00173 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value_size 41632</span>
-<a name="l00174"></a>00174 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_values 10015</span>
-<a name="l00175"></a>00175 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_verbose 14980</span>
-<a name="l00176"></a>00176 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_writer 10005</span>
-<a name="l00177"></a>00177 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> hashkey_t {
-<a name="l00178"></a>00178       HK_action = HK_VALUE_action, 
-<a name="l00179"></a>00179       HK_action_global = HK_VALUE_action_global, 
-<a name="l00180"></a>00180       HK_action_one = HK_VALUE_action_one, 
-<a name="l00181"></a>00181       HK_action_perfork = HK_VALUE_action_perfork, 
-<a name="l00182"></a>00182       HK_action_request = HK_VALUE_action_request, 
-<a name="l00183"></a>00183       HK_action_request_global = HK_VALUE_action_request_global, 
-<a name="l00184"></a>00184       HK_action_request_one = HK_VALUE_action_request_one, 
-<a name="l00185"></a>00185       HK_action_request_perfork = HK_VALUE_action_request_perfork, 
-<a name="l00186"></a>00186       HK_addr = HK_VALUE_addr, 
-<a name="l00187"></a>00187       HK_affinity = HK_VALUE_affinity, 
-<a name="l00188"></a>00188       HK_after = HK_VALUE_after, 
-<a name="l00189"></a>00189       HK_append = HK_VALUE_append, 
-<a name="l00190"></a>00190       HK_async = HK_VALUE_async, 
-<a name="l00191"></a>00191       HK_backend = HK_VALUE_backend, 
-<a name="l00192"></a>00192       HK_backlog = HK_VALUE_backlog, 
-<a name="l00193"></a>00193       HK_before = HK_VALUE_before, 
-<a name="l00194"></a>00194       HK_benchmark_function = HK_VALUE_benchmark_function, 
-<a name="l00195"></a>00195       HK_bind = HK_VALUE_bind, 
-<a name="l00196"></a>00196       HK_block_off = HK_VALUE_block_off, 
-<a name="l00197"></a>00197       HK_block_size = HK_VALUE_block_size, 
-<a name="l00198"></a>00198       HK_block_vid = HK_VALUE_block_vid, 
-<a name="l00199"></a>00199       HK_blocks = HK_VALUE_blocks, 
-<a name="l00200"></a>00200       HK_body = HK_VALUE_body, 
-<a name="l00201"></a>00201       HK_buffer = HK_VALUE_buffer, 
-<a name="l00202"></a>00202       HK_buffer_size = HK_VALUE_buffer_size, 
-<a name="l00203"></a>00203       HK_capture = HK_VALUE_capture, 
-<a name="l00204"></a>00204       HK_class = HK_VALUE_class, 
-<a name="l00205"></a>00205       HK_clientid = HK_VALUE_clientid, 
-<a name="l00206"></a>00206       HK_close = HK_VALUE_close, 
-<a name="l00207"></a>00207       HK_config = HK_VALUE_config, 
-<a name="l00208"></a>00208       HK_connect = HK_VALUE_connect, 
-<a name="l00209"></a>00209       HK_convert = HK_VALUE_convert, 
-<a name="l00210"></a>00210       HK_copy = HK_VALUE_copy, 
-<a name="l00211"></a>00211       HK_count = HK_VALUE_count, 
-<a name="l00212"></a>00212       HK_create = HK_VALUE_create, 
-<a name="l00213"></a>00213       HK_data = HK_VALUE_data, 
-<a name="l00214"></a>00214       HK_data_e = HK_VALUE_data_e, 
-<a name="l00215"></a>00215       HK_data_g = HK_VALUE_data_g, 
-<a name="l00216"></a>00216       HK_data_v = HK_VALUE_data_v, 
-<a name="l00217"></a>00217       HK_default = HK_VALUE_default, 
-<a name="l00218"></a>00218       HK_destination = HK_VALUE_destination, 
-<a name="l00219"></a>00219       HK_destroy = HK_VALUE_destroy, 
-<a name="l00220"></a>00220       HK_dump_last = HK_VALUE_dump_last, 
-<a name="l00221"></a>00221       HK_engine = HK_VALUE_engine, 
-<a name="l00222"></a>00222       HK_enum_method = HK_VALUE_enum_method, 
-<a name="l00223"></a>00223       HK_exclusive = HK_VALUE_exclusive, 
-<a name="l00224"></a>00224       HK_extended = HK_VALUE_extended, 
-<a name="l00225"></a>00225       HK_fatal = HK_VALUE_fatal, 
-<a name="l00226"></a>00226       HK_field = HK_VALUE_field, 
-<a name="l00227"></a>00227       HK_filename = HK_VALUE_filename, 
-<a name="l00228"></a>00228       HK_folder = HK_VALUE_folder, 
-<a name="l00229"></a>00229       HK_force_async = HK_VALUE_force_async, 
-<a name="l00230"></a>00230       HK_force_sync = HK_VALUE_force_sync, 
-<a name="l00231"></a>00231       HK_format = HK_VALUE_format, 
-<a name="l00232"></a>00232       HK_function = HK_VALUE_function, 
-<a name="l00233"></a>00233       HK_global = HK_VALUE_global, 
-<a name="l00234"></a>00234       HK_hash = HK_VALUE_hash, 
-<a name="l00235"></a>00235       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
-<a name="l00236"></a>00236       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
-<a name="l00237"></a>00237       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
-<a name="l00238"></a>00238       HK_headers = HK_VALUE_headers, 
-<a name="l00239"></a>00239       HK_hwm = HK_VALUE_hwm, 
-<a name="l00240"></a>00240       HK_icase = HK_VALUE_icase, 
-<a name="l00241"></a>00241       HK_identity = HK_VALUE_identity, 
-<a name="l00242"></a>00242       HK_ignore_errors = HK_VALUE_ignore_errors, 
-<a name="l00243"></a>00243       HK_index = HK_VALUE_index, 
-<a name="l00244"></a>00244       HK_inode = HK_VALUE_inode, 
-<a name="l00245"></a>00245       HK_input = HK_VALUE_input, 
-<a name="l00246"></a>00246       HK_insert = HK_VALUE_insert, 
-<a name="l00247"></a>00247       HK_item_sample = HK_VALUE_item_sample, 
-<a name="l00248"></a>00248       HK_item_size = HK_VALUE_item_size, 
-<a name="l00249"></a>00249       HK_items = HK_VALUE_items, 
-<a name="l00250"></a>00250       HK_key = HK_VALUE_key, 
-<a name="l00251"></a>00251       HK_key1 = HK_VALUE_key1, 
-<a name="l00252"></a>00252       HK_key2 = HK_VALUE_key2, 
-<a name="l00253"></a>00253       HK_key3 = HK_VALUE_key3, 
-<a name="l00254"></a>00254       HK_key4 = HK_VALUE_key4, 
-<a name="l00255"></a>00255       HK_lazy = HK_VALUE_lazy, 
-<a name="l00256"></a>00256       HK_length = HK_VALUE_length, 
-<a name="l00257"></a>00257       HK_linger = HK_VALUE_linger, 
-<a name="l00258"></a>00258       HK_loop = HK_VALUE_loop, 
-<a name="l00259"></a>00259       HK_machine = HK_VALUE_machine, 
-<a name="l00260"></a>00260       HK_marker = HK_VALUE_marker, 
-<a name="l00261"></a>00261       HK_marker_data = HK_VALUE_marker_data, 
-<a name="l00262"></a>00262       HK_master = HK_VALUE_master, 
-<a name="l00263"></a>00263       HK_max_global = HK_VALUE_max_global, 
-<a name="l00264"></a>00264       HK_max_perfork = HK_VALUE_max_perfork, 
-<a name="l00265"></a>00265       HK_max_perinstance = HK_VALUE_max_perinstance, 
-<a name="l00266"></a>00266       HK_mcast_loop = HK_VALUE_mcast_loop, 
-<a name="l00267"></a>00267       HK_mode = HK_VALUE_mode, 
-<a name="l00268"></a>00268       HK_mode_global = HK_VALUE_mode_global, 
-<a name="l00269"></a>00269       HK_mode_perfork = HK_VALUE_mode_perfork, 
-<a name="l00270"></a>00270       HK_mountpoint = HK_VALUE_mountpoint, 
-<a name="l00271"></a>00271       HK_multithread = HK_VALUE_multithread, 
-<a name="l00272"></a>00272       HK_n_initial = HK_VALUE_n_initial, 
-<a name="l00273"></a>00273       HK_name = HK_VALUE_name, 
-<a name="l00274"></a>00274       HK_nelements = HK_VALUE_nelements, 
-<a name="l00275"></a>00275       HK_nelements_min = HK_VALUE_nelements_min, 
-<a name="l00276"></a>00276       HK_nelements_mul = HK_VALUE_nelements_mul, 
-<a name="l00277"></a>00277       HK_nelements_step = HK_VALUE_nelements_step, 
-<a name="l00278"></a>00278       HK_newline = HK_VALUE_newline, 
-<a name="l00279"></a>00279       HK_notbol = HK_VALUE_notbol, 
-<a name="l00280"></a>00280       HK_noteol = HK_VALUE_noteol, 
-<a name="l00281"></a>00281       HK_offset = HK_VALUE_offset, 
-<a name="l00282"></a>00282       HK_offset_from = HK_VALUE_offset_from, 
-<a name="l00283"></a>00283       HK_offset_key = HK_VALUE_offset_key, 
-<a name="l00284"></a>00284       HK_offset_out = HK_VALUE_offset_out, 
-<a name="l00285"></a>00285       HK_offset_to = HK_VALUE_offset_to, 
-<a name="l00286"></a>00286       HK_output = HK_VALUE_output, 
-<a name="l00287"></a>00287       HK_parameter = HK_VALUE_parameter, 
-<a name="l00288"></a>00288       HK_parameter_request = HK_VALUE_parameter_request, 
-<a name="l00289"></a>00289       HK_pass_first = HK_VALUE_pass_first, 
-<a name="l00290"></a>00290       HK_path = HK_VALUE_path, 
-<a name="l00291"></a>00291       HK_paused = HK_VALUE_paused, 
-<a name="l00292"></a>00292       HK_perlevel = HK_VALUE_perlevel, 
-<a name="l00293"></a>00293       HK_pool_interval = HK_VALUE_pool_interval, 
-<a name="l00294"></a>00294       HK_port = HK_VALUE_port, 
-<a name="l00295"></a>00295       HK_random = HK_VALUE_random, 
-<a name="l00296"></a>00296       HK_rate = HK_VALUE_rate, 
-<a name="l00297"></a>00297       HK_rcvbuf_size = HK_VALUE_rcvbuf_size, 
-<a name="l00298"></a>00298       HK_read_size = HK_VALUE_read_size, 
-<a name="l00299"></a>00299       HK_reader = HK_VALUE_reader, 
-<a name="l00300"></a>00300       HK_readonly = HK_VALUE_readonly, 
-<a name="l00301"></a>00301       HK_real_offset = HK_VALUE_real_offset, 
-<a name="l00302"></a>00302       HK_reclen = HK_VALUE_reclen, 
-<a name="l00303"></a>00303       HK_reconnect_ivl = HK_VALUE_reconnect_ivl, 
-<a name="l00304"></a>00304       HK_reconnect_ivl_max = HK_VALUE_reconnect_ivl_max, 
-<a name="l00305"></a>00305       HK_recovery_ivl = HK_VALUE_recovery_ivl, 
-<a name="l00306"></a>00306       HK_recovery_ivl_msec = HK_VALUE_recovery_ivl_msec, 
-<a name="l00307"></a>00307       HK_regexp = HK_VALUE_regexp, 
-<a name="l00308"></a>00308       HK_removed_items = HK_VALUE_removed_items, 
-<a name="l00309"></a>00309       HK_req_count = HK_VALUE_req_count, 
-<a name="l00310"></a>00310       HK_req_read = HK_VALUE_req_read, 
-<a name="l00311"></a>00311       HK_req_rebuild = HK_VALUE_req_rebuild, 
-<a name="l00312"></a>00312       HK_req_rebuild_destination = HK_VALUE_req_rebuild_destination, 
-<a name="l00313"></a>00313       HK_req_rebuild_enable = HK_VALUE_req_rebuild_enable, 
-<a name="l00314"></a>00314       HK_request = HK_VALUE_request, 
-<a name="l00315"></a>00315       HK_request_out = HK_VALUE_request_out, 
-<a name="l00316"></a>00316       HK_ret = HK_VALUE_ret, 
-<a name="l00317"></a>00317       HK_retry = HK_VALUE_retry, 
-<a name="l00318"></a>00318       HK_retry_request = HK_VALUE_retry_request, 
-<a name="l00319"></a>00319       HK_return = HK_VALUE_return, 
-<a name="l00320"></a>00320       HK_return_result = HK_VALUE_return_result, 
-<a name="l00321"></a>00321       HK_return_to = HK_VALUE_return_to, 
-<a name="l00322"></a>00322       HK_role = HK_VALUE_role, 
-<a name="l00323"></a>00323       HK_rules = HK_VALUE_rules, 
-<a name="l00324"></a>00324       HK_shop = HK_VALUE_shop, 
-<a name="l00325"></a>00325       HK_silent = HK_VALUE_silent, 
-<a name="l00326"></a>00326       HK_size = HK_VALUE_size, 
-<a name="l00327"></a>00327       HK_slave = HK_VALUE_slave, 
-<a name="l00328"></a>00328       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
-<a name="l00329"></a>00329       HK_socket = HK_VALUE_socket, 
-<a name="l00330"></a>00330       HK_source = HK_VALUE_source, 
-<a name="l00331"></a>00331       HK_split = HK_VALUE_split, 
-<a name="l00332"></a>00332       HK_storage = HK_VALUE_storage, 
-<a name="l00333"></a>00333       HK_string = HK_VALUE_string, 
-<a name="l00334"></a>00334       HK_structure = HK_VALUE_structure, 
-<a name="l00335"></a>00335       HK_subscribe = HK_VALUE_subscribe, 
-<a name="l00336"></a>00336       HK_swap = HK_VALUE_swap, 
-<a name="l00337"></a>00337       HK_sync = HK_VALUE_sync, 
-<a name="l00338"></a>00338       HK_temprorary = HK_VALUE_temprorary, 
-<a name="l00339"></a>00339       HK_test = HK_VALUE_test, 
-<a name="l00340"></a>00340       HK_tick_interval = HK_VALUE_tick_interval, 
-<a name="l00341"></a>00341       HK_truncate = HK_VALUE_truncate, 
-<a name="l00342"></a>00342       HK_type = HK_VALUE_type, 
-<a name="l00343"></a>00343       HK_unsubscribe = HK_VALUE_unsubscribe, 
-<a name="l00344"></a>00344       HK_uuid = HK_VALUE_uuid, 
-<a name="l00345"></a>00345       HK_value = HK_VALUE_value, 
-<a name="l00346"></a>00346       HK_value_bits = HK_VALUE_value_bits, 
-<a name="l00347"></a>00347       HK_value_size = HK_VALUE_value_size, 
-<a name="l00348"></a>00348       HK_values = HK_VALUE_values, 
-<a name="l00349"></a>00349       HK_verbose = HK_VALUE_verbose, 
-<a name="l00350"></a>00350       HK_writer = HK_VALUE_writer, 
-<a name="l00351"></a>00351 } hashkey_t;
-<a name="l00352"></a>00352 <span class="preprocessor">#endif</span>
-<a name="l00353"></a>00353 <span class="preprocessor"></span>
-<a name="l00354"></a>00354 <span class="preprocessor">#ifdef HASHKEYS_C</span>
-<a name="l00355"></a>00355 <span class="preprocessor"></span><a class="code" href="structkeypair__t.html">keypair_t</a> hashkeys[] = {
-<a name="l00356"></a>00356       { <span class="stringliteral">&quot;action&quot;</span>, HK_VALUE_action }, 
-<a name="l00357"></a>00357       { <span class="stringliteral">&quot;action_global&quot;</span>, HK_VALUE_action_global }, 
-<a name="l00358"></a>00358       { <span class="stringliteral">&quot;action_one&quot;</span>, HK_VALUE_action_one }, 
-<a name="l00359"></a>00359       { <span class="stringliteral">&quot;action_perfork&quot;</span>, HK_VALUE_action_perfork }, 
-<a name="l00360"></a>00360       { <span class="stringliteral">&quot;action_request&quot;</span>, HK_VALUE_action_request }, 
-<a name="l00361"></a>00361       { <span class="stringliteral">&quot;action_request_global&quot;</span>, HK_VALUE_action_request_global }, 
-<a name="l00362"></a>00362       { <span class="stringliteral">&quot;action_request_one&quot;</span>, HK_VALUE_action_request_one }, 
-<a name="l00363"></a>00363       { <span class="stringliteral">&quot;action_request_perfork&quot;</span>, HK_VALUE_action_request_perfork }, 
-<a name="l00364"></a>00364       { <span class="stringliteral">&quot;addr&quot;</span>, HK_VALUE_addr }, 
-<a name="l00365"></a>00365       { <span class="stringliteral">&quot;affinity&quot;</span>, HK_VALUE_affinity }, 
-<a name="l00366"></a>00366       { <span class="stringliteral">&quot;after&quot;</span>, HK_VALUE_after }, 
-<a name="l00367"></a>00367       { <span class="stringliteral">&quot;append&quot;</span>, HK_VALUE_append }, 
-<a name="l00368"></a>00368       { <span class="stringliteral">&quot;async&quot;</span>, HK_VALUE_async }, 
-<a name="l00369"></a>00369       { <span class="stringliteral">&quot;backend&quot;</span>, HK_VALUE_backend }, 
-<a name="l00370"></a>00370       { <span class="stringliteral">&quot;backlog&quot;</span>, HK_VALUE_backlog }, 
-<a name="l00371"></a>00371       { <span class="stringliteral">&quot;before&quot;</span>, HK_VALUE_before }, 
-<a name="l00372"></a>00372       { <span class="stringliteral">&quot;benchmark_function&quot;</span>, HK_VALUE_benchmark_function }, 
-<a name="l00373"></a>00373       { <span class="stringliteral">&quot;bind&quot;</span>, HK_VALUE_bind }, 
-<a name="l00374"></a>00374       { <span class="stringliteral">&quot;block_off&quot;</span>, HK_VALUE_block_off }, 
-<a name="l00375"></a>00375       { <span class="stringliteral">&quot;block_size&quot;</span>, HK_VALUE_block_size }, 
-<a name="l00376"></a>00376       { <span class="stringliteral">&quot;block_vid&quot;</span>, HK_VALUE_block_vid }, 
-<a name="l00377"></a>00377       { <span class="stringliteral">&quot;blocks&quot;</span>, HK_VALUE_blocks }, 
-<a name="l00378"></a>00378       { <span class="stringliteral">&quot;body&quot;</span>, HK_VALUE_body }, 
-<a name="l00379"></a>00379       { <span class="stringliteral">&quot;buffer&quot;</span>, HK_VALUE_buffer }, 
-<a name="l00380"></a>00380       { <span class="stringliteral">&quot;buffer_size&quot;</span>, HK_VALUE_buffer_size }, 
-<a name="l00381"></a>00381       { <span class="stringliteral">&quot;capture&quot;</span>, HK_VALUE_capture }, 
-<a name="l00382"></a>00382       { <span class="stringliteral">&quot;class&quot;</span>, HK_VALUE_class }, 
-<a name="l00383"></a>00383       { <span class="stringliteral">&quot;clientid&quot;</span>, HK_VALUE_clientid }, 
-<a name="l00384"></a>00384       { <span class="stringliteral">&quot;close&quot;</span>, HK_VALUE_close }, 
-<a name="l00385"></a>00385       { <span class="stringliteral">&quot;config&quot;</span>, HK_VALUE_config }, 
-<a name="l00386"></a>00386       { <span class="stringliteral">&quot;connect&quot;</span>, HK_VALUE_connect }, 
-<a name="l00387"></a>00387       { <span class="stringliteral">&quot;convert&quot;</span>, HK_VALUE_convert }, 
-<a name="l00388"></a>00388       { <span class="stringliteral">&quot;copy&quot;</span>, HK_VALUE_copy }, 
-<a name="l00389"></a>00389       { <span class="stringliteral">&quot;count&quot;</span>, HK_VALUE_count }, 
-<a name="l00390"></a>00390       { <span class="stringliteral">&quot;create&quot;</span>, HK_VALUE_create }, 
-<a name="l00391"></a>00391       { <span class="stringliteral">&quot;data&quot;</span>, HK_VALUE_data }, 
-<a name="l00392"></a>00392       { <span class="stringliteral">&quot;data_e&quot;</span>, HK_VALUE_data_e }, 
-<a name="l00393"></a>00393       { <span class="stringliteral">&quot;data_g&quot;</span>, HK_VALUE_data_g }, 
-<a name="l00394"></a>00394       { <span class="stringliteral">&quot;data_v&quot;</span>, HK_VALUE_data_v }, 
-<a name="l00395"></a>00395       { <span class="stringliteral">&quot;default&quot;</span>, HK_VALUE_default }, 
-<a name="l00396"></a>00396       { <span class="stringliteral">&quot;destination&quot;</span>, HK_VALUE_destination }, 
-<a name="l00397"></a>00397       { <span class="stringliteral">&quot;destroy&quot;</span>, HK_VALUE_destroy }, 
-<a name="l00398"></a>00398       { <span class="stringliteral">&quot;dump_last&quot;</span>, HK_VALUE_dump_last }, 
-<a name="l00399"></a>00399       { <span class="stringliteral">&quot;engine&quot;</span>, HK_VALUE_engine }, 
-<a name="l00400"></a>00400       { <span class="stringliteral">&quot;enum_method&quot;</span>, HK_VALUE_enum_method }, 
-<a name="l00401"></a>00401       { <span class="stringliteral">&quot;exclusive&quot;</span>, HK_VALUE_exclusive }, 
-<a name="l00402"></a>00402       { <span class="stringliteral">&quot;extended&quot;</span>, HK_VALUE_extended }, 
-<a name="l00403"></a>00403       { <span class="stringliteral">&quot;fatal&quot;</span>, HK_VALUE_fatal }, 
-<a name="l00404"></a>00404       { <span class="stringliteral">&quot;field&quot;</span>, HK_VALUE_field }, 
-<a name="l00405"></a>00405       { <span class="stringliteral">&quot;filename&quot;</span>, HK_VALUE_filename }, 
-<a name="l00406"></a>00406       { <span class="stringliteral">&quot;folder&quot;</span>, HK_VALUE_folder }, 
-<a name="l00407"></a>00407       { <span class="stringliteral">&quot;force_async&quot;</span>, HK_VALUE_force_async }, 
-<a name="l00408"></a>00408       { <span class="stringliteral">&quot;force_sync&quot;</span>, HK_VALUE_force_sync }, 
-<a name="l00409"></a>00409       { <span class="stringliteral">&quot;format&quot;</span>, HK_VALUE_format }, 
-<a name="l00410"></a>00410       { <span class="stringliteral">&quot;function&quot;</span>, HK_VALUE_function }, 
-<a name="l00411"></a>00411       { <span class="stringliteral">&quot;global&quot;</span>, HK_VALUE_global }, 
-<a name="l00412"></a>00412       { <span class="stringliteral">&quot;hash&quot;</span>, HK_VALUE_hash }, 
-<a name="l00413"></a>00413       { <span class="stringliteral">&quot;hash_ptr_end&quot;</span>, HK_VALUE_hash_ptr_end }, 
-<a name="l00414"></a>00414       { <span class="stringliteral">&quot;hash_ptr_inline&quot;</span>, HK_VALUE_hash_ptr_inline }, 
-<a name="l00415"></a>00415       { <span class="stringliteral">&quot;hash_ptr_null&quot;</span>, HK_VALUE_hash_ptr_null }, 
-<a name="l00416"></a>00416       { <span class="stringliteral">&quot;headers&quot;</span>, HK_VALUE_headers }, 
-<a name="l00417"></a>00417       { <span class="stringliteral">&quot;hwm&quot;</span>, HK_VALUE_hwm }, 
-<a name="l00418"></a>00418       { <span class="stringliteral">&quot;icase&quot;</span>, HK_VALUE_icase }, 
-<a name="l00419"></a>00419       { <span class="stringliteral">&quot;identity&quot;</span>, HK_VALUE_identity }, 
-<a name="l00420"></a>00420       { <span class="stringliteral">&quot;ignore_errors&quot;</span>, HK_VALUE_ignore_errors }, 
-<a name="l00421"></a>00421       { <span class="stringliteral">&quot;index&quot;</span>, HK_VALUE_index }, 
-<a name="l00422"></a>00422       { <span class="stringliteral">&quot;inode&quot;</span>, HK_VALUE_inode }, 
-<a name="l00423"></a>00423       { <span class="stringliteral">&quot;input&quot;</span>, HK_VALUE_input }, 
-<a name="l00424"></a>00424       { <span class="stringliteral">&quot;insert&quot;</span>, HK_VALUE_insert }, 
-<a name="l00425"></a>00425       { <span class="stringliteral">&quot;item_sample&quot;</span>, HK_VALUE_item_sample }, 
-<a name="l00426"></a>00426       { <span class="stringliteral">&quot;item_size&quot;</span>, HK_VALUE_item_size }, 
-<a name="l00427"></a>00427       { <span class="stringliteral">&quot;items&quot;</span>, HK_VALUE_items }, 
-<a name="l00428"></a>00428       { <span class="stringliteral">&quot;key&quot;</span>, HK_VALUE_key }, 
-<a name="l00429"></a>00429       { <span class="stringliteral">&quot;key1&quot;</span>, HK_VALUE_key1 }, 
-<a name="l00430"></a>00430       { <span class="stringliteral">&quot;key2&quot;</span>, HK_VALUE_key2 }, 
-<a name="l00431"></a>00431       { <span class="stringliteral">&quot;key3&quot;</span>, HK_VALUE_key3 }, 
-<a name="l00432"></a>00432       { <span class="stringliteral">&quot;key4&quot;</span>, HK_VALUE_key4 }, 
-<a name="l00433"></a>00433       { <span class="stringliteral">&quot;lazy&quot;</span>, HK_VALUE_lazy }, 
-<a name="l00434"></a>00434       { <span class="stringliteral">&quot;length&quot;</span>, HK_VALUE_length }, 
-<a name="l00435"></a>00435       { <span class="stringliteral">&quot;linger&quot;</span>, HK_VALUE_linger }, 
-<a name="l00436"></a>00436       { <span class="stringliteral">&quot;loop&quot;</span>, HK_VALUE_loop }, 
-<a name="l00437"></a>00437       { <span class="stringliteral">&quot;machine&quot;</span>, HK_VALUE_machine }, 
-<a name="l00438"></a>00438       { <span class="stringliteral">&quot;marker&quot;</span>, HK_VALUE_marker }, 
-<a name="l00439"></a>00439       { <span class="stringliteral">&quot;marker_data&quot;</span>, HK_VALUE_marker_data }, 
-<a name="l00440"></a>00440       { <span class="stringliteral">&quot;master&quot;</span>, HK_VALUE_master }, 
-<a name="l00441"></a>00441       { <span class="stringliteral">&quot;max_global&quot;</span>, HK_VALUE_max_global }, 
-<a name="l00442"></a>00442       { <span class="stringliteral">&quot;max_perfork&quot;</span>, HK_VALUE_max_perfork }, 
-<a name="l00443"></a>00443       { <span class="stringliteral">&quot;max_perinstance&quot;</span>, HK_VALUE_max_perinstance }, 
-<a name="l00444"></a>00444       { <span class="stringliteral">&quot;mcast_loop&quot;</span>, HK_VALUE_mcast_loop }, 
-<a name="l00445"></a>00445       { <span class="stringliteral">&quot;mode&quot;</span>, HK_VALUE_mode }, 
-<a name="l00446"></a>00446       { <span class="stringliteral">&quot;mode_global&quot;</span>, HK_VALUE_mode_global }, 
-<a name="l00447"></a>00447       { <span class="stringliteral">&quot;mode_perfork&quot;</span>, HK_VALUE_mode_perfork }, 
-<a name="l00448"></a>00448       { <span class="stringliteral">&quot;mountpoint&quot;</span>, HK_VALUE_mountpoint }, 
-<a name="l00449"></a>00449       { <span class="stringliteral">&quot;multithread&quot;</span>, HK_VALUE_multithread }, 
-<a name="l00450"></a>00450       { <span class="stringliteral">&quot;n_initial&quot;</span>, HK_VALUE_n_initial }, 
-<a name="l00451"></a>00451       { <span class="stringliteral">&quot;name&quot;</span>, HK_VALUE_name }, 
-<a name="l00452"></a>00452       { <span class="stringliteral">&quot;nelements&quot;</span>, HK_VALUE_nelements }, 
-<a name="l00453"></a>00453       { <span class="stringliteral">&quot;nelements_min&quot;</span>, HK_VALUE_nelements_min }, 
-<a name="l00454"></a>00454       { <span class="stringliteral">&quot;nelements_mul&quot;</span>, HK_VALUE_nelements_mul }, 
-<a name="l00455"></a>00455       { <span class="stringliteral">&quot;nelements_step&quot;</span>, HK_VALUE_nelements_step }, 
-<a name="l00456"></a>00456       { <span class="stringliteral">&quot;newline&quot;</span>, HK_VALUE_newline }, 
-<a name="l00457"></a>00457       { <span class="stringliteral">&quot;notbol&quot;</span>, HK_VALUE_notbol }, 
-<a name="l00458"></a>00458       { <span class="stringliteral">&quot;noteol&quot;</span>, HK_VALUE_noteol }, 
-<a name="l00459"></a>00459       { <span class="stringliteral">&quot;offset&quot;</span>, HK_VALUE_offset }, 
-<a name="l00460"></a>00460       { <span class="stringliteral">&quot;offset_from&quot;</span>, HK_VALUE_offset_from }, 
-<a name="l00461"></a>00461       { <span class="stringliteral">&quot;offset_key&quot;</span>, HK_VALUE_offset_key }, 
-<a name="l00462"></a>00462       { <span class="stringliteral">&quot;offset_out&quot;</span>, HK_VALUE_offset_out }, 
-<a name="l00463"></a>00463       { <span class="stringliteral">&quot;offset_to&quot;</span>, HK_VALUE_offset_to }, 
-<a name="l00464"></a>00464       { <span class="stringliteral">&quot;output&quot;</span>, HK_VALUE_output }, 
-<a name="l00465"></a>00465       { <span class="stringliteral">&quot;parameter&quot;</span>, HK_VALUE_parameter }, 
-<a name="l00466"></a>00466       { <span class="stringliteral">&quot;parameter_request&quot;</span>, HK_VALUE_parameter_request }, 
-<a name="l00467"></a>00467       { <span class="stringliteral">&quot;pass_first&quot;</span>, HK_VALUE_pass_first }, 
-<a name="l00468"></a>00468       { <span class="stringliteral">&quot;path&quot;</span>, HK_VALUE_path }, 
-<a name="l00469"></a>00469       { <span class="stringliteral">&quot;paused&quot;</span>, HK_VALUE_paused }, 
-<a name="l00470"></a>00470       { <span class="stringliteral">&quot;perlevel&quot;</span>, HK_VALUE_perlevel }, 
-<a name="l00471"></a>00471       { <span class="stringliteral">&quot;pool_interval&quot;</span>, HK_VALUE_pool_interval }, 
-<a name="l00472"></a>00472       { <span class="stringliteral">&quot;port&quot;</span>, HK_VALUE_port }, 
-<a name="l00473"></a>00473       { <span class="stringliteral">&quot;random&quot;</span>, HK_VALUE_random }, 
-<a name="l00474"></a>00474       { <span class="stringliteral">&quot;rate&quot;</span>, HK_VALUE_rate }, 
-<a name="l00475"></a>00475       { <span class="stringliteral">&quot;rcvbuf_size&quot;</span>, HK_VALUE_rcvbuf_size }, 
-<a name="l00476"></a>00476       { <span class="stringliteral">&quot;read_size&quot;</span>, HK_VALUE_read_size }, 
-<a name="l00477"></a>00477       { <span class="stringliteral">&quot;reader&quot;</span>, HK_VALUE_reader }, 
-<a name="l00478"></a>00478       { <span class="stringliteral">&quot;readonly&quot;</span>, HK_VALUE_readonly }, 
-<a name="l00479"></a>00479       { <span class="stringliteral">&quot;real_offset&quot;</span>, HK_VALUE_real_offset }, 
-<a name="l00480"></a>00480       { <span class="stringliteral">&quot;reclen&quot;</span>, HK_VALUE_reclen }, 
-<a name="l00481"></a>00481       { <span class="stringliteral">&quot;reconnect_ivl&quot;</span>, HK_VALUE_reconnect_ivl }, 
-<a name="l00482"></a>00482       { <span class="stringliteral">&quot;reconnect_ivl_max&quot;</span>, HK_VALUE_reconnect_ivl_max }, 
-<a name="l00483"></a>00483       { <span class="stringliteral">&quot;recovery_ivl&quot;</span>, HK_VALUE_recovery_ivl }, 
-<a name="l00484"></a>00484       { <span class="stringliteral">&quot;recovery_ivl_msec&quot;</span>, HK_VALUE_recovery_ivl_msec }, 
-<a name="l00485"></a>00485       { <span class="stringliteral">&quot;regexp&quot;</span>, HK_VALUE_regexp }, 
-<a name="l00486"></a>00486       { <span class="stringliteral">&quot;removed_items&quot;</span>, HK_VALUE_removed_items }, 
-<a name="l00487"></a>00487       { <span class="stringliteral">&quot;req_count&quot;</span>, HK_VALUE_req_count }, 
-<a name="l00488"></a>00488       { <span class="stringliteral">&quot;req_read&quot;</span>, HK_VALUE_req_read }, 
-<a name="l00489"></a>00489       { <span class="stringliteral">&quot;req_rebuild&quot;</span>, HK_VALUE_req_rebuild }, 
-<a name="l00490"></a>00490       { <span class="stringliteral">&quot;req_rebuild_destination&quot;</span>, HK_VALUE_req_rebuild_destination }, 
-<a name="l00491"></a>00491       { <span class="stringliteral">&quot;req_rebuild_enable&quot;</span>, HK_VALUE_req_rebuild_enable }, 
-<a name="l00492"></a>00492       { <span class="stringliteral">&quot;request&quot;</span>, HK_VALUE_request }, 
-<a name="l00493"></a>00493       { <span class="stringliteral">&quot;request_out&quot;</span>, HK_VALUE_request_out }, 
-<a name="l00494"></a>00494       { <span class="stringliteral">&quot;ret&quot;</span>, HK_VALUE_ret }, 
-<a name="l00495"></a>00495       { <span class="stringliteral">&quot;retry&quot;</span>, HK_VALUE_retry }, 
-<a name="l00496"></a>00496       { <span class="stringliteral">&quot;retry_request&quot;</span>, HK_VALUE_retry_request }, 
-<a name="l00497"></a>00497       { <span class="stringliteral">&quot;return&quot;</span>, HK_VALUE_return }, 
-<a name="l00498"></a>00498       { <span class="stringliteral">&quot;return_result&quot;</span>, HK_VALUE_return_result }, 
-<a name="l00499"></a>00499       { <span class="stringliteral">&quot;return_to&quot;</span>, HK_VALUE_return_to }, 
-<a name="l00500"></a>00500       { <span class="stringliteral">&quot;role&quot;</span>, HK_VALUE_role }, 
-<a name="l00501"></a>00501       { <span class="stringliteral">&quot;rules&quot;</span>, HK_VALUE_rules }, 
-<a name="l00502"></a>00502       { <span class="stringliteral">&quot;shop&quot;</span>, HK_VALUE_shop }, 
-<a name="l00503"></a>00503       { <span class="stringliteral">&quot;silent&quot;</span>, HK_VALUE_silent }, 
-<a name="l00504"></a>00504       { <span class="stringliteral">&quot;size&quot;</span>, HK_VALUE_size }, 
-<a name="l00505"></a>00505       { <span class="stringliteral">&quot;slave&quot;</span>, HK_VALUE_slave }, 
-<a name="l00506"></a>00506       { <span class="stringliteral">&quot;sndbuf_size&quot;</span>, HK_VALUE_sndbuf_size }, 
-<a name="l00507"></a>00507       { <span class="stringliteral">&quot;socket&quot;</span>, HK_VALUE_socket }, 
-<a name="l00508"></a>00508       { <span class="stringliteral">&quot;source&quot;</span>, HK_VALUE_source }, 
-<a name="l00509"></a>00509       { <span class="stringliteral">&quot;split&quot;</span>, HK_VALUE_split }, 
-<a name="l00510"></a>00510       { <span class="stringliteral">&quot;storage&quot;</span>, HK_VALUE_storage }, 
-<a name="l00511"></a>00511       { <span class="stringliteral">&quot;string&quot;</span>, HK_VALUE_string }, 
-<a name="l00512"></a>00512       { <span class="stringliteral">&quot;structure&quot;</span>, HK_VALUE_structure }, 
-<a name="l00513"></a>00513       { <span class="stringliteral">&quot;subscribe&quot;</span>, HK_VALUE_subscribe }, 
-<a name="l00514"></a>00514       { <span class="stringliteral">&quot;swap&quot;</span>, HK_VALUE_swap }, 
-<a name="l00515"></a>00515       { <span class="stringliteral">&quot;sync&quot;</span>, HK_VALUE_sync }, 
-<a name="l00516"></a>00516       { <span class="stringliteral">&quot;temprorary&quot;</span>, HK_VALUE_temprorary }, 
-<a name="l00517"></a>00517       { <span class="stringliteral">&quot;test&quot;</span>, HK_VALUE_test }, 
-<a name="l00518"></a>00518       { <span class="stringliteral">&quot;tick_interval&quot;</span>, HK_VALUE_tick_interval }, 
-<a name="l00519"></a>00519       { <span class="stringliteral">&quot;truncate&quot;</span>, HK_VALUE_truncate }, 
-<a name="l00520"></a>00520       { <span class="stringliteral">&quot;type&quot;</span>, HK_VALUE_type }, 
-<a name="l00521"></a>00521       { <span class="stringliteral">&quot;unsubscribe&quot;</span>, HK_VALUE_unsubscribe }, 
-<a name="l00522"></a>00522       { <span class="stringliteral">&quot;uuid&quot;</span>, HK_VALUE_uuid }, 
-<a name="l00523"></a>00523       { <span class="stringliteral">&quot;value&quot;</span>, HK_VALUE_value }, 
-<a name="l00524"></a>00524       { <span class="stringliteral">&quot;value_bits&quot;</span>, HK_VALUE_value_bits }, 
-<a name="l00525"></a>00525       { <span class="stringliteral">&quot;value_size&quot;</span>, HK_VALUE_value_size }, 
-<a name="l00526"></a>00526       { <span class="stringliteral">&quot;values&quot;</span>, HK_VALUE_values }, 
-<a name="l00527"></a>00527       { <span class="stringliteral">&quot;verbose&quot;</span>, HK_VALUE_verbose }, 
-<a name="l00528"></a>00528       { <span class="stringliteral">&quot;writer&quot;</span>, HK_VALUE_writer }, 
-<a name="l00529"></a>00529       { NULL, 0 }  
-<a name="l00530"></a>00530 };
-<a name="l00531"></a>00531 <span class="preprocessor">#endif</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_class 6119</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_clientid 21563</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_close 5895</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_config 9498</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_connect 15066</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_convert 15734</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_copy 3487</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_count 6256</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_create 9552</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data 3084</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_e 9095</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_g 9167</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_data_v 9707</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_default 15471</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_destination 55072</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_destroy 16170</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_dump_last 31113</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_engine 9534</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_enum_method 53634</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_exclusive 31143</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_fatal 5786</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_field 5659</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_filename 21157</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_folder 9747</span>
+<a name="l00053"></a>00053 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_force_async 53994</span>
+<a name="l00054"></a>00054 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_force_sync 41290</span>
+<a name="l00055"></a>00055 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_format 9917</span>
+<a name="l00056"></a>00056 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_function 22303</span>
+<a name="l00057"></a>00057 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash 3191</span>
+<a name="l00058"></a>00058 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_end 68083</span>
+<a name="l00059"></a>00059 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_inline 131665</span>
+<a name="l00060"></a>00060 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hash_ptr_null 89234</span>
+<a name="l00061"></a>00061 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_headers 15245</span>
+<a name="l00062"></a>00062 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_hwm 1561</span>
+<a name="l00063"></a>00063 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_identity 23282</span>
+<a name="l00064"></a>00064 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_ignore_errors 90804</span>
+<a name="l00065"></a>00065 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_index 6061</span>
+<a name="l00066"></a>00066 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_inode 5669</span>
+<a name="l00067"></a>00067 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_input 6325</span>
+<a name="l00068"></a>00068 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_insert 10222</span>
+<a name="l00069"></a>00069 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_item_sample 53559</span>
+<a name="l00070"></a>00070 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_item_size 30871</span>
+<a name="l00071"></a>00071 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_items 6097</span>
+<a name="l00072"></a>00072 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key 1600</span>
+<a name="l00073"></a>00073 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key1 2384</span>
+<a name="l00074"></a>00074 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key2 2400</span>
+<a name="l00075"></a>00075 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_key4 2432</span>
+<a name="l00076"></a>00076 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_lazy 3530</span>
+<a name="l00077"></a>00077 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_length 9794</span>
+<a name="l00078"></a>00078 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_linger 9795</span>
+<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_loop 3343</span>
+<a name="l00080"></a>00080 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_machine 14586</span>
+<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_master 10017</span>
+<a name="l00082"></a>00082 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_global 39928</span>
+<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_perfork 54985</span>
+<a name="l00084"></a>00084 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_max_perinstance 130972</span>
+<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mcast_loop 42125</span>
+<a name="l00086"></a>00086 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode 3069</span>
+<a name="l00087"></a>00087 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode_global 52254</span>
+<a name="l00088"></a>00088 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mode_perfork 70285</span>
+<a name="l00089"></a>00089 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_mountpoint 42967</span>
+<a name="l00090"></a>00090 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_multithread 52579</span>
+<a name="l00091"></a>00091 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_n_initial 30097</span>
+<a name="l00092"></a>00092 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_name 3095</span>
+<a name="l00093"></a>00093 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements 31592</span>
+<a name="l00094"></a>00094 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_min 87991</span>
+<a name="l00095"></a>00095 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_mul 89381</span>
+<a name="l00096"></a>00096 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_nelements_step 110732</span>
+<a name="l00097"></a>00097 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset 9978</span>
+<a name="l00098"></a>00098 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_from 54684</span>
+<a name="l00099"></a>00099 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_key 41762</span>
+<a name="l00100"></a>00100 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_out 42814</span>
+<a name="l00101"></a>00101 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_offset_to 31048</span>
+<a name="l00102"></a>00102 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_output 10516</span>
+<a name="l00103"></a>00103 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_parameter 30821</span>
+<a name="l00104"></a>00104 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_parameter_request 196377</span>
+<a name="l00105"></a>00105 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_pass_first 42778</span>
+<a name="l00106"></a>00106 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_path 3208</span>
+<a name="l00107"></a>00107 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_paused 9518</span>
+<a name="l00108"></a>00108 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_perlevel 21904</span>
+<a name="l00109"></a>00109 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_pool_interval 88331</span>
+<a name="l00110"></a>00110 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_port 3438</span>
+<a name="l00111"></a>00111 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rate 3162</span>
+<a name="l00112"></a>00112 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rcvbuf_size 54678</span>
+<a name="l00113"></a>00113 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_read_size 30640</span>
+<a name="l00114"></a>00114 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reader 9620</span>
+<a name="l00115"></a>00115 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_readonly 22762</span>
+<a name="l00116"></a>00116 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_real_offset 54467</span>
+<a name="l00117"></a>00117 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reclen 9622</span>
+<a name="l00118"></a>00118 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reconnect_ivl 88025</span>
+<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_reconnect_ivl_max 190682</span>
+<a name="l00120"></a>00120 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_recovery_ivl 71126</span>
+<a name="l00121"></a>00121 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_recovery_ivl_msec 188887</span>
+<a name="l00122"></a>00122 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_removed_items 88298</span>
+<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_count 31695</span>
+<a name="l00124"></a>00124 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_read 20694</span>
+<a name="l00125"></a>00125 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild 53236</span>
+<a name="l00126"></a>00126 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild_destination 464804</span>
+<a name="l00127"></a>00127 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_req_rebuild_enable 216394</span>
+<a name="l00128"></a>00128 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_request 15756</span>
+<a name="l00129"></a>00129 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_request_out 56563</span>
+<a name="l00130"></a>00130 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_ret 1562</span>
+<a name="l00131"></a>00131 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_retry 6411</span>
+<a name="l00132"></a>00132 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_retry_request 91119</span>
+<a name="l00133"></a>00133 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return 10244</span>
+<a name="l00134"></a>00134 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return_result 91189</span>
+<a name="l00135"></a>00135 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_return_to 31314</span>
+<a name="l00136"></a>00136 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_role 3146</span>
+<a name="l00137"></a>00137 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_rules 6045</span>
+<a name="l00138"></a>00138 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_shop 3322</span>
+<a name="l00139"></a>00139 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_silent 10049</span>
+<a name="l00140"></a>00140 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_size 3249</span>
+<a name="l00141"></a>00141 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_slave 5833</span>
+<a name="l00142"></a>00142 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_sndbuf_size 54561</span>
+<a name="l00143"></a>00143 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_socket 9863</span>
+<a name="l00144"></a>00144 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_source 9547</span>
+<a name="l00145"></a>00145 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_split 6115</span>
+<a name="l00146"></a>00146 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_storage 14484</span>
+<a name="l00147"></a>00147 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_string 9743</span>
+<a name="l00148"></a>00148 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_structure 31338</span>
+<a name="l00149"></a>00149 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_subscribe 29482</span>
+<a name="l00150"></a>00150 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_swap 3256</span>
+<a name="l00151"></a>00151 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_sync 3173</span>
+<a name="l00152"></a>00152 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_temprorary 43267</span>
+<a name="l00153"></a>00153 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_test 3411</span>
+<a name="l00154"></a>00154 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_tick_interval 88187</span>
+<a name="l00155"></a>00155 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_truncate 21500</span>
+<a name="l00156"></a>00156 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_type 3224</span>
+<a name="l00157"></a>00157 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_unsubscribe 52727</span>
+<a name="l00158"></a>00158 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_uuid 3130</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value 5875</span>
+<a name="l00160"></a>00160 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value_bits 41713</span>
+<a name="l00161"></a>00161 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_value_size 41632</span>
+<a name="l00162"></a>00162 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_values 10015</span>
+<a name="l00163"></a>00163 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_verbose 14980</span>
+<a name="l00164"></a>00164 <span class="preprocessor"></span><span class="preprocessor">#define HK_VALUE_writer 10005</span>
+<a name="l00165"></a>00165 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">enum</span> hashkey_t {
+<a name="l00166"></a>00166       HK_action = HK_VALUE_action, 
+<a name="l00167"></a>00167       HK_action_global = HK_VALUE_action_global, 
+<a name="l00168"></a>00168       HK_action_one = HK_VALUE_action_one, 
+<a name="l00169"></a>00169       HK_action_perfork = HK_VALUE_action_perfork, 
+<a name="l00170"></a>00170       HK_action_request = HK_VALUE_action_request, 
+<a name="l00171"></a>00171       HK_action_request_global = HK_VALUE_action_request_global, 
+<a name="l00172"></a>00172       HK_action_request_one = HK_VALUE_action_request_one, 
+<a name="l00173"></a>00173       HK_action_request_perfork = HK_VALUE_action_request_perfork, 
+<a name="l00174"></a>00174       HK_addr = HK_VALUE_addr, 
+<a name="l00175"></a>00175       HK_affinity = HK_VALUE_affinity, 
+<a name="l00176"></a>00176       HK_after = HK_VALUE_after, 
+<a name="l00177"></a>00177       HK_append = HK_VALUE_append, 
+<a name="l00178"></a>00178       HK_async = HK_VALUE_async, 
+<a name="l00179"></a>00179       HK_backend = HK_VALUE_backend, 
+<a name="l00180"></a>00180       HK_backlog = HK_VALUE_backlog, 
+<a name="l00181"></a>00181       HK_before = HK_VALUE_before, 
+<a name="l00182"></a>00182       HK_benchmark_function = HK_VALUE_benchmark_function, 
+<a name="l00183"></a>00183       HK_bind = HK_VALUE_bind, 
+<a name="l00184"></a>00184       HK_block_off = HK_VALUE_block_off, 
+<a name="l00185"></a>00185       HK_block_size = HK_VALUE_block_size, 
+<a name="l00186"></a>00186       HK_block_vid = HK_VALUE_block_vid, 
+<a name="l00187"></a>00187       HK_blocks = HK_VALUE_blocks, 
+<a name="l00188"></a>00188       HK_body = HK_VALUE_body, 
+<a name="l00189"></a>00189       HK_buffer = HK_VALUE_buffer, 
+<a name="l00190"></a>00190       HK_buffer_size = HK_VALUE_buffer_size, 
+<a name="l00191"></a>00191       HK_class = HK_VALUE_class, 
+<a name="l00192"></a>00192       HK_clientid = HK_VALUE_clientid, 
+<a name="l00193"></a>00193       HK_close = HK_VALUE_close, 
+<a name="l00194"></a>00194       HK_config = HK_VALUE_config, 
+<a name="l00195"></a>00195       HK_connect = HK_VALUE_connect, 
+<a name="l00196"></a>00196       HK_convert = HK_VALUE_convert, 
+<a name="l00197"></a>00197       HK_copy = HK_VALUE_copy, 
+<a name="l00198"></a>00198       HK_count = HK_VALUE_count, 
+<a name="l00199"></a>00199       HK_create = HK_VALUE_create, 
+<a name="l00200"></a>00200       HK_data = HK_VALUE_data, 
+<a name="l00201"></a>00201       HK_data_e = HK_VALUE_data_e, 
+<a name="l00202"></a>00202       HK_data_g = HK_VALUE_data_g, 
+<a name="l00203"></a>00203       HK_data_v = HK_VALUE_data_v, 
+<a name="l00204"></a>00204       HK_default = HK_VALUE_default, 
+<a name="l00205"></a>00205       HK_destination = HK_VALUE_destination, 
+<a name="l00206"></a>00206       HK_destroy = HK_VALUE_destroy, 
+<a name="l00207"></a>00207       HK_dump_last = HK_VALUE_dump_last, 
+<a name="l00208"></a>00208       HK_engine = HK_VALUE_engine, 
+<a name="l00209"></a>00209       HK_enum_method = HK_VALUE_enum_method, 
+<a name="l00210"></a>00210       HK_exclusive = HK_VALUE_exclusive, 
+<a name="l00211"></a>00211       HK_fatal = HK_VALUE_fatal, 
+<a name="l00212"></a>00212       HK_field = HK_VALUE_field, 
+<a name="l00213"></a>00213       HK_filename = HK_VALUE_filename, 
+<a name="l00214"></a>00214       HK_folder = HK_VALUE_folder, 
+<a name="l00215"></a>00215       HK_force_async = HK_VALUE_force_async, 
+<a name="l00216"></a>00216       HK_force_sync = HK_VALUE_force_sync, 
+<a name="l00217"></a>00217       HK_format = HK_VALUE_format, 
+<a name="l00218"></a>00218       HK_function = HK_VALUE_function, 
+<a name="l00219"></a>00219       HK_hash = HK_VALUE_hash, 
+<a name="l00220"></a>00220       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
+<a name="l00221"></a>00221       HK_hash_ptr_inline = HK_VALUE_hash_ptr_inline, 
+<a name="l00222"></a>00222       HK_hash_ptr_null = HK_VALUE_hash_ptr_null, 
+<a name="l00223"></a>00223       HK_headers = HK_VALUE_headers, 
+<a name="l00224"></a>00224       HK_hwm = HK_VALUE_hwm, 
+<a name="l00225"></a>00225       HK_identity = HK_VALUE_identity, 
+<a name="l00226"></a>00226       HK_ignore_errors = HK_VALUE_ignore_errors, 
+<a name="l00227"></a>00227       HK_index = HK_VALUE_index, 
+<a name="l00228"></a>00228       HK_inode = HK_VALUE_inode, 
+<a name="l00229"></a>00229       HK_input = HK_VALUE_input, 
+<a name="l00230"></a>00230       HK_insert = HK_VALUE_insert, 
+<a name="l00231"></a>00231       HK_item_sample = HK_VALUE_item_sample, 
+<a name="l00232"></a>00232       HK_item_size = HK_VALUE_item_size, 
+<a name="l00233"></a>00233       HK_items = HK_VALUE_items, 
+<a name="l00234"></a>00234       HK_key = HK_VALUE_key, 
+<a name="l00235"></a>00235       HK_key1 = HK_VALUE_key1, 
+<a name="l00236"></a>00236       HK_key2 = HK_VALUE_key2, 
+<a name="l00237"></a>00237       HK_key4 = HK_VALUE_key4, 
+<a name="l00238"></a>00238       HK_lazy = HK_VALUE_lazy, 
+<a name="l00239"></a>00239       HK_length = HK_VALUE_length, 
+<a name="l00240"></a>00240       HK_linger = HK_VALUE_linger, 
+<a name="l00241"></a>00241       HK_loop = HK_VALUE_loop, 
+<a name="l00242"></a>00242       HK_machine = HK_VALUE_machine, 
+<a name="l00243"></a>00243       HK_master = HK_VALUE_master, 
+<a name="l00244"></a>00244       HK_max_global = HK_VALUE_max_global, 
+<a name="l00245"></a>00245       HK_max_perfork = HK_VALUE_max_perfork, 
+<a name="l00246"></a>00246       HK_max_perinstance = HK_VALUE_max_perinstance, 
+<a name="l00247"></a>00247       HK_mcast_loop = HK_VALUE_mcast_loop, 
+<a name="l00248"></a>00248       HK_mode = HK_VALUE_mode, 
+<a name="l00249"></a>00249       HK_mode_global = HK_VALUE_mode_global, 
+<a name="l00250"></a>00250       HK_mode_perfork = HK_VALUE_mode_perfork, 
+<a name="l00251"></a>00251       HK_mountpoint = HK_VALUE_mountpoint, 
+<a name="l00252"></a>00252       HK_multithread = HK_VALUE_multithread, 
+<a name="l00253"></a>00253       HK_n_initial = HK_VALUE_n_initial, 
+<a name="l00254"></a>00254       HK_name = HK_VALUE_name, 
+<a name="l00255"></a>00255       HK_nelements = HK_VALUE_nelements, 
+<a name="l00256"></a>00256       HK_nelements_min = HK_VALUE_nelements_min, 
+<a name="l00257"></a>00257       HK_nelements_mul = HK_VALUE_nelements_mul, 
+<a name="l00258"></a>00258       HK_nelements_step = HK_VALUE_nelements_step, 
+<a name="l00259"></a>00259       HK_offset = HK_VALUE_offset, 
+<a name="l00260"></a>00260       HK_offset_from = HK_VALUE_offset_from, 
+<a name="l00261"></a>00261       HK_offset_key = HK_VALUE_offset_key, 
+<a name="l00262"></a>00262       HK_offset_out = HK_VALUE_offset_out, 
+<a name="l00263"></a>00263       HK_offset_to = HK_VALUE_offset_to, 
+<a name="l00264"></a>00264       HK_output = HK_VALUE_output, 
+<a name="l00265"></a>00265       HK_parameter = HK_VALUE_parameter, 
+<a name="l00266"></a>00266       HK_parameter_request = HK_VALUE_parameter_request, 
+<a name="l00267"></a>00267       HK_pass_first = HK_VALUE_pass_first, 
+<a name="l00268"></a>00268       HK_path = HK_VALUE_path, 
+<a name="l00269"></a>00269       HK_paused = HK_VALUE_paused, 
+<a name="l00270"></a>00270       HK_perlevel = HK_VALUE_perlevel, 
+<a name="l00271"></a>00271       HK_pool_interval = HK_VALUE_pool_interval, 
+<a name="l00272"></a>00272       HK_port = HK_VALUE_port, 
+<a name="l00273"></a>00273       HK_rate = HK_VALUE_rate, 
+<a name="l00274"></a>00274       HK_rcvbuf_size = HK_VALUE_rcvbuf_size, 
+<a name="l00275"></a>00275       HK_read_size = HK_VALUE_read_size, 
+<a name="l00276"></a>00276       HK_reader = HK_VALUE_reader, 
+<a name="l00277"></a>00277       HK_readonly = HK_VALUE_readonly, 
+<a name="l00278"></a>00278       HK_real_offset = HK_VALUE_real_offset, 
+<a name="l00279"></a>00279       HK_reclen = HK_VALUE_reclen, 
+<a name="l00280"></a>00280       HK_reconnect_ivl = HK_VALUE_reconnect_ivl, 
+<a name="l00281"></a>00281       HK_reconnect_ivl_max = HK_VALUE_reconnect_ivl_max, 
+<a name="l00282"></a>00282       HK_recovery_ivl = HK_VALUE_recovery_ivl, 
+<a name="l00283"></a>00283       HK_recovery_ivl_msec = HK_VALUE_recovery_ivl_msec, 
+<a name="l00284"></a>00284       HK_removed_items = HK_VALUE_removed_items, 
+<a name="l00285"></a>00285       HK_req_count = HK_VALUE_req_count, 
+<a name="l00286"></a>00286       HK_req_read = HK_VALUE_req_read, 
+<a name="l00287"></a>00287       HK_req_rebuild = HK_VALUE_req_rebuild, 
+<a name="l00288"></a>00288       HK_req_rebuild_destination = HK_VALUE_req_rebuild_destination, 
+<a name="l00289"></a>00289       HK_req_rebuild_enable = HK_VALUE_req_rebuild_enable, 
+<a name="l00290"></a>00290       HK_request = HK_VALUE_request, 
+<a name="l00291"></a>00291       HK_request_out = HK_VALUE_request_out, 
+<a name="l00292"></a>00292       HK_ret = HK_VALUE_ret, 
+<a name="l00293"></a>00293       HK_retry = HK_VALUE_retry, 
+<a name="l00294"></a>00294       HK_retry_request = HK_VALUE_retry_request, 
+<a name="l00295"></a>00295       HK_return = HK_VALUE_return, 
+<a name="l00296"></a>00296       HK_return_result = HK_VALUE_return_result, 
+<a name="l00297"></a>00297       HK_return_to = HK_VALUE_return_to, 
+<a name="l00298"></a>00298       HK_role = HK_VALUE_role, 
+<a name="l00299"></a>00299       HK_rules = HK_VALUE_rules, 
+<a name="l00300"></a>00300       HK_shop = HK_VALUE_shop, 
+<a name="l00301"></a>00301       HK_silent = HK_VALUE_silent, 
+<a name="l00302"></a>00302       HK_size = HK_VALUE_size, 
+<a name="l00303"></a>00303       HK_slave = HK_VALUE_slave, 
+<a name="l00304"></a>00304       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
+<a name="l00305"></a>00305       HK_socket = HK_VALUE_socket, 
+<a name="l00306"></a>00306       HK_source = HK_VALUE_source, 
+<a name="l00307"></a>00307       HK_split = HK_VALUE_split, 
+<a name="l00308"></a>00308       HK_storage = HK_VALUE_storage, 
+<a name="l00309"></a>00309       HK_string = HK_VALUE_string, 
+<a name="l00310"></a>00310       HK_structure = HK_VALUE_structure, 
+<a name="l00311"></a>00311       HK_subscribe = HK_VALUE_subscribe, 
+<a name="l00312"></a>00312       HK_swap = HK_VALUE_swap, 
+<a name="l00313"></a>00313       HK_sync = HK_VALUE_sync, 
+<a name="l00314"></a>00314       HK_temprorary = HK_VALUE_temprorary, 
+<a name="l00315"></a>00315       HK_test = HK_VALUE_test, 
+<a name="l00316"></a>00316       HK_tick_interval = HK_VALUE_tick_interval, 
+<a name="l00317"></a>00317       HK_truncate = HK_VALUE_truncate, 
+<a name="l00318"></a>00318       HK_type = HK_VALUE_type, 
+<a name="l00319"></a>00319       HK_unsubscribe = HK_VALUE_unsubscribe, 
+<a name="l00320"></a>00320       HK_uuid = HK_VALUE_uuid, 
+<a name="l00321"></a>00321       HK_value = HK_VALUE_value, 
+<a name="l00322"></a>00322       HK_value_bits = HK_VALUE_value_bits, 
+<a name="l00323"></a>00323       HK_value_size = HK_VALUE_value_size, 
+<a name="l00324"></a>00324       HK_values = HK_VALUE_values, 
+<a name="l00325"></a>00325       HK_verbose = HK_VALUE_verbose, 
+<a name="l00326"></a>00326       HK_writer = HK_VALUE_writer, 
+<a name="l00327"></a>00327 } hashkey_t;
+<a name="l00328"></a>00328 <span class="preprocessor">#endif</span>
+<a name="l00329"></a>00329 <span class="preprocessor"></span>
+<a name="l00330"></a>00330 <span class="preprocessor">#ifdef HASHKEYS_C</span>
+<a name="l00331"></a>00331 <span class="preprocessor"></span><a class="code" href="structkeypair__t.html">keypair_t</a> hashkeys[] = {
+<a name="l00332"></a>00332       { <span class="stringliteral">&quot;action&quot;</span>, HK_VALUE_action }, 
+<a name="l00333"></a>00333       { <span class="stringliteral">&quot;action_global&quot;</span>, HK_VALUE_action_global }, 
+<a name="l00334"></a>00334       { <span class="stringliteral">&quot;action_one&quot;</span>, HK_VALUE_action_one }, 
+<a name="l00335"></a>00335       { <span class="stringliteral">&quot;action_perfork&quot;</span>, HK_VALUE_action_perfork }, 
+<a name="l00336"></a>00336       { <span class="stringliteral">&quot;action_request&quot;</span>, HK_VALUE_action_request }, 
+<a name="l00337"></a>00337       { <span class="stringliteral">&quot;action_request_global&quot;</span>, HK_VALUE_action_request_global }, 
+<a name="l00338"></a>00338       { <span class="stringliteral">&quot;action_request_one&quot;</span>, HK_VALUE_action_request_one }, 
+<a name="l00339"></a>00339       { <span class="stringliteral">&quot;action_request_perfork&quot;</span>, HK_VALUE_action_request_perfork }, 
+<a name="l00340"></a>00340       { <span class="stringliteral">&quot;addr&quot;</span>, HK_VALUE_addr }, 
+<a name="l00341"></a>00341       { <span class="stringliteral">&quot;affinity&quot;</span>, HK_VALUE_affinity }, 
+<a name="l00342"></a>00342       { <span class="stringliteral">&quot;after&quot;</span>, HK_VALUE_after }, 
+<a name="l00343"></a>00343       { <span class="stringliteral">&quot;append&quot;</span>, HK_VALUE_append }, 
+<a name="l00344"></a>00344       { <span class="stringliteral">&quot;async&quot;</span>, HK_VALUE_async }, 
+<a name="l00345"></a>00345       { <span class="stringliteral">&quot;backend&quot;</span>, HK_VALUE_backend }, 
+<a name="l00346"></a>00346       { <span class="stringliteral">&quot;backlog&quot;</span>, HK_VALUE_backlog }, 
+<a name="l00347"></a>00347       { <span class="stringliteral">&quot;before&quot;</span>, HK_VALUE_before }, 
+<a name="l00348"></a>00348       { <span class="stringliteral">&quot;benchmark_function&quot;</span>, HK_VALUE_benchmark_function }, 
+<a name="l00349"></a>00349       { <span class="stringliteral">&quot;bind&quot;</span>, HK_VALUE_bind }, 
+<a name="l00350"></a>00350       { <span class="stringliteral">&quot;block_off&quot;</span>, HK_VALUE_block_off }, 
+<a name="l00351"></a>00351       { <span class="stringliteral">&quot;block_size&quot;</span>, HK_VALUE_block_size }, 
+<a name="l00352"></a>00352       { <span class="stringliteral">&quot;block_vid&quot;</span>, HK_VALUE_block_vid }, 
+<a name="l00353"></a>00353       { <span class="stringliteral">&quot;blocks&quot;</span>, HK_VALUE_blocks }, 
+<a name="l00354"></a>00354       { <span class="stringliteral">&quot;body&quot;</span>, HK_VALUE_body }, 
+<a name="l00355"></a>00355       { <span class="stringliteral">&quot;buffer&quot;</span>, HK_VALUE_buffer }, 
+<a name="l00356"></a>00356       { <span class="stringliteral">&quot;buffer_size&quot;</span>, HK_VALUE_buffer_size }, 
+<a name="l00357"></a>00357       { <span class="stringliteral">&quot;class&quot;</span>, HK_VALUE_class }, 
+<a name="l00358"></a>00358       { <span class="stringliteral">&quot;clientid&quot;</span>, HK_VALUE_clientid }, 
+<a name="l00359"></a>00359       { <span class="stringliteral">&quot;close&quot;</span>, HK_VALUE_close }, 
+<a name="l00360"></a>00360       { <span class="stringliteral">&quot;config&quot;</span>, HK_VALUE_config }, 
+<a name="l00361"></a>00361       { <span class="stringliteral">&quot;connect&quot;</span>, HK_VALUE_connect }, 
+<a name="l00362"></a>00362       { <span class="stringliteral">&quot;convert&quot;</span>, HK_VALUE_convert }, 
+<a name="l00363"></a>00363       { <span class="stringliteral">&quot;copy&quot;</span>, HK_VALUE_copy }, 
+<a name="l00364"></a>00364       { <span class="stringliteral">&quot;count&quot;</span>, HK_VALUE_count }, 
+<a name="l00365"></a>00365       { <span class="stringliteral">&quot;create&quot;</span>, HK_VALUE_create }, 
+<a name="l00366"></a>00366       { <span class="stringliteral">&quot;data&quot;</span>, HK_VALUE_data }, 
+<a name="l00367"></a>00367       { <span class="stringliteral">&quot;data_e&quot;</span>, HK_VALUE_data_e }, 
+<a name="l00368"></a>00368       { <span class="stringliteral">&quot;data_g&quot;</span>, HK_VALUE_data_g }, 
+<a name="l00369"></a>00369       { <span class="stringliteral">&quot;data_v&quot;</span>, HK_VALUE_data_v }, 
+<a name="l00370"></a>00370       { <span class="stringliteral">&quot;default&quot;</span>, HK_VALUE_default }, 
+<a name="l00371"></a>00371       { <span class="stringliteral">&quot;destination&quot;</span>, HK_VALUE_destination }, 
+<a name="l00372"></a>00372       { <span class="stringliteral">&quot;destroy&quot;</span>, HK_VALUE_destroy }, 
+<a name="l00373"></a>00373       { <span class="stringliteral">&quot;dump_last&quot;</span>, HK_VALUE_dump_last }, 
+<a name="l00374"></a>00374       { <span class="stringliteral">&quot;engine&quot;</span>, HK_VALUE_engine }, 
+<a name="l00375"></a>00375       { <span class="stringliteral">&quot;enum_method&quot;</span>, HK_VALUE_enum_method }, 
+<a name="l00376"></a>00376       { <span class="stringliteral">&quot;exclusive&quot;</span>, HK_VALUE_exclusive }, 
+<a name="l00377"></a>00377       { <span class="stringliteral">&quot;fatal&quot;</span>, HK_VALUE_fatal }, 
+<a name="l00378"></a>00378       { <span class="stringliteral">&quot;field&quot;</span>, HK_VALUE_field }, 
+<a name="l00379"></a>00379       { <span class="stringliteral">&quot;filename&quot;</span>, HK_VALUE_filename }, 
+<a name="l00380"></a>00380       { <span class="stringliteral">&quot;folder&quot;</span>, HK_VALUE_folder }, 
+<a name="l00381"></a>00381       { <span class="stringliteral">&quot;force_async&quot;</span>, HK_VALUE_force_async }, 
+<a name="l00382"></a>00382       { <span class="stringliteral">&quot;force_sync&quot;</span>, HK_VALUE_force_sync }, 
+<a name="l00383"></a>00383       { <span class="stringliteral">&quot;format&quot;</span>, HK_VALUE_format }, 
+<a name="l00384"></a>00384       { <span class="stringliteral">&quot;function&quot;</span>, HK_VALUE_function }, 
+<a name="l00385"></a>00385       { <span class="stringliteral">&quot;hash&quot;</span>, HK_VALUE_hash }, 
+<a name="l00386"></a>00386       { <span class="stringliteral">&quot;hash_ptr_end&quot;</span>, HK_VALUE_hash_ptr_end }, 
+<a name="l00387"></a>00387       { <span class="stringliteral">&quot;hash_ptr_inline&quot;</span>, HK_VALUE_hash_ptr_inline }, 
+<a name="l00388"></a>00388       { <span class="stringliteral">&quot;hash_ptr_null&quot;</span>, HK_VALUE_hash_ptr_null }, 
+<a name="l00389"></a>00389       { <span class="stringliteral">&quot;headers&quot;</span>, HK_VALUE_headers }, 
+<a name="l00390"></a>00390       { <span class="stringliteral">&quot;hwm&quot;</span>, HK_VALUE_hwm }, 
+<a name="l00391"></a>00391       { <span class="stringliteral">&quot;identity&quot;</span>, HK_VALUE_identity }, 
+<a name="l00392"></a>00392       { <span class="stringliteral">&quot;ignore_errors&quot;</span>, HK_VALUE_ignore_errors }, 
+<a name="l00393"></a>00393       { <span class="stringliteral">&quot;index&quot;</span>, HK_VALUE_index }, 
+<a name="l00394"></a>00394       { <span class="stringliteral">&quot;inode&quot;</span>, HK_VALUE_inode }, 
+<a name="l00395"></a>00395       { <span class="stringliteral">&quot;input&quot;</span>, HK_VALUE_input }, 
+<a name="l00396"></a>00396       { <span class="stringliteral">&quot;insert&quot;</span>, HK_VALUE_insert }, 
+<a name="l00397"></a>00397       { <span class="stringliteral">&quot;item_sample&quot;</span>, HK_VALUE_item_sample }, 
+<a name="l00398"></a>00398       { <span class="stringliteral">&quot;item_size&quot;</span>, HK_VALUE_item_size }, 
+<a name="l00399"></a>00399       { <span class="stringliteral">&quot;items&quot;</span>, HK_VALUE_items }, 
+<a name="l00400"></a>00400       { <span class="stringliteral">&quot;key&quot;</span>, HK_VALUE_key }, 
+<a name="l00401"></a>00401       { <span class="stringliteral">&quot;key1&quot;</span>, HK_VALUE_key1 }, 
+<a name="l00402"></a>00402       { <span class="stringliteral">&quot;key2&quot;</span>, HK_VALUE_key2 }, 
+<a name="l00403"></a>00403       { <span class="stringliteral">&quot;key4&quot;</span>, HK_VALUE_key4 }, 
+<a name="l00404"></a>00404       { <span class="stringliteral">&quot;lazy&quot;</span>, HK_VALUE_lazy }, 
+<a name="l00405"></a>00405       { <span class="stringliteral">&quot;length&quot;</span>, HK_VALUE_length }, 
+<a name="l00406"></a>00406       { <span class="stringliteral">&quot;linger&quot;</span>, HK_VALUE_linger }, 
+<a name="l00407"></a>00407       { <span class="stringliteral">&quot;loop&quot;</span>, HK_VALUE_loop }, 
+<a name="l00408"></a>00408       { <span class="stringliteral">&quot;machine&quot;</span>, HK_VALUE_machine }, 
+<a name="l00409"></a>00409       { <span class="stringliteral">&quot;master&quot;</span>, HK_VALUE_master }, 
+<a name="l00410"></a>00410       { <span class="stringliteral">&quot;max_global&quot;</span>, HK_VALUE_max_global }, 
+<a name="l00411"></a>00411       { <span class="stringliteral">&quot;max_perfork&quot;</span>, HK_VALUE_max_perfork }, 
+<a name="l00412"></a>00412       { <span class="stringliteral">&quot;max_perinstance&quot;</span>, HK_VALUE_max_perinstance }, 
+<a name="l00413"></a>00413       { <span class="stringliteral">&quot;mcast_loop&quot;</span>, HK_VALUE_mcast_loop }, 
+<a name="l00414"></a>00414       { <span class="stringliteral">&quot;mode&quot;</span>, HK_VALUE_mode }, 
+<a name="l00415"></a>00415       { <span class="stringliteral">&quot;mode_global&quot;</span>, HK_VALUE_mode_global }, 
+<a name="l00416"></a>00416       { <span class="stringliteral">&quot;mode_perfork&quot;</span>, HK_VALUE_mode_perfork }, 
+<a name="l00417"></a>00417       { <span class="stringliteral">&quot;mountpoint&quot;</span>, HK_VALUE_mountpoint }, 
+<a name="l00418"></a>00418       { <span class="stringliteral">&quot;multithread&quot;</span>, HK_VALUE_multithread }, 
+<a name="l00419"></a>00419       { <span class="stringliteral">&quot;n_initial&quot;</span>, HK_VALUE_n_initial }, 
+<a name="l00420"></a>00420       { <span class="stringliteral">&quot;name&quot;</span>, HK_VALUE_name }, 
+<a name="l00421"></a>00421       { <span class="stringliteral">&quot;nelements&quot;</span>, HK_VALUE_nelements }, 
+<a name="l00422"></a>00422       { <span class="stringliteral">&quot;nelements_min&quot;</span>, HK_VALUE_nelements_min }, 
+<a name="l00423"></a>00423       { <span class="stringliteral">&quot;nelements_mul&quot;</span>, HK_VALUE_nelements_mul }, 
+<a name="l00424"></a>00424       { <span class="stringliteral">&quot;nelements_step&quot;</span>, HK_VALUE_nelements_step }, 
+<a name="l00425"></a>00425       { <span class="stringliteral">&quot;offset&quot;</span>, HK_VALUE_offset }, 
+<a name="l00426"></a>00426       { <span class="stringliteral">&quot;offset_from&quot;</span>, HK_VALUE_offset_from }, 
+<a name="l00427"></a>00427       { <span class="stringliteral">&quot;offset_key&quot;</span>, HK_VALUE_offset_key }, 
+<a name="l00428"></a>00428       { <span class="stringliteral">&quot;offset_out&quot;</span>, HK_VALUE_offset_out }, 
+<a name="l00429"></a>00429       { <span class="stringliteral">&quot;offset_to&quot;</span>, HK_VALUE_offset_to }, 
+<a name="l00430"></a>00430       { <span class="stringliteral">&quot;output&quot;</span>, HK_VALUE_output }, 
+<a name="l00431"></a>00431       { <span class="stringliteral">&quot;parameter&quot;</span>, HK_VALUE_parameter }, 
+<a name="l00432"></a>00432       { <span class="stringliteral">&quot;parameter_request&quot;</span>, HK_VALUE_parameter_request }, 
+<a name="l00433"></a>00433       { <span class="stringliteral">&quot;pass_first&quot;</span>, HK_VALUE_pass_first }, 
+<a name="l00434"></a>00434       { <span class="stringliteral">&quot;path&quot;</span>, HK_VALUE_path }, 
+<a name="l00435"></a>00435       { <span class="stringliteral">&quot;paused&quot;</span>, HK_VALUE_paused }, 
+<a name="l00436"></a>00436       { <span class="stringliteral">&quot;perlevel&quot;</span>, HK_VALUE_perlevel }, 
+<a name="l00437"></a>00437       { <span class="stringliteral">&quot;pool_interval&quot;</span>, HK_VALUE_pool_interval }, 
+<a name="l00438"></a>00438       { <span class="stringliteral">&quot;port&quot;</span>, HK_VALUE_port }, 
+<a name="l00439"></a>00439       { <span class="stringliteral">&quot;rate&quot;</span>, HK_VALUE_rate }, 
+<a name="l00440"></a>00440       { <span class="stringliteral">&quot;rcvbuf_size&quot;</span>, HK_VALUE_rcvbuf_size }, 
+<a name="l00441"></a>00441       { <span class="stringliteral">&quot;read_size&quot;</span>, HK_VALUE_read_size }, 
+<a name="l00442"></a>00442       { <span class="stringliteral">&quot;reader&quot;</span>, HK_VALUE_reader }, 
+<a name="l00443"></a>00443       { <span class="stringliteral">&quot;readonly&quot;</span>, HK_VALUE_readonly }, 
+<a name="l00444"></a>00444       { <span class="stringliteral">&quot;real_offset&quot;</span>, HK_VALUE_real_offset }, 
+<a name="l00445"></a>00445       { <span class="stringliteral">&quot;reclen&quot;</span>, HK_VALUE_reclen }, 
+<a name="l00446"></a>00446       { <span class="stringliteral">&quot;reconnect_ivl&quot;</span>, HK_VALUE_reconnect_ivl }, 
+<a name="l00447"></a>00447       { <span class="stringliteral">&quot;reconnect_ivl_max&quot;</span>, HK_VALUE_reconnect_ivl_max }, 
+<a name="l00448"></a>00448       { <span class="stringliteral">&quot;recovery_ivl&quot;</span>, HK_VALUE_recovery_ivl }, 
+<a name="l00449"></a>00449       { <span class="stringliteral">&quot;recovery_ivl_msec&quot;</span>, HK_VALUE_recovery_ivl_msec }, 
+<a name="l00450"></a>00450       { <span class="stringliteral">&quot;removed_items&quot;</span>, HK_VALUE_removed_items }, 
+<a name="l00451"></a>00451       { <span class="stringliteral">&quot;req_count&quot;</span>, HK_VALUE_req_count }, 
+<a name="l00452"></a>00452       { <span class="stringliteral">&quot;req_read&quot;</span>, HK_VALUE_req_read }, 
+<a name="l00453"></a>00453       { <span class="stringliteral">&quot;req_rebuild&quot;</span>, HK_VALUE_req_rebuild }, 
+<a name="l00454"></a>00454       { <span class="stringliteral">&quot;req_rebuild_destination&quot;</span>, HK_VALUE_req_rebuild_destination }, 
+<a name="l00455"></a>00455       { <span class="stringliteral">&quot;req_rebuild_enable&quot;</span>, HK_VALUE_req_rebuild_enable }, 
+<a name="l00456"></a>00456       { <span class="stringliteral">&quot;request&quot;</span>, HK_VALUE_request }, 
+<a name="l00457"></a>00457       { <span class="stringliteral">&quot;request_out&quot;</span>, HK_VALUE_request_out }, 
+<a name="l00458"></a>00458       { <span class="stringliteral">&quot;ret&quot;</span>, HK_VALUE_ret }, 
+<a name="l00459"></a>00459       { <span class="stringliteral">&quot;retry&quot;</span>, HK_VALUE_retry }, 
+<a name="l00460"></a>00460       { <span class="stringliteral">&quot;retry_request&quot;</span>, HK_VALUE_retry_request }, 
+<a name="l00461"></a>00461       { <span class="stringliteral">&quot;return&quot;</span>, HK_VALUE_return }, 
+<a name="l00462"></a>00462       { <span class="stringliteral">&quot;return_result&quot;</span>, HK_VALUE_return_result }, 
+<a name="l00463"></a>00463       { <span class="stringliteral">&quot;return_to&quot;</span>, HK_VALUE_return_to }, 
+<a name="l00464"></a>00464       { <span class="stringliteral">&quot;role&quot;</span>, HK_VALUE_role }, 
+<a name="l00465"></a>00465       { <span class="stringliteral">&quot;rules&quot;</span>, HK_VALUE_rules }, 
+<a name="l00466"></a>00466       { <span class="stringliteral">&quot;shop&quot;</span>, HK_VALUE_shop }, 
+<a name="l00467"></a>00467       { <span class="stringliteral">&quot;silent&quot;</span>, HK_VALUE_silent }, 
+<a name="l00468"></a>00468       { <span class="stringliteral">&quot;size&quot;</span>, HK_VALUE_size }, 
+<a name="l00469"></a>00469       { <span class="stringliteral">&quot;slave&quot;</span>, HK_VALUE_slave }, 
+<a name="l00470"></a>00470       { <span class="stringliteral">&quot;sndbuf_size&quot;</span>, HK_VALUE_sndbuf_size }, 
+<a name="l00471"></a>00471       { <span class="stringliteral">&quot;socket&quot;</span>, HK_VALUE_socket }, 
+<a name="l00472"></a>00472       { <span class="stringliteral">&quot;source&quot;</span>, HK_VALUE_source }, 
+<a name="l00473"></a>00473       { <span class="stringliteral">&quot;split&quot;</span>, HK_VALUE_split }, 
+<a name="l00474"></a>00474       { <span class="stringliteral">&quot;storage&quot;</span>, HK_VALUE_storage }, 
+<a name="l00475"></a>00475       { <span class="stringliteral">&quot;string&quot;</span>, HK_VALUE_string }, 
+<a name="l00476"></a>00476       { <span class="stringliteral">&quot;structure&quot;</span>, HK_VALUE_structure }, 
+<a name="l00477"></a>00477       { <span class="stringliteral">&quot;subscribe&quot;</span>, HK_VALUE_subscribe }, 
+<a name="l00478"></a>00478       { <span class="stringliteral">&quot;swap&quot;</span>, HK_VALUE_swap }, 
+<a name="l00479"></a>00479       { <span class="stringliteral">&quot;sync&quot;</span>, HK_VALUE_sync }, 
+<a name="l00480"></a>00480       { <span class="stringliteral">&quot;temprorary&quot;</span>, HK_VALUE_temprorary }, 
+<a name="l00481"></a>00481       { <span class="stringliteral">&quot;test&quot;</span>, HK_VALUE_test }, 
+<a name="l00482"></a>00482       { <span class="stringliteral">&quot;tick_interval&quot;</span>, HK_VALUE_tick_interval }, 
+<a name="l00483"></a>00483       { <span class="stringliteral">&quot;truncate&quot;</span>, HK_VALUE_truncate }, 
+<a name="l00484"></a>00484       { <span class="stringliteral">&quot;type&quot;</span>, HK_VALUE_type }, 
+<a name="l00485"></a>00485       { <span class="stringliteral">&quot;unsubscribe&quot;</span>, HK_VALUE_unsubscribe }, 
+<a name="l00486"></a>00486       { <span class="stringliteral">&quot;uuid&quot;</span>, HK_VALUE_uuid }, 
+<a name="l00487"></a>00487       { <span class="stringliteral">&quot;value&quot;</span>, HK_VALUE_value }, 
+<a name="l00488"></a>00488       { <span class="stringliteral">&quot;value_bits&quot;</span>, HK_VALUE_value_bits }, 
+<a name="l00489"></a>00489       { <span class="stringliteral">&quot;value_size&quot;</span>, HK_VALUE_value_size }, 
+<a name="l00490"></a>00490       { <span class="stringliteral">&quot;values&quot;</span>, HK_VALUE_values }, 
+<a name="l00491"></a>00491       { <span class="stringliteral">&quot;verbose&quot;</span>, HK_VALUE_verbose }, 
+<a name="l00492"></a>00492       { <span class="stringliteral">&quot;writer&quot;</span>, HK_VALUE_writer }, 
+<a name="l00493"></a>00493       { NULL, 0 }  
+<a name="l00494"></a>00494 };
+<a name="l00495"></a>00495 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

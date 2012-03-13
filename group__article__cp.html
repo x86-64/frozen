@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>Flow-based fun | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -56,8 +56,8 @@ Copying files in simple way</h2>
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
                 action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
-                source      = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;INPUT&quot;</span>  },
-                destination = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;OUTPUT&quot;</span> }
+                source      = (file_t){ filename = <span class="stringliteral">&quot;INPUT&quot;</span>  },
+                destination = (file_t){ filename = <span class="stringliteral">&quot;OUTPUT&quot;</span> }
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
@@ -78,7 +78,7 @@ FILE(`remote_file&#39;, `8888&#39;)
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
                 action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
-                source      = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;INPUT&quot;</span> },
+                source      = (file_t){ filename = <span class="stringliteral">&quot;INPUT&quot;</span> },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&quot;remote_file&quot;</span>
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
@@ -94,14 +94,14 @@ FILE(`remote_file&#39;, `8888&#39;)
 { <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
 {
         <span class="keyword">class  </span>= &quot;modules/zeromq&quot;,
-        socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+        socket = (zeromq_t){
                 type = <span class="stringliteral">&quot;rep&quot;</span>,
                 bind = <span class="stringliteral">&quot;tcp://127.0.0.1:8888&quot;</span>
         },
         shop = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 EXPLODE(`buffer<span class="stringliteral">&#39;, `buffer&#39;</span>,
                 `
-                        { <span class="keyword">class </span>= &quot;query&quot;, data = (<a class="code" href="structfile__t.html">file_t</a>){ filename = <span class="stringliteral">&quot;OUTPUT&quot;</span> } }
+                        { <span class="keyword">class </span>= &quot;query&quot;, data = (file_t){ filename = <span class="stringliteral">&quot;OUTPUT&quot;</span> } }
                 <span class="stringliteral">&#39;),</span>
 <span class="stringliteral">                { class = &quot;shop/return&quot; }</span>
 <span class="stringliteral">        }</span>
@@ -180,7 +180,7 @@ include(implode.m4)
 { <span class="keyword">class </span>= &quot;emitter&quot;, request = {                        <span class="comment">// enumerate db</span>
         request = {
                 action = (action_t)<span class="stringliteral">&quot;enum&quot;</span>,
-                data   = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){                    <span class="comment">// our zeromq socket, we pass it to db, so it could use it</span>
+                data   = (zeromq_t){                    <span class="comment">// our zeromq socket, we pass it to db, so it could use it</span>
                         type    = <span class="stringliteral">&quot;push&quot;</span>,
                         connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8887&quot;</span>,
                         lazy    = (uint_t)<span class="stringliteral">&quot;1&quot;</span>
@@ -212,7 +212,7 @@ include(implode.m4)
 `       IMPLODE(`input<span class="stringliteral">&#39;, `output&#39;</span>,
         `{
                 <span class="keyword">class  </span>= &quot;modules/zeromq&quot;,
-                socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+                socket = (zeromq_t){
                         type = <span class="stringliteral">&quot;req&quot;</span>,
                         connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8888&quot;</span>
                 },
@@ -227,7 +227,7 @@ include(implode.m4)
 { <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
 {
         <span class="keyword">class  </span>= &quot;modules/zeromq&quot;,
-        socket = (<a class="code" href="structzeromq__t.html">zeromq_t</a>){
+        socket = (zeromq_t){
                 type = <span class="stringliteral">&quot;rep&quot;</span>,
                 bind = <span class="stringliteral">&quot;tcp://127.0.0.1:8888&quot;</span>
         },
@@ -248,7 +248,7 @@ include(implode.m4)
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 

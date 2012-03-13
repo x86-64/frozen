@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>Frozen - flexible data processing daemon</title>
+<title>machine.h Source File | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -46,7 +46,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>Globals</span></a></li>
     </ul>
   </div>
 <div class="header">
@@ -54,21 +53,21 @@
 <div class="title">machine.h</div>  </div>
 </div>
 <div class="contents">
-<a href="machine_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef MACHINE_H</span>
+<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef MACHINE_H</span>
 <a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define MACHINE_H</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00074"></a><a class="code" href="machine_8h.html#a4d435b539269066ebae1cc607f69dc27">00074</a> <span class="keyword">typedef</span> ssize_t (*<a class="code" href="machine_8h.html#a4d435b539269066ebae1cc607f69dc27" title="Init function for machine. Allocate userdata and init default values here.">f_init</a>)      (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *);                         
-<a name="l00075"></a><a class="code" href="machine_8h.html#af86c6bf57b7ea61c85ccf278539caa0e">00075</a> <span class="keyword">typedef</span> ssize_t (*<a class="code" href="machine_8h.html#af86c6bf57b7ea61c85ccf278539caa0e" title="Configure function for machine. Try to make it reentrant. Assign configuration values and validate it...">f_configure</a>) (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *, <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *);               
-<a name="l00076"></a><a class="code" href="machine_8h.html#a324f84689490de5e5890148a2d3bf437">00076</a> <span class="keyword">typedef</span> ssize_t (*<a class="code" href="machine_8h.html#a324f84689490de5e5890148a2d3bf437" title="Destroy function for machine. Free all allocated resources here.">f_destroy</a>)   (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *);                         
+<a name="l00074"></a>00074 <span class="keyword">typedef</span> ssize_t (*f_init)      (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *);                         
+<a name="l00075"></a>00075 <span class="keyword">typedef</span> ssize_t (*f_configure) (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *, <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *);               
+<a name="l00076"></a>00076 <span class="keyword">typedef</span> ssize_t (*f_destroy)   (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *);                         
 <a name="l00077"></a>00077 
 <a name="l00082"></a><a class="code" href="structmachine__t.html">00082</a> <span class="keyword">struct </span><a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> {
 <a name="l00083"></a><a class="code" href="structmachine__t.html#a5ac083a645d964373f022d03df4849c8">00083</a>         <span class="keywordtype">char</span>                  *<a class="code" href="structmachine__t.html#a5ac083a645d964373f022d03df4849c8" title="Current instance name. Must be unique. Optional.">name</a>;             
 <a name="l00084"></a><a class="code" href="structmachine__t.html#a5d426b76513908dba3a237f9eb342a9d">00084</a>         <span class="keywordtype">char</span>                  *<span class="keyword">class</span>;            
 <a name="l00085"></a>00085         
 <a name="l00086"></a><a class="code" href="structmachine__t.html#a94a85b3869136dacf981fb7800c2cc80">00086</a>         api_types              <a class="code" href="structmachine__t.html#a94a85b3869136dacf981fb7800c2cc80" title="Supported apis. For example (API_HASH | API_FAST). Required.">supported_api</a>;    
-<a name="l00087"></a><a class="code" href="structmachine__t.html#af16ae07479a0d5e7d658bc39e7fbfd56">00087</a>         <a class="code" href="machine_8h.html#a4d435b539269066ebae1cc607f69dc27" title="Init function for machine. Allocate userdata and init default values here.">f_init</a>                 <a class="code" href="structmachine__t.html#af16ae07479a0d5e7d658bc39e7fbfd56" title="Machine init function. Optional.">func_init</a>;        
-<a name="l00088"></a><a class="code" href="structmachine__t.html#a9c8cd950499302a0a05f84013c26cc86">00088</a>         <a class="code" href="machine_8h.html#af86c6bf57b7ea61c85ccf278539caa0e" title="Configure function for machine. Try to make it reentrant. Assign configuration values and validate it...">f_configure</a>            <a class="code" href="structmachine__t.html#a9c8cd950499302a0a05f84013c26cc86" title="Machine configure function. Optional.">func_configure</a>;   
-<a name="l00089"></a><a class="code" href="structmachine__t.html#a2159882fda36dd81639ed4609ddf07e3">00089</a>         <a class="code" href="machine_8h.html#a324f84689490de5e5890148a2d3bf437" title="Destroy function for machine. Free all allocated resources here.">f_destroy</a>              <a class="code" href="structmachine__t.html#a2159882fda36dd81639ed4609ddf07e3" title="Machine destroy function. Optional.">func_destroy</a>;     
+<a name="l00087"></a><a class="code" href="structmachine__t.html#af16ae07479a0d5e7d658bc39e7fbfd56">00087</a>         f_init                 <a class="code" href="structmachine__t.html#af16ae07479a0d5e7d658bc39e7fbfd56" title="Machine init function. Optional.">func_init</a>;        
+<a name="l00088"></a><a class="code" href="structmachine__t.html#a9c8cd950499302a0a05f84013c26cc86">00088</a>         f_configure            <a class="code" href="structmachine__t.html#a9c8cd950499302a0a05f84013c26cc86" title="Machine configure function. Optional.">func_configure</a>;   
+<a name="l00089"></a><a class="code" href="structmachine__t.html#a2159882fda36dd81639ed4609ddf07e3">00089</a>         f_destroy              <a class="code" href="structmachine__t.html#a2159882fda36dd81639ed4609ddf07e3" title="Machine destroy function. Optional.">func_destroy</a>;     
 <a name="l00090"></a>00090         
 <a name="l00091"></a>00091         <span class="keyword">struct </span>{
 <a name="l00092"></a><a class="code" href="structmachine__t.html#ab4b92a6ee7156240c1c6179d37e75777">00092</a>                 f_hash         <a class="code" href="structmachine__t.html#ab4b92a6ee7156240c1c6179d37e75777" title="Handler for API_HASH.">func_handler</a>;     
@@ -84,54 +83,55 @@
 <a name="l00102"></a>00102 API ssize_t         class_register          (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *proto); 
 <a name="l00103"></a>00103 API <span class="keywordtype">void</span>            class_unregister        (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *proto); 
 <a name="l00104"></a>00104 
-<a name="l00105"></a>00105 API <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *     request_get_current(<span class="keywordtype">void</span>);               
-<a name="l00106"></a>00106 API <span class="keywordtype">void</span>            request_set_current(<a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
-<a name="l00107"></a>00107 
-<a name="l00108"></a>00108 API ssize_t         machine_new             (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> **pmachine, <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config); 
-<a name="l00109"></a>00109 API <span class="keywordtype">void</span>            machine_acquire         (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
-<a name="l00110"></a>00110 API <a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *     machine_find            (<span class="keywordtype">char</span> *name); 
-<a name="l00111"></a>00111 API <span class="keywordtype">void</span>            machine_destroy         (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
-<a name="l00112"></a>00112 API ssize_t         machine_is_ghost        (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine);
-<a name="l00113"></a>00113 
-<a name="l00114"></a>00114 <span class="comment">//API ssize_t         machine_query           (machine_t *machine, request_t *request); ///&lt; Query machine with hash request</span>
-<a name="l00115"></a>00115 <span class="comment">//API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///&lt; Pass hash request to next machines in shop. @param machine Current machine</span>
-<a name="l00116"></a>00116 
-<a name="l00117"></a>00117 <span class="preprocessor">#define machine_query(_machine,_request)  (_machine)-&gt;machine_type_hash.func_handler(_machine, _request)</span>
-<a name="l00118"></a>00118 <span class="preprocessor"></span><span class="preprocessor">#define machine_pass(_machine,_request)   (_machine)-&gt;cnext-&gt;machine_type_hash.func_handler((_machine)-&gt;cnext, _request)</span>
-<a name="l00119"></a>00119 <span class="preprocessor"></span>
-<a name="l00143"></a>00143 API ssize_t         shop_new               (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config, <a class="code" href="structlist.html">list</a> **shops);
-<a name="l00144"></a>00144 API <span class="keywordtype">void</span>            shop_list_destroy      (<a class="code" href="structlist.html">list</a> *machine);      
-<a name="l00145"></a>00145 API <span class="keywordtype">void</span>            shop_destroy           (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
-<a name="l00146"></a>00146 
-<a name="l00147"></a>00147     ssize_t         frozen_machine_init     (<span class="keywordtype">void</span>);
-<a name="l00148"></a>00148     <span class="keywordtype">void</span>            frozen_machine_destroy  (<span class="keywordtype">void</span>);
-<a name="l00149"></a>00149 
-<a name="l00150"></a>00150 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
-<a name="l00151"></a>00151 
-<a name="l00152"></a>00152 <span class="comment">// Thread-specific userdata functions</span>
-<a name="l00153"></a><a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38">00153</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (<span class="keywordtype">void</span> *);        
-<a name="l00154"></a><a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627">00154</a> <span class="keyword">typedef</span> void     (*<a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a>)   (<span class="keywordtype">void</span> *);        
-<a name="l00155"></a>00155 
-<a name="l00157"></a><a class="code" href="structthread__data__ctx__t.html">00157</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
-<a name="l00158"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00158</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
-<a name="l00159"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00159</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
-<a name="l00160"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00160</a>         <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a>        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
-<a name="l00161"></a><a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834">00161</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834" title="User data.">userdata</a>;                
-<a name="l00162"></a>00162 } <a class="code" href="machine_8h.html#a8305ea7d017c23448a8f2226f07176d9" title="Thread data context.">thread_data_ctx_t</a>;
-<a name="l00163"></a>00163 
-<a name="l00172"></a>00172 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, <a class="code" href="machine_8h.html#a32fea2034c914567993e916e5f5cfb38" title="Thread-specific data constructor.">f_thread_create</a> func_create, <a class="code" href="machine_8h.html#afdf36ae91ac2f85c25080ae29a9cd627" title="Thread-specific data destructor.">f_thread_destroy</a> func_destroy, <span class="keywordtype">void</span> *userdata);
-<a name="l00173"></a>00173 
-<a name="l00177"></a>00177 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00178"></a>00178 
-<a name="l00183"></a>00183 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
-<a name="l00184"></a>00184 
-<a name="l00185"></a>00185 <span class="preprocessor">#endif // MACHINE_H</span>
+<a name="l00105"></a>00105 API <a class="code" href="structlist.html">list</a> *          request_get_stack(<span class="keywordtype">void</span>);                   
+<a name="l00106"></a>00106 API <span class="keywordtype">void</span>            request_enter_context(<a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request); 
+<a name="l00107"></a>00107 API <span class="keywordtype">void</span>            request_leave_context(<span class="keywordtype">void</span>);               
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109 API ssize_t         machine_new             (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> **pmachine, <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config); 
+<a name="l00110"></a>00110 API <span class="keywordtype">void</span>            machine_acquire         (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
+<a name="l00111"></a>00111 API <a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *     machine_find            (<span class="keywordtype">char</span> *name); 
+<a name="l00112"></a>00112 API <span class="keywordtype">void</span>            machine_destroy         (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
+<a name="l00113"></a>00113 API ssize_t         machine_is_ghost        (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine);
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115 <span class="comment">//API ssize_t         machine_query           (machine_t *machine, request_t *request); ///&lt; Query machine with hash request</span>
+<a name="l00116"></a>00116 <span class="comment">//API ssize_t         machine_pass            (machine_t *machine, request_t *request); ///&lt; Pass hash request to next machines in shop. @param machine Current machine</span>
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118 <span class="preprocessor">#define machine_query(_machine,_request)  (_machine)-&gt;machine_type_hash.func_handler(_machine, _request)</span>
+<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="preprocessor">#define machine_pass(_machine,_request)   (_machine)-&gt;cnext-&gt;machine_type_hash.func_handler((_machine)-&gt;cnext, _request)</span>
+<a name="l00120"></a>00120 <span class="preprocessor"></span>
+<a name="l00144"></a>00144 API ssize_t         shop_new               (<a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *config, <a class="code" href="structlist.html">list</a> **shops);
+<a name="l00145"></a>00145 API <span class="keywordtype">void</span>            shop_list_destroy      (<a class="code" href="structlist.html">list</a> *machine);      
+<a name="l00146"></a>00146 API <span class="keywordtype">void</span>            shop_destroy           (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine); 
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148     ssize_t         frozen_machine_init     (<span class="keywordtype">void</span>);
+<a name="l00149"></a>00149     <span class="keywordtype">void</span>            frozen_machine_destroy  (<span class="keywordtype">void</span>);
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151 <span class="keyword">extern</span> pthread_mutex_t                destroy_mtx; <span class="comment">// TODO remove this..</span>
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153 <span class="comment">// Thread-specific userdata functions</span>
+<a name="l00154"></a>00154 <span class="keyword">typedef</span> <span class="keywordtype">void</span>   * (*f_thread_create)    (<span class="keywordtype">void</span> *);        
+<a name="l00155"></a>00155 <span class="keyword">typedef</span> void     (*f_thread_destroy)   (<span class="keywordtype">void</span> *);        
+<a name="l00156"></a>00156 
+<a name="l00158"></a><a class="code" href="structthread__data__ctx__t.html">00158</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> {
+<a name="l00159"></a><a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82">00159</a>         uintmax_t              <a class="code" href="structthread__data__ctx__t.html#aea4a3eb80549c3cd2b7af9f7a659fb82" title="Inited structure or not.">inited</a>;                  
+<a name="l00160"></a><a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf">00160</a>         pthread_key_t          <a class="code" href="structthread__data__ctx__t.html#ac256ecc480ba7aaf877e07aed0a791bf" title="Pthread key to hold thread-specific data in it.">key</a>;                     
+<a name="l00161"></a><a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a">00161</a>         f_thread_create        <a class="code" href="structthread__data__ctx__t.html#ae7ea912df619c29607cb5ba5de45664a" title="Constructor function.">func_create</a>;             
+<a name="l00162"></a><a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834">00162</a>         <span class="keywordtype">void</span>                  *<a class="code" href="structthread__data__ctx__t.html#afd0ffb02780e738d4c0a10ab833b7834" title="User data.">userdata</a>;                
+<a name="l00163"></a>00163 } <a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a>;
+<a name="l00164"></a>00164 
+<a name="l00173"></a>00173 ssize_t            thread_data_init(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data, f_thread_create func_create, f_thread_destroy func_destroy, <span class="keywordtype">void</span> *userdata);
+<a name="l00174"></a>00174 
+<a name="l00178"></a>00178 <span class="keywordtype">void</span>               thread_data_destroy(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00179"></a>00179 
+<a name="l00184"></a>00184 <span class="keywordtype">void</span> *             thread_data_get(<a class="code" href="structthread__data__ctx__t.html" title="Thread data context.">thread_data_ctx_t</a> *thread_data);
+<a name="l00185"></a>00185 
+<a name="l00186"></a>00186 <span class="preprocessor">#endif // MACHINE_H</span>
 </pre></div></div>
 </div>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Mar 6 2012 20:51:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
+Generated on Tue Mar 13 2012 12:36:24 for frozen by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.5.1</small></address>
 
 <script type="text/javascript">
 
