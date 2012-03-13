@@ -34,23 +34,6 @@ define(`ZEROMQ_DEVICE', dnl ZEROMQ_DEVICE(device, frontend_name, backend_name)
 	}
 ')
 
-define(`ZEROMQ_HASH_REP', dnl ZEROMQ_HASH_REP(service_name, shop_name)
-`
-	{ class = "modules/zeromq",
-		socket = (zeromq_t){
-			type = "rep",
-			$1
-		},
-		shop = (machine_t){
-			EXPLODE(`buffer', `buffer',
-			`
-				SHOP_QUERY($2)
-			'),
-			SHOP_RETURN()
-		}
-	}
-')
-
 define(`ZEROMQ_HASH_REQ', dnl ZEROMQ_HASH_REQ(service_name, request)
 `
         { class = "query",
@@ -76,6 +59,64 @@ define(`ZEROMQ_HASH_REQ', dnl ZEROMQ_HASH_REQ(service_name, request)
                 }
         }
 ')
+
+define(`ZEROMQ_HASH_REP', dnl ZEROMQ_HASH_REP(service_name, shop_name)
+`
+	{ class = "modules/zeromq",
+		socket = (zeromq_t){
+			type = "rep",
+			$1
+		},
+		shop = (machine_t){
+			EXPLODE(`buffer', `buffer',
+			`
+				SHOP_QUERY($2)
+			'),
+			SHOP_RETURN()
+		}
+	}
+')
+
+define(`ZEROMQ_HASH_PUSH', dnl ZEROMQ_HASH_PUSH(service_name, buffer_hashkey)
+`
+	{ class = "query",
+		request = {
+			action = (action_t)"query",
+			request = {
+				$2
+			}
+		},
+		data = (machine_t){
+			IMPLODE(`input', `output',
+			`{
+				class  = "modules/zeromq",
+				socket = (zeromq_t){
+					type    = "push",
+					$1
+				},
+				input  = (hashkey_t)"input",
+				output = (hashkey_t)"output",
+				convert = (uint_t)"1"
+			}'),
+                        { class = "end" }
+		}
+	}
+')
+
+define(`ZEROMQ_HASH_PULL', dnl ZEROMQ_HASH_PULL(service_name, shop_name)
+`
+	{ class = "modules/zeromq",
+		socket = (zeromq_t){
+			type = "pull",
+			$1
+		}
+	},
+	EXPLODE(`buffer', `buffer',
+	`
+		SHOP_QUERY($2)
+	')
+')
+
 
 define(`ZEROMQ_PUSH', dnl ZEROMQ_PUSH(service_name, buffer_hashkey)
 `
