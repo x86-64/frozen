@@ -35,6 +35,7 @@ typedef struct slider_t {
 } slider_t;
 
 uintmax_t       data_slider_t_get_offset     (data_t *data);
+ssize_t         data_slider_t_set_offset     (data_t *data, intmax_t offset, uintmax_t dir);
 void            data_slider_t_freeze         (data_t *data);
 void            data_slider_t_unfreeze       (data_t *data);
 slider_t *      slider_t_alloc               (data_t *data, uintmax_t offset);

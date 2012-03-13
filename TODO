@@ -14,7 +14,6 @@
 - portable action_t packed format
 - machine rate-limit, delay
 - benchmark functions remove from main request flow, need new approach for machine parameters, for machine/pool too
-- slider_t set position func
 - netstring_t parse (get code from mongrel for parsing)
 - rewrite mongrel send\parse routines to use netstring_t, container_t types
 - cache, append only cache

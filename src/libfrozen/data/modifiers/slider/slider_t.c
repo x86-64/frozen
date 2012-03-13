@@ -27,6 +27,17 @@ uintmax_t data_slider_t_get_offset(data_t *data){ // {{{
 	
 	return fdata->off;
 } // }}}
+ssize_t   data_slider_t_set_offset(data_t *data, intmax_t offset, uintmax_t dir){ // {{{
+	slider_t                  *fdata             = (slider_t *)data->ptr;
+	
+	switch(dir){
+		case SEEK_SET: fdata->off  = offset; break;
+		case SEEK_CUR: fdata->off += offset; break;
+		default:
+			return -EINVAL;
+	}
+	return 0;
+} // }}}
 void      data_slider_t_freeze(data_t *data){ // {{{
 	slider_t                  *fdata             = (slider_t *)data->ptr;
 	
