@@ -4,6 +4,8 @@ include(zeromq.m4)
 
 ZEROMQ_SERVICE(`zmq_test1',  `127.0.0.1', `8888', `1000')
 ZEROMQ_SERVICE(`zmq_test2',  `127.0.0.1', `8889')
+ZEROMQ_SERVICE(`zmq_dev_in', `127.0.0.1', `8890')
+ZEROMQ_SERVICE(`zmq_dev_out',`127.0.0.1', `8891')
 
 { class = "thread" },
 
@@ -11,20 +13,29 @@ ZEROMQ_SERVICE(`zmq_test2',  `127.0.0.1', `8889')
 	buffer1 = (raw_t)"Hello, zeromq push world #1!\n",
 	buffer2 = (raw_t)"Hello, zeromq push world #2!\n",
 	buffer3 = (raw_t)"Hello, zeromq push world #3!\n",
+	
 	buffer4 = (raw_t)"Hello, zeromq req world #1!\n",
 	buffer5 = (raw_t)"Hello, zeromq req world #2!\n",
-	buffer6 = (raw_t)"Hello, zeromq req world #3!\n"
+	buffer6 = (raw_t)"Hello, zeromq req world #3!\n",
+	
+	buffer7 = (raw_t)"Hello, zeromq device world #1!\n",
+	buffer8 = (raw_t)"Hello, zeromq device world #2!\n",
+	buffer9 = (raw_t)"Hello, zeromq device world #3!\n"
 }},
 
 // test zeromq push
-ZEROMQ_PUSH(`zmq_test1', `buffer1'),
-ZEROMQ_PUSH(`zmq_test1', `buffer2'),
-ZEROMQ_PUSH(`zmq_test1', `buffer3'),
+ZEROMQ_PUSH(`zmq_test1_connect', `buffer1'),
+ZEROMQ_PUSH(`zmq_test1_connect', `buffer2'),
+ZEROMQ_PUSH(`zmq_test1_connect', `buffer3'),
+
+ZEROMQ_PUSH(`zmq_dev_in_connect', `buffer7'),
+ZEROMQ_PUSH(`zmq_dev_in_connect', `buffer8'),
+ZEROMQ_PUSH(`zmq_dev_in_connect', `buffer9'),
 
 // test zeromq req
-ZEROMQ_HASH_REQ(`zmq_test2', `buffer = (env_t)"buffer4"'),
-ZEROMQ_HASH_REQ(`zmq_test2', `buffer = (env_t)"buffer5"'),
-ZEROMQ_HASH_REQ(`zmq_test2', `buffer = (env_t)"buffer6"'),
+ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer4"'),
+ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer5"'),
+ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer6"'),
 
 { class = "kill" },
 NULL,
@@ -39,11 +50,17 @@ SHOP(`shop_print',
 ')
 
 DAEMON(`
-	ZEROMQ_PULL(`zmq_test1', `shop_print')
+	ZEROMQ_PULL(`zmq_test1_bind', `shop_print')
 ')
 DAEMON(`
-	ZEROMQ_HASH_REP(`zmq_test2', `shop_print')
+	ZEROMQ_HASH_REP(`zmq_test2_bind', `shop_print')
 ')
 
+DAEMON(`
+	ZEROMQ_DEVICE(`streamer', `zmq_dev_in_bind', `zmq_dev_out_bind')
+')
+DAEMON(`
+	ZEROMQ_PULL(`zmq_dev_out_connect', `shop_print')
+')
 
 { class = "end" }

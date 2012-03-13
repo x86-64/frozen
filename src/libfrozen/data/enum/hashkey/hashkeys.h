@@ -42,6 +42,7 @@
 #define HK_VALUE_default 15471
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
+#define HK_VALUE_device 9357
 #define HK_VALUE_dump_last 31113
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
@@ -53,6 +54,7 @@
 #define HK_VALUE_force_async 53994
 #define HK_VALUE_force_sync 41290
 #define HK_VALUE_format 9917
+#define HK_VALUE_frontend 21643
 #define HK_VALUE_function 22303
 #define HK_VALUE_hash 3191
 #define HK_VALUE_hash_ptr_end 68083
@@ -204,6 +206,7 @@ typedef enum hashkey_t {
       HK_default = HK_VALUE_default, 
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
+      HK_device = HK_VALUE_device, 
       HK_dump_last = HK_VALUE_dump_last, 
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
@@ -215,6 +218,7 @@ typedef enum hashkey_t {
       HK_force_async = HK_VALUE_force_async, 
       HK_force_sync = HK_VALUE_force_sync, 
       HK_format = HK_VALUE_format, 
+      HK_frontend = HK_VALUE_frontend, 
       HK_function = HK_VALUE_function, 
       HK_hash = HK_VALUE_hash, 
       HK_hash_ptr_end = HK_VALUE_hash_ptr_end, 
@@ -370,6 +374,7 @@ keypair_t hashkeys[] = {
       { "default", HK_VALUE_default }, 
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 
+      { "device", HK_VALUE_device }, 
       { "dump_last", HK_VALUE_dump_last }, 
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
@@ -381,6 +386,7 @@ keypair_t hashkeys[] = {
       { "force_async", HK_VALUE_force_async }, 
       { "force_sync", HK_VALUE_force_sync }, 
       { "format", HK_VALUE_format }, 
+      { "frontend", HK_VALUE_frontend }, 
       { "function", HK_VALUE_function }, 
       { "hash", HK_VALUE_hash }, 
       { "hash_ptr_end", HK_VALUE_hash_ptr_end }, 

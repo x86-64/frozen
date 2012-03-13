@@ -92,6 +92,14 @@ static int     zeromq_t_string_to_type(char *type_str){ // {{{
 	}
 	return -1;
 } // }}}
+static int     zeromq_t_string_to_dev(char *type_str){ // {{{
+	if(type_str != NULL){
+		if(strcasecmp(type_str, "queue") == 0) return ZMQ_QUEUE;
+		if(strcasecmp(type_str, "forwarder") == 0) return ZMQ_FORWARDER;
+		if(strcasecmp(type_str, "streamer") == 0) return ZMQ_STREAMER;
+	}
+	return -1;
+} // }}}
 
 // get opt {{{
 #define get_opt(_key,_func){                                                                                          \
@@ -763,11 +771,98 @@ static machine_t zmq_helper_proto = { // {{{
 	}
 }; // }}}
 
+typedef struct zeromq_dev_userdata {
+	int                    device;
+	data_t                 frontend;
+	data_t                 backend;
+} zeromq_dev_userdata;
+
+static ssize_t zeromq_dev_init(machine_t *machine){ // {{{
+	zeromq_dev_userdata   *userdata;
+	
+	if((userdata = machine->userdata = calloc(1, sizeof(zeromq_dev_userdata))) == NULL)
+		return error("calloc failed");
+	
+	return 0;
+} // }}}
+static ssize_t zeromq_dev_destroy(machine_t *machine){ // {{{
+	zeromq_dev_userdata   *userdata          = (zeromq_dev_userdata *)machine->userdata;
+	
+	data_free(&userdata->frontend);
+	data_free(&userdata->backend);
+	free(userdata);
+	return 0;
+} // }}}
+static ssize_t zeromq_dev_configure(machine_t *machine, config_t *config){ // {{{
+	ssize_t                ret;
+	char                  *device_str        = NULL;
+	zeromq_dev_userdata   *userdata          = (zeromq_dev_userdata *)machine->userdata;
+	
+	hash_data_convert(ret, TYPE_STRINGT, device_str, config, HK(device));
+	if(ret != 0)
+		return error("device parameter not supplied");
+		
+	userdata->device = zeromq_t_string_to_dev(device_str);
+	free(device_str);
+	if(userdata->device == -1)
+		return error("device string invalid");
+	
+	hash_holder_consume(ret, userdata->frontend,  config, HK(frontend));
+	if(ret != 0)
+		return error("frontend parameter not supplied");
+	hash_holder_consume(ret, userdata->backend,  config, HK(backend));
+	if(ret != 0)
+		return error("backend parameter not supplied");
+	
+	return 0;
+} // }}}
+
+static ssize_t zeromq_dev_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret1, ret2;
+	zeromq_t              *frontend_fdata;
+	zeromq_t              *backend_fdata;
+	zeromq_dev_userdata   *userdata          = (zeromq_dev_userdata *)machine->userdata;
+	
+	request_enter_context(request);
+	
+		fastcall_getdata r_frontend = { { 3, ACTION_GETDATA } };
+		ret1 = data_query(&userdata->frontend, &r_frontend);
+		
+		fastcall_getdata r_backend  = { { 3, ACTION_GETDATA } };
+		ret2 = data_query(&userdata->backend,  &r_backend);
+	
+	request_leave_context();
+	if(ret1 < 0) return ret1;
+	if(ret2 < 0) return ret2;
+	
+	if(r_frontend.data->type != TYPE_ZEROMQT)
+		return error("invalid frontend data supplied");
+	if(r_backend.data->type != TYPE_ZEROMQT)
+		return error("invalid backend data supplied");
+	
+	frontend_fdata = r_frontend.data->ptr;
+	backend_fdata  = r_backend.data->ptr;
+	
+	zmq_device(userdata->device, frontend_fdata->zmq_socket, backend_fdata->zmq_socket);
+	return 0;
+} // }}}
+static machine_t zmq_device_proto = { // {{{
+	.class          = "modules/zeromq_device",
+	.supported_api  = API_HASH,
+	.func_init      = &zeromq_dev_init,
+	.func_configure = &zeromq_dev_configure,
+	.func_destroy   = &zeromq_dev_destroy,
+	.machine_type_hash = {
+		.func_handler = &zeromq_dev_handler
+	}
+}; // }}}
+
 int main(void){
 	errors_register((err_item *)&errs_list, &emodule);
 	data_register(&zmq_proto);
 	data_register(&zmq_msg_proto);
 	class_register(&zmq_helper_proto);
+	class_register(&zmq_device_proto);
 	
 	type_zeromqt     = datatype_t_getid_byname(ZEROMQT_NAME,     NULL);
 	type_zeromq_msgt = datatype_t_getid_byname(ZEROMQ_MSGT_NAME, NULL);
