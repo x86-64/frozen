@@ -271,6 +271,7 @@ data_proto_t raw_t_proto = {
 	.type          = TYPE_RAWT,
 	.type_str      = "raw_t",
 	.api_type      = API_HANDLERS,
+	.properties    = DATA_GREEDY,
 	.handlers      = {
 		[ACTION_LENGTH]      = (f_data_func)&data_raw_len,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,

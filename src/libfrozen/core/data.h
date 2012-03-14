@@ -80,6 +80,10 @@ typedef enum data_api_type {
 	API_HANDLERS
 } data_api_type;
 
+typedef enum data_properties {
+	DATA_GREEDY     = 1,
+} data_properties;
+
 typedef ssize_t    (*f_data_func)  (data_t *, void *args);
 
 /// Data holder
@@ -93,6 +97,7 @@ struct data_proto_t {
 	uint32_t               type_port;
 	char                  *type_str;
 	data_api_type          api_type;
+	data_properties        properties;
 	
 	f_data_func            handler_default;
 	f_data_func            handlers[ACTION_INVALID];
@@ -150,6 +155,8 @@ API ssize_t              data_get_continious    (data_t *data, data_t *freeme, v
  * @retval 1       Call successful, data converted to raw_t (need free)
 */
 API ssize_t              data_make_flat         (data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size);
+
+#define data_is_greedy(_data) (data_protos[ ((data_t *)(_data))->type ]->properties & DATA_GREEDY) != 0 ///< Check is data greedy?
 
 /** Free data
  * @param _data Data to be freed

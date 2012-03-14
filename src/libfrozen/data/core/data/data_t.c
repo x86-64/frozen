@@ -31,9 +31,10 @@ static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	// get data
 	data_slider_t_freeze(&sl_input);
 		
-		ret = data_query(&new_data, &r_convert);
-		if(errors_is_unix(ret, ENOSYS)){
+		if( data_is_greedy(&new_data) ){
 			ret = data_query(&d_binstring, &r_convert);
+		}else{
+			ret = data_query(&new_data, &r_convert);
 		}
 	
 	data_slider_t_unfreeze(&sl_input);
@@ -47,6 +48,7 @@ static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *farg
 } // }}}
 static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
+	data_t                 d_void             = DATA_VOID;
 	data_t                *fdata              = src->ptr;
 	data_t                 sl_output          = DATA_SLIDERT(fargs->dest, 0);
 	
@@ -59,6 +61,10 @@ static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	
 	fdata = r_getdata.data;
 	
+	if(fdata->type == TYPE_MACHINET){ // HACK HACK HACK
+		fdata = &d_void;
+	}
+	
 	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
 	data_t                 d_binstring        = DATA_BINSTRINGT(fdata);
 	fastcall_convert_to    r_convert          = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
@@ -70,9 +76,10 @@ static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	// write data
 	data_slider_t_freeze(&sl_output);
 		
-		ret = data_query(fdata, &r_convert);
-		if(errors_is_unix(ret, ENOSYS)){
+		if( data_is_greedy(fdata) ){
 			ret = data_query(&d_binstring, &r_convert);
+		}else{
+			ret = data_query(fdata, &r_convert);
 		}
 		
 	data_slider_t_unfreeze(&sl_output);
