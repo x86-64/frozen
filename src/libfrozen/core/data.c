@@ -136,7 +136,10 @@ ssize_t              data_make_flat(data_t *data, format_t format, data_t *freem
 		// try direct pointers
 		fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
 		fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-		if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0 && r_ptr.ptr != NULL){
+		if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0){
+			if(r_ptr.ptr == NULL && r_len.length != 0)
+				return -EFAULT;
+			
 			data_set_void(freeme);
 			*ptr      = r_ptr.ptr;
 			*ptr_size = r_len.length;
@@ -153,7 +156,10 @@ ssize_t              data_make_flat(data_t *data, format_t format, data_t *freem
 	
 	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
 	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(&temp, &r_len) == 0 && data_query(&temp, &r_ptr) == 0 && r_ptr.ptr != NULL){
+	if( data_query(&temp, &r_len) == 0 && data_query(&temp, &r_ptr) == 0){
+		if(r_ptr.ptr == NULL && r_len.length != 0)
+			return -EFAULT;
+		
 		*freeme   = temp;
 		*ptr      = r_ptr.ptr;
 		*ptr_size = r_len.length;
