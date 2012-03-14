@@ -122,19 +122,25 @@ static ssize_t data_slider_t_free(data_t *data, fastcall_free *fargs){ // {{{
 } // }}}
 static ssize_t data_slider_t_length(data_t *data, fastcall_length *fargs){ // {{{
 	ssize_t                    ret;
+	uintmax_t                  off;
 	slider_t                  *fdata             = (slider_t *)data->ptr;
+	
+	if(fdata->frozen_off != ~0)
+		off = fdata->frozen_off;
+	else
+		off = fdata->off;
 	
 	switch(fargs->format){
 		case FORMAT(native):
 			if( (ret = data_query(fdata->data, fargs)) < 0)
 				return ret;
 			
-			if( fdata->off > fargs->length ){
+			if( off > fargs->length ){
 				fargs->length = 0;
 				return ret;
 			}
 			
-			fargs->length -= fdata->off;
+			fargs->length -= off;
 			return ret;
 			
 		default: // we don't mess with other formats
