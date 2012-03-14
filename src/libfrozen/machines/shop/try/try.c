@@ -39,29 +39,27 @@ typedef struct try_userdata {
 	hashkey_t              request_out;
 	hashkey_t              return_to;
 	machine_t             *try_end;
-	
-	thread_data_ctx_t      thread_data;
 } try_userdata;
 
-typedef struct try_threaddata {
+typedef struct tryend_userdata {
+	try_userdata          *userdata;
 	machine_t             *machine;
 	request_t             *request;
 	ssize_t                ret;
-} try_threaddata;
+} tryend_userdata;
 
 static ssize_t try_end_handler(machine_t *machine, request_t *request){ // {{{
-	try_userdata         *userdata          = (try_userdata *)machine->userdata;
-	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
+	tryend_userdata       *userdata          = (tryend_userdata *)machine->userdata;
 	
-	if(userdata->request == 0){
-		threaddata->ret = machine_pass(threaddata->machine, request);
+	if(userdata->userdata->request == 0){
+		userdata->ret = machine_pass(userdata->machine, request);
 	}else{
 		request_t r_next[] = {
-			{ userdata->request_out, DATA_PTR_HASHT(request) },
-			hash_inline(threaddata->request),
+			{ userdata->userdata->request_out, DATA_PTR_HASHT(request) },
+			hash_inline(userdata->request),
 			hash_end
 		};
-		threaddata->ret = machine_pass(threaddata->machine, r_next);
+		userdata->ret = machine_pass(userdata->machine, r_next);
 	}
 	return 0;
 } // }}}
@@ -73,23 +71,9 @@ machine_t try_end_proto = {
 	}
 };
 
-static void * try_threaddata_create(try_userdata *userdata){ // {{{
-	try_threaddata      *threaddata;
-	
-	if( (threaddata = malloc(sizeof(try_threaddata))) == NULL)
-		goto error1;
-	
-	return threaddata;
-
-error1:
-	return NULL;
-} // }}}
-static void   try_threaddata_destroy(try_threaddata *threaddata){ // {{{
-	free(threaddata);
-} // }}}
-
 static ssize_t try_init(machine_t *machine){ // {{{
 	try_userdata         *userdata;
+	tryend_userdata      *te_userdata;
 	
 	if((userdata = machine->userdata = calloc(1, sizeof(try_userdata))) == NULL)
 		return error("calloc failed");
@@ -102,14 +86,17 @@ static ssize_t try_init(machine_t *machine){ // {{{
 		free(userdata);
 		return error("malloc failed");
 	}
-	memcpy(userdata->try_end, &try_end_proto, sizeof(machine_t));
-	userdata->try_end->userdata = userdata;
 	
-	return thread_data_init(
-		&userdata->thread_data, 
-		(f_thread_create)&try_threaddata_create,
-		(f_thread_destroy)&try_threaddata_destroy,
-		userdata);
+	if((te_userdata = malloc(sizeof(tryend_userdata))) == NULL){
+		free(userdata);
+		free(userdata->try_end);
+		return error("malloc failed");
+	}
+	te_userdata->userdata = userdata;
+	
+	memcpy(userdata->try_end, &try_end_proto, sizeof(machine_t));
+	userdata->try_end->userdata = te_userdata;
+	return 0;
 } // }}}
 static ssize_t try_destroy(machine_t *machine){ // {{{
 	try_userdata      *userdata = (try_userdata *)machine->userdata;
@@ -117,7 +104,7 @@ static ssize_t try_destroy(machine_t *machine){ // {{{
 	fastcall_free r_free = { { 2, ACTION_FREE } };
 	data_query(&userdata->machine, &r_free);
 	
-	thread_data_destroy(&userdata->thread_data);
+	free(userdata->try_end->userdata);
 	free(userdata->try_end);
 	free(userdata);
 	return 0;
@@ -170,12 +157,11 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 	data_t                freeme;
 	request_t            *try_request;
 	try_userdata         *userdata          = (try_userdata *)machine->userdata;
-	try_threaddata       *threaddata        = thread_data_get(&userdata->thread_data);
+	tryend_userdata      *te_userdata       = userdata->try_end->userdata;
 	
-	
-	threaddata->machine  = machine;
-	threaddata->request  = request;
-	threaddata->ret      = 0;
+	te_userdata->machine  = machine;
+	te_userdata->request  = request;
+	te_userdata->ret      = 0;
 	
 	data_set_void(&freeme);
 	
@@ -202,7 +188,7 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 				hash_inline(request),
 				hash_end
 			};
-			threaddata->ret = machine_pass(machine, r_pass);
+			te_userdata->ret = machine_pass(machine, r_pass);
 		}else{
 			request_t r_pass[] = {
 				{ HK(ret), DATA_PTR_SIZET(&ret) },
@@ -216,14 +202,14 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 				hash_inline(request),
 				hash_end
 			};
-			threaddata->ret = machine_pass(machine, r_next);
+			te_userdata->ret = machine_pass(machine, r_next);
 		}
 	}
 	
 	request_leave_context();
 	
 	data_free(&freeme);
-	return threaddata->ret;
+	return te_userdata->ret;
 } // }}}
 
 machine_t try_proto = {
