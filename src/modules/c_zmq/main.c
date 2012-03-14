@@ -669,6 +669,9 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	
 	socket_fdata = r_getdata.data->ptr;
 	
+	if((ret = zeromq_t_prepare(socket_fdata, 0)) < 0)
+		return ret;
+
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
 		case ZMQ_PUB:;
@@ -842,6 +845,11 @@ static ssize_t zeromq_dev_handler(machine_t *machine, request_t *request){ // {{
 	
 	frontend_fdata = r_frontend.data->ptr;
 	backend_fdata  = r_backend.data->ptr;
+	if(
+		(ret1 = zeromq_t_prepare(frontend_fdata, 0)) < 0 ||
+		(ret1 = zeromq_t_prepare(backend_fdata, 0)) < 0
+	)
+		return ret1;
 	
 	zmq_device(userdata->device, frontend_fdata->zmq_socket, backend_fdata->zmq_socket);
 	return 0;

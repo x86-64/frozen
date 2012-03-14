@@ -59,7 +59,7 @@ define(`ZEROMQ_HASH_REQ', dnl ZEROMQ_HASH_REQ(service_name, request)
 			IMPLODE(`input', `output',
 			`{
 				class  = "modules/zeromq",
-				socket = ZEROMQ_SOCKET(`req', $1),
+				socket = ZEROMQ_SOCKET(`req', `$1'),
 				input  = (hashkey_t)"input",
 				output = (hashkey_t)"output",
 				convert = (uint_t)"1"
@@ -72,7 +72,7 @@ define(`ZEROMQ_HASH_REQ', dnl ZEROMQ_HASH_REQ(service_name, request)
 define(`ZEROMQ_HASH_REP', dnl ZEROMQ_HASH_REP(service_name, shop_name)
 `
 	{ class = "modules/zeromq",
-		socket = ZEROMQ_SOCKET(`rep', $1),
+		socket = ZEROMQ_SOCKET(`rep', `$1'),
 		shop = (machine_t){
 			EXPLODE(`buffer', `buffer',
 			`
@@ -96,7 +96,7 @@ define(`ZEROMQ_HASH_PUSH', dnl ZEROMQ_HASH_PUSH(service_name, buffer_hashkey)
 			IMPLODE(`input', `output',
 			`{
 				class   = "modules/zeromq",
-				socket  = ZEROMQ_SOCKET(`push', $1),
+				socket  = ZEROMQ_SOCKET(`push', `$1'),
 				input   = (hashkey_t)"input",
 				output  = (hashkey_t)"output",
 				convert = (uint_t)"1"
@@ -109,7 +109,7 @@ define(`ZEROMQ_HASH_PUSH', dnl ZEROMQ_HASH_PUSH(service_name, buffer_hashkey)
 define(`ZEROMQ_HASH_PULL', dnl ZEROMQ_HASH_PULL(service_name, shop_name)
 `
 	{ class = "modules/zeromq",
-		socket = ZEROMQ_SOCKET(`pull', $1)
+		socket = ZEROMQ_SOCKET(`pull', `$1')
 	},
 	EXPLODE(`buffer', `buffer',
 	`
@@ -130,7 +130,7 @@ define(`ZEROMQ_PUSH', dnl ZEROMQ_PUSH(service_name, buffer_hashkey)
 		data = (machine_t){
 			{
 				class   = "modules/zeromq",
-				socket  = ZEROMQ_SOCKET(`push', $1),
+				socket  = ZEROMQ_SOCKET(`push', `$1'),
 				convert = (uint_t)"1"
 			},
 			{ class = "end" }
@@ -141,7 +141,7 @@ define(`ZEROMQ_PUSH', dnl ZEROMQ_PUSH(service_name, buffer_hashkey)
 define(`ZEROMQ_PULL', dnl ZEROMQ_PULL(service_name, shop_name)
 `
 	{ class = "modules/zeromq",
-		socket = ZEROMQ_SOCKET(`pull', $1)
+		socket = ZEROMQ_SOCKET(`pull', `$1')
 	},
 	SHOP_QUERY($2)
 ')
