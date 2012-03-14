@@ -6,14 +6,13 @@
 #include <storage/raw/raw_t.h>
 #include <io/fd/fd_t.h>
 #include <modifiers/slider/slider_t.h>
+#include <core/data/data_t.h>
 
 #define HASH_INITIAL_SIZE 8
 
 typedef struct hash_t_ctx {
 	hash_t                *hash;
 	uintmax_t              step;
-	uintmax_t              buffer_data_offset;
-	data_t                *sl_holder;
 	data_t                *sl_data;
 } hash_t_ctx;
 
@@ -54,71 +53,32 @@ not_equal:
 } // }}}
 static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	ssize_t                ret;
-	datatype_t             type;
 	data_t                 d_key             = DATA_PTR_HASHKEYT(&hash_item->key);
-	data_t                 d_type            = DATA_PTR_DATATYPET(&type);
+	data_t                 d_data            = DATA_PTR_DATAT(&hash_item->data);
 	
 	if(hash_item->key == 0) // skip deleted keys
-		return ITER_CONTINUE;
-	
-	// strip refs
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(&hash_item->data, &r_getdata)) < 0)
-		return ITER_BREAK;
-	
-	type = r_getdata.data->type;
-	
-	if(type == TYPE_MACHINET) // HACK HACK HACK
 		return ITER_CONTINUE;
 	
 	if(hash_item->key != hash_ptr_end && hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
 		return ITER_CONTINUE;
 	
-	switch(ctx->step){
-		case 0:; // step one: count all elements
-			fastcall_length r_length = { { 4, ACTION_LENGTH }, 0, FORMAT(packed) };
-			
-			if( (ret = data_query(&d_key,  &r_length)) < 0)
-				return ret;
-			ctx->buffer_data_offset += r_length.length;
-			
-			if( (ret = data_query(&d_type, &r_length)) < 0)
-				return ret;
-			ctx->buffer_data_offset += r_length.length;
-			
-			break;
-
-		case 1:; // step two: write to buffer
-			fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_holder, FORMAT(packed) };
-			
-			// write header
-			if( (ret = data_query(&d_key,  &r_convert)) < 0)
-				return ret;
-			if( (ret = data_query(&d_type, &r_convert)) < 0)
-				return ret;
-			
-			// write data
-			data_slider_t_freeze(ctx->sl_data);
-				
-				fastcall_convert_to r_convert2 = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
-				ret = data_query(r_getdata.data, &r_convert2);
-			
-			data_slider_t_unfreeze(ctx->sl_data);
-			return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
-	};
-	return ITER_CONTINUE;
-} // }}}
-static ssize_t data_hash_t_convert_from_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
-	ssize_t                ret;
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
 	
+	// write header
 	data_slider_t_freeze(ctx->sl_data);
-	
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, ctx->sl_data, FORMAT(packed) };
-		ret = data_query(&hash_item->data, &r_convert);
-	
+		ret = data_query(&d_key, &r_convert);
 	data_slider_t_unfreeze(ctx->sl_data);
+	if(ret < 0)
+		return ITER_BREAK;
 	
-	return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
+	// write data
+	data_slider_t_freeze(ctx->sl_data);
+		ret = data_query(&d_data, &r_convert);
+	data_slider_t_unfreeze(ctx->sl_data);
+	if(ret < 0)
+		return ITER_BREAK;
+	
+	return ITER_CONTINUE;
 } // }}}
 static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ctx){ // {{{
 	unsigned int           k;
@@ -221,18 +181,12 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	
 	switch(fargs->format){
 		case FORMAT(native):
-		case FORMAT(packed):
-			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
-				return -EFAULT;
+		case FORMAT(packed):;
+			data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, 0);
 			
-			data_t                 d_sl_holder       = DATA_SLIDERT(fargs->dest, 0);
-			data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, ctx.buffer_data_offset);
-			
-			ctx.step++;
-			ctx.sl_holder = &d_sl_holder;
 			ctx.sl_data   = &d_sl_data;
 			
-			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK)
+			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_END) != ITER_OK)
 				return -EFAULT;
 			
 			break;
@@ -265,11 +219,24 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	switch(fargs->format){
 		case FORMAT(native):
 		case FORMAT(packed): break;
+		
 		case FORMAT(human):
 		case FORMAT(config):
-		case FORMAT(hash):
 			dst->ptr = NULL;
 			return 0;
+
+		case FORMAT(hash):;
+			hash_t                *config;
+			
+			data_get(ret, TYPE_HASHT, config, fargs->src);
+			if(ret != 0)
+				return -EINVAL;
+			
+			if( (dst->ptr = hash_rebuild(config)) == NULL)
+				return -EINVAL;
+			
+			return 0;
+
 		default:
 			return -ENOSYS;
 	}
@@ -278,30 +245,36 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	hash           = hash_new(hash_nelements);
 	
 	for(curr = hash;; curr++){
-		data_t       d_key          = DATA_PTR_HASHKEYT(&curr->key);
-		data_t       d_type         = DATA_PTR_DATATYPET(&curr->data.type);
-
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(packed) };
+		data_t                d_key          = DATA_PTR_HASHKEYT(&curr->key);
+		data_t                d_data         = DATA_PTR_DATAT(&curr->data);
+		fastcall_convert_from r_convert      = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(packed) };
 		
+		// read key
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
 			return ret;
-		if( (ret = data_query(&d_type, &r_convert)) < 0)
-			return ret;
 		
-		if(curr->key == hash_ptr_end)
-			break;
-		
-		// redata data holders if any
+		// set correct 
 		if(dst->ptr != NULL){
 			if( (old_data = hash_data_find((hash_t *)dst->ptr, curr->key)) != NULL){
-				curr->data.ptr  = old_data->ptr;
+				data_t t_data = DATA_PTR_DATAT(old_data);
+				d_data = t_data;
 			}else{
-				curr->data.ptr  = NULL;
+				data_set_void(&curr->data);
 				list_add(&freeit, &curr->data);
 			}
 		}else{
-			curr->data.ptr  = NULL;
+			data_set_void(&curr->data);
 		}
+		
+		
+		data_slider_t_freeze(&sl_src);
+			
+			ret = data_query(&d_data, &r_convert);
+		
+		data_slider_t_unfreeze(&sl_src);
+		
+		if(curr->key == hash_ptr_end)
+			break;
 		
 		nelements++;
 		if(nelements + 1 == hash_nelements){
@@ -313,16 +286,10 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			memcpy(new_hash, hash, nelements * sizeof(hash_t));
 			free(hash); // !!! free, not hash_free
 			
-			hash = new_hash;
 			curr = new_hash + (curr - hash);
+			hash = new_hash;
 		}
 	}
-	
-	// redata data
-	hash_t_ctx ctx = { .sl_data = &sl_src };
-	ret = (hash_iter(hash, (hash_iterator)&data_hash_t_convert_from_iter, &ctx, 0) == ITER_OK) ?
-		0 :
-		-EFAULT;
 	
 	if(dst->ptr == NULL){
 		dst->ptr = (ret == 0) ? hash : NULL; // return hash if status ok
