@@ -47,6 +47,9 @@ static ssize_t container_iter(data_t *chunk_data, container_ctx *ctx){ // {{{
 	uintmax_t              chunk_size;
 	uintmax_t              call              = 1;
 	
+	if(ctx->size == 0)
+		return 0;
+	
 	chunk_size = data_get_size(chunk_data, ctx->format);
 								
 	if(
