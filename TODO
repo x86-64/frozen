@@ -6,6 +6,7 @@
   - write m4 macro for balancer machine
   - index + file_t as store macro set
 
+- split_t convert_to
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
 - pcre_t compare func
 - machine 'exec'
