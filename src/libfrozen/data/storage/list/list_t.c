@@ -31,7 +31,7 @@ static ssize_t iter_list_t_convert_from(hash_t *hash_item, data_t *ctx){ // {{{
 	ssize_t                ret;
 	list_t                *fdata             = (list_t *)ctx->ptr;
 	
-	ret = list_t_unshift(fdata, &hash_item->data);
+	ret = list_t_push(fdata, &hash_item->data);
 	data_set_void(&hash_item->data);
 	
 	return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
@@ -140,7 +140,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 				if(item.type == TYPE_LISTENDT)
 					break;
 				
-				if( (ret = list_t_unshift(fdata, &item)) < 0)
+				if( (ret = list_t_push(fdata, &item)) < 0)
 					break;
 			}
 			break;
@@ -315,7 +315,7 @@ list_t *        list_t_copy                (list_t *list){ // {{{
 		if(data_query(&chunk->data, &r_copy) < 0)
 			goto error;
 		
-		list_t_unshift(new_list, &data_copy);
+		list_t_push(new_list, &data_copy);
 	}
 	return new_list;
 error:
@@ -329,22 +329,6 @@ void            list_t_free                (list_t *list){ // {{{
 
 ssize_t         list_t_unshift             (list_t *list, data_t *data){ // {{{
 	list_chunk_t     *chunk;
-	list_chunk_t     *curr;
-	
-	if( (chunk = chunk_alloc(data)) == NULL)
-		return -ENOMEM;
-	
-	for(curr = list->head; curr; curr = curr->cnext){
-		if(curr->cnext == NULL){
-			curr->cnext = chunk;
-			return 0;
-		}
-	}
-	list->head = chunk;
-	return 0;
-} // }}}
-ssize_t         list_t_push                (list_t *list, data_t *data){ // {{{
-	list_chunk_t     *chunk;
 	
 	if( (chunk = chunk_alloc(data)) == NULL)
 		return -ENOMEM;
@@ -357,7 +341,7 @@ ssize_t         list_t_push                (list_t *list, data_t *data){ // {{{
 	list->head = chunk;
 	return 0;
 } // }}}
-ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
+ssize_t         list_t_shift               (list_t *list, data_t *data){ // {{{
 	list_chunk_t     *chunk;
 	
 	if(list->head == NULL)
@@ -375,6 +359,41 @@ ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
 	memcpy(data, &chunk->data, sizeof(data_t));
 	chunk_free(chunk);
 	return 0;
+} // }}}
+ssize_t         list_t_push                (list_t *list, data_t *data){ // {{{
+	list_chunk_t     *chunk;
+	list_chunk_t     *curr;
+	
+	if( (chunk = chunk_alloc(data)) == NULL)
+		return -ENOMEM;
+	
+	for(curr = list->head; curr; curr = curr->cnext){
+		if(curr->cnext == NULL){
+			curr->cnext = chunk;
+			return 0;
+		}
+	}
+	list->head = chunk;
+	return 0;
+} // }}}
+ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
+	list_chunk_t     *curr;
+	list_chunk_t     **prev                  = &list->head;
+	
+	for(curr = list->head; curr; curr = curr->cnext){
+		if(curr->cnext == NULL){
+			*prev = NULL;
+			
+			fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } }; // caller will use it
+			data_query(&curr->data, &r_acquire);
+			
+			memcpy(data, &curr->data, sizeof(data_t));
+			chunk_free(curr);
+			return 0;
+		}
+		prev = &curr->cnext;
+	}
+	return -EINVAL;
 } // }}}
 
 ssize_t         list_t_enum                (list_t *list, list_t_callback callback, void *userdata){ // {{{
