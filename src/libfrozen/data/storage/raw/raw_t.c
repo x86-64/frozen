@@ -102,19 +102,15 @@ raw_t *        raw_t_alloc(uintmax_t size){ // {{{
 } // }}}
 
 static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
-	fargs->length = ((raw_t *)data->ptr)->size;
-	switch(fargs->format){
-		case FORMAT(native):
-		case FORMAT(human):
-		case FORMAT(config):
-			break;
-		default:
-			return -ENOSYS;
-	}
+	raw_t                 *fdata = ((raw_t *)data->ptr);
+	
+	fargs->length = fdata ? fdata->size : 0;
 	return 0;
 } // }}}
 static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
-	fargs->ptr = ((raw_t *)data->ptr)->ptr;
+	raw_t                 *fdata = ((raw_t *)data->ptr);
+	
+	fargs->ptr = fdata ? fdata->ptr : NULL;
 	return 0;
 } // }}}
 static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
