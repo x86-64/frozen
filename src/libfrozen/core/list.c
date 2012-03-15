@@ -184,6 +184,7 @@ void *     list_iter_next(list *clist, void **iter){ // {{{
 			return curr;
 		}
 	}
+	*iter = NULL;
 	return NULL;
 } // }}}
 void *     list_pop(list *clist){ // {{{
