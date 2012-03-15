@@ -48,7 +48,6 @@ static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *farg
 } // }}}
 static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
-	data_t                 d_void             = DATA_VOID;
 	data_t                *fdata              = src->ptr;
 	data_t                 sl_output          = DATA_SLIDERT(fargs->dest, 0);
 	
@@ -60,10 +59,6 @@ static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 		return ret;
 	
 	fdata = r_getdata.data;
-	
-	if(fdata->type == TYPE_MACHINET){ // HACK HACK HACK
-		fdata = &d_void;
-	}
 	
 	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
 	data_t                 d_binstring        = DATA_BINSTRINGT(fdata);
