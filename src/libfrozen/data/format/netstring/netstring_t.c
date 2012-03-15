@@ -18,6 +18,7 @@ netstring_t *        netstring_t_alloc(data_t *data){ // {{{
 } // }}}
 void                 netstring_t_destroy(netstring_t *netstring){ // {{{
 	data_free(&netstring->freeit);
+	free(netstring);
 } // }}}
 
 static ssize_t data_netstring_t_handler (data_t *data, fastcall_header *fargs){ // {{{

@@ -20,6 +20,7 @@ slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
 } // }}}
 void              slider_t_destroy(slider_t *slider){ // {{{
 	data_free(&slider->freeit);
+	free(slider);
 } // }}}
 
 uintmax_t data_slider_t_get_offset(data_t *data){ // {{{

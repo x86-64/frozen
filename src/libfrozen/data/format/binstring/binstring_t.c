@@ -21,6 +21,7 @@ binstring_t *        binstring_t_alloc(data_t *data){ // {{{
 } // }}}
 void                 binstring_t_destroy(binstring_t *binstring){ // {{{
 	data_free(&binstring->freeit);
+	free(binstring);
 } // }}}
 
 static ssize_t data_binstring_t_handler (data_t *data, fastcall_header *fargs){ // {{{
