@@ -10,8 +10,8 @@
 typedef struct zeromq_t {
 	void                  *zmq_socket;
 	hash_t                *config;
-	uintmax_t              lazy;
-	
+	uintmax_t              suspended;
+
 	int                    zmq_type;                
 } zeromq_t;
 
@@ -53,6 +53,69 @@ zeromq_t_opt_t                 zmq_opts_int[] = {
 void                          *zmq_ctx           = NULL;
 uintmax_t                      zmq_data          = 0;
 pthread_mutex_t                zmq_data_mtx      = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct suspended_item {
+	uintmax_t              time;
+	data_t                 item;
+} suspended_item;
+
+list                           suspended         = LIST_INITIALIZER;
+pthread_mutex_t                suspended_mtx     = PTHREAD_MUTEX_INITIALIZER;
+
+static ssize_t suspended_suspend(data_t *item){ // {{{
+	suspended_item        *descr;
+	
+	if( (descr = malloc(sizeof(suspended_item))) == NULL)
+		return -ENOMEM;
+	
+	descr->time    = time(NULL);
+	descr->item    = *item;
+	
+	pthread_mutex_lock(&suspended_mtx);
+		
+		list_add(&suspended, descr);
+		
+	pthread_mutex_unlock(&suspended_mtx);
+	
+	data_set_void(item);
+	return 0;
+} // }}}
+static ssize_t suspended_raise(data_t *item){ // {{{
+	ssize_t                ret;
+	suspended_item        *curr;
+	uintmax_t              ctime             = time(NULL);
+	void                  *iter              = NULL;
+	
+	pthread_mutex_lock(&suspended_mtx);
+		while( (curr = list_iter_next(&suspended, &iter)) != NULL){
+			fastcall_compare r_compare = { { 4, ACTION_COMPARE }, &curr->item };
+			if( (ret = data_query(item, &r_compare)) < 0)
+				goto error;
+			
+			if(r_compare.result == 0)
+				break;
+			
+			if(curr->time + 20 <= ctime){      // free expired data
+				data_free(&curr->item);
+				
+				list_delete(&suspended, curr);
+				free(curr);
+			}
+		}
+		if(curr != NULL){
+			ret = 0;
+			data_free(item);
+			*item = curr->item;
+			
+			list_delete(&suspended, curr);
+			free(curr);
+		}else{
+			ret = -EINVAL;
+		}
+error:
+	pthread_mutex_unlock(&suspended_mtx);
+	return ret;
+} // }}}
 
 static ssize_t zeromq_t_global_increment(void){ // {{{
 	ssize_t                ret               = 0;
@@ -136,7 +199,13 @@ static ssize_t zeromq_t_error_to_ret(ssize_t ret, ssize_t def){ // {{{
 }
 // }}}
 
-static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
+static void    zeromq_t_socket_destroy(zeromq_t *fdata){ // {{{
+	if(fdata->zmq_socket)
+		zmq_close(fdata->zmq_socket);		
+	
+	zeromq_t_global_decrement();
+} // }}}
+static ssize_t zeromq_t_socket_new(zeromq_t *fdata){ // {{{
 	ssize_t                ret, ret2;
 	uintmax_t              ready             = 0;
 	char                  *p;
@@ -147,6 +216,9 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 	uint64_t               opt_uint64;
 	void                  *opt_binary_ptr;
 	uintmax_t              opt_binary_size;
+	
+	if( (ret = zeromq_t_global_increment()) < 0)
+		return ret;
 	
 	get_opt(HK(type),
 		do{
@@ -233,65 +305,88 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 	);
 	if(ret != 0)
 		goto error;
-	if(ready != 2)
+	if(ready != 2){
 		ret = error("no bind nor connect supplied in zmq options");
+		goto error;
+	}
 	
+	return 0;
+
 error:
+	zeromq_t_socket_destroy(fdata);
 	return ret;
 } // }}}
 
-static void    zeromq_t_destroy(zeromq_t *fdata){ // {{{
-	if(fdata->lazy == 0){
-		if(fdata->zmq_socket)
-			zmq_close(fdata->zmq_socket);		
-		
-		zeromq_t_global_decrement();
+static void    zeromq_t_socket_susp_destroy(data_t *data){ // {{{
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr; 
+	
+	if(fdata->suspended == 0){
+		fdata->suspended = 1;
+		suspended_suspend(data);
+		return;
+	}
+	zeromq_t_socket_destroy(fdata);
+} // }}}
+static ssize_t zeromq_t_socket_susp_new(data_t *data){ // {{{
+	if(suspended_raise(data) >= 0){
+		((zeromq_t *)(data->ptr))->suspended = 0;
+		return 0;
 	}
 	
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr; 
+	return zeromq_t_socket_new(fdata);
+} // }}}
+
+static void    zeromq_t_socket_susp_lazy_destroy(data_t *data){ // {{{
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr; 
+	
+	if(fdata->zmq_socket != NULL) // if( socket_created )
+		zeromq_t_socket_susp_destroy(data);
+} // }}}
+static ssize_t zeromq_t_socket_susp_lazy_new(data_t *data){ // {{{
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	
+	if(fdata->zmq_socket == NULL)
+		return zeromq_t_socket_susp_new(data);
+	
+	return 0;
+} // }}}
+
+static void    zeromq_t_destroy(data_t *data){ // {{{
+	if(data->ptr == NULL)
+		return;
+	
+	zeromq_t_socket_susp_lazy_destroy(data);
+	
+	if(data->type == TYPE_VOIDT) // consumed by suspended mod
+		return;
+	
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr; 
 	if(fdata->config)
 		hash_free(fdata->config);
 	
 	free(fdata);
+	data_set_void(data);
 } // }}}
-static ssize_t zeromq_t_prepare(zeromq_t *fdata, uintmax_t force){ // {{{
-	ssize_t                ret;
-	
-	if(
-		fdata->zmq_socket == NULL &&
-		(
-			force       == 1 ||
-			fdata->lazy == 1
-		)
-	){ // if no socket yet created and in lazy mode
-		fdata->lazy = 0; // drop lazy (don't affect global settings stored in hash)
-		
-		if( (ret = zeromq_t_global_increment()) < 0)
-			return ret;
-		
-		if( (ret = zeromq_t_socket_from_config(fdata)) < 0){
-			zeromq_t_destroy(fdata);
-			return ret;
-		}
-	}
-	return 0;
+static ssize_t zeromq_t_prepare(data_t *data){ // {{{
+	return zeromq_t_socket_susp_lazy_new(data);
 } // }}}
-static ssize_t zeromq_t_new(zeromq_t **pfdata, config_t *config){ // {{{
+static ssize_t zeromq_t_new(data_t *data, config_t *config){ // {{{
 	ssize_t                ret;
+	uintmax_t              lazy              = 0;
 	zeromq_t              *fdata;
 	
-	if((fdata = calloc(1, sizeof(zeromq_t))) == NULL)
+	if((data->ptr = fdata = calloc(1, sizeof(zeromq_t))) == NULL)
 		return -ENOMEM;
 	
-	fdata->config = config;
+	fdata->config    = config;
+	fdata->suspended = 0;
 	
-	hash_data_get(ret, TYPE_UINTT, fdata->lazy, fdata->config, HK(lazy));
-	if(fdata->lazy == 0){
-		if( (ret = zeromq_t_prepare(fdata, 1)) < 0)
-			return ret;
-	}
+	hash_data_get(ret, TYPE_UINTT, lazy, fdata->config, HK(lazy));
+	if(lazy != 0)
+		return 0;
 	
-	*pfdata = fdata;
-	return 0;
+	return zeromq_t_prepare(data);
 } // }}}
 
 static void    zeromq_t_msg_free(void *data, void *hint){ // {{{
@@ -301,6 +396,19 @@ static void    zeromq_t_msg_free(void *data, void *hint){ // {{{
 	}
 } // }}}
 
+static ssize_t data_zeromq_t_compare(data_t *data, fastcall_compare *fargs){ // {{{
+	ssize_t                ret;
+	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	
+	// compare data2 with data1's hash. If data2 is zeromq socket, if would compare data1's hash with data2's hash
+	
+	data_t           d_config  = DATA_PTR_HASHT(fdata->config);
+	fastcall_compare r_compare = { { 4, ACTION_COMPARE }, &d_config };
+	ret = data_query(fargs->data2, &r_compare);
+	
+	fargs->result = r_compare.result;
+	return ret;
+} // }}}
 static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
@@ -331,7 +439,7 @@ static ssize_t data_zeromq_t_convert_from(data_t *data, fastcall_convert_from *f
 			if( (config = hash_copy(config)) == NULL)
 				return -ENOMEM;
 			
-			return zeromq_t_new((zeromq_t **)&data->ptr, config);
+			return zeromq_t_new(data, config);
 			
 		case FORMAT(packed):;
 			data_t             packed           = DATA_PTR_HASHT(NULL); // don't free result, used internally 
@@ -339,7 +447,7 @@ static ssize_t data_zeromq_t_convert_from(data_t *data, fastcall_convert_from *f
 			if( (ret = data_query(&packed, fargs) < 0))
 				return ret;
 			
-			return zeromq_t_new((zeromq_t **)&data->ptr, (hash_t *)packed.ptr);
+			return zeromq_t_new(data, (hash_t *)packed.ptr);
 
 		default:
 			break;
@@ -347,9 +455,7 @@ static ssize_t data_zeromq_t_convert_from(data_t *data, fastcall_convert_from *f
 	return -ENOSYS;
 } // }}}
 static ssize_t data_zeromq_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	if(data->ptr != NULL)
-		zeromq_t_destroy(data->ptr);
-	
+	zeromq_t_destroy(data);
 	return 0;
 } // }}}
 static ssize_t data_zeromq_t_read(data_t *data, fastcall_read *fargs){ // {{{
@@ -357,10 +463,12 @@ static ssize_t data_zeromq_t_read(data_t *data, fastcall_read *fargs){ // {{{
 	void                  *msg_data;
 	size_t                 msg_data_size;
 	zmq_msg_t              zmq_msg;
-	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	zeromq_t              *fdata;
 	
-	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
+	if( (ret = zeromq_t_prepare(data)) < 0)
 		return ret;
+	
+	fdata = data->ptr;
 	
 	if( zmq_msg_init(&zmq_msg) != 0)
 		return error("zmq_msg_init failed");
@@ -388,11 +496,13 @@ static ssize_t data_zeromq_t_write(data_t *data, fastcall_write *fargs){ // {{{
 	ssize_t                ret;
 	void                  *msg_data;
 	zmq_msg_t              zmq_msg;
-	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	zeromq_t              *fdata;
 	
-	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
+	if( (ret = zeromq_t_prepare(data)) < 0)
 		return ret;
 	
+	fdata = data->ptr;
+
 	if( zmq_msg_init_size(&zmq_msg, fargs->buffer_size) != 0)
 		return -errno;
 	
@@ -409,11 +519,13 @@ static ssize_t data_zeromq_t_transfer(data_t *data, fastcall_transfer *fargs){ /
 	void                  *msg_data;
 	size_t                 msg_data_size;
 	zmq_msg_t              zmq_msg;
-	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	zeromq_t              *fdata;
 	
-	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
+	if( (ret = zeromq_t_prepare(data)) < 0)
 		return ret;
 	
+	fdata = data->ptr;
+
 	if( zmq_msg_init(&zmq_msg) != 0)
 		return error("zmq_msg_init failed");
 	
@@ -441,11 +553,13 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	void                  *msg_data          = NULL;
 	uintmax_t              msg_size          = 0;
 	zmq_msg_t              zmq_msg;
-	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	zeromq_t              *fdata;
 	
-	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
+	if( (ret = zeromq_t_prepare(data)) < 0)
 		return ret;
 	
+	fdata = data->ptr;
+
 	if(fargs->data){
 		// convert data to continious memory space
 		switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) ){
@@ -478,11 +592,13 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 static ssize_t data_zeromq_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
 	ssize_t                ret;
 	zmq_msg_t             *zmq_msg;
-	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
+	zeromq_t              *fdata;
 	
-	if( (ret = zeromq_t_prepare(fdata, 0)) < 0)
+	if( (ret = zeromq_t_prepare(data)) < 0)
 		return ret;
 	
+	fdata = data->ptr;
+
 	if( (zmq_msg = malloc(sizeof(zmq_msg_t))) == NULL)
 		return -ENOMEM;
 	
@@ -531,6 +647,7 @@ data_proto_t zmq_proto = { // {{{
 		[ACTION_PUSH]           = (f_data_func)&data_zeromq_t_push,
 		[ACTION_POP]            = (f_data_func)&data_zeromq_t_pop,
 		[ACTION_ENUM]           = (f_data_func)&data_zeromq_t_enum,
+		[ACTION_COMPARE]        = (f_data_func)&data_zeromq_t_compare,
 	}
 }; // }}}
 
@@ -684,10 +801,10 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	if(r_getdata.data->type != TYPE_ZEROMQT)
 		return -EINVAL;
 	
-	socket_fdata = r_getdata.data->ptr;
-	
-	if((ret = zeromq_t_prepare(socket_fdata, 0)) < 0)
+	if((ret = zeromq_t_prepare(r_getdata.data)) < 0)
 		return ret;
+	
+	socket_fdata = r_getdata.data->ptr;
 
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
@@ -863,13 +980,14 @@ static ssize_t zeromq_dev_handler(machine_t *machine, request_t *request){ // {{
 	if(r_backend.data->type != TYPE_ZEROMQT)
 		return error("invalid backend data supplied");
 	
-	frontend_fdata = r_frontend.data->ptr;
-	backend_fdata  = r_backend.data->ptr;
 	if(
-		(ret1 = zeromq_t_prepare(frontend_fdata, 0)) < 0 ||
-		(ret1 = zeromq_t_prepare(backend_fdata, 0)) < 0
+		(ret1 = zeromq_t_prepare(r_frontend.data)) < 0 ||
+		(ret1 = zeromq_t_prepare(r_backend.data)) < 0
 	)
 		return ret1;
+	
+	frontend_fdata = r_frontend.data->ptr;
+	backend_fdata  = r_backend.data->ptr;
 	
 	zmq_device(userdata->device, frontend_fdata->zmq_socket, backend_fdata->zmq_socket);
 	return 0;
