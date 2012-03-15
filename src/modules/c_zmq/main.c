@@ -100,6 +100,22 @@ static int     zeromq_t_string_to_dev(char *type_str){ // {{{
 	}
 	return -1;
 } // }}}
+static ssize_t zeromq_t_error_to_ret(ssize_t ret, ssize_t def){ // {{{
+	switch(ret){
+		case EINVAL:           return error("The endpoint supplied is invalid");
+		case EPROTONOSUPPORT:  return error("The requested transport protocol is not supported.");
+		case ENOCOMPATPROTO:   return error("The requested transport protocol is not compatible with the socket type.");
+		case EADDRINUSE:       return error("The requested address is already in use.");
+		case EADDRNOTAVAIL:    return error("The requested address was not local.");
+		case ENODEV:           return error("The requested address specifies a nonexistent interface.");
+		case ETERM:            return error("The 0MQ context associated with the specified socket was terminated.");
+		case ENOTSOCK:         return error("The provided socket was invalid.");
+		case EMTHREAD:         return error("No I/O thread is available to accomplish the task.");
+		case EINTR:            return error("The operation was interrupted by delivery of a signal.");
+		default: break;
+	}
+	return def;
+} // }}}
 
 // get opt {{{
 #define get_opt(_key,_func){                                                                                          \
@@ -201,7 +217,7 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 			if(zmq_bind(fdata->zmq_socket, opt_binary_ptr) == 0){
 				ready = 2;
 			}else{
-				ret = error("zmq_bind failed");
+				ret = zeromq_t_error_to_ret(errno, error("zmq_bind failed"));
 			}
 		}while(0)
 	);
@@ -210,7 +226,7 @@ static ssize_t zeromq_t_socket_from_config(zeromq_t *fdata){ // {{{
 			if(zmq_connect(fdata->zmq_socket, opt_binary_ptr) == 0){
 				ready = 2;
 			}else{
-				ret = error("zmq_connect failed");
+				ret = zeromq_t_error_to_ret(errno, error("zmq_connect failed"));
 			}
 		}while(0)
 	);
