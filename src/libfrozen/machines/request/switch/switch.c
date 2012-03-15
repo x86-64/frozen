@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <shop/pass/pass.h>
 
 /**
  * @ingroup machine
@@ -82,12 +83,11 @@ query:
 	if(rule->machine == NULL)
 		goto pass;
 	
-	request_t r_next[] = {
-		{ HK(return_to), DATA_NEXT_MACHINET(context->machine) },
-		hash_inline(context->request),
-		hash_end
-	};
-	context->ret = machine_query(rule->machine, r_next);
+	stack_call(context->machine);
+		
+		context->ret = machine_query(rule->machine, context->request);
+		
+	stack_clean();
 	return 0;
 pass:
 	context->ret = machine_pass(context->machine, context->request);
@@ -130,7 +130,7 @@ static ssize_t switch_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t switch_handler(machine_t *machine, request_t *request){ // {{{
 	void                  *iter              = NULL;
 	switch_rule           *rule;
-	switch_context         context           = { machine, request };
+	switch_context         context           = { machine->cnext, request };
 	switch_userdata       *userdata          = (switch_userdata *)machine->userdata;
 	
 	while( (rule = list_iter_next(&userdata->rules, &iter)) != NULL){

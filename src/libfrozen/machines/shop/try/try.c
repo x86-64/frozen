@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <shop/pass/pass.h>
 
 /**
  * @ingroup machine
@@ -25,7 +26,6 @@
  *                                        (machine_t)'name',      //  - to shop named "name"
  *                                        ...
  *              request                 = (hashkey_t)"request",   // request to try, default current request
- *              return_to               = (hashkey_t)"return_to"  // return_to hash key, default "return_to"
  * }
  * @endcode
  */
@@ -37,7 +37,6 @@ typedef struct try_userdata {
 	data_t                 machine;
 	hashkey_t              request;
 	hashkey_t              request_out;
-	hashkey_t              return_to;
 	machine_t             *try_end;
 } try_userdata;
 
@@ -80,7 +79,6 @@ static ssize_t try_init(machine_t *machine){ // {{{
 	
 	userdata->request     = 0; 
 	userdata->request_out = 0; 
-	userdata->return_to   = HK(return_to);
 	
 	if((userdata->try_end = malloc(sizeof(machine_t))) == NULL){
 		free(userdata);
@@ -118,7 +116,6 @@ static ssize_t try_configure(machine_t *machine, config_t *config){ // {{{
 		userdata->request_out = userdata->request;
 	}
 	hash_data_get(ret, TYPE_HASHKEYT, userdata->request_out, config, HK(request_out));
-	hash_data_get(ret, TYPE_HASHKEYT, userdata->return_to,   config, HK(return_to));
 	
 	hash_holder_consume(ret, userdata->machine, config, HK(shop));
 	if(ret != 0)
@@ -172,39 +169,39 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 			return ret;
 	}
 	
-	request_t r_next[] = {
-		{ userdata->return_to, DATA_MACHINET(userdata->try_end) },
-		hash_inline(try_request),
-		hash_end
-	};
-	
 	request_enter_context(request);
 	
-	fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-	if( (ret = data_query(&userdata->machine, &r_query)) < 0){
-		if(userdata->request == 0){
-			request_t r_pass[] = {
-				{ HK(ret), DATA_PTR_SIZET(&ret) },
-				hash_inline(request),
-				hash_end
-			};
-			te_userdata->ret = machine_pass(machine, r_pass);
-		}else{
-			request_t r_pass[] = {
-				{ HK(ret), DATA_PTR_SIZET(&ret) },
-				hash_inline(try_request),
-				hash_end
-			};
-			
-			request_t r_next[] = {
-				{ HK(ret),               DATA_PTR_SIZET(&ret)   },
-				{ userdata->request_out, DATA_PTR_HASHT(r_pass) },
-				hash_inline(request),
-				hash_end
-			};
-			te_userdata->ret = machine_pass(machine, r_next);
+		stack_call(userdata->try_end);
+
+			fastcall_query r_query = { { 3, ACTION_QUERY }, try_request };
+			ret = data_query(&userdata->machine, &r_query);
+		
+		stack_clean();
+
+		if(ret < 0){
+			if(userdata->request == 0){
+				request_t r_pass[] = {
+					{ HK(ret), DATA_PTR_SIZET(&ret) },
+					hash_inline(request),
+					hash_end
+				};
+				te_userdata->ret = machine_pass(machine, r_pass);
+			}else{
+				request_t r_pass[] = {
+					{ HK(ret), DATA_PTR_SIZET(&ret) },
+					hash_inline(try_request),
+					hash_end
+				};
+				
+				request_t r_next[] = {
+					{ HK(ret),               DATA_PTR_SIZET(&ret)   },
+					{ userdata->request_out, DATA_PTR_HASHT(r_pass) },
+					hash_inline(request),
+					hash_end
+				};
+				te_userdata->ret = machine_pass(machine, r_next);
+			}
 		}
-	}
 	
 	request_leave_context();
 	

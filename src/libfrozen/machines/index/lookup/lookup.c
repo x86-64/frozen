@@ -1,4 +1,5 @@
 #include <libfrozen.h>
+#include <shop/pass/pass.h>
 
 /**
  * @ingroup machine
@@ -57,14 +58,19 @@ static ssize_t lookup_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t lookup_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
 	lookup_userdata       *userdata          = (lookup_userdata *)machine->userdata;
 	
-	request_t r_query[] = {
-		{ HK(action),          DATA_ACTIONT(ACTION_READ) },
-		{ HK(return_to),       DATA_MACHINET(machine)    },
-		hash_next(request)
-	};
-	return machine_query(userdata->machine_index, r_query);
+	stack_call(machine->cnext);
+
+		request_t r_query[] = {
+			{ HK(action),          DATA_ACTIONT(ACTION_READ) },
+			hash_next(request)
+		};
+		ret = machine_query(userdata->machine_index, r_query);
+		
+	stack_clean();
+	return ret;
 } // }}}
 
 machine_t lookup_proto = {

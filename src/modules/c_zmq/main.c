@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <zmq.h>
 #include <zeromq_t.h>
+#include <shop/pass/pass.h>
 
 #include <errors_list.c>
 
@@ -735,14 +736,17 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			if( (ret = data_query(r_getdata.data, &r_rep_pop)) < 0)           // message allocated here
 				return ret;
 			
-			request_t r_next[] = {
-				{ userdata->hk_output,  item                             },
-				{ HK(return_to),        DATA_MACHINET(userdata->zmq_end) },
-				hash_inline(request),
-				hash_end
-			};
-			fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
-			ret = data_query(&userdata->shop, &r_query);
+			stack_call(userdata->zmq_end);
+			
+				request_t r_next[] = {
+					{ userdata->hk_output,  item                             },
+					hash_inline(request),
+					hash_end
+				};
+				fastcall_query r_query = { { 3, ACTION_QUERY }, r_next };
+				ret = data_query(&userdata->shop, &r_query);
+			
+			stack_clean();
 			
 			data_free(&r_next[0].data);                                       // message free'd here, if not consumed
 			return ret;

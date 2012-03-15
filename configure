@@ -20973,7 +20973,6 @@ fi
 
 
 
-
 	# Check whether --enable-machinereturn was given.
 if test "${enable_machinereturn+set}" = set; then :
   enableval=$enable_machinereturn;
@@ -20989,19 +20988,19 @@ fi
 	fi
 
 	if test "${enable_machinereturn}" = "yes"; then
-		MACHINE_DIR_return="shop/return"
+		MACHINE_DIR_return="shop/pass"
 		MACHINE_DEP_return=""
 				MACHINE_SELECTED="$MACHINE_SELECTED return"
 
 			fi
 
-	if test "$MACHINE_MAKEFILE_shop_return" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/shop/return/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS shop/return"
+	if test "$MACHINE_MAKEFILE_shop_pass" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/shop/pass/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS shop/pass"
 
-		MACHINE_MAKEFILE_shop_return=yes
+		MACHINE_MAKEFILE_shop_pass=yes
 
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/return/libfrozen_machine_return.la"
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED shop/pass/libfrozen_machine_pass.la"
 
 	fi
 
