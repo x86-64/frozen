@@ -1,5 +1,5 @@
 /**
- * @ingroup tutorial
+ * @ingroup articles
  * @addtogroup article_dist Building distributed data processing pipeline
  * 
  * Then we try to process huge amount of data it nearly always results in building complex and hardly maintainable

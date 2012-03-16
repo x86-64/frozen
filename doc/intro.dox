@@ -1,6 +1,7 @@
 /** @defgroup api Api */
 /** @defgroup machine Machines */
 /** @defgroup data Data */
+/** @defgroup articles Articles */
 /** @defgroup tutorial Tutorials */
 
 /** @mainpage
@@ -8,8 +9,6 @@
  *  @section intro Introduction
  *    Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing.
  *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
- *    Primary goal of this project is to have set of interchangeable modules to construct data processing pipelines, data and retrieve data
- *    for web or local clients.
  *
  *    There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one
  *    approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels
@@ -19,47 +18,41 @@
  *    If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
  *    library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.
  *
+ *  @section goals Goals
+ *    @li Create flexible tool to manage huge amounts of data
+ *    @li Make tool to build distributed and fault-tolerant systems in easy way
+ *    @li Standardize data storage and transmission formats
+ *    @li Get rid of temporary scripts, conversion utilities, all sort of one-time parsers
+ *
  *  @section caps Capabilities
+ *    @li Common data types: ints, strings, lists, hashes and more  
+ *    @li Embedded packing and unpacking routines for any type of data
+ *    @li Processing modules: regular expressions, switches and many more
  *    @li Web development related modules: mongrel2, mustache, leveldb
- *    @li Processing modules: regular expressions, switches, structures and many more
- *    @li IO modules: fuse, ZeroMQ, file, memory, sockets
+ *    @li IO modules: fuse, file, memory, sockets
+ *    @li Parallelization and distributed systems on top of ZeroMQ network
  *    @li Zero-copy everywhere it possible
  *    @li M4 macro in configuration files
  *    @li Benchmarking and measurements
  *
- *  @section links Useful links
+ *  @section get_info Get informed
  *  
+ *  @li @ref article_rationale
  *  @li @ref tutorial_basics
- *  @li More tutorials: @ref tutorial
- *  @li Architecture review: @ref machine, @ref api, @ref data.
- *  @li <a href="https://github.com/x86-64/frozen">Github project page</a>
- *  @li <a href="https://github.com/x86-64/frozen/zipball/master">Download as .zip</a>
- *  @li <a href="https://github.com/x86-64/frozen/tarball/master">Download as .tar.gz</a>
+ *  @li @ref tutorial_configuration
+ *  @li @ref tutorial_execution
+ *  @li @ref tutorial_common
+ *  @li More @ref tutorial
+ *  @li Read some @ref articles
  *
- *  @section rationale Rationale
- *    @li Flow-based programming
+ *  @section get_started Get started
  *
- *        There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of 
- *        incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
- *        Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art
- *        in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
- *        it is easy to make changes, maintain and test things. Why not use this in general programming?
- *        So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram
- *        which in realtime show load to every computer in your cluster and you could change any parameter on fly, add some more workers and so on.
- *
- *    @li Configuration driven software
- *
- *        Nowadays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for
- *        first time use, but then you start using it turns out it was pre-configured in source code to achieve some goals, which in turn
- *        can not match with your's. Only you can know how to construct most optimal solution of your problem. Fancy software can't do this,
- *        For example, one ip address can be address of server in nearby rack, and other ip can be on the another side of earth, so what software could do?
- *        Measure latency of every ip it see? It will result in horrible, complex code with lot of bugs and overhead to each request. But if where was
- *        the way to tell "hey, this link would be slow, let's set up a buffer or even compress data. But rest of links will keep send plain data".
- *        No way your current database can do so.
- *    
- *    @li Configure every aspect
- *       
- *        Big configs filled with comments to every "max_recv_buffer_size" and alike drives people crazy. There is no image of how the hell this thing working,
- *        and which parameter belong to which part of software. And this lead to bad configuration and resource wasting.
+ *  @li @ref article_install
+ *  @li <a class="el" href="https://github.com/x86-64/frozen/tree/master/examples">Examples</a> 
  *  
+ *  @section get_involved Get involved
+ *
+ *  @li <a class="el" href="https://github.com/x86-64/frozen">Github project page</a>
+ *  @li Architecture review: @ref machine, @ref api, @ref data.
+ *
  */
