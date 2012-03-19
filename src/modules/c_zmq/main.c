@@ -287,7 +287,7 @@ static ssize_t zeromq_t_socket_new(zeromq_t *fdata){ // {{{
 	
 	get_opt(HK(bind),
 		do{
-			if(zmq_bind(fdata->zmq_socket, opt_binary_ptr) == 0){
+			if(zmq_bind(fdata->zmq_socket, p) == 0){
 				ready = 2;
 			}else{
 				ret = zeromq_t_error_to_ret(errno, error("zmq_bind failed"));
@@ -296,7 +296,7 @@ static ssize_t zeromq_t_socket_new(zeromq_t *fdata){ // {{{
 	);
 	get_opt(HK(connect),
 		do{
-			if(zmq_connect(fdata->zmq_socket, opt_binary_ptr) == 0){
+			if(zmq_connect(fdata->zmq_socket, p) == 0){
 				ready = 2;
 			}else{
 				ret = zeromq_t_error_to_ret(errno, error("zmq_connect failed"));
