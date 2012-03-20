@@ -134,6 +134,7 @@
 #define HK_VALUE_retry_request 91119
 #define HK_VALUE_return 10244
 #define HK_VALUE_return_result 91189
+#define HK_VALUE_return_to 31314
 #define HK_VALUE_role 3146
 #define HK_VALUE_rules 6045
 #define HK_VALUE_shop 3322
@@ -297,6 +298,7 @@ typedef enum hashkey_t {
       HK_retry_request = HK_VALUE_retry_request, 
       HK_return = HK_VALUE_return, 
       HK_return_result = HK_VALUE_return_result, 
+      HK_return_to = HK_VALUE_return_to, 
       HK_role = HK_VALUE_role, 
       HK_rules = HK_VALUE_rules, 
       HK_shop = HK_VALUE_shop, 
@@ -464,6 +466,7 @@ keypair_t hashkeys[] = {
       { "retry_request", HK_VALUE_retry_request }, 
       { "return", HK_VALUE_return }, 
       { "return_result", HK_VALUE_return_result }, 
+      { "return_to", HK_VALUE_return_to }, 
       { "role", HK_VALUE_role }, 
       { "rules", HK_VALUE_rules }, 
       { "shop", HK_VALUE_shop }, 

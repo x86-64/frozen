@@ -58,9 +58,6 @@ static ssize_t       data_slice_t_convert_to    (data_t *src, fastcall_convert_t
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
-	if(fargs->format != FORMAT(native))
-		return -ENOSYS;
-	
 	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;
 	
 	return default_transfer(fdata->data, fargs->dest, fdata->off, 0, fdata->size, transfered);
@@ -88,7 +85,7 @@ static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_conver
 			
 			hash_data_get(ret, TYPE_UINTT, fdata->off,    config, HK(offset));
 			hash_data_get(ret, TYPE_UINTT, fdata->size,   config, HK(size));
-			hash_holder_consume(ret, input, config, HK(input));
+			hash_holder_consume(ret, input, config, HK(data));
 			if(ret != 0)
 				return -EINVAL;
 			
@@ -97,9 +94,13 @@ static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_conver
 
 			*fdata->data = input;
 			return 0;
-
-		default:
-			break;
+			
+		default:                              // packed or native - create raw_t instead of slice_t
+		                                      // (coz we can not pack slice_t into raw_t in convert_to)
+			dest->type = TYPE_RAWT;
+			dest->ptr  = NULL;
+			
+			return data_query(dest, fargs);
 	}
 	return -ENOSYS;
 } // }}}
@@ -129,6 +130,7 @@ data_proto_t slice_t_proto = {
 	.type                   = TYPE_SLICET,
 	.type_str               = "slice_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_GREEDY,
 	.handler_default        = (f_data_func)&data_slice_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_slice_t_convert_to,
