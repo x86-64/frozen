@@ -134,7 +134,7 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 	if( (input = hash_data_find(request, userdata->input)) == NULL)
 		return error("no input string in request");
 	
-	data_t                 hslider           = DATA_SLIDERT(input, 0);
+	data_t                 hslider           = DATA_AUTO_SLIDERT(input, 0);
 	
 	while(1){
 		fastcall_read r_read = { { 5, ACTION_READ }, 0, threaddata->buffer, userdata->buffer_size };

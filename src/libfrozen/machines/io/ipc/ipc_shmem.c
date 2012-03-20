@@ -277,7 +277,7 @@ ssize_t ipc_shmem_query   (ipc_t *ipc, request_t *request){ // {{{
 		
 		// read request back
 		if(userdata->return_result != 0){
-			fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT(packed) };
+			fastcall_convert_from r_convert_from = { { 5, ACTION_CONVERT_FROM }, &d_ipcmem, FORMAT(packed) };
 			data_query(buffer, &r_convert_from);
 		}
 		ret = 0;

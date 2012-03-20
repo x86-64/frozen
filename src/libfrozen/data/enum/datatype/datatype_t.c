@@ -48,6 +48,7 @@ datatype_t     datatype_t_getid_byport(DATATYPE_PORTABLE port, ssize_t *pret){ /
 
 static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	uintmax_t              transfered        = 0;
 	char                   buffer[DEF_BUFFER_SIZE];
 	
 	if(fargs->src == NULL)
@@ -68,14 +69,16 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			buffer[r_read.buffer_size] = '\0';
 			
 			*(datatype_t *)(dst->ptr) = datatype_t_getid_byname(buffer, &ret);
-			return ret;
+			transfered = strlen(buffer);
+			break;
 
 		case FORMAT(native):;
 			fastcall_read r_clean = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(datatype_t) };
 			if( (ret = data_query(fargs->src, &r_clean)) < 0)
 				return ret;
 			
-			return ret;
+			transfered = sizeof(datatype_t);
+			break;
 		
 		case FORMAT(packed):;
 			DATATYPE_PORTABLE type_port = 0;
@@ -85,12 +88,16 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 				return ret;
 			
 			*(datatype_t *)(dst->ptr) = datatype_t_getid_byport(type_port, &ret);
-			return ret;
+			transfered = sizeof(type_port);
+			break;
 			
 		default:
-			break;
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return ret;
 } // }}}
 static ssize_t data_datatype_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;

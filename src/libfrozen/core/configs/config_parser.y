@@ -92,7 +92,7 @@ hash_name :
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&$$);
 		data_t                 d_initstr         = DATA_PTR_STRING($1);
 
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
 			emit_error("unknown hashkey_t \"%s\" (ret: %s)", $1, errors_describe(ret));
 		
@@ -107,7 +107,7 @@ hash_value :
 		$$.type = TYPE_RAWT;
 		$$.ptr  = NULL;
 		
-		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&$$, &r_init_str)) < 0)
 			emit_error("data string init failed (ret: %s)", errors_describe(ret));
 
@@ -121,7 +121,7 @@ hash_value :
 		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
 		data_t                 d_val_initstr     = DATA_PTR_STRING($4);
 		
-		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
 			emit_error("unknown datatype_t \"%s\" (ret: %s)", $2, errors_describe(ret));
 		
@@ -129,7 +129,7 @@ hash_value :
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init2 = { { 5, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&$$, &r_init2)) < 0)
 			emit_error("data init failed \"%s\" (ret: %s)", $2, errors_describe(ret));
 		
@@ -143,7 +143,7 @@ hash_value :
 		data_t                 d_type_initstr    = DATA_PTR_STRING($2);
 		data_t                 d_hash            = DATA_PTR_HASHT($5);
 
-		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
 			emit_error("unknown datatype_t \"%s\" (ret: %s)", $2, errors_describe(ret));
 		
@@ -151,7 +151,7 @@ hash_value :
 		$$.ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
 		if( (ret = data_query(&$$, &r_convert)) < 0)
 			emit_error("data init failed \"%s\" (ret: %s)", $2, errors_describe(ret));
 		

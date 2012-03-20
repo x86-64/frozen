@@ -7,7 +7,7 @@
 #include <bind_t.h>
 
 ssize_t           bind_t_sync(bind_t *fdata){ // {{{
-	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &fdata->slave, fdata->format };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &fdata->slave, fdata->format };
 	return data_query(&fdata->master, &r_convert);
 } // }}}
 bind_t *          bind_t_alloc(data_t *master, data_t *slave, format_t format, uintmax_t fatal, uintmax_t sync){ // {{{
@@ -22,7 +22,7 @@ bind_t *          bind_t_alloc(data_t *master, data_t *slave, format_t format, u
 	fdata->sync      = sync;
 	fdata->sync_curr = sync;
 	
-	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &fdata->slave, format };
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &fdata->slave, format };
 	if(data_query(&fdata->master, &r_convert) < 0 && fatal != 0){
 		free(fdata);
 		return NULL;

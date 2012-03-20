@@ -137,7 +137,9 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	char                  *endptr;
 	char                   buffer[[DEF_BUFFER_SIZE]] = { 0 };
+	uintmax_t              transfered                = 0;
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -156,8 +158,9 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 				return -EFAULT;
 			}
 			
-			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, NULL, 10);
-			return 0;
+			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, &endptr, 10);
+			transfered = (endptr - buffer);
+			break;
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
@@ -168,12 +171,16 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			}
 			
 			*(TYPE *)(dst->ptr) = *((TYPE *)buffer);
-			return 0;
-
-		default:
+			transfered = sizeof(TYPE);
 			break;
+			
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return 0;
 } // }}}
 static ssize_t data_[]NAME()_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL || *(TYPE *)data->ptr == 0) ? 1 : 0;

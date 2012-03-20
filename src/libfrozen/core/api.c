@@ -486,7 +486,7 @@ ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{
 	if( (output = hash_data_find(request, HK(destination))) == NULL)
 		return -EINVAL;
 	
-	fastcall_convert_to    fargs             = { { 4, ACTION_CONVERT_TO }, output, format };
+	fastcall_convert_to    fargs             = { { 5, ACTION_CONVERT_TO }, output, format };
 	ret = data_query(data, &fargs);
 	
 	data_t                *buffer            = hash_data_find(request, HK(size));
@@ -504,6 +504,7 @@ ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_f
 		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(source),     *fargs->src                                           },
 		{ HK(format),      DATA_PTR_FORMATT( &format                          ) },
+		{ HK(size),        DATA_PTR_UINTT( &fargs->transfered                 ) },
 		hash_end
 	};
 	return machine_query(machine, r_next);
@@ -518,8 +519,15 @@ ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // 
 	if( (input = hash_data_find(request, HK(source))) == NULL)
 		return -EINVAL;
 	
-	fastcall_convert_from    fargs             = { { 4, ACTION_CONVERT_FROM }, input, format };
-	return data_query(data, &fargs);
+	fastcall_convert_from    fargs             = { { 5, ACTION_CONVERT_FROM }, input, format };
+	ret = data_query(data, &fargs);
+	
+	data_t                *buffer            = hash_data_find(request, HK(size));
+	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.transfered, sizeof(fargs.transfered) };
+	if(buffer)
+		data_query(buffer, &r_write);
+	
+	return ret;
 } // }}}
 
 ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{

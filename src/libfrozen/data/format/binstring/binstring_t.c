@@ -49,18 +49,15 @@ static ssize_t data_binstring_t_convert_to(data_t *src, fastcall_convert_to *far
 			fastcall_write r_write1 = { { 5, ACTION_WRITE }, 0, &length, sizeof(length) };
 			ret         = data_query(&sl_dest, &r_write1);
 			transfered += r_write1.buffer_size;
+			data_slider_t_set_offset(&sl_dest, r_write1.buffer_size, SEEK_CUR);
 			
 			if(ret < 0)
 				break;
 			
 			// <data>
-			data_slider_t_freeze(&sl_dest);
-				
-				fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_dest, FORMAT(native) };
-				ret         = data_query(fdata->data, &r_convert);
-				transfered += r_convert.transfered;
-				
-			data_slider_t_unfreeze(&sl_dest);
+			fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_dest, FORMAT(native) };
+			ret         = data_query(fdata->data, &r_convert);
+			transfered += r_convert.transfered;
 			break;
 			
 		default:
@@ -109,8 +106,11 @@ static ssize_t data_binstring_t_convert_from(data_t *dst, fastcall_convert_from 
 			
 			data_t d_slice = DATA_SLICET(fargs->src, sizeof(length), length);
 			
-			fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_slice, FORMAT(native) };
-			return data_query(fdata->data, &r_convert);
+			fargs->src = &d_slice;
+			ret = data_query(fdata->data, fargs);
+			
+			fargs->transfered += sizeof(length);
+			return ret;
 		
 		default:
 			break;

@@ -14,7 +14,8 @@ static list                    dynamic_keys   = LIST_INITIALIZER;
 
 static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	uintmax_t              transfered        = 0;
+	char                   buffer[DEF_BUFFER_SIZE];
 	keypair_t             *kp;
 	hashkey_t              key_val;
 	
@@ -33,7 +34,10 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 			if( (ret = data_query(fargs->src, &r_read)) < 0)
 				return ret;
 			
-			key_val = portable_hash(buffer);
+			buffer[r_read.buffer_size] = '\0';
+			
+			key_val    = portable_hash(buffer);
+			transfered = strlen(buffer);
 	
 	#ifdef COLLISION_CHECK
 		#ifdef STATIC_KEYS_CHECK
@@ -65,7 +69,7 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 		#endif
 	
 			*(hashkey_t *)(dst->ptr) = key_val;
-			return 0;
+			break;
 		
 		case FORMAT(packed):;
 			HASHKEY_PORTABLE  key_port = 0;
@@ -75,12 +79,16 @@ static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *f
 				return ret;
 			
 			*(hashkey_t *)(dst->ptr) = key_port;
-			return 0;
+			transfered = sizeof(key_port);
+			break;
 			
 		default:
-			break;
+			return -ENOSYS;
 	}
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return 0;
 	goto collision; // dummy
 
 collision:

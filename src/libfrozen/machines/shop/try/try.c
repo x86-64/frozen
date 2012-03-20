@@ -141,7 +141,7 @@ static ssize_t get_hash(data_t *data, data_t *freeme, hash_t **hash){ // {{{
 	freeme->type = TYPE_HASHT;
 	freeme->ptr  = NULL;
 	
-	fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, r_getdata.data, FORMAT(packed) };
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, r_getdata.data, FORMAT(packed) };
 	if( (ret = data_query(freeme, &r_convert)) < 0)
 		return ret;
 	

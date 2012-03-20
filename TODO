@@ -34,6 +34,8 @@
 - machine multi_request
   - action BATCH
 
+- timestamp_t convert_from transfered
+
 - data 'range_t'
 
 - libev

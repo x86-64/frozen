@@ -23,28 +23,32 @@ static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	data_t                 new_data          = DATA_VOID;
 	data_t                 d_datatype        = DATA_PTR_DATATYPET(&new_data.type);
 	data_t                 d_binstring       = DATA_BINSTRINGT(&new_data);
-	fastcall_convert_from  r_convert         = { { 4, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
+	fastcall_convert_from  r_convert         = { { 5, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
+	
 	// get datatype
 	if( (ret = data_query(&d_datatype, &r_convert)) < 0)
 		return ret;
 	
-	// get data
-	data_slider_t_freeze(&sl_input);
-		
-		if( data_is_greedy(&new_data) ){
-			ret = data_query(&d_binstring, &r_convert);
-		}else{
-			ret = data_query(&new_data, &r_convert);
-		}
+	data_slider_t_set_offset(&sl_input, r_convert.transfered, SEEK_CUR);
 	
-	data_slider_t_unfreeze(&sl_input);
+	// get data
+	if( data_is_greedy(&new_data) ){
+		ret = data_query(&d_binstring, &r_convert);
+	}else{
+		ret = data_query(&new_data, &r_convert);
+	}
+	data_slider_t_set_offset(&sl_input, r_convert.transfered, SEEK_CUR);
 	
 	// accept data only eq void_t or datatype same as passed
-	if(fdata->type == TYPE_VOIDT || fdata->type == new_data.type){
-		*fdata = new_data;
-		return ret;
-	}
-	return -EINVAL;
+	if( !(fdata->type == TYPE_VOIDT || fdata->type == new_data.type))
+		return -EINVAL;
+	
+	*fdata = new_data;
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = data_slider_t_get_offset(&sl_input);
+		
+	return ret;
 } // }}}
 static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
@@ -62,22 +66,25 @@ static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	
 	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
 	data_t                 d_binstring        = DATA_BINSTRINGT(fdata);
-	fastcall_convert_to    r_convert          = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+	fastcall_convert_to    r_convert          = { { 5, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
 	
 	// write datatype
 	if( (ret = data_query(&d_datatype, &r_convert)) < 0)
 		return ret;
 	
+	data_slider_t_set_offset(&sl_output, r_convert.transfered, SEEK_CUR);
+	
 	// write data
-	data_slider_t_freeze(&sl_output);
-		
-		if( data_is_greedy(fdata) ){
-			ret = data_query(&d_binstring, &r_convert);
-		}else{
-			ret = data_query(fdata, &r_convert);
-		}
-		
-	data_slider_t_unfreeze(&sl_output);
+	if( data_is_greedy(fdata) ){
+		ret = data_query(&d_binstring, &r_convert);
+	}else{
+		ret = data_query(fdata, &r_convert);
+	}
+	data_slider_t_set_offset(&sl_output, r_convert.transfered, SEEK_CUR);
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = data_slider_t_get_offset(&sl_output);
+	
 	return ret;
 } // }}}
 

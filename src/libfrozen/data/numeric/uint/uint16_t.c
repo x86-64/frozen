@@ -162,7 +162,9 @@ static ssize_t data_uint16_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	return ret;
 } // }}}
 static ssize_t data_uint16_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	char                  *endptr;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	uintmax_t              transfered                = 0;
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -181,8 +183,9 @@ static ssize_t data_uint16_t_convert_from(data_t *dst, fastcall_convert_from *fa
 				return -EFAULT;
 			}
 			
-			*(uint16_t *)(dst->ptr) = (uint16_t )strtoul(buffer, NULL, 10);
-			return 0;
+			*(uint16_t *)(dst->ptr) = (uint16_t )strtoul(buffer, &endptr, 10);
+			transfered = (endptr - buffer);
+			break;
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
@@ -193,12 +196,16 @@ static ssize_t data_uint16_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			}
 			
 			*(uint16_t *)(dst->ptr) = *((uint16_t *)buffer);
-			return 0;
-
-		default:
+			transfered = sizeof(uint16_t);
 			break;
+			
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return 0;
 } // }}}
 static ssize_t data_uint16_t_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL || *(uint16_t *)data->ptr == 0) ? 1 : 0;

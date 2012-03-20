@@ -93,6 +93,9 @@ clean_read:;
 	if( (ret = data_query(fargs->src, &r_read)) < -1)
 		return ret;
 		
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = r_read.buffer_size;
+	
 	return 0;
 } // }}}
 static ssize_t data_string_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{

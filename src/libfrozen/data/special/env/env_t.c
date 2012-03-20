@@ -83,9 +83,7 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 		case FORMAT(config):;
 		case FORMAT(human):;
 			data_t                 hkey              = DATA_PTR_HASHKEYT(&fdata->key);
-			
-			fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, fargs->src, fargs->format };
-			return data_query(&hkey, &r_convert);
+			return data_query(&hkey, fargs);
 			
 		default:
 			break;

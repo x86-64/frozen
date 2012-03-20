@@ -5,7 +5,7 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 
-slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
+slider_t *        slider_t_alloc(data_t *data, uintmax_t offset, uintmax_t auto_slide){ // {{{
 	slider_t                 *fdata;
 	
 	if( (fdata = malloc(sizeof(slider_t))) == NULL )
@@ -13,7 +13,7 @@ slider_t *        slider_t_alloc(data_t *data, uintmax_t offset){ // {{{
 	
 	fdata->data       = data;
 	fdata->off        = offset;
-	fdata->frozen_off = ~0;
+	fdata->auto_slide = auto_slide;
 	
 	data_set_void(&fdata->freeit);
 	return fdata;
@@ -39,16 +39,6 @@ ssize_t   data_slider_t_set_offset(data_t *data, intmax_t offset, uintmax_t dir)
 	}
 	return 0;
 } // }}}
-void      data_slider_t_freeze(data_t *data){ // {{{
-	slider_t                  *fdata             = (slider_t *)data->ptr;
-	
-	fdata->frozen_off = fdata->off;
-} // }}}
-void      data_slider_t_unfreeze(data_t *data){ // {{{
-	slider_t                  *fdata             = (slider_t *)data->ptr;
-	
-	fdata->frozen_off = ~0;
-} // }}}
 
 static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // {{{
 	size_t                     ret;
@@ -59,14 +49,13 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 		case ACTION_WRITE:;
 			fastcall_io         *ioargs     = (fastcall_io *)fargs;
 			
-			if(fdata->frozen_off != ~0)
-				ioargs->offset      += fdata->frozen_off;
-			else
-				ioargs->offset      += fdata->off;
-
-			if( (ret = data_query(fdata->data, ioargs)) >= 0)
-				fdata->off += ioargs->buffer_size;
-
+			ioargs->offset      += fdata->off;
+			
+			if( (ret = data_query(fdata->data, ioargs)) >= 0){
+				if(fdata->auto_slide != 0)
+					fdata->off += ioargs->buffer_size;
+			}
+			
 			return ret;
 		
 		case ACTION_TRANSFER:
@@ -101,7 +90,7 @@ static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(ret != 0)
 				return -EINVAL;
 			
-			if( (fdata = dst->ptr = slider_t_alloc(&data, offset)) == NULL){
+			if( (fdata = dst->ptr = slider_t_alloc(&data, offset, 1)) == NULL){
 				data_free(&data);
 				return -ENOMEM;
 			}
@@ -123,25 +112,19 @@ static ssize_t data_slider_t_free(data_t *data, fastcall_free *fargs){ // {{{
 } // }}}
 static ssize_t data_slider_t_length(data_t *data, fastcall_length *fargs){ // {{{
 	ssize_t                    ret;
-	uintmax_t                  off;
 	slider_t                  *fdata             = (slider_t *)data->ptr;
-	
-	if(fdata->frozen_off != ~0)
-		off = fdata->frozen_off;
-	else
-		off = fdata->off;
 	
 	switch(fargs->format){
 		case FORMAT(native):
 			if( (ret = data_query(fdata->data, fargs)) < 0)
 				return ret;
 			
-			if( off > fargs->length ){
+			if( fdata->off > fargs->length ){
 				fargs->length = 0;
 				return ret;
 			}
 			
-			fargs->length -= off;
+			fargs->length -= fdata->off;
 			return ret;
 			
 		default: // we don't mess with other formats

@@ -234,7 +234,7 @@ static ssize_t data_container_t_convert_to(data_t *data, fastcall_convert_to *fa
 	if(fdata == NULL)
 		return -EINVAL;
 	
-	data_t                 sl_dest = DATA_SLIDERT(fargs->dest, 0);
+	data_t                 sl_dest = DATA_AUTO_SLIDERT(fargs->dest, 0);
 	container_convert_ctx  convert_ctx = {
 		.sl_dest      = &sl_dest,
 		.size         = 0,

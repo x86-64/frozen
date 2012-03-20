@@ -31,15 +31,12 @@ static ssize_t  struct_iter_pack(hash_t *element, void *p_ctx){
 		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // get default value
 			return ITER_BREAK;
 	}
-	
-	data_slider_t_freeze(iter_ctx->buffer);
-	
 	// write data to buffer
-	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, iter_ctx->buffer, format };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, iter_ctx->buffer, format };
 	if(data_query(value, &r_convert) != 0)
 		return ITER_BREAK;
 	
-	data_slider_t_unfreeze(iter_ctx->buffer);
+	data_slider_t_set_offset(iter_ctx->buffer, r_convert.transfered, SEEK_CUR);
 	
 	return ITER_CONTINUE;
 }
@@ -72,14 +69,12 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 		need_data_free = 1;
 	}
 	
-	data_slider_t_freeze(iter_ctx->buffer);
-
 	// read data from buffer
-	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_FROM }, iter_ctx->buffer, format };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_FROM }, iter_ctx->buffer, format };
 	if(data_query(value, &r_convert) < 0)
 		return ITER_BREAK;
 	
-	data_slider_t_unfreeze(iter_ctx->buffer);
+	data_slider_t_set_offset(iter_ctx->buffer, r_convert.transfered, SEEK_CUR);
 	
 	if(need_data_free == 1){
 		fastcall_free r_free = { { 2, ACTION_FREE } };

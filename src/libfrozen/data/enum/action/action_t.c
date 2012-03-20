@@ -7,6 +7,8 @@
 #define ERRORS_MODULE_NAME "enum/action"
 
 static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              transfered        = 0;
 	keypair_t             *kp;
 	char                   buffer[DEF_BUFFER_SIZE];
 	
@@ -26,22 +28,31 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 				return -EFAULT;
 			
 			buffer[r_read.buffer_size] = '\0';
-
+			
+			ret = -EINVAL;
 			for(kp = &actions[0]; kp->key_str != NULL; kp++){
 				if(strcasecmp(kp->key_str, buffer) == 0){
 					*(action_t *)(dst->ptr) = kp->key_val;
-					return 0;
+					ret        = 0;
+					transfered = strlen(kp->key_str);
+					break;
 				}
 			}
-			return -EINVAL;
+			break;
+			
 		case FORMAT(packed):;
 			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(action_t) };
-			return data_query(fargs->src, &r_read2);
+			ret        = data_query(fargs->src, &r_read2);
+			transfered = sizeof(action_t);
+			break;
 		
 		default:
-			break;
+			return -ENOSYS;
 	}
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return ret;
 } // }}}
 static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;

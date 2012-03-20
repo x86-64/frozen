@@ -62,21 +62,19 @@ static ssize_t data_hash_t_convert_to_iter(hash_t *hash_item, hash_t_ctx *ctx){ 
 	if(hash_item->key != hash_ptr_end && hash_item != hash_find(ctx->hash, hash_item->key)) // skip duplicates
 		return ITER_CONTINUE;
 	
-	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, ctx->sl_data, FORMAT(packed) };
 	
 	// write header
-	data_slider_t_freeze(ctx->sl_data);
-		ret = data_query(&d_key, &r_convert);
-	data_slider_t_unfreeze(ctx->sl_data);
-	if(ret < 0)
+	if( (ret = data_query(&d_key,  &r_convert)) < 0)
 		return ITER_BREAK;
 	
+	data_slider_t_set_offset(ctx->sl_data, r_convert.transfered, SEEK_CUR);
+
 	// write data
-	data_slider_t_freeze(ctx->sl_data);
-		ret = data_query(&d_data, &r_convert);
-	data_slider_t_unfreeze(ctx->sl_data);
-	if(ret < 0)
+	if( (ret = data_query(&d_data, &r_convert)) < 0)
 		return ITER_BREAK;
+	
+	data_slider_t_set_offset(ctx->sl_data, r_convert.transfered, SEEK_CUR);
 	
 	return ITER_CONTINUE;
 } // }}}
@@ -189,10 +187,13 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			if(hash_iter(ctx.hash, (hash_iterator)&data_hash_t_convert_to_iter, &ctx, HASH_ITER_END) != ITER_OK)
 				return -EFAULT;
 			
+			if(fargs->header.nargs >= 5)
+				fargs->transfered = data_slider_t_get_offset(&d_sl_data);
+			
 			break;
 			
 		case FORMAT(debug):;
-			data_t                 d_sl_data2        = DATA_SLIDERT(fargs->dest, 0);
+			data_t                 d_sl_data2        = DATA_AUTO_SLIDERT(fargs->dest, 0);
 			
 			ctx.step      = 0;
 			ctx.sl_data   = &d_sl_data2;
@@ -247,11 +248,13 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	for(curr = hash;; curr++){
 		data_t                d_key          = DATA_PTR_HASHKEYT(&curr->key);
 		data_t                d_data         = DATA_PTR_DATAT(&curr->data);
-		fastcall_convert_from r_convert      = { { 4, ACTION_CONVERT_FROM }, &sl_src, FORMAT(packed) };
+		fastcall_convert_from r_convert      = { { 5, ACTION_CONVERT_FROM }, &sl_src, FORMAT(packed) };
 		
 		// read key
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
 			return ret;
+		
+		data_slider_t_set_offset(&sl_src, r_convert.transfered, SEEK_CUR);
 		
 		// set correct 
 		if(dst->ptr != NULL){
@@ -266,12 +269,8 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			data_set_void(&curr->data);
 		}
 		
-		
-		data_slider_t_freeze(&sl_src);
-			
-			ret = data_query(&d_data, &r_convert);
-		
-		data_slider_t_unfreeze(&sl_src);
+		ret = data_query(&d_data, &r_convert);
+		data_slider_t_set_offset(&sl_src, r_convert.transfered, SEEK_CUR);
 		
 		if(curr->key == hash_ptr_end)
 			break;
@@ -300,6 +299,10 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		
 		free(hash);      // no need for this hash - we redata data in old one
 	}
+	
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = data_slider_t_get_offset(&sl_src);
+	
 	return ret;
 } // }}}
 

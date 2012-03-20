@@ -3,13 +3,13 @@
 
 #include <enum/format/format_t.h>
 
-static ssize_t ipv4_from_string(uint32_t *pip, char *string, uintmax_t string_size){ // {{{
+static ssize_t ipv4_from_string(uint32_t *pip, char *string, uintmax_t *string_size){ // {{{
 	uint64_t               ip, ip_part;
 	uintmax_t              i;
 	uintmax_t              have_dots         = 0;
 	char                  *p;
 	
-	for(i=0; i<string_size; i++){
+	for(i=0; i<*string_size; i++){
 		switch(string[i]){
 			case '.': have_dots++; break;  
 			case 'x':                         // hex numbers
@@ -21,7 +21,6 @@ static ssize_t ipv4_from_string(uint32_t *pip, char *string, uintmax_t string_si
 					break;
 				if(string[i] >= 'a' && string[i] <= 'f')
 					break;
-				string_size = i;
 				goto exit;
 		}
 	}
@@ -37,8 +36,10 @@ exit:
 			ip       += ip_part;
 			p++;
 		}
+		*string_size = p - string - 1;
 	}else{
-		ip  = strtoull(string, NULL, 0);
+		ip  = strtoull(string, &p, 0);
+		*string_size = p - string;
 	}
 	*pip = (uint32_t)ip;
 	return 0;
@@ -216,7 +217,9 @@ static ssize_t data_ipv4_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	return ret;
 } // }}}
 static ssize_t data_ipv4_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	uintmax_t              transfered        = 0;
 	ipv4_t                *fdata;
 	
 	if(fargs->src == NULL)
@@ -234,17 +237,25 @@ static ssize_t data_ipv4_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0)
 				return -EFAULT;
-			return ipv4_from_string(&fdata->ip, buffer, r_read_str.buffer_size);
+			
+			ret        = ipv4_from_string(&fdata->ip, buffer, &r_read_str.buffer_size);
+			transfered = r_read_str.buffer_size;
+			break;
 		
 		case FORMAT(native):;
 		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &fdata->ip, sizeof(fdata->ip) };
-			return data_query(fargs->src, &r_read);
-		
-		default:
+			ret        = data_query(fargs->src, &r_read);
+			transfered = sizeof(fdata->ip);
 			break;
+			
+		default:
+			return -ENOSYS;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return ret;
 } // }}}
 static ssize_t data_ipv4_t_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
 	ipv4_t                *fdata             = (ipv4_t *)data->ptr;

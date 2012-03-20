@@ -55,12 +55,10 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			for(chunk = fdata->head; chunk; chunk = chunk->cnext){
 				data_t         d_data             = DATA_PTR_DATAT(&chunk->data);
 				
-				data_slider_t_freeze(&sl_output);
+				fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+				ret = data_query(&d_data, &r_convert);
 				
-					fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
-					ret = data_query(&d_data, &r_convert);
-
-				data_slider_t_unfreeze(&sl_output);
+				data_slider_t_set_offset(&sl_output, r_convert.transfered, SEEK_CUR);
 				
 				if(ret < 0)
 					break;
@@ -69,13 +67,11 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 			// terminate list
 			data_t                 terminator         = { TYPE_LISTENDT, NULL };
 			data_t                 d_data             = DATA_PTR_DATAT(&terminator);
-				
-			data_slider_t_freeze(&sl_output);
-				
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
-				qret = data_query(&d_data, &r_convert);
-				
-			data_slider_t_unfreeze(&sl_output);
+			
+			fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
+			qret = data_query(&d_data, &r_convert);
+			
+			data_slider_t_set_offset(&sl_output, r_convert.transfered, SEEK_CUR);
 			
 			if(qret < 0)
 				ret = qret;
@@ -84,12 +80,16 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 		default:
 			return -ENOSYS;
 	}
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = data_slider_t_get_offset(&sl_output);
+	
 	return ret;
 } // }}}
 static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret               = 0;
 	list_t                *fdata;
-	data_t                 sl_input         = DATA_SLIDERT(fargs->src, 0);
+	uintmax_t              transfered        = 0;
+	data_t                 sl_input          = DATA_SLIDERT(fargs->src, 0);
 	
 	switch(fargs->format){
 		case FORMAT(native):
@@ -127,15 +127,11 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			while(1){
 				data_set_void(&item);
 				
-				data_slider_t_freeze(&sl_input);
-				
-					fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
-					ret = data_query(&d_item, &r_convert);
-				
-				data_slider_t_unfreeze(&sl_input);
-				
-				if(ret < 0)
+				fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &sl_input, FORMAT(packed) };
+				if( (ret = data_query(&d_item, &r_convert)) < 0)
 					break;
+				
+				data_slider_t_set_offset(&sl_input, r_convert.transfered, SEEK_CUR);
 				
 				if(item.type == TYPE_LISTENDT)
 					break;
@@ -143,11 +139,15 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 				if( (ret = list_t_push(fdata, &item)) < 0)
 					break;
 			}
+			transfered = data_slider_t_get_offset(&sl_input);
 			break;
 
 		default:
 			return -ENOSYS;
 	};
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
 	return ret;
 } // }}}
 static ssize_t data_list_t_free(data_t *data, fastcall_free *fargs){ // {{{

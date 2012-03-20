@@ -67,27 +67,28 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 	
 	return 0;
 } // }}}
-static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t length){ // {{{
+static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t *length){ // {{{
 	ssize_t                ret, ret2;
 	raw_t                 *dst_data;
 	
-	switch( (ret = raw_prepare(dst, length)) ){
+	switch( (ret = raw_prepare(dst, *length)) ){
 		case 0:       break;
 		case -ENOSPC: break;
 		default:      return ret;
 	}
 	dst_data = (raw_t *)(dst->ptr);
 	
-	if(src && length > 0){
+	if(src && *length > 0){
 		fastcall_read r_read = {
 			{ 5, ACTION_READ },
 			offset,
 			dst_data->ptr,
-			MIN(dst_data->size, length)
+			MIN(dst_data->size, *length)
 		};
 		if( (ret2 = data_query(src, &r_read)) < 0)
 			return ret2;
 		
+		*length = r_read.buffer_size;
 	}
 	return ret;
 } // }}}
@@ -179,7 +180,7 @@ static ssize_t data_raw_convert_to(data_t *src, fastcall_convert_to *fargs){ // 
 static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              length            = 0;
-	
+
 	switch(fargs->format){
 		case FORMAT(native):
 		case FORMAT(human):
@@ -190,7 +191,10 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			if( (ret = data_query(fargs->src, &r_len1)) < 0)
 				return ret;
 			
-			return raw_read(dst, fargs->src, 0, r_len1.length);
+			length = r_len1.length;
+			
+			ret = raw_read(dst, fargs->src, 0, &length);
+			break;
 			
 		case FORMAT(hash):;
 			hash_t                *config;
@@ -210,9 +214,13 @@ static ssize_t data_raw_convert_from(data_t *dst, fastcall_convert_from *fargs){
 			}
 			hash_data_get(ret, TYPE_UINTT, length, config, HK(length));
 			
-			return raw_read(dst, buffer, 0, length);
+			ret = raw_read(dst, buffer, 0, &length);
+			break;
 	};
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = length;
+	
+	return ret;
 } // }}}
 static ssize_t data_raw_write(data_t *dst, fastcall_write *fargs){ // {{{
 	ssize_t                ret;

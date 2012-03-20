@@ -50,15 +50,15 @@ static ssize_t data_netstring_t_convert_to(data_t *src, fastcall_convert_to *far
 			ret         = data_query(&sl_dest, &r_net_write1);
 			transfered += r_net_write1.buffer_size;	
 			if(ret < 0) break;
+			data_slider_t_set_offset(&sl_dest, r_net_write1.buffer_size, SEEK_CUR);
 			
 			// <data>
-			data_slider_t_freeze(&sl_dest);
-				
-				fastcall_convert_to r_net_convert = { { 5, ACTION_CONVERT_TO }, &sl_dest, FORMAT(native) };
-				ret         = data_query(fdata->data, &r_net_convert);
-				transfered += r_net_convert.transfered;
-				
-			data_slider_t_unfreeze(&sl_dest);
+			
+			fastcall_convert_to r_net_convert = { { 5, ACTION_CONVERT_TO }, &sl_dest, FORMAT(native) };
+			ret         = data_query(fdata->data, &r_net_convert);
+			transfered += r_net_convert.transfered;
+			
+			data_slider_t_set_offset(&sl_dest, r_net_convert.transfered, SEEK_CUR);
 			if(ret < 0) break;
 			
 			// ,

@@ -1490,7 +1490,7 @@ yyreduce:
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
 		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (2)].name));
 
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
 			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (2)].name), errors_describe(ret));
 		
@@ -1509,7 +1509,7 @@ yyreduce:
 		(yyval.data).type = TYPE_RAWT;
 		(yyval.data).ptr  = NULL;
 		
-		fastcall_convert_from r_init_str = { { 4, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
 			emit_error("data string init failed (ret: %s)", errors_describe(ret));
 
@@ -1535,7 +1535,7 @@ yyreduce:
 		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (4)].name));
 		data_t                 d_val_initstr     = DATA_PTR_STRING((yyvsp[(4) - (4)].name));
 		
-		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
 			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
 		
@@ -1543,7 +1543,7 @@ yyreduce:
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_convert_from r_init2 = { { 4, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init2 = { { 5, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&(yyval.data), &r_init2)) < 0)
 			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
 		
@@ -1563,7 +1563,7 @@ yyreduce:
 		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (6)].name));
 		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
 
-		fastcall_convert_from r_init1 = { { 4, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
+		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_init1)) < 0)
 			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
 		
@@ -1571,7 +1571,7 @@ yyreduce:
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
-		fastcall_convert_from r_convert = { { 4, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
 		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
 			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
 		

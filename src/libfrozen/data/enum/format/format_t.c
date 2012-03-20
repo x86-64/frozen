@@ -13,6 +13,7 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
 	keypair_t             *kp;
 	format_t               key_val;
+	uintmax_t              transfered        = 0;
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
@@ -29,7 +30,8 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
 			
-			key_val = portable_hash(buffer);
+			key_val    = portable_hash(buffer);
+			transfered = strlen(buffer);
 	
 	#ifdef COLLISION_CHECK
 		#ifdef STATIC_KEYS_CHECK
@@ -61,12 +63,15 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 		#endif
 	
 			*(format_t *)(dst->ptr) = key_val;
-			return 0;
+			break;
 		
 		default:
-			break;
+			return -ENOSYS;
 	}
-	return -ENOSYS;
+	if(fargs->header.nargs >= 5)
+		fargs->transfered = transfered;
+	
+	return 0;
 	goto collision; // dummy
 
 collision:
