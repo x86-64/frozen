@@ -133,11 +133,16 @@ static ssize_t switch_handler(machine_t *machine, request_t *request){ // {{{
 	switch_context         context           = { machine->cnext, request };
 	switch_userdata       *userdata          = (switch_userdata *)machine->userdata;
 	
-	while( (rule = list_iter_next(&userdata->rules, &iter)) != NULL){
-		if(switch_iterator(rule, &context) == 0)
-			return context.ret;
-	}
+	request_enter_context(request);
+
+		while( (rule = list_iter_next(&userdata->rules, &iter)) != NULL){
+			if(switch_iterator(rule, &context) == 0){
+				request_leave_context();
+				return context.ret;
+			}
+		}
 	
+	request_leave_context();
 	return machine_pass(machine, request);
 } // }}}
 
