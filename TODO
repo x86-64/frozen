@@ -28,7 +28,6 @@
 
 - document data packing abillity: uint_t, list_t, hash_t is packable, container_t depend on data in it, raw_t not packable
 - review code for multi-threading support, document machine's thread-safety capabilities
-- machine/pool
 - data perthread_t wrapper
 - data queue_t
 - machine multi_request

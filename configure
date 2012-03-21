@@ -849,6 +849,7 @@ enable_machinebenchmark
 enable_machinefactory
 enable_machinelimit
 enable_machinemorph
+enable_machinepool
 enable_machinerebuild_monitor
 enable_machinerebuild_reader
 enable_machinerebuild_writer
@@ -1630,6 +1631,7 @@ Optional Features:
                           disable machine factory
   --disable-machine-limit disable machine limit
   --disable-machine-morph disable machine morph
+  --disable-machine-pool  disable machine pool
   --disable-machine-rebuild-monitor
                           disable machine rebuild-monitor
   --disable-machine-rebuild-reader
@@ -20560,6 +20562,43 @@ fi
 		MACHINE_MAKEFILE_machine_morph=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/morph/libfrozen_machine_morph.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinepool was given.
+if test "${enable_machinepool+set}" = set; then :
+  enableval=$enable_machinepool;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinepool}" = "yes"; then
+			enable_machinepool="no"
+		else
+			enable_machinepool="yes"
+		fi
+	fi
+
+	if test "${enable_machinepool}" = "yes"; then
+		MACHINE_DIR_pool="machine/pool"
+		MACHINE_DEP_pool=""
+				MACHINE_SELECTED="$MACHINE_SELECTED pool"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_machine_pool" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/pool/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/pool"
+
+		MACHINE_MAKEFILE_machine_pool=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/pool/libfrozen_machine_pool.la"
 
 	fi
 
