@@ -1,12 +1,15 @@
 #!/bin/sh
 
+mkdir tmp_modules/ 2>/dev/null
+find ../src/modules -type f -name '*.so' -exec cp {} tmp_modules/ \;
+
 exit_err=0
 
 for f in `ls example_*.out`; do
 	cfg=`echo $f | sed "s/example_//" | sed "s/\.out//"`
 	
 	echo -n "testing $cfg: "
-	../src/frozend/frozend -c ../examples/$cfg >tmp_$cfg.out 2>&1
+	../src/frozend/frozend --modules tmp_modules/ -o "-I../src/m4/" -c ../examples/$cfg >tmp_$cfg.out 2>&1
 	
 	diff -u example_$cfg.out tmp_$cfg.out >tmp_$cfg.diff 2>&1
 	err=$?
@@ -21,4 +24,6 @@ for f in `ls example_*.out`; do
 		rm  tmp_$cfg.diff
 	fi;
 done;
+
+rm -rf tmp_modules/
 exit $exit_err;
