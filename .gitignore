@@ -15,11 +15,16 @@ callgrind.out
 *.c_
 backend_selected.h
 data_selected.h
+config.h
+*~
 config.log
 config.status
+configure.scan
 frozend
 paths.h
 src/lang/*
 test/test
 test/tests.m4
 test/test.c
+*BROKEN*
+rest/*
