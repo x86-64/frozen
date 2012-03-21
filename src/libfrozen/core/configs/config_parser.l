@@ -49,6 +49,7 @@ blank   [ \n\r\t]+
 	}
 }
 
+"#!"+[^\n]*     { }
 "//"+[^\n]*     { }
 "/*"                    BEGIN(comment);
 <comment>[^*]*
