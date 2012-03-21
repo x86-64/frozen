@@ -53,6 +53,7 @@ enum datatype_t {
    TYPE_LISTENDT = 46,
    TYPE_MEMORYT = 47,
    TYPE_RAWT = 48,
+   TYPE_MUTEXT = 49,
 };
 
 #endif

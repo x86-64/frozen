@@ -90,6 +90,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/sync/mutex/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/query/config.m4 \

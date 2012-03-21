@@ -824,6 +824,7 @@ enable_list_t
 enable_list_end_t
 enable_memory_t
 enable_raw_t
+enable_mutex_t
 enable_machinekill
 enable_machinethread
 enable_machinequery
@@ -1593,6 +1594,7 @@ Optional Features:
                           disable data list_end_t
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
+  --disable-data-mutex_t  disable data mutex_t
   --disable-machine-kill  disable machine kill
   --disable-machine-thread
                           disable machine thread
@@ -19641,6 +19643,43 @@ fi
 		DATA_MAKEFILE_storage_raw=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/raw/libfrozen_data_raw.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-mutex_t was given.
+if test "${enable_mutex_t+set}" = set; then :
+  enableval=$enable_mutex_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_mutex_t}" = "yes"; then
+			enable_mutex_t="no"
+		else
+			enable_mutex_t="yes"
+		fi
+	fi
+
+	if test "${enable_mutex_t}" = "yes"; then
+		DATA_DIR_mutex_t="sync/mutex"
+		DATA_DEP_mutex_t=""
+		DATA_ID_mutex_t=""
+		DATA_SELECTED="$DATA_SELECTED mutex_t"
+		DATA_HEADERS="$DATA_HEADERS sync/mutex/mutex_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_sync_mutex" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/sync/mutex/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS sync/mutex"
+
+		DATA_MAKEFILE_sync_mutex=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} sync/mutex/libfrozen_data_mutex.la"
 
 	fi
 
