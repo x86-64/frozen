@@ -53,6 +53,7 @@
  *  @section get_involved Get involved
  *
  *  @li <a class="el" href="https://github.com/x86-64/frozen">Github project page</a>
+ *  @li <a class="el" href="http://groups.google.com/group/frozend">Discussion group & announcements</a>
  *  @li Architecture review: @ref machine, @ref api, @ref data.
  *
  */
