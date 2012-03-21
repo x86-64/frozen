@@ -855,6 +855,7 @@ enable_machinerebuild_reader
 enable_machinerebuild_writer
 enable_machineassign
 enable_machinedebug
+enable_machinedelay
 enable_machineemitter
 enable_machineend
 enable_machineimplode
@@ -1641,6 +1642,7 @@ Optional Features:
   --disable-machine-assign
                           disable machine assign
   --disable-machine-debug disable machine debug
+  --disable-machine-delay disable machine delay
   --disable-machine-emitter
                           disable machine emitter
   --disable-machine-end   disable machine end
@@ -20782,6 +20784,43 @@ fi
 		MACHINE_MAKEFILE_request_debug=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/debug/libfrozen_machine_debug.la"
+
+	fi
+
+
+
+
+
+
+
+	# Check whether --enable-machinedelay was given.
+if test "${enable_machinedelay+set}" = set; then :
+  enableval=$enable_machinedelay;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_machinedelay}" = "yes"; then
+			enable_machinedelay="no"
+		else
+			enable_machinedelay="yes"
+		fi
+	fi
+
+	if test "${enable_machinedelay}" = "yes"; then
+		MACHINE_DIR_delay="request/delay"
+		MACHINE_DEP_delay=""
+				MACHINE_SELECTED="$MACHINE_SELECTED delay"
+
+			fi
+
+	if test "$MACHINE_MAKEFILE_request_delay" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/request/delay/Makefile"
+		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS request/delay"
+
+		MACHINE_MAKEFILE_request_delay=yes
+
+		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED request/delay/libfrozen_machine_delay.la"
 
 	fi
 

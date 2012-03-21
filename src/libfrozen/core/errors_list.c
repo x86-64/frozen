@@ -110,6 +110,8 @@ static err_item errs_list[] = {
  { -82182, "src/libfrozen/machines/machine/morph/morph.c: HK(config) not supplied" },
  { -82163, "src/libfrozen/machines/machine/morph/morph.c: calloc failed" },
  { -81920, "unknown error in module machine/morph" },
+ { -73986, "src/libfrozen/machines/request/delay/delay.c: calloc failed" },
+ { -73728, "unknown error in module request/delay" },
  { -69965, "src/libfrozen/machines/machine/benchmark/benchmark.c: calloc failed" },
  { -69632, "unknown error in module machine/benchmark" },
  { -65795, "src/libfrozen/machines/request/debug/debug.c: calloc failed" },

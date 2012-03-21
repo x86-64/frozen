@@ -32,6 +32,7 @@ extern machine_t rebuild_reader_proto;
 extern machine_t rebuild_writer_proto;
 extern machine_t assign_proto;
 extern machine_t debug_proto;
+extern machine_t delay_proto;
 extern machine_t emitter_proto;
 extern machine_t end_proto;
 extern machine_t implode_proto;
@@ -74,6 +75,7 @@ machine_t * machine_protos[] = {
    &rebuild_writer_proto,
    &assign_proto,
    &debug_proto,
+   &delay_proto,
    &emitter_proto,
    &end_proto,
    &implode_proto,

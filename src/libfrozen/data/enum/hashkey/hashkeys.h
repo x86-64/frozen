@@ -141,6 +141,7 @@
 #define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
 #define HK_VALUE_slave 5833
+#define HK_VALUE_sleep 5872
 #define HK_VALUE_sndbuf_size 54561
 #define HK_VALUE_socket 9863
 #define HK_VALUE_source 9547
@@ -157,6 +158,7 @@
 #define HK_VALUE_truncate 21500
 #define HK_VALUE_type 3224
 #define HK_VALUE_unsubscribe 52727
+#define HK_VALUE_usleep 9722
 #define HK_VALUE_uuid 3130
 #define HK_VALUE_value 5875
 #define HK_VALUE_value_bits 41713
@@ -305,6 +307,7 @@ typedef enum hashkey_t {
       HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
       HK_slave = HK_VALUE_slave, 
+      HK_sleep = HK_VALUE_sleep, 
       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
       HK_socket = HK_VALUE_socket, 
       HK_source = HK_VALUE_source, 
@@ -321,6 +324,7 @@ typedef enum hashkey_t {
       HK_truncate = HK_VALUE_truncate, 
       HK_type = HK_VALUE_type, 
       HK_unsubscribe = HK_VALUE_unsubscribe, 
+      HK_usleep = HK_VALUE_usleep, 
       HK_uuid = HK_VALUE_uuid, 
       HK_value = HK_VALUE_value, 
       HK_value_bits = HK_VALUE_value_bits, 
@@ -473,6 +477,7 @@ keypair_t hashkeys[] = {
       { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
       { "slave", HK_VALUE_slave }, 
+      { "sleep", HK_VALUE_sleep }, 
       { "sndbuf_size", HK_VALUE_sndbuf_size }, 
       { "socket", HK_VALUE_socket }, 
       { "source", HK_VALUE_source }, 
@@ -489,6 +494,7 @@ keypair_t hashkeys[] = {
       { "truncate", HK_VALUE_truncate }, 
       { "type", HK_VALUE_type }, 
       { "unsubscribe", HK_VALUE_unsubscribe }, 
+      { "usleep", HK_VALUE_usleep }, 
       { "uuid", HK_VALUE_uuid }, 
       { "value", HK_VALUE_value }, 
       { "value_bits", HK_VALUE_value_bits }, 
