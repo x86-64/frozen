@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>slider_t | frozen - flexible data processing daemon</title>
+<title>machine/pool | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -46,16 +46,18 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">slider_t</div>  </div>
-<div class="ingroups"><a class="el" href="group__data.html">Data</a></div></div><!--header-->
+<div class="title">machine/pool</div>  </div>
+<div class="ingroups"><a class="el" href="group__machine.html">Machines</a></div></div><!--header-->
 <div class="contents">
+<p>This module keep pool of given shops and manage them. </p>
 
 
-<h3><a class="anchor" id="slider_t_overview"></a>Overview</h3><div class="textblock">This can be used for continious read or write without calculating valid offset. Just wrap desired data and read (or write) from 0 offset every time. </div>
-
-<h3><a class="anchor" id="slider_t_define"></a>Define</h3><div class="textblock">Possible defines: </p>
-<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> slider = DATA_SLIDERT(data, starting_offset, auto_slide);
-       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> slider = DATA_HEAP_SLIDERT(data, starting_offset, auto_slide);
+<h3><a class="anchor" id="page_pool_config"></a>Configuration</h3><div class="textblock">Accepted configuration: </p>
+<div class="fragment"><pre class="fragment">        {
+                <span class="keyword">class             </span>= &quot;machine/pool&quot;,
+                config            = { ... },               <span class="comment">// hash with shop configuration</span>
+                size              = (uint_t)<span class="stringliteral">&quot;10&quot;</span>           <span class="comment">// initial pool size, default 1</span>
+        }
 </pre></div> </div></div><!-- contents -->
 
 

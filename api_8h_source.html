@@ -175,96 +175,97 @@
 <a name="l00232"></a>00232         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
 <a name="l00233"></a>00233         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *src;
 <a name="l00234"></a>00234         uintmax_t              format;
-<a name="l00235"></a>00235 };
-<a name="l00236"></a><a class="code" href="structfastcall__convert__to.html">00236</a> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a> {
-<a name="l00237"></a>00237         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00238"></a>00238         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *dest;
-<a name="l00239"></a>00239         uintmax_t              format;
-<a name="l00240"></a>00240         uintmax_t              transfered;
-<a name="l00241"></a>00241 };
-<a name="l00242"></a>00242 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a>    <a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a>;
-<a name="l00243"></a>00243 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a>  <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a>;
-<a name="l00244"></a>00244 
-<a name="l00245"></a><a class="code" href="structfastcall__compare.html">00245</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__compare.html">fastcall_compare</a> {
-<a name="l00246"></a>00246         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00247"></a>00247         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data2;
-<a name="l00248"></a>00248         uintmax_t              result; <span class="comment">// 0 - equal, 1 - data1 is less, 2 - data2 is less</span>
-<a name="l00249"></a>00249 } <a class="code" href="structfastcall__compare.html">fastcall_compare</a>;
-<a name="l00250"></a>00250 
-<a name="l00251"></a><a class="code" href="structfastcall__arith.html">00251</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a> {
-<a name="l00252"></a>00252         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00253"></a>00253         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data2;
-<a name="l00254"></a>00254 } <a class="code" href="structfastcall__arith.html">fastcall_arith</a>;
-<a name="l00255"></a>00255 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_add</a>;
-<a name="l00256"></a>00256 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_sub</a>;
-<a name="l00257"></a>00257 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_mul</a>;
-<a name="l00258"></a>00258 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_div</a>;
-<a name="l00259"></a>00259 
-<a name="l00260"></a><a class="code" href="structfastcall__arith__no__arg.html">00260</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> {
-<a name="l00261"></a>00261         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00262"></a>00262 } <a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a>;
-<a name="l00263"></a>00263 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> <a class="code" href="structfastcall__arith__no__arg.html">fastcall_increment</a>;
-<a name="l00264"></a>00264 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> <a class="code" href="structfastcall__arith__no__arg.html">fastcall_decrement</a>;
-<a name="l00265"></a>00265 
-<a name="l00266"></a><a class="code" href="structfastcall__getdataptr.html">00266</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__getdataptr.html">fastcall_getdataptr</a> {
-<a name="l00267"></a>00267         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00268"></a>00268         <span class="keywordtype">void</span>                  *ptr;
-<a name="l00269"></a>00269 } <a class="code" href="structfastcall__getdataptr.html">fastcall_getdataptr</a>;
-<a name="l00270"></a><a class="code" href="structfastcall__getdata.html">00270</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__getdata.html">fastcall_getdata</a> {
-<a name="l00271"></a>00271         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00272"></a>00272         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
-<a name="l00273"></a>00273 } <a class="code" href="structfastcall__getdata.html">fastcall_getdata</a>;
-<a name="l00274"></a>00274 
-<a name="l00275"></a><a class="code" href="structfastcall__is__null.html">00275</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__is__null.html">fastcall_is_null</a> {
-<a name="l00276"></a>00276         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00277"></a>00277         uintmax_t              is_null;
-<a name="l00278"></a>00278 } <a class="code" href="structfastcall__is__null.html">fastcall_is_null</a>;
-<a name="l00279"></a>00279 
-<a name="l00280"></a><a class="code" href="structfastcall__create.html">00280</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__create.html">fastcall_create</a> {
-<a name="l00281"></a>00281         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00282"></a>00282         uintmax_t              size;
-<a name="l00283"></a>00283         uintmax_t              offset;
-<a name="l00284"></a>00284 } <a class="code" href="structfastcall__create.html">fastcall_create</a>;
-<a name="l00285"></a>00285 
-<a name="l00286"></a><a class="code" href="structfastcall__delete.html">00286</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__delete.html">fastcall_delete</a> {
-<a name="l00287"></a>00287         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00288"></a>00288         uintmax_t              offset;
-<a name="l00289"></a>00289         uintmax_t              size;
-<a name="l00290"></a>00290 } <a class="code" href="structfastcall__delete.html">fastcall_delete</a>;
-<a name="l00291"></a>00291 
-<a name="l00292"></a><a class="code" href="structfastcall__count.html">00292</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__count.html">fastcall_count</a> {
-<a name="l00293"></a>00293         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00294"></a>00294         uintmax_t              nelements;
-<a name="l00295"></a>00295 } <a class="code" href="structfastcall__count.html">fastcall_count</a>;
-<a name="l00296"></a>00296 
-<a name="l00297"></a><a class="code" href="structfastcall__push.html">00297</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__push.html">fastcall_push</a> {
-<a name="l00298"></a>00298         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00299"></a>00299         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
-<a name="l00300"></a>00300 } <a class="code" href="structfastcall__push.html">fastcall_push</a>;
-<a name="l00301"></a>00301 
-<a name="l00302"></a><a class="code" href="structfastcall__pop.html">00302</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__pop.html">fastcall_pop</a> {
-<a name="l00303"></a>00303         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00304"></a>00304         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
-<a name="l00305"></a>00305 } <a class="code" href="structfastcall__pop.html">fastcall_pop</a>;
-<a name="l00306"></a>00306 
-<a name="l00307"></a><a class="code" href="structfastcall__enum.html">00307</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__enum.html">fastcall_enum</a> {
-<a name="l00308"></a>00308         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00309"></a>00309         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *dest;
-<a name="l00310"></a>00310 } <a class="code" href="structfastcall__enum.html">fastcall_enum</a>;
-<a name="l00311"></a>00311 
-<a name="l00312"></a><a class="code" href="structfastcall__query.html">00312</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__query.html">fastcall_query</a> {
-<a name="l00313"></a>00313         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
-<a name="l00314"></a>00314         <a class="code" href="structhash__t.html" title="Hash item.">request_t</a>             *request;
-<a name="l00315"></a>00315 } <a class="code" href="structfastcall__query.html">fastcall_query</a>;
-<a name="l00316"></a>00316 
-<a name="l00317"></a>00317 <span class="keyword">extern</span> uintmax_t fastcall_nargs[];
-<a name="l00318"></a>00318 
-<a name="l00319"></a>00319 ssize_t     data_hash_query(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
-<a name="l00320"></a>00320 ssize_t     machine_fast_query(<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine, <span class="keywordtype">void</span> *hargs);
-<a name="l00321"></a>00321 
-<a name="l00322"></a>00322 ssize_t     api_machine_nosys  (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
-<a name="l00323"></a>00323 ssize_t     api_data_nosys     (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structfastcall__header.html">fastcall_header</a> *hargs);
-<a name="l00324"></a>00324 <span class="preprocessor">#endif</span>
+<a name="l00235"></a>00235         uintmax_t              transfered;
+<a name="l00236"></a>00236 };
+<a name="l00237"></a><a class="code" href="structfastcall__convert__to.html">00237</a> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a> {
+<a name="l00238"></a>00238         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00239"></a>00239         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *dest;
+<a name="l00240"></a>00240         uintmax_t              format;
+<a name="l00241"></a>00241         uintmax_t              transfered;
+<a name="l00242"></a>00242 };
+<a name="l00243"></a>00243 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a>    <a class="code" href="structfastcall__convert__to.html">fastcall_convert_to</a>;
+<a name="l00244"></a>00244 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a>  <a class="code" href="structfastcall__convert__from.html">fastcall_convert_from</a>;
+<a name="l00245"></a>00245 
+<a name="l00246"></a><a class="code" href="structfastcall__compare.html">00246</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__compare.html">fastcall_compare</a> {
+<a name="l00247"></a>00247         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00248"></a>00248         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data2;
+<a name="l00249"></a>00249         uintmax_t              result; <span class="comment">// 0 - equal, 1 - data1 is less, 2 - data2 is less</span>
+<a name="l00250"></a>00250 } <a class="code" href="structfastcall__compare.html">fastcall_compare</a>;
+<a name="l00251"></a>00251 
+<a name="l00252"></a><a class="code" href="structfastcall__arith.html">00252</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a> {
+<a name="l00253"></a>00253         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00254"></a>00254         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data2;
+<a name="l00255"></a>00255 } <a class="code" href="structfastcall__arith.html">fastcall_arith</a>;
+<a name="l00256"></a>00256 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_add</a>;
+<a name="l00257"></a>00257 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_sub</a>;
+<a name="l00258"></a>00258 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_mul</a>;
+<a name="l00259"></a>00259 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith.html">fastcall_arith</a>  <a class="code" href="structfastcall__arith.html">fastcall_div</a>;
+<a name="l00260"></a>00260 
+<a name="l00261"></a><a class="code" href="structfastcall__arith__no__arg.html">00261</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> {
+<a name="l00262"></a>00262         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00263"></a>00263 } <a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a>;
+<a name="l00264"></a>00264 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> <a class="code" href="structfastcall__arith__no__arg.html">fastcall_increment</a>;
+<a name="l00265"></a>00265 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__arith__no__arg.html">fastcall_arith_no_arg</a> <a class="code" href="structfastcall__arith__no__arg.html">fastcall_decrement</a>;
+<a name="l00266"></a>00266 
+<a name="l00267"></a><a class="code" href="structfastcall__getdataptr.html">00267</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__getdataptr.html">fastcall_getdataptr</a> {
+<a name="l00268"></a>00268         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00269"></a>00269         <span class="keywordtype">void</span>                  *ptr;
+<a name="l00270"></a>00270 } <a class="code" href="structfastcall__getdataptr.html">fastcall_getdataptr</a>;
+<a name="l00271"></a><a class="code" href="structfastcall__getdata.html">00271</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__getdata.html">fastcall_getdata</a> {
+<a name="l00272"></a>00272         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00273"></a>00273         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00274"></a>00274 } <a class="code" href="structfastcall__getdata.html">fastcall_getdata</a>;
+<a name="l00275"></a>00275 
+<a name="l00276"></a><a class="code" href="structfastcall__is__null.html">00276</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__is__null.html">fastcall_is_null</a> {
+<a name="l00277"></a>00277         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00278"></a>00278         uintmax_t              is_null;
+<a name="l00279"></a>00279 } <a class="code" href="structfastcall__is__null.html">fastcall_is_null</a>;
+<a name="l00280"></a>00280 
+<a name="l00281"></a><a class="code" href="structfastcall__create.html">00281</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__create.html">fastcall_create</a> {
+<a name="l00282"></a>00282         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00283"></a>00283         uintmax_t              size;
+<a name="l00284"></a>00284         uintmax_t              offset;
+<a name="l00285"></a>00285 } <a class="code" href="structfastcall__create.html">fastcall_create</a>;
+<a name="l00286"></a>00286 
+<a name="l00287"></a><a class="code" href="structfastcall__delete.html">00287</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__delete.html">fastcall_delete</a> {
+<a name="l00288"></a>00288         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00289"></a>00289         uintmax_t              offset;
+<a name="l00290"></a>00290         uintmax_t              size;
+<a name="l00291"></a>00291 } <a class="code" href="structfastcall__delete.html">fastcall_delete</a>;
+<a name="l00292"></a>00292 
+<a name="l00293"></a><a class="code" href="structfastcall__count.html">00293</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__count.html">fastcall_count</a> {
+<a name="l00294"></a>00294         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00295"></a>00295         uintmax_t              nelements;
+<a name="l00296"></a>00296 } <a class="code" href="structfastcall__count.html">fastcall_count</a>;
+<a name="l00297"></a>00297 
+<a name="l00298"></a><a class="code" href="structfastcall__push.html">00298</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__push.html">fastcall_push</a> {
+<a name="l00299"></a>00299         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00300"></a>00300         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00301"></a>00301 } <a class="code" href="structfastcall__push.html">fastcall_push</a>;
+<a name="l00302"></a>00302 
+<a name="l00303"></a><a class="code" href="structfastcall__pop.html">00303</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__pop.html">fastcall_pop</a> {
+<a name="l00304"></a>00304         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00305"></a>00305         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00306"></a>00306 } <a class="code" href="structfastcall__pop.html">fastcall_pop</a>;
+<a name="l00307"></a>00307 
+<a name="l00308"></a><a class="code" href="structfastcall__enum.html">00308</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__enum.html">fastcall_enum</a> {
+<a name="l00309"></a>00309         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00310"></a>00310         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *dest;
+<a name="l00311"></a>00311 } <a class="code" href="structfastcall__enum.html">fastcall_enum</a>;
+<a name="l00312"></a>00312 
+<a name="l00313"></a><a class="code" href="structfastcall__query.html">00313</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structfastcall__query.html">fastcall_query</a> {
+<a name="l00314"></a>00314         <a class="code" href="structfastcall__header.html">fastcall_header</a>        header;
+<a name="l00315"></a>00315         <a class="code" href="structhash__t.html" title="Hash item.">request_t</a>             *request;
+<a name="l00316"></a>00316 } <a class="code" href="structfastcall__query.html">fastcall_query</a>;
+<a name="l00317"></a>00317 
+<a name="l00318"></a>00318 <span class="keyword">extern</span> uintmax_t fastcall_nargs[];
+<a name="l00319"></a>00319 
+<a name="l00320"></a>00320 ssize_t     data_hash_query(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
+<a name="l00321"></a>00321 ssize_t     machine_fast_query(<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine, <span class="keywordtype">void</span> *hargs);
+<a name="l00322"></a>00322 
+<a name="l00323"></a>00323 ssize_t     api_machine_nosys  (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a> *machine, <a class="code" href="structhash__t.html" title="Hash item.">request_t</a> *request);
+<a name="l00324"></a>00324 ssize_t     api_data_nosys     (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structfastcall__header.html">fastcall_header</a> *hargs);
+<a name="l00325"></a>00325 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

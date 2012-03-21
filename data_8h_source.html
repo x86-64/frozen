@@ -157,7 +157,7 @@
 <a name="l00245"></a>00245 <span class="preprocessor"></span>
 <a name="l00255"></a>00255 <span class="preprocessor">#define data_convert(_ret, _type, _dst, _src) {                                          \</span>
 <a name="l00256"></a>00256 <span class="preprocessor">        data_t __data_dst = { _type, REF_##_type(_dst) };                                \</span>
-<a name="l00257"></a>00257 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 4, ACTION_CONVERT_FROM }, _src, FORMAT(native) };  \</span>
+<a name="l00257"></a>00257 <span class="preprocessor">        fastcall_convert_from _r_convert = { { 5, ACTION_CONVERT_FROM }, _src, FORMAT(native) };  \</span>
 <a name="l00258"></a>00258 <span class="preprocessor">        _ret = data_query(&amp;__data_dst, &amp;_r_convert);                                     \</span>
 <a name="l00259"></a>00259 <span class="preprocessor">        _dst = DEREF_##_type(&amp;__data_dst);                                               \</span>
 <a name="l00260"></a>00260 <span class="preprocessor">        (void)_ret;                                                                      \</span>
