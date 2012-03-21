@@ -1,6 +1,6 @@
 * flow-based architecture for machine, request-based architecture for data:
   - machine/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
-  - machine/pool: pool get parameter not flow-based (not important for now, another approach?)
+  - machine/limit: limit get parameter not flow-based (not important for now, another approach?)
 
 * m4 macro collection
   - write m4 macro for balancer machine
@@ -12,7 +12,7 @@
 - machine/rebuild deprecate?
 - portable action_t packed format
 - machine rate-limit, delay
-- benchmark functions remove from main request flow, need new approach for machine parameters, for machine/pool too
+- benchmark functions remove from main request flow, need new approach for machine parameters, for machine/limit too
 - netstring_t parse (get code from mongrel for parsing)
 - rewrite mongrel send\parse routines to use netstring_t, container_t types
 - cache, append only cache
@@ -28,7 +28,7 @@
 
 - document data packing abillity: uint_t, list_t, hash_t is packable, container_t depend on data in it, raw_t not packable
 - review code for multi-threading support, document machine's thread-safety capabilities
-- machine thread_pool
+- machine/pool
 - data perthread_t wrapper
 - data queue_t
 - machine multi_request

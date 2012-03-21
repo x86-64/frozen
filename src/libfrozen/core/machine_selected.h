@@ -24,8 +24,8 @@ extern machine_t tcp_proto;
 extern machine_t tcp_child_proto;
 extern machine_t benchmark_proto;
 extern machine_t factory_proto;
+extern machine_t limit_proto;
 extern machine_t morph_proto;
-extern machine_t pool_proto;
 extern machine_t rebuild_monitor_proto;
 extern machine_t rebuild_reader_proto;
 extern machine_t rebuild_writer_proto;
@@ -65,8 +65,8 @@ machine_t * machine_protos[] = {
    &tcp_child_proto,
    &benchmark_proto,
    &factory_proto,
+   &limit_proto,
    &morph_proto,
-   &pool_proto,
    &rebuild_monitor_proto,
    &rebuild_reader_proto,
    &rebuild_writer_proto,

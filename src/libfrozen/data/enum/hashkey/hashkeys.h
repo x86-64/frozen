@@ -77,6 +77,7 @@
 #define HK_VALUE_key4 2432
 #define HK_VALUE_lazy 3530
 #define HK_VALUE_length 9794
+#define HK_VALUE_limit_interval 109537
 #define HK_VALUE_linger 9795
 #define HK_VALUE_loop 3343
 #define HK_VALUE_machine 14586
@@ -108,7 +109,6 @@
 #define HK_VALUE_path 3208
 #define HK_VALUE_paused 9518
 #define HK_VALUE_perlevel 21904
-#define HK_VALUE_pool_interval 88331
 #define HK_VALUE_port 3438
 #define HK_VALUE_rate 3162
 #define HK_VALUE_rcvbuf_size 54678
@@ -241,6 +241,7 @@ typedef enum hashkey_t {
       HK_key4 = HK_VALUE_key4, 
       HK_lazy = HK_VALUE_lazy, 
       HK_length = HK_VALUE_length, 
+      HK_limit_interval = HK_VALUE_limit_interval, 
       HK_linger = HK_VALUE_linger, 
       HK_loop = HK_VALUE_loop, 
       HK_machine = HK_VALUE_machine, 
@@ -272,7 +273,6 @@ typedef enum hashkey_t {
       HK_path = HK_VALUE_path, 
       HK_paused = HK_VALUE_paused, 
       HK_perlevel = HK_VALUE_perlevel, 
-      HK_pool_interval = HK_VALUE_pool_interval, 
       HK_port = HK_VALUE_port, 
       HK_rate = HK_VALUE_rate, 
       HK_rcvbuf_size = HK_VALUE_rcvbuf_size, 
@@ -409,6 +409,7 @@ keypair_t hashkeys[] = {
       { "key4", HK_VALUE_key4 }, 
       { "lazy", HK_VALUE_lazy }, 
       { "length", HK_VALUE_length }, 
+      { "limit_interval", HK_VALUE_limit_interval }, 
       { "linger", HK_VALUE_linger }, 
       { "loop", HK_VALUE_loop }, 
       { "machine", HK_VALUE_machine }, 
@@ -440,7 +441,6 @@ keypair_t hashkeys[] = {
       { "path", HK_VALUE_path }, 
       { "paused", HK_VALUE_paused }, 
       { "perlevel", HK_VALUE_perlevel }, 
-      { "pool_interval", HK_VALUE_pool_interval }, 
       { "port", HK_VALUE_port }, 
       { "rate", HK_VALUE_rate }, 
       { "rcvbuf_size", HK_VALUE_rcvbuf_size }, 

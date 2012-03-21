@@ -4,20 +4,20 @@
 
 /**
  * @ingroup machine
- * @addtogroup mod_pool machine/pool
+ * @addtogroup mod_machine_limit machine/limit
  *
- * Pool module inserted in forkable machine shop can track any property of machine (like memory usage)
+ * This module inserted in shop can track any property of machine (like memory usage)
  * and limit it. Underlying modules can be destroyed or call special function.
  *
  */
 /**
- * @ingroup mod_pool
- * @page page_pool_config Configuration
+ * @ingroup mod_machine_limit
+ * @page page_limit_config Configuration
  * 
  * Accepted configuration:
  * @code
  * 	{
- * 	        class             = "pool",
+ * 	        class             = "machine/limit",
  * 	        parameter         =                    # Step 1: how <parameter> value will be obtained:
  * 	                            "ticks",           #  - <parameter> is ticks collected in last <ticks_interval> seconds, default
  * 	                            "request",         #  - send <parameter_request> + HK(buffer) -> (uint_t).
@@ -49,13 +49,13 @@
  *              action_request_perfork = { ... }       # override for _perfork limits
  *              action_request_global  = { ... }       # override for _global limits
  *              
- *              pool_interval     = (uint_t)'5'        # see below. This parameter is global,
+ *              limit_interval     = (uint_t)'5'        # see below. This parameter is global,
  *                                                       newly created machines overwrite it
  *              tick_interval     = (uint_t)'5'        # see below.
  * 	}
  *
  * Limit behavior:
- *   - Limit checked ones per <pool_interval> (default 5 seconds). Between two checks machines can overconsume limit, but this method
+ *   - Limit checked ones per <limit_interval> (default 5 seconds). Between two checks machines can overconsume limit, but this method
  *     will have less performance loss.
  *   - Ticks collected in <tick_interval> period. One tick is one passed request.
  *
@@ -63,7 +63,7 @@
  */
 
 #define ERRORS_MODULE_ID 15
-#define ERRORS_MODULE_NAME "machine/pool"
+#define ERRORS_MODULE_NAME "machine/limit"
 #define POOL_INTERVAL_DEFAULT 5
 #define TICK_INTERVAL_DEFAULT 5
 
@@ -99,7 +99,7 @@ typedef struct rule {
 	request_t       *action_request;
 } rule;
 
-typedef struct pool_userdata {
+typedef struct limit_userdata {
 	// usage params
 	uintmax_t        created_on;
 	uintmax_t        usage_parameter;
@@ -118,9 +118,9 @@ typedef struct pool_userdata {
 	rule             rule_one;
 	rule             rule_perfork;
 	rule             rule_global;
-} pool_userdata;
+} limit_userdata;
 
-static uintmax_t        pool_interval          = POOL_INTERVAL_DEFAULT;
+static uintmax_t        limit_interval          = POOL_INTERVAL_DEFAULT;
 static uintmax_t        running_pools          = 0;
 static pthread_mutex_t  running_pools_mtx      = PTHREAD_MUTEX_INITIALIZER;
 static pthread_t        main_thread;
@@ -128,10 +128,10 @@ static list             watch_one;
 static list             watch_perfork;
 static list             watch_global;
 
-static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *request);
-static ssize_t pool_machine_request_died(machine_t *machine, request_t *request);
+static ssize_t limit_machine_request_cticks(machine_t *machine, request_t *request);
+static ssize_t limit_machine_request_died(machine_t *machine, request_t *request);
 
-static parameter_method  pool_string_to_parameter(char *string){ // {{{
+static parameter_method  limit_string_to_parameter(char *string){ // {{{
 	if(string != NULL){
 		if(strcasecmp(string, "request") == 0)        return PARAMETER_REQUEST;
 		if(strcasecmp(string, "ticks") == 0)          return PARAMETER_TICKS;
@@ -139,7 +139,7 @@ static parameter_method  pool_string_to_parameter(char *string){ // {{{
 	}
 	return PARAMETER_DEFAULT;
 } // }}}
-static choose_method     pool_string_to_method(char *string){ // {{{
+static choose_method     limit_string_to_method(char *string){ // {{{
 	if(string != NULL){
 		if(strcasecmp(string, "random") == 0)        return METHOD_RANDOM;
 		if(strcasecmp(string, "first") == 0)         return METHOD_FIRST;
@@ -149,7 +149,7 @@ static choose_method     pool_string_to_method(char *string){ // {{{
 	}
 	return METHOD_DEFAULT;
 } // }}}
-static action_method     pool_string_to_action(char *string){ // {{{
+static action_method     limit_string_to_action(char *string){ // {{{
 	if(string != NULL){
 		if(strcasecmp(string, "destroy") == 0) return ACTION_DESTROY;
 		if(strcasecmp(string, "request") == 0) return ACTION_REQUEST;
@@ -157,12 +157,12 @@ static action_method     pool_string_to_action(char *string){ // {{{
 	return ACTION_DEFAULT;
 } // }}}
 
-static void pool_set_handler(machine_t *machine, f_hash func){ // {{{
+static void limit_set_handler(machine_t *machine, f_hash func){ // {{{
 	machine->machine_type_hash.func_handler = func;
 } // }}}
-uintmax_t   pool_parameter_get(machine_t *machine, pool_userdata *userdata){ // {{{
+uintmax_t   limit_parameter_get(machine_t *machine, limit_userdata *userdata){ // {{{
 	switch(userdata->parameter){
-		case PARAMETER_ONE:   return (machine->machine_type_hash.func_handler == &pool_machine_request_died) ? 0 : 1;
+		case PARAMETER_ONE:   return (machine->machine_type_hash.func_handler == &limit_machine_request_died) ? 0 : 1;
 		case PARAMETER_TICKS: return userdata->usage_ticks_last;
 		case PARAMETER_REQUEST:;
 			uintmax_t buffer    = 0;
@@ -178,13 +178,13 @@ uintmax_t   pool_parameter_get(machine_t *machine, pool_userdata *userdata){ // 
 	};
 	return 0;
 } // }}}
-void        pool_machine_action(machine_t *machine, rule *rule){ // {{{
-	pool_userdata        *userdata          = (pool_userdata *)machine->userdata;
+void        limit_machine_action(machine_t *machine, rule *rule){ // {{{
+	limit_userdata        *userdata          = (limit_userdata *)machine->userdata;
 	
 	switch(rule->action){
 		case ACTION_DESTROY:;
 			// set machine mode to died
-			pool_set_handler(machine, &pool_machine_request_died);
+			limit_set_handler(machine, &limit_machine_request_died);
 			
 			if(userdata->perfork_childs != &userdata->perfork_childs_own){
 				// kill childs for forked shops, keep for initial
@@ -200,14 +200,14 @@ void        pool_machine_action(machine_t *machine, rule *rule){ // {{{
 	};
 	
 	// update parameter
-	userdata->usage_parameter = pool_parameter_get(machine, userdata);
+	userdata->usage_parameter = limit_parameter_get(machine, userdata);
 } // }}}
-void        pool_group_limit(list *machines, rule *rule, uintmax_t need_lock){ // {{{
+void        limit_group_limit(list *machines, rule *rule, uintmax_t need_lock){ // {{{
 	uintmax_t              i, lsz;
 	uintmax_t              parameter;
 	uintmax_t              parameter_group;
 	machine_t             *machine;
-	pool_userdata         *machine_ud;
+	limit_userdata         *machine_ud;
 	machine_t            **lchilds;
 	
 	if(rule->limit == __MAX(uintmax_t)) // no limits
@@ -229,25 +229,25 @@ repeat:;
 			
 			for(i=0; i<lsz; i++){
 				machine    = lchilds[i];
-				machine_ud = (pool_userdata *)machine->userdata;
+				machine_ud = (limit_userdata *)machine->userdata;
 				
 				if( (parameter = machine_ud->usage_parameter) == 0)
 					continue;
 				
 				parameter_group += parameter;
 				
-				#define pool_kill_check(_machine, _field, _moreless) { \
+				#define limit_kill_check(_machine, _field, _moreless) { \
 					if(_machine == NULL){ \
 						_machine = machine; \
 					}else{ \
-						if(machine_ud->_field _moreless ((pool_userdata *)_machine->userdata)->_field) \
+						if(machine_ud->_field _moreless ((limit_userdata *)_machine->userdata)->_field) \
 							_machine = machine; \
 					} \
 				}
-				pool_kill_check(machine_first,      created_on,       <);
-				pool_kill_check(machine_last,       created_on,       >);
-				pool_kill_check(machine_low,        usage_parameter,  <);
-				pool_kill_check(machine_high,       usage_parameter,  >);
+				limit_kill_check(machine_first,      created_on,       <);
+				limit_kill_check(machine_last,       created_on,       >);
+				limit_kill_check(machine_low,        usage_parameter,  <);
+				limit_kill_check(machine_high,       usage_parameter,  >);
 			}
 			
 			if(parameter_group >= rule->limit){
@@ -260,7 +260,7 @@ repeat:;
 					default:                    machine = NULL; break;
 				};
 				if(machine != NULL){
-					pool_machine_action(machine, rule);
+					limit_machine_action(machine, rule);
 					goto repeat;
 				}
 			}
@@ -270,22 +270,22 @@ repeat:;
 	
 	return;
 } // }}}
-void *      pool_main_thread(void *null){ // {{{
+void *      limit_main_thread(void *null){ // {{{
 	void                  *iter;
 	machine_t             *machine;
-	pool_userdata         *machine_ud;
+	limit_userdata         *machine_ud;
 	
 	while(1){
 		// update parameter + limit one
 		list_rdlock(&watch_one);
 			iter = NULL;
 			while( (machine = list_iter_next(&watch_one, &iter)) != NULL){
-				machine_ud = (pool_userdata *)machine->userdata;
+				machine_ud = (limit_userdata *)machine->userdata;
 				
-				machine_ud->usage_parameter = pool_parameter_get(machine, machine_ud);
+				machine_ud->usage_parameter = limit_parameter_get(machine, machine_ud);
 				
 				if(machine_ud->usage_parameter > machine_ud->rule_one.limit)
-					pool_machine_action(machine, &machine_ud->rule_one);
+					limit_machine_action(machine, &machine_ud->rule_one);
 			}
 		list_unlock(&watch_one);
 		
@@ -293,9 +293,9 @@ void *      pool_main_thread(void *null){ // {{{
 		list_rdlock(&watch_perfork);
 			iter = NULL;
 			while( (machine = list_iter_next(&watch_perfork, &iter)) != NULL){
-				machine_ud = (pool_userdata *)machine->userdata;
+				machine_ud = (limit_userdata *)machine->userdata;
 				
-				pool_group_limit(machine_ud->perfork_childs, &machine_ud->rule_perfork, 1);
+				limit_group_limit(machine_ud->perfork_childs, &machine_ud->rule_perfork, 1);
 			}
 		list_unlock(&watch_perfork);
 		
@@ -303,20 +303,20 @@ void *      pool_main_thread(void *null){ // {{{
 		list_rdlock(&watch_global);
 			iter = NULL;
 			while( (machine = list_iter_next(&watch_global, &iter)) != NULL){
-				machine_ud = (pool_userdata *)machine->userdata;
+				machine_ud = (limit_userdata *)machine->userdata;
 				
-				pool_group_limit(&watch_global, &machine_ud->rule_global, 0);
+				limit_group_limit(&watch_global, &machine_ud->rule_global, 0);
 			}
 		list_unlock(&watch_global);
 		
-		sleep(pool_interval);
+		sleep(limit_interval);
 	};
 	return NULL;
 } // }}}
 
-static ssize_t pool_init(machine_t *machine){ // {{{
+static ssize_t limit_init(machine_t *machine){ // {{{
 	ssize_t                ret               = 0;
-	pool_userdata         *userdata          = machine->userdata = calloc(1, sizeof(pool_userdata));
+	limit_userdata         *userdata          = machine->userdata = calloc(1, sizeof(limit_userdata));
 	if(userdata == NULL)
 		return error("calloc failed");
 	
@@ -327,17 +327,17 @@ static ssize_t pool_init(machine_t *machine){ // {{{
 			list_init(&watch_perfork);
 			list_init(&watch_global);
 			
-			if(pthread_create(&main_thread, NULL, &pool_main_thread, NULL) != 0)
+			if(pthread_create(&main_thread, NULL, &limit_main_thread, NULL) != 0)
 				ret = error("pthread_create failed");
 		}
 	pthread_mutex_unlock(&running_pools_mtx);
 	
 	return ret;
 } // }}}
-static ssize_t pool_destroy(machine_t *machine){ // {{{
+static ssize_t limit_destroy(machine_t *machine){ // {{{
 	void                  *res;
 	ssize_t                ret               = 0;
-	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
+	limit_userdata         *userdata          = (limit_userdata *)machine->userdata;
 	
 	if(userdata->perfork_childs == &userdata->perfork_childs_own){
 		list_destroy(&userdata->perfork_childs_own);
@@ -375,7 +375,7 @@ exit:
 	
 	return ret;
 } // }}}
-static ssize_t pool_configure_any(machine_t *machine, machine_t *parent, config_t *config){ // {{{
+static ssize_t limit_configure_any(machine_t *machine, machine_t *parent, config_t *config){ // {{{
 	ssize_t                ret;
 	uintmax_t              cfg_limit_one     = __MAX(uintmax_t);
 	uintmax_t              cfg_limit_fork    = __MAX(uintmax_t);
@@ -395,7 +395,7 @@ static ssize_t pool_configure_any(machine_t *machine, machine_t *parent, config_
 	hash_t                *cfg_act_req_frk;
 	hash_t                *cfg_act_req_glb;
 	hash_t                *cfg_param_req     = cfg_act_req_def;
-	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
+	limit_userdata         *userdata          = (limit_userdata *)machine->userdata;
 	
 	hash_data_get(ret, TYPE_STRINGT, cfg_parameter,    config, HK(parameter));
 	hash_data_get(ret, TYPE_STRINGT, cfg_mode_perfork, config, HK(mode_perfork));
@@ -422,17 +422,17 @@ static ssize_t pool_configure_any(machine_t *machine, machine_t *parent, config_
 	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req_frk,  config, HK(action_request_perfork));
 	hash_data_consume(ret, TYPE_HASHT,   cfg_act_req_glb,  config, HK(action_request_global));
 	
-	hash_data_get(ret, TYPE_UINTT,   cfg_pool,         config, HK(pool_interval));
+	hash_data_get(ret, TYPE_UINTT,   cfg_pool,         config, HK(limit_interval));
 	if(ret != 0)
-		pool_interval = cfg_pool;
+		limit_interval = cfg_pool;
 	
-	userdata->parameter                   = pool_string_to_parameter(cfg_parameter);
+	userdata->parameter                   = limit_string_to_parameter(cfg_parameter);
 	userdata->parameter_request           = cfg_param_req ? cfg_param_req : hash_copy(cfg_act_req_def);
-	userdata->rule_perfork.mode           = pool_string_to_method(cfg_mode_perfork);
-	userdata->rule_global.mode            = pool_string_to_method(cfg_mode_global);
-	userdata->rule_one.action             = pool_string_to_action(cfg_act_perfork);
-	userdata->rule_perfork.action         = pool_string_to_action(cfg_act_perfork);
-	userdata->rule_global.action          = pool_string_to_action(cfg_act_global);
+	userdata->rule_perfork.mode           = limit_string_to_method(cfg_mode_perfork);
+	userdata->rule_global.mode            = limit_string_to_method(cfg_mode_global);
+	userdata->rule_one.action             = limit_string_to_action(cfg_act_perfork);
+	userdata->rule_perfork.action         = limit_string_to_action(cfg_act_perfork);
+	userdata->rule_global.action          = limit_string_to_action(cfg_act_global);
 	userdata->rule_one.action_request     = cfg_act_req_one;
 	userdata->rule_perfork.action_request = cfg_act_req_frk;
 	userdata->rule_global.action_request  = cfg_act_req_glb;
@@ -454,26 +454,26 @@ static ssize_t pool_configure_any(machine_t *machine, machine_t *parent, config_
 		list_add(&watch_global,  machine);
 	
 	if(userdata->parameter == PARAMETER_TICKS){
-		pool_set_handler(machine, &pool_machine_request_cticks);
+		limit_set_handler(machine, &limit_machine_request_cticks);
 	}else{
-		pool_set_handler(machine, NULL);
+		limit_set_handler(machine, NULL);
 	}
 	
 	return 0;
 } // }}}
-static ssize_t pool_configure(machine_t *machine, config_t *config){ // {{{
-	pool_userdata        *userdata          = (pool_userdata *)machine->userdata;
+static ssize_t limit_configure(machine_t *machine, config_t *config){ // {{{
+	limit_userdata        *userdata          = (limit_userdata *)machine->userdata;
 	
 	// no fork, so use own data
 	userdata->perfork_childs       = &userdata->perfork_childs_own;
 	list_init(&userdata->perfork_childs_own);
 	
-	return pool_configure_any(machine, NULL, config);
+	return limit_configure_any(machine, NULL, config);
 } // }}}
 
-static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *request){ // {{{
+static ssize_t limit_machine_request_cticks(machine_t *machine, request_t *request){ // {{{
 	uintmax_t              time_curr;
-	pool_userdata         *userdata = (pool_userdata *)machine->userdata;
+	limit_userdata         *userdata = (limit_userdata *)machine->userdata;
 	
 	// update usage ticks
 	
@@ -487,15 +487,15 @@ static ssize_t pool_machine_request_cticks(machine_t *machine, request_t *reques
 	
 	return machine_pass(machine, request);
 } // }}}
-static ssize_t pool_machine_request_died(machine_t *machine, request_t *request){ // {{{
+static ssize_t limit_machine_request_died(machine_t *machine, request_t *request){ // {{{
 	return errorn(EBADF);
 } // }}}
 
-machine_t pool_proto = {
-	.class          = "machine/pool",
+machine_t limit_proto = {
+	.class          = "machine/limit",
 	.supported_api  = API_HASH,
-	.func_init      = &pool_init,
-	.func_configure = &pool_configure,
-	.func_destroy   = &pool_destroy
+	.func_init      = &limit_init,
+	.func_configure = &limit_configure,
+	.func_destroy   = &limit_destroy
 };
 
