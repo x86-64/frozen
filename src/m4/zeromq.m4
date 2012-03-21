@@ -18,6 +18,24 @@ define(`ZEROMQ_SERVICE', dnl ZEROMQ_SERVICE(service_name, host, port, hwm)
 	')
 ')
 
+define(`ZEROMQ_QUEUE', dnl ZEROMQ_QUEUE(queue_name, hwm)
+`
+	define($1`_bind',
+	`
+		bind = "ipc://$2"
+		ifelse($3, `', `',
+			`, hwm  = (uint64_t)"$3"'
+		)
+	')
+	define($1`_connect',
+	`
+		connect = "ipc://$2"
+		ifelse($3, `', `',
+			`, hwm  = (uint64_t)"$3"'
+		)
+	')
+')
+
 define(`ZEROMQ_SOCKET', dnl ZEROMQ_SOCKET(type, sevice_name)
 `(zeromq_t){
 	type    = "$1",
@@ -83,7 +101,7 @@ define(`ZEROMQ_HASH_REP', dnl ZEROMQ_HASH_REP(service_name, shop_name)
 	}
 ')
 
-define(`ZEROMQ_HASH_PUSH', dnl ZEROMQ_HASH_PUSH(service_name, buffer_hashkey)
+define(`ZEROMQ_HASH_PUSH', dnl ZEROMQ_HASH_PUSH(service_name, hash)
 `
 	{ class = "query",
 		request = {
