@@ -7,7 +7,6 @@
   - index + file_t as store macro set
 
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
-- pcre_t compare func
 - machine 'exec'
 - machine/rebuild deprecate?
 - portable action_t packed format

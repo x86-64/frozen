@@ -162,6 +162,38 @@ exit:;
 	data_free(&freeit);
 	return ret;
 } // }}}
+static ssize_t data_pcre_t_compare(data_t *data, fastcall_compare *fargs){ // {{{
+	ssize_t                ret;
+	int                    ovector[1 * 3];
+	void                  *data_ptr;
+	uintmax_t              data_size;
+	data_t                 freeit;
+	pcre_t                *fdata             = (pcre_t *)data->ptr;
+	
+	if(fargs->data2 == NULL)
+		return errorn(ENOSYS);
+	
+	if( (ret = data_make_flat(fargs->data2, FORMAT(native), &freeit, &data_ptr, &data_size)) < 0){
+		data_free(&freeit);
+		return ret;
+	}
+	
+	if(pcre_exec(
+		fdata->re, NULL,
+		data_ptr, data_size,
+		0,
+		fdata->options,
+		ovector,
+		(sizeof(ovector) / sizeof(ovector[0]))
+	) < 0){
+		fargs->result = 1; // not match
+	}else{
+		fargs->result = 0; // match
+	}
+	
+	data_free(&freeit);
+	return 0;
+} // }}}
 
 data_proto_t pcre_t_proto = {
 	.type_str               = PCRET_NAME,
@@ -169,7 +201,7 @@ data_proto_t pcre_t_proto = {
 	.handlers               = {
 		[ACTION_ALLOC]          = (f_data_func)&data_pcre_t_nosys,
 		[ACTION_LENGTH]         = (f_data_func)&data_pcre_t_nosys,
-		[ACTION_COMPARE]        = (f_data_func)&data_pcre_t_nosys,
+		[ACTION_COMPARE]        = (f_data_func)&data_pcre_t_compare,
 		[ACTION_CONVERT_FROM]   = (f_data_func)&data_pcre_t_convert_from,
 		[ACTION_FREE]           = (f_data_func)&data_pcre_t_free,
 		[ACTION_ENUM]           = (f_data_func)&data_pcre_t_enum,
