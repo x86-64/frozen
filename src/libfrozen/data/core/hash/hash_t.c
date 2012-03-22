@@ -252,7 +252,7 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		
 		// read key
 		if( (ret = data_query(&d_key, &r_convert)) < 0)
-			return ret;
+			break;
 		
 		data_slider_t_set_offset(&sl_src, r_convert.transfered, SEEK_CUR);
 		
@@ -269,7 +269,9 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 			data_set_void(&curr->data);
 		}
 		
-		ret = data_query(&d_data, &r_convert);
+		if( (ret = data_query(&d_data, &r_convert)) < 0)
+			break;
+		
 		data_slider_t_set_offset(&sl_src, r_convert.transfered, SEEK_CUR);
 		
 		if(curr->key == hash_ptr_end)
