@@ -2,10 +2,9 @@
   - machine/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
   - machine/limit: limit get parameter not flow-based (not important for now, another approach?)
 
-* m4 macro collection
-  - write m4 macro for balancer machine
-  - index + file_t as store macro set
-
+- action LOOKUP
+- unique_t key parameter. using LOOKUP action compare two items
+- data hash_internal_t - portable_hash wrapper
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
 - machine 'exec'
 - machine/rebuild deprecate?
