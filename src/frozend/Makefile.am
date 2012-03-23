@@ -9,8 +9,6 @@ frozend_LDADD   = $(top_srcdir)/src/libfrozen/libfrozen.la $(OPTIONAL)
 
 frozend.c: paths.h
 paths.h: paths.h.in
-	cat paths.h.in > $@
-	sed "s#%modulesdir%#$(modulesdir)#g" -i $@
-	sed "s#%m4sdir%#$(m4sdir)#g" -i $@
+	cat paths.h.in | sed "s#%modulesdir%#${modulesdir}#g" | sed "s#%m4sdir%#${m4sdir}#g" > $@
 
 CLEANFILES=paths.h

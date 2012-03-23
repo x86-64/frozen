@@ -638,9 +638,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 frozend.c: paths.h
 paths.h: paths.h.in
-	cat paths.h.in > $@
-	sed "s#%modulesdir%#$(modulesdir)#g" -i $@
-	sed "s#%m4sdir%#$(m4sdir)#g" -i $@
+	cat paths.h.in | sed "s#%modulesdir%#${modulesdir}#g" | sed "s#%m4sdir%#${m4sdir}#g" > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
