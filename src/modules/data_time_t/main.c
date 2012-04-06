@@ -122,7 +122,6 @@ static ssize_t data_timestamp_t_convert_to(data_t *src, fastcall_convert_to *far
 	switch( fargs->format ){
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fdata->time = 0;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &fdata->time, sizeof(fdata->time) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
