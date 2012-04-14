@@ -21,6 +21,7 @@
 
 typedef struct timestamp_t {
 	time_t                 time;
+	uintmax_t              now;
 } timestamp_t;
 
 #endif

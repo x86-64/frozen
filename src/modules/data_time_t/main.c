@@ -15,13 +15,20 @@ static char           *time_formats[] = {
 	"%s",                                  // UNIX timestamp
 };
 
-static ssize_t timestamp_from_string(time_t *ptime, char *string, uintmax_t string_size){ // {{{
+static ssize_t timestamp_from_string(timestamp_t *ptime, char *string, uintmax_t string_size){ // {{{
 	uintmax_t              i;
 	struct tm              timetm            = { 0 };
 	
+	if(strncasecmp("now", string, string_size) == 0){
+		ptime->time = 0;
+		ptime->now  = 1;
+		return 0;
+	}
+
 	for(i=0; i<sizeof(time_formats)/sizeof(time_formats[0]); i++){
 		if(strptime(string, time_formats[i], &timetm) != NULL){
-			*ptime = mktime(&timetm);
+			ptime->time = mktime(&timetm);
+			ptime->now  = 0;
 			return 0;
 		}
 	}
@@ -58,6 +65,12 @@ static ssize_t timestamp_to_string(time_t time, char *string, size_t *string_siz
 	}
 	return -ENOSYS;
 } // }}}
+static time_t  timestamp_gettime(timestamp_t *timestamp){ // {{{
+	if(timestamp->now == 1)
+		return time(NULL);
+	
+	return timestamp->time;
+} // }}}
 
 static ssize_t data_timestamp_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	if(fargs->format == FORMAT(packed)){
@@ -78,8 +91,8 @@ static ssize_t data_timestamp_t_compare(data_t *data1, fastcall_compare *fargs){
 	if(fargs->data2 == NULL || fargs->data2->type != TYPE_TIMESTAMPT || fargs->data2->ptr == NULL)
 		return -EINVAL;
 	
-	data1_val = ((timestamp_t *)(data1->ptr))->time;
-	data2_val = ((timestamp_t *)(fargs->data2->ptr))->time;
+	data1_val = timestamp_gettime((timestamp_t *)(data1->ptr));
+	data2_val = timestamp_gettime((timestamp_t *)(fargs->data2->ptr));
 	
 	      if(data1_val == data2_val){ cret = 0;
 	}else if(data1_val  < data2_val){ cret = 1;
@@ -90,7 +103,7 @@ static ssize_t data_timestamp_t_compare(data_t *data1, fastcall_compare *fargs){
 static ssize_t data_timestamp_t_arith_no_arg(data_t *data, fastcall_arith_no_arg *fargs){ // {{{
 	ssize_t                ret               = 0;
 	timestamp_t           *fdata             = (timestamp_t *)data->ptr;
-	time_t                 fdata_val         = fdata->time;
+	time_t                 fdata_val         = timestamp_gettime(fdata);
 	
 	switch(fargs->header.action){
 		case ACTION_INCREMENT:
@@ -107,14 +120,16 @@ static ssize_t data_timestamp_t_arith_no_arg(data_t *data, fastcall_arith_no_arg
 			return -ENOSYS;
 	}
 	fdata->time = fdata_val;
+	fdata->now  = 0;
 	return ret;
 } // }}}
 static ssize_t data_timestamp_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
-	uintmax_t              transfered        = 0;
-	timestamp_t           *fdata             = (timestamp_t *)src->ptr;
 	char                   buffer[DEF_BUFFER_SIZE];
 	uintmax_t              buffer_size       = sizeof(buffer);
+	uintmax_t              transfered        = 0;
+	timestamp_t           *fdata             = (timestamp_t *)src->ptr;
+	time_t                 time_val          = timestamp_gettime(fdata);
 	
 	if(fargs->dest == NULL || fdata == NULL)
 		return -EINVAL;
@@ -122,13 +137,13 @@ static ssize_t data_timestamp_t_convert_to(data_t *src, fastcall_convert_to *far
 	switch( fargs->format ){
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &fdata->time, sizeof(fdata->time) };
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &time_val, sizeof(time_val) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
 			break;
 		
 		default:
-			if( (ret = timestamp_to_string(fdata->time, buffer, &buffer_size, fargs->format)) != 0)
+			if( (ret = timestamp_to_string(time_val, buffer, &buffer_size, fargs->format)) != 0)
 				return ret;
 			
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &buffer, buffer_size };
@@ -160,10 +175,11 @@ static ssize_t data_timestamp_t_convert_from(data_t *dst, fastcall_convert_from 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read_str) != 0)
 				return -EFAULT;
-			return timestamp_from_string(&fdata->time, buffer, r_read_str.buffer_size);
+			return timestamp_from_string(fdata, buffer, r_read_str.buffer_size);
 		
 		case FORMAT(native):;
 		case FORMAT(packed):;
+			fdata->now = 0;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &fdata->time, sizeof(fdata->time) };
 			return data_query(fargs->src, &r_read);
 		

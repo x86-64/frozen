@@ -7,7 +7,6 @@
 - data perthread_t wrapper
 - view_t for data in any format
 - action LOOKUP (data_t as key, any data - int or string)
-- (timestamp_t)"now"
 - unique_t key parameter. using LOOKUP action compare two items
 - data hash_internal_t - portable_hash wrapper
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
