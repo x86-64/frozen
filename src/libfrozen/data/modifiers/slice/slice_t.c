@@ -125,6 +125,13 @@ static ssize_t       data_slice_t_free(data_t *data, fastcall_free *fargs){ // {
 	slice_t_free(fdata);
 	return 0;
 } // }}}
+static ssize_t       data_slice_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
+	fargs->data = data;
+	return 0;
+} // }}}
+static ssize_t       data_slice_t_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
+	return -ENOSYS;
+} // }}}
 
 data_proto_t slice_t_proto = {
 	.type                   = TYPE_SLICET,
@@ -141,6 +148,8 @@ data_proto_t slice_t_proto = {
 		[ACTION_LENGTH]       = (f_data_func)&data_slice_t_len,
 		[ACTION_COPY]         = (f_data_func)&data_slice_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
+		[ACTION_GETDATA]      = (f_data_func)&data_slice_t_getdata,
+		[ACTION_GETDATAPTR]   = (f_data_func)&data_slice_t_getdataptr,
 	}
 };
 

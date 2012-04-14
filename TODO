@@ -4,8 +4,6 @@
 
 * new config syntax
 
-- env_t to data_make_flat invalid
-- slice_t to data_make_flat invalid
 - data perthread_t wrapper
 - view_t for data in any format
 - action LOOKUP (data_t as key, any data - int or string)
@@ -25,6 +23,7 @@
 - zmq patterns
   - proxy pattern
   - replace machines and stuff in request with proxy
+- slice_t write getdata ptr handler
 
 - write allocator_fixed_t push/pop same as for list_t
 - broken tcp
