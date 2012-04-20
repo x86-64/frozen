@@ -31,7 +31,7 @@
  *
  * @li Thread safety. Required.
  * @li Support ACTION_PUSH and ACTION_POP functions. Required.
- * @li Support ACTION_COUNT. Optional, for accurate measurement of elements count.
+ * @li Support ACTION_LENGTH. Optional, for accurate measurement of elements count.
  */
 
 //#define DATA_ALLOCATOR_FIXEDT(...)      { TYPE_ALLOCATOR_FIXEDT, (allocator_fixed_t []){ __VA_ARGS__ } }

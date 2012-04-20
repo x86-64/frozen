@@ -9,14 +9,14 @@
  *  Frozen tries to use native C data representation where it possible. Native types is
  *  uintmax_t (TYPE_UINTT), char * (TYPE_STRING), own structures such as hash_t, machine_t, datatype_t and so on.
  *
- *  To keep data type consistensy and generalize data processing "data holder" was introduced. This is
+ *  To keep data type consistency and generalize data processing "data holder" was introduced. This is
  *  simple structure data_t which consist of data type field and pointer to data. Data api accept only
- *  data wrapped in such holder. Wrapping can be achieved directly in user function, without unnessesery calls, so
+ *  data wrapped in such holder. Wrapping can be achieved directly in user function, without unnecessary calls, so
  *  this have low overhead.
  *
  *  Data api, as machine api, receive data holder and request with specified action inside. If this data have
  *  correct handlers for action api performs it. There are many standard actions defined, for example, ACTION_READ, _WRITE,
- *  _COPY, _ALLOC, _FREE, _COMPARE, _CONVERT_TO, _CONVERT_FROM and so on.
+ *  _FREE, _COMPARE, _CONVERT_TO, _CONVERT_FROM and so on.
  *
  *  Data api use same structures and actions as API_FAST, so it will be easy to pass request, arrived to machine, to
  *  data. See @ref api_fast
@@ -35,11 +35,11 @@
  *  know nothing about data it process. You also can't create clean default_t data, routines will return errors.
  */
 /** @ingroup data
- *  @page data_memorymanagment Memory managment
+ *  @page data_memorymanagment Memory management
  *  
  *  Almost every data can exist in three variations: within data section, within stack and within heap. Data api itself should not
  *  resist any of this representation. However, it is worth to mention, than some of data actions can produce only
- *  allocated data. This includes: ACTION_COPY, ACTION_ALLOC, ACTION_CONVERT_FROM and can be more. After calling this actions user
+ *  allocated data. This includes: ACTION_CONVERT_FROM and can be more. After calling this actions user
  *  is responsible to free allocated data.
  *
  *  Policy of data action handler should be following:
@@ -63,10 +63,6 @@
  *  All integer data can be converted in any other integer type. Buffer or string, containing human representation of integer, can also
  *  be converted in clean integer type. String with machine name can be converted to this machine pointer, hash with machine config
  *  can also be converted to new machine, and so on.
- *
- *  This ability also useful to avoid unnesessery data copying from place to place. For example, ipc_shmem machine use shared memory to
- *  send data to another process. If there was no conversion, it would require buffer with already packed data, which would be copied to
- *  shared memory. And, of course, special packing machine. Instead of that, ipc_shmem take any input and convert it directly to shared memory.
  */
 
 #define DEF_BUFFER_SIZE 1024
@@ -209,6 +205,7 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
 	if(_ret == 0){                                                         \
 		data_set_void(_src);                                           \
 	}                                                                      \
+	(void)_ret;                                                            \
 }
 
 /** Consume holder
@@ -226,6 +223,22 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
 	}else{                                                                 \
 		_ret = -EINVAL;                                                \
 	}                                                                      \
+	(void)_ret;                                                            \
+}
+
+/** Copy data in holder
+ * @param _ret  Return value (ssize_t)
+ * @param _dt   Destination data holder. (data_t *)
+ * @param _src  Source data holder (data_t *)
+ * @retval -EINVAL Invalid source, or convertation error
+ * @retval 0       Operation successful
+ */
+#define holder_copy(_ret,_dt,_src){                                            \
+	(_dt)->type = (_src)->type;                                    \
+	(_dt)->ptr  = NULL;                                            \
+	fastcall_convert_from _r_convert = { { 5, ACTION_CONVERT_FROM }, _src, FORMAT(native) };  \
+	_ret = data_query((_dt), &_r_convert);                         \
+	(void)_ret;                                                            \
 }
 
 /** Write value from holder to supplied buffer.
@@ -238,8 +251,8 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
  */
 #define data_set(_ret,_type,_dt,_dst){                                                   \
 	data_t __data_src = { _type, REF_##_type(_dt) };                                 \
-	fastcall_transfer _r_transfer = { { 3, ACTION_TRANSFER }, _dst };                \
-	_ret = data_query(&__data_src, &_r_transfer);                                    \
+	fastcall_convert_to _r_convert = { { 5, ACTION_CONVERT_TO }, _dst, FORMAT(native) }; \
+	_ret = data_query(&__data_src, &_r_convert);                                    \
 	(void)_ret;                                                                      \
 }
 

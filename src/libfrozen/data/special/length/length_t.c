@@ -6,28 +6,6 @@
 
 #include <length_t.h>
 
-static ssize_t data_length_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
-	ssize_t                ret;
-	length_t              *fdata             = (length_t *)src->ptr;
-	length_t              *new_fdata         = NULL;
-	
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	if(fdata){
-		if( (new_fdata = malloc(sizeof(length_t))) == NULL)
-			return -EINVAL;
-		
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &new_fdata->data };
-		if( (ret = data_query(&fdata->data, &r_copy)) < 0){
-			free(new_fdata);
-			return ret;
-		}
-	}
-	fargs->dest->type = src->type;
-	fargs->dest->ptr  = new_fdata;
-	return 0;
-} // }}}
 static ssize_t data_length_t_free(data_t *data, fastcall_free *hargs){ // {{{
 	length_t              *fdata             = (length_t *)data->ptr;
 	
@@ -98,7 +76,6 @@ data_proto_t length_t_proto = {
 	.type_str               = "length_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_COPY]         = (f_data_func)&data_length_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_length_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_length_t_convert_from,
 		//[ACTION_GETDATA]      = (f_data_func)&data_length_t_getdata,

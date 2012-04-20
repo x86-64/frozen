@@ -114,34 +114,6 @@ static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ //
 	fargs->ptr = fdata ? fdata->ptr : NULL;
 	return 0;
 } // }}}
-static ssize_t data_raw_copy(data_t *src, fastcall_copy *fargs){ // {{{
-	ssize_t                ret;
-	raw_t                 *dst_data;
-	raw_t                 *src_data = ((raw_t *)src->ptr);
-	
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	fargs->dest->type = TYPE_RAWT;
-	fargs->dest->ptr  = NULL;
-	
-	switch( (ret = raw_prepare(fargs->dest, src_data->size)) ){
-		case 0:       break;
-		case -ENOSPC: break;
-		default:      return ret;
-	}
-	
-	dst_data = (raw_t *)(fargs->dest->ptr);
-	
-	memcpy(dst_data->ptr, src_data->ptr, MIN(dst_data->size, src_data->size));
-	return ret;
-} // }}}
-static ssize_t data_raw_alloc(data_t *dst, fastcall_alloc *fargs){ // {{{
-	if(dst->ptr != NULL)        // accept only empty data, in other case it could lead to memleak
-		return -EEXIST;
-	
-	return raw_prepare(dst, fargs->length);
-} // }}}
 static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	raw_t                 *raw_data = ((raw_t *)data->ptr);
 	
@@ -279,8 +251,6 @@ data_proto_t raw_t_proto = {
 	.handlers      = {
 		[ACTION_LENGTH]      = (f_data_func)&data_raw_len,
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
-		[ACTION_COPY]        = (f_data_func)&data_raw_copy,
-		[ACTION_ALLOC]       = (f_data_func)&data_raw_alloc,
 		[ACTION_FREE]        = (f_data_func)&data_raw_free,
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_raw_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_raw_convert_from,

@@ -127,8 +127,8 @@ static ssize_t data_folder_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		data_t                 d_next            = DATA_PTR_HASHT(r_next);
 		data_t                 d_copy;
 		
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &d_copy };
-		if( (ret = data_query(&d_next, &r_copy)) < 0)
+		holder_copy(ret, &d_copy, &d_next);
+		if(ret < 0)
 			break;
 		
 		fastcall_push r_push = { { 3, ACTION_PUSH }, &d_copy };

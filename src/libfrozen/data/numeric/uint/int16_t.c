@@ -34,7 +34,10 @@ static ssize_t data_int16_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = sizeof(int16_t);
 	return 0;
 } // }}}
-static ssize_t data_int16_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
+static ssize_t data_int16_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
+	if(data->ptr)
+		return 0;
+
 	if( (data->ptr = malloc(sizeof(int16_t))) == NULL)
 		return -ENOMEM;
 	return 0;
@@ -170,7 +173,7 @@ static ssize_t data_int16_t_convert_from(data_t *dst, fastcall_convert_from *far
 		return -EINVAL;
 	
 	if(dst->ptr == NULL){ // no buffer, alloc new
-		if(data_int16_t_alloc(dst, NULL) != 0)
+		if( (dst->ptr = malloc(sizeof(int16_t))) == NULL)
 			return -ENOMEM;
 	}
 
@@ -217,7 +220,7 @@ data_proto_t int16_t_proto = {
 	.type_str               = "int16_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_ALLOC]          = (f_data_func)&data_int16_t_alloc,
+		[ACTION_RESIZE]         = (f_data_func)&data_int16_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_int16_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_int16_t_compare,
 		[ACTION_ADD]            = (f_data_func)&data_int16_t_arith,

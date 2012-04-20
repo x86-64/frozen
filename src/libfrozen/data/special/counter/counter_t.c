@@ -70,24 +70,6 @@ static ssize_t data_counter_t_convert_from(data_t *dst, fastcall_convert_from *f
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t data_counter_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
-	ssize_t                ret;
-	counter_t             *new_fdata;
-	counter_t             *fdata             = (counter_t *)data->ptr;
-	
-	if( (new_fdata = counter_t_alloc(&fdata->counter)) == NULL)
-		return -ENOMEM;
-	
-	fastcall_copy r_copy = { { 3, ACTION_COPY }, &new_fdata->counter };
-	if( (ret = data_query(&fdata->counter, &r_copy)) < 0){
-		free(new_fdata);
-		return ret;
-	}
-	
-	fargs->dest->type = data->type;
-	fargs->dest->ptr  = new_fdata;
-	return 0;
-} // }}}
 static ssize_t data_counter_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	counter_t_destroy(data->ptr);
 	return 0;
@@ -99,7 +81,6 @@ data_proto_t counter_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_counter_t_convert_from,
-		[ACTION_COPY]         = (f_data_func)&data_counter_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_counter_t_free,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_counter_t_convert_to,
 		[ACTION_READ]         = (f_data_func)&data_counter_t_incandpass,

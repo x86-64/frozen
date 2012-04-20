@@ -12,6 +12,7 @@
 #define FORMAT_VALUE_ip_dotoctint 71644
 #define FORMAT_VALUE_ip_hexint 31498
 #define FORMAT_VALUE_ip_int 10014
+#define FORMAT_VALUE_item 3222
 #define FORMAT_VALUE_native 9808
 #define FORMAT_VALUE_netstring 30930
 #define FORMAT_VALUE_packed 9228
@@ -36,6 +37,7 @@ typedef enum format_t {
       FORMAT_ip_dotoctint = FORMAT_VALUE_ip_dotoctint, 
       FORMAT_ip_hexint = FORMAT_VALUE_ip_hexint, 
       FORMAT_ip_int = FORMAT_VALUE_ip_int, 
+      FORMAT_item = FORMAT_VALUE_item, 
       FORMAT_native = FORMAT_VALUE_native, 
       FORMAT_netstring = FORMAT_VALUE_netstring, 
       FORMAT_packed = FORMAT_VALUE_packed, 
@@ -64,6 +66,7 @@ keypair_t formats[] = {
       { "ip_dotoctint", FORMAT_VALUE_ip_dotoctint }, 
       { "ip_hexint", FORMAT_VALUE_ip_hexint }, 
       { "ip_int", FORMAT_VALUE_ip_int }, 
+      { "item", FORMAT_VALUE_item }, 
       { "native", FORMAT_VALUE_native }, 
       { "netstring", FORMAT_VALUE_netstring }, 
       { "packed", FORMAT_VALUE_packed }, 

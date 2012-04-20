@@ -14,7 +14,6 @@ extern machine_t murmur2_64_proto;
 extern machine_t fill_proto;
 extern machine_t hashtable_proto;
 extern machine_t lookup_proto;
-extern machine_t mphf_proto;
 extern machine_t stdin_proto;
 extern machine_t stdout_proto;
 extern machine_t stderr_proto;
@@ -27,9 +26,6 @@ extern machine_t factory_proto;
 extern machine_t limit_proto;
 extern machine_t morph_proto;
 extern machine_t pool_proto;
-extern machine_t rebuild_monitor_proto;
-extern machine_t rebuild_reader_proto;
-extern machine_t rebuild_writer_proto;
 extern machine_t assign_proto;
 extern machine_t debug_proto;
 extern machine_t delay_proto;
@@ -57,7 +53,6 @@ machine_t * machine_protos[] = {
    &fill_proto,
    &hashtable_proto,
    &lookup_proto,
-   &mphf_proto,
    &stdin_proto,
    &stdout_proto,
    &stderr_proto,
@@ -70,9 +65,6 @@ machine_t * machine_protos[] = {
    &limit_proto,
    &morph_proto,
    &pool_proto,
-   &rebuild_monitor_proto,
-   &rebuild_reader_proto,
-   &rebuild_writer_proto,
    &assign_proto,
    &debug_proto,
    &delay_proto,

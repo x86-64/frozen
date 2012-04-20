@@ -8,8 +8,7 @@
  *  
  *  Every user request processed by one machine, or by machine shop. Machine can perform
  *  various actions:
- *    @li interact with external things, such as files, sockets, etc
- *    @li interact with internal things, with another machines, data
+ *    @li interact with datatypes, such as files, sockets, etc
  *    @li can read, write and modify request's values
  *
  *  If user request is too complex for one machine, it can be processed with shop of machines.
@@ -56,18 +55,6 @@
  *  async requests is too good to discard them, so you can use queue to save all requests and process them later, returning
  *  control almost immediatly. Of course, in such case, you should keep all data used in this request until this request
  *  will be really finished.
- */
-/** @ingroup machine
- *  @page machine_childs Parents and childs
- *  
- *  Every machine, if this is not standalone machine, can have their parent(s) and child(s). Parent machine can pass to your machine
- *  requests. Childs is machines to which your machine can pass request. If machine have more than one child, request passed to every
- *  child repeatedly. If this is not that you want - you can solve it with any of path rewriting machine. Such approach is useful,
- *  because you can add child to any machine and monitor requests passed by. This can be used in logging.
- *  
- *  You can connect machines in any way you want, but there is one limit - if your configuration produce infinity loops they will not
- *  be terminated or avoided. However this is doesn't mean that you can't send requests to parent machines. Just make sure it will work.
- * 
  */
 
 

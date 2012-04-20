@@ -203,8 +203,7 @@ static ssize_t data_file_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
 		return -errno;
 	
 	return 0;
-} // }}}
-static ssize_t data_file_t_create(data_t *data, fastcall_create *fargs){ // {{{
+/*
 	ssize_t                ret;
 	struct stat            stat;
 	file_t                *fdata             = (file_t *)data->ptr;
@@ -218,9 +217,7 @@ static ssize_t data_file_t_create(data_t *data, fastcall_create *fargs){ // {{{
 	fargs->offset = stat.st_size;
 	
 	if(ftruncate(fdata->handle, stat.st_size + fargs->size) == -1)
-		return -errno;
-	
-	return 0;
+		return -errno;*/
 } // }}}
 
 data_proto_t file_t_proto = {
@@ -230,11 +227,11 @@ data_proto_t file_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_file_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_file_t_free,
+		
+		[ACTION_RESIZE]       = (f_data_func)&data_file_t_resize,
 		[ACTION_LENGTH]       = (f_data_func)&data_file_t_len,
-		[ACTION_CREATE]       = (f_data_func)&data_file_t_create,
 		[ACTION_READ]         = (f_data_func)&data_file_t_read,
 		[ACTION_WRITE]        = (f_data_func)&data_file_t_write,
-		[ACTION_RESIZE]       = (f_data_func)&data_file_t_resize,
 	}
 };
 

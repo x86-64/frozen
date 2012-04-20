@@ -21,11 +21,10 @@ static ssize_t data_random_t_handler (data_t *data, fastcall_header *hargs){ // 
 			}
 			return 0;
 		
-		case ACTION_TRANSFER:
 		case ACTION_CONVERT_TO:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
 		
-		case ACTION_ALLOC:
+		case ACTION_RESIZE:
 		case ACTION_FREE:
 		case ACTION_CONVERT_FROM:
 			data->ptr = NULL;

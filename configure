@@ -838,7 +838,6 @@ enable_machinemurmur2_64
 enable_machinefill
 enable_machinehashtable
 enable_machinelookup
-enable_machinemphf
 enable_machinestdin
 enable_machinestdout
 enable_machinestderr
@@ -851,9 +850,6 @@ enable_machinefactory
 enable_machinelimit
 enable_machinemorph
 enable_machinepool
-enable_machinerebuild_monitor
-enable_machinerebuild_reader
-enable_machinerebuild_writer
 enable_machineassign
 enable_machinedebug
 enable_machinedelay
@@ -1617,7 +1613,6 @@ Optional Features:
                           disable machine hashtable
   --disable-machine-lookup
                           disable machine lookup
-  --disable-machine-mphf  disable machine mphf
   --disable-machine-stdin disable machine stdin
   --disable-machine-stdout
                           disable machine stdout
@@ -1635,12 +1630,6 @@ Optional Features:
   --disable-machine-limit disable machine limit
   --disable-machine-morph disable machine morph
   --disable-machine-pool  disable machine pool
-  --disable-machine-rebuild-monitor
-                          disable machine rebuild-monitor
-  --disable-machine-rebuild-reader
-                          disable machine rebuild-reader
-  --disable-machine-rebuild-writer
-                          disable machine rebuild-writer
   --disable-machine-assign
                           disable machine assign
   --disable-machine-debug disable machine debug
@@ -20167,43 +20156,6 @@ fi
 
 
 
-	# Check whether --enable-machinemphf was given.
-if test "${enable_machinemphf+set}" = set; then :
-  enableval=$enable_machinemphf;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinemphf}" = "yes"; then
-			enable_machinemphf="no"
-		else
-			enable_machinemphf="yes"
-		fi
-	fi
-
-	if test "${enable_machinemphf}" = "yes"; then
-		MACHINE_DIR_mphf="index/mphf"
-		MACHINE_DEP_mphf=""
-				MACHINE_SELECTED="$MACHINE_SELECTED mphf"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_index_mphf" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/index/mphf/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS index/mphf"
-
-		MACHINE_MAKEFILE_index_mphf=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED index/mphf/libfrozen_machine_mphf.la"
-
-	fi
-
-
-
-
-
-
-
 	# Check whether --enable-machinestdin was given.
 if test "${enable_machinestdin+set}" = set; then :
   enableval=$enable_machinestdin;
@@ -20640,115 +20592,6 @@ fi
 		MACHINE_MAKEFILE_machine_pool=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/pool/libfrozen_machine_pool.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinerebuild_monitor was given.
-if test "${enable_machinerebuild_monitor+set}" = set; then :
-  enableval=$enable_machinerebuild_monitor;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinerebuild_monitor}" = "yes"; then
-			enable_machinerebuild_monitor="no"
-		else
-			enable_machinerebuild_monitor="yes"
-		fi
-	fi
-
-	if test "${enable_machinerebuild_monitor}" = "yes"; then
-		MACHINE_DIR_rebuild_monitor="machine/rebuild"
-		MACHINE_DEP_rebuild_monitor=""
-				MACHINE_SELECTED="$MACHINE_SELECTED rebuild_monitor"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_rebuild" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/rebuild/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/rebuild"
-
-		MACHINE_MAKEFILE_machine_rebuild=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-machinerebuild_reader was given.
-if test "${enable_machinerebuild_reader+set}" = set; then :
-  enableval=$enable_machinerebuild_reader;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinerebuild_reader}" = "yes"; then
-			enable_machinerebuild_reader="no"
-		else
-			enable_machinerebuild_reader="yes"
-		fi
-	fi
-
-	if test "${enable_machinerebuild_reader}" = "yes"; then
-		MACHINE_DIR_rebuild_reader="machine/rebuild"
-		MACHINE_DEP_rebuild_reader=""
-				MACHINE_SELECTED="$MACHINE_SELECTED rebuild_reader"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_rebuild" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/rebuild/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/rebuild"
-
-		MACHINE_MAKEFILE_machine_rebuild=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
-
-	fi
-
-
-
-
-
-
-	# Check whether --enable-machinerebuild_writer was given.
-if test "${enable_machinerebuild_writer+set}" = set; then :
-  enableval=$enable_machinerebuild_writer;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinerebuild_writer}" = "yes"; then
-			enable_machinerebuild_writer="no"
-		else
-			enable_machinerebuild_writer="yes"
-		fi
-	fi
-
-	if test "${enable_machinerebuild_writer}" = "yes"; then
-		MACHINE_DIR_rebuild_writer="machine/rebuild"
-		MACHINE_DEP_rebuild_writer=""
-				MACHINE_SELECTED="$MACHINE_SELECTED rebuild_writer"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_machine_rebuild" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/machine/rebuild/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS machine/rebuild"
-
-		MACHINE_MAKEFILE_machine_rebuild=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED machine/rebuild/libfrozen_machine_rebuild.la"
 
 	fi
 

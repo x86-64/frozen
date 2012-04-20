@@ -34,7 +34,10 @@ static ssize_t data_uint32_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = sizeof(uint32_t);
 	return 0;
 } // }}}
-static ssize_t data_uint32_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
+static ssize_t data_uint32_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
+	if(data->ptr)
+		return 0;
+
 	if( (data->ptr = malloc(sizeof(uint32_t))) == NULL)
 		return -ENOMEM;
 	return 0;
@@ -170,7 +173,7 @@ static ssize_t data_uint32_t_convert_from(data_t *dst, fastcall_convert_from *fa
 		return -EINVAL;
 	
 	if(dst->ptr == NULL){ // no buffer, alloc new
-		if(data_uint32_t_alloc(dst, NULL) != 0)
+		if( (dst->ptr = malloc(sizeof(uint32_t))) == NULL)
 			return -ENOMEM;
 	}
 
@@ -217,7 +220,7 @@ data_proto_t uint32_t_proto = {
 	.type_str               = "uint32_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_ALLOC]          = (f_data_func)&data_uint32_t_alloc,
+		[ACTION_RESIZE]         = (f_data_func)&data_uint32_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_uint32_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_uint32_t_compare,
 		[ACTION_ADD]            = (f_data_func)&data_uint32_t_arith,

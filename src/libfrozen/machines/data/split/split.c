@@ -231,8 +231,8 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 		data_t         hslice            = DATA_SLICET(input, lmatch_offset, ~0);
 		data_t         last_part         = { TYPE_RAWT, NULL };
 		
-		fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &last_part };
-		if( (ret = data_query(&hslice, &r_transfer)) < -1)
+		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &last_part, FORMAT(native) };
+		if( (ret = data_query(&hslice, &r_convert)) < -1)
 			return ret;
 		
 		if(ret != -1){

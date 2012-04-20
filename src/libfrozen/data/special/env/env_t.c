@@ -35,37 +35,12 @@ static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	
 	return data_query(rdata, hargs);
 } // }}}
-static ssize_t data_env_t_alloc(data_t *data, fastcall_alloc *hargs){ // {{{
-	if( (data->ptr = malloc(sizeof(env_t))) == NULL)
-		return -ENOMEM;
-	
-	((env_t *)data->ptr)->key = HK(input);
-	return 0;
-} // }}}
 static ssize_t data_env_t_free(data_t *data, fastcall_free *hargs){ // {{{
 	free(data->ptr);
 	data->ptr = NULL;
 	return 0;
 } // }}}
-/*static ssize_t data_env_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
-	env_t                 *fdata             = (env_t *)src->ptr;
-	env_t                 *new_fdata         = NULL;
-	
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	if(fdata){
-		if( (new_fdata = malloc(sizeof(env_t))) == NULL)
-			return -EINVAL;
-		
-		new_fdata->key = fdata->key;
-	}
-	fargs->dest->type = src->type;
-	fargs->dest->ptr  = new_fdata;
-	return 0;
-} // }}}*/
 static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	ssize_t                ret;
 	env_t                 *fdata;
 	
 	if(dst->ptr != NULL)
@@ -74,8 +49,8 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
-	if( (ret = data_env_t_alloc(dst, NULL)) != 0)
-		return ret;
+	if( (dst->ptr = malloc(sizeof(env_t))) == NULL)
+		return -ENOMEM;
 	
 	fdata = (env_t *)dst->ptr;
 	
@@ -104,8 +79,6 @@ data_proto_t env_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_env_t_handler,
 	.handlers               = {
-		[ACTION_ALLOC]        = (f_data_func)&data_env_t_alloc,
-		//[ACTION_COPY]         = (f_data_func)&data_env_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_env_t_convert_from,
 		[ACTION_GETDATA]      = (f_data_func)&data_env_t_getdata,

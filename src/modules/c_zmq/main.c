@@ -410,12 +410,42 @@ static ssize_t data_zeromq_t_compare(data_t *data, fastcall_compare *fargs){ // 
 	return ret;
 } // }}}
 static ssize_t data_zeromq_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
+	void                  *msg_data;
+	size_t                 msg_data_size;
+	zmq_msg_t              zmq_msg;
 	zeromq_t              *fdata             = (zeromq_t *)data->ptr;
 	
 	switch(fargs->format){
 		case FORMAT(packed):;
 			data_t             packed           = DATA_PTR_HASHT(fdata->config);
 			return data_query(&packed, fargs);
+			
+		case FORMAT(native):;
+			if( (ret = zeromq_t_prepare(data)) < 0)
+				return ret;
+			
+			fdata = data->ptr;
+
+			if( zmq_msg_init(&zmq_msg) != 0)
+				return error("zmq_msg_init failed");
+			
+			if( zmq_recv(fdata->zmq_socket, &zmq_msg, 0) != 0)
+				return -errno;
+			
+			msg_data      = zmq_msg_data(&zmq_msg);
+			msg_data_size = zmq_msg_size(&zmq_msg);
+			
+			fastcall_write r_write = {
+				{ 5, ACTION_WRITE },
+				0,
+				msg_data,
+				msg_data_size
+			};
+			ret = data_query(fargs->dest, &r_write);
+			
+			zmq_msg_close(&zmq_msg);
+			return ret;
 			
 		default:
 			break;
@@ -514,38 +544,6 @@ static ssize_t data_zeromq_t_write(data_t *data, fastcall_write *fargs){ // {{{
 	
 	return 0;
 } // }}}
-static ssize_t data_zeromq_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
-	ssize_t                ret;
-	void                  *msg_data;
-	size_t                 msg_data_size;
-	zmq_msg_t              zmq_msg;
-	zeromq_t              *fdata;
-	
-	if( (ret = zeromq_t_prepare(data)) < 0)
-		return ret;
-	
-	fdata = data->ptr;
-
-	if( zmq_msg_init(&zmq_msg) != 0)
-		return error("zmq_msg_init failed");
-	
-	if( zmq_recv(fdata->zmq_socket, &zmq_msg, 0) != 0)
-		return -errno;
-	
-	msg_data      = zmq_msg_data(&zmq_msg);
-	msg_data_size = zmq_msg_size(&zmq_msg);
-	
-	fastcall_write r_write = {
-		{ 5, ACTION_WRITE },
-		0,
-		msg_data,
-		msg_data_size
-	};
-	ret = data_query(fargs->dest, &r_write);
-	
-	zmq_msg_close(&zmq_msg);
-	return ret;
-} // }}}
 static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	ssize_t                ret;
 	data_t                 freeme;
@@ -643,7 +641,6 @@ data_proto_t zmq_proto = { // {{{
 		[ACTION_FREE]           = (f_data_func)&data_zeromq_t_free,
 		[ACTION_READ]           = (f_data_func)&data_zeromq_t_read,
 		[ACTION_WRITE]          = (f_data_func)&data_zeromq_t_write,
-		[ACTION_TRANSFER]       = (f_data_func)&data_zeromq_t_transfer,
 		[ACTION_PUSH]           = (f_data_func)&data_zeromq_t_push,
 		[ACTION_POP]            = (f_data_func)&data_zeromq_t_pop,
 		[ACTION_ENUM]           = (f_data_func)&data_zeromq_t_enum,
@@ -700,7 +697,6 @@ data_proto_t zmq_msg_proto = { // {{{
 		[ACTION_CONVERT_TO]     = (f_data_func)&data_zeromq_msg_t_convert_to,
 		[ACTION_CONVERT_FROM]   = (f_data_func)&data_zeromq_msg_t_nosys,
 		[ACTION_FREE]           = (f_data_func)&data_zeromq_msg_t_free,
-		[ACTION_COPY]           = (f_data_func)&data_zeromq_msg_t_nosys,
 	}
 }; // }}}
 

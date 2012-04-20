@@ -199,7 +199,6 @@ data_proto_t pcre_t_proto = {
 	.type_str               = PCRET_NAME,
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_ALLOC]          = (f_data_func)&data_pcre_t_nosys,
 		[ACTION_LENGTH]         = (f_data_func)&data_pcre_t_nosys,
 		[ACTION_COMPARE]        = (f_data_func)&data_pcre_t_compare,
 		[ACTION_CONVERT_FROM]   = (f_data_func)&data_pcre_t_convert_from,

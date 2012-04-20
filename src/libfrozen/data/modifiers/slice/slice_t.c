@@ -40,17 +40,6 @@ static ssize_t       data_slice_t_io       (data_t *data, fastcall_io *fargs){ /
 	fargs->offset      += fdata->off;
 	return data_query(fdata->data, fargs);
 } // }}}
-static ssize_t       data_slice_t_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
-	uintmax_t             *transfered;
-	slice_t               *fdata             = (slice_t *)src->ptr;
-	
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	transfered = (fargs->header.nargs >= 4) ? &fargs->transfered : NULL;
-	
-	return default_transfer(fdata->data, fargs->dest, fdata->off, 0, fdata->size, transfered);
-} // }}}
 static ssize_t       data_slice_t_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	uintmax_t             *transfered;
 	slice_t               *fdata             = (slice_t *)src->ptr;
@@ -104,18 +93,6 @@ static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_conver
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t       data_slice_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
-	slice_t               *fdata             = (slice_t *)data->ptr;
-	
-	if(fdata == NULL)
-		return -EINVAL;
-	
-	if( (fargs->dest->ptr = slice_t_copy(fdata)) == NULL)
-		return -EFAULT;
-	
-	fargs->dest->type = data->type;
-	return 0;
-} // }}}
 static ssize_t       data_slice_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	slice_t               *fdata             = (slice_t *)data->ptr;
 	
@@ -142,11 +119,9 @@ data_proto_t slice_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_slice_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_slice_t_convert_from,
-		[ACTION_TRANSFER]     = (f_data_func)&data_slice_t_transfer,
 		[ACTION_READ]         = (f_data_func)&data_slice_t_io,
 		[ACTION_WRITE]        = (f_data_func)&data_slice_t_io,
 		[ACTION_LENGTH]       = (f_data_func)&data_slice_t_len,
-		[ACTION_COPY]         = (f_data_func)&data_slice_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
 		[ACTION_GETDATA]      = (f_data_func)&data_slice_t_getdata,
 		[ACTION_GETDATAPTR]   = (f_data_func)&data_slice_t_getdataptr,
@@ -163,9 +138,6 @@ slice_t *       slice_t_alloc               (data_t *data, uintmax_t offset, uin
 	slice->off  = offset;
 	slice->size = size;
 	return slice;
-} // }}}
-slice_t *       slice_t_copy                (slice_t *slice){ // {{{
-	return memdup(slice, sizeof(slice_t));
 } // }}}
 void            slice_t_free                (slice_t *slice){ // {{{
 	free(slice);

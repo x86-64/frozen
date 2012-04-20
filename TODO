@@ -1,20 +1,16 @@
-* flow-based architecture for machine, request-based architecture for data:
-  - machine/rebuild: enum proc not flow-based (normal, rewrite code to use ACTION_ENUM)
-  - machine/limit: limit get parameter not flow-based (not important for now, another approach?)
-
 * new config syntax
 
+- allocator_array_t 
+- record_t from split code
 - data perthread_t wrapper
 - view_t for data in any format
-- action LOOKUP (data_t as key, any data - int or string)
 - unique_t key parameter. using LOOKUP action compare two items
 - data hash_internal_t - portable_hash wrapper
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
 - machine 'exec'
-- machine/rebuild deprecate?
 - portable action_t packed format
 - machine rate-limit
-- benchmark functions remove from main request flow, need new approach for machine parameters, for machine/limit too
+- benchmark, limit - rewrite to use ACTION_CONTROL
 - netstring_t parse (get code from mongrel for parsing)
 - rewrite mongrel send\parse routines to use netstring_t, container_t types
 - cache, append only cache
@@ -24,7 +20,9 @@
   - replace machines and stuff in request with proxy
 - slice_t write getdata ptr handler
 
+- broken allocator_fixed_t's create/delete
 - write allocator_fixed_t push/pop same as for list_t
+
 - broken tcp
 
 - rewrite file_t to use fd_t
@@ -32,7 +30,6 @@
 - document data packing abillity: uint_t, list_t, hash_t is packable, container_t depend on data in it, raw_t not packable
 - review code for multi-threading support, document machine's thread-safety capabilities
 - machine multi_request
-  - action BATCH
 
 - timestamp_t convert_from transfered
 
@@ -41,5 +38,3 @@
 - libev
 - co-routines
 - error backtrace
-
-- actions documentation

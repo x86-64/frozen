@@ -15,7 +15,7 @@ typedef struct allocator_fixed_t {
 	pthread_rwlock_t       rwlock;
 } allocator_fixed_t;
 
-static ssize_t allocator_getnewid(allocator_fixed_t *fdata, uintmax_t *newid){ // {{{
+/*static ssize_t allocator_getnewid(allocator_fixed_t *fdata, uintmax_t *newid){ // {{{
 	ssize_t                ret;
 	
 	if(__MAX(uintmax_t) / fdata->item_size <= fdata->last_id)
@@ -32,7 +32,7 @@ static ssize_t allocator_getnewid(allocator_fixed_t *fdata, uintmax_t *newid){ /
 		return ret;
 	}
 	return 0;
-} // }}}
+} // }}}*/
 /*static ssize_t allocator_removelastid(allocator_fixed_t *fdata){ // {{{
 	ssize_t                ret;
 	uintmax_t              id;
@@ -163,7 +163,7 @@ exit:
 	pthread_rwlock_unlock(&fdata->rwlock);
 	return ret;
 } // }}}
-static ssize_t data_allocator_fixed_t_create(data_t *data, fastcall_create *fargs){ // {{{
+/*static ssize_t data_allocator_fixed_t_create(data_t *data, fastcall_create *fargs){ // {{{
 	ssize_t                ret;
 	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
 	
@@ -180,8 +180,8 @@ static ssize_t data_allocator_fixed_t_create(data_t *data, fastcall_create *farg
 			if( (ret = data_query(&fdata->removed_items, &r_pop)) == 0)
 				goto exit;
 			
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &d_offset };
-			ret = data_query(&d_copy, &r_transfer);
+			fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &d_offset, FORMAT(native) };
+			ret = data_query(&d_copy, &r_convert);
 			goto exit;
 		}
 		
@@ -200,8 +200,8 @@ static ssize_t data_allocator_fixed_t_delete(data_t *data, fastcall_delete *farg
 			data_t        d_offset = DATA_PTR_UINTT(&fargs->offset);
 			data_t        d_copy;
 			
-			fastcall_copy r_copy = { { 3, ACTION_COPY }, &d_copy };
-			if( (ret = data_query(&d_offset, &r_copy)) < 0)
+			holder_copy(ret, &d_copy, &d_offset);
+			if(ret < 0)
 				goto exit;
 			
 			fastcall_push r_push   = {
@@ -219,8 +219,8 @@ static ssize_t data_allocator_fixed_t_delete(data_t *data, fastcall_delete *farg
 exit:
 	pthread_rwlock_unlock(&fdata->rwlock);
 	return ret;
-} // }}}
-static ssize_t data_allocator_fixed_t_count(data_t *data, fastcall_count *fargs){ // {{{
+} // }}}*/
+static ssize_t data_allocator_fixed_t_length(data_t *data, fastcall_length *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              in_removed     = 0;
 	allocator_fixed_t     *fdata          = (allocator_fixed_t *)data->ptr;
@@ -228,13 +228,13 @@ static ssize_t data_allocator_fixed_t_count(data_t *data, fastcall_count *fargs)
 	pthread_rwlock_rdlock(&fdata->rwlock);
 	
 		if(fdata->removed_items.type){
-			fastcall_count fargs = { { 3, ACTION_COUNT } };
+			fastcall_length fargs = { { 4, ACTION_LENGTH }, FORMAT(item) };
 			if(data_query(&fdata->removed_items, &fargs) == 0){
-				in_removed = fargs.nelements;
+				in_removed = fargs.length;
 			}
 		}
 	
-		fargs->nelements = fdata->last_id - in_removed - 1;
+		fargs->length = fdata->last_id - in_removed - 1;
 		ret = 0;
 	
 	pthread_rwlock_unlock(&fdata->rwlock);
@@ -310,9 +310,9 @@ data_proto_t allocator_fixed_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_allocator_fixed_t_free,
 		[ACTION_READ]         = (f_data_func)&data_allocator_fixed_t_io,
 		[ACTION_WRITE]        = (f_data_func)&data_allocator_fixed_t_io,
-		[ACTION_CREATE]       = (f_data_func)&data_allocator_fixed_t_create,
-		[ACTION_DELETE]       = (f_data_func)&data_allocator_fixed_t_delete,
-		[ACTION_COUNT]        = (f_data_func)&data_allocator_fixed_t_count,
+		//[ACTION_CREATE]       = (f_data_func)&data_allocator_fixed_t_create,
+		//[ACTION_DELETE]       = (f_data_func)&data_allocator_fixed_t_delete,
+		[ACTION_LENGTH]       = (f_data_func)&data_allocator_fixed_t_length,
 		//[ACTION_PUSH]         = (f_data_func)&data_allocator_fixed_t_push,
 		//[ACTION_POP]          = (f_data_func)&data_allocator_fixed_t_pop,
 	}

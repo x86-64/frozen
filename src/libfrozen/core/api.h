@@ -35,25 +35,25 @@
  *
  *  Such structures used to describe user request and process it. It can hold any amount of parameters with
  *  any data type and any value. Also, data value isn't copied to hash, hash only hold pointer to data. So,
- *  unnessesary copying form place to place avoided.
+ *  unnecessary copying form place to place avoided.
  *
  *  If hash defined within function such declaration converted to several "mov" and "lea" assembly command,
  *  which write hash in current stack frame. This can be processed very fast, because of lack of shoped
- *  computation and hopefuly with help of caches.
+ *  computation and hopefully with help of caches.
  *
- *  Staticly declared hashes already datad in usable form, so no overhead here.
+ *  Statically declared hashes already stored in usable form, so no overhead here.
  *
- *  Hash can contain inline hashes, can contain embeded hashes and so on. @see hashes
+ *  Hash can contain inline hashes, can contain embedded hashes and so on. @see hashes
  *
  *  In conclusion, advantages of this api type:
  *  @li Any number and order of parameters
- *  @li Any number of optional and required parameters, again, in any order
+ *  @li Any number of optional and required parameters
  *  @li Data not copied from user's buffer
  *  @li Fast "allocation" and assignment
  *
  *  Disadvantages:
  *  @li Very greedy to stack space. (However stack space is already allocated and used, so why not?)
- *  @li Key find is slow. This done by incremental search througth all parameters.
+ *  @li Key find is slow. This done by incremental search through all parameters.
  *
  */
 /** @ingroup api
@@ -65,11 +65,11 @@
  *  (offset, size, buffer). So, hash_find api gets very busy and callgrind isn't very happy with that.
  *
  *  However, this situation is simple to solve. We know how many parameters we want to pass, and we have no
- *  optional parameters. Simpliest solution is pack all parameters in order known to both machines. In C world
+ *  optional parameters. Simplest solution is pack all parameters in order known to both machines. In C world
  *  this can be perfectly done by defining a struct. So, we use them for fast api.
  *  
  *  Each action have own structure, where data defined in specified order. As bonus, you can have own
- *  optional paramenters by redefining structure.
+ *  optional parameters by redefining structure.
  *
  *  Example:
  *  @code
@@ -79,7 +79,7 @@
  *          &buffer,                    // .buffer
  *          100                         // .buffer_size
  *       };
- *       machine_fast_query(machine, &r_read);
+ *       data_query(data, &r_read);
  *  @endcode
  *
  *  Advantages:
@@ -92,27 +92,6 @@
  *  @li If you want to change value of request and keep old value, you should keep value, or make new structure and fill it
  *  @li No freedom in parameter defines
  */
-/** @ingroup api
- *  @page api_downgrade Downgrading
- *  
- *  Currenly machine code have support for so called "request downgrading". This process occurs then some API_FAST-capable
- *  machine pass request to API_FAST-notcapable machine. So, this code creates new hash request and fill it with parameters from
- *  fast request.
- *
- *  This is very painful process. At first, all optional parameters is lost. Second, this is overhead in any case. Third,
- *  all further processing is done by hash apis. There is no such process as "upgrading" and never be.
- *
- *  As developer, try avoid this. As end user, you can ignore it.
- */
-/** @ingroup api
- *  @page api_newmachine Recomendations for new machines
- *  
- *  If you write new machine you have to choose which api to implement.
- *
- *  If machine provide access to very fast things, such as memory - API_FAST is top priority.
- *  Common things, such as files, directories have to implement both API_HASH and API_FAST.
- *  Unusual things, and data processing can implement only API_HASH. 
- */
 
 typedef enum api_types {
 	API_HASH = 1,
@@ -123,80 +102,327 @@ typedef ssize_t (*f_hash)      (machine_t *, request_t *);
 typedef ssize_t (*f_fast_func) (data_t *,    void *);
 typedef ssize_t (*f_callback)  (request_t *, void *);
 
-/*
-	ACTION(CREATE),
-	ACTION(DELETE),
-	ACTION(COUNT),
-	ACTION(CUSTOM),
-	ACTION(REBUILD),
-
-	ACTION(EXECUTE),
-	ACTION(START),
-	ACTION(STOP),
-	ACTION(ALLOC),
-	ACTION(RESIZE),
-	ACTION(FREE),
-	ACTION(LENGTH),
-	ACTION(COMPARE),
-	ACTION(INCREMENT),
-	ACTION(DECREMENT),
-	ACTION(ADD),
-	ACTION(SUB),
-	ACTION(MULTIPLY),
-	ACTION(DIVIDE),
-	ACTION(READ),
-	ACTION(WRITE),
-	ACTION(CONVERT_TO)
-	ACTION(CONVERT_FROM),
-	ACTION(TRANSFER),
-	ACTION(COPY),
-	ACTION(IS_NULL),
-	
-	ACTION(PUSH),
-	ACTION(POP),
-	ACTION(ENUM),
-	
-	ACTION(QUERY),
-	
-	ACTION(GETDATAPTR),
-	ACTION(GETDATA),
-	
-	ACTION(ACQUIRE)
-*/
-
 typedef struct fastcall_header {
 	uintmax_t              nargs;
 	uintmax_t              action;
 } fastcall_header;
 
+/*
+	// Data views
+	ACTION(GETDATAPTR),
+	
+	// Various
+	ACTION(GETDATA),
+	ACTION(QUERY),
+	
+	ACTION(ACQUIRE)
+	ACTION(EXECUTE),
+	ACTION(START),
+	ACTION(STOP),
+*/
+
+// Core api set {{{
+/** @ingroup api
+ *  @addtogroup api_core Core api set
+ */
+/** @ingroup api_core
+ *  @page api_core_overview Overview
+ *  
+ *  This is core data api set. It used for creation, transfer and free of data.
+ */
+
+/** @ingroup api_core
+ *  @section api_core_convert_from Convert_from action
+ *
+ *  Used to transfer information from one data to another, this could be thought as "set" action. Destination data in this case
+ *  updated or initialized from source. This function works from destination data point of view, so information should be acceptable for it.
+ *
+ *  <h3> For developer </h3>
+ *  @li Handler should use basic storage api set for byte-array type of data to get it
+ *  @li Function should count number of transfered bytes
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_convert_from { // ACTION(CONVERT_FROM) 
+	fastcall_header        header;
+	data_t                *src;
+	uintmax_t              format;
+	uintmax_t              transfered;
+} fastcall_convert_from;
+
+/** @ingroup api_core
+ *  @section api_core_convert_to Convert_to action
+ *
+ *  Used to transfer information from one data to another, this could be thought as "get" action. Destination data in this case
+ *  updated or initialized from source. This function works from source data point of view.
+ *
+ *  <h3> For developer </h3>
+ *  @li Handler should use basic storage api set for byte-array type of data to get it
+ *  @li Function should count number of transfered bytes
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_convert_to { // ACTION(CONVERT_TO) 
+	fastcall_header        header;
+	data_t                *dest;
+	uintmax_t              format;
+	uintmax_t              transfered;
+} fastcall_convert_to;
+
+/** @ingroup api_core
+ *  @section api_core_free Free action
+ *
+ *  Used to free data and all related resources.
+ *
+ *  <h3> For developer </h3>
+ *  @li Handler should free all allocated resources and call data_set_void on current data.
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_free { // ACTION(FREE)
+	fastcall_header        header;
+} fastcall_free;
+// }}}
+// Basic storage api set {{{
+/** @ingroup api
+ *  @addtogroup api_storage Basic storage api set
+ */
+/** @ingroup api_storage
+ *  @page api_storage_overview Overview
+ *  
+ *  This is api set for byte-array storage. It used for allocation, free, read ans write for byte arrays.
+ */
+
+/** @ingroup api_storage
+ *  @section api_storage_resize Resize action
+ *
+ *  Used to resize available space inside data.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_resize { // ACTION(RESIZE)
+	fastcall_header        header;
+	uintmax_t              length;
+} fastcall_resize;
+
+/** @ingroup api_storage
+ *  @section api_storage_length Length measurement action
+ *
+ *  Used to get length of available space inside data.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_length { // ACTION(LENGTH)
+	fastcall_header        header;
+	uintmax_t              length;
+	uintmax_t              format;
+} fastcall_length;
+
+/** @ingroup api_storage
+ *  @section api_storage_read Read action
+ *
+ *  Used to read byte array from data info specified continuous buffer.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li User should provide valid buffer and buffer_size parameters. No NULL pointer allowed as weel as invalid pointer.
+ */
+/** @ingroup api_storage
+ *  @section api_storage_length Write action
+ *
+ *  Used to write byte array to data from specified continuous buffer.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li User should provide valid buffer and buffer_size parameters. No NULL pointer allowed as weel as invalid pointer.
+ */
 typedef struct fastcall_io {
 	fastcall_header        header;
 	uintmax_t              offset;
 	void                  *buffer;
 	uintmax_t              buffer_size;
 } fastcall_io;
-typedef struct fastcall_io     fastcall_read;
-typedef struct fastcall_io     fastcall_write;
+typedef struct fastcall_io     fastcall_read;  // ACTION(READ)
+typedef struct fastcall_io     fastcall_write; // ACTION(WRITE)
 
-typedef struct fastcall_length {
-	fastcall_header        header;
-	uintmax_t              length;
-	uintmax_t              format;
-} fastcall_length;
+// }}}
+// Basic arithmetic api set {{{
+/** @ingroup api
+ *  @addtogroup api_arith Basic arithmetic api set
+ */
+/** @ingroup api_arith
+ *  @page api_arith_overview Overview
+ *  
+ *  This is api set for arithmetic computations. Probably useful only for numerics, but still should be.
+ */
 
-typedef struct fastcall_alloc {
+/** @ingroup api_arith
+ *  @section api_arith_add Increment, decrement, add, sub, multiply and divide actions
+ *
+ *  Used to make increments, decrements, +, -, *, / with data.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li Better to provide data with same datatypes, or expect error
+ */
+typedef struct fastcall_arith {
 	fastcall_header        header;
-	uintmax_t              length;
-} fastcall_alloc;
+	data_t                *data2;
+} fastcall_arith;
+typedef struct fastcall_arith  fastcall_add; // ACTION(ADD)
+typedef struct fastcall_arith  fastcall_sub; // ACTION(SUB)
+typedef struct fastcall_arith  fastcall_mul; // ACTION(MULTIPLY)
+typedef struct fastcall_arith  fastcall_div; // ACTION(DIVIDE)
 
-typedef struct fastcall_resize {
+typedef struct fastcall_arith_no_arg {
 	fastcall_header        header;
-	uintmax_t              length;
-} fastcall_resize;
+} fastcall_arith_no_arg;
+typedef struct fastcall_arith_no_arg fastcall_increment; // ACTION(INCREMENT)
+typedef struct fastcall_arith_no_arg fastcall_decrement; // ACTION(DECREMENT)
 
-typedef struct fastcall_free {
+// }}}
+// Compare api set {{{
+/** @ingroup api
+ *  @addtogroup api_compare Compare api set
+ */
+/** @ingroup api_compare
+ *  @page api_compare_overview Overview
+ *  
+ *  This is api set for comparisons between datatypes.
+ */
+
+/** @ingroup api_compare
+ *  @section api_compare_is_null Is null action
+ *
+ *  Used to get is current data equals to same type empty data.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_is_null { // ACTION(IS_NULL)
 	fastcall_header        header;
-} fastcall_free;
+	uintmax_t              is_null;
+} fastcall_is_null;
+
+/** @ingroup api_compare
+ *  @section api_compare_compare Compare action
+ *
+ *  Compare current and given data. Result written to ->result field.
+ *
+ *  @return 0 Data equals
+ *  @return 1 Current data is less
+ *  @return 2 Given data is less
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_compare { // ACTION(COMPARE)
+	fastcall_header        header;
+	data_t                *data2;
+	uintmax_t              result;
+} fastcall_compare;
+// }}}
+// Items api set {{{
+/** @ingroup api
+ *  @addtogroup api_items Items api set
+ */
+/** @ingroup api_items
+ *  @page api_items_overview Overview
+ *  
+ *  This is api set is for container type of datatypes. It used to work with items stored inside containers.
+ */
+
+/** @ingroup api_items
+ *  @section api_items_create Create action
+ *  
+ *  Create new item in container.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+/** @ingroup api_items
+ *  @section api_items_lookup Lookup action
+ *  
+ *  Read item from container with given key. Returned item is copy or safe reference to stored item.
+ *
+ *  <h3> For developer </h3>
+ *  @li Return ref_t or copy of data
+ *  <h3> For user </h3>
+ *  @li Free data then it is no longer need.
+ */
+/** @ingroup api_items
+ *  @section api_items_update Update action
+ *  
+ *  Update item in container with given key. Value can be consumed.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li Get ready to data consuming process.
+ *  @li Free value then it is no longer need.
+ */
+/** @ingroup api_items
+ *  @section api_items_delete Delete action
+ *  
+ *  Delete item in container with given key.
+ *
+ *  @param value If specified - return deleted item (same as pop but for given key)
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_crud {
+	fastcall_header        header;
+	data_t                *key;
+	data_t                *value;
+} fastcall_crud;
+typedef struct fastcall_crud fastcall_create; // ACTION(CREATE)
+typedef struct fastcall_crud fastcall_lookup; // ACTION(LOOKUP)
+typedef struct fastcall_crud fastcall_update; // ACTION(UPDATE)
+typedef struct fastcall_crud fastcall_delete; // ACTION(DELETE)
+
+/** @ingroup api_items
+ *  @section api_items_push Push action
+ *  
+ *  Push item in container. Pushed item can be consumed.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li Get ready to data consuming process.
+ *  @li Free value then it is no longer need.
+ */
+typedef struct fastcall_push { // ACTION(PUSH)
+	fastcall_header        header;
+	data_t                *data;
+} fastcall_push;
+
+/** @ingroup api_items
+ *  @section api_items_pop Pop action
+ *  
+ *  Pop item from container.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li Free data then it is no longer need
+ */
+typedef struct fastcall_pop { // ACTION(POP)
+	fastcall_header        header;
+	data_t                *data;
+} fastcall_pop;
+
+/** @ingroup api_items
+ *  @section api_items_enum Enum action
+ *  
+ *  Enumerate all items in container. 
+ *
+ *  <h3> For developer </h3>
+ *  @li Return ref_t or copy of data
+ *  <h3> For user </h3>
+ *  @li Free data then it is no longer need
+ */
+typedef struct fastcall_enum { // ACTION(ENUM)
+	fastcall_header        header;
+	data_t                *dest;
+} fastcall_enum;
+// }}}
 
 typedef struct fastcall_acquire {
 	fastcall_header        header;
@@ -212,58 +438,6 @@ typedef struct fastcall_stop {
 	fastcall_header        header;
 } fastcall_stop;
 
-typedef struct fastcall_init {
-	fastcall_header        header;
-	char                  *string;
-} fastcall_init;
-
-typedef struct fastcall_copy {
-	fastcall_header        header;
-	data_t                *dest;
-} fastcall_copy;
-
-typedef struct fastcall_transfer {
-	fastcall_header        header;
-	data_t                *dest;
-	uintmax_t              transfered;
-} fastcall_transfer;
-
-struct fastcall_convert_from {
-	fastcall_header        header;
-	data_t                *src;
-	uintmax_t              format;
-	uintmax_t              transfered;
-};
-struct fastcall_convert_to {
-	fastcall_header        header;
-	data_t                *dest;
-	uintmax_t              format;
-	uintmax_t              transfered;
-};
-typedef struct fastcall_convert_to    fastcall_convert_to;
-typedef struct fastcall_convert_from  fastcall_convert_from;
-
-typedef struct fastcall_compare {
-	fastcall_header        header;
-	data_t                *data2;
-	uintmax_t              result; // 0 - equal, 1 - data1 is less, 2 - data2 is less
-} fastcall_compare;
-
-typedef struct fastcall_arith {
-	fastcall_header        header;
-	data_t                *data2;
-} fastcall_arith;
-typedef struct fastcall_arith  fastcall_add;
-typedef struct fastcall_arith  fastcall_sub;
-typedef struct fastcall_arith  fastcall_mul;
-typedef struct fastcall_arith  fastcall_div;
-
-typedef struct fastcall_arith_no_arg {
-	fastcall_header        header;
-} fastcall_arith_no_arg;
-typedef struct fastcall_arith_no_arg fastcall_increment;
-typedef struct fastcall_arith_no_arg fastcall_decrement;
-
 typedef struct fastcall_getdataptr {
 	fastcall_header        header;
 	void                  *ptr;
@@ -273,47 +447,22 @@ typedef struct fastcall_getdata {
 	data_t                *data;
 } fastcall_getdata;
 
-typedef struct fastcall_is_null {
-	fastcall_header        header;
-	uintmax_t              is_null;
-} fastcall_is_null;
-
-typedef struct fastcall_create {
-	fastcall_header        header;
-	uintmax_t              size;
-	uintmax_t              offset;
-} fastcall_create;
-
-typedef struct fastcall_delete {
-	fastcall_header        header;
-	uintmax_t              offset;
-	uintmax_t              size;
-} fastcall_delete;
-
-typedef struct fastcall_count {
-	fastcall_header        header;
-	uintmax_t              nelements;
-} fastcall_count;
-
-typedef struct fastcall_push {
-	fastcall_header        header;
-	data_t                *data;
-} fastcall_push;
-
-typedef struct fastcall_pop {
-	fastcall_header        header;
-	data_t                *data;
-} fastcall_pop;
-
-typedef struct fastcall_enum {
-	fastcall_header        header;
-	data_t                *dest;
-} fastcall_enum;
-
 typedef struct fastcall_query {
 	fastcall_header        header;
 	request_t             *request;
 } fastcall_query;
+
+typedef struct fastcall_batch { // ACTION(BATCH)
+	fastcall_header        header;
+	fastcall_header      **requests;
+} fastcall_batch;
+
+typedef struct fastcall_control { // ACTION(CONTROL)
+	fastcall_header        header;
+	uintmax_t              function;
+	data_t                *key;
+	data_t                *value;
+} fastcall_control;
 
 extern uintmax_t fastcall_nargs[];
 

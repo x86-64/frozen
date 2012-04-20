@@ -36,7 +36,6 @@ typedef struct slice_t {
 } slice_t;
 
 API slice_t *       slice_t_alloc               (data_t *data, uintmax_t offset, uintmax_t size);
-API slice_t *       slice_t_copy                (slice_t *list);
 API void            slice_t_free                (slice_t *list);
 
 #endif

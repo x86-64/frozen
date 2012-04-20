@@ -94,28 +94,6 @@ static ssize_t       data_default_write         (data_t *data, fastcall_write *f
 	memcpy(r_ptr.ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
 	return 0;
 } // }}}
-static ssize_t       data_default_copy          (data_t *src, fastcall_copy *fargs){ // {{{
-	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(src, &r_ptr) != 0)
-		return -EFAULT;
-	
-	if(fargs->dest == NULL)
-		return -EINVAL;
-	
-	if(r_ptr.ptr != NULL){
-		fastcall_length r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-		if( data_query(src, &r_len) != 0)
-			return -EFAULT;
-		
-		if( (fargs->dest->ptr = memdup(r_ptr.ptr, r_len.length)) == NULL)
-			return -EFAULT;
-	}else{
-		fargs->dest->ptr = NULL;
-	}
-	
-	fargs->dest->type = src->type;
-	return 0;
-} // }}}
 static ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs){ // {{{
 	ssize_t                ret;
 	char                   buffer1[DEF_BUFFER_SIZE], buffer2[DEF_BUFFER_SIZE];
@@ -196,18 +174,6 @@ static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null 
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
 } // }}}
-static ssize_t       data_default_transfer      (data_t *src, fastcall_transfer *fargs){ // {{{
-	ssize_t                ret;
-	
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, fargs->dest, FORMAT(native) };
-	if( (ret = data_query(src, &r_convert)) != 0)
-		return ret;
-	
-	if(fargs->header.nargs >= 4)
-		fargs->transfered = r_convert.transfered;
-	
-	return 0;
-} // }}}
 static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	uintmax_t             *transfered;
 	
@@ -224,8 +190,8 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs){ // {{{
 	switch(fargs->format){
 		case FORMAT(native):;
-			fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, dest };
-			return data_query(fargs->src, &r_transfer);
+			fastcall_convert_to r_convert = { { 3, ACTION_CONVERT_TO }, dest, FORMAT(native) };
+			return data_query(fargs->src, &r_convert);
 			
 		default:
 			break;
@@ -238,11 +204,9 @@ data_proto_t default_t_proto = {
 	.type_str        = "",
 	.api_type        = API_HANDLERS,
 	.handlers        = {
-		[ACTION_COPY]        = (f_data_func)&data_default_copy,
 		[ACTION_COMPARE]     = (f_data_func)&data_default_compare,
 		[ACTION_READ]        = (f_data_func)&data_default_read,
 		[ACTION_WRITE]       = (f_data_func)&data_default_write,
-		[ACTION_TRANSFER]    = (f_data_func)&data_default_transfer,
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
 		[ACTION_FREE]        = (f_data_func)&data_default_free,

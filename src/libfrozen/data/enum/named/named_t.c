@@ -33,11 +33,11 @@ static void      named_destroy(named_t *fdata){ // {{{
 		}
 	pthread_mutex_unlock(&named_mtx);
 } // }}}
-static void      named_ref_inc(named_t *fdata){ // {{{
-	pthread_mutex_lock(&named_mtx);
-		fdata->refs++;
-	pthread_mutex_unlock(&named_mtx);
-} // }}}
+//static void      named_ref_inc(named_t *fdata){ // {{{
+//	pthread_mutex_lock(&named_mtx);
+//		fdata->refs++;
+//	pthread_mutex_unlock(&named_mtx);
+//} // }}}
 named_t *        named_new(char *name, data_t *data){ // {{{
 	named_t               *fdata;
 	
@@ -143,14 +143,6 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 	};
 	return -ENOSYS;
 } // }}}
-static ssize_t data_named_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
-	if(src->ptr == NULL || fargs->dest == NULL)
-		return -EINVAL;
-	
-	fargs->dest->ptr = src->ptr;
-	named_ref_inc(src->ptr);
-	return 0;
-} // }}}
 static ssize_t data_named_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr == NULL)
 		return -EINVAL;
@@ -166,7 +158,6 @@ data_proto_t named_t_proto = {
 	.handler_default        = (f_data_func)&data_named_t_default,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_named_t_convert_from,
-		[ACTION_COPY]         = (f_data_func)&data_named_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_named_t_free,
 	}
 };

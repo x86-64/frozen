@@ -79,11 +79,6 @@ static ssize_t data_timestamp_t_len(data_t *data, fastcall_length *fargs){ // {{
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t data_timestamp_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
-	if( (data->ptr = malloc(sizeof(timestamp_t))) == NULL)
-		return -ENOMEM;
-	return 0;
-} // }}}
 static ssize_t data_timestamp_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
 	ssize_t                cret;
 	time_t                 data1_val, data2_val;
@@ -164,7 +159,7 @@ static ssize_t data_timestamp_t_convert_from(data_t *dst, fastcall_convert_from 
 		return -EINVAL;
 	
 	if(dst->ptr == NULL){ // no buffer, alloc new
-		if(data_timestamp_t_alloc(dst, NULL) != 0)
+		if( (dst->ptr = malloc(sizeof(timestamp_t))) == NULL)
 			return -ENOMEM;
 	}
 	
@@ -199,7 +194,6 @@ data_proto_t timestamp_proto = {
 	.type_str               = TIMESTAMPT_NAME,
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_ALLOC]          = (f_data_func)&data_timestamp_t_alloc,
 		[ACTION_LENGTH]         = (f_data_func)&data_timestamp_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_timestamp_t_compare,
 		[ACTION_INCREMENT]      = (f_data_func)&data_timestamp_t_arith_no_arg,

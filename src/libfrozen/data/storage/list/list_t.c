@@ -37,12 +37,6 @@ static ssize_t iter_list_t_convert_from(hash_t *hash_item, data_t *ctx){ // {{{
 	return (ret < 0) ? ITER_BREAK : ITER_CONTINUE;
 } // }}}
 
-static ssize_t data_list_t_alloc(data_t *data, fastcall_alloc *fargs){ // {{{
-	if( (data->ptr = list_t_alloc()) == NULL)
-		return -ENOMEM;
-	
-	return 0;
-} // }}}
 static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret               = 0;
 	ssize_t                qret;
@@ -95,7 +89,10 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
-			return data_list_t_alloc(dst, NULL);
+			if( (dst->ptr = list_t_alloc()) == NULL)
+				return -ENOMEM;
+			
+			return 0;
 			
 		case FORMAT(hash):;
 			hash_t                *config;
@@ -180,18 +177,6 @@ static ssize_t data_list_t_pop(data_t *data, fastcall_pop *fargs){ // {{{
 	
 	return list_t_pop(fdata, fargs->data);
 } // }}}
-static ssize_t data_list_t_copy(data_t *data, fastcall_copy *fargs){ // {{{
-	list_t                *fdata             = (list_t *)data->ptr;
-	
-	if(fdata == NULL)
-		return -EINVAL;
-	
-	if( (fargs->dest->ptr = list_t_copy(fdata)) == NULL)
-		return -EFAULT;
-	
-	fargs->dest->type = data->type;
-	return 0;
-} // }}}
 static ssize_t data_list_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
 	list_t                *fdata             = (list_t *)data1->ptr;
 	
@@ -222,11 +207,9 @@ data_proto_t list_t_proto = { // {{{
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_list_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_list_t_convert_from,
-		[ACTION_ALLOC]        = (f_data_func)&data_list_t_alloc,
 		[ACTION_FREE]         = (f_data_func)&data_list_t_free,
 		[ACTION_PUSH]         = (f_data_func)&data_list_t_push,
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
-		[ACTION_COPY]         = (f_data_func)&data_list_t_copy,
 		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
 		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
 	}
@@ -305,14 +288,15 @@ list_t *        list_t_alloc               (void){ // {{{
 	return list;
 } // }}}
 list_t *        list_t_copy                (list_t *list){ // {{{
+	ssize_t                ret;
 	list_t                *new_list;
 	list_chunk_t          *chunk;
 	data_t                 data_copy;
 	
 	new_list = list_t_alloc();
 	for(chunk = list->head; chunk; chunk = chunk->cnext){
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &data_copy };
-		if(data_query(&chunk->data, &r_copy) < 0)
+		holder_copy(ret, &data_copy, &chunk->data);
+		if(ret < 0)
 			goto error;
 		
 		list_t_push(new_list, &data_copy);

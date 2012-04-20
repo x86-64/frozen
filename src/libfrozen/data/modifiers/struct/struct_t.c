@@ -61,8 +61,8 @@ static ssize_t  struct_iter_unpack(hash_t *element, void *p_ctx){
 		if( (value = hash_data_find(element_params, HK(default))) == NULL)  // if not - copy default value
 			return ITER_BREAK;
 		
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &need_data };
-		if(data_query(value, &r_copy) != 0)
+		holder_copy(ret, &need_data, value);
+		if(ret < 0)
 			return ITER_BREAK;
 		
 		value          = &need_data;
@@ -112,23 +112,6 @@ uintmax_t  struct_unpack    (hash_t *structure, request_t *values, data_t *buffe
 	return data_slider_t_get_offset(&sl_buffer);
 }
 
-static ssize_t   data_struct_t_transfer(data_t *data, fastcall_transfer *fargs){ // {{{
-	struct_t              *fdata             = (struct_t *)(data->ptr);
-	
-	if(fargs->dest == NULL || fdata == NULL || fdata->values == NULL || fdata->structure == NULL)
-		return -EINVAL;
-	
-	data_t                 sl_buffer         = DATA_SLIDERT(fargs->dest, 0);
-	struct_iter_ctx        iter_ctx;
-	
-	iter_ctx.values      = fdata->values;
-	iter_ctx.buffer      = &sl_buffer;
-	
-	if(hash_iter(fdata->structure, &struct_iter_pack, &iter_ctx, 0) == ITER_BREAK)
-		return 0;
-	
-	return data_slider_t_get_offset(&sl_buffer);
-} // }}}
 static ssize_t   data_struct_t_convert_to(data_t *data, fastcall_convert_to *fargs){ // {{{
 	struct_t              *fdata             = (struct_t *)(data->ptr);
 	
@@ -158,7 +141,6 @@ data_proto_t struct_t_proto = {
 	.type_str               = "struct_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_TRANSFER]   = (f_data_func)&data_struct_t_transfer,
 		[ACTION_CONVERT_TO] = (f_data_func)&data_struct_t_convert_to,
 	}
 };

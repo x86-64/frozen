@@ -51,7 +51,7 @@ typedef struct regexp_userdata {
 	hash_t                *capture;
 	hashkey_t              input;
 	hashkey_t              marker;
-	data_t                *marker_data;
+	data_t                 marker_data;
 
 	uintmax_t              compiled;
 	uintmax_t              ncaptures;
@@ -87,26 +87,14 @@ static void    config_freeregexp(regexp_userdata *userdata){ // {{{
 } // }}}
 
 static ssize_t config_newmarkerdata(regexp_userdata *userdata, data_t *marker_data){ // {{{
-	data_t                *new_data;
-	
-	if( (new_data = malloc(sizeof(data_t))) == NULL)
-		return errorn(ENOMEM);
-	
-	fastcall_copy r_copy = { { 3, ACTION_COPY }, new_data };
-	if(data_query(marker_data, &r_copy) != 0){
-		free(new_data);
-		return error("can not copy marker data");
-	}
-	
-	userdata->marker_data = new_data;
+	ssize_t                ret;
+
+	holder_consume(ret, userdata->marker_data, marker_data);
 	return 0;
 } // }}}
 static void    config_freemarkerdata(regexp_userdata *userdata){ // {{{
-	if(userdata->marker_data != &marker_default){
-		fastcall_free r_free = { { 2, ACTION_FREE } };
-		data_query(userdata->marker_data, &r_free);
-		
-		free(userdata->marker_data);
+	if(memcmp(&userdata->marker_data, &marker_default, sizeof(data_t)) != 0){
+		data_free(&userdata->marker_data);
 	}
 } // }}}
 
@@ -118,7 +106,7 @@ static ssize_t regexp_init(machine_t *machine){ // {{{
 	
 	userdata->input       = HDK(buffer);
 	userdata->marker      = HDK(marker);
-	userdata->marker_data = &marker_default;
+	userdata->marker_data = marker_default;
 	userdata->regexp_str  = strdup(".*");
 	return 0;
 } // }}}
@@ -185,7 +173,7 @@ static ssize_t regexp_matched(machine_t *machine, request_t *request, data_t *in
 	
 	if(capture_id == 0){
 		request_t r_next[] = {
-			{ userdata->marker, *userdata->marker_data },
+			{ userdata->marker, userdata->marker_data },
 			hash_inline(request),
 			hash_end
 		};

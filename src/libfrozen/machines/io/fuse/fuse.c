@@ -328,7 +328,7 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 	if(item->type == VFS_FILE){
 		// updating size
 		request_t r_count[] = {
-			{ HK(action),  DATA_ACTIONT(ACTION_COUNT)       },
+			{ HK(action),  DATA_ACTIONT(ACTION_LENGTH)       },
 			{ HK(buffer),  DATA_PTR_OFFT(&size)                  },
 			hash_end
 		};

@@ -87,7 +87,6 @@ static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs)
 			rargs->buffer_size = fread(rargs->buffer, 1, rargs->buffer_size, *fd);
 			return 0;
 		
-		case ACTION_TRANSFER:
 		case ACTION_CONVERT_TO:
 			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
 
@@ -152,16 +151,16 @@ static ssize_t stdin_handler(machine_t *machine, request_t *request){ // {{{
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
 	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
-	if(ret == 0 && action == ACTION_TRANSFER)
+	if(ret == 0)
 		return errorn(ENOSYS);
 	
 	if( (output = hash_data_find(request, userdata->key)) == NULL)
 		return error("output key not supplied");
 	
-	fastcall_transfer r_transfer = { { 4, ACTION_TRANSFER }, output };
-	ret = data_query(&stdin_io, &r_transfer);
+	fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, output, FORMAT(native) };
+	ret = data_query(&stdin_io, &r_convert);
 	
-	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	hash_data_set(retd, TYPE_UINTT, r_convert.transfered, request, HK(size));
 	return ret;
 } // }}}
 static ssize_t stdout_handler(machine_t *machine, request_t *request){ // {{{
@@ -172,10 +171,10 @@ static ssize_t stdout_handler(machine_t *machine, request_t *request){ // {{{
 	if( (input = hash_data_find(request, userdata->key)) == NULL)
 		return error("input key not supplied");
 	
-	static fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &stdout_io };
-	ret = data_query(input, &r_transfer);
+	static fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &stdout_io, FORMAT(native) };
+	ret = data_query(input, &r_convert);
 	
-	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	hash_data_set(retd, TYPE_UINTT, r_convert.transfered, request, HK(size));
 	return ret;
 } // }}}
 static ssize_t stderr_handler(machine_t *machine, request_t *request){ // {{{
@@ -186,10 +185,10 @@ static ssize_t stderr_handler(machine_t *machine, request_t *request){ // {{{
 	if( (input = hash_data_find(request, userdata->key)) == NULL)
 		return error("input key not supplied");
 	
-	static fastcall_transfer r_transfer = { { 3, ACTION_TRANSFER }, &stderr_io };
-	ret = data_query(input, &r_transfer);
+	static fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &stderr_io, FORMAT(native) };
+	ret = data_query(input, &r_convert);
 	
-	hash_data_set(retd, TYPE_UINTT, r_transfer.transfered, request, HK(size));
+	hash_data_set(retd, TYPE_UINTT, r_convert.transfered, request, HK(size));
 	return ret;
 } // }}}
 

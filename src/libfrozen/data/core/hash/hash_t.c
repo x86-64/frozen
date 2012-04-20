@@ -145,16 +145,6 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	return ITER_CONTINUE;
 } // }}}
 
-static ssize_t data_hash_t_copy(data_t *src, fastcall_copy *fargs){ // {{{
-	hash_t                *src_hash          = (hash_t *)src->ptr;
-	data_t                *dst_data          = (data_t *)fargs->dest;
-	
-	if( (dst_data->ptr = hash_copy(src_hash)) == NULL)
-		return -EFAULT;
-	
-	dst_data->type = src->type;
-	return 0;
-} // }}}
 static ssize_t data_hash_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	hash_free(data->ptr);
 	return 0;
@@ -178,7 +168,6 @@ static ssize_t data_hash_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	hash_t_ctx             ctx               = { .hash = src->ptr };
 	
 	switch(fargs->format){
-		case FORMAT(native):
 		case FORMAT(packed):;
 			data_t                 d_sl_data         = DATA_SLIDERT(fargs->dest, 0);
 			
@@ -219,7 +208,16 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	
 	switch(fargs->format){
 		case FORMAT(native):
-		case FORMAT(packed): break;
+			if(fargs->src->type != TYPE_HASHT)
+				return -EFAULT;
+			hash = fargs->src->ptr;
+
+			if( (dst->ptr = hash_copy(hash)) == NULL)
+				return -ENOMEM;
+			return 0;
+
+		case FORMAT(packed):
+			break;
 		
 		case FORMAT(human):
 		case FORMAT(config):
@@ -313,7 +311,6 @@ data_proto_t hash_t_proto = {
 	.type_str               = "hash_t",
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_COPY]         = (f_data_func)&data_hash_t_copy,
 		[ACTION_FREE]         = (f_data_func)&data_hash_t_free,
 		[ACTION_COMPARE]      = (f_data_func)&data_hash_t_compare,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_hash_t_convert_to,
@@ -356,6 +353,7 @@ hash_t *           hash_new                     (size_t nelements){ // {{{
 	return hash;
 } // }}}
 hash_t *           hash_copy                    (hash_t *hash){ // {{{
+	ssize_t       ret;
 	unsigned int  k;
 	hash_t       *el, *el_new, *new_hash;
 	
@@ -379,8 +377,7 @@ hash_t *           hash_copy                    (hash_t *hash){ // {{{
 		el_new->data.type = el->data.type;
 		el_new->data.ptr  = NULL;
 		
-		fastcall_copy r_copy = { { 3, ACTION_COPY }, &el_new->data };
-		data_query(&el->data, &r_copy);
+		holder_copy(ret, &el_new->data, &el->data);
 		
 		el_new++;
 	}
