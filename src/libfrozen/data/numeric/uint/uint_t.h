@@ -48,10 +48,13 @@
  */
 
 #define DATA_UINTT(value) { TYPE_UINTT, (uintmax_t []){ value } } 
+#define DATA_HEAP_UINTT(value) { TYPE_UINTT, data_uint_t_alloc(value) } 
 #define DATA_PTR_UINTT(value) { TYPE_UINTT, value } 
 #define DEREF_TYPE_UINTT(_data) *(uintmax_t *)((_data)->ptr) 
 #define REF_TYPE_UINTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_UINTT 1
+
+uintmax_t * data_uint_t_alloc(uintmax_t value);
 
 #endif
 /* vim: set filetype=m4: */

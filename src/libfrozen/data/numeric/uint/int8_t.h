@@ -48,10 +48,13 @@
  */
 
 #define DATA_INT8T(value) { TYPE_INT8T, (int8_t []){ value } } 
+#define DATA_HEAP_INT8T(value) { TYPE_INT8T, data_int8_t_alloc(value) } 
 #define DATA_PTR_INT8T(value) { TYPE_INT8T, value } 
 #define DEREF_TYPE_INT8T(_data) *(int8_t *)((_data)->ptr) 
 #define REF_TYPE_INT8T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT8T 1
+
+int8_t * data_int8_t_alloc(int8_t value);
 
 #endif
 /* vim: set filetype=m4: */

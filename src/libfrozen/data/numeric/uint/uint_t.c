@@ -30,6 +30,16 @@
 #include <uint_t.h>
 #include <enum/format/format_t.h>
 
+uintmax_t * data_uint_t_alloc(uintmax_t value){ // {{{
+	uintmax_t        *ptr;
+	
+	if( (ptr = malloc(sizeof(uintmax_t))) == NULL)
+		return NULL;
+	
+	*ptr = value;
+	return ptr;
+} // }}}
+
 static ssize_t data_uint_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = sizeof(uintmax_t);
 	return 0;
@@ -165,6 +175,7 @@ static ssize_t data_uint_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	return ret;
 } // }}}
 static ssize_t data_uint_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	char                  *endptr;
 	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
 	uintmax_t              transfered                = 0;
@@ -181,9 +192,9 @@ static ssize_t data_uint_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		case FORMAT(config):;
 		case FORMAT(human):; // TODO fix it for slider_t 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
-			if(data_query(fargs->src, &r_read_str) != 0){
+			if( (ret = data_query(fargs->src, &r_read_str)) < 0){
 				// TODO memleak
-				return -EFAULT;
+				return ret;
 			}
 			
 			*(uintmax_t *)(dst->ptr) = (uintmax_t )strtoul(buffer, &endptr, 10);
@@ -193,9 +204,9 @@ static ssize_t data_uint_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		case FORMAT(native):;
 		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(uintmax_t) };
-			if(data_query(fargs->src, &r_read) != 0){
+			if( (ret = data_query(fargs->src, &r_read)) < 0){
 				// TODO memleak
-				return -EFAULT;
+				return ret;
 			}
 			
 			*(uintmax_t *)(dst->ptr) = *((uintmax_t *)buffer);

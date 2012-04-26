@@ -48,10 +48,13 @@
  */
 
 #define DATA_UINT32T(value) { TYPE_UINT32T, (uint32_t []){ value } } 
+#define DATA_HEAP_UINT32T(value) { TYPE_UINT32T, data_uint32_t_alloc(value) } 
 #define DATA_PTR_UINT32T(value) { TYPE_UINT32T, value } 
 #define DEREF_TYPE_UINT32T(_data) *(uint32_t *)((_data)->ptr) 
 #define REF_TYPE_UINT32T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_UINT32T 1
+
+uint32_t * data_uint32_t_alloc(uint32_t value);
 
 #endif
 /* vim: set filetype=m4: */

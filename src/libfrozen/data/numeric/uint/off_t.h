@@ -48,10 +48,13 @@
  */
 
 #define DATA_OFFT(value) { TYPE_OFFT, (off_t []){ value } } 
+#define DATA_HEAP_OFFT(value) { TYPE_OFFT, data_off_t_alloc(value) } 
 #define DATA_PTR_OFFT(value) { TYPE_OFFT, value } 
 #define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)->ptr) 
 #define REF_TYPE_OFFT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_OFFT 1
+
+off_t * data_off_t_alloc(off_t value);
 
 #endif
 /* vim: set filetype=m4: */

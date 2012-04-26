@@ -48,10 +48,13 @@
  */
 
 #define DATA_INTT(value) { TYPE_INTT, (intmax_t []){ value } } 
+#define DATA_HEAP_INTT(value) { TYPE_INTT, data_int_t_alloc(value) } 
 #define DATA_PTR_INTT(value) { TYPE_INTT, value } 
 #define DEREF_TYPE_INTT(_data) *(intmax_t *)((_data)->ptr) 
 #define REF_TYPE_INTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INTT 1
+
+intmax_t * data_int_t_alloc(intmax_t value);
 
 #endif
 /* vim: set filetype=m4: */

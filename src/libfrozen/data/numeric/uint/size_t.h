@@ -48,10 +48,13 @@
  */
 
 #define DATA_SIZET(value) { TYPE_SIZET, (size_t []){ value } } 
+#define DATA_HEAP_SIZET(value) { TYPE_SIZET, data_size_t_alloc(value) } 
 #define DATA_PTR_SIZET(value) { TYPE_SIZET, value } 
 #define DEREF_TYPE_SIZET(_data) *(size_t *)((_data)->ptr) 
 #define REF_TYPE_SIZET(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_SIZET 1
+
+size_t * data_size_t_alloc(size_t value);
 
 #endif
 /* vim: set filetype=m4: */

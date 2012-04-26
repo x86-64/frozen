@@ -5,6 +5,16 @@ m4_include(uint_init.m4)
 [#include <]NAME()[.h>]
 #include <enum/format/format_t.h>
 
+TYPE() * data_[]NAME()_alloc([]TYPE() value){ // {{{
+	TYPE()        *ptr;
+	
+	if( (ptr = malloc(sizeof([]TYPE()))) == NULL)
+		return NULL;
+	
+	*ptr = value;
+	return ptr;
+} // }}}
+
 static ssize_t data_[]NAME()_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = sizeof([]TYPE());
 	return 0;
@@ -140,6 +150,7 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	char                  *endptr;
 	char                   buffer[[DEF_BUFFER_SIZE]] = { 0 };
 	uintmax_t              transfered                = 0;
@@ -156,9 +167,9 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 		case FORMAT(config):;
 		case FORMAT(human):; // TODO fix it for slider_t 
 			fastcall_read r_read_str = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
-			if(data_query(fargs->src, &r_read_str) != 0){
+			if( (ret = data_query(fargs->src, &r_read_str)) < 0){
 				// TODO memleak
-				return -EFAULT;
+				return ret;
 			}
 			
 			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, &endptr, 10);
@@ -168,9 +179,9 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 		case FORMAT(native):;
 		case FORMAT(packed):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
-			if(data_query(fargs->src, &r_read) != 0){
+			if( (ret = data_query(fargs->src, &r_read)) < 0){
 				// TODO memleak
-				return -EFAULT;
+				return ret;
 			}
 			
 			*(TYPE *)(dst->ptr) = *((TYPE *)buffer);

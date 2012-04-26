@@ -48,10 +48,13 @@
  */
 
 #define DATA_INT64T(value) { TYPE_INT64T, (int64_t []){ value } } 
+#define DATA_HEAP_INT64T(value) { TYPE_INT64T, data_int64_t_alloc(value) } 
 #define DATA_PTR_INT64T(value) { TYPE_INT64T, value } 
 #define DEREF_TYPE_INT64T(_data) *(int64_t *)((_data)->ptr) 
 #define REF_TYPE_INT64T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT64T 1
+
+int64_t * data_int64_t_alloc(int64_t value);
 
 #endif
 /* vim: set filetype=m4: */
