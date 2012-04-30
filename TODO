@@ -1,7 +1,5 @@
 * new config syntax
 
-- allocator_array_t 
-- record_t from split code
 - data perthread_t wrapper
 - view_t for data in any format
 - unique_t key parameter. using LOOKUP action compare two items

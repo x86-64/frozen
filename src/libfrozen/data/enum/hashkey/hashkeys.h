@@ -137,6 +137,7 @@
 #define HK_VALUE_return_to 31314
 #define HK_VALUE_role 3146
 #define HK_VALUE_rules 6045
+#define HK_VALUE_separator 31443
 #define HK_VALUE_shop 3322
 #define HK_VALUE_silent 10049
 #define HK_VALUE_size 3249
@@ -303,6 +304,7 @@ typedef enum hashkey_t {
       HK_return_to = HK_VALUE_return_to, 
       HK_role = HK_VALUE_role, 
       HK_rules = HK_VALUE_rules, 
+      HK_separator = HK_VALUE_separator, 
       HK_shop = HK_VALUE_shop, 
       HK_silent = HK_VALUE_silent, 
       HK_size = HK_VALUE_size, 
@@ -473,6 +475,7 @@ keypair_t hashkeys[] = {
       { "return_to", HK_VALUE_return_to }, 
       { "role", HK_VALUE_role }, 
       { "rules", HK_VALUE_rules }, 
+      { "separator", HK_VALUE_separator }, 
       { "shop", HK_VALUE_shop }, 
       { "silent", HK_VALUE_silent }, 
       { "size", HK_VALUE_size }, 
