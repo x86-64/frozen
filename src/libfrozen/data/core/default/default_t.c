@@ -2,7 +2,8 @@
 
 #include <core/string/string_t.h>
 #include <enum/format/format_t.h>
-	
+#include <special/immortal/immortal_t.h>
+
 ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintmax_t write_offset, uintmax_t size, uintmax_t *ptransfered){ // {{{
 	ssize_t         ret;
 	uintmax_t       roffset                  = read_offset;
@@ -198,6 +199,18 @@ static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 immortal          = DATA_IMMORTALT(data);
+	fastcall_create        r_create          = { { 4, ACTION_CREATE }, NULL, &immortal };
+	fastcall_create        r_end             = { { 4, ACTION_CREATE }, NULL, NULL      };
+	
+	ret = data_query(fargs->dest, &r_create);
+	
+	data_query(fargs->dest, &r_end);
+	
+	return ret;
+} // }}}
 
 data_proto_t default_t_proto = {
 	.type            = TYPE_DEFAULTT,
@@ -213,6 +226,8 @@ data_proto_t default_t_proto = {
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_GETDATA]     = (f_data_func)&data_default_getdata,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
+
+		[ACTION_ENUM]        = (f_data_func)&data_default_enum,
 	}
 };
 
