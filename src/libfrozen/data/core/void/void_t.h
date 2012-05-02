@@ -23,4 +23,6 @@
 #define REF_TYPE_VOIDT(_dt) _dt
 #define HAVEBUFF_TYPE_VOIDT 0
 
+#define data_is_void(_data)   (_data)->type == TYPE_VOIDT
+
 #endif
