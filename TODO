@@ -1,8 +1,5 @@
 * new config syntax
 
-- default_t default functions sets
-- default_t tags for default function sets
-- convert_from native aka copy action for all data types
 - view_t for data in any format
 - unique_t key parameter. using LOOKUP action compare two items
 - data hash_internal_t - portable_hash wrapper
@@ -19,6 +16,8 @@
   - proxy pattern
   - replace machines and stuff in request with proxy
 - slice_t write getdata ptr handler
+- default_t default functions sets
+- default_t tags for default function sets
 
 - broken allocator_fixed_t's create/delete
 - write allocator_fixed_t push/pop same as for list_t
@@ -30,6 +29,7 @@
 
 - document data packing abillity: uint_t, list_t, hash_t is packable, container_t depend on data in it, raw_t not packable
 - review code for multi-threading support, document machine's thread-safety capabilities
+- convert_from native aka copy action for all data types
 
 - timestamp_t convert_from transfered
 
