@@ -201,9 +201,11 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
  * @retval 0       Operation successful
  */
 #define data_consume(_ret,_type,_dt,_src){                                     \
-	data_get(_ret,_type,_dt,_src);                                         \
-	if(_ret == 0){                                                         \
-		data_set_void(_src);                                           \
+	data_t  _d_consumed;                                                   \
+	data_t *_d_fix = &_d_consumed;                                         \
+	holder_consume(_ret, _d_consumed, _src);                               \
+	if(_ret >= 0){                                                         \
+		data_get(_ret, _type, _dt, _d_fix);                            \
 	}                                                                      \
 	(void)_ret;                                                            \
 }
@@ -215,11 +217,10 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
  * @retval -EINVAL Invalid source, or convertation error
  * @retval 0       Operation successful
  */
-#define holder_consume(_ret,_dt,_src){                                         \
-	if( (_src) != NULL){                                                   \
-		_dt = *(_src);                                                 \
-		data_set_void(_src);                                           \
-		_ret = 0;                                                      \
+#define holder_consume(_ret,_dst,_src){                                        \
+	if((_src) != NULL){                                                    \
+		fastcall_consume _r_consume = { { 3, ACTION_CONSUME }, &_dst };\
+		_ret = data_query((_src), &_r_consume);                        \
 	}else{                                                                 \
 		_ret = -EINVAL;                                                \
 	}                                                                      \

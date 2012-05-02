@@ -1,7 +1,5 @@
 * new config syntax
 
-- action _CONSUME
-- default_t consume handler
 - default_t default functions sets
 - default_t tags for default function sets
 - convert_from native aka copy action for all data types

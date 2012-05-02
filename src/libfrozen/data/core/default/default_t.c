@@ -95,6 +95,7 @@ static ssize_t       data_default_write         (data_t *data, fastcall_write *f
 	memcpy(r_ptr.ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
 	return 0;
 } // }}}
+
 static ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs){ // {{{
 	ssize_t                ret;
 	char                   buffer1[DEF_BUFFER_SIZE], buffer2[DEF_BUFFER_SIZE];
@@ -153,16 +154,9 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 		buffer2_size -= cmp_size;
 	}while(1);
 	return 0;
+
 } // }}}
-static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
-	
-	if(r_ptr.ptr != NULL)
-		free(r_ptr.ptr);
-	return 0;
-} // }}}
+
 static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdataptr *fargs){ // {{{
 	fargs->ptr = data->ptr;
 	return 0;
@@ -175,6 +169,7 @@ static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null 
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
 } // }}}
+
 static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	uintmax_t             *transfered;
 	
@@ -199,6 +194,24 @@ static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
+	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
+	if( data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
+		return -EFAULT;
+	
+	if(r_ptr.ptr != NULL)
+		free(r_ptr.ptr);
+	return 0;
+} // }}}
+static ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs){ // {{{
+	//ssize_t                ret;
+	//holder_copy(ret, fargs->dest, data)
+	//return ret;
+	*fargs->dest = *data;
+	data->ptr = NULL;
+	return 0;
+} // }}}
+
 static ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
 	data_t                 immortal          = DATA_IMMORTALT(data);
@@ -217,16 +230,20 @@ data_proto_t default_t_proto = {
 	.type_str        = "",
 	.api_type        = API_HANDLERS,
 	.handlers        = {
-		[ACTION_COMPARE]     = (f_data_func)&data_default_compare,
 		[ACTION_READ]        = (f_data_func)&data_default_read,
 		[ACTION_WRITE]       = (f_data_func)&data_default_write,
-		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
-		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
-		[ACTION_FREE]        = (f_data_func)&data_default_free,
+		
+		[ACTION_COMPARE]     = (f_data_func)&data_default_compare,
+		
 		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
 		[ACTION_GETDATA]     = (f_data_func)&data_default_getdata,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
-
+		
+		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
+		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
+		[ACTION_FREE]        = (f_data_func)&data_default_free,
+		[ACTION_CONSUME]     = (f_data_func)&data_default_consume,
+		
 		[ACTION_ENUM]        = (f_data_func)&data_default_enum,
 	}
 };

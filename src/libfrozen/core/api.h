@@ -179,6 +179,26 @@ typedef struct fastcall_convert_to { // ACTION(CONVERT_TO)
 typedef struct fastcall_free { // ACTION(FREE)
 	fastcall_header        header;
 } fastcall_free;
+
+/** @ingroup api_core
+ *  @section api_core_control Control action
+ *
+ *  Used to control datatype and request additional information about datatype.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ */
+typedef struct fastcall_control { // ACTION(CONTROL)
+	fastcall_header        header;
+	uintmax_t              function;
+	data_t                *key;
+	data_t                *value;
+} fastcall_control;
+
+typedef struct fastcall_consume { // ACTION(CONSUME)
+	fastcall_header        header;
+	data_t                *dest;
+} fastcall_consume;
 // }}}
 // Basic storage api set {{{
 /** @ingroup api
@@ -457,12 +477,6 @@ typedef struct fastcall_batch { // ACTION(BATCH)
 	fastcall_header      **requests;
 } fastcall_batch;
 
-typedef struct fastcall_control { // ACTION(CONTROL)
-	fastcall_header        header;
-	uintmax_t              function;
-	data_t                *key;
-	data_t                *value;
-} fastcall_control;
 
 extern uintmax_t fastcall_nargs[];
 
