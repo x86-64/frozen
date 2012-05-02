@@ -811,6 +811,7 @@ enable_uint16_t
 enable_uint32_t
 enable_uint64_t
 enable_bind_t
+enable_consumable_t
 enable_counter_t
 enable_emitter_t
 enable_env_t
@@ -1575,6 +1576,8 @@ Optional Features:
   --disable-data-uint32_t disable data uint32_t
   --disable-data-uint64_t disable data uint64_t
   --disable-data-bind_t   disable data bind_t
+  --disable-data-consumable_t
+                          disable data consumable_t
   --disable-data-counter_t
                           disable data counter_t
   --disable-data-emitter_t
@@ -19157,6 +19160,43 @@ fi
 		DATA_MAKEFILE_special_bind=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/bind/libfrozen_data_bind.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-consumable_t was given.
+if test "${enable_consumable_t+set}" = set; then :
+  enableval=$enable_consumable_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_consumable_t}" = "yes"; then
+			enable_consumable_t="no"
+		else
+			enable_consumable_t="yes"
+		fi
+	fi
+
+	if test "${enable_consumable_t}" = "yes"; then
+		DATA_DIR_consumable_t="special/consumable"
+		DATA_DEP_consumable_t=""
+		DATA_ID_consumable_t=""
+		DATA_SELECTED="$DATA_SELECTED consumable_t"
+		DATA_HEADERS="$DATA_HEADERS special/consumable/consumable_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_special_consumable" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/special/consumable/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS special/consumable"
+
+		DATA_MAKEFILE_special_consumable=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/consumable/libfrozen_data_consumable.la"
 
 	fi
 
