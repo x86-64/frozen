@@ -11,26 +11,19 @@ static ssize_t data_default_donothing(data_t *data, void *hargs){ // {{{
 } // }}}
 static void    data_fill_blanks(data_proto_t *p){ // {{{
 	uintmax_t              j;
-	f_data_func            func;
+	
+	if(p->api_type != API_HANDLERS)
+		return;
 	
 	p->type_port = portable_hash(p->type_str);
-	switch(p->api_type){
-		case API_DEFAULT_HANDLER:
-			func = p->handler_default;
-			for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++)
-				p->handlers[j] = func;
-			break;
-		case API_HANDLERS:
-			for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
-				if(!p->handlers[j]){
-					if(p->handler_default && j != ACTION_CONSUME){
-						p->handlers[j] = p->handler_default;
-					}else{
-						p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
-					}
-				}
+	for(j=0; j<sizeof(p->handlers)/sizeof(p->handlers[0]); j++){
+		if(!p->handlers[j]){
+			if(p->handler_default && j != ACTION_CONSUME){
+				p->handlers[j] = p->handler_default;
+			}else{
+				p->handlers[j] = data_protos[ TYPE_DEFAULTT ]->handlers[j];
 			}
-			break;
+		}
 	}
 } // }}}
 

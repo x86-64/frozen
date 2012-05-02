@@ -44,6 +44,6 @@ static ssize_t data_random_t_handler (data_t *data, fastcall_header *hargs){ // 
 data_proto_t random_t_proto = {
 	.type                   = TYPE_RANDOMT,
 	.type_str               = "random_t",
-	.api_type               = API_DEFAULT_HANDLER,
+	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_random_t_handler,
 };

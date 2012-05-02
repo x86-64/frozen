@@ -7,7 +7,7 @@ ssize_t mynull_handler(data_t *data, fastcall_header *hargs){
 
 data_proto_t mynull_proto = {
 	.type_str               = "mynull_t",
-	.api_type               = API_DEFAULT_HANDLER,
+	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&mynull_handler
 };
 

@@ -58,6 +58,6 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 data_proto_t emitter_t_proto = {
 	.type                   = TYPE_EMITTERT,
 	.type_str               = "emitter_t",
-	.api_type               = API_DEFAULT_HANDLER,
+	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_emitter_t_handler,
 };

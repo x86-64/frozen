@@ -72,7 +72,6 @@
 #include <enum/format/format_t.h>
 
 typedef enum data_api_type {
-	API_DEFAULT_HANDLER,
 	API_HANDLERS
 } data_api_type;
 
