@@ -5,6 +5,7 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 #include <core/default/default_t.h>
+#include <storage/raw/raw_t.h>
 
 static ssize_t       data_slice_t_handler  (data_t *data, fastcall_header *fargs){ // {{{
 	slice_t               *fdata             = (slice_t *)data->ptr;
@@ -86,9 +87,8 @@ static ssize_t       data_slice_t_convert_from    (data_t *dest, fastcall_conver
 			
 		default:                              // packed or native - create raw_t instead of slice_t
 		                                      // (coz we can not pack slice_t into raw_t in convert_to)
-			dest->type = TYPE_RAWT;
-			dest->ptr  = NULL;
-			
+			data_raw_t_empty(dest);
+
 			return data_query(dest, fargs);
 	}
 	return -ENOSYS;

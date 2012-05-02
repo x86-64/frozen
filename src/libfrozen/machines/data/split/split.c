@@ -229,7 +229,7 @@ static ssize_t split_handler(machine_t *machine, request_t *request){ // {{{
 	}else{
 		// save end of buffer to use in next request
 		data_t         hslice            = DATA_SLICET(input, lmatch_offset, ~0);
-		data_t         last_part         = { TYPE_RAWT, NULL };
+		data_t         last_part         = DATA_RAWT_EMPTY();
 		
 		fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &last_part, FORMAT(native) };
 		if( (ret = data_query(&hslice, &r_convert)) < -1)

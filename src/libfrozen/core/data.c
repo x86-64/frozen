@@ -100,8 +100,7 @@ ssize_t              data_get_continious(data_t *data, data_t *freeme, void **pt
 		goto ok;
 	}
 	
-	freeme->type = TYPE_RAWT;
-	freeme->ptr  = NULL;
+	data_raw_t_empty(freeme);
 	
 	// strange types
 	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, freeme, FORMAT(native) };
@@ -140,9 +139,8 @@ ssize_t              data_make_flat(data_t *data, format_t format, data_t *freem
 		}
 	}
 	
-	temp.type = TYPE_RAWT;
-	temp.ptr  = NULL;
-	
+	data_set_void(&temp);
+
 	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &temp, format };
 	if( (ret = data_query(data, &r_convert)) < 0)
 		return ret;

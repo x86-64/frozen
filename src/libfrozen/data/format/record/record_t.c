@@ -7,6 +7,7 @@
 #include <modifiers/slice/slice_t.h>
 #include <modifiers/slider/slider_t.h>
 #include <io/io/io_t.h>
+#include <storage/raw/raw_t.h>
 
 typedef struct enum_userdata {
 	data_t                *data;
@@ -123,8 +124,7 @@ record_t *        record_t_alloc(data_t *data, data_t *separator, uintmax_t cons
 	
 	data_set_void(&fdata->storage);
 	data_set_void(&fdata->separator);
-	fdata->item.type = TYPE_RAWT;
-	fdata->item.ptr  = NULL;
+	data_raw_t_empty(&fdata->item);
 	
 	if(data){
 		fdata->storage       = *data;

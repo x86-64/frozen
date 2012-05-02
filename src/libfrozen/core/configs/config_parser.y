@@ -104,8 +104,7 @@ hash_value :
 		ssize_t                ret;
 		data_t                 d_initstr    = DATA_PTR_STRING($1);
 		
-		$$.type = TYPE_RAWT;
-		$$.ptr  = NULL;
+		data_raw_t_empty(&$$);
 		
 		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&$$, &r_init_str)) < 0)

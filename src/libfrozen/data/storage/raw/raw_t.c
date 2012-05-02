@@ -94,7 +94,7 @@ static ssize_t raw_read(data_t *dst, data_t *src, uintmax_t offset, uintmax_t *l
 } // }}}
 
 raw_t *        raw_t_alloc(uintmax_t size){ // {{{
-	data_t                 new_raw           = { TYPE_RAWT, NULL };
+	data_t                 new_raw           = DATA_RAWT_EMPTY();
 	
 	if(raw_prepare(&new_raw, size) < 0)
 		return NULL;

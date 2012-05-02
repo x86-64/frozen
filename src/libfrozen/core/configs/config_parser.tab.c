@@ -467,7 +467,7 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    57,    57,    60,    64,    69,    78,    82,    88,    89,
-      90,   103,   116,   117,   139
+      90,   103,   115,   116,   138
 };
 #endif
 
@@ -1506,8 +1506,7 @@ yyreduce:
 		ssize_t                ret;
 		data_t                 d_initstr    = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
 		
-		(yyval.data).type = TYPE_RAWT;
-		(yyval.data).ptr  = NULL;
+		data_raw_t_empty(&(yyval.data));
 		
 		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
 		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
@@ -1520,14 +1519,14 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 116 "configs/config_parser.y"
+#line 115 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 117 "configs/config_parser.y"
+#line 116 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		datatype_t             type;
@@ -1555,7 +1554,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 139 "configs/config_parser.y"
+#line 138 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		datatype_t             type;
@@ -1583,7 +1582,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1587 "configs/config_parser.tab.c"
+#line 1586 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1814,7 +1813,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 162 "configs/config_parser.y"
+#line 161 "configs/config_parser.y"
 
 
 void yyerror(hash_t **hash, const char *msg){ // {{{

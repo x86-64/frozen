@@ -145,7 +145,7 @@ static ssize_t send_reply(machine_t *machine, request_t *request){ // {{{
 			return ret;
 	}else{
 		data_t                 d_struct          = DATA_STRUCTT(reply_struct, request);
-		data_t                 d_raw             = { TYPE_RAWT, NULL };
+		data_t                 d_raw             = DATA_RAWT_EMPTY();
 		
 		fastcall_convert_to r_convert = {
 			{ 4, ACTION_CONVERT_TO },
