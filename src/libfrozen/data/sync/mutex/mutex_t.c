@@ -71,6 +71,11 @@ static ssize_t data_mutex_t_getdata(data_t *data, fastcall_getdata *fargs){ // {
 	fargs->data = data;
 	return 0;
 } // }}}
+static ssize_t data_mutex_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	if(data->ptr)
+		mutex_t_destroy((mutex_t *)data->ptr);
+	return 0;
+} // }}}
 
 data_proto_t mutex_t_proto = {
 	.type                   = TYPE_MUTEXT,
@@ -80,5 +85,6 @@ data_proto_t mutex_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_mutex_t_convert_from,
 		[ACTION_GETDATA]      = (f_data_func)&data_mutex_t_getdata,
+		[ACTION_FREE]         = (f_data_func)&data_mutex_t_free,
 	}
 };
