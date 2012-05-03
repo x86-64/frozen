@@ -108,9 +108,6 @@ typedef struct fastcall_header {
 } fastcall_header;
 
 /*
-	// Data views
-	ACTION(GETDATAPTR),
-	
 	// Various
 	ACTION(GETDATA),
 	ACTION(QUERY),
@@ -443,6 +440,37 @@ typedef struct fastcall_enum { // ACTION(ENUM)
 	data_t                *dest;
 } fastcall_enum;
 // }}}
+// Data views api set {{{
+/** @ingroup api
+ *  @addtogroup api_view Data view api set
+ */
+/** @ingroup api_view
+ *  @page api_view_overview Overview
+ *  
+ *  This is view api set. It used for creation of current view of data value.
+ */
+
+/** @ingroup api_view
+ *  @section api_view_view View action
+ *
+ *  Used to create view for current data. It return pointer <ptr> to continious in memory chunk with length <length>.
+ *  
+ *  @param ptr      Pointer to memory chunk
+ *  @param length   Length of memory chunk
+ *  @param freeit   Data containing this view.
+ *
+ *  <h3> For developer </h3>
+ *  <h3> For user </h3>
+ *  @li Caller should free <freeit> data after call
+ */
+typedef struct fastcall_view { // ACTION(VIEW)
+	fastcall_header        header;
+	uintmax_t              format;
+	void                  *ptr;
+	uintmax_t              length;
+	data_t                 freeit;
+} fastcall_view;
+// }}}
 
 typedef struct fastcall_acquire {
 	fastcall_header        header;
@@ -458,10 +486,6 @@ typedef struct fastcall_stop {
 	fastcall_header        header;
 } fastcall_stop;
 
-typedef struct fastcall_getdataptr {
-	fastcall_header        header;
-	void                  *ptr;
-} fastcall_getdataptr;
 typedef struct fastcall_getdata {
 	fastcall_header        header;
 	data_t                *data;

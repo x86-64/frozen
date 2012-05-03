@@ -199,6 +199,7 @@ static machine_t mongrel2_reply_proto = {
 };
 
 static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ // {{{
+	ssize_t                ret;
 	data_t                *buffer;
 	char                  *p, *uuid_p, *connid_p, *path_p, *header_p, *body_p, *e;
 	uintmax_t                  uuid_l,  connid_l,  path_l,  header_l,  body_l;
@@ -206,29 +207,27 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ /
 	if( (buffer = hash_data_find(request, HK(buffer))) == NULL )
 		return -EINVAL;
 	
-	// little hack here, parsing real data would be difficult, so we accept only "plain" memory chunks
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(buffer, &r_len) != 0 || data_query(buffer, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EINVAL;
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(buffer, &r_view)) < 0)
+		return ret;
 	
-	p = r_ptr.ptr;
-	e = r_ptr.ptr + r_len.length;
+	p = r_view.ptr;
+	e = r_view.ptr + r_view.length;
 	
 	     uuid_p   = p;
-	if( (connid_p = memchr(p, ' ', (e-p))) == NULL) return -EINVAL; uuid_l   = connid_p - uuid_p;   p = ++connid_p;
-	if( (path_p   = memchr(p, ' ', (e-p))) == NULL) return -EINVAL; connid_l = path_p   - connid_p; p = ++path_p;
-	if( (header_p = memchr(p, ' ', (e-p))) == NULL) return -EINVAL; path_l   = header_p - path_p;
+	if( (connid_p = memchr(p, ' ', (e-p))) == NULL){ ret = -EINVAL; goto exit; }; uuid_l   = connid_p - uuid_p;   p = ++connid_p;
+	if( (path_p   = memchr(p, ' ', (e-p))) == NULL){ ret = -EINVAL; goto exit; }; connid_l = path_p   - connid_p; p = ++path_p;
+	if( (header_p = memchr(p, ' ', (e-p))) == NULL){ ret = -EINVAL; goto exit; }; path_l   = header_p - path_p;
 	
 	header_p++;
 	header_l = 0; sscanf(header_p, "%" SCNuMAX, &header_l);
-	if( (header_p = memchr(header_p, ':', (e-header_p))) == NULL) return -EINVAL; header_p++;
-	if(header_l >= (e-header_p)) return -EINVAL;
+	if( (header_p = memchr(header_p, ':', (e-header_p))) == NULL){ ret = -EINVAL; goto exit; }; header_p++;
+	if(header_l >= (e-header_p)){ ret = -EINVAL; goto exit; };
 	
 	body_p = header_p + header_l + 1;
 	body_l   = 0; sscanf(body_p,   "%" SCNuMAX, &body_l);
-	if( (body_p   = memchr(body_p,   ':', (e-body_p))) == NULL) return -EINVAL; body_p++;
-	if(body_l >= (e-body_p)) return -EINVAL;
+	if( (body_p   = memchr(body_p,   ':', (e-body_p))) == NULL){ ret = -EINVAL; goto exit; }; body_p++;
+	if(body_l >= (e-body_p)){ ret = -EINVAL; goto exit; };
 	
 	request_t r_next[] = {
 		{ HK(uuid),     DATA_RAW(uuid_p,   uuid_l)   },
@@ -240,7 +239,10 @@ static ssize_t mongrel2_parse_handler(machine_t *machine, request_t *request){ /
 		hash_end
 	};
 	
-	return machine_pass(machine, r_next);
+	ret = machine_pass(machine, r_next);
+exit:
+	data_free(&r_view.freeit);
+	return ret;
 } // }}}
 
 static machine_t mongrel2_parse_proto = {

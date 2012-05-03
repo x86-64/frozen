@@ -648,11 +648,16 @@ data_proto_t zmq_proto = { // {{{
 	}
 }; // }}}
 
-static ssize_t data_zeromq_msg_t_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
+static ssize_t data_zeromq_msg_t_view(data_t *data, fastcall_view *fargs){ // {{{
 	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
 	
-	fargs->ptr = zmq_msg_data(fdata);
-	return 0;
+	if(fdata){
+		fargs->ptr    = zmq_msg_data(fdata);
+		fargs->length = zmq_msg_size(fdata);
+		data_set_void(&fargs->freeit);
+		return 0;
+	}
+	return -EINVAL;
 } // }}}
 static ssize_t data_zeromq_msg_t_length(data_t *data, fastcall_length *fargs){ // {{{
 	zmq_msg_t             *fdata             = (zmq_msg_t *)data->ptr;
@@ -692,7 +697,7 @@ data_proto_t zmq_msg_proto = { // {{{
 	.type_str               = ZEROMQ_MSGT_NAME,
 	.api_type               = API_HANDLERS,
 	.handlers               = {
-		[ACTION_GETDATAPTR]     = (f_data_func)&data_zeromq_msg_t_getdataptr,
+		[ACTION_VIEW]           = (f_data_func)&data_zeromq_msg_t_view,
 		[ACTION_LENGTH]         = (f_data_func)&data_zeromq_msg_t_length,
 		[ACTION_CONVERT_TO]     = (f_data_func)&data_zeromq_msg_t_convert_to,
 		[ACTION_CONVERT_FROM]   = (f_data_func)&data_zeromq_msg_t_nosys,

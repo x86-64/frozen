@@ -108,11 +108,16 @@ static ssize_t data_raw_len(data_t *data, fastcall_length *fargs){ // {{{
 	fargs->length = fdata ? fdata->size : 0;
 	return 0;
 } // }}}
-static ssize_t data_raw_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
-	raw_t                 *fdata = ((raw_t *)data->ptr);
+static ssize_t data_raw_view(data_t *data, fastcall_view *fargs){ // {{{
+	raw_t                 *fdata             = ((raw_t *)data->ptr);
 	
-	fargs->ptr = fdata ? fdata->ptr : NULL;
-	return 0;
+	if(fdata){
+		fargs->ptr    = fdata->ptr;  
+		fargs->length = fdata->size;
+		data_set_void(&fargs->freeit);
+		return 0;
+	}
+	return -EINVAL;
 } // }}}
 static ssize_t data_raw_free(data_t *data, fastcall_free *fargs){ // {{{
 	raw_t                 *raw_data = ((raw_t *)data->ptr);
@@ -250,7 +255,7 @@ data_proto_t raw_t_proto = {
 	.properties    = DATA_GREEDY,
 	.handlers      = {
 		[ACTION_LENGTH]      = (f_data_func)&data_raw_len,
-		[ACTION_GETDATAPTR]  = (f_data_func)&data_raw_getdataptr,
+		[ACTION_VIEW]        = (f_data_func)&data_raw_view,
 		[ACTION_FREE]        = (f_data_func)&data_raw_free,
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_raw_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_raw_convert_from,

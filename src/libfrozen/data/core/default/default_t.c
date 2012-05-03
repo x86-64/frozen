@@ -3,6 +3,7 @@
 #include <core/string/string_t.h>
 #include <enum/format/format_t.h>
 #include <special/immortal/immortal_t.h>
+#include <storage/raw/raw_t.h>
 
 ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintmax_t write_offset, uintmax_t size, uintmax_t *ptransfered){ // {{{
 	ssize_t         ret;
@@ -52,47 +53,61 @@ ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintm
 } // }}}
 
 static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
+	ssize_t                ret;
 	
-	if(r_len.length == 0){
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(data, &r_view)) < 0)
+		return ret;
+	
+	if(r_view.length == 0){
 		fargs->buffer_size = 0;
+		data_free(&r_view.freeit);
 		return -1; // EOF
 	}
 	
-	if(fargs->buffer == NULL || fargs->offset > r_len.length)
+	if(fargs->buffer == NULL || fargs->offset > r_view.length){
+		data_free(&r_view.freeit);
 		return -EINVAL; // invalid range
+	}
 	
-	fargs->buffer_size = MIN(fargs->buffer_size, r_len.length - fargs->offset);
+	fargs->buffer_size = MIN(fargs->buffer_size, r_view.length - fargs->offset);
 	
 	if(fargs->buffer_size == 0){
-		fargs->buffer_size = 0;
+		data_free(&r_view.freeit);
 		return -1; // EOF
 	}
 	
-	memcpy(fargs->buffer, r_ptr.ptr + fargs->offset, fargs->buffer_size);
+	memcpy(fargs->buffer, r_view.ptr + fargs->offset, fargs->buffer_size);
+	data_free(&r_view.freeit);
 	return 0;
 } // }}}
 static ssize_t       data_default_write         (data_t *data, fastcall_write *fargs){ // {{{
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(data, &r_len) != 0 || data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
+	ssize_t                ret;
 	
-	if(r_len.length == 0)
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(data, &r_view)) < 0)
+		return ret;
+	
+	if(r_view.length == 0){
+		fargs->buffer_size = 0;
+		data_free(&r_view.freeit);
 		return -1; // EOF
+	}
 	
-	if(fargs->buffer == NULL || fargs->offset > r_len.length)
+	if(fargs->buffer == NULL || fargs->offset > r_view.length){
+		data_free(&r_view.freeit);
 		return -EINVAL; // invalid range
+	}
 	
-	fargs->buffer_size = MIN(fargs->buffer_size, r_len.length - fargs->offset);
+	fargs->buffer_size = MIN(fargs->buffer_size, r_view.length - fargs->offset);
 	
-	if(fargs->buffer_size == 0)
+	if(fargs->buffer_size == 0){
+		data_free(&r_view.freeit);
 		return -1; // EOF
+	}
 	
-	memcpy(r_ptr.ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
+	memcpy(r_view.ptr + fargs->offset, fargs->buffer, fargs->buffer_size);
+	data_free(&r_view.freeit);
 	return 0;
 } // }}}
 
@@ -157,9 +172,41 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 
 } // }}}
 
-static ssize_t       data_default_getdataptr    (data_t *data, fastcall_getdataptr *fargs){ // {{{
-	fargs->ptr = data->ptr;
-	return 0;
+static ssize_t       data_default_view          (data_t *data, fastcall_view *fargs){ // {{{
+	ssize_t                ret;
+	
+	switch(fargs->format){
+		case FORMAT(native):;
+			if(data->ptr == NULL)
+				return -EINVAL;
+			
+			fastcall_length r_len = { { 3, ACTION_LENGTH }, FORMAT(native) };
+			data_query(data, &r_len);
+			
+			fargs->ptr    = data->ptr;
+			fargs->length = r_len.length;
+			data_set_void(&fargs->freeit);
+			return 0;
+			
+		default:;
+			data_t           d_view         = DATA_RAWT_EMPTY();
+			
+			fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &d_view, fargs->format };
+			if( (ret = data_query(data, &r_convert)) < 0)
+				return ret;
+			
+			fastcall_view       r_view    = { { 6, ACTION_VIEW }, FORMAT(native) };
+			if( (ret = data_query(&d_view, &r_view)) < 0){
+				data_free(&d_view);
+				return ret;
+			}
+			
+			fargs->ptr    = r_view.ptr;
+			fargs->length = r_view.length;
+			fargs->freeit = d_view;
+			return 0;
+	}
+	return -ENOSYS;
 } // }}}
 static ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs){ // {{{
 	fargs->data = data;
@@ -195,12 +242,8 @@ static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_
 	return -ENOSYS;
 } // }}}
 static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	if( data_query(data, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
-	
-	if(r_ptr.ptr != NULL)
-		free(r_ptr.ptr);
+	if(data->ptr != NULL)
+		free(data->ptr);
 	return 0;
 } // }}}
 static ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs){ // {{{
@@ -235,7 +278,7 @@ data_proto_t default_t_proto = {
 		
 		[ACTION_COMPARE]     = (f_data_func)&data_default_compare,
 		
-		[ACTION_GETDATAPTR]  = (f_data_func)&data_default_getdataptr,
+		[ACTION_VIEW]        = (f_data_func)&data_default_view,
 		[ACTION_GETDATA]     = (f_data_func)&data_default_getdata,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
 		

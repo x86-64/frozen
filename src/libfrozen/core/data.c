@@ -91,71 +91,26 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 ssize_t              data_get_continious(data_t *data, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
 	ssize_t                ret;
 	
-	// direct pointers
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0 && r_ptr.ptr != NULL){
-		data_set_void(freeme);
-		ret = 0;
-		goto ok;
-	}
-	
-	data_raw_t_empty(freeme);
-	
-	// strange types
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, freeme, FORMAT(native) };
-	if( (ret = data_query(data, &r_convert)) < 0)
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(data, &r_view)) < 0)
 		return ret;
 	
-	if( data_query(freeme, &r_len) == 0 && data_query(freeme, &r_ptr) == 0 && r_ptr.ptr != NULL){
-		ret = 1;
-		goto ok;
-	}
-	
-	return -EFAULT;
-ok:
-	*ptr      = r_ptr.ptr;
-	*ptr_size = r_len.length;
-	return ret;
+	*ptr      = r_view.ptr;
+	*ptr_size = r_view.length;
+	*freeme   = r_view.freeit;
+	return 0;
 } // }}}
 
 ssize_t              data_make_flat(data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
 	ssize_t                ret;
-	data_t                 temp;
 	
-	// native format speed-up
-	if(format == FORMAT(native)){
-		// try direct pointers
-		fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-		fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-		if( data_query(data, &r_len) == 0 && data_query(data, &r_ptr) == 0){
-			if(r_ptr.ptr == NULL && r_len.length != 0)
-				return -EFAULT;
-			
-			data_set_void(freeme);
-			*ptr      = r_ptr.ptr;
-			*ptr_size = r_len.length;
-			return 0;
-		}
-	}
-	
-	data_set_void(&temp);
-
-	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &temp, format };
-	if( (ret = data_query(data, &r_convert)) < 0)
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, format };
+	if( (ret = data_query(data, &r_view)) < 0)
 		return ret;
 	
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(&temp, &r_len) == 0 && data_query(&temp, &r_ptr) == 0){
-		if(r_ptr.ptr == NULL && r_len.length != 0)
-			return -EFAULT;
-		
-		*freeme   = temp;
-		*ptr      = r_ptr.ptr;
-		*ptr_size = r_len.length;
-		return 1;
-	}
-	return -EFAULT;
+	*ptr      = r_view.ptr;
+	*ptr_size = r_view.length;
+	*freeme   = r_view.freeit;
+	return 0;
 } // }}}
 

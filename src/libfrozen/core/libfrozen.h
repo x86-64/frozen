@@ -84,8 +84,8 @@ void *alloca (size_t);
 #include <configs/config.h>
 #include <enums.h>
 
-#include <api.h>
 #include <data.h>
+#include <api.h>
 #include <data_selected.h>
 #include <machine.h>
 #include <machine_selected.h>

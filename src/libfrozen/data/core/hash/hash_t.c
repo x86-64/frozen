@@ -124,10 +124,9 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	data_hash_t_append_pad(ctx);
 	data_hash_t_append(ctx, buffer);
 	
-	fastcall_getdataptr r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length     r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if(data_query(&element->data, &r_ptr) == 0 && data_query(&element->data, &r_len) == 0){
-		for(k = 0; k < r_len.length; k++){
+	fastcall_view r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if(data_query(&element->data, &r_view) == 0){
+		for(k = 0; k < r_view.length; k++){
 			if((k % 32) == 0){
 				snprintf(buffer, sizeof(buffer), "   0x%.5x: ", k);
 				
@@ -136,10 +135,11 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 				data_hash_t_append(ctx, buffer);
 			}
 			
-			snprintf(buffer, sizeof(buffer), "%.2hhx ", (unsigned int)(*((char *)r_ptr.ptr + k)));
+			snprintf(buffer, sizeof(buffer), "%.2hhx ", (unsigned int)(*((char *)r_view.ptr + k)));
 			data_hash_t_append(ctx, buffer);
 		}
 	}
+	data_free(&r_view.freeit);
 	data_hash_t_append(ctx, "\n");
 	
 	return ITER_CONTINUE;

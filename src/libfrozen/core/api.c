@@ -503,7 +503,7 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_SUB] = 3,
 	[ACTION_MULTIPLY] = 3,
 	[ACTION_DIVIDE] = 3,
-	[ACTION_GETDATAPTR] = 3,
+	[ACTION_VIEW] = 6,
 	[ACTION_IS_NULL] = 3,
 };
 

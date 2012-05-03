@@ -27,15 +27,16 @@ ssize_t data_strstr(data_t *haystack, data_t *separator, uintmax_t *offset, uint
 	
 	data_t                 sl_haystack           = DATA_AUTO_SLIDERT(haystack, 0);
 	
-	fastcall_getdataptr  r_ptr = { { 3, ACTION_GETDATAPTR } };
-	fastcall_length      r_len = { { 4, ACTION_LENGTH }, 0, FORMAT(native) };
-	if( data_query(separator, &r_len) != 0 || data_query(separator, &r_ptr) != 0 || r_ptr.ptr == NULL)
-		return -EFAULT;
+	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(separator, &r_view)) < 0) 
+		return ret;
 	
-	separator_ptr = r_ptr.ptr;
-	separator_len = r_len.length;
-	if(separator_len > DEF_BUFFER_SIZE)
+	separator_ptr = r_view.ptr;
+	separator_len = r_view.length;
+	if(separator_len > DEF_BUFFER_SIZE){
+		data_free(&r_view.freeit);
 		return -EINVAL;
+	}
 	
 	while(1){
 		fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer_stack, sizeof(buffer_stack) };
@@ -58,7 +59,7 @@ ssize_t data_strstr(data_t *haystack, data_t *separator, uintmax_t *offset, uint
 				
 				fastcall_read r_read = { { 5, ACTION_READ }, 0, buffer_stack + buffer_left, sizeof(buffer_stack) - buffer_left };
 				if( (ret = data_query(&sl_haystack, &r_read)) < 0)
-					return ret;
+					goto exit;
 				
 				buffer            = buffer_stack;
 				buffer_left      += r_read.buffer_size;
@@ -71,7 +72,8 @@ ssize_t data_strstr(data_t *haystack, data_t *separator, uintmax_t *offset, uint
 				// found match
 				*offset  = original_offset + (match - buffer_stack);
 				*sep_len = separator_len;
-				return 0;
+				ret      = 0;
+				goto exit;
 			}
 			
 			buffer         = match + 1;
@@ -80,6 +82,8 @@ ssize_t data_strstr(data_t *haystack, data_t *separator, uintmax_t *offset, uint
 		
 		original_offset = original_eoffset;
 	}
+exit:
+	data_free(&r_view.freeit);
 	return ret;
 } // }}}
 ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest){ // {{{

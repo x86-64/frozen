@@ -57,8 +57,8 @@ static ssize_t data_length_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	fargs->data = &fdata->data;
 	return 0;
 } // }}}*/
-static ssize_t       data_length_t_getdataptr(data_t *data, fastcall_getdataptr *fargs){ // {{{
-	return -EINVAL;
+static ssize_t data_length_t_view(data_t *data, fastcall_view *fargs){ // {{{
+	return -ENOSYS;
 } // }}}
 static ssize_t data_length_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	ssize_t                ret;
@@ -79,7 +79,7 @@ data_proto_t length_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_length_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_length_t_convert_from,
 		//[ACTION_GETDATA]      = (f_data_func)&data_length_t_getdata,
-		[ACTION_GETDATAPTR]   = (f_data_func)&data_length_t_getdataptr,
+		[ACTION_VIEW]         = (f_data_func)&data_length_t_view,
 		[ACTION_READ]         = (f_data_func)&data_length_t_handler,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_length_t_handler,
 		[ACTION_LENGTH]       = (f_data_func)&data_length_t_handler,
