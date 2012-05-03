@@ -64,7 +64,8 @@ static ssize_t data_machine_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	return 0;
 } // }}}
 static ssize_t data_machine_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	shop_destroy((machine_t *)data->ptr);
+	if(data->ptr)
+		shop_destroy((machine_t *)data->ptr);
 	return 0;
 } // }}}
 static ssize_t data_machine_t_query(data_t *data, fastcall_query *fargs){ // {{{
