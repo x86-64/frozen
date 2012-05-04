@@ -19,6 +19,7 @@
 - default_t default functions sets
 - default_t tags for default function sets
 - remove data_make_flat, data_get_continious
+- mutex_t _VIEW handler to hold lock until .freeit freed
 
 - broken allocator_fixed_t's create/delete
 - write allocator_fixed_t push/pop same as for list_t
