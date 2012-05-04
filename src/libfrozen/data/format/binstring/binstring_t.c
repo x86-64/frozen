@@ -156,6 +156,7 @@ data_proto_t binstring_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_binstring_t_convert_from,
 		[ACTION_LENGTH]       = (f_data_func)&data_binstring_t_length,
 		[ACTION_FREE]         = (f_data_func)&data_binstring_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };
 

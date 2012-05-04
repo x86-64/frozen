@@ -158,6 +158,7 @@ data_proto_t netstring_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_netstring_t_convert_from,
 		[ACTION_LENGTH]       = (f_data_func)&data_netstring_t_length,
 		[ACTION_FREE]         = (f_data_func)&data_netstring_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };
 

@@ -159,5 +159,6 @@ data_proto_t named_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_named_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_named_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

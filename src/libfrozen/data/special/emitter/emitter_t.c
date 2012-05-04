@@ -60,4 +60,7 @@ data_proto_t emitter_t_proto = {
 	.type_str               = "emitter_t",
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_emitter_t_handler,
+	.handlers               = {
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+	}
 };

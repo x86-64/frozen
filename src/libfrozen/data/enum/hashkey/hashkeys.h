@@ -39,6 +39,7 @@
 #define HK_VALUE_data_e 9095
 #define HK_VALUE_data_g 9167
 #define HK_VALUE_data_v 9707
+#define HK_VALUE_datatype 22292
 #define HK_VALUE_default 15471
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
@@ -206,6 +207,7 @@ typedef enum hashkey_t {
       HK_data_e = HK_VALUE_data_e, 
       HK_data_g = HK_VALUE_data_g, 
       HK_data_v = HK_VALUE_data_v, 
+      HK_datatype = HK_VALUE_datatype, 
       HK_default = HK_VALUE_default, 
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
@@ -377,6 +379,7 @@ keypair_t hashkeys[] = {
       { "data_e", HK_VALUE_data_e }, 
       { "data_g", HK_VALUE_data_g }, 
       { "data_v", HK_VALUE_data_v }, 
+      { "datatype", HK_VALUE_datatype }, 
       { "default", HK_VALUE_default }, 
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 

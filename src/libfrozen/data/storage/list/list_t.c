@@ -212,6 +212,7 @@ data_proto_t list_t_proto = { // {{{
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
 		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
 		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 }; // }}}
 
@@ -237,6 +238,7 @@ data_proto_t list_end_t_proto = { // {{{
 		[ACTION_CONVERT_TO]    = (f_data_func)&data_list_end_t_convert_to,
 		[ACTION_CONVERT_FROM]  = (f_data_func)&data_list_end_t_convert_from,
 		[ACTION_GETDATA]       = (f_data_func)&data_list_end_t_getdata,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 }; // }}}
 

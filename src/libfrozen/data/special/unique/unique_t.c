@@ -74,5 +74,6 @@ data_proto_t unique_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_unique_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_unique_t_free,
 		[ACTION_PUSH]         = (f_data_func)&data_unique_t_push,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

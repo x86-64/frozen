@@ -44,6 +44,7 @@ data_proto_t random_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_random_t_handler,
 	.handlers               = {
-		[ACTION_CONVERT_TO]    = (f_data_func)&data_default_convert_to,
+		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

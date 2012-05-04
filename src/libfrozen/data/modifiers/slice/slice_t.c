@@ -124,6 +124,7 @@ data_proto_t slice_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
 		[ACTION_GETDATA]      = (f_data_func)&data_slice_t_getdata,
 		[ACTION_VIEW]         = (f_data_func)&data_slice_t_view,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };
 

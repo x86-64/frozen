@@ -2,6 +2,7 @@
 
 #include <core/string/string_t.h>
 #include <enum/format/format_t.h>
+#include <enum/hashkey/hashkey_t.h>
 #include <special/immortal/immortal_t.h>
 #include <storage/raw/raw_t.h>
 
@@ -254,6 +255,18 @@ ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs)
 	data->ptr = NULL;
 	return 0;
 } // }}}
+ssize_t       data_default_control       (data_t *data, fastcall_control *fargs){ // {{{
+	switch(fargs->function){
+		case HK(datatype):;
+			data_t                d_type    = DATA_PTR_DATATYPET(&data->type);
+			fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type, FORMAT(native) };
+			return data_query(fargs->value, &r_convert);
+			
+		default:
+			break;
+	};
+	return -ENOSYS;
+} // }}}
 
 ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
@@ -285,6 +298,7 @@ data_proto_t default_t_proto = {
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,
 		[ACTION_CONVERT_FROM]= (f_data_func)&data_default_convert_from,
 		[ACTION_FREE]        = (f_data_func)&data_default_free,
+		[ACTION_CONTROL]     = (f_data_func)&data_default_control,
 		[ACTION_CONSUME]     = (f_data_func)&data_default_consume,
 		
 		[ACTION_ENUM]        = (f_data_func)&data_default_enum,

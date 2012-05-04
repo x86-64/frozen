@@ -21,6 +21,7 @@ ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs)
 ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs);
 ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs);
 ssize_t       data_default_free          (data_t *data, fastcall_free *fargs);
+ssize_t       data_default_control       (data_t *data, fastcall_control *fargs);
 ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs);
 ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs);
 
