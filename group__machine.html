@@ -54,6 +54,8 @@
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="groups"></a>
 Modules</h2></td></tr>
+<tr class="memitem:group__mod__machine__mphf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__mphf.html">index/mphf</a></td></tr>
+<tr class="memitem:group__mod__machine__rebuild"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__rebuild.html">machine/rebuild</a></td></tr>
 <tr class="memitem:group__mod__machine__kill"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__kill.html">daemon/kill</a></td></tr>
 <tr class="memitem:group__mod__machine__thread"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__thread.html">daemon/thread</a></td></tr>
 <tr class="memitem:group__mod__machine__query"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__query.html">data/query</a></td></tr>
@@ -64,7 +66,6 @@ Modules</h2></td></tr>
 <tr class="memitem:group__mod__machine__fill"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__fill.html">index/fill</a></td></tr>
 <tr class="memitem:group__mod__machine__hashtable"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__hashtable.html">index/hashtable</a></td></tr>
 <tr class="memitem:group__mod__machine__lookup"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__lookup.html">index/lookup</a></td></tr>
-<tr class="memitem:group__mod__machine__mphf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__mphf.html">index/mphf</a></td></tr>
 <tr class="memitem:group__mod__machine__stdin"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__stdin.html">io/stdin</a></td></tr>
 <tr class="memitem:group__mod__machine__stdout"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__stdout.html">io/stdout</a></td></tr>
 <tr class="memitem:group__mod__machine__stderr"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__stderr.html">io/stderr</a></td></tr>
@@ -75,7 +76,6 @@ Modules</h2></td></tr>
 <tr class="memitem:group__mod__machine__limit"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__limit.html">machine/limit</a></td></tr>
 <tr class="memitem:group__mod__machine__morph"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__morph.html">machine/morph</a></td></tr>
 <tr class="memitem:group__mod__machine__pool"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__pool.html">machine/pool</a></td></tr>
-<tr class="memitem:group__mod__machine__rebuild"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__rebuild.html">machine/rebuild</a></td></tr>
 <tr class="memitem:group__mod__machine__assign"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__assign.html">request/assign</a></td></tr>
 <tr class="memitem:group__mod__machine__debug"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__debug.html">request/debug</a></td></tr>
 <tr class="memitem:group__mod__machine__delay"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__mod__machine__delay.html">request/delay</a></td></tr>
@@ -95,8 +95,7 @@ Modules</h2></td></tr>
 
 <h3><a class="anchor" id="machine_overview"></a>Machines overview</h3><div class="textblock">Every user request processed by one machine, or by machine shop. Machine can perform various actions: </p>
 <ul>
-<li>interact with external things, such as files, sockets, etc </li>
-<li>interact with internal things, with another machines, data </li>
+<li>interact with datatypes, such as files, sockets, etc </li>
 <li>can read, write and modify request's values</li>
 </ul>
 <p>If user request is too complex for one machine, it can be processed with shop of machines. Shop of machines process user request step by step. One machine in such shop can modify request in way another machine can understand it. Another machines can do, as we already know, external things, for example write user data to file.There is several types of requests and corresponding apis. Details described in api section. </div>
@@ -118,9 +117,7 @@ Modules</h2></td></tr>
 <li>pass any request to next machine(s) in shop </li>
 <li>etc...</li>
 </ul>
-<p>Internally all requests flow into some kind of recursive processing there each step is next machine. So, there is no such thing as async requests. Request considered finished then first machine return control to caller. But, async requests is too good to discard them, so you can use queue to save all requests and process them later, returning control almost immediatly. Of course, in such case, you should keep all data used in this request until this request will be really finished. </div>
-
-<h3><a class="anchor" id="machine_childs"></a>Parents and childs</h3><div class="textblock">Every machine, if this is not standalone machine, can have their parent(s) and child(s). Parent machine can pass to your machine requests. Childs is machines to which your machine can pass request. If machine have more than one child, request passed to every child repeatedly. If this is not that you want - you can solve it with any of path rewriting machine. Such approach is useful, because you can add child to any machine and monitor requests passed by. This can be used in logging.You can connect machines in any way you want, but there is one limit - if your configuration produce infinity loops they will not be terminated or avoided. However this is doesn't mean that you can't send requests to parent machines. Just make sure it will work. </div></div><!-- contents -->
+<p>Internally all requests flow into some kind of recursive processing there each step is next machine. So, there is no such thing as async requests. Request considered finished then first machine return control to caller. But, async requests is too good to discard them, so you can use queue to save all requests and process them later, returning control almost immediatly. Of course, in such case, you should keep all data used in this request until this request will be really finished. </div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>

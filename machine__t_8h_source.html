@@ -62,8 +62,9 @@
 <a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_MACHINET(_data) (machine_t *)((_data)-&gt;ptr)</span>
 <a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_MACHINET(_dt) _dt</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_MACHINET 0</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span>
-<a name="l00030"></a>00030 <span class="preprocessor">#endif</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define UNVIEW_TYPE_MACHINET(_ret, _dt, _view)  { _dt = (machine_t *)((_view)-&gt;ptr); _ret = 0; }</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span>
+<a name="l00031"></a>00031 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

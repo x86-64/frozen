@@ -64,8 +64,9 @@
 <a name="l00017"></a>00017 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_ACTIONT(_data) *(action_t *)((_data)-&gt;ptr)</span>
 <a name="l00018"></a>00018 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_ACTIONT(_dt) (&amp;(_dt))</span>
 <a name="l00019"></a>00019 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_ACTIONT 1</span>
-<a name="l00020"></a>00020 <span class="preprocessor"></span>
-<a name="l00021"></a>00021 <span class="preprocessor">#endif</span>
+<a name="l00020"></a>00020 <span class="preprocessor"></span><span class="preprocessor">#define UNVIEW_TYPE_ACTIONT(_ret, _dt, _view)  { _dt = *(action_t *)((_view)-&gt;ptr); _ret = 0; }</span>
+<a name="l00021"></a>00021 <span class="preprocessor"></span>
+<a name="l00022"></a>00022 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

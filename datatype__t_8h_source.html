@@ -64,10 +64,11 @@
 <a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_DATATYPET(_data) *(datatype_t *)((_data)-&gt;ptr)</span>
 <a name="l00026"></a>00026 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_DATATYPET(_dt) (&amp;(_dt))</span>
 <a name="l00027"></a>00027 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_DATATYPET 1</span>
-<a name="l00028"></a>00028 <span class="preprocessor"></span>
-<a name="l00029"></a>00029 API datatype_t     datatype_t_getid_byname(<span class="keywordtype">char</span> *name, ssize_t *pret);
-<a name="l00030"></a>00030 
-<a name="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define UNVIEW_TYPE_DATATYPET(_ret, _dt, _view)  { _dt = *(datatype_t *)((_view)-&gt;ptr); _ret = 0; }</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span>
+<a name="l00030"></a>00030 API datatype_t     datatype_t_getid_byname(<span class="keywordtype">char</span> *name, ssize_t *pret);
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 
