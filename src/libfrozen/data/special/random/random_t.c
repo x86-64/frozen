@@ -21,9 +21,6 @@ static ssize_t data_random_t_handler (data_t *data, fastcall_header *hargs){ // 
 			}
 			return 0;
 		
-		case ACTION_CONVERT_TO:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
-		
 		case ACTION_RESIZE:
 		case ACTION_FREE:
 		case ACTION_CONVERT_FROM:
@@ -46,4 +43,7 @@ data_proto_t random_t_proto = {
 	.type_str               = "random_t",
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_random_t_handler,
+	.handlers               = {
+		[ACTION_CONVERT_TO]    = (f_data_func)&data_default_convert_to,
+	}
 };

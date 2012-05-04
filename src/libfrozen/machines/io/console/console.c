@@ -88,7 +88,7 @@ static ssize_t stdin_io_handler(data_t *data, FILE **fd, fastcall_header *hargs)
 			return 0;
 		
 		case ACTION_CONVERT_TO:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ hargs->action ](data, hargs);
+			return data_default_convert_to(data, (fastcall_convert_to *)hargs);
 
 		default:
 			break;

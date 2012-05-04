@@ -52,7 +52,7 @@ ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintm
 	return 0;
 } // }}}
 
-static ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
+ssize_t       data_default_read          (data_t *data, fastcall_read *fargs){ // {{{
 	ssize_t                ret;
 	
 	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
@@ -81,7 +81,7 @@ static ssize_t       data_default_read          (data_t *data, fastcall_read *fa
 	data_free(&r_view.freeit);
 	return 0;
 } // }}}
-static ssize_t       data_default_write         (data_t *data, fastcall_write *fargs){ // {{{
+ssize_t       data_default_write         (data_t *data, fastcall_write *fargs){ // {{{
 	ssize_t                ret;
 	
 	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
@@ -111,7 +111,7 @@ static ssize_t       data_default_write         (data_t *data, fastcall_write *f
 	return 0;
 } // }}}
 
-static ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs){ // {{{
+ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs){ // {{{
 	ssize_t                ret;
 	char                   buffer1[DEF_BUFFER_SIZE], buffer2[DEF_BUFFER_SIZE];
 	uintmax_t              buffer1_size, buffer2_size, cmp_size;
@@ -172,7 +172,7 @@ static ssize_t       data_default_compare       (data_t *data1, fastcall_compare
 
 } // }}}
 
-static ssize_t       data_default_view          (data_t *data, fastcall_view *fargs){ // {{{
+ssize_t       data_default_view          (data_t *data, fastcall_view *fargs){ // {{{
 	ssize_t                ret;
 	
 	switch(fargs->format){
@@ -208,16 +208,16 @@ static ssize_t       data_default_view          (data_t *data, fastcall_view *fa
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs){ // {{{
+ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs){ // {{{
 	fargs->data = data;
 	return 0;
 } // }}}
-static ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
+ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
 } // }}}
 
-static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
+ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
 	uintmax_t             *transfered;
 	
 	if(fargs->dest == NULL)
@@ -230,7 +230,7 @@ static ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_t
 	
 	return default_transfer(src, fargs->dest, 0, 0, ~0, transfered);
 } // }}}
-static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs){ // {{{
+ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs){ // {{{
 	switch(fargs->format){
 		case FORMAT(native):;
 			fastcall_convert_to r_convert = { { 3, ACTION_CONVERT_TO }, dest, FORMAT(native) };
@@ -241,12 +241,12 @@ static ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
+ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr != NULL)
 		free(data->ptr);
 	return 0;
 } // }}}
-static ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs){ // {{{
+ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs){ // {{{
 	//ssize_t                ret;
 	//holder_copy(ret, fargs->dest, data)
 	//return ret;
@@ -255,7 +255,7 @@ static ssize_t       data_default_consume       (data_t *data, fastcall_consume 
 	return 0;
 } // }}}
 
-static ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
+ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
 	data_t                 immortal          = DATA_IMMORTALT(data);
 	fastcall_create        r_create          = { { 4, ACTION_CREATE }, NULL, &immortal };

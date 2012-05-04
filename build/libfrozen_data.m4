@@ -83,6 +83,8 @@ AC_DEFUN([FROZEN_DATA_END],[
 		for h in $DATA_HEADERS; do
 			echo "#include <$h>" >> $data_selected_h
 		done;
+		echo "#else" >> $data_selected_h
+			echo "#include <core/default/default_t.h>" >> $data_selected_h
 		echo "#endif" >> $data_selected_h
 		
 		echo "#ifdef DATA_C" >> $data_selected_h

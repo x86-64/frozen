@@ -57,10 +57,6 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 			}
 			
 			return ret;
-		
-		case ACTION_CONVERT_TO:
-		case ACTION_GETDATA:
-			return data_protos[ TYPE_DEFAULTT ]->handlers[ fargs->action ](data, fargs);
 
 		default:
 			break;
@@ -142,5 +138,8 @@ data_proto_t slider_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_slider_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_slider_t_free,
 		[ACTION_LENGTH]       = (f_data_func)&data_slider_t_length,
+		
+		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,
+		[ACTION_GETDATA]      = (f_data_func)&data_default_getdata,
 	}
 };

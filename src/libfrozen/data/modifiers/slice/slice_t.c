@@ -4,7 +4,6 @@
 #include <enum/format/format_t.h>
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
-#include <core/default/default_t.h>
 #include <storage/raw/raw_t.h>
 
 static ssize_t       data_slice_t_handler  (data_t *data, fastcall_header *fargs){ // {{{

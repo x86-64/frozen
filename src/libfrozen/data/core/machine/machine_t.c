@@ -4,7 +4,6 @@
 #include <core/string/string_t.h>
 #include <core/hash/hash_t.h>
 #include <enum/format/format_t.h>
-#include <core/default/default_t.h>
 
 static ssize_t data_machine_t_default(data_t *data, void *hargs){ // {{{
 	return machine_fast_query((machine_t *)data->ptr, hargs);
