@@ -5,7 +5,6 @@
 - data hash_internal_t - portable_hash wrapper
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
 - machine 'exec'
-- portable action_t packed format
 - machine rate-limit
 - benchmark, limit - rewrite to use ACTION_CONTROL
 - netstring_t parse (get code from mongrel for parsing)

@@ -6,14 +6,46 @@
 #define ERRORS_MODULE_ID 51
 #define ERRORS_MODULE_NAME "enum/action"
 
+#define PACKED uintmax_t
+
+static ssize_t action_t_find_value(char **string, action_t value){ // {{{
+	keypair_t             *kp;
+	
+	for(kp = &actions[0]; kp->key_str != NULL; kp++){
+		if(kp->key_val == value){
+			*string = kp->key_str;
+			return 0;
+		}
+	}
+	return -EINVAL;
+} // }}}
+static ssize_t action_t_find_string(char *string, action_t *value){ // {{{
+	keypair_t             *kp;
+	
+	for(kp = &actions[0]; kp->key_str != NULL; kp++){
+		if(strcasecmp(kp->key_str, string) == 0){
+			*value = kp->key_val;
+			return 0;
+		}
+	}
+	return -EINVAL;
+} // }}}
+static ssize_t action_t_find_packed(PACKED packed, action_t *value){ // {{{
+	keypair_t             *kp;
+	
+	for(kp = &actions[0]; kp->key_str != NULL; kp++){
+		if( portable_hash(kp->key_str) == packed ){
+			*value = kp->key_val;
+			return 0;
+		}
+	}
+	return -EINVAL;
+} // }}}
+
 static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              transfered        = 0;
-	keypair_t             *kp;
 	char                   buffer[DEF_BUFFER_SIZE];
-	
-	if(fargs->src == NULL)
-		return -EINVAL;
 	
 	if(dst->ptr == NULL){ // no buffer, alloc new
 		if( (dst->ptr = malloc(sizeof(action_t))) == NULL)
@@ -24,26 +56,26 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 		case FORMAT(config):;
 		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
-			if(data_query(fargs->src, &r_read) != 0)
-				return -EFAULT;
+			if( (ret = data_query(fargs->src, &r_read)) < 0)
+				return ret;
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			ret = -EINVAL;
-			for(kp = &actions[0]; kp->key_str != NULL; kp++){
-				if(strcasecmp(kp->key_str, buffer) == 0){
-					*(action_t *)(dst->ptr) = kp->key_val;
-					ret        = 0;
-					transfered = strlen(kp->key_str);
-					break;
-				}
-			}
+			ret        = action_t_find_string(buffer, (action_t *)dst->ptr);
+			transfered = r_read.buffer_size;
 			break;
 			
 		case FORMAT(packed):;
-			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(action_t) };
-			ret        = data_query(fargs->src, &r_read2);
-			transfered = sizeof(action_t);
+			PACKED          packed;
+			
+			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, &packed, sizeof(packed) };
+			if( (ret = data_query(fargs->src, &r_read2)) < 0)
+				return ret;
+			
+			if( (ret = action_t_find_packed(packed, (action_t *)dst->ptr)) < 0)
+				return ret;
+			
+			transfered = r_read2.buffer_size;
 			break;
 		
 		default:
@@ -58,7 +90,6 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	ssize_t                ret;
 	action_t               value;
 	uintmax_t              transfered;
-	keypair_t             *kp;
 	char                  *string            = "(unknown)";
 	
 	if(fargs->dest == NULL || src->ptr == NULL)
@@ -66,26 +97,22 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	
 	value = *(action_t *)src->ptr;
 	
+	if( (ret = action_t_find_value(&string, value)) < 0)
+		return ret;
+	
 	switch(fargs->format){
 		case FORMAT(config):;
 		case FORMAT(native):;
 		case FORMAT(human):;
-			// find in static keys first
-			for(kp = &actions[0]; kp->key_str != NULL; kp++){
-				if(kp->key_val == value){
-					string = kp->key_str;
-					goto found;
-				}
-			}
-		
-		found:;
 			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, string, strlen(string) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
 			break;
 		
 		case FORMAT(packed):;
-			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &value, sizeof(value) };
+			PACKED        packed = portable_hash(string);
+			
+			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &packed, sizeof(packed) };
 			ret        = data_query(fargs->dest, &r_write2);
 			transfered = r_write.buffer_size;
 			break;
@@ -100,9 +127,11 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 } // }}}		
 static ssize_t data_action_t_len(data_t *data, fastcall_length *fargs){ // {{{
 	switch(fargs->format){
-		case FORMAT(packed):
 		case FORMAT(native):
 			fargs->length = sizeof(action_t);
+			return 0;
+		case FORMAT(packed):
+			fargs->length = sizeof(PACKED);
 			return 0;
 		default:
 			break;
