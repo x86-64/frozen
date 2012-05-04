@@ -18,6 +18,7 @@
 - slice_t write getdata ptr handler
 - default_t default functions sets
 - default_t tags for default function sets
+- remove data_make_flat, data_get_continious
 
 - broken allocator_fixed_t's create/delete
 - write allocator_fixed_t push/pop same as for list_t
