@@ -32,6 +32,4 @@
 - review code for multi-threading support, document machine's thread-safety capabilities
 - convert_from native aka copy action for all data types
 
-- timestamp_t convert_from transfered
-
 - data 'range_t'
