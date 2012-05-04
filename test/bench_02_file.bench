@@ -2,7 +2,7 @@
 { class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "restart" } } },
 { class => "emitter", request = { machine = (machine_t)"file",
 	request = {
-		action => (action_t)"create",
+		action => (action_t)"write",
 		size   => (size_t)'100',
 		buffer => "abcdefghjklmnopqrstuvwxyz"
 	}
