@@ -155,10 +155,11 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @see data_get
  */
 #define hash_data_get(_ret,_type,_dt,_hash,_key){                  \
+	data_t *_d = hash_data_find(_hash,_key);                    \
 	data_get(_ret,                                              \
 		_type,                                              \
 		_dt,                                                \
-		hash_data_find(_hash,_key)                          \
+		_d                                                  \
 	);                                                          \
 	(void)_ret;                                                 \
 };
@@ -172,10 +173,11 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @see data_get
  */
 #define hash_data_consume(_ret,_type,_dt,_hash,_key){               \
+	data_t *_d = hash_data_find(_hash,_key);                    \
 	data_consume(_ret,                                          \
 		_type,                                              \
 		_dt,                                                \
-		hash_data_find(_hash,_key)                          \
+		_d                                                  \
 	);                                                          \
 	(void)_ret;                                                 \
 };
@@ -188,9 +190,10 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @see data_get
  */
 #define hash_holder_consume(_ret,_data,_hash,_key){                 \
+	data_t *_d = hash_data_find(_hash,_key);                    \
 	holder_consume(_ret,                                        \
 		_data,                                              \
-		hash_data_find(_hash,_key)                          \
+		_d                                                  \
 	);                                                          \
 };
 
@@ -203,10 +206,11 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @see data_get
  */
 #define hash_data_convert(_ret,_type,_dt,_hash,_key){               \
+	data_t *_d = hash_data_find(_hash,_key);                    \
 	data_convert(_ret,                                          \
 		_type,                                              \
 		_dt,                                                \
-		hash_data_find(_hash,_key)                          \
+		_d                                                  \
 	);                                                          \
 	(void)_ret;                                                 \
 };
@@ -220,10 +224,11 @@ API ssize_t            hash_iter                    (hash_t *hash, hash_iterator
  * @see data_get
  */
 #define hash_data_set(_ret,_type,_dt,_hash,_key){                   \
+	data_t *_d = hash_data_find(_hash,_key);                    \
 	data_set(_ret,                                              \
 		_type,                                              \
 		_dt,                                                \
-		hash_data_find(_hash,_key)                          \
+		_d                                                  \
 	);                                                          \
 	(void)_ret;                                                 \
 };
