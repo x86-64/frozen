@@ -53,6 +53,7 @@
 #define DEREF_TYPE_SIZET(_data) *(size_t *)((_data)->ptr) 
 #define REF_TYPE_SIZET(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_SIZET 1
+#define UNVIEW_TYPE_SIZET(_ret, _dt, _view)  {  _dt = *(size_t *)((_view)->ptr); _ret = 0; } 
 
 size_t * data_size_t_alloc(size_t value);
 

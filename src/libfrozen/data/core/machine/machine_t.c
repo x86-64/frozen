@@ -86,6 +86,7 @@ data_proto_t machine_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_machine_t_free,
 		[ACTION_QUERY]        = (f_data_func)&data_machine_t_query,
 		[ACTION_GETDATA]      = (f_data_func)&data_machine_t_getdata,
+		[ACTION_VIEW]         = (f_data_func)&data_default_view,
 		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

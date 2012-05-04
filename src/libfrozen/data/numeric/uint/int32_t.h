@@ -53,6 +53,7 @@
 #define DEREF_TYPE_INT32T(_data) *(int32_t *)((_data)->ptr) 
 #define REF_TYPE_INT32T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT32T 1
+#define UNVIEW_TYPE_INT32T(_ret, _dt, _view)  {  _dt = *(int32_t *)((_view)->ptr); _ret = 0; } 
 
 int32_t * data_int32_t_alloc(int32_t value);
 

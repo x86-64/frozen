@@ -28,5 +28,6 @@
 #define DEREF_TYPE_HASHKEYT(_data) *(hashkey_t *)((_data)->ptr)
 #define REF_TYPE_HASHKEYT(_dt) (&(_dt))
 #define HAVEBUFF_TYPE_HASHKEYT 1
+#define UNVIEW_TYPE_HASHKEYT(_ret, _dt, _view)  { _dt = *(hashkey_t *)((_view)->ptr); _ret = 0; }
 
 #endif

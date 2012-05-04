@@ -24,5 +24,6 @@
 #define DEREF_TYPE_STRINGT(_data) (char *)((_data)->ptr)
 #define REF_TYPE_STRINGT(_dt) _dt
 #define HAVEBUFF_TYPE_STRINGT 0
+#define UNVIEW_TYPE_STRINGT(_ret, _dt, _view)  { _dt = (char *)((_view)->ptr); _ret = 0; }
 
 #endif

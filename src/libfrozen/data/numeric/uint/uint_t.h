@@ -53,6 +53,7 @@
 #define DEREF_TYPE_UINTT(_data) *(uintmax_t *)((_data)->ptr) 
 #define REF_TYPE_UINTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_UINTT 1
+#define UNVIEW_TYPE_UINTT(_ret, _dt, _view)  {  _dt = *(uintmax_t *)((_view)->ptr); _ret = 0; } 
 
 uintmax_t * data_uint_t_alloc(uintmax_t value);
 

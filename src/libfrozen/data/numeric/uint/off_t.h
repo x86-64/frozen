@@ -53,6 +53,7 @@
 #define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)->ptr) 
 #define REF_TYPE_OFFT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_OFFT 1
+#define UNVIEW_TYPE_OFFT(_ret, _dt, _view)  {  _dt = *(off_t *)((_view)->ptr); _ret = 0; } 
 
 off_t * data_off_t_alloc(off_t value);
 

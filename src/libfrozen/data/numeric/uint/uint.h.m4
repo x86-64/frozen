@@ -29,6 +29,7 @@ m4_include(uint_init.m4)
 [#define DEREF_TYPE_]DEF()[(_data) *(]TYPE()[ *)((_data)->ptr) ]
 [#define REF_TYPE_]DEF()[(_dt) (&(_dt)) ]
 [#define HAVEBUFF_TYPE_]DEF() 1
+[#define UNVIEW_TYPE_]DEF()[(_ret, _dt, _view)  {  _dt = *(]TYPE()[ *)((_view)->ptr); _ret = 0; } ]
 
 TYPE() * data_[]NAME()_alloc([]TYPE() value);
 

@@ -53,6 +53,7 @@
 #define DEREF_TYPE_INT16T(_data) *(int16_t *)((_data)->ptr) 
 #define REF_TYPE_INT16T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT16T 1
+#define UNVIEW_TYPE_INT16T(_ret, _dt, _view)  {  _dt = *(int16_t *)((_view)->ptr); _ret = 0; } 
 
 int16_t * data_int16_t_alloc(int16_t value);
 

@@ -53,6 +53,7 @@
 #define DEREF_TYPE_INT8T(_data) *(int8_t *)((_data)->ptr) 
 #define REF_TYPE_INT8T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT8T 1
+#define UNVIEW_TYPE_INT8T(_ret, _dt, _view)  {  _dt = *(int8_t *)((_view)->ptr); _ret = 0; } 
 
 int8_t * data_int8_t_alloc(int8_t value);
 

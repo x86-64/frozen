@@ -35,6 +35,7 @@
 #define DEREF_TYPE_HASHT(_data) (hash_t *)((_data)->ptr)
 #define REF_TYPE_HASHT(_dt) _dt
 #define HAVEBUFF_TYPE_HASHT 0
+#define UNVIEW_TYPE_HASHT(_ret, _dt, _view)  { _dt = (hash_t *)((_view)->ptr); _ret = 0; }
 
 
 /** @file hash.h */

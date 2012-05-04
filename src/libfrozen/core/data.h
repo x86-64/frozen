@@ -178,9 +178,25 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
  * @retval 0       Operation successful
  */
 #define data_get(_ret,_type,_dt,_src){                                         \
-	if((_src) != NULL && (_src)->type == _type){                           \
-		_dt  = DEREF_##_type(_src);                                    \
-		_ret = 0;                                                      \
+	datatype_t       _datatype;                                            \
+	data_t           _d_type    = DATA_PTR_DATATYPET(&_datatype);          \
+	fastcall_control _r_control = {                                        \
+		{ 5, ACTION_CONTROL },                                         \
+		HK(datatype), NULL, &_d_type                                   \
+	};                                                                     \
+	if(                                                                    \
+		(_src) != NULL &&                                              \
+		data_query((_src), &_r_control) >= 0 &&                        \
+		_datatype == _type                                             \
+	){                                                                     \
+		fastcall_view _r_view = {                                      \
+			{ 6, ACTION_VIEW },                                    \
+			FORMAT(native)                                         \
+		};                                                             \
+		if( (_ret = data_query((_src), &_r_view)) >= 0){               \
+			UNVIEW_##_type(_ret, _dt, &_r_view);                   \
+			data_free(&_r_view.freeit);                            \
+		}                                                              \
 	}else{                                                                 \
 		if( HAVEBUFF_##_type == 1 ){                                   \
 			data_convert(_ret, _type, _dt, _src);                  \

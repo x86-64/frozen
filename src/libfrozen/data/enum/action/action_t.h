@@ -17,5 +17,6 @@
 #define DEREF_TYPE_ACTIONT(_data) *(action_t *)((_data)->ptr)
 #define REF_TYPE_ACTIONT(_dt) (&(_dt))
 #define HAVEBUFF_TYPE_ACTIONT 1
+#define UNVIEW_TYPE_ACTIONT(_ret, _dt, _view)  { _dt = *(action_t *)((_view)->ptr); _ret = 0; }
 
 #endif

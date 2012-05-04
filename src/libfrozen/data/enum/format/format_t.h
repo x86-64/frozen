@@ -25,5 +25,6 @@
 #define DEREF_TYPE_FORMATT(_data) *(format_t *)((_data)->ptr)
 #define REF_TYPE_FORMATT(_dt) (&(_dt))
 #define HAVEBUFF_TYPE_FORMATT 1
+#define UNVIEW_TYPE_FORMATT(_ret, _dt, _view)  { _dt = *(format_t *)((_view)->ptr); _ret = 0; }
 
 #endif
