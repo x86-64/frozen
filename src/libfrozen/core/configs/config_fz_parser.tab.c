@@ -62,25 +62,38 @@
 #define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
-#define yyparse         config_parse
-#define yylex           config_lex
-#define yyerror         config_error
-#define yylval          config_lval
-#define yychar          config_char
-#define yydebug         config_debug
-#define yynerrs         config_nerrs
+#define yyparse         config_fz_parse
+#define yylex           config_fz_lex
+#define yyerror         config_fz_error
+#define yylval          config_fz_lval
+#define yychar          config_fz_char
+#define yydebug         config_fz_debug
+#define yynerrs         config_fz_nerrs
 
 
 /* Copy the first part of user declarations.  */
 
 /* Line 268 of yacc.c  */
-#line 1 "configs/config_parser.y"
+#line 1 "configs/config_fz_parser.y"
 
 #include <libfrozen.h>
 #include <configs/config.h>
-#include <configs/config_parser.tab.h>	
+#include <configs/config_fz_parser.tab.h>	
 
-static void yyerror (hash_t **, const char *);
+typedef enum fz_keyword {
+	KEYWORD_LOCAL  = 1,
+	KEYWORD_GLOBAL = 2,
+} fz_keyword;
+
+keypair_t fz_keywords[] = {
+	{ "local",  KEYWORD_LOCAL  },
+	{ "global", KEYWORD_GLOBAL },
+	{ NULL, 0 }
+};
+
+static void          yyerror(hash_t **, const char *);
+static ssize_t       config_fz_keyword(uintmax_t *keyword, char *string);
+static ssize_t       config_fz_keyword_validate(uintmax_t *pkeyword);
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE config__scan_string (const char *string);  
@@ -99,10 +112,12 @@ extern char *config_get_text(void);
 		YYERROR;                                                    \
 	}while(0); }
 
+#define config_fz_lex config_lex
+
 
 
 /* Line 268 of yacc.c  */
-#line 106 "configs/config_parser.tab.c"
+#line 121 "configs/config_fz_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -143,18 +158,22 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 32 "configs/config_parser.y"
+#line 47 "configs/config_fz_parser.y"
 
-	hash_t     *hash_items;
-	hash_t      hash_item;
-	hashkey_t   key;
+	hash_t     *entities;
+	hash_t      entity;
+	
 	char       *name;
 	data_t      data;
+	
+	hashkey_t   hashkey;
+	datatype_t  datatype;
+	uintmax_t   keyword;
 
 
 
 /* Line 293 of yacc.c  */
-#line 158 "configs/config_parser.tab.c"
+#line 177 "configs/config_fz_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -166,7 +185,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 170 "configs/config_parser.tab.c"
+#line 189 "configs/config_fz_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -383,18 +402,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   29
+#define YYLAST   49
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  13
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  14
+#define YYNRULES  27
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  24
+#define YYNSTATES  49
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -410,15 +429,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      10,    11,     2,     2,     7,     2,     2,     2,     2,     2,
+      12,    13,     2,     2,    10,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     7,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     8,     2,     9,     2,     2,     2,     2,
+       2,     2,     2,     8,    11,     9,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -440,25 +459,30 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     6,     8,    12,    15,    17,    18,
-      21,    24,    26,    30,    35
+       0,     0,     3,     5,     6,     8,    11,    14,    17,    23,
+      24,    26,    33,    35,    39,    40,    42,    46,    48,    52,
+      54,    58,    61,    66,    68,    72,    74,    76
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      13,     0,    -1,    14,    -1,    -1,    15,    -1,    14,     7,
-      15,    -1,    16,    17,    -1,     6,    -1,    -1,     6,     5,
-      -1,     3,     5,    -1,     4,    -1,     8,    14,     9,    -1,
-      10,     3,    11,     4,    -1,    10,     3,    11,     8,    14,
-       9,    -1
+      15,     0,    -1,    16,    -1,    -1,    17,    -1,    16,    17,
+      -1,    18,     7,    -1,    20,     7,    -1,    26,     3,     8,
+      19,     9,    -1,    -1,    23,    -1,    24,     8,    21,     9,
+      10,    19,    -1,     3,    -1,    20,    11,    20,    -1,    -1,
+      22,    -1,    21,    10,    22,    -1,    23,    -1,    25,     5,
+      23,    -1,     4,    -1,     8,    21,     9,    -1,    24,     4,
+      -1,    24,     8,    21,     9,    -1,     3,    -1,    12,    24,
+      13,    -1,     3,    -1,     3,    -1,    26,    26,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    48,    48,    51,    55,    60,    69,    73,    79,    80,
-      81,    94,   106,   107,   129
+       0,    71,    71,    75,    79,    84,    94,    98,   106,   117,
+     120,   123,   147,   150,   157,   161,   166,   176,   180,   187,
+     199,   200,   214,   230,   241,   245,   257,   263
 };
 #endif
 
@@ -468,8 +492,10 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "NAME", "STRING", "ASSIGN", "TNULL",
-  "','", "'{'", "'}'", "'('", "')'", "$accept", "start", "hash_items",
-  "hash_item", "hash_name", "hash_value", 0
+  "';'", "'{'", "'}'", "','", "'|'", "'('", "')'", "$accept", "start",
+  "entities", "entity", "entity_data", "entity_data_item",
+  "entity_pipeline", "hash_items", "hash_item", "data", "datatype",
+  "hashkey", "keyword", 0
 };
 #endif
 
@@ -478,23 +504,25 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,    44,   123,   125,
-      40,    41
+       0,   256,   257,   258,   259,   260,   261,    59,   123,   125,
+      44,   124,    40,    41
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    12,    13,    14,    14,    14,    15,    15,    16,    16,
-      16,    17,    17,    17,    17
+       0,    14,    15,    16,    16,    16,    17,    17,    18,    19,
+      19,    19,    20,    20,    21,    21,    21,    22,    22,    23,
+      23,    23,    23,    24,    24,    25,    26,    26
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     0,     1,     3,     2,     1,     0,     2,
-       2,     1,     3,     4,     6
+       0,     2,     1,     0,     1,     2,     2,     2,     5,     0,
+       1,     6,     1,     3,     0,     1,     3,     1,     3,     1,
+       3,     2,     4,     1,     3,     1,     1,     2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -502,64 +530,76 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       8,     0,     7,     0,     2,     4,     0,    10,     9,     1,
-       8,    11,     8,     0,     6,     5,     0,     0,    12,     0,
-      13,     8,     0,    14
+       3,    12,     0,     2,     4,     0,     0,     0,     1,     5,
+       6,     7,     0,    26,     0,    12,    13,     9,    26,    23,
+      19,    14,     0,     0,    10,     0,    23,     0,    15,    17,
+       0,     0,     0,     8,    21,    14,    20,     0,    14,     0,
+      24,     0,    16,     0,    18,    22,    22,     9,    11
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,     5,     6,    14
+      -1,     2,     3,     4,     5,    23,     6,    27,    28,    29,
+      30,    31,     7
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -13
+#define YYPACT_NINF -18
 static const yytype_int8 yypact[] =
 {
-       1,     6,    13,    12,    16,   -13,    11,   -13,   -13,   -13,
-      14,   -13,     7,    22,   -13,   -13,    -4,    17,   -13,    -2,
-     -13,     7,    15,   -13
+       9,    15,    10,     9,   -18,    17,     8,    26,   -18,   -18,
+     -18,   -18,    35,    18,    36,   -18,    29,    -1,   -18,   -18,
+     -18,     1,     5,    32,   -18,    12,    37,    23,   -18,   -18,
+      19,    38,    31,   -18,   -18,     1,   -18,     1,     1,    -1,
+     -18,    25,   -18,    27,   -18,    39,   -18,    -1,   -18
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -13,   -13,   -12,    19,   -13,   -13
+     -18,   -18,   -18,    42,   -18,     0,    34,   -10,    11,   -17,
+     -16,   -18,     7
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -4
+#define YYTABLE_NINF -27
 static const yytype_int8 yytable[] =
 {
-      16,    -3,    20,    10,     1,    18,    21,     2,    -3,    22,
-       1,     7,     9,     2,    -3,    11,    -3,     1,     8,    12,
-       2,    13,    10,    10,    23,    17,     0,     0,    19,    15
+      24,    25,    19,    20,    26,    20,    32,    21,    19,    21,
+       8,    22,     1,    22,    14,    11,    34,    22,   -26,    12,
+      35,    14,    44,    34,    10,    41,    17,    38,    43,    13,
+      24,    25,    36,    37,    45,    37,    46,    37,    15,    18,
+      12,    33,   -25,    39,    40,     9,    16,    48,    42,    47
 };
 
 #define yypact_value_is_default(yystate) \
-  ((yystate) == (-13))
+  ((yystate) == (-18))
 
 #define yytable_value_is_error(yytable_value) \
   YYID (0)
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      12,     0,     4,     7,     3,     9,     8,     6,     7,    21,
-       3,     5,     0,     6,     7,     4,     9,     3,     5,     8,
-       6,    10,     7,     7,     9,     3,    -1,    -1,    11,    10
+      17,    17,     3,     4,     3,     4,    22,     8,     3,     8,
+       0,    12,     3,    12,     7,     7,     4,    12,     3,    11,
+       8,    14,    39,     4,     7,    35,     8,     8,    38,     3,
+      47,    47,     9,    10,     9,    10,     9,    10,     3,     3,
+      11,     9,     5,     5,    13,     3,    12,    47,    37,    10
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     6,    13,    14,    15,    16,     5,     5,     0,
-       7,     4,     8,    10,    17,    15,    14,     3,     9,    11,
-       4,     8,    14,     9
+       0,     3,    15,    16,    17,    18,    20,    26,     0,    17,
+       7,     7,    11,     3,    26,     3,    20,     8,     3,     3,
+       4,     8,    12,    19,    23,    24,     3,    21,    22,    23,
+      24,    25,    24,     9,     4,     8,     9,    10,     8,     5,
+      13,    21,    22,    21,    23,     9,     9,    10,    19
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1401,179 +1441,331 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 48 "configs/config_parser.y"
-    { *hash = (yyvsp[(1) - (1)].hash_items); }
+#line 71 "configs/config_fz_parser.y"
+    { *hash = (yyvsp[(1) - (1)].entities); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 51 "configs/config_parser.y"
+#line 75 "configs/config_fz_parser.y"
     {
-		(yyval.hash_items) = malloc(sizeof(hash_t));
-		hash_assign_hash_end((yyval.hash_items));
+		(yyval.entities) = malloc(sizeof(hash_t));
+		hash_assign_hash_end((yyval.entities));
 	}
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 55 "configs/config_parser.y"
+#line 79 "configs/config_fz_parser.y"
     {
-		(yyval.hash_items) = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item));
-		hash_assign_hash_end (&(yyval.hash_items)[1]);
+		(yyval.entities) = malloc(2 * sizeof(hash_t));
+		hash_assign_hash_t   (&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity));
+		hash_assign_hash_end (&(yyval.entities)[1]);
 	}
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 60 "configs/config_parser.y"
+#line 84 "configs/config_fz_parser.y"
     {
-		size_t nelements = hash_nelements((yyvsp[(1) - (3)].hash_items));
-		(yyvsp[(1) - (3)].hash_items) = realloc((yyvsp[(1) - (3)].hash_items), (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyvsp[(1) - (3)].hash_items)[nelements-1], &(yyvsp[(3) - (3)].hash_item));
-		hash_assign_hash_end (&(yyvsp[(1) - (3)].hash_items)[nelements  ]);
-		(yyval.hash_items) = (yyvsp[(1) - (3)].hash_items);
+		size_t nelements = hash_nelements((yyvsp[(1) - (2)].entities));
+		(yyvsp[(1) - (2)].entities) = realloc((yyvsp[(1) - (2)].entities), (nelements + 1) * sizeof(hash_t));
+		hash_assign_hash_t   (&(yyvsp[(1) - (2)].entities)[nelements-1], &(yyvsp[(2) - (2)].entity));
+		hash_assign_hash_end (&(yyvsp[(1) - (2)].entities)[nelements  ]);
+		(yyval.entities) = (yyvsp[(1) - (2)].entities);
 	}
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 69 "configs/config_parser.y"
+#line 94 "configs/config_fz_parser.y"
     {
-		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
-		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
+		(yyval.entity).key  = HK(data);
+		(yyval.entity).data = (yyvsp[(1) - (2)].data);
 	}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 73 "configs/config_parser.y"
+#line 98 "configs/config_fz_parser.y"
     {
-		(yyval.hash_item).key = hash_ptr_null;
+		(yyval.entity).key  = HK(machine);
+		(yyval.entity).data = (yyvsp[(1) - (2)].data);
 	}
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 79 "configs/config_parser.y"
-    { (yyval.key) = 0; }
+#line 106 "configs/config_fz_parser.y"
+    {
+		ssize_t           ret;
+		
+		if( (ret = data_named_t(&(yyval.data), (yyvsp[(2) - (5)].name), (yyvsp[(4) - (5)].data))) < 0)
+			emit_error("data init failed (ret: %s)", errors_describe(ret));
+		
+		free((yyvsp[(2) - (5)].name));
+	}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 80 "configs/config_parser.y"
-    { (yyval.key) = 0; }
+#line 117 "configs/config_fz_parser.y"
+    {
+		data_set_void(&(yyval.data));
+	}
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 81 "configs/config_parser.y"
+#line 120 "configs/config_fz_parser.y"
     {
-		ssize_t                ret;
-		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
-		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (2)].name));
-
-		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&d_key, &r_convert)) < 0)
-			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (2)].name), errors_describe(ret));
-		
-		free((yyvsp[(1) - (2)].name));
+		(yyval.data) = (yyvsp[(1) - (1)].data);
 	}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 94 "configs/config_parser.y"
+#line 123 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
-		data_t                 d_initstr    = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
+		hash_t                 r_hash[] = {
+			{ HK(data), (yyvsp[(6) - (6)].data) },
+			hash_inline((yyvsp[(3) - (6)].entities)),
+			hash_end
+		};
+		data_t                 d_hash            = DATA_PTR_HASHT(r_hash);
 		
-		data_raw_t_empty(&(yyval.data));
+		(yyval.data).type = (yyvsp[(1) - (6)].datatype);
+		(yyval.data).ptr  = NULL;
 		
-		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
-			emit_error("data string init failed (ret: %s)", errors_describe(ret));
-
-		free((yyvsp[(1) - (1)].name));
+		/* convert string to needed data */
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
+		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
+			emit_error("proxy data init failed (ret: %s)", errors_describe(ret));
+		
+		hash_free((yyvsp[(3) - (6)].entities));
+		data_free(&r_hash[0].data);
 	}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 106 "configs/config_parser.y"
-    { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash_items); }
+#line 147 "configs/config_fz_parser.y"
+    {
+		data_set_void(&(yyval.data));
+	}
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 107 "configs/config_parser.y"
+#line 150 "configs/config_fz_parser.y"
     {
-		ssize_t                ret;
-		datatype_t             type;
-		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
-		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (4)].name));
-		data_t                 d_val_initstr     = DATA_PTR_STRING((yyvsp[(4) - (4)].name));
-		
-		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&d_type, &r_init1)) < 0)
-			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
-		
-		(yyval.data).type = type;
-		(yyval.data).ptr  = NULL;
-		
-		/* convert string to needed data */
-		fastcall_convert_from r_init2 = { { 5, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&(yyval.data), &r_init2)) < 0)
-			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (4)].name), errors_describe(ret));
-		
-		free((yyvsp[(2) - (4)].name));
-		free((yyvsp[(4) - (4)].name));
+		data_set_void(&(yyval.data));
 	}
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 129 "configs/config_parser.y"
+#line 157 "configs/config_fz_parser.y"
+    {
+		(yyval.entities) = malloc(sizeof(hash_t));
+		hash_assign_hash_end((yyval.entities));
+	}
+    break;
+
+  case 15:
+
+/* Line 1806 of yacc.c  */
+#line 161 "configs/config_fz_parser.y"
+    {
+		(yyval.entities) = malloc(2 * sizeof(hash_t));
+		hash_assign_hash_t   (&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity));
+		hash_assign_hash_end (&(yyval.entities)[1]);
+	}
+    break;
+
+  case 16:
+
+/* Line 1806 of yacc.c  */
+#line 166 "configs/config_fz_parser.y"
+    {
+		size_t nelements = hash_nelements((yyvsp[(1) - (3)].entities));
+		(yyvsp[(1) - (3)].entities) = realloc((yyvsp[(1) - (3)].entities), (nelements + 1) * sizeof(hash_t));
+		hash_assign_hash_t   (&(yyvsp[(1) - (3)].entities)[nelements-1], &(yyvsp[(3) - (3)].entity));
+		hash_assign_hash_end (&(yyvsp[(1) - (3)].entities)[nelements  ]);
+		(yyval.entities) = (yyvsp[(1) - (3)].entities);
+	}
+    break;
+
+  case 17:
+
+/* Line 1806 of yacc.c  */
+#line 176 "configs/config_fz_parser.y"
+    {
+		(yyval.entity).key  = 0;
+		(yyval.entity).data = (yyvsp[(1) - (1)].data);
+	}
+    break;
+
+  case 18:
+
+/* Line 1806 of yacc.c  */
+#line 180 "configs/config_fz_parser.y"
+    {
+		(yyval.entity).key  = (yyvsp[(1) - (3)].hashkey);
+		(yyval.entity).data = (yyvsp[(3) - (3)].data);
+	}
+    break;
+
+  case 19:
+
+/* Line 1806 of yacc.c  */
+#line 187 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
-		datatype_t             type;
-		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
-		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(2) - (6)].name));
-		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(5) - (6)].hash_items));
-
-		fastcall_convert_from r_init1 = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&d_type, &r_init1)) < 0)
-			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
+		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
 		
-		(yyval.data).type = type;
+		data_raw_t_empty(&(yyval.data));
+		
+		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&(yyval.data), &r_init_str)) < 0)
+			emit_error("value init failed from string (ret: %s)", errors_describe(ret));
+		
+		free((yyvsp[(1) - (1)].name));
+	}
+    break;
+
+  case 20:
+
+/* Line 1806 of yacc.c  */
+#line 199 "configs/config_fz_parser.y"
+    { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].entities); }
+    break;
+
+  case 21:
+
+/* Line 1806 of yacc.c  */
+#line 200 "configs/config_fz_parser.y"
+    {
+		ssize_t                ret;
+		data_t                 d_val_initstr     = DATA_PTR_STRING((yyvsp[(2) - (2)].name));
+		
+		(yyval.data).type = (yyvsp[(1) - (2)].datatype);
+		(yyval.data).ptr  = NULL;
+		
+		/* convert string to needed data */
+		fastcall_convert_from r_init2 = { { 5, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&(yyval.data), &r_init2)) < 0)
+			emit_error("value init failed \"%s\" (ret: %s)", (yyvsp[(2) - (2)].name), errors_describe(ret));
+		
+		free((yyvsp[(2) - (2)].name));
+	}
+    break;
+
+  case 22:
+
+/* Line 1806 of yacc.c  */
+#line 214 "configs/config_fz_parser.y"
+    {
+		ssize_t                ret;
+		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(3) - (4)].entities));
+		
+		(yyval.data).type = (yyvsp[(1) - (4)].datatype);
 		(yyval.data).ptr  = NULL;
 		
 		/* convert string to needed data */
 		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
 		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
-			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
+			emit_error("value init failed (ret: %s)", errors_describe(ret));
 		
-		free((yyvsp[(2) - (6)].name));
-		hash_free((yyvsp[(5) - (6)].hash_items));
+		hash_free((yyvsp[(3) - (4)].entities));
+	}
+    break;
+
+  case 23:
+
+/* Line 1806 of yacc.c  */
+#line 230 "configs/config_fz_parser.y"
+    {
+		ssize_t                ret;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.datatype));
+		data_t                 d_type_initstr    = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
+		
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&d_type, &r_convert)) < 0)
+			emit_error("unknown datatype_t \"%s\" (ret: %s)", (yyvsp[(1) - (1)].name), errors_describe(ret));
+		
+		free((yyvsp[(1) - (1)].name));
+	}
+    break;
+
+  case 24:
+
+/* Line 1806 of yacc.c  */
+#line 241 "configs/config_fz_parser.y"
+    {
+		(yyval.datatype) = (yyvsp[(2) - (3)].datatype);
+	}
+    break;
+
+  case 25:
+
+/* Line 1806 of yacc.c  */
+#line 245 "configs/config_fz_parser.y"
+    {
+		ssize_t                ret;
+		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.hashkey));
+		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
+		
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&d_key, &r_convert)) < 0)
+			emit_error("unknown hashkey_t \"%s\" (ret: %s)", (yyvsp[(1) - (1)].name), errors_describe(ret));
+		
+		free((yyvsp[(1) - (1)].name));
+	}
+    break;
+
+  case 26:
+
+/* Line 1806 of yacc.c  */
+#line 257 "configs/config_fz_parser.y"
+    {
+		if(config_fz_keyword(&(yyval.keyword), (yyvsp[(1) - (1)].name)) < 0)
+			emit_error("unknown keyword \"%s\"", (yyvsp[(1) - (1)].name));
+			
+		free((yyvsp[(1) - (1)].name));
+	}
+    break;
+
+  case 27:
+
+/* Line 1806 of yacc.c  */
+#line 263 "configs/config_fz_parser.y"
+    {
+		ssize_t                ret;
+		
+		(yyval.keyword) = (yyvsp[(1) - (2)].keyword) | (yyvsp[(2) - (2)].keyword);
+		if( (ret = config_fz_keyword_validate(&(yyval.keyword))) < 0)
+			emit_error("invalid keyword combination (ret: %s)", errors_describe(ret));
 	}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1577 "configs/config_parser.tab.c"
+#line 1769 "configs/config_fz_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1804,10 +1996,10 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 152 "configs/config_parser.y"
+#line 272 "configs/config_fz_parser.y"
 
 
-static void yyerror(hash_t **hash, const char *msg){ // {{{
+static void    yyerror(hash_t **hash, const char *msg){ // {{{
 	char                  *file              = config_ext_file; 
 	
 	if(!file)
@@ -1816,8 +2008,28 @@ static void yyerror(hash_t **hash, const char *msg){ // {{{
 	fprintf(stderr, "%s: error: %d: %s\n", file, config_get_lineno(), msg);
 	(void)hash;
 } // }}}
+static ssize_t config_fz_keyword(uintmax_t *keyword, char *string){ // {{{
+	keypair_t             *kp;
+	
+	for(kp = fz_keywords; kp->key_str; kp++){
+		if(strcasecmp(string, kp->key_str) == 0){
+			*keyword = kp->key_val;
+			return 0;
+		}
+	}
+	return -EINVAL;
+} // }}}
+static ssize_t config_fz_keyword_validate(uintmax_t *pkeyword){ // {{{
+	uintmax_t             keyword           = *pkeyword;
+	
+	// local/global
+	if((keyword & KEYWORD_GLOBAL) != 0){ keyword &= ~KEYWORD_LOCAL; };
+	
+	*pkeyword = keyword;
+	return 0;
+} // }}}
 
-hash_t *   configs_pl_string_parse(char *string){ // {{{
+hash_t *       configs_fz_string_parse(char *string){ // {{{
 	hash_t *new_hash = NULL;
 	
 	config__scan_string(string);

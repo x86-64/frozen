@@ -4,7 +4,8 @@ EXTRA_DIST=                                     \
 	errors_list.c                           \
         configs/config_parser.tab.h             \
 	configs/config_parser.l                 \
-	configs/config_parser.y                 
+	configs/config_parser.y                 \
+	configs/config_fz_parser.y  
 
 noinst_LTLIBRARIES=libfrozen_core.la
 libfrozen_core_la_SOURCES=                                   \
@@ -14,6 +15,8 @@ libfrozen_core_la_SOURCES=                                   \
 			data.c                               \
 			list.c                               \
                         machine.c                            \
+                        configs/config.c                     \
+                        configs/config_fz_parser.tab.c       \
                         configs/config_parser.tab.c          \
                         configs/config_parser.lex.c
 
@@ -23,6 +26,8 @@ headers_confdir=$(headersdir)/configs/
 headers_HEADERS=libfrozen.h api.h errors.h data.h list.h machine.h public.h enums.h data_selected.h machine_selected.h
 headers_conf_HEADERS=configs/config.h
 
+configs/config_fz_parser.tab.c: configs/config_parser.lex.c
+	${BISON} -p config_fz_ -d -b configs/config_fz_parser configs/config_fz_parser.y
 configs/config_parser.tab.c: configs/config_parser.lex.c
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
 configs/config_parser.lex.c:
@@ -31,5 +36,7 @@ configs/config_parser.lex.c:
 CLEANFILES =	\
 		configs/config_parser.tab.c                            \
 		configs/config_parser.tab.h                            \
-		configs/config_parser.lex.c                            
+		configs/config_parser.lex.c                            \
+		configs/config_fz_parser.tab.c                         \
+		configs/config_fz_parser.tab.h
 

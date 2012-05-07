@@ -51,18 +51,22 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 32 "configs/config_parser.y"
+#line 47 "configs/config_fz_parser.y"
 
-	hash_t     *hash_items;
-	hash_t      hash_item;
-	hashkey_t   key;
+	hash_t     *entities;
+	hash_t      entity;
+	
 	char       *name;
 	data_t      data;
+	
+	hashkey_t   hashkey;
+	datatype_t  datatype;
+	uintmax_t   keyword;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 66 "configs/config_parser.tab.h"
+#line 70 "configs/config_fz_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

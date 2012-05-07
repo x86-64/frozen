@@ -138,6 +138,8 @@ am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
 	libfrozen_core_la-api.lo libfrozen_core_la-errors.lo \
 	libfrozen_core_la-data.lo libfrozen_core_la-list.lo \
 	libfrozen_core_la-machine.lo \
+	configs/libfrozen_core_la-config.lo \
+	configs/libfrozen_core_la-config_fz_parser.tab.lo \
 	configs/libfrozen_core_la-config_parser.tab.lo \
 	configs/libfrozen_core_la-config_parser.lex.lo
 libfrozen_core_la_OBJECTS = $(am_libfrozen_core_la_OBJECTS)
@@ -334,7 +336,8 @@ EXTRA_DIST = \
 	errors_list.c                           \
         configs/config_parser.tab.h             \
 	configs/config_parser.l                 \
-	configs/config_parser.y                 
+	configs/config_parser.y                 \
+	configs/config_fz_parser.y  
 
 noinst_LTLIBRARIES = libfrozen_core.la
 libfrozen_core_la_SOURCES = \
@@ -344,6 +347,8 @@ libfrozen_core_la_SOURCES = \
 			data.c                               \
 			list.c                               \
                         machine.c                            \
+                        configs/config.c                     \
+                        configs/config_fz_parser.tab.c       \
                         configs/config_parser.tab.c          \
                         configs/config_parser.lex.c
 
@@ -354,7 +359,9 @@ headers_conf_HEADERS = configs/config.h
 CLEANFILES = \
 		configs/config_parser.tab.c                            \
 		configs/config_parser.tab.h                            \
-		configs/config_parser.lex.c                            
+		configs/config_parser.lex.c                            \
+		configs/config_fz_parser.tab.c                         \
+		configs/config_fz_parser.tab.h
 
 all: all-am
 
@@ -405,6 +412,10 @@ configs/$(am__dirstamp):
 configs/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) configs/$(DEPDIR)
 	@: > configs/$(DEPDIR)/$(am__dirstamp)
+configs/libfrozen_core_la-config.lo: configs/$(am__dirstamp) \
+	configs/$(DEPDIR)/$(am__dirstamp)
+configs/libfrozen_core_la-config_fz_parser.tab.lo:  \
+	configs/$(am__dirstamp) configs/$(DEPDIR)/$(am__dirstamp)
 configs/libfrozen_core_la-config_parser.tab.lo:  \
 	configs/$(am__dirstamp) configs/$(DEPDIR)/$(am__dirstamp)
 configs/libfrozen_core_la-config_parser.lex.lo:  \
@@ -414,6 +425,10 @@ libfrozen_core.la: $(libfrozen_core_la_OBJECTS) $(libfrozen_core_la_DEPENDENCIES
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f configs/libfrozen_core_la-config.$(OBJEXT)
+	-rm -f configs/libfrozen_core_la-config.lo
+	-rm -f configs/libfrozen_core_la-config_fz_parser.tab.$(OBJEXT)
+	-rm -f configs/libfrozen_core_la-config_fz_parser.tab.lo
 	-rm -f configs/libfrozen_core_la-config_parser.lex.$(OBJEXT)
 	-rm -f configs/libfrozen_core_la-config_parser.lex.lo
 	-rm -f configs/libfrozen_core_la-config_parser.tab.$(OBJEXT)
@@ -428,6 +443,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-libfrozen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfrozen_core_la-machine.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_fz_parser.tab.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Plo@am__quote@
 
@@ -496,6 +513,20 @@ libfrozen_core_la-machine.lo: machine.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='machine.c' object='libfrozen_core_la-machine.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o libfrozen_core_la-machine.lo `test -f 'machine.c' || echo '$(srcdir)/'`machine.c
+
+configs/libfrozen_core_la-config.lo: configs/config.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config.Tpo -c -o configs/libfrozen_core_la-config.lo `test -f 'configs/config.c' || echo '$(srcdir)/'`configs/config.c
+@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_core_la-config.Tpo configs/$(DEPDIR)/libfrozen_core_la-config.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config.c' object='configs/libfrozen_core_la-config.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_core_la-config.lo `test -f 'configs/config.c' || echo '$(srcdir)/'`configs/config.c
+
+configs/libfrozen_core_la-config_fz_parser.tab.lo: configs/config_fz_parser.tab.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config_fz_parser.tab.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config_fz_parser.tab.Tpo -c -o configs/libfrozen_core_la-config_fz_parser.tab.lo `test -f 'configs/config_fz_parser.tab.c' || echo '$(srcdir)/'`configs/config_fz_parser.tab.c
+@am__fastdepCC_TRUE@	$(am__mv) configs/$(DEPDIR)/libfrozen_core_la-config_fz_parser.tab.Tpo configs/$(DEPDIR)/libfrozen_core_la-config_fz_parser.tab.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='configs/config_fz_parser.tab.c' object='configs/libfrozen_core_la-config_fz_parser.tab.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -c -o configs/libfrozen_core_la-config_fz_parser.tab.lo `test -f 'configs/config_fz_parser.tab.c' || echo '$(srcdir)/'`configs/config_fz_parser.tab.c
 
 configs/libfrozen_core_la-config_parser.tab.lo: configs/config_parser.tab.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfrozen_core_la_CFLAGS) $(CFLAGS) -MT configs/libfrozen_core_la-config_parser.tab.lo -MD -MP -MF configs/$(DEPDIR)/libfrozen_core_la-config_parser.tab.Tpo -c -o configs/libfrozen_core_la-config_parser.tab.lo `test -f 'configs/config_parser.tab.c' || echo '$(srcdir)/'`configs/config_parser.tab.c
@@ -765,6 +796,8 @@ uninstall-am: uninstall-headersHEADERS uninstall-headers_confHEADERS
 	uninstall-headers_confHEADERS
 
 
+configs/config_fz_parser.tab.c: configs/config_parser.lex.c
+	${BISON} -p config_fz_ -d -b configs/config_fz_parser configs/config_fz_parser.y
 configs/config_parser.tab.c: configs/config_parser.lex.c
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
 configs/config_parser.lex.c:
