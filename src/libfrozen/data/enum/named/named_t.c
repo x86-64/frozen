@@ -23,12 +23,7 @@ static void      named_destroy(named_t *fdata){ // {{{
 			list_delete(&named_data, fdata);
 			free(fdata->name);
 			
-			if(fdata->data){
-				fastcall_free r_free = { { 2, ACTION_FREE } };
-				data_query(fdata->data, &r_free);
-				free(fdata->data);
-			}
-			
+			data_free(&fdata->data);
 			free(fdata);
 		}
 	pthread_mutex_unlock(&named_mtx);
@@ -38,16 +33,16 @@ static void      named_destroy(named_t *fdata){ // {{{
 //		fdata->refs++;
 //	pthread_mutex_unlock(&named_mtx);
 //} // }}}
-named_t *        named_new(char *name, data_t *data){ // {{{
+ssize_t          data_named_t(data_t *data, char *name, data_t child){ // {{{
 	named_t               *fdata;
 	
 	if(name == NULL)
-		return NULL;
+		return -EINVAL;
 	
 	pthread_mutex_lock(&named_mtx);
 		
 		if( (fdata = named_find(name)) != NULL){
-			if(data != NULL)       // user trying to redefine data
+			if(!data_is_void(&child))       // user trying to redefine data
 				goto error;
 			goto found;
 		}
@@ -60,33 +55,38 @@ named_t *        named_new(char *name, data_t *data){ // {{{
 			goto error;
 		}
 		
-		fdata->data = NULL;
+		data_set_void(&fdata->data);
 		fdata->refs = 0;
 		
 		list_add(&named_data, fdata);
 		
 	found:
-		if(fdata->data == NULL && data != NULL) // define data for ghost named
-			fdata->data = data;
+		if(data_is_void(&fdata->data)){
+			if(! (data_is_void(&child)) ) // define child for ghost named
+				fdata->data = child;
+		}
 		
 		fdata->refs++;
 	error:
 		
 	pthread_mutex_unlock(&named_mtx);
 	
-	return fdata;
+	data->type = TYPE_NAMEDT;
+	data->ptr  = fdata;
+	return fdata ? 0 : -EFAULT;
 } // }}}
 
 static ssize_t data_named_t_default(data_t *data, fastcall_header *hargs){ // {{{
 	named_t               *fdata             = (named_t *)data->ptr;
 	
-	if(fdata == NULL || fdata->data == NULL) // forbid ghost calls
+	if(fdata == NULL)
 		return -EINVAL;
 	
-	return data_query(fdata->data, hargs);
+	return data_query(&fdata->data, hargs);
 } // }}}
 static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	data_t                 d_void            = DATA_VOID;
 	char                   buffer[DEF_BUFFER_SIZE];
 	
 	if(fargs->src == NULL)
@@ -101,16 +101,12 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			if( (dst->ptr = named_new(buffer, NULL)) == NULL)
-				return -EFAULT;
-			
-			return 0;
+			return data_named_t(dst, buffer, d_void);
 			
 		case FORMAT(hash):;
 			hash_t                *config;
 			data_t                *name;
-			data_t                *data         = NULL;
-			data_t                 data_holder;
+			data_t                 data           = DATA_VOID;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
@@ -119,24 +115,15 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 			if( (name = hash_data_find(config, HK(name))) == NULL)
 				return -EINVAL;
 			
-			hash_holder_consume(ret, data_holder, config, HK(data));
-			if(ret == 0){
-				if( (data = malloc(sizeof(data_t))) == NULL)
-					return -ENOMEM;
-				
-				*data = data_holder;
-			}
-			
 			fastcall_read r_read2 = { { 5, ACTION_READ }, 0, buffer, sizeof(buffer) - 1 };
 			if(data_query(name, &r_read2) < 0)
 				return -EINVAL;
 			
 			buffer[r_read2.buffer_size] = '\0';
 			
-			if( (dst->ptr = named_new(buffer, data)) == NULL)
-				return -EFAULT;
+			hash_holder_consume(ret, data, config, HK(data));
 			
-			return 0;
+			return data_named_t(dst, buffer, data);
 			
 		default:
 			break;
@@ -145,7 +132,7 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 } // }}}
 static ssize_t data_named_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr == NULL)
-		return -EINVAL;
+		return 0;
 	
 	named_destroy((named_t *)data->ptr);
 	return 0;

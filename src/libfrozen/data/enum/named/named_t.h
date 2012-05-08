@@ -27,17 +27,16 @@
  *
  */
 
-#define DATA_NAMEDT(_name,_data)  { TYPE_NAMEDT, named_new(_name, _data) }
 #define DEREF_TYPE_NAMEDT(_data) (named_t *)((_data)->ptr)
 #define REF_TYPE_NAMEDT(_dt) _dt
 #define HAVEBUFF_TYPE_NAMEDT 0
 
 typedef struct named_t {
 	char                  *name;
-	data_t                *data;
+	data_t                 data;
 	uintmax_t              refs;
 } named_t;
 
-API named_t *        named_new(char *name, data_t *data);
+API ssize_t               data_named_t(data_t *data, char *name, data_t child);
 
 #endif
