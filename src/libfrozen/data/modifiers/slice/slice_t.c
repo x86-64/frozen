@@ -106,7 +106,24 @@ static ssize_t       data_slice_t_getdata(data_t *data, fastcall_getdata *fargs)
 	return 0;
 } // }}}
 static ssize_t       data_slice_t_view(data_t *data, fastcall_view *fargs){ // {{{
-	return -ENOSYS;
+	ssize_t                ret;
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	if( (ret = data_query(fdata->data, fargs)) < 0)
+		return ret;
+	
+	if(fdata->off > fargs->length){
+		ret = -EINVAL;
+		goto error;
+	}
+	
+	fargs->ptr    += fdata->off;
+	fargs->length  = MIN(fdata->size, fargs->length - fdata->off);
+	return 0;
+	
+error:
+	data_free(&fargs->freeit);
+	return ret;
 } // }}}
 
 data_proto_t slice_t_proto = {
