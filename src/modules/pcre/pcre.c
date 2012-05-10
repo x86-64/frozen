@@ -13,9 +13,11 @@ typedef struct pcre_t {
 } pcre_t;
 
 static void    pcre_t_destroy(pcre_t *fdata){ // {{{
-	data_free(&fdata->freeit);
-	pcre_free(fdata->re);
-	free(fdata);
+	if(fdata){
+		data_free(&fdata->freeit);
+		pcre_free(fdata->re);
+		free(fdata);
+	}
 } // }}}
 static ssize_t pcre_t_new(pcre_t **pfdata, config_t *config){ // {{{
 	ssize_t                ret;
