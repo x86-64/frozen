@@ -2,6 +2,7 @@
 #include <container_t.h>
 
 #include <core/void/void_t.h>
+#include <storage/raw/raw_t.h>
 #include <enum/format/format_t.h>
 #include <modifiers/slider/slider_t.h>
 
@@ -255,6 +256,25 @@ static ssize_t data_container_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	container_free((container_t *)data->ptr);
 	return 0;
 } // }}}
+static ssize_t data_container_t_view(data_t *data, fastcall_view *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 d_view         = DATA_RAWT_EMPTY();
+	
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &d_view, fargs->format };
+	if( (ret = data_query(data, &r_convert)) < 0)
+		return ret;
+	
+	fastcall_view       r_view    = { { 6, ACTION_VIEW }, FORMAT(native) };
+	if( (ret = data_query(&d_view, &r_view)) < 0){
+		data_free(&d_view);
+		return ret;
+	}
+	
+	fargs->ptr    = r_view.ptr;
+	fargs->length = r_view.length;
+	fargs->freeit = d_view;
+	return 0;
+} // }}}
 
 data_proto_t container_t_proto = {
 	.type                   = TYPE_CONTAINERT,
@@ -270,5 +290,6 @@ data_proto_t container_t_proto = {
 		[ACTION_PUSH]         = (f_data_func)&data_container_t_pass,
 		[ACTION_POP]          = (f_data_func)&data_container_t_pass,
 		[ACTION_ENUM]         = (f_data_func)&data_container_t_pass,
+		[ACTION_VIEW]         = (f_data_func)&data_container_t_view,
 	}
 };
