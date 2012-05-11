@@ -817,7 +817,7 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			if(userdata->force_convert != 0){
 				data_raw_t_empty(&input_convert);
 				
-				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &input_convert, FORMAT(native) };
+				fastcall_convert_to r_convert = { { 4, ACTION_CONVERT_TO }, &input_convert, FORMAT(packed) };
 				if( (ret = data_query(input, &r_convert)) < 0)
 					return ret;
 				
