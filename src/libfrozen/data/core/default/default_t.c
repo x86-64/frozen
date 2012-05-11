@@ -181,7 +181,7 @@ ssize_t       data_default_view          (data_t *data, fastcall_view *fargs){ /
 			if(data->ptr == NULL)
 				return -EINVAL;
 			
-			fastcall_length r_len = { { 3, ACTION_LENGTH }, FORMAT(native) };
+			fastcall_length r_len = { { 3, ACTION_LENGTH }, 0, FORMAT(native) };
 			data_query(data, &r_len);
 			
 			fargs->ptr    = data->ptr;
