@@ -309,6 +309,7 @@ data_proto_t record_t_proto = {
 	.type            = TYPE_RECORDT,
 	.type_str        = "record_t",
 	.api_type        = API_HANDLERS,
+	.properties      = DATA_PROXY,
 	.handlers        = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_record_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_record_t_free,

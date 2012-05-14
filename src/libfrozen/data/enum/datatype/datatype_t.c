@@ -163,6 +163,7 @@ data_proto_t datatype_t_proto = {
 	.type                   = TYPE_DATATYPET,
 	.type_str               = "datatype_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_datatype_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_datatype_t_convert_from,

@@ -142,6 +142,7 @@ static ssize_t data_format_t_len(data_t *data, fastcall_length *fargs){ // {{{
 data_proto_t format_t_proto = {
 	.type_str               = "format_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_format_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_format_t_convert_from,

@@ -79,6 +79,7 @@ data_proto_t machine_t_proto = {
 	.type                   = TYPE_MACHINET,
 	.type_str               = "machine_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handler_default        = (f_data_func)&data_machine_t_default,
 	.handlers = {
 		[ACTION_LENGTH]       = (f_data_func)&data_machine_t_len,

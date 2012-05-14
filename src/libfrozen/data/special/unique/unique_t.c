@@ -69,6 +69,7 @@ data_proto_t unique_t_proto = {
 	.type                   = TYPE_UNIQUET,
 	.type_str               = "unique_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_unique_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_unique_t_convert_from,

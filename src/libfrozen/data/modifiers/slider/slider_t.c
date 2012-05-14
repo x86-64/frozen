@@ -133,6 +133,7 @@ data_proto_t slider_t_proto = {
 	.type                   = TYPE_SLIDERT,
 	.type_str               = "slider_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_slider_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_slider_t_convert_from,

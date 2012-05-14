@@ -82,6 +82,7 @@ static ssize_t data_consumable_t_consume(data_t *data, fastcall_consume *fargs){
 data_proto_t consumable_t_proto = {
 	.type_str               = "consumable_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_consumable_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM]  = (f_data_func)&data_consumable_t_convert_from,

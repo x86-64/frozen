@@ -230,6 +230,7 @@ data_proto_t size_t_proto = {
 	.type                   = TYPE_SIZET,
 	.type_str               = "size_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_RESIZE]         = (f_data_func)&data_size_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_size_t_len,

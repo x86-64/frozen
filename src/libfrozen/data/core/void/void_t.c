@@ -22,6 +22,7 @@ data_proto_t void_t_proto = {
 	.type          = TYPE_VOIDT,
 	.type_str      = "void_t",
 	.api_type      = API_HANDLERS,
+	.properties    = DATA_ENDPOINT,
 	.handlers      = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_void_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_void_t_convert_from,

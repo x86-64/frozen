@@ -169,6 +169,7 @@ data_proto_t hashkey_t_proto = {
 	.type                   = TYPE_HASHKEYT,
 	.type_str               = "hashkey_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_hashkey_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_hashkey_t_convert_from,

@@ -280,6 +280,7 @@ data_proto_t container_t_proto = {
 	.type                   = TYPE_CONTAINERT,
 	.type_str               = "container_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_LENGTH]       = (f_data_func)&data_container_t_len,
 		[ACTION_READ]         = (f_data_func)&data_container_t_read,

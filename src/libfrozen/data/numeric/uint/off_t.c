@@ -230,6 +230,7 @@ data_proto_t off_t_proto = {
 	.type                   = TYPE_OFFT,
 	.type_str               = "off_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_RESIZE]         = (f_data_func)&data_off_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_off_t_len,

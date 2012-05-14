@@ -205,6 +205,7 @@ data_proto_t NAME()_proto = {
 	.type                   = TYPE_[]DEF(),
 	.type_str               = "[]NAME()",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[[ACTION_RESIZE]]         = (f_data_func)&data_[]NAME()_resize,
 		[[ACTION_LENGTH]]         = (f_data_func)&data_[]NAME()_len,

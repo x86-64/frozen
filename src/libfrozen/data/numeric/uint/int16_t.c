@@ -230,6 +230,7 @@ data_proto_t int16_t_proto = {
 	.type                   = TYPE_INT16T,
 	.type_str               = "int16_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_RESIZE]         = (f_data_func)&data_int16_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_int16_t_len,

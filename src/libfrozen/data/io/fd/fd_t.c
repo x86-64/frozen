@@ -98,6 +98,7 @@ data_proto_t fd_t_proto = {
 	.type                   = TYPE_FDT,
 	.type_str               = "fd_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_READ]         = (f_data_func)&data_fd_t_read,
 		[ACTION_WRITE]        = (f_data_func)&data_fd_t_write,

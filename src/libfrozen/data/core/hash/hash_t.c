@@ -310,6 +310,7 @@ data_proto_t hash_t_proto = {
 	.type                   = TYPE_HASHT,
 	.type_str               = "hash_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_FREE]         = (f_data_func)&data_hash_t_free,
 		[ACTION_COMPARE]      = (f_data_func)&data_hash_t_compare,

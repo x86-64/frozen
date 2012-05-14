@@ -34,6 +34,7 @@ data_proto_t dataptr_t_proto = {
 	.type                   = TYPE_DATAPTRT,
 	.type_str               = "dataptr_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_LENGTH]       = (f_data_func)&data_dataptr_t_len,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_dataptr_t_convert_from,

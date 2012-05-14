@@ -18,6 +18,7 @@ data_proto_t anything_t_proto = {
 	.type          = TYPE_ANYTHINGT,
 	.type_str      = "anything_t",
 	.api_type      = API_HANDLERS,
+	.properties    = DATA_PROXY,
 	.handlers      = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_anything_t_convert_from,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_anything_t_noerr,

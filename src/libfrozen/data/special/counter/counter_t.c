@@ -79,6 +79,7 @@ data_proto_t counter_t_proto = {
 	.type                   = TYPE_COUNTERT,
 	.type_str               = "counter_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_counter_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_counter_t_free,

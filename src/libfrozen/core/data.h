@@ -77,6 +77,8 @@ typedef enum data_api_type {
 
 typedef enum data_properties {
 	DATA_GREEDY     = 1,
+	DATA_ENDPOINT   = 2,
+	DATA_PROXY      = 4,
 } data_properties;
 
 typedef ssize_t    (*f_data_func)  (data_t *, void *args);

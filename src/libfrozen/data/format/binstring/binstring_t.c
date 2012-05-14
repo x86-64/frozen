@@ -150,6 +150,7 @@ data_proto_t binstring_t_proto = {
 	.type            = TYPE_BINSTRINGT,
 	.type_str        = "binstring_t",
 	.api_type        = API_HANDLERS,
+	.properties      = DATA_PROXY,
 	.handler_default = (f_data_func)&data_binstring_t_handler,
 	.handlers        = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_binstring_t_convert_to,

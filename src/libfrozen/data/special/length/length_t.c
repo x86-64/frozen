@@ -75,6 +75,7 @@ static ssize_t data_length_t_handler(data_t *data, fastcall_header *hargs){ // {
 data_proto_t length_t_proto = {
 	.type_str               = "length_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handlers               = {
 		[ACTION_FREE]         = (f_data_func)&data_length_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_length_t_convert_from,

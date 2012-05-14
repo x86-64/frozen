@@ -230,6 +230,7 @@ data_proto_t uint_t_proto = {
 	.type                   = TYPE_UINTT,
 	.type_str               = "uint_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_RESIZE]         = (f_data_func)&data_uint_t_resize,
 		[ACTION_LENGTH]         = (f_data_func)&data_uint_t_len,

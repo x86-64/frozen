@@ -152,6 +152,7 @@ data_proto_t netstring_t_proto = {
 	.type            = TYPE_NETSTRINGT,
 	.type_str        = "netstring_t",
 	.api_type        = API_HANDLERS,
+	.properties      = DATA_PROXY,
 	.handler_default = (f_data_func)&data_netstring_t_handler,
 	.handlers        = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_netstring_t_convert_to,

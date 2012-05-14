@@ -136,6 +136,7 @@ data_proto_t string_t_proto = {
 	.type          = TYPE_STRINGT,
 	.type_str      = "string_t",
 	.api_type      = API_HANDLERS,
+	.properties    = DATA_ENDPOINT,
 	.handlers      = {
 		[ACTION_LENGTH]       = (f_data_func)&data_string_t_len,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_string_t_convert_to,

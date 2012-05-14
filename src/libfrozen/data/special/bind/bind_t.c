@@ -102,6 +102,7 @@ static ssize_t data_bind_t_free(data_t *data, fastcall_free *hargs){ // {{{
 data_proto_t bind_t_proto = {
 	.type_str               = "bind_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_bind_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_bind_t_convert_from,

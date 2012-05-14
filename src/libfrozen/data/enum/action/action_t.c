@@ -142,6 +142,7 @@ static ssize_t data_action_t_len(data_t *data, fastcall_length *fargs){ // {{{
 data_proto_t action_t_proto = {
 	.type_str               = "action_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_action_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_action_t_convert_from,

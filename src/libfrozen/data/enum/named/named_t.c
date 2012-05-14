@@ -142,6 +142,7 @@ data_proto_t named_t_proto = {
 	.type                   = TYPE_NAMEDT,
 	.type_str               = "named_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_named_t_default,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_named_t_convert_from,

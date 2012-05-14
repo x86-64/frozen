@@ -42,6 +42,7 @@ data_proto_t random_t_proto = {
 	.type                   = TYPE_RANDOMT,
 	.type_str               = "random_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handler_default        = (f_data_func)&data_random_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,

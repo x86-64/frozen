@@ -305,6 +305,7 @@ data_proto_t allocator_fixed_t_proto = {
         .type                   = TYPE_ALLOCATORFIXEDT,
         .type_str               = "allocator_fixed_t",
         .api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_allocator_fixed_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_allocator_fixed_t_free,

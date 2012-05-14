@@ -70,6 +70,7 @@ static ssize_t data_ref_t_acquire(data_t *data, fastcall_acquire *hargs){ // {{{
 data_proto_t ref_t_proto = {
 	.type_str               = "ref_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_PROXY,
 	.handler_default        = (f_data_func)&data_ref_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_ref_t_convert_from,

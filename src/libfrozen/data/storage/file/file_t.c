@@ -224,6 +224,7 @@ data_proto_t file_t_proto = {
 	.type                   = TYPE_FILET,
 	.type_str               = "file_t",
 	.api_type               = API_HANDLERS,
+	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_file_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_file_t_free,

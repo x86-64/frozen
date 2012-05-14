@@ -155,6 +155,7 @@ data_proto_t memory_t_proto = {
 	.type          = TYPE_MEMORYT,
 	.type_str      = "memory_t",
 	.api_type      = API_HANDLERS,
+	.properties    = DATA_ENDPOINT,
 	.handlers      = {
 		[ACTION_LENGTH]      = (f_data_func)&data_memory_t_len,
 		[ACTION_READ]        = (f_data_func)&data_memory_t_read,
