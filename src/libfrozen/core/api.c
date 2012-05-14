@@ -70,6 +70,21 @@ ssize_t     action_crud_from_hash(data_t *data, request_t *request){ // {{{
 	key   = hash_data_find(request, HK(key));
 	value = hash_data_find(request, HK(value));
 	
+	if(key){
+		fastcall_getdata r_getdata_key = { { 3, ACTION_GETDATA } };
+		if( (ret = data_query(key, &r_getdata_key)) < 0)
+			return ret;
+		
+		key = r_getdata_key.data;
+	}
+	if(value){
+		fastcall_getdata r_getdata_value = { { 3, ACTION_GETDATA } };
+		if( (ret = data_query(value, &r_getdata_value)) < 0)
+			return ret;
+		
+		value = r_getdata_value.data;
+	}
+	
 	fastcall_crud fargs = { { 4, action }, key, value };
 	ret = data_query(data, &fargs);
 	
