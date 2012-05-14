@@ -26,4 +26,5 @@ for f in `ls example_*.out`; do
 done;
 
 rm -rf tmp_modules/
+rm -rf zmq_local_queue
 exit $exit_err;

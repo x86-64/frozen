@@ -2,7 +2,7 @@ include(shop.m4)
 include(daemon.m4)
 include(zeromq.m4)
 
-ZEROMQ_QUEUE(`myqueue', `5')
+ZEROMQ_QUEUE(`myqueue', `zmq_local_queue', `5')
 
 { class = "thread" },
 
