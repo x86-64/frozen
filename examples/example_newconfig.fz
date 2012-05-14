@@ -1,0 +1,6 @@
+local testdata {
+	record_t { separator = "Z" },
+	raw_t    "aaZbbZccZ"
+};
+
+
