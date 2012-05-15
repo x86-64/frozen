@@ -58,7 +58,9 @@ static ssize_t data_consumable_t_free(data_t *data, fastcall_free *fargs){ // {{
 	if(!fdata)
 		return 0;
 	
-	data_consumable_t_handler(data, (fastcall_header *)fargs);
+	if(fdata->not_consumable == 0){
+		data_consumable_t_handler(data, (fastcall_header *)fargs);
+	}
 	
 	if(fdata->heap == 1)
 		free(fdata);
