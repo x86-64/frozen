@@ -827,6 +827,7 @@ enable_list_end_t
 enable_memory_t
 enable_raw_t
 enable_mutex_t
+enable_triplet_key_t
 enable_machinekill
 enable_machinethread
 enable_machinequery
@@ -1596,6 +1597,8 @@ Optional Features:
   --disable-data-memory_t disable data memory_t
   --disable-data-raw_t    disable data raw_t
   --disable-data-mutex_t  disable data mutex_t
+  --disable-data-triplet_key_t
+                          disable data triplet_key_t
   --disable-machine-kill  disable machine kill
   --disable-machine-thread
                           disable machine thread
@@ -19748,6 +19751,43 @@ fi
 		DATA_MAKEFILE_sync_mutex=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} sync/mutex/libfrozen_data_mutex.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-triplet_key_t was given.
+if test "${enable_triplet_key_t+set}" = set; then :
+  enableval=$enable_triplet_key_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_triplet_key_t}" = "yes"; then
+			enable_triplet_key_t="no"
+		else
+			enable_triplet_key_t="yes"
+		fi
+	fi
+
+	if test "${enable_triplet_key_t}" = "yes"; then
+		DATA_DIR_triplet_key_t="triplets/key"
+		DATA_DEP_triplet_key_t="uint_t hash_t slider_t format_t"
+		DATA_ID_triplet_key_t=""
+		DATA_SELECTED="$DATA_SELECTED triplet_key_t"
+		DATA_HEADERS="$DATA_HEADERS triplets/key/triplet_key_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_triplets_key" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/triplets/key/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS triplets/key"
+
+		DATA_MAKEFILE_triplets_key=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} triplets/key/libfrozen_data_key.la"
 
 	fi
 

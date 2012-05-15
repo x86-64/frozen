@@ -56,6 +56,7 @@ enum datatype_t {
    TYPE_MEMORYT = 49,
    TYPE_RAWT = 50,
    TYPE_MUTEXT = 51,
+   TYPE_TRIPLETKEYT = 52,
 };
 
 #endif
