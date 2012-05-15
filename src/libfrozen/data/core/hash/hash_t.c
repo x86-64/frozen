@@ -7,6 +7,7 @@
 #include <io/fd/fd_t.h>
 #include <modifiers/slider/slider_t.h>
 #include <core/data/data_t.h>
+#include <special/consumable/consumable_t.h>
 
 #define HASH_INITIAL_SIZE 8
 
@@ -306,6 +307,50 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	return ret;
 } // }}}
 
+static ssize_t data_hash_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
+	ssize_t                ret;
+	hashkey_t              key;
+	data_t                *value;
+	hash_t                *fdata             = (hash_t *)data->ptr;
+	
+	if(fargs->key == NULL || fargs->value == NULL)
+		return -EINVAL;
+	
+	data_get(ret, TYPE_HASHKEYT, key, fargs->key);
+	if(ret != 0)
+		return -EINVAL;
+	
+	if( (value = hash_data_find(fdata, key)) == NULL)
+		return -ENOENT;
+	
+        if( (ret = data_notconsumable_t(fargs->value, *value)) < 0)
+		return ret;
+	
+	return 0;
+} // }}}
+static ssize_t data_hash_t_delete(data_t *data, fastcall_delete *fargs){ // {{{
+	ssize_t                ret;
+	hashkey_t              key;
+	hash_t                *hitem;
+	hash_t                *fdata             = (hash_t *)data->ptr;
+	
+	if(fargs->key == NULL)
+		return -EINVAL;
+	
+	data_get(ret, TYPE_HASHKEYT, key, fargs->key);
+	if(ret != 0)
+		return -EINVAL;
+	
+	if( (hitem = hash_find(fdata, key)) == NULL)
+		return -ENOENT;
+	
+	if(fargs->value)
+		*fargs->value = hitem->data;
+	
+	hash_assign_hash_null(hitem);
+	return 0;
+} // }}}
+
 data_proto_t hash_t_proto = {
 	.type                   = TYPE_HASHT,
 	.type_str               = "hash_t",
@@ -316,6 +361,9 @@ data_proto_t hash_t_proto = {
 		[ACTION_COMPARE]      = (f_data_func)&data_hash_t_compare,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_hash_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_hash_t_convert_from,
+		
+		[ACTION_LOOKUP]       = (f_data_func)&data_hash_t_lookup,
+		[ACTION_DELETE]       = (f_data_func)&data_hash_t_delete,
 	}
 };
 
