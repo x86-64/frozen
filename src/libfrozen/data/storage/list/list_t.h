@@ -27,6 +27,8 @@
 
 /** @file list.h */
 
+API ssize_t         data_list_t(data_t *data);
+
 typedef struct list_t       list_t;
 typedef struct list_chunk_t list_chunk_t;
 

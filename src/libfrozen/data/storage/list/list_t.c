@@ -7,6 +7,14 @@
 #include <special/ref/ref_t.h>
 #include <core/data/data_t.h>
 
+ssize_t        data_list_t(data_t *data){ // {{{
+	if( (data->ptr = list_t_alloc()) == NULL)
+		return -ENOMEM;
+	
+	data->type = TYPE_LISTT;
+	return 0;
+} // }}}
+
 static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{{
 	ssize_t                ret;
 	
@@ -89,10 +97,7 @@ static ssize_t data_list_t_convert_from(data_t *dst, fastcall_convert_from *farg
 		case FORMAT(native):
 		case FORMAT(human):
 		case FORMAT(config):;
-			if( (dst->ptr = list_t_alloc()) == NULL)
-				return -ENOMEM;
-			
-			return 0;
+			return data_list_t(dst);
 			
 		case FORMAT(hash):;
 			hash_t                *config;
@@ -156,6 +161,33 @@ static ssize_t data_list_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	list_t_free(fdata);
 	return 0;
 } // }}}
+static ssize_t data_list_t_create(data_t *data, fastcall_crud *fargs){ // {{{
+	list_t                *fdata             = (list_t *)data->ptr;
+	
+	if(fargs->value == NULL) // EOF
+		return 0;
+	
+	if(fdata == NULL){
+		if( (fdata = data->ptr = list_t_alloc()) == NULL)
+			return -ENOMEM;
+	}
+	
+	if(fargs->key == NULL)
+		return list_t_push(fdata, fargs->value);
+	
+	return -ENOSYS;
+} // }}}
+static ssize_t data_list_t_delete(data_t *data, fastcall_crud *fargs){ // {{{
+	list_t                *fdata             = (list_t *)data->ptr;
+	
+	if(fdata == NULL)
+		return -EINVAL;
+	
+	if(fargs->key == NULL)
+		return list_t_pop(fdata, fargs->value);
+	
+	return -ENOSYS;
+} // }}}
 static ssize_t data_list_t_push(data_t *data, fastcall_push *fargs){ // {{{
 	list_t                *fdata             = (list_t *)data->ptr;
 	
@@ -209,11 +241,14 @@ data_proto_t list_t_proto = { // {{{
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_list_t_convert_to,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_list_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_list_t_free,
+		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		
+		[ACTION_CREATE]       = (f_data_func)&data_list_t_create,
+		[ACTION_DELETE]       = (f_data_func)&data_list_t_delete,
+		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
 		[ACTION_PUSH]         = (f_data_func)&data_list_t_push,
 		[ACTION_POP]          = (f_data_func)&data_list_t_pop,
-		[ACTION_COMPARE]      = (f_data_func)&data_list_t_compare,
-		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
-		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 }; // }}}
 
@@ -255,13 +290,11 @@ static list_chunk_t *    chunk_alloc(data_t *data){ // {{{
 		return NULL;
 	
 	chunk->cnext       = NULL;
-	memcpy(&chunk->data, &d_ref, sizeof(data_t));
+	chunk->data        = d_ref;
 	return chunk;
 } // }}}
 static void              chunk_free(list_chunk_t *chunk){ // {{{
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&chunk->data, &r_free);
-	
+	data_free(&chunk->data);
 	free(chunk);
 } // }}}
 
