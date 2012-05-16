@@ -211,6 +211,13 @@ static ssize_t data_record_t_length(data_t *data, fastcall_length *fargs){ // {{
 	}
 	return ret;
 } // }}}
+static ssize_t data_record_t_consume(data_t *data, fastcall_consume *fargs){ // {{{
+	record_t              *fdata             = (record_t *)data->ptr;
+	
+	*fargs->dest = fdata->item;
+	data_raw_t_empty(&fdata->item);
+	return 0;
+} // }}}
 
 static ssize_t data_record_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
@@ -282,9 +289,26 @@ static ssize_t data_record_t_free(data_t *data, fastcall_free *fargs){ // {{{
 } // }}}
 
 static ssize_t data_record_t_crud(data_t *data, fastcall_crud *fargs){ // {{{
-	//record_t                  *fdata             = (record_t *)data->ptr;
-	
 	return -ENOSYS;
+} // }}}
+static ssize_t data_record_t_lookup(data_t *data, fastcall_crud *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              key;
+	record_t              *fdata             = (record_t *)data->ptr;
+	
+	data_get(ret, TYPE_UINTT, key, fargs->key);
+	if(ret != 0)
+		return -EINVAL;
+	
+	data_t                 sl_storage        = DATA_SLICET(&fdata->storage, key, ~0);
+	
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &sl_storage, FORMAT(packed) };
+	if( (ret = data_query(data, &r_convert)) < 0)
+		return ret;
+	
+	fastcall_consume r_consume = { { 3, ACTION_CONSUME }, fargs->value };
+	data_query(data, &r_consume);
+	return 0;
 } // }}}
 static ssize_t data_record_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
@@ -321,9 +345,11 @@ data_proto_t record_t_proto = {
 		[ACTION_READ]         = (f_data_func)&data_record_t_handler,
 		[ACTION_WRITE]        = (f_data_func)&data_record_t_handler,
 		[ACTION_LENGTH]       = (f_data_func)&data_record_t_handler,
+		[ACTION_VIEW]         = (f_data_func)&data_record_t_handler,
+		[ACTION_CONSUME]      = (f_data_func)&data_record_t_consume,
 		
 		[ACTION_CREATE]       = (f_data_func)&data_record_t_crud,
-		[ACTION_LOOKUP]       = (f_data_func)&data_record_t_crud,
+		[ACTION_LOOKUP]       = (f_data_func)&data_record_t_lookup,
 		[ACTION_UPDATE]       = (f_data_func)&data_record_t_crud,
 		[ACTION_DELETE]       = (f_data_func)&data_record_t_crud,
 		[ACTION_ENUM]         = (f_data_func)&data_record_t_enum,
