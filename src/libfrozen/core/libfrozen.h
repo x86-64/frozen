@@ -89,6 +89,7 @@ void *alloca (size_t);
 #include <data_selected.h>
 #include <machine.h>
 #include <machine_selected.h>
+#include <helpers.h>
 
 API int       frozen_init(void);
 API int       frozen_destroy(void);

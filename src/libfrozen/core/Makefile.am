@@ -15,6 +15,7 @@ libfrozen_core_la_SOURCES=                                   \
 			data.c                               \
 			list.c                               \
                         machine.c                            \
+			helpers.c                            \
                         configs/config.c                     \
                         configs/config_fz_parser.tab.c       \
                         configs/config_parser.tab.c          \
@@ -23,7 +24,7 @@ libfrozen_core_la_SOURCES=                                   \
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
 
 headers_confdir=$(headersdir)/configs/
-headers_HEADERS=libfrozen.h api.h errors.h data.h list.h machine.h public.h enums.h data_selected.h machine_selected.h
+headers_HEADERS=libfrozen.h api.h errors.h data.h list.h machine.h helpers.h public.h enums.h data_selected.h machine_selected.h
 headers_conf_HEADERS=configs/config.h
 
 configs/config_fz_parser.tab.c: configs/config_parser.lex.c
