@@ -145,6 +145,22 @@ static ssize_t data_binstring_t_length(data_t *data, fastcall_length *fargs){ //
 	}
 	return ret;
 } // }}}
+static ssize_t data_binstring_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	binstring_t           *fdata             = (binstring_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data), fdata->data      },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 
 data_proto_t binstring_t_proto = {
 	.type            = TYPE_BINSTRINGT,
@@ -157,7 +173,7 @@ data_proto_t binstring_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_binstring_t_convert_from,
 		[ACTION_LENGTH]       = (f_data_func)&data_binstring_t_length,
 		[ACTION_FREE]         = (f_data_func)&data_binstring_t_free,
-		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		[ACTION_CONTROL]      = (f_data_func)&data_binstring_t_control,
 	}
 };
 

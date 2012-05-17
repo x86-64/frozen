@@ -1,5 +1,6 @@
 #include <libfrozen.h>
 
+#include <core/void/void_t.h>
 #include <core/string/string_t.h>
 #include <enum/format/format_t.h>
 #include <enum/hashkey/hashkey_t.h>
@@ -261,6 +262,17 @@ ssize_t       data_default_control       (data_t *data, fastcall_control *fargs)
 			data_t                d_type    = DATA_PTR_DATATYPET(&data->type);
 			fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type, FORMAT(native) };
 			return data_query(fargs->value, &r_convert);
+		
+		case HK(data):;
+			data_t                d_key     = DATA_VOID;
+			
+			if(fargs->key && helper_key_current(fargs->key, &d_key) == 0){ // expect only empty key
+				data_free(&d_key);
+				return -EINVAL;
+			}
+			
+			fargs->value = data;
+			return 0;
 			
 		default:
 			break;

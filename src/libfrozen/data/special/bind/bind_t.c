@@ -98,6 +98,23 @@ static ssize_t data_bind_t_free(data_t *data, fastcall_free *hargs){ // {{{
 	data_set_void(data);
 	return 0;
 } // }}}
+static ssize_t data_bind_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	bind_t               *fdata             = (bind_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data),  &fdata->master      },
+				{ HK(slave), &fdata->slave       },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 
 data_proto_t bind_t_proto = {
 	.type_str               = "bind_t",
@@ -107,6 +124,6 @@ data_proto_t bind_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_bind_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_bind_t_free,
-		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		[ACTION_CONTROL]      = (f_data_func)&data_bind_t_control,
 	}
 };

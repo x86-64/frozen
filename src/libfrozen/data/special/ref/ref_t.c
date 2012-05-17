@@ -66,6 +66,22 @@ static ssize_t data_ref_t_acquire(data_t *data, fastcall_acquire *hargs){ // {{{
 	ref_t_acquire(fdata);
 	return 0;
 } // }}}
+static ssize_t data_ref_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	ref_t               *fdata             = (ref_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data), &fdata->data     },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 
 data_proto_t ref_t_proto = {
 	.type_str               = "ref_t",
@@ -76,5 +92,6 @@ data_proto_t ref_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_ref_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_ref_t_free,
 		[ACTION_ACQUIRE]      = (f_data_func)&data_ref_t_acquire,
+		[ACTION_CONTROL]      = (f_data_func)&data_ref_t_control,
 	}
 };

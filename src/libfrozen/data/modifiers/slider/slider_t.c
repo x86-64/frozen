@@ -128,6 +128,22 @@ static ssize_t data_slider_t_length(data_t *data, fastcall_length *fargs){ // {{
 	}
 	return data_query(fdata->data, fargs);
 } // }}}
+static ssize_t data_slider_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	slider_t              *fdata             = (slider_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data), fdata->data      },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 
 data_proto_t slider_t_proto = {
 	.type                   = TYPE_SLIDERT,
@@ -142,6 +158,6 @@ data_proto_t slider_t_proto = {
 		
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,
 		[ACTION_GETDATA]      = (f_data_func)&data_default_getdata,
-		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		[ACTION_CONTROL]      = (f_data_func)&data_slider_t_control,
 	}
 };

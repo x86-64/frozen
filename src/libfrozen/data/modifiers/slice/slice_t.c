@@ -153,6 +153,22 @@ error:
 	data_free(&fargs->freeit);
 	return ret;
 } // }}}
+static ssize_t       data_slice_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data), fdata->data      },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 static ssize_t       data_slice_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              key;
@@ -199,7 +215,7 @@ data_proto_t slice_t_proto = {
 		[ACTION_FREE]         = (f_data_func)&data_slice_t_free,
 		[ACTION_GETDATA]      = (f_data_func)&data_slice_t_getdata,
 		[ACTION_VIEW]         = (f_data_func)&data_slice_t_view,
-		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		[ACTION_CONTROL]      = (f_data_func)&data_slice_t_control,
 		[ACTION_LOOKUP]       = (f_data_func)&data_slice_t_lookup,
 		[ACTION_ENUM]         = (f_data_func)&data_slice_t_enum,
 	}

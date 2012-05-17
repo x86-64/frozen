@@ -170,6 +170,23 @@ static ssize_t data_triplet_key_t_enum(data_t *data, fastcall_enum *fargs){ // {
 	data_query(fargs->dest, &r_end);
 	return ret;
 } // }}}
+static ssize_t data_triplet_key_t_control(data_t *data, fastcall_control *fargs){ // {{{
+	triplet_key_t         *fdata             = (triplet_key_t *)data->ptr;
+	
+	switch(fargs->function){
+		case HK(data):;
+			helper_control_data_t r_internal[] = {
+				{ HK(data),  &fdata->storage      },
+				{ HK(slave), &fdata->slave        },
+				{ 0, NULL }
+			};
+			return helper_control_data(data, fargs, r_internal);
+			
+		default:
+			break;
+	}
+	return data_default_control(data, fargs);
+} // }}}
 
 data_proto_t triplet_key_t_proto = {
 	.type            = TYPE_TRIPLETKEYT,
@@ -180,6 +197,7 @@ data_proto_t triplet_key_t_proto = {
 	.handlers        = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_triplet_key_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_triplet_key_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_triplet_key_t_control,
 		
 		[ACTION_CREATE]       = (f_data_func)&data_triplet_key_t_c,
 		[ACTION_LOOKUP]       = (f_data_func)&data_triplet_key_t_ru,
