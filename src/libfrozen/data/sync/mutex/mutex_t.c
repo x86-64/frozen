@@ -67,10 +67,6 @@ static ssize_t data_mutex_t_convert_from(data_t *dst, fastcall_convert_from *far
 	
 	return data_mutex_t_handler(dst, (fastcall_header *)fargs);
 } // }}}
-static ssize_t data_mutex_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
-	fargs->data = data;
-	return 0;
-} // }}}
 static ssize_t data_mutex_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr)
 		mutex_t_destroy((mutex_t *)data->ptr);
@@ -85,7 +81,7 @@ data_proto_t mutex_t_proto = {
 	.handler_default        = (f_data_func)&data_mutex_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_mutex_t_convert_from,
-		[ACTION_GETDATA]      = (f_data_func)&data_mutex_t_getdata,
 		[ACTION_FREE]         = (f_data_func)&data_mutex_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

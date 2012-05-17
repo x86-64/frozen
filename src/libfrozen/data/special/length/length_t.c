@@ -51,12 +51,6 @@ static ssize_t data_length_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	}
 	return -ENOSYS;
 } // }}}
-/*static ssize_t data_length_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
-	length_t              *fdata             = (length_t *)data->ptr;
-	
-	fargs->data = &fdata->data;
-	return 0;
-} // }}}*/
 static ssize_t data_length_t_view(data_t *data, fastcall_view *fargs){ // {{{
 	return -ENOSYS;
 } // }}}
@@ -79,10 +73,10 @@ data_proto_t length_t_proto = {
 	.handlers               = {
 		[ACTION_FREE]         = (f_data_func)&data_length_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_length_t_convert_from,
-		//[ACTION_GETDATA]      = (f_data_func)&data_length_t_getdata,
 		[ACTION_VIEW]         = (f_data_func)&data_length_t_view,
 		[ACTION_READ]         = (f_data_func)&data_length_t_handler,
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_length_t_handler,
 		[ACTION_LENGTH]       = (f_data_func)&data_length_t_handler,
+		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 };

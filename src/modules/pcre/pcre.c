@@ -116,6 +116,7 @@ static ssize_t data_pcre_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	void                  *data_ptr;
 	uintmax_t              data_size;
 	data_t                 freeit;
+	data_t                *deref;
 	uintmax_t              offset            = 0;
 	pcre_t                *fdata             = (pcre_t *)data->ptr;
 	
@@ -128,8 +129,8 @@ static ssize_t data_pcre_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	}
 	
 	// deref fdata->data
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(fdata->data, &r_getdata)) < 0){
+	data_realholder(ret, fdata->data, deref);
+	if(ret < 0){
 		data_free(&freeit);
 		return ret;
 	}
@@ -145,7 +146,7 @@ static ssize_t data_pcre_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 		) < 0)
 			goto exit;
 		
-		data_t        d_item      = DATA_HEAP_SLICET(r_getdata.data, ovector[0], ovector[1] - ovector[0]);
+		data_t        d_item      = DATA_HEAP_SLICET(deref, ovector[0], ovector[1] - ovector[0]);
 		fastcall_push r_push_item = { { 3, ACTION_PUSH }, &d_item };
 		ret = data_query(fargs->dest, &r_push_item);
 		

@@ -157,7 +157,6 @@ data_proto_t slider_t_proto = {
 		[ACTION_LENGTH]       = (f_data_func)&data_slider_t_length,
 		
 		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,
-		[ACTION_GETDATA]      = (f_data_func)&data_default_getdata,
 		[ACTION_CONTROL]      = (f_data_func)&data_slider_t_control,
 	}
 };

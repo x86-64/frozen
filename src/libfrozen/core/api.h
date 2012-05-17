@@ -109,7 +109,6 @@ typedef struct fastcall_header {
 
 /*
 	// Various
-	ACTION(GETDATA),
 	ACTION(QUERY),
 	
 	ACTION(ACQUIRE)
@@ -485,11 +484,6 @@ typedef struct fastcall_start {
 typedef struct fastcall_stop {
 	fastcall_header        header;
 } fastcall_stop;
-
-typedef struct fastcall_getdata {
-	fastcall_header        header;
-	data_t                *data;
-} fastcall_getdata;
 
 typedef struct fastcall_query {
 	fastcall_header        header;

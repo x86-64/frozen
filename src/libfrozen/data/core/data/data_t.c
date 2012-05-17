@@ -2,6 +2,7 @@
 #include <data_t.h>
 
 #include <core/void/void_t.h>
+#include <core/hash/hash_t.h>
 #include <enum/format/format_t.h>
 #include <modifiers/slider/slider_t.h>
 #include <format/binstring/binstring_t.h>
@@ -14,11 +15,9 @@ static ssize_t data_data_t_convert_from(data_t *dst, fastcall_convert_from *farg
 	if(fdata == NULL)
 		return -EINVAL;
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(fdata, &r_getdata)) < 0)
+	data_realholder(ret, fdata, fdata);
+	if(ret < 0)
 		return ret;
-	
-	fdata = r_getdata.data;
 	
 	data_t                 new_data          = DATA_VOID;
 	data_t                 d_datatype        = DATA_PTR_DATATYPET(&new_data.type);
@@ -58,11 +57,9 @@ static ssize_t data_data_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	if(src->ptr == NULL)
 		return -EINVAL;
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(fdata, &r_getdata)) < 0)
+	data_realholder(ret, fdata, fdata);
+	if(ret < 0)
 		return ret;
-	
-	fdata = r_getdata.data;
 	
 	data_t                 d_datatype         = DATA_PTR_DATATYPET(&fdata->type);
 	data_t                 d_binstring        = DATA_BINSTRINGT(fdata);

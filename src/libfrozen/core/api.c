@@ -14,18 +14,20 @@ ssize_t api_data_nosys(data_t *data, fastcall_header *hargs){ // {{{
 } // }}}
 
 static ssize_t remove_symlinks(hash_t *hash_item, hash_t **new_hash){ // {{{
+	ssize_t                ret;
+	data_t                *data;
 	hash_t                *new_hash_item;
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( data_query(&hash_item->data, &r_getdata) < 0)
+	data_realholder(ret, &hash_item->data, data);
+	if(ret < 0)
 		return ITER_BREAK;
 	
 	if( (new_hash_item = hash_new(3)) == NULL)
 		return ITER_BREAK;
 	
 	new_hash_item[0].key       = hash_item->key;
-	new_hash_item[0].data.type = r_getdata.data->type;
-	new_hash_item[0].data.ptr  = r_getdata.data->ptr;
+	new_hash_item[0].data.type = data->type;
+	new_hash_item[0].data.ptr  = data->ptr;
 	hash_assign_hash_inline(&new_hash_item[1], *new_hash);
 	
 	*new_hash = new_hash_item;
@@ -71,18 +73,14 @@ ssize_t     action_crud_from_hash(data_t *data, request_t *request){ // {{{
 	value = hash_data_find(request, HK(value));
 	
 	if(key){
-		fastcall_getdata r_getdata_key = { { 3, ACTION_GETDATA } };
-		if( (ret = data_query(key, &r_getdata_key)) < 0)
+		data_realholder(ret, key, key);
+		if(ret < 0)
 			return ret;
-		
-		key = r_getdata_key.data;
 	}
 	if(value){
-		fastcall_getdata r_getdata_value = { { 3, ACTION_GETDATA } };
-		if( (ret = data_query(value, &r_getdata_value)) < 0)
+		data_realholder(ret, value, value);
+		if(ret < 0)
 			return ret;
-		
-		value = r_getdata_value.data;
 	}
 	
 	fastcall_crud fargs = { { 4, action }, key, value };
@@ -191,11 +189,11 @@ ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
 	data_t                *holder_ptr        = NULL;
 	
 	if( (pointer = hash_data_find(request, HK(data))) != NULL){
-		fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-		if( (ret = data_query(pointer, &r_getdata)) < 0)
+		data_realholder(ret, pointer, pointer);
+		if(ret < 0)
 			return ret;
 		
-		holder_consume(ret, holder, r_getdata.data);
+		holder_consume(ret, holder, pointer);
 		if(ret != 0)
 			return -EINVAL;
 		
@@ -224,12 +222,12 @@ ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
 	
 	if( (pointer = hash_data_find(request, HK(data))) == NULL)
 		return -EINVAL;
-	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(pointer, &r_getdata)) < 0)
+		
+	data_realholder(ret, pointer, pointer);
+	if(ret < 0)
 		return ret;
 	
-	fastcall_pop           fargs             = { { 3, ACTION_POP }, r_getdata.data };
+	fastcall_pop           fargs             = { { 3, ACTION_POP }, pointer };
 	return data_query(data, &fargs);
 } // }}}
 
@@ -474,12 +472,12 @@ ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 		(func = api_data_from_hash[action]) == NULL
 	)
 		return -ENOSYS;
-	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(data, &r_getdata)) < 0)
+		
+	data_realholder(ret, data, data);
+	if(ret < 0)
 		return ret;
 	
-	return func(r_getdata.data, request);
+	return func(data, request);
 } // }}}
 ssize_t     machine_fast_query(machine_t *machine, void *hargs){ // {{{
 	f_machine_from_fast    func;

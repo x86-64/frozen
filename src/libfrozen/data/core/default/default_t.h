@@ -16,7 +16,6 @@ ssize_t       data_default_read          (data_t *data, fastcall_read *fargs);
 ssize_t       data_default_write         (data_t *data, fastcall_write *fargs);
 ssize_t       data_default_compare       (data_t *data1, fastcall_compare *fargs);
 ssize_t       data_default_view          (data_t *data, fastcall_view *fargs);
-ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs);
 ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs);
 ssize_t       data_default_convert_to    (data_t *src, fastcall_convert_to *fargs);
 ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *fargs);

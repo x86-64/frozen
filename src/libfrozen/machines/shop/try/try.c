@@ -127,13 +127,13 @@ static ssize_t try_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t get_hash(data_t *data, data_t *freeme, hash_t **hash){ // {{{
 	ssize_t                ret;
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(data, &r_getdata)) < 0)
+	data_realholder(ret, data, data);
+	if(ret < 0)
 		return ret;
 	
 	// plain hash
-	if(r_getdata.data->type == TYPE_HASHT){
-		*hash = (hash_t *)r_getdata.data->ptr;
+	if(data->type == TYPE_HASHT){
+		*hash = (hash_t *)data->ptr;
 		return 0;
 	}
 	
@@ -141,7 +141,7 @@ static ssize_t get_hash(data_t *data, data_t *freeme, hash_t **hash){ // {{{
 	freeme->type = TYPE_HASHT;
 	freeme->ptr  = NULL;
 	
-	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, r_getdata.data, FORMAT(packed) };
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, data, FORMAT(packed) };
 	if( (ret = data_query(freeme, &r_convert)) < 0)
 		return ret;
 	

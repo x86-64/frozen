@@ -35,11 +35,6 @@ static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	
 	return data_query(rdata, hargs);
 } // }}}
-static ssize_t data_env_t_free(data_t *data, fastcall_free *hargs){ // {{{
-	free(data->ptr);
-	data->ptr = NULL;
-	return 0;
-} // }}}
 static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	env_t                 *fdata;
 	
@@ -65,12 +60,9 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	}
 	return -ENOSYS;
 } // }}}
-static ssize_t data_env_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
-	env_t                 *fdata             = (env_t *)data->ptr;
-	
-	if( (fargs->data = env_t_find(fdata)) == NULL)
-		return -EINVAL;
-	
+static ssize_t data_env_t_free(data_t *data, fastcall_free *hargs){ // {{{
+	free(data->ptr);
+	data->ptr = NULL;
 	return 0;
 } // }}}
 
@@ -79,8 +71,7 @@ data_proto_t env_t_proto = {
 	.api_type               = API_HANDLERS,
 	.handler_default        = (f_data_func)&data_env_t_handler,
 	.handlers               = {
-		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_env_t_convert_from,
-		[ACTION_GETDATA]      = (f_data_func)&data_env_t_getdata,
+		[ACTION_FREE]         = (f_data_func)&data_env_t_free,
 	}
 };

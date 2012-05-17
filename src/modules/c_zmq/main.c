@@ -716,21 +716,22 @@ typedef struct zeromq_userdata {
 
 static ssize_t zmq_end_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
+	data_t                *socket;
 	data_t                *buffer;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
-	fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-	if( (ret = data_query(&userdata->socket, &r_getdata)) < 0)
+	data_realholder(ret, &userdata->socket, socket);
+	if(ret < 0)
 		return ret;
 	
-	if(r_getdata.data->type != TYPE_ZEROMQT)
+	if(socket->type != TYPE_ZEROMQT)
 		return -EINVAL;
 	
 	if( (buffer = hash_data_find(request, userdata->hk_input)) == NULL )
 		return -EINVAL;
 	
 	fastcall_push r_push = { { 3, ACTION_PUSH }, buffer };
-	if( (ret = data_query(r_getdata.data, &r_push)) < 0)
+	if( (ret = data_query(socket, &r_push)) < 0)
 		return ret;
 	
 	return 0;
@@ -787,25 +788,27 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	data_t                 item;
 	data_t                 input_convert     = DATA_VOID;
 	data_t                *input;
+	data_t                *socket;
 	zeromq_t              *socket_fdata;
 	zeromq_userdata       *userdata          = (zeromq_userdata *)machine->userdata;
 	
 	request_enter_context(request);
 	
-		fastcall_getdata r_getdata = { { 3, ACTION_GETDATA } };
-		ret = data_query(&userdata->socket, &r_getdata);
+		data_realholder(ret, &userdata->socket, socket);
+		if(ret < 0)
+			return ret;
 	
 	request_leave_context();
 	if(ret < 0)
 		return ret;
 	
-	if(r_getdata.data->type != TYPE_ZEROMQT)
+	if(socket->type != TYPE_ZEROMQT)
 		return -EINVAL;
 	
-	if((ret = zeromq_t_prepare(r_getdata.data)) < 0)
+	if((ret = zeromq_t_prepare(socket)) < 0)
 		return ret;
 	
-	socket_fdata = r_getdata.data->ptr;
+	socket_fdata = socket->ptr;
 
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
@@ -832,11 +835,11 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 	switch(socket_fdata->zmq_type){
 		case ZMQ_REQ:;
 			fastcall_push r_req_push = { { 3, ACTION_PUSH }, input };
-			if( (ret = data_query(r_getdata.data, &r_req_push)) < 0)          // input buffer consumed here
+			if( (ret = data_query(socket, &r_req_push)) < 0)          // input buffer consumed here
 				goto exit;
 			
 			fastcall_pop  r_req_pop  = { { 3, ACTION_POP  }, &item };
-			if( (ret = data_query(r_getdata.data, &r_req_pop)) < 0)           // new message allocated here
+			if( (ret = data_query(socket, &r_req_pop)) < 0)           // new message allocated here
 				goto exit;
 			
 			request_t r_req_next[] = {
@@ -850,7 +853,7 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 			
 		case ZMQ_REP:;
 			fastcall_pop  r_rep_pop  = { { 3, ACTION_POP  }, &item };
-			if( (ret = data_query(r_getdata.data, &r_rep_pop)) < 0)           // message allocated here
+			if( (ret = data_query(socket, &r_rep_pop)) < 0)           // message allocated here
 				return ret;
 			
 			stack_call(userdata->zmq_end);
@@ -871,7 +874,7 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 		case ZMQ_PUB:;
 		case ZMQ_PUSH:;
 			fastcall_push r_pub_push = { { 3, ACTION_PUSH }, input };
-			if( (ret = data_query(r_getdata.data, &r_pub_push)) < 0)          // input buffer consumed here
+			if( (ret = data_query(socket, &r_pub_push)) < 0)          // input buffer consumed here
 				goto exit;
 			
 			break;
@@ -879,7 +882,7 @@ static ssize_t zeromq_handler(machine_t *machine, request_t *request){ // {{{
 		case ZMQ_SUB:;
 		case ZMQ_PULL:;
 			fastcall_pop  r_sub_pop  = { { 3, ACTION_POP  }, &item };
-			if( (ret = data_query(r_getdata.data, &r_sub_pop)) < 0)           // new message allocated here
+			if( (ret = data_query(socket, &r_sub_pop)) < 0)           // new message allocated here
 				return ret;
 			
 			request_t r_sub_next[] = {
@@ -959,35 +962,34 @@ static ssize_t zeromq_dev_configure(machine_t *machine, config_t *config){ // {{
 
 static ssize_t zeromq_dev_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret1, ret2;
+	data_t                *frontend;
+	data_t                *backend;
 	zeromq_t              *frontend_fdata;
 	zeromq_t              *backend_fdata;
 	zeromq_dev_userdata   *userdata          = (zeromq_dev_userdata *)machine->userdata;
 	
 	request_enter_context(request);
-	
-		fastcall_getdata r_frontend = { { 3, ACTION_GETDATA } };
-		ret1 = data_query(&userdata->frontend, &r_frontend);
 		
-		fastcall_getdata r_backend  = { { 3, ACTION_GETDATA } };
-		ret2 = data_query(&userdata->backend,  &r_backend);
+		data_realholder(ret1, &userdata->frontend, frontend);
+		data_realholder(ret2, &userdata->backend,  backend);
 	
 	request_leave_context();
 	if(ret1 < 0) return ret1;
 	if(ret2 < 0) return ret2;
 	
-	if(r_frontend.data->type != TYPE_ZEROMQT)
+	if(frontend->type != TYPE_ZEROMQT)
 		return error("invalid frontend data supplied");
-	if(r_backend.data->type != TYPE_ZEROMQT)
+	if(backend->type != TYPE_ZEROMQT)
 		return error("invalid backend data supplied");
 	
 	if(
-		(ret1 = zeromq_t_prepare(r_frontend.data)) < 0 ||
-		(ret1 = zeromq_t_prepare(r_backend.data)) < 0
+		(ret1 = zeromq_t_prepare(frontend)) < 0 ||
+		(ret1 = zeromq_t_prepare(backend)) < 0
 	)
 		return ret1;
 	
-	frontend_fdata = r_frontend.data->ptr;
-	backend_fdata  = r_backend.data->ptr;
+	frontend_fdata = frontend->ptr;
+	backend_fdata  = backend->ptr;
 	
 	zmq_device(userdata->device, frontend_fdata->zmq_socket, backend_fdata->zmq_socket);
 	return 0;

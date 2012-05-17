@@ -70,10 +70,6 @@ static ssize_t data_machine_t_free(data_t *data, fastcall_free *fargs){ // {{{
 static ssize_t data_machine_t_query(data_t *data, fastcall_query *fargs){ // {{{
 	return machine_query( (machine_t *)data->ptr, fargs->request );
 } // }}}
-static ssize_t data_machine_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
-	fargs->data = data;
-	return 0;
-} // }}}
 
 data_proto_t machine_t_proto = {
 	.type                   = TYPE_MACHINET,
@@ -86,7 +82,6 @@ data_proto_t machine_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_machine_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_machine_t_free,
 		[ACTION_QUERY]        = (f_data_func)&data_machine_t_query,
-		[ACTION_GETDATA]      = (f_data_func)&data_machine_t_getdata,
 		[ACTION_VIEW]         = (f_data_func)&data_default_view,
 		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}

@@ -210,10 +210,6 @@ ssize_t       data_default_view          (data_t *data, fastcall_view *fargs){ /
 	}
 	return -ENOSYS;
 } // }}}
-ssize_t       data_default_getdata       (data_t *data, fastcall_getdata *fargs){ // {{{
-	fargs->data = data;
-	return 0;
-} // }}}
 ssize_t       data_default_is_null       (data_t *data, fastcall_is_null *fargs){ // {{{
 	fargs->is_null = (data->ptr == NULL) ? 1 : 0;
 	return 0;
@@ -304,7 +300,6 @@ data_proto_t default_t_proto = {
 		[ACTION_COMPARE]     = (f_data_func)&data_default_compare,
 		
 		[ACTION_VIEW]        = (f_data_func)&data_default_view,
-		[ACTION_GETDATA]     = (f_data_func)&data_default_getdata,
 		[ACTION_IS_NULL]     = (f_data_func)&data_default_is_null,
 		
 		[ACTION_CONVERT_TO]  = (f_data_func)&data_default_convert_to,

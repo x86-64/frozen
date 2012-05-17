@@ -155,6 +155,22 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
 
 #define data_is_greedy(_data) (data_protos[ ((data_t *)(_data))->type ]->properties & DATA_GREEDY) != 0 ///< Check is data greedy?
 
+/** Get real data holder
+ * @param      _ret    Return code (ssize_t)
+ * @param      _data   Data (data_t *)
+ * @param[out] _holder Real holder (data_t *)
+ */
+#define data_realholder(_ret, _data, _holder){                 \
+	static fastcall_control _r_control = {                 \
+		{ 5, ACTION_CONTROL },                         \
+		HK(data),                                      \
+		NULL,                                          \
+		NULL                                           \
+	};                                                     \
+	_ret    = data_query(_data, &_r_control);              \
+	_holder = _r_control.value;                            \
+}
+
 /** Free data
  * @param _data Data to be freed
  */

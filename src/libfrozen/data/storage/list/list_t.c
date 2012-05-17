@@ -55,7 +55,22 @@ static ssize_t data_list_t_convert_to(data_t *src, fastcall_convert_to *fargs){ 
 	switch(fargs->format){
 		case FORMAT(packed):;
 			for(chunk = fdata->head; chunk; chunk = chunk->cnext){
-				data_t         d_data             = DATA_PTR_DATAT(&chunk->data);
+				// remove ref_t from top
+				hash_t           r_key[] = {
+					{ 0, DATA_HASHKEYT(HK(data)) },
+					hash_end
+				};
+				data_t           d_key     = DATA_PTR_HASHT(r_key);
+				fastcall_control r_control = {
+					{ 5, ACTION_CONTROL },
+					HK(data),
+					&d_key,
+					NULL
+				};
+				if( (ret = data_query(&chunk->data, &r_control)) < 0)
+					break;
+				
+				data_t         d_data             = DATA_PTR_DATAT(r_control.value);
 				
 				fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_output, FORMAT(packed) };
 				ret = data_query(&d_data, &r_convert);
@@ -261,10 +276,6 @@ static ssize_t data_list_end_t_convert_to(data_t *data, fastcall_convert_to *far
 static ssize_t data_list_end_t_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
 	return 0;
 } // }}}
-static ssize_t data_list_end_t_getdata(data_t *data, fastcall_getdata *fargs){ // {{{
-	fargs->data = data;
-	return 0;
-} // }}}
 data_proto_t list_end_t_proto = { // {{{
 	.type                   = TYPE_LISTENDT,
 	.type_str               = "list_end_t",
@@ -273,7 +284,6 @@ data_proto_t list_end_t_proto = { // {{{
 	.handlers               = {
 		[ACTION_CONVERT_TO]    = (f_data_func)&data_list_end_t_convert_to,
 		[ACTION_CONVERT_FROM]  = (f_data_func)&data_list_end_t_convert_from,
-		[ACTION_GETDATA]       = (f_data_func)&data_list_end_t_getdata,
 		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 	}
 }; // }}}
