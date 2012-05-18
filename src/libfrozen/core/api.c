@@ -231,30 +231,6 @@ ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
 	return data_query(data, &fargs);
 } // }}}
 
-ssize_t     action_start_from_fast(machine_t *machine, fastcall_start *fargs){ // {{{
-	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		hash_end
-	};
-	return machine_query(machine, r_next);
-} // }}}
-ssize_t     action_start_from_hash(data_t *data, request_t *request){ // {{{
-	fastcall_start           fargs             = { { 2, ACTION_START } };
-	return data_query(data, &fargs);
-} // }}}
-
-ssize_t     action_stop_from_fast(machine_t *machine, fastcall_stop *fargs){ // {{{
-	request_t  r_next[] = {
-		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		hash_end
-	};
-	return machine_query(machine, r_next);
-} // }}}
-ssize_t     action_stop_from_hash(data_t *data, request_t *request){ // {{{
-	fastcall_stop           fargs             = { { 2, ACTION_STOP } };
-	return data_query(data, &fargs);
-} // }}}
-
 ssize_t     action_free_from_fast(machine_t *machine, fastcall_free *fargs){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
@@ -500,8 +476,6 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_ENUM]  = 4,
 	[ACTION_PUSH] = 3,
 	[ACTION_POP] = 3,
-	[ACTION_START] = 2,
-	[ACTION_STOP] = 2,
 	[ACTION_FREE] = 2,
 	[ACTION_INCREMENT] = 2,
 	[ACTION_DECREMENT] = 2,
@@ -531,8 +505,6 @@ f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
 	[ACTION_ENUM]         = (f_machine_from_fast)&action_enum_from_fast,
 	[ACTION_PUSH]         = (f_machine_from_fast)&action_push_from_fast,
 	[ACTION_POP]          = (f_machine_from_fast)&action_pop_from_fast,
-	[ACTION_START]        = (f_machine_from_fast)&action_start_from_fast,
-	[ACTION_STOP]         = (f_machine_from_fast)&action_stop_from_fast,
 	[ACTION_FREE]         = (f_machine_from_fast)&action_free_from_fast,
 	[ACTION_INCREMENT]    = (f_machine_from_fast)&action_increment_from_fast,
 	[ACTION_DECREMENT]    = (f_machine_from_fast)&action_decrement_from_fast,
@@ -555,8 +527,6 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_ENUM]         = (f_data_from_hash)&action_enum_from_hash,
 	[ACTION_PUSH]         = (f_data_from_hash)&action_push_from_hash,
 	[ACTION_POP]          = (f_data_from_hash)&action_pop_from_hash,
-	[ACTION_START]        = (f_data_from_hash)&action_start_from_hash,
-	[ACTION_STOP]         = (f_data_from_hash)&action_stop_from_hash,
 	[ACTION_FREE]         = (f_data_from_hash)&action_free_from_hash,
 	[ACTION_INCREMENT]    = (f_data_from_hash)&action_increment_from_hash,
 	[ACTION_DECREMENT]    = (f_data_from_hash)&action_decrement_from_hash,

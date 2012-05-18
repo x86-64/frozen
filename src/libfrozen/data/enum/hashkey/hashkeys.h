@@ -148,6 +148,8 @@
 #define HK_VALUE_socket 9863
 #define HK_VALUE_source 9547
 #define HK_VALUE_split 6115
+#define HK_VALUE_start 6176
+#define HK_VALUE_stop 3370
 #define HK_VALUE_storage 14484
 #define HK_VALUE_string 9743
 #define HK_VALUE_structure 31338
@@ -316,6 +318,8 @@ typedef enum hashkey_t {
       HK_socket = HK_VALUE_socket, 
       HK_source = HK_VALUE_source, 
       HK_split = HK_VALUE_split, 
+      HK_start = HK_VALUE_start, 
+      HK_stop = HK_VALUE_stop, 
       HK_storage = HK_VALUE_storage, 
       HK_string = HK_VALUE_string, 
       HK_structure = HK_VALUE_structure, 
@@ -488,6 +492,8 @@ keypair_t hashkeys[] = {
       { "socket", HK_VALUE_socket }, 
       { "source", HK_VALUE_source }, 
       { "split", HK_VALUE_split }, 
+      { "start", HK_VALUE_start }, 
+      { "stop", HK_VALUE_stop }, 
       { "storage", HK_VALUE_storage }, 
       { "string", HK_VALUE_string }, 
       { "structure", HK_VALUE_structure }, 

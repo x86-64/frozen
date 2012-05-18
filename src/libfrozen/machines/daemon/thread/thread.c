@@ -160,12 +160,19 @@ static ssize_t thread_configure(machine_t *machine, config_t *config){ // {{{
 static ssize_t thread_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
 	action_t               action;
-	
+	hashkey_t              function;
+
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
+	if(ret != 0 || action != ACTION_CONTROL)
+		return errorn(ENOSYS);
 	
-	switch(action){
-		case ACTION_START: return thread_control_start(machine);
-		case ACTION_STOP:  return thread_control_stop(machine);
+	hash_data_get(ret, TYPE_HASHKEYT, function, request, HK(function));
+	if(ret != 0)
+		return errorn(ENOSYS);
+	
+	switch(function){
+		case HK(start): return thread_control_start(machine);
+		case HK(stop):  return thread_control_stop(machine);
 		default:
 			break;
 	}
