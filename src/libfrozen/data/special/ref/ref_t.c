@@ -70,12 +70,6 @@ static ssize_t data_ref_t_free(data_t *data, fastcall_free *hargs){ // {{{
 		ref_t_destroy(fdata);
 	return 0;
 } // }}}
-static ssize_t data_ref_t_acquire(data_t *data, fastcall_acquire *hargs){ // {{{
-	ref_t                 *fdata             = (ref_t *)data->ptr;
-
-	ref_t_acquire(fdata);
-	return 0;
-} // }}}
 static ssize_t data_ref_t_control(data_t *data, fastcall_control *fargs){ // {{{
 	ref_t               *fdata             = (ref_t *)data->ptr;
 	
@@ -101,7 +95,6 @@ data_proto_t ref_t_proto = {
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_ref_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_ref_t_free,
-		[ACTION_ACQUIRE]      = (f_data_func)&data_ref_t_acquire,
 		[ACTION_CONTROL]      = (f_data_func)&data_ref_t_control,
 	}
 };

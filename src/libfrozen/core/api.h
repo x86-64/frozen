@@ -110,8 +110,6 @@ typedef struct fastcall_header {
 /*
 	// Various
 	ACTION(QUERY),
-	
-	ACTION(ACQUIRE)
 */
 
 // Core api set {{{
@@ -467,10 +465,6 @@ typedef struct fastcall_view { // ACTION(VIEW)
 	data_t                 freeit;
 } fastcall_view;
 // }}}
-
-typedef struct fastcall_acquire {
-	fastcall_header        header;
-} fastcall_acquire;
 
 typedef struct fastcall_query {
 	fastcall_header        header;
