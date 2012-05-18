@@ -29,10 +29,14 @@ static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{
 	return 0;
 } // }}}
 static ssize_t iter_list_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
-	fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } };
-	data_query(data, &r_acquire);
+	ssize_t                ret;
+	data_t                 d_copy;
 	
-	fastcall_push r_push = { { 3, ACTION_PUSH }, data };
+	holder_copy(ret, &d_copy, data);
+	if(ret < 0)
+		return ret;
+	
+	fastcall_push r_push = { { 3, ACTION_PUSH }, &d_copy };
 	return data_query(fargs->dest, &r_push);
 } // }}}
 static ssize_t iter_list_t_convert_from(hash_t *hash_item, data_t *ctx){ // {{{
@@ -372,6 +376,8 @@ ssize_t         list_t_unshift             (list_t *list, data_t *data){ // {{{
 	return 0;
 } // }}}
 ssize_t         list_t_shift               (list_t *list, data_t *data){ // {{{
+	ssize_t           ret;
+	data_t            d_copy;
 	list_chunk_t     *chunk;
 	
 	if(list->head == NULL)
@@ -383,10 +389,11 @@ ssize_t         list_t_shift               (list_t *list, data_t *data){ // {{{
 	//if(list->tail == chunk)
 	//	list->tail = NULL;
 	
-	fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } }; // caller will use it
-	data_query(&chunk->data, &r_acquire);
+	holder_copy(ret, &d_copy, &chunk->data);
+	if(ret < 0)
+		return ret;
 	
-	memcpy(data, &chunk->data, sizeof(data_t));
+	*data = d_copy;
 	chunk_free(chunk);
 	return 0;
 } // }}}
@@ -407,6 +414,8 @@ ssize_t         list_t_push                (list_t *list, data_t *data){ // {{{
 	return 0;
 } // }}}
 ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
+	ssize_t           ret;
+	data_t            d_copy;
 	list_chunk_t     *curr;
 	list_chunk_t     **prev                  = &list->head;
 	
@@ -414,10 +423,11 @@ ssize_t         list_t_pop                 (list_t *list, data_t *data){ // {{{
 		if(curr->cnext == NULL){
 			*prev = NULL;
 			
-			fastcall_acquire r_acquire = { { 2, ACTION_ACQUIRE } }; // caller will use it
-			data_query(&curr->data, &r_acquire);
+			holder_copy(ret, &d_copy, &curr->data);
+			if(ret < 0)
+				return ret;
 			
-			memcpy(data, &curr->data, sizeof(data_t));
+			*data = d_copy;
 			chunk_free(curr);
 			return 0;
 		}
