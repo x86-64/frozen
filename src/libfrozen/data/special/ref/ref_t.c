@@ -37,6 +37,15 @@ static ssize_t data_ref_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 		return data_ref_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
 	
 	switch(fargs->format){
+		case FORMAT(native):
+			if(fargs->src->type != TYPE_REFT)
+				return -EFAULT;
+			
+			ref_t_acquire(fargs->src->ptr);
+			
+			*dst = *fargs->src;
+			return 0;
+
 		case FORMAT(hash):;
 			hash_t                *config;
 			data_t                 data;
@@ -57,12 +66,13 @@ static ssize_t data_ref_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 static ssize_t data_ref_t_free(data_t *data, fastcall_free *hargs){ // {{{
 	ref_t                 *fdata             = (ref_t *)data->ptr;
 	
-	ref_t_destroy(fdata);
+	if(fdata)
+		ref_t_destroy(fdata);
 	return 0;
 } // }}}
 static ssize_t data_ref_t_acquire(data_t *data, fastcall_acquire *hargs){ // {{{
 	ref_t                 *fdata             = (ref_t *)data->ptr;
-	
+
 	ref_t_acquire(fdata);
 	return 0;
 } // }}}
