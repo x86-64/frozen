@@ -132,6 +132,7 @@ API void               hash_free                    (hash_t *hash);      ///< Fr
 API void               hash_dump                    (hash_t *hash);      ///< Print human-readable version of hash
 
 API hash_t *           hash_find                    (hash_t *hash, hashkey_t key); ///< Find key in hash
+API hash_t *           hash_find_id                 (hash_t *hash, uintmax_t *key); ///< Find key in hash by id
 API data_t *           hash_data_find               (hash_t *hash, hashkey_t key); ///< Find key in hash and return pointer to data holder
 API size_t             hash_nelements               (hash_t *hash); ///< Count number of elements in hash
 

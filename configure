@@ -18046,8 +18046,8 @@ fi
 
 	if test "${enable_hash_t}" = "yes"; then
 		DATA_DIR_hash_t="core/hash"
-		DATA_DEP_hash_t=""
-		DATA_ID_hash_t="17"
+		DATA_DEP_hash_t="uint_t consumable_t data_t slider_t fd_t raw_t datatype_t format_t"
+		DATA_ID_hash_t=""
 		DATA_SELECTED="$DATA_SELECTED hash_t"
 		DATA_HEADERS="$DATA_HEADERS core/hash/hash_t.h"
 	fi

@@ -8,6 +8,7 @@
 #include <modifiers/slider/slider_t.h>
 #include <core/data/data_t.h>
 #include <special/consumable/consumable_t.h>
+#include <numeric/uint/uint_t.h>
 
 #define HASH_INITIAL_SIZE 8
 
@@ -309,24 +310,31 @@ static ssize_t data_hash_t_convert_from(data_t *dst, fastcall_convert_from *farg
 
 static ssize_t data_hash_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
-	hashkey_t              key;
-	data_t                *value;
+	hashkey_t              key_hashkey;
+	uintmax_t              key_uint;
+	hash_t                *value;
 	hash_t                *fdata             = (hash_t *)data->ptr;
 	
 	if(fargs->key == NULL || fargs->value == NULL)
 		return -EINVAL;
 	
-	data_get(ret, TYPE_HASHKEYT, key, fargs->key);
-	if(ret != 0)
-		return -EINVAL;
-	
-	if( (value = hash_data_find(fdata, key)) == NULL)
-		return -ENOENT;
-	
-        if( (ret = data_notconsumable_t(fargs->value, *value)) < 0)
-		return ret;
-	
-	return 0;
+	data_get(ret, TYPE_HASHKEYT, key_hashkey, fargs->key);
+	if(ret == 0){
+		if( (value = hash_find(fdata, key_hashkey)) == NULL)
+			return -ENOENT;
+		
+		goto found;
+	}
+	data_get(ret, TYPE_UINTT, key_uint, fargs->key);
+	if(ret == 0){
+		if( (value = hash_find_id(fdata, &key_uint)) == NULL)
+			return -ENOENT;
+		
+		goto found;
+	}
+	return -EINVAL;
+found:
+	return data_notconsumable_t(fargs->value, value->data);
 } // }}}
 static ssize_t data_hash_t_delete(data_t *data, fastcall_delete *fargs){ // {{{
 	ssize_t                ret;
@@ -462,6 +470,7 @@ void               hash_free                    (hash_t *hash){ // {{{
 	free(hash);
 } // }}}
 
+// TODO rewrite hash_find
 hash_t *           hash_find                    (hash_t *hash, hashkey_t key){ // {{{
 	register hash_t       *inline_hash;
 	
@@ -479,6 +488,23 @@ hash_t *           hash_find                    (hash_t *hash, hashkey_t key){ /
 					return inline_hash;
 			}
 		}while(hash->key != hash_ptr_end);
+	}
+	return NULL;
+} // }}}
+hash_t *           hash_find_id                 (hash_t *hash, uintmax_t *key){ // {{{
+	register hash_t       *inline_hash;
+	
+	for(;; hash++, *key = *key - 1){
+		if(hash->key == hash_ptr_inline){
+			if( (inline_hash = hash_find_id((hash_t *)hash->data.ptr, key)) != NULL)
+				return inline_hash;
+		}
+		
+		if(hash->key == hash_ptr_end)
+			break;
+		
+		if(*key == 0)
+			return hash;
 	}
 	return NULL;
 } // }}}
