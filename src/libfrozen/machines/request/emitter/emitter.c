@@ -70,10 +70,10 @@ static ssize_t emitter_handler(machine_t *machine, request_t *request){ // {{{
 	
 	if(userdata->req){
 		data_t           d_emitter = DATA_PTR_EMITTERT(userdata->req);
-		fastcall_execute r_exec    = { { 2, ACTION_EXECUTE } };
+		fastcall_query   r_query   = { { 2, ACTION_QUERY } };
 		
 		for(i = 0; i < userdata->nreq; i++){
-			if( (ret = data_query(&d_emitter, &r_exec)) < 0){
+			if( (ret = data_query(&d_emitter, &r_query)) < 0){
 				if(userdata->silent == 0)
 					errors_log("emitter error: %d: %s\n", ret, errors_describe(ret));
 			}
