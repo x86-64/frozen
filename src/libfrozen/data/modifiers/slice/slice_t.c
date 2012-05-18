@@ -5,6 +5,34 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 #include <storage/raw/raw_t.h>
+#include <io/io/io_t.h>
+
+typedef struct enum_userdata {
+	data_t                *data;
+	fastcall_enum         *fargs;
+	uintmax_t              skip_keys;
+	uintmax_t              limit_keys;
+} enum_userdata;
+
+static ssize_t       data_slice_t_iter_iot(data_t *data, enum_userdata *userdata, fastcall_create *fargs){ // {{{
+	if(fargs->value == NULL)        // skip end of enum
+		return 0;
+	
+	if(userdata->skip_keys > 0){
+		userdata->skip_keys--;
+		return 0;               // skip key
+	}
+	
+	if(userdata->limit_keys != ~(uintmax_t)0){
+		if(userdata->limit_keys == 0)
+			return -1;      // EOF
+		
+		userdata->limit_keys--;
+	}
+	
+	fastcall_create r_create = { { 4, ACTION_CREATE }, fargs->key, fargs->value };
+	return data_query(userdata->fargs->dest, &r_create);
+} // }}}
 
 static ssize_t       data_slice_t_handler  (data_t *data, fastcall_header *fargs){ // {{{
 	slice_t               *fdata             = (slice_t *)data->ptr;
@@ -125,6 +153,36 @@ error:
 	data_free(&fargs->freeit);
 	return ret;
 } // }}}
+static ssize_t       data_slice_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              key;
+	data_t                 d_key             = DATA_PTR_UINTT(&key);
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	data_get(ret, TYPE_UINTT, key, fargs->key);
+	if(ret < 0)
+		return data_query(fdata->data, fargs);
+	
+	key += fdata->off;
+	
+	fastcall_lookup r_lookup = { { 4, ACTION_LOOKUP }, &d_key, fargs->value };
+	return data_query(fdata->data, &r_lookup);
+} // }}}
+static ssize_t       data_slice_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	ssize_t                ret;
+	slice_t               *fdata             = (slice_t *)data->ptr;
+	
+	enum_userdata          userdata          = { data, fargs, fdata->off, fdata->size };
+	data_t                 iot               = DATA_IOT(&userdata, (f_io_func)&data_slice_t_iter_iot);
+	fastcall_enum          r_enum            = { { 3, ACTION_ENUM }, &iot };
+	ret = data_query(fdata->data, &r_enum);
+	
+	// last
+	fastcall_create r_end = { { 3, ACTION_CREATE }, NULL, NULL };
+	data_query(fargs->dest, &r_end);
+	
+	return (ret == -1) ? 0 : ret; // EOF can be returned in iter_iot function, this is fine behavior
+} // }}}
 
 data_proto_t slice_t_proto = {
 	.type                   = TYPE_SLICET,
@@ -142,6 +200,8 @@ data_proto_t slice_t_proto = {
 		[ACTION_GETDATA]      = (f_data_func)&data_slice_t_getdata,
 		[ACTION_VIEW]         = (f_data_func)&data_slice_t_view,
 		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
+		[ACTION_LOOKUP]       = (f_data_func)&data_slice_t_lookup,
+		[ACTION_ENUM]         = (f_data_func)&data_slice_t_enum,
 	}
 };
 
