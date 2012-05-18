@@ -54,13 +54,32 @@
 <div class="title">config.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 
-<a name="l00002"></a>00002 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_path;
-<a name="l00003"></a>00003 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_incs;
-<a name="l00004"></a>00004 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_opts;
-<a name="l00005"></a>00005 
-<a name="l00006"></a>00006 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_string_parse (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>);
-<a name="l00007"></a>00007 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_file_parse   (<span class="keywordtype">char</span> *filename);
+<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef CONFIGS_CONFIG_H</span>
+<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define CONFIGS_CONFIG_H</span>
+<a name="l00003"></a>00003 <span class="preprocessor"></span>
+<a name="l00004"></a>00004 <span class="keyword">typedef</span> <span class="keyword">enum</span> config_format {
+<a name="l00005"></a>00005         CONFIG_PLAIN          = 0x01,  <span class="comment">// .conf extension</span>
+<a name="l00006"></a>00006         CONFIG_DATAORIENTED   = 0x02,  <span class="comment">// .fz   extension</span>
+<a name="l00007"></a>00007 } config_format;
+<a name="l00008"></a>00008 <span class="preprocessor">#define config_format_mask   0x0f</span>
+<a name="l00009"></a>00009 <span class="preprocessor"></span>
+<a name="l00010"></a>00010 <span class="keyword">typedef</span> <span class="keyword">enum</span> config_wrapper {
+<a name="l00011"></a>00011         CONFIG_M4             = 0x10, <span class="comment">// .m4</span>
+<a name="l00012"></a>00012 } config_wrapper;
+<a name="l00013"></a>00013 <span class="preprocessor">#define config_wrapper_mask  0xf0</span>
+<a name="l00014"></a>00014 <span class="preprocessor"></span>
+<a name="l00015"></a>00015 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_path;
+<a name="l00016"></a>00016 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_incs;
+<a name="l00017"></a>00017 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_m4_opts;
+<a name="l00018"></a>00018 <span class="keyword">extern</span> <span class="keywordtype">char</span> *config_ext_file;
+<a name="l00019"></a>00019 
+<a name="l00020"></a>00020 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_pl_string_parse (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>);
+<a name="l00021"></a>00021 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_fz_string_parse (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>);
+<a name="l00022"></a>00022 
+<a name="l00023"></a>00023 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_string_parse (<span class="keywordtype">char</span> *<span class="keywordtype">string</span>, config_format format);
+<a name="l00024"></a>00024 API <a class="code" href="structhash__t.html" title="Hash item.">hash_t</a> *   configs_file_parse   (<span class="keywordtype">char</span> *filename);
+<a name="l00025"></a>00025 
+<a name="l00026"></a>00026 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

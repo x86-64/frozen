@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>go_interface_t.h Source File | frozen - flexible data processing daemon</title>
+<title>triplet_key_t | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -40,27 +40,24 @@
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li class="current"><a href="files.html"><span>Files</span></a></li>
-    </ul>
-  </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">go_interface_t.h</div>  </div>
-</div><!--header-->
+<div class="title">triplet_key_t</div>  </div>
+<div class="ingroups"><a class="el" href="group__data.html">Data</a></div></div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_GOINTERFACE_T_H</span>
-<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_GOINTERFACE_T_H</span>
-<a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00004"></a>00004 <span class="preprocessor">#define DATA_GOINTERFACET(_ptr)   { TYPE_GOINTERFACET, (void *)_ptr }</span>
-<a name="l00005"></a>00005 <span class="preprocessor"></span>
-<a name="l00006"></a>00006 <span class="preprocessor">#endif</span>
-</pre></div></div><!-- contents -->
+
+
+<h3><a class="anchor" id="triplet_key_t_overview"></a>Overview</h3><div class="textblock">This data used to change key in CRUD request using supplied 3rd party data. New key is value returned from this data in lookup request.<ul>
+<li>CREATE: Item created in storage with empty key. Resulting key saved to slave data as value to original request key. </li>
+<li>LOOKUP, UPDATE: Key from request looked up in slave data, if found - request to storage data with value </li>
+<li>DELETE: Key from request looked up in slave data, if found - request delete in storage data with value and finally remove key from slave. </li>
+<li>ENUM: Slave data enumerated and for each item storage data with this key called. </li>
+</ul>
+</div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>named_t.h Source File | frozen - flexible data processing daemon</title>
+<title>helpers.h Source File | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -51,25 +51,25 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">named_t.h</div>  </div>
+<div class="title">helpers.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_NAMED_T_H</span>
-<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_NAMED_T_H</span>
+<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef HELPERS_H</span>
+<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define HELPERS_H</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00030"></a>00030 <span class="preprocessor">#define DEREF_TYPE_NAMEDT(_data) (named_t *)((_data)-&gt;ptr)</span>
-<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_NAMEDT(_dt) _dt</span>
-<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_NAMEDT 0</span>
-<a name="l00033"></a>00033 <span class="preprocessor"></span>
-<a name="l00034"></a><a class="code" href="structnamed__t.html">00034</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structnamed__t.html">named_t</a> {
-<a name="l00035"></a>00035         <span class="keywordtype">char</span>                  *name;
-<a name="l00036"></a>00036         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 data;
-<a name="l00037"></a>00037         uintmax_t              refs;
-<a name="l00038"></a>00038 } <a class="code" href="structnamed__t.html">named_t</a>;
-<a name="l00039"></a>00039 
-<a name="l00040"></a>00040 API ssize_t               data_named_t(<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <span class="keywordtype">char</span> *name, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> child);
-<a name="l00041"></a>00041 
-<a name="l00042"></a>00042 <span class="preprocessor">#endif</span>
+<a name="l00006"></a>00006 <span class="comment">// Key helpers {{{</span>
+<a name="l00029"></a>00029 <span class="comment"></span>API ssize_t              <a class="code" href="group__helpers__keys.html#gad44f595c782729a156c69a0139427b7d">helper_key_current</a>     (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *key, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *token);
+<a name="l00030"></a>00030 <span class="comment">// }}}</span>
+<a name="l00031"></a>00031 <span class="comment">// Handler helpers {{{</span>
+<a name="l00040"></a><a class="code" href="structhelper__control__data__t.html">00040</a> <span class="comment"></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structhelper__control__data__t.html">helper_control_data_t</a> {
+<a name="l00041"></a>00041         uintmax_t              key;
+<a name="l00042"></a>00042         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                *data;
+<a name="l00043"></a>00043 } <a class="code" href="structhelper__control__data__t.html">helper_control_data_t</a>;
+<a name="l00044"></a>00044 
+<a name="l00078"></a>00078 API ssize_t              <a class="code" href="group__helpers__handlers.html#gab561833d4a1de39ca79818823d603bb6">helper_control_data</a>     (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structfastcall__control.html">fastcall_control</a> *fargs, <a class="code" href="structhelper__control__data__t.html">helper_control_data_t</a> *internal_ptrs);
+<a name="l00079"></a>00079 <span class="comment">// }}}</span>
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

@@ -84,13 +84,17 @@
 <a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define DATA_UINT_OFFT_H</span>
 <a name="l00029"></a>00029 <span class="preprocessor"></span>
 <a name="l00050"></a>00050 <span class="preprocessor">#define DATA_OFFT(value) { TYPE_OFFT, (off_t []){ value } } </span>
-<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define DATA_PTR_OFFT(value) { TYPE_OFFT, value } </span>
-<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)-&gt;ptr) </span>
-<a name="l00053"></a>00053 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_OFFT(_dt) (&amp;(_dt)) </span>
-<a name="l00054"></a>00054 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_OFFT 1</span>
-<a name="l00055"></a>00055 <span class="preprocessor"></span>
-<a name="l00056"></a>00056 <span class="preprocessor">#endif</span>
-<a name="l00057"></a>00057 <span class="preprocessor"></span><span class="comment">/* vim: set filetype=m4: */</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define DATA_HEAP_OFFT(value) { TYPE_OFFT, data_off_t_alloc(value) } </span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define DATA_PTR_OFFT(value) { TYPE_OFFT, value } </span>
+<a name="l00053"></a>00053 <span class="preprocessor"></span><span class="preprocessor">#define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)-&gt;ptr) </span>
+<a name="l00054"></a>00054 <span class="preprocessor"></span><span class="preprocessor">#define REF_TYPE_OFFT(_dt) (&amp;(_dt)) </span>
+<a name="l00055"></a>00055 <span class="preprocessor"></span><span class="preprocessor">#define HAVEBUFF_TYPE_OFFT 1</span>
+<a name="l00056"></a>00056 <span class="preprocessor"></span><span class="preprocessor">#define UNVIEW_TYPE_OFFT(_ret, _dt, _view)  {  _dt = *(off_t *)((_view)-&gt;ptr); _ret = 0; } </span>
+<a name="l00057"></a>00057 <span class="preprocessor"></span>
+<a name="l00058"></a>00058 off_t * data_off_t_alloc(off_t value);
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060 <span class="preprocessor">#endif</span>
+<a name="l00061"></a>00061 <span class="preprocessor"></span><span class="comment">/* vim: set filetype=m4: */</span>
 </pre></div></div><!-- contents -->
 
 

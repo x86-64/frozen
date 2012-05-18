@@ -87,7 +87,7 @@ Machine configuration</h2>
 <ul>
 <li>Already known name parameter is used by core to maintain global names </li>
 <li>String parameter, can have "\t\r\n" inside string. </li>
-<li>Integer parameter, here we have uint_t, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify uint8_t, int16_t and another variations. </li>
+<li>Integer parameter, here we have uint_t, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify <a class="el" href="group__uint8__t.html">uint8_t</a>, <a class="el" href="group__int16__t.html">int16_t</a> and another variations. </li>
 <li>Some sometype_t data, which can be initialized from string. Examples: <a class="el" href="group__format__t.html">format_t</a>, <a class="el" href="group__hashkey__t.html">hashkey_t</a> </li>
 <li>Some complex sometype_t data, which can be initialized from hash. Example: <a class="el" href="group__raw__t.html">raw_t</a>. </li>
 <li>Environment data <a class="el" href="group__env__t.html">env_t</a>. It use current request key "somekey" to obtain data. Not every machine parameter can be used in such way. Machine must use this parameter during request and not in initialization stage.</li>
