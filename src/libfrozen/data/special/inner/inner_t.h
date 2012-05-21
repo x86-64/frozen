@@ -13,6 +13,7 @@
 typedef struct inner_t {
 	data_t                 storage;
 	data_t                 key;
+	uintmax_t              control;
 } inner_t;
 
 #endif
