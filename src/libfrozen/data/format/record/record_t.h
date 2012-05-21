@@ -19,19 +19,8 @@
 
 #include <core/void/void_t.h>
 
-//#define DATA_RECORDT(_data)       { TYPE_RECORDT, (record_t []){ { _data, DATA_VOID } }}
-//#define DATA_HEAP_RECORDT(_size)  { TYPE_RECORDT, record_t_alloc(_size)                }
 #define DEREF_TYPE_RECORDT(_data) (record_t *)((_data)->ptr)
 #define REF_TYPE_RECORDT(_dt) _dt
 #define HAVEBUFF_TYPE_RECORDT 0
-
-typedef struct record_t {
-	data_t                 storage;
-	data_t                 separator;
-
-	data_t                 item;
-} record_t;
-
-//record_t *          record_t_alloc             (data_t *data);
 
 #endif
