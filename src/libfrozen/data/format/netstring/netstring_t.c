@@ -5,20 +5,29 @@
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
 #include <modifiers/slider/slider_t.h>
+#include <modifiers/slice/slice_t.h>
 
-netstring_t *        netstring_t_alloc(data_t *data){ // {{{
-	netstring_t                 *fdata;
+ssize_t data_netstring_t(data_t *data, data_t storage){ // {{{
+	netstring_t           *fdata;
 	
 	if( (fdata = malloc(sizeof(netstring_t))) == NULL )
-		return NULL;
+		return -ENOMEM;
 	
-	fdata->data       = data;
-	data_set_void(&fdata->freeit);
-	return fdata;
+	fdata->storage = storage;
+	fdata->data    = &fdata->storage;
+	
+	data->type = TYPE_NETSTRINGT;
+	data->ptr  = fdata;
+	return 0;
 } // }}}
-void                 netstring_t_destroy(netstring_t *netstring){ // {{{
-	data_free(&netstring->freeit);
-	free(netstring);
+void    data_netstring_t_destroy(data_t *data){ // {{{
+	netstring_t           *fdata             = (netstring_t *)data->ptr;
+	
+	if(fdata){
+		data_free(&fdata->storage);
+		free(fdata);
+	}
+	data_set_void(data);
 } // }}}
 
 static ssize_t data_netstring_t_handler (data_t *data, fastcall_header *fargs){ // {{{
@@ -82,32 +91,61 @@ static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from 
 	switch(fargs->format){
 		case FORMAT(hash):;
 			hash_t                *config;
-			data_t                 data;
+			data_t                 storage;
+			
+			if(fdata != NULL) // we already inited - pass
+				break;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
 				return -EINVAL;
 			
-			if(fdata != NULL) // we already inited - pass
-				break;
-
-			hash_holder_consume(ret, data, config, HK(data));
+			hash_holder_consume(ret, storage, config, HK(data));
 			if(ret != 0)
 				return -EINVAL;
 			
-			if( (fdata = dst->ptr = netstring_t_alloc(&data)) == NULL){
-				data_free(&data);
+			if( (ret = data_netstring_t(dst, storage)) < 0){
+				data_free(&storage);
 				return -ENOMEM;
 			}
-			
-			fdata->freeit = data;
-			fdata->data   = &fdata->freeit;
 			return 0;
-
+			
+		case FORMAT(native):;
+			data_t                     fargs_src_storage;
+			netstring_t               *fargs_src        = (netstring_t *)fargs->src->ptr;
+			
+			if(fdata != NULL) // we already inited - pass
+				break;
+			
+			if(dst->type != fargs->src->type)
+				return -EINVAL;
+			
+			holder_copy(ret, &fargs_src_storage, &fargs_src->storage);
+			if(ret < 0)
+				return ret;
+			
+			if( (ret = data_netstring_t(dst, fargs_src_storage)) < 0){
+				data_free(&fargs_src_storage);
+				return ret;
+			}
+			return 0;
+			
 		case FORMAT(netstring):
-		case FORMAT(packed):
-			// TODO unpack
-			return -ENOSYS;
+		case FORMAT(packed):;
+			uintmax_t              size;
+			data_t                 d_size           = DATA_PTR_UINTT(&size);
+			
+			fastcall_convert_from r_convert_size = { { 5, ACTION_CONVERT_FROM }, fargs->src, FORMAT(human) };
+			if( (ret = data_query(&d_size, &r_convert_size)) < 0)
+				return ret;
+			
+			data_t d_slice = DATA_SLICET(fargs->src, r_convert_size.transfered + 1, size); // 123:
+			
+			fargs->src = &d_slice;
+			ret = data_query(fdata->data, fargs);
+			
+			fargs->transfered += r_convert_size.transfered + 2; // 123:data,
+			return ret;
 
 		default:
 			break;
@@ -115,9 +153,7 @@ static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from 
 	return data_netstring_t_handler(dst, (fastcall_header *)fargs);
 } // }}}
 static ssize_t data_netstring_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	netstring_t                  *fdata             = (netstring_t *)data->ptr;
-	
-	netstring_t_destroy(fdata);
+	data_netstring_t_destroy(data);
 	return 0;
 } // }}}
 static ssize_t data_netstring_t_length(data_t *data, fastcall_length *fargs){ // {{{
