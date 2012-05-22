@@ -9,19 +9,45 @@
 
 #define BINSTRING_SIZE uint32_t
 
-binstring_t *        binstring_t_alloc(data_t *data){ // {{{
-	binstring_t                 *fdata;
+ssize_t data_binstring_t(data_t *data, data_t storage){ // {{{
+	binstring_t           *fdata;
 	
 	if( (fdata = malloc(sizeof(binstring_t))) == NULL )
-		return NULL;
+		return -ENOMEM;
 	
-	fdata->data       = data;
-	data_set_void(&fdata->freeit);
-	return fdata;
+	fdata->data       = &fdata->storage;
+	fdata->storage    = storage;
+
+	data->type = TYPE_BINSTRINGT;
+	data->ptr  = fdata;
+	return 0;
 } // }}}
-void                 binstring_t_destroy(binstring_t *binstring){ // {{{
-	data_free(&binstring->freeit);
-	free(binstring);
+static ssize_t data_binstring_t_from_config(data_t *data, config_t *config){ // {{{
+	ssize_t                ret;
+	data_t                 storage;
+	
+	hash_holder_consume(ret, storage, config, HK(data));
+	if(ret < 0)
+		goto error1;
+	
+	if( (ret = data_binstring_t(data, storage)) < 0)
+		goto error2;
+	
+	return 0;
+	
+error2:
+	data_free(&storage);
+error1:
+	return ret;
+} // }}}
+static void    data_binstring_t_destroy(data_t *data){ // {{{
+	binstring_t           *fdata             = (binstring_t *)data->ptr;
+	
+	if(fdata){
+		data_free(&fdata->storage);
+		free(fdata);
+	}
+	data_set_void(data);
 } // }}}
 
 static ssize_t data_binstring_t_handler (data_t *data, fastcall_header *fargs){ // {{{
@@ -76,27 +102,15 @@ static ssize_t data_binstring_t_convert_from(data_t *dst, fastcall_convert_from 
 	switch(fargs->format){
 		case FORMAT(hash):;
 			hash_t                *config;
-			data_t                 data;
+			
+			if(fdata != NULL)          // we already inited - pass request
+				break;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
 				return -EINVAL;
 			
-			if(fdata != NULL)          // we already inited - pass request
-				break;
-			
-			hash_holder_consume(ret, data, config, HK(data));
-			if(ret != 0)
-				return -EINVAL;
-			
-			if( (fdata = dst->ptr = binstring_t_alloc(&data)) == NULL){
-				data_free(&data);
-				return -ENOMEM;
-			}
-			
-			fdata->freeit = data;
-			fdata->data   = &fdata->freeit;
-			return 0;
+			return data_binstring_t_from_config(dst, config);
 
 		case FORMAT(binstring):
 		case FORMAT(packed):;
@@ -112,6 +126,26 @@ static ssize_t data_binstring_t_convert_from(data_t *dst, fastcall_convert_from 
 			fargs->transfered += sizeof(length);
 			return ret;
 		
+		case FORMAT(native):;
+			data_t                     fargs_src_storage;
+			binstring_t               *fargs_src        = (binstring_t *)fargs->src->ptr;
+			
+			if(fdata != NULL) // we already inited - pass
+				break;
+			
+			if(dst->type != fargs->src->type)
+				return -EINVAL;
+			
+			holder_copy(ret, &fargs_src_storage, &fargs_src->storage);
+			if(ret < 0)
+				return ret;
+			
+			if( (ret = data_binstring_t(dst, fargs_src_storage)) < 0){
+				data_free(&fargs_src_storage);
+				return ret;
+			}
+			return 0;
+		
 		default:
 			break;
 	}
@@ -119,9 +153,7 @@ static ssize_t data_binstring_t_convert_from(data_t *dst, fastcall_convert_from 
 	return data_binstring_t_handler(dst, (fastcall_header *)fargs);
 } // }}}
 static ssize_t data_binstring_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	binstring_t                  *fdata             = (binstring_t *)data->ptr;
-	
-	binstring_t_destroy(fdata);
+	data_binstring_t_destroy(data);
 	return 0;
 } // }}}
 static ssize_t data_binstring_t_length(data_t *data, fastcall_length *fargs){ // {{{
