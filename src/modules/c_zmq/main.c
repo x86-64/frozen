@@ -184,7 +184,7 @@ static ssize_t zeromq_t_error_to_ret(ssize_t ret, ssize_t def){ // {{{
 // get opt {{{
 #define get_opt(_key,_func){                                                                                          \
 	if( (opt = hash_data_find(fdata->config, _key)) != NULL){                                                     \
-		if(data_get_continious(opt, &freeme, &opt_binary_ptr, &opt_binary_size) >= 0){                        \
+		if(data_make_flat(opt, FORMAT(native), &freeme, &opt_binary_ptr, &opt_binary_size) >= 0){              \
 			if( (p = strndup(opt_binary_ptr, opt_binary_size)) != NULL){                                  \
 				_func;                                                                                \
 				free(p);                                                                              \
@@ -192,7 +192,7 @@ static ssize_t zeromq_t_error_to_ret(ssize_t ret, ssize_t def){ // {{{
 				ret = error("strndup failed");                                                        \
 			}                                                                                             \
 		}else{                                                                                                \
-			ret = error("data_get_continious failed on zmq options");                                     \
+			ret = error("data_make_flat failed on zmq options");                                          \
 		}                                                                                                     \
 		data_free(&freeme);                                                                                   \
 	}                                                                                                             \
@@ -236,12 +236,12 @@ static ssize_t zeromq_t_socket_new(zeromq_t *fdata){ // {{{
 	// binary options
 	for(ret = 0, c = zmq_opts_binary; ret == 0 && c->key != 0; c++){
 		if( (opt = hash_data_find(fdata->config, c->key))){
-			if(data_get_continious(opt, &freeme, &opt_binary_ptr, &opt_binary_size) >= 0){
+			if(data_make_flat(opt, FORMAT(native), &freeme, &opt_binary_ptr, &opt_binary_size) >= 0){
 				if(zmq_setsockopt(fdata->zmq_socket, c->option, opt_binary_ptr, opt_binary_size) != 0){
 					ret = error("zmq_setsockopt binary failed");
 				}
 			}else{
-				ret = error("data_get_continious failed on zmq options");
+				ret = error("data_make_flat failed on zmq options");
 			}
 			data_free(&freeme);
 		}
@@ -560,7 +560,7 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 
 	if(fargs->data){
 		// convert data to continious memory space
-		switch( (ret = data_get_continious(fargs->data, &freeme, &msg_data, &msg_size)) ){
+		switch( (ret = data_make_flat(fargs->data, FORMAT(native), &freeme, &msg_data, &msg_size)) ){
 			case 0: // use old data, it is ok!
 				if( (freehint = memdup(fargs->data, sizeof(data_t))) == NULL){
 					data_free(&freeme);

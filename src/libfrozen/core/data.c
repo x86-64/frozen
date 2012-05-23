@@ -88,19 +88,6 @@ ssize_t              data_register(data_proto_t *proto){ // {{{
 	return data_protos[ data->type ]->handlers[ fargs->action ](data, args);
 } // }}}*/
 
-ssize_t              data_get_continious(data_t *data, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
-	ssize_t                ret;
-	
-	fastcall_view  r_view = { { 6, ACTION_VIEW }, FORMAT(native) };
-	if( (ret = data_query(data, &r_view)) < 0)
-		return ret;
-	
-	*ptr      = r_view.ptr;
-	*ptr_size = r_view.length;
-	*freeme   = r_view.freeit;
-	return 0;
-} // }}}
-
 ssize_t              data_make_flat(data_t *data, format_t format, data_t *freeme, void **ptr, uintmax_t *ptr_size){ // {{{
 	ssize_t                ret;
 	
