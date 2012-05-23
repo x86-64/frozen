@@ -54,7 +54,12 @@
 <h3><a class="anchor" id="netstring_t_overview"></a>Overview</h3><div class="textblock">This data used to represent supplied data in netstring format. </div>
 
 <h3><a class="anchor" id="netstring_t_define"></a>Define</h3><div class="textblock">Possible defines: </p>
-<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> hnetstring = DATA_NETSTRINGT(data)
+<div class="fragment"><pre class="fragment">       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> d_raw          = DATA_RAWT();
+       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> d_netstring;
+
+       data_netstring_t(&amp;d_netstring, d_raw);
+       <span class="comment">// or</span>
+       <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> d_netstring    = DATA_NETSTRINGT(&amp;d_raw);
 </pre></div> </div></div><!-- contents -->
 
 
