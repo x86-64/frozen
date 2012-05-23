@@ -6,6 +6,8 @@
 #include <enum/hashkey/hashkey_t.h>
 #include <special/immortal/immortal_t.h>
 #include <storage/raw/raw_t.h>
+#include <modifiers/slice/slice_t.h>
+#include <numeric/uint/uint_t.h>
 
 ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintmax_t write_offset, uintmax_t size, uintmax_t *ptransfered){ // {{{
 	ssize_t         ret;
@@ -276,6 +278,21 @@ ssize_t       data_default_control       (data_t *data, fastcall_control *fargs)
 	return -ENOSYS;
 } // }}}
 
+ssize_t       data_default_lookup        (data_t *data, fastcall_lookup *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              key               = 0;
+	
+	if(fargs->value == NULL)
+		return -EINVAL;
+	
+	data_get(ret, TYPE_UINTT, key, fargs->key);
+	if(ret < 0)
+		return ret;
+	
+	data_t                 sl_data           = DATA_HEAP_SLICET(data, key, ~0);
+	*fargs->value = sl_data;
+	return 0;
+} // }}}
 ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
 	data_t                 immortal          = DATA_IMMORTALT(data);
@@ -308,6 +325,7 @@ data_proto_t default_t_proto = {
 		[ACTION_CONTROL]     = (f_data_func)&data_default_control,
 		[ACTION_CONSUME]     = (f_data_func)&data_default_consume,
 		
+		[ACTION_LOOKUP]      = (f_data_func)&data_default_lookup,
 		[ACTION_ENUM]        = (f_data_func)&data_default_enum,
 	}
 };

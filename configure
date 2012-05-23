@@ -18014,8 +18014,8 @@ fi
 
 	if test "${enable_default_t}" = "yes"; then
 		DATA_DIR_default_t="core/default"
-		DATA_DEP_default_t="string_t"
-		DATA_ID_default_t="0"
+		DATA_DEP_default_t="string_t uint_t slice_t immortal_t hashkey_t format_t void_t"
+		DATA_ID_default_t=""
 		DATA_SELECTED="$DATA_SELECTED default_t"
 		DATA_HEADERS="$DATA_HEADERS core/default/default_t.h"
 	fi
