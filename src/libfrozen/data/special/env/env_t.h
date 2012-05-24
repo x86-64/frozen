@@ -27,4 +27,6 @@ typedef struct env_t {
 	hashkey_t              key;
 } env_t;
 
+API ssize_t data_env_t(data_t *data, hashkey_t key);
+
 #endif

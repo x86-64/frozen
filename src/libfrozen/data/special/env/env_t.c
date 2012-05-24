@@ -6,7 +6,49 @@
 
 #include <env_t.h>
 
-static data_t * env_t_find(env_t *fdata){ // {{{
+ssize_t data_env_t(data_t *data, hashkey_t key){ // {{{
+	env_t                 *fdata;
+
+	if( (fdata = malloc(sizeof(env_t))) == NULL)
+		return -ENOMEM;
+	
+	fdata->key = key;
+	
+	data->type = TYPE_ENVT;
+	data->ptr  = fdata;
+	return 0;
+} // }}}
+static ssize_t  data_env_t_from_config(data_t *data, config_t *config){ // {{{
+	ssize_t                ret;
+	hashkey_t              key;
+
+	hash_data_get(ret, TYPE_HASHKEYT, key, config, HK(key));
+	if(ret < 0)
+		return ret;
+	
+	return data_env_t(data, key);
+} // }}}
+static ssize_t  data_env_t_from_string(data_t *data, data_t *string){ // {{{
+	ssize_t                ret;
+	hashkey_t              key;
+	data_t                 d_key             = DATA_PTR_HASHKEYT(&key);
+	
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, string, FORMAT(human) };
+	if( (ret = data_query(&d_key, &r_convert)) < 0 )
+		return ret;
+	
+	return data_env_t(data, key);
+} // }}}
+static void     data_env_t_destroy(data_t *data){ // {{{
+	env_t                 *fdata             = (env_t *)data->ptr;
+	
+	if(fdata){
+		free(fdata);
+	}
+	data_set_void(data);
+} // }}}
+
+static data_t * data_env_t_find(env_t *fdata){ // {{{
 	list                  *stack;
 	request_t             *curr;
 	data_t                *data              = NULL;
@@ -30,30 +72,30 @@ static ssize_t data_env_t_handler(data_t *data, fastcall_header *hargs){ // {{{
 	data_t                *rdata;
 	env_t                 *fdata             = (env_t *)data->ptr;
 	
-	if( (rdata = env_t_find(fdata)) == NULL)
+	if( (rdata = data_env_t_find(fdata)) == NULL)
 		return -EINVAL;
 	
 	return data_query(rdata, hargs);
 } // }}}
 static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	env_t                 *fdata;
+	ssize_t                ret;
 	
 	if(dst->ptr != NULL)
 		return data_env_t_handler(dst, (fastcall_header *)fargs);  // already inited - pass to underlying data
 	
-	if(fargs->src == NULL)
-		return -EINVAL;
-	
-	if( (dst->ptr = malloc(sizeof(env_t))) == NULL)
-		return -ENOMEM;
-	
-	fdata = (env_t *)dst->ptr;
-	
 	switch(fargs->format){
+		case FORMAT(hash):;
+			hash_t                *config;
+			
+			data_get(ret, TYPE_HASHT, config, fargs->src);
+			if(ret != 0)
+				return -EINVAL;
+			
+			return data_env_t_from_config(dst, config);
+		
 		case FORMAT(config):;
 		case FORMAT(human):;
-			data_t                 hkey              = DATA_PTR_HASHKEYT(&fdata->key);
-			return data_query(&hkey, fargs);
+			return data_env_t_from_string(dst, fargs->src);
 			
 		default:
 			break;
@@ -61,8 +103,7 @@ static ssize_t data_env_t_convert_from(data_t *dst, fastcall_convert_from *fargs
 	return -ENOSYS;
 } // }}}
 static ssize_t data_env_t_free(data_t *data, fastcall_free *hargs){ // {{{
-	free(data->ptr);
-	data->ptr = NULL;
+	data_env_t_destroy(data);
 	return 0;
 } // }}}
 
