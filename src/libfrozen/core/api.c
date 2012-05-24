@@ -5,6 +5,7 @@ typedef ssize_t (*f_data_from_hash)     (data_t *, request_t *);
 
 extern f_machine_from_fast api_machine_from_fast [ACTION_INVALID];
 extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
+extern hash_t *            api_data_from_list    [ACTION_INVALID];
 
 ssize_t api_machine_nosys(machine_t *machine, request_t *request){ // {{{
 	return -ENOSYS;
@@ -431,6 +432,26 @@ ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
 	
 	return func(data, request);
 } // }}}
+ssize_t     data_list_query(data_t *data, request_t *list){ // {{{
+	ssize_t                ret;
+	action_t               action;
+	f_data_from_hash       func;
+	
+	data_get(ret, TYPE_ACTIONT, action, &list->data);
+	if(
+		ret != 0 ||
+		action >= ACTION_INVALID ||
+		(func = api_data_from_hash[action]) == NULL
+	)
+		return -ENOSYS;
+		
+	data_realholder(ret, data, data);
+	if(ret < 0)
+		return ret;
+	
+	hash_rename(list, api_data_from_list[action]);
+	return func(data, list);
+} // }}}
 ssize_t     machine_fast_query(machine_t *machine, void *hargs){ // {{{
 	f_machine_from_fast    func;
 	
@@ -508,3 +529,22 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 	[ACTION_CONVERT_FROM] = (f_data_from_hash)&action_convert_from_from_hash,
 };
 
+hash_t * api_data_from_list[ACTION_INVALID] = {
+	[ACTION_CREATE]       = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_LOOKUP]       = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_UPDATE]       = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_DELETE]       = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_READ]         = (hash_t []){ { HK(action), DATA_VOID }, { HK(offset),      DATA_VOID }, { HK(buffer), DATA_VOID }, { HK(size), DATA_VOID } },
+	[ACTION_WRITE]        = (hash_t []){ { HK(action), DATA_VOID }, { HK(offset),      DATA_VOID }, { HK(buffer), DATA_VOID }, { HK(size), DATA_VOID } },
+	[ACTION_RESIZE]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(size),        DATA_VOID } },
+	[ACTION_PUSH]         = (hash_t []){ { HK(action), DATA_VOID }, { HK(data),        DATA_VOID } },
+	[ACTION_POP]          = (hash_t []){ { HK(action), DATA_VOID }, { HK(data),        DATA_VOID } },
+	[ACTION_FREE]         = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_INCREMENT]    = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_DECREMENT]    = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_ENUM]         = (hash_t []){ { HK(action), DATA_VOID }, { HK(data),        DATA_VOID } },
+	[ACTION_LENGTH]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(size),        DATA_VOID }, { HK(format), DATA_VOID }, },
+	[ACTION_QUERY]        = (hash_t []){ { HK(action), DATA_VOID }, { HK(request),     DATA_VOID } },
+	[ACTION_CONVERT_TO]   = (hash_t []){ { HK(action), DATA_VOID }, { HK(destination), DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
+	[ACTION_CONVERT_FROM] = (hash_t []){ { HK(action), DATA_VOID }, { HK(source),      DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
+};

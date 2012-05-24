@@ -480,6 +480,7 @@ typedef struct fastcall_batch { // ACTION(BATCH)
 extern uintmax_t fastcall_nargs[];
 
 ssize_t     data_hash_query(data_t *data, request_t *request);
+ssize_t     data_list_query(data_t *data, request_t *list);
 ssize_t     machine_fast_query(machine_t *machine, void *hargs);
 
 ssize_t     api_machine_nosys  (machine_t *machine, request_t *request);
