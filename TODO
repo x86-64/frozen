@@ -2,25 +2,21 @@
 
 - view_t for data in any format
 - unique_t key parameter. using LOOKUP action compare two items
-- data hash_internal_t - portable_hash wrapper
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch
 - machine 'exec'
 - machine rate-limit
 - benchmark, limit - rewrite to use ACTION_CONTROL
-- netstring_t parse (get code from mongrel for parsing)
 - rewrite mongrel send\parse routines to use netstring_t, container_t types
 - cache, append only cache
 - rewrite debug dump funcs, data_dump
 - zmq patterns
   - proxy pattern
   - replace machines and stuff in request with proxy
-- slice_t write getdata ptr handler
 - default_t default functions sets
 - default_t tags for default function sets
 - mutex_t _VIEW handler to hold lock until .freeit freed
 
 - broken allocator_fixed_t's create/delete
-- write allocator_fixed_t push/pop same as for list_t
 
 - broken tcp
 - data perthread_t wrapper
