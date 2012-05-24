@@ -571,6 +571,31 @@ size_t             hash_nelements               (hash_t *hash){ // {{{
 	}
 	return i + 1;
 } // }}}
+static ssize_t     hash_rename_recursive        (hash_t *hash, hash_t **keys){ // {{{
+	register hashkey_t     key;
+	
+	for(;; hash++){
+		if(hash->key == hash_ptr_inline){
+			hash_rename_recursive((hash_t *)hash->data.ptr, keys);
+			continue;
+		}
+		
+		if(hash->key == hash_ptr_end)
+			break;
+		
+		key = (*keys)->key;
+		
+		if(key == hash_ptr_end)
+			break;
+		
+		hash->key = key;
+		*keys = *keys + 1;
+	}
+	return 0;
+} // }}}
+ssize_t            hash_rename                  (hash_t *hash, hash_t *keys){ // {{{
+	return hash_rename_recursive(hash, &keys);
+} // }}}
 
 data_t *           hash_data_find               (hash_t *hash, hashkey_t key){ // {{{
 	hash_t *temp;

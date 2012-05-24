@@ -135,6 +135,7 @@ API hash_t *           hash_find                    (hash_t *hash, hashkey_t key
 API hash_t *           hash_find_id                 (hash_t *hash, uintmax_t *key); ///< Find key in hash by id
 API data_t *           hash_data_find               (hash_t *hash, hashkey_t key); ///< Find key in hash and return pointer to data holder
 API size_t             hash_nelements               (hash_t *hash); ///< Count number of elements in hash
+API ssize_t            hash_rename                  (hash_t *hash, hash_t *keys); ///< Rename keys in hash using another hash
 
 /** @brief Iterate all hash keys and pass them to callback
  *  @param hash  Hash to iteration
