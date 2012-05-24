@@ -105,6 +105,10 @@ API ssize_t         machine_is_ghost        (machine_t *machine);
 #define machine_query(_machine,_request)  (_machine)->machine_type_hash.func_handler(_machine, _request)
 #define machine_pass(_machine,_request)   (_machine)->cnext->machine_type_hash.func_handler((_machine)->cnext, _request)
 
+void               pipeline_new      (machine_t **pipeline);
+ssize_t            pipeline_append   (machine_t **pipeline, config_t *machine_config);
+machine_t *        pipeline_finalize (machine_t **pipeline);
+
 /** @brief Create new shop.
  *
  *  Configuration is hash with items. For example:
