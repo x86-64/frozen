@@ -469,6 +469,14 @@ void               hash_free                    (hash_t *hash){ // {{{
 	
 	free(hash);
 } // }}}
+hash_t *           hash_append(hash_t *hash, hash_t item){ // {{{
+	size_t nelements = hash_nelements(hash);
+
+	hash = realloc(hash, (nelements + 1) * sizeof(hash_t));
+	hash_assign_hash_t   (&hash[nelements-1], &item);
+	hash_assign_hash_end (&hash[nelements  ]);
+	return hash;
+} // }}}
 
 // TODO rewrite hash_find
 hash_t *           hash_find                    (hash_t *hash, hashkey_t key){ // {{{

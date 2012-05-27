@@ -131,6 +131,7 @@ API hash_t *           hash_rebuild                 (hash_t *hash);      ///< Re
 API void               hash_free                    (hash_t *hash);      ///< Free allocated, or copy of hash
 API void               hash_dump                    (hash_t *hash);      ///< Print human-readable version of hash
 
+API hash_t *           hash_append                  (hash_t *hash, hash_t item); ///< Append item to hash
 API hash_t *           hash_find                    (hash_t *hash, hashkey_t key); ///< Find key in hash
 API hash_t *           hash_find_id                 (hash_t *hash, uintmax_t *key); ///< Find key in hash by id
 API data_t *           hash_data_find               (hash_t *hash, hashkey_t key); ///< Find key in hash and return pointer to data holder
