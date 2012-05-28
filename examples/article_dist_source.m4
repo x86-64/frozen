@@ -1,6 +1,6 @@
 { class = "thread" },
 { class = "query", data = (file_t){ filename = "/var/log/messages", readonly = (uint_t)"1" }, request = {
-	action      = (action_t)"transfer",
+	action      = (action_t)"convert_to",
 	destination = (machine_t){
 		
 		// split file chunks to lines

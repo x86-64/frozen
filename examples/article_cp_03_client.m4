@@ -6,7 +6,7 @@ FILE(`remote_file2', `8887')
 { class => "daemon/thread" },
 { class => "emitter", request = {
 	request = {
-		action      = (action_t)"transfer",
+		action      = (action_t)"convert_to",
 		source      = (machine_t)"remote_file1",
 		destination = (machine_t)"remote_file2"
 	},
