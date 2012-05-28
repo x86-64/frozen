@@ -1,4 +1,3 @@
-{ class => "daemon/thread" },
 { class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "restart" } } },
 { class => "emitter", request = { machine = (machine_t)"file",
 	request = {
@@ -16,8 +15,9 @@
 	}
 }, count => (uint_t)'1000000' },
 { class => "emitter", request = { machine = (machine_t)"file", request = { benchmark_function = "print_long" } } },
-{ class => "kill"                                              },
-NULL,
+{ class => "end"                                              }
+
+{ class => "end" },
 { class => "benchmark", name => "file"                                },
 { class => "data/query", data = (file_t){ filename => "data_bench_file.dat" } },
 { class => "end" }
