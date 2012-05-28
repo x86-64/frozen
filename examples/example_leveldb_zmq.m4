@@ -2,7 +2,7 @@ include(shop.m4)
 include(implode.m4)
 
 // we are here
-{ class = "thread" },
+
 { class = "emitter", request = {                        // write key to db
 	request = {
 		action = (action_t)"write",
@@ -58,8 +58,7 @@ include(implode.m4)
 		{ class = "end" }
 	}
 }},
-{ class = "kill" },
-NULL,
+{ class = "end" }
 
 // helper routines
 SHOP(`leveldb',

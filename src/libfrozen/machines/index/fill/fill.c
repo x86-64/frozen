@@ -59,7 +59,7 @@ static ssize_t fill_init(machine_t *machine){ // {{{
 static ssize_t fill_destroy(machine_t *machine){ // {{{
 	fill_userdata       *userdata = (fill_userdata *)machine->userdata;
 	
-	shop_destroy(userdata->machine_index);
+	pipeline_destroy(userdata->machine_index);
 	free(userdata);
 	return 0;
 } // }}}

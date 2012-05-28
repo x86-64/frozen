@@ -72,23 +72,9 @@ start : entities { *hash = $1; }
 
 /* entities {{{ */
 entities :
-	/* empty */ {
-		$$ = malloc(sizeof(hash_t));
-		hash_assign_hash_end($$);
-	}
-	| entity {
-		$$ = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&$$[0], &$1);
-		hash_assign_hash_end (&$$[1]);
-	}
-	| entities entity {
-		size_t nelements = hash_nelements($1);
-		$1 = realloc($1, (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&$1[nelements-1], &$2);
-		hash_assign_hash_end (&$1[nelements  ]);
-		$$ = $1;
-	}
-	;
+	/* empty */       { $$ = hash_new(1); }
+	| entity          { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| entities entity { $$ = hash_append($1, $2); };
 
 entity :
 	  entity_data ';' {
@@ -154,23 +140,9 @@ entity_pipeline :
 /* }}} */
 /* hash {{{ */
 hash_items :
-	/* empty */ {
-		$$ = malloc(sizeof(hash_t));
-		hash_assign_hash_end($$);
-	}
-	| hash_item {
-		$$ = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&$$[0], &$1);
-		hash_assign_hash_end (&$$[1]);
-	}
-	| hash_items ',' hash_item {
-		size_t nelements = hash_nelements($1);
-		$1 = realloc($1, (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&$1[nelements-1], &$3);
-		hash_assign_hash_end (&$1[nelements  ]);
-		$$ = $1;
-	}
-	;
+	/* empty */ { $$ = hash_new(1); }
+	| hash_item { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| hash_items ',' hash_item { $$ = hash_append($1, $3); };
 
 hash_item :
 	  data {

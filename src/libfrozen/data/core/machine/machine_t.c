@@ -25,18 +25,18 @@ static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *f
 
 		case FORMAT(hash):;
 			hash_t                *config;
-			list                  *shops;
+			hash_t                *pipelines;
 			
 			data_get(ret, TYPE_HASHT, config, fargs->src);
 			if(ret != 0)
 				return -EINVAL;
 			
-			if( (ret = shop_new(config, &shops)) < 0)
+			if( (ret = pipelines_new(&pipelines, config)) < 0)
 				return ret;
 			
-			dst->ptr = list_pop(shops);
-			
-			shop_list_destroy(shops); // destroy rest, no splitted machines in machine_t for now
+			*dst = pipelines[0].data;
+			data_set_void(&pipelines[0].data);
+			hash_free(pipelines);
 			goto check;
 		
 		case FORMAT(config):;
@@ -64,7 +64,7 @@ static ssize_t data_machine_t_len(data_t *data, fastcall_length *fargs){ // {{{
 } // }}}
 static ssize_t data_machine_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr)
-		shop_destroy((machine_t *)data->ptr);
+		pipeline_destroy((machine_t *)data->ptr);
 	return 0;
 } // }}}
 static ssize_t data_machine_t_query(data_t *data, fastcall_query *fargs){ // {{{

@@ -1,4 +1,4 @@
-{ class => "daemon/thread" },
+
 { class => "emitter", request = {
 	request = {
 		action      = (action_t)"convert_to",
@@ -7,7 +7,7 @@
 	},
 	machine = (machine_t){
 		{ class = "data/query", data = (env_t)"source" },
-		{ class = "kill" }
+		{ class = "end" }
 	}
 },
 { class = "end" }

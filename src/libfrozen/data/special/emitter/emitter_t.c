@@ -38,7 +38,7 @@ static ssize_t data_emitter_t_handler (data_t *data, fastcall_header *hargs){ //
 			if(fdata == NULL)
 				return -EFAULT;
 			
-			shop_destroy(fdata->machine);
+			pipeline_destroy(fdata->machine);
 			hash_free(fdata->request);
 			if(fdata->allocated)
 				free(data->ptr);

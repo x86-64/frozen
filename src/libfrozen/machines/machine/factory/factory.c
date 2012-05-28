@@ -37,7 +37,7 @@ static ssize_t factory_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t factory_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	list                  *shops;
+	hash_t                *pipelines;
 	data_t                *output;
 	factory_userdata      *userdata = (factory_userdata *)machine->userdata;
 	
@@ -55,11 +55,12 @@ static ssize_t factory_handler(machine_t *machine, request_t *request){ // {{{
 		)},
 		hash_end
 	};
-	if( (ret = shop_new(child_config, &shops)) < 0)
+	if( (ret = pipelines_new(&pipelines, child_config)) < 0)
 		return ret;
 	
-	output->ptr = list_pop(shops);
-	shop_list_destroy(shops); // destroy rest
+	*output = pipelines[0].data;
+	data_set_void(&pipelines[0].data);
+	hash_free(pipelines);
 	return 0;
 } // }}}
 

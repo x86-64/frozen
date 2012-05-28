@@ -30,7 +30,6 @@
 #define ERRORS_MODULE_NAME "daemon/thread"
 
 typedef struct thread_userdata {
-	uintmax_t              paused;
 	uintmax_t              loop;
 	uintmax_t              ignore_errors;
 	uintmax_t              destroy_on_exit;
@@ -45,7 +44,6 @@ static void *  thread_routine(machine_t *machine){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
-	usleep(300000); // BUG improper fix for too fast thread creation, before machine connected to chain
 	do{
 		request_t r_request[] = { hash_end };
 		if( (ret = machine_pass(machine, r_request)) < 0){
@@ -62,7 +60,7 @@ static void *  thread_routine(machine_t *machine){ // {{{
 		
 		if(userdata->destroy_on_exit){
 			userdata->self_termination = 1;
-			shop_destroy(machine);
+			pipeline_destroy(machine);
 			goto self_free;
 		}
 	pthread_mutex_unlock(&userdata->thread_mutex);
@@ -146,13 +144,9 @@ static ssize_t thread_configure(machine_t *machine, config_t *config){ // {{{
 	ssize_t                ret;
 	thread_userdata       *userdata          = (thread_userdata *)machine->userdata;
 	
-	hash_data_get(ret, TYPE_UINTT, userdata->paused,            config, HK(paused));
 	hash_data_get(ret, TYPE_UINTT, userdata->loop,              config, HK(loop));
 	hash_data_get(ret, TYPE_UINTT, userdata->ignore_errors,     config, HK(ignore_errors));
 	hash_data_get(ret, TYPE_UINTT, userdata->destroy_on_exit,   config, HK(destroy));
-	
-	if(userdata->paused == 0)
-		thread_control_start(machine);
 	
 	return 0;
 } // }}}

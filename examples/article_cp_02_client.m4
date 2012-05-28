@@ -2,7 +2,7 @@ include(examples/article_cp_common.m4)
 
 FILE(`remote_file', `8888')
 
-{ class => "daemon/thread" },
+
 { class => "emitter", request = {
 	request = {
 		action      = (action_t)"convert_to",
@@ -11,7 +11,7 @@ FILE(`remote_file', `8888')
 	},
 	machine = (machine_t){
 		{ class = "data/query", data = (env_t)"source" },
-		{ class = "kill" }
+		{ class = "end" }
 	}
 }},
 { class = "end" }

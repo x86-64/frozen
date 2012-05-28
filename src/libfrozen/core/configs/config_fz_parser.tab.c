@@ -478,11 +478,11 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    71,    71,    75,    79,    84,    94,    98,   106,   117,
-     120,   123,   147,   150,   157,   161,   166,   176,   180,   187,
-     199,   200,   214,   230,   241,   245,   257,   263
+       0,    71,    71,    75,    76,    77,    80,    84,    92,   103,
+     106,   109,   133,   136,   143,   144,   145,   148,   152,   159,
+     171,   172,   186,   202,   213,   217,   229,   235
 };
 #endif
 
@@ -1449,40 +1449,27 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 75 "configs/config_fz_parser.y"
-    {
-		(yyval.entities) = malloc(sizeof(hash_t));
-		hash_assign_hash_end((yyval.entities));
-	}
+    { (yyval.entities) = hash_new(1); }
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 79 "configs/config_fz_parser.y"
-    {
-		(yyval.entities) = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity));
-		hash_assign_hash_end (&(yyval.entities)[1]);
-	}
+#line 76 "configs/config_fz_parser.y"
+    { (yyval.entities) = hash_new(2); hash_assign_hash_t(&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity)); }
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 84 "configs/config_fz_parser.y"
-    {
-		size_t nelements = hash_nelements((yyvsp[(1) - (2)].entities));
-		(yyvsp[(1) - (2)].entities) = realloc((yyvsp[(1) - (2)].entities), (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyvsp[(1) - (2)].entities)[nelements-1], &(yyvsp[(2) - (2)].entity));
-		hash_assign_hash_end (&(yyvsp[(1) - (2)].entities)[nelements  ]);
-		(yyval.entities) = (yyvsp[(1) - (2)].entities);
-	}
+#line 77 "configs/config_fz_parser.y"
+    { (yyval.entities) = hash_append((yyvsp[(1) - (2)].entities), (yyvsp[(2) - (2)].entity)); }
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 94 "configs/config_fz_parser.y"
+#line 80 "configs/config_fz_parser.y"
     {
 		(yyval.entity).key  = HK(data);
 		(yyval.entity).data = (yyvsp[(1) - (2)].data);
@@ -1492,7 +1479,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 98 "configs/config_fz_parser.y"
+#line 84 "configs/config_fz_parser.y"
     {
 		(yyval.entity).key  = HK(machine);
 		(yyval.entity).data = (yyvsp[(1) - (2)].data);
@@ -1502,7 +1489,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 106 "configs/config_fz_parser.y"
+#line 92 "configs/config_fz_parser.y"
     {
 		ssize_t           ret;
 		
@@ -1516,7 +1503,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 117 "configs/config_fz_parser.y"
+#line 103 "configs/config_fz_parser.y"
     {
 		data_set_void(&(yyval.data));
 	}
@@ -1525,7 +1512,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 120 "configs/config_fz_parser.y"
+#line 106 "configs/config_fz_parser.y"
     {
 		(yyval.data) = (yyvsp[(1) - (1)].data);
 	}
@@ -1534,7 +1521,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 123 "configs/config_fz_parser.y"
+#line 109 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		hash_t                 r_hash[] = {
@@ -1560,7 +1547,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 147 "configs/config_fz_parser.y"
+#line 133 "configs/config_fz_parser.y"
     {
 		data_set_void(&(yyval.data));
 	}
@@ -1569,7 +1556,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 150 "configs/config_fz_parser.y"
+#line 136 "configs/config_fz_parser.y"
     {
 		data_set_void(&(yyval.data));
 	}
@@ -1578,41 +1565,28 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 157 "configs/config_fz_parser.y"
-    {
-		(yyval.entities) = malloc(sizeof(hash_t));
-		hash_assign_hash_end((yyval.entities));
-	}
+#line 143 "configs/config_fz_parser.y"
+    { (yyval.entities) = hash_new(1); }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 161 "configs/config_fz_parser.y"
-    {
-		(yyval.entities) = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity));
-		hash_assign_hash_end (&(yyval.entities)[1]);
-	}
+#line 144 "configs/config_fz_parser.y"
+    { (yyval.entities) = hash_new(2); hash_assign_hash_t(&(yyval.entities)[0], &(yyvsp[(1) - (1)].entity)); }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 166 "configs/config_fz_parser.y"
-    {
-		size_t nelements = hash_nelements((yyvsp[(1) - (3)].entities));
-		(yyvsp[(1) - (3)].entities) = realloc((yyvsp[(1) - (3)].entities), (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&(yyvsp[(1) - (3)].entities)[nelements-1], &(yyvsp[(3) - (3)].entity));
-		hash_assign_hash_end (&(yyvsp[(1) - (3)].entities)[nelements  ]);
-		(yyval.entities) = (yyvsp[(1) - (3)].entities);
-	}
+#line 145 "configs/config_fz_parser.y"
+    { (yyval.entities) = hash_append((yyvsp[(1) - (3)].entities), (yyvsp[(3) - (3)].entity)); }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 176 "configs/config_fz_parser.y"
+#line 148 "configs/config_fz_parser.y"
     {
 		(yyval.entity).key  = 0;
 		(yyval.entity).data = (yyvsp[(1) - (1)].data);
@@ -1622,7 +1596,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 180 "configs/config_fz_parser.y"
+#line 152 "configs/config_fz_parser.y"
     {
 		(yyval.entity).key  = (yyvsp[(1) - (3)].hashkey);
 		(yyval.entity).data = (yyvsp[(3) - (3)].data);
@@ -1632,7 +1606,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 187 "configs/config_fz_parser.y"
+#line 159 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_initstr         = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
@@ -1650,14 +1624,14 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 199 "configs/config_fz_parser.y"
+#line 171 "configs/config_fz_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].entities); }
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 200 "configs/config_fz_parser.y"
+#line 172 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_val_initstr     = DATA_PTR_STRING((yyvsp[(2) - (2)].name));
@@ -1677,7 +1651,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 214 "configs/config_fz_parser.y"
+#line 186 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_hash            = DATA_PTR_HASHT((yyvsp[(3) - (4)].entities));
@@ -1697,7 +1671,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 230 "configs/config_fz_parser.y"
+#line 202 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.datatype));
@@ -1714,7 +1688,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 241 "configs/config_fz_parser.y"
+#line 213 "configs/config_fz_parser.y"
     {
 		(yyval.datatype) = (yyvsp[(2) - (3)].datatype);
 	}
@@ -1723,7 +1697,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 245 "configs/config_fz_parser.y"
+#line 217 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.hashkey));
@@ -1740,7 +1714,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 257 "configs/config_fz_parser.y"
+#line 229 "configs/config_fz_parser.y"
     {
 		if(config_fz_keyword(&(yyval.keyword), (yyvsp[(1) - (1)].name)) < 0)
 			emit_error("unknown keyword \"%s\"", (yyvsp[(1) - (1)].name));
@@ -1752,7 +1726,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 263 "configs/config_fz_parser.y"
+#line 235 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		
@@ -1765,7 +1739,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1769 "configs/config_fz_parser.tab.c"
+#line 1743 "configs/config_fz_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1996,7 +1970,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 272 "configs/config_fz_parser.y"
+#line 244 "configs/config_fz_parser.y"
 
 
 static void    yyerror(hash_t **hash, const char *msg){ // {{{

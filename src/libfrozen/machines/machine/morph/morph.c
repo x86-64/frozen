@@ -67,7 +67,7 @@ static ssize_t morph_configure(machine_t *machine, config_t *config){ // {{{
 
 static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret;
-	list                  *shops;
+	hash_t                *pipelines;
 	morph_userdata        *userdata = (morph_userdata *)machine->userdata;
 
 	if(userdata->running == 0){
@@ -79,13 +79,13 @@ static ssize_t morph_handler(machine_t *machine, request_t *request){ // {{{
 			)},
 			hash_end
 		};
-		if( (ret = shop_new(child_config, &shops)) < 0)
+		if( (ret = pipelines_new(&pipelines, child_config)) < 0)
 			return ret;
 		
-		userdata->machine = list_pop(shops);
 		userdata->running = 1;
-		
-		shop_list_destroy(shops);
+		userdata->machine = pipelines[0].data.ptr;
+		data_set_void(&pipelines[0].data);
+		hash_free(pipelines);
 		
 		if(userdata->pass_first == 0)
 			return 0;

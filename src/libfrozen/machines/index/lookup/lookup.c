@@ -42,7 +42,7 @@ static ssize_t lookup_init(machine_t *machine){ // {{{
 static ssize_t lookup_destroy(machine_t *machine){ // {{{
 	lookup_userdata       *userdata = (lookup_userdata *)machine->userdata;
 	
-	shop_destroy(userdata->machine_index);
+	pipeline_destroy(userdata->machine_index);
 	free(userdata);
 	return 0;
 } // }}}

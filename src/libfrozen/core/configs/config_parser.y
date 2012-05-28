@@ -30,41 +30,61 @@ extern char *config_get_text(void);
 %parse-param {hash_t **hash}
 
 %union {
-	hash_t     *hash_items;
+	hash_t     *hash;
 	hash_t      hash_item;
 	hashkey_t   key;
 	char       *name;
 	data_t      data;
+	machine_t  *pipeline;
 }
 %token NAME STRING ASSIGN TNULL
-%type  <hash_items>  hash_items
-%type  <hash_item>   hash_item
+%type  <hash>        hash_items entity_pipelines entity_pipeline_config
+%type  <hash_item>   hash_item  entity_pipeline
 %type  <key>         hash_name
 %type  <name>        NAME STRING
 %type  <data>        hash_value
+%type  <pipeline>    entity_pipeline_raw
 
 %%
 
-start : hash_items { *hash = $1; }
+start : entity_pipelines { *hash = $1; }
 
-hash_items :
-	/* empty */ {
-		$$ = malloc(sizeof(hash_t));
-		hash_assign_hash_end($$);
-	}
-	| hash_item {
-		$$ = malloc(2 * sizeof(hash_t));
-		hash_assign_hash_t   (&$$[0], &$1);
-		hash_assign_hash_end (&$$[1]);
-	}
-	| hash_items ',' hash_item {
-		size_t nelements = hash_nelements($1);
-		$1 = realloc($1, (nelements + 1) * sizeof(hash_t));
-		hash_assign_hash_t   (&$1[nelements-1], &$3);
-		hash_assign_hash_end (&$1[nelements  ]);
-		$$ = $1;
+/* entity: pipeline {{{*/
+entity_pipelines :
+	/* empty */       { $$ = hash_new(1); }
+	| entity_pipeline { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| entity_pipelines entity_pipeline { $$ = hash_append($1, $2);  }
+	;
+
+entity_pipeline :
+	entity_pipeline_raw {
+		$$.key       = HK(machine);
+		$$.data.type = TYPE_MACHINET;
+		$$.data.ptr  = pipeline_finalize(&$1);
 	}
 	;
+
+entity_pipeline_raw :
+	entity_pipeline_config {
+		pipeline_new(&$$);
+		pipeline_append(&$$, $1);
+		hash_free($1);
+	}
+	| entity_pipeline_raw ',' entity_pipeline_config {
+		$$ = $1;
+		pipeline_append(&$$, $3);
+		hash_free($3);
+	}
+	;
+
+entity_pipeline_config :
+	'{' hash_items '}' { $$ = $2; };
+/* }}} */
+
+hash_items :
+	/* empty */ { $$ = hash_new(1); }
+	| hash_item { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| hash_items ',' hash_item { $$ = hash_append($1, $3); };
 
 hash_item : hash_name hash_value {
 		$$.key = $1;

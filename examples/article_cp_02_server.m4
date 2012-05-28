@@ -16,3 +16,6 @@ include(implode.m4)
 	}
 },
 { class = "end" }
+
+{ class = "delay", sleep = (uint_t)"10000" },
+{ class = "end" }

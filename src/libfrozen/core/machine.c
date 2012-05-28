@@ -11,10 +11,48 @@ pthread_mutex_t                destroy_mtx;
 pthread_key_t                  key_curr_request;
 
 typedef struct machine_new_ctx {
-	list                  *shops;
+	hash_t                *pipelines;
 	machine_t             *pipeline;
 	ssize_t                ret;
 } machine_new_ctx;
+
+static ssize_t     pipeline_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
+	ssize_t                ret;
+	hash_t                *config;
+	
+	if(item->key == hash_ptr_null || item->key == hash_ptr_end){
+		if(ctx->pipeline){
+			hash_t hpipeline;
+			
+			hpipeline.key       = HK(machine);
+			hpipeline.data.type = TYPE_MACHINET;
+			hpipeline.data.ptr  = pipeline_finalize(&ctx->pipeline);
+			
+			ctx->pipelines = hash_append(ctx->pipelines, hpipeline);
+		}
+		
+		pipeline_new(&ctx->pipeline);
+		return ITER_CONTINUE;
+	}
+	
+	data_get(ret, TYPE_HASHT, config, &(item->data));
+	if(ret != 0)
+		return ITER_CONTINUE;
+	
+	if( (ctx->ret = pipeline_append(&ctx->pipeline, config)) < 0)
+		return ITER_BREAK;
+	
+	return ITER_CONTINUE;
+} // }}}
+static ssize_t     pipeline_execute_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
+	if(item->key != HK(machine) || item->data.type != TYPE_MACHINET)
+		return ITER_CONTINUE;
+	
+	if( (ctx->ret = pipeline_execute(item->data.ptr)) < 0)
+		return ITER_BREAK;
+	
+	return ITER_CONTINUE;
+} // }}}
 
 static machine_t machine_dummy = { // {{{
 	.machine_type_hash = {
@@ -344,63 +382,46 @@ machine_t *        pipeline_finalize (machine_t **pipeline){ // {{{
 	*pipeline = NULL;
 	return curr;
 } // }}}
-
-static ssize_t     shop_new_iter(hash_t *item, machine_new_ctx *ctx){ // {{{
-	ssize_t                ret;
-	hash_t                *config;
-	
-	if(item->key == hash_ptr_null || item->key == hash_ptr_end){
-		if(ctx->pipeline)
-			list_add(ctx->shops, pipeline_finalize(&ctx->pipeline));
-		
-		pipeline_new(&ctx->pipeline);
-		return ITER_CONTINUE;
-	}
-	
-	data_get(ret, TYPE_HASHT, config, &(item->data));
-	if(ret != 0)
-		return ITER_CONTINUE;
-	
-	if( (ctx->ret = pipeline_append(&ctx->pipeline, config)) < 0)
-		return ITER_BREAK;
-	
-	return ITER_CONTINUE;
+ssize_t            pipeline_execute  (machine_t *pipeline){ // {{{
+	request_t r_request[] = {
+		{ HK(action),   DATA_ACTIONT(ACTION_CONTROL) },
+		{ HK(function), DATA_HASHKEYT(HK(start))     },
+		hash_end
+	};
+	return machine_query(pipeline, r_request);
 } // }}}
-
-ssize_t            shop_new          (hash_t *config, list **pshops){ // {{{
-	list                  *shops;
-	
-	if(pshops == NULL)
-		return -EINVAL;
-	
-	if( (shops = list_alloc()) == NULL)
-		return -ENOMEM;
-	
-	machine_new_ctx        ctx               = { shops, NULL, 0 };
-	if(hash_iter(config, (hash_iterator)&shop_new_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK){
-		shop_list_destroy(shops);
-		return ctx.ret;
-	}
-	
-	*pshops = shops;
-	return 0;
-} // }}}
-void               shop_list_destroy (list *list){ // {{{
-	machine_t             *shop;
-	
-	while( (shop = list_pop(list)) )
-		shop_destroy(shop);
-	
-	list_free(list);
-} // }}}
-void               shop_destroy      (machine_t *machine){ // {{{
+void               pipeline_destroy  (machine_t *pipeline){ // {{{
 	machine_t             *curr;
 	machine_t             *next;
 	
-	for(curr = machine; curr != &machine_dummy; curr = next){
+	for(curr = pipeline; curr != &machine_dummy; curr = next){
 		next = curr->cnext;
 		machine_destroy(curr);
 	}
+} // }}}
+
+ssize_t            pipelines_new     (hash_t **ppipelines, hash_t *config){ // {{{
+	hash_t                *pipelines;
+	
+	if( (pipelines = hash_new(1)) == NULL)
+		return -ENOMEM;
+	
+	machine_new_ctx        ctx               = { pipelines, NULL, 0 };
+	if(hash_iter(config, (hash_iterator)&pipeline_new_iter, &ctx, HASH_ITER_NULL | HASH_ITER_END) != ITER_OK){
+		hash_free(ctx.pipelines);
+		return ctx.ret;
+	}
+	
+	*ppipelines = ctx.pipelines;
+	return 0;
+} // }}}
+ssize_t            pipelines_execute (hash_t *pipelines){ // {{{
+	machine_new_ctx        ctx               = { NULL, NULL, 0 };
+	hash_iter(pipelines, (hash_iterator)&pipeline_execute_iter, &ctx, 0);
+	return ctx.ret;
+} // }}}
+void               pipelines_destroy (hash_t *pipelines){ // {{{
+	hash_free(pipelines);
 } // }}}
 
 ssize_t            frozen_machine_init(void){ // {{{

@@ -53,16 +53,17 @@ typedef union YYSTYPE
 /* Line 2068 of yacc.c  */
 #line 32 "configs/config_parser.y"
 
-	hash_t     *hash_items;
+	hash_t     *hash;
 	hash_t      hash_item;
 	hashkey_t   key;
 	char       *name;
 	data_t      data;
+	machine_t  *pipeline;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 66 "configs/config_parser.tab.h"
+#line 67 "configs/config_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -59,6 +59,13 @@ static struct option            long_options  [sizeof(option_data)/sizeof(struct
 static char                     short_options [sizeof(option_data)/sizeof(struct cmdline_option) + 1]; 
 static struct cmdline_option *  map_opts      [96]; 
 
+void signal_handler(int sig){ // {{{
+	switch(sig) {
+		case SIGHUP:  break;
+		case SIGINT:
+		case SIGTERM: main_cleanup(); exit(0); break;
+	}
+} // }}}
 // daemonization {{{
 void daemonize(void){ // {{{
 	int i;
@@ -328,7 +335,6 @@ void main_cleanup(void){
 }
 void main_rest(void){
 	ssize_t                ret;
-	int                    sig;
 	sigset_t               set;
 	
 	/* options init */
@@ -344,36 +350,27 @@ void main_rest(void){
 		
 	modules_load();
 	
+	signal(SIGHUP,signal_handler); /* catch hangup signal */ // TODO rewrite to sigaction
+	signal(SIGINT,signal_handler);
+	signal(SIGTERM,signal_handler); /* catch kill signal */  // NOTICE after modules_load() coz Go override TERM
+	
 	config_m4_incs = defconfig_m4sdir;
 	
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);                     // block all signals, main thread will handler that
 	
-	config_t *config = configs_file_parse(opt_config_file);
-	if(config == NULL){
+	config_t *pipelines = configs_file_parse(opt_config_file);
+	if(pipelines == NULL){
 		fprintf(stderr, "config file not exist, empty or invalid\n");
 		exit(255);
 	}
 	
-	list *shops;
-	
-	if( (ret = shop_new(config, &shops)) < 0){
-		errors_log("shop_new error: %d: %s\n", ret, errors_describe(ret));
-		exit(255);
-	}
-	hash_free(config);
-	
 	sigprocmask(SIG_UNBLOCK, &set, NULL);           // enable all signals for this thread
 	
-	while(sigwait(&set, &sig) == 0){
-		switch(sig) {
-			case SIGHUP:  break;
-			case SIGINT:
-			case SIGTERM:
-				shop_list_destroy(shops);
-				main_cleanup();
-				exit(0);
-		}
+	if( (ret = pipelines_execute(pipelines)) < 0){
+		errors_log("pipelines_execute error: %d: %s\n", ret, errors_describe(ret));
+		exit(255);
 	}
+	hash_free(pipelines);
 }
 

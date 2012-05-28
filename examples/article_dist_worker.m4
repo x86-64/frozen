@@ -15,3 +15,6 @@
 	connect = "tcp://127.0.0.1:8801"
 }},
 { class = "end" }
+
+{ class = "delay", sleep = (uint_t)"10000" },
+{ class = "end" }

@@ -8,7 +8,7 @@ ZEROMQ_SERVICE(`zmq_test3',  `127.0.0.1', `8892')
 ZEROMQ_SERVICE(`zmq_dev_in', `127.0.0.1', `8890')
 ZEROMQ_SERVICE(`zmq_dev_out',`127.0.0.1', `8891')
 
-{ class = "thread" },
+
 
 { class = "assign", before = {
 	buffer1 = (raw_t)"Hello, zeromq push world #1!\n",
@@ -46,8 +46,7 @@ ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer4"'),
 ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer5"'),
 ZEROMQ_HASH_REQ(`zmq_test2_connect', `buffer = (env_t)"buffer6"'),
 
-{ class = "kill" },
-NULL,
+{ class = "end" }
 
 
 SHOP(`shop_print',

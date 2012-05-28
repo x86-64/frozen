@@ -1,5 +1,6 @@
 * new config syntax
 
+- fix data_t with data_make_flat func
 - view_t for data in any format
 - unique_t key parameter. using LOOKUP action compare two items
 - raw_t constant parameter - do convert_from as compare with existing data and emit error on mismatch

@@ -5,7 +5,7 @@
  * @ingroup machine
  * @addtogroup mod_machine_pool machine/pool
  *
- * This module keep pool of given shops and manage them.
+ * This module keep pool of given pipelines_pool and manage them.
  */
 /**
  * @ingroup mod_machine_pool
@@ -25,34 +25,35 @@
 #define ERRORS_MODULE_NAME "machine/pool"
 
 typedef struct pool_userdata {
-	list                   shops;
+	list                   pipelines_pool;
 	request_t             *prototype;
 } pool_userdata;
 
 static ssize_t pool_resize(machine_t *pool, uintmax_t new_size){ // {{{
 	ssize_t                ret;
-	list                  *shop;
+	hash_t                *pipelines;
 	uintmax_t              current_size;
 	request_t             *prototype;
 	pool_userdata         *userdata          = (pool_userdata *)pool->userdata;
 	
-	current_size = list_count(&userdata->shops);
+	current_size = list_count(&userdata->pipelines_pool);
 	
 	for(; current_size < new_size; current_size++){
 		prototype = hash_copy(userdata->prototype);
 		
-		ret = shop_new(prototype, &shop);
+		if( (ret = pipelines_new(&pipelines, prototype)) < 0)
+			return ret;
 		
 		hash_free(prototype);
 		if(ret < 0)
 			return ret;
 		
-		list_add(&userdata->shops, shop);
+		list_add(&userdata->pipelines_pool, pipelines);
 	}
 	for(; current_size > new_size; current_size--){
-		shop = list_pop(&userdata->shops);
+		pipelines = list_pop(&userdata->pipelines_pool);
 		
-		shop_list_destroy(shop);
+		hash_free(pipelines);
 	}
 	return 0;
 } // }}}
@@ -62,14 +63,14 @@ static ssize_t pool_init(machine_t *machine){ // {{{
 	if(userdata == NULL)
 		return error("calloc failed");
 	
-	list_init(&userdata->shops);
+	list_init(&userdata->pipelines_pool);
 	return 0;
 } // }}}
 static ssize_t pool_destroy(machine_t *machine){ // {{{
 	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
 	
 	pool_resize(machine, 0);
-	list_destroy(&userdata->shops);
+	list_destroy(&userdata->pipelines_pool);
 	return 0;
 } // }}}
 static ssize_t pool_configure(machine_t *machine, config_t *config){ // {{{
@@ -87,7 +88,33 @@ static ssize_t pool_configure(machine_t *machine, config_t *config){ // {{{
 } // }}}
 
 static ssize_t pool_handler(machine_t *machine, request_t *request){ // {{{
-	return errorn(EBADF);
+	ssize_t                ret;
+	action_t               action;
+	hashkey_t              function;
+	hash_t                *pipeline;
+	void                  *iter              = NULL;
+	pool_userdata         *userdata          = (pool_userdata *)machine->userdata;
+	
+	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
+	if(ret != 0 || action != ACTION_CONTROL)
+		return errorn(ENOSYS);
+	
+	hash_data_get(ret, TYPE_HASHKEYT, function, request, HK(function));
+	if(ret != 0)
+		return errorn(ENOSYS);
+	
+	switch(function){
+		case HK(start):
+			while( (pipeline = list_iter_next(&userdata->pipelines_pool, &iter)) != NULL){
+				if( (ret = pipelines_execute(pipeline)) < 0)
+					return ret;
+			}
+			return 0;
+			
+		default:
+			break;
+	}
+	return errorn(ENOSYS);
 } // }}}
 
 machine_t pool_proto = {

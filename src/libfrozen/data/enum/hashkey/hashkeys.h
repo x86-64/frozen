@@ -109,7 +109,6 @@
 #define HK_VALUE_parameter_request 196377
 #define HK_VALUE_pass_first 42778
 #define HK_VALUE_path 3208
-#define HK_VALUE_paused 9518
 #define HK_VALUE_perlevel 21904
 #define HK_VALUE_port 3438
 #define HK_VALUE_rate 3162
@@ -280,7 +279,6 @@ typedef enum hashkey_t {
       HK_parameter_request = HK_VALUE_parameter_request, 
       HK_pass_first = HK_VALUE_pass_first, 
       HK_path = HK_VALUE_path, 
-      HK_paused = HK_VALUE_paused, 
       HK_perlevel = HK_VALUE_perlevel, 
       HK_port = HK_VALUE_port, 
       HK_rate = HK_VALUE_rate, 
@@ -455,7 +453,6 @@ keypair_t hashkeys[] = {
       { "parameter_request", HK_VALUE_parameter_request }, 
       { "pass_first", HK_VALUE_pass_first }, 
       { "path", HK_VALUE_path }, 
-      { "paused", HK_VALUE_paused }, 
       { "perlevel", HK_VALUE_perlevel }, 
       { "port", HK_VALUE_port }, 
       { "rate", HK_VALUE_rate }, 

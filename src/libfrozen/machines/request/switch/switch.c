@@ -106,7 +106,7 @@ static ssize_t switch_destroy(machine_t *machine){ // {{{
 	switch_rule           *rule;
 	
 	while( (rule = list_pop(&userdata->rules)) != NULL){
-		shop_destroy(rule->machine);
+		pipeline_destroy(rule->machine);
 		hash_free(rule->request);
 		free(rule);
 	}

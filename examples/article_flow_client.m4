@@ -2,7 +2,7 @@ include(zeromq.m4)
 
 include(article_flow_config.m4)
 
-{ class = "thread" }, 
+ 
 
 { class = "assign", before = {                                             // set our data
 	data = (raw_t)"client_data"

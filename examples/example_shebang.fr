@@ -1,6 +1,6 @@
 #!../src/frozend/frozend -c
 
-{ class => "daemon/thread" },
+
 { class => "request/emitter",
 	request = {
 		request = { buffer = (raw_t) { buffer = "Hello, world!\n" } },

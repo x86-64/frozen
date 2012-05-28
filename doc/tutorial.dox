@@ -59,8 +59,8 @@
  * @code
  * { <machine 1 configuration> },
  * { <machine 2 configuration> },
- * { <machine 3 configuration> },
- * NULL,
+ * { <machine 3 configuration> }
+ *
  * {
  *   <machine 4 configuration>
  *   duplicate_to = {                             // this is configuration parameter name for imaginary duplicator machine
@@ -72,10 +72,6 @@
  * @endcode
  * 
  * This example configuration describe shops showed on picture in @ref tutorial_basics.
- *
- * NULL keyword used to split connection between machines - if there is
- * no NULL - machine 3 would be connected to machine 4 from top and so on. But this behavior is wrong, so NULL keyword created. Unlike other
- * common representation of graphs, we don't write connections between machines explicitly.
  *
  * @section tutorial_configuration_machine Machine configuration
  * 

@@ -188,7 +188,7 @@ void        limit_machine_action(machine_t *machine, rule *rule){ // {{{
 			
 			if(userdata->perfork_childs != &userdata->perfork_childs_own){
 				// kill childs for forked shops, keep for initial
-				shop_destroy(machine->cnext);
+				pipeline_destroy(machine->cnext);
 			}
 			
 			break;
