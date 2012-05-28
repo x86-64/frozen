@@ -146,13 +146,8 @@ static ssize_t stdout_configure(machine_t *machine, hash_t *config){ // {{{
 
 static ssize_t stdin_handler(machine_t *machine, request_t *request){ // {{{
 	ssize_t                ret, retd;
-	action_t               action;
 	data_t                *output;
 	std_userdata          *userdata          = (std_userdata *)machine->userdata;
-	
-	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
-	if(ret == 0)
-		return errorn(ENOSYS);
 	
 	if( (output = hash_data_find(request, userdata->key)) == NULL)
 		return error("output key not supplied");
