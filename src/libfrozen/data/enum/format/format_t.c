@@ -24,6 +24,7 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	}
 	
 	switch(fargs->format){
+		case FORMAT(packed):;
 		case FORMAT(config):;
 		case FORMAT(human):;
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
@@ -93,6 +94,7 @@ static ssize_t data_format_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 	value = *(format_t *)src->ptr;
 	
 	switch(fargs->format){
+		case FORMAT(packed):;
 		case FORMAT(config):;
 		case FORMAT(native):;
 		case FORMAT(human):;
