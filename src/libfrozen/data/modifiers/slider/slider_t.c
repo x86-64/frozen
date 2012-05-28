@@ -119,7 +119,8 @@ static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fa
 static ssize_t data_slider_t_free(data_t *data, fastcall_free *fargs){ // {{{
 	slider_t                  *fdata             = (slider_t *)data->ptr;
 	
-	slider_t_destroy(fdata);
+	if(fdata)
+		slider_t_destroy(fdata);
 	return 0;
 } // }}}
 static ssize_t data_slider_t_length(data_t *data, fastcall_length *fargs){ // {{{
