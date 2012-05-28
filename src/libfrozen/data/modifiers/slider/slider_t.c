@@ -4,6 +4,7 @@
 #include <enum/format/format_t.h>
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
+#include <storage/raw/raw_t.h>
 
 slider_t *        slider_t_alloc(data_t *data, uintmax_t offset, uintmax_t auto_slide){ // {{{
 	slider_t                 *fdata;
@@ -63,6 +64,19 @@ static ssize_t data_slider_t_handler (data_t *data, fastcall_header *fargs){ // 
 	};
 	return data_query(fdata->data, fargs);
 } // }}}
+static ssize_t       data_slider_t_convert_to    (data_t *src, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t             *transfered;
+	slider_t              *fdata             = (slider_t *)src->ptr;
+	
+	if(fargs->dest == NULL)
+		return -EINVAL;
+	
+	transfered = (fargs->header.nargs >= 5) ? &fargs->transfered : NULL;
+	
+	ret = default_transfer(fdata->data, fargs->dest, fdata->off, 0, ~0, transfered);
+	return (ret == -1) ? 0 : ret;
+} // }}}
 static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	slider_t              *fdata;
@@ -94,8 +108,11 @@ static ssize_t data_slider_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			fdata->data   = &fdata->freeit;
 			return 0;
 			
-		default:
-			break;
+		default:                              // packed or native - create raw_t instead of slider_t
+		                                      // (coz we can not pack slider_t into raw_t in convert_to)
+			data_raw_t_empty(dst);
+
+			return data_query(dst, fargs);
 	}
 	return -ENOSYS;
 } // }}}
@@ -149,14 +166,14 @@ data_proto_t slider_t_proto = {
 	.type                   = TYPE_SLIDERT,
 	.type_str               = "slider_t",
 	.api_type               = API_HANDLERS,
-	.properties             = DATA_PROXY,
+	.properties             = DATA_GREEDY | DATA_PROXY,
 	.handler_default        = (f_data_func)&data_slider_t_handler,
 	.handlers               = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_slider_t_convert_from,
 		[ACTION_FREE]         = (f_data_func)&data_slider_t_free,
 		[ACTION_LENGTH]       = (f_data_func)&data_slider_t_length,
 		
-		[ACTION_CONVERT_TO]   = (f_data_func)&data_default_convert_to,
+		[ACTION_CONVERT_TO]   = (f_data_func)&data_slider_t_convert_to,
 		[ACTION_CONTROL]      = (f_data_func)&data_slider_t_control,
 	}
 };
