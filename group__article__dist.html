@@ -56,9 +56,9 @@ Goal</h2>
 <h2><a class="anchor" id="step1"></a>
 Step 1: read data</h2>
 <p>To read data we use following config: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>= &quot;query&quot;, data = (file_t){ filename = <span class="stringliteral">&quot;/var/log/messages&quot;</span>, readonly = (uint_t)<span class="stringliteral">&quot;1&quot;</span> }, request = {
-        action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+        action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
         destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 
                 <span class="comment">// split file chunks to lines</span>
@@ -72,7 +72,7 @@ Step 1: read data</h2>
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>We just read data from file, next we split it in lines and send using zeromq to workers pool. We do not bother with doing it fast right here because we do not need to. If you have huge data, you possibly have huge cluster to process it, and very likely you have distributed fs on it. Every cluster configuration have it's own advantages and disadvantages. Maybe you have several data storage servers and they are very good at reading speed, but maybe you have common hardware with low read speed on hdd. In any case you should consider best approach for your cluster and use it. We can start as many readers with as many files as we want, because zeromq allow us to join this flows to be merged into one.</p>
 <h2><a class="anchor" id="step2"></a>
 Step 2: categorize data</h2>
@@ -93,6 +93,9 @@ Step 2: categorize data</h2>
         type    = <span class="stringliteral">&quot;push&quot;</span>,
         connect = <span class="stringliteral">&quot;tcp://127.0.0.1:8801&quot;</span>
 }},
+{ <span class="keyword">class </span>= &quot;end&quot; }
+
+{ <span class="keyword">class </span>= &quot;delay&quot;, sleep = (uint_t)<span class="stringliteral">&quot;10000&quot;</span> },
 { <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>Next step is to decide - which data where to go. Lets to in straightforward for now with <a class="el" href="group__mod__machine__regexp.html">data/regexp</a>. </p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;thread&quot;, loop = (uint_t)<span class="stringliteral">&quot;1&quot;</span> },
@@ -124,6 +127,9 @@ Step 2: categorize data</h2>
 }},
 
 { <span class="keyword">class </span>= &quot;end&quot; }
+
+{ <span class="keyword">class </span>= &quot;delay&quot;, sleep = (uint_t)<span class="stringliteral">&quot;10000&quot;</span> },
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>Here we grep data with "dhcp" in it and send to another process. See both <a class="el" href="group__mod__machine__regexp.html">data/regexp</a>, <a class="el" href="group__mod__machine__switch.html">request/switch</a> and <a class="el" href="group__tutorial__common.html">Tutorial: most used modules</a> for more complex examples.</p>
 <h2><a class="anchor" id="step3"></a>
 Step 3: save results</h2>
@@ -142,6 +148,9 @@ Step 3: save results</h2>
                 buffer = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;buffer&quot;</span>
         }
 },
+{ <span class="keyword">class </span>= &quot;end&quot; }
+
+{ <span class="keyword">class </span>= &quot;delay&quot;, sleep = (uint_t)<span class="stringliteral">&quot;10000&quot;</span> },
 { <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><h2><a class="anchor" id="testing"></a>
 Testing</h2>

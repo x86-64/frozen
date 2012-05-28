@@ -82,6 +82,9 @@ Example configuration</h2>
         connect  = <span class="stringliteral">&quot;tcp://127.0.0.1:9998&quot;</span>
 }},
 { <span class="keyword">class </span>= &quot;end&quot; }
+
+{ <span class="keyword">class </span>= &quot;delay&quot;, sleep = (uint_t)<span class="stringliteral">&quot;10000&quot;</span> },
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>Here we have single-threaded handler which only send simple "hello!" string back to client.</p>
 <h2><a class="anchor" id="tutorial_mod_bench_data"></a>
 Benchmarking data</h2>

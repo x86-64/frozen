@@ -52,18 +52,18 @@
 <h2><a class="anchor" id="simple_copy"></a>
 Copying files in simple way</h2>
 <p>What could be simplier than to copy file? May be this is not very interesting way to spend your time, but lets take a look how we can do job using frozen and it's flow-based nature. First, assume we want to copy file within same computer. We need to open both files, read some from one file to buffer, write this buffer to second file, and in both steps monitor return codes, right? No. We just call "transfer" method on file, like so:</p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;INPUT&quot;</span>  },
                 destination = (file_t){ filename = <span class="stringliteral">&quot;OUTPUT&quot;</span> }
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
-                { <span class="keyword">class </span>= &quot;kill&quot; }
+                { <span class="keyword">class </span>= &quot;end&quot; }
         }
-}},
+},
 { <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div> <div class="fragment"><pre class="fragment">   $ frozend -c examples/article_cp_01_simple.m4 -o <span class="stringliteral">&quot;-DINPUT=TODO -DOUTPUT=TODO.bak&quot;</span>
 </pre></div><p> That was pretty easy. But that if we want to copy file from different machines?</p>
@@ -74,16 +74,16 @@ Copying file to another computer</h2>
 
 FILE(`remote_file&#39;, `8888&#39;)
 
-{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;INPUT&quot;</span> },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&quot;remote_file&quot;</span>
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
-                { <span class="keyword">class </span>= &quot;kill&quot; }
+                { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
 { <span class="keyword">class </span>= &quot;end&quot; }
@@ -107,6 +107,9 @@ FILE(`remote_file&#39;, `8888&#39;)
 <span class="stringliteral">        }</span>
 <span class="stringliteral">},</span>
 <span class="stringliteral">{ class = &quot;end&quot; }</span>
+<span class="stringliteral"></span>
+<span class="stringliteral">{ class = &quot;delay&quot;, sleep = (uint_t)&quot;10000&quot; },</span>
+<span class="stringliteral">{ class = &quot;end&quot; }</span>
 </pre></div><p>Not at all. It have endless thread which read from zeromq socket, then EXPLODE request from incoming message and pass it to file. To use this we run in shell following commands: </p>
 <div class="fragment"><pre class="fragment">   $ frozend -c examples/article_cp_02_server.m4 -o <span class="stringliteral">&quot;-DOUTPUT=TODO.bak&quot;</span> &amp;
    $ frozend -c examples/article_cp_02_client.m4 -o <span class="stringliteral">&quot;-DINPUT=TODO&quot;</span>
@@ -118,16 +121,16 @@ Copying files between computers</h2>
 FILE(`remote_file1&#39;, `8888&#39;)
 FILE(`remote_file2&#39;, `8887&#39;)
 
-{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&quot;remote_file1&quot;</span>,
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>)<span class="stringliteral">&quot;remote_file2&quot;</span>
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
-                { <span class="keyword">class </span>= &quot;kill&quot; }
+                { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
 { <span class="keyword">class </span>= &quot;end&quot; }
@@ -148,7 +151,7 @@ Enumerating things on LevelDB</h2>
 include(implode.m4)
 
 <span class="comment">// we are here</span>
-{ <span class="keyword">class </span>= &quot;thread&quot; },
+
 { <span class="keyword">class </span>= &quot;emitter&quot;, request = {                        <span class="comment">// write key to db</span>
         request = {
                 action = (action_t)<span class="stringliteral">&quot;write&quot;</span>,
@@ -204,8 +207,7 @@ include(implode.m4)
 <span class="stringliteral">                { class = &quot;end&quot; }</span>
 <span class="stringliteral">        }</span>
 <span class="stringliteral">}},</span>
-<span class="stringliteral">{ class = &quot;kill&quot; },</span>
-<span class="stringliteral">NULL,</span>
+<span class="stringliteral">{ class = &quot;end&quot; }</span>
 <span class="stringliteral"></span>
 <span class="stringliteral">// helper routines</span>
 <span class="stringliteral">SHOP(`leveldb&#39;</span>,

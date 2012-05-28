@@ -53,23 +53,19 @@
 Input</h2>
 <p><em>Stdin</em> </p>
 <p>To have anything to be parsed it should be somehow passed in machine. Frozen have different ways in input data, most simple one is console. <a class="el" href="group__mod__machine__stdin.html">io/stdin</a> used to get data from stdin. And because stdin module is passive, <a class="el" href="group__mod__machine__query.html">data/query</a> with <a class="el" href="group__mod__machine__thread.html">daemon/thread</a> used to activly transfer data from one machine shop to another. In this case destination is <a class="el" href="group__mod__machine__stdout.html">io/stdout</a> used. For more about outputs read next chapter.</p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
-                source      = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                        { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot; }
-                },
-                destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                        { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot;  }
-                }
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
+                source      = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdin&quot;</span>,
+                destination = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdout&quot;</span>
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                 { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p><em>Fuse</em> </p>
 <p>Next way is <a class="el" href="group__mod__machine__fuse.html">io/fuse</a> machine. It create filesystem using fuse and pass all read and writes to user defined machines. Sample configuration can look like so:</p>
 <div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>= &quot;fuse&quot;, mountpoint = <span class="stringliteral">&quot;/home/test/&quot;</span>, items = {
@@ -80,7 +76,7 @@ Input</h2>
 </pre></div><p>This creates file system in /home/test folder, which contain file named "one" and every write request to this file will result in console output. Use "echo 'hello' &gt;&gt; /home/test/one" or similar to test it.</p>
 <p><em>Emitter</em> </p>
 <p>One more way to input is describe machine which send requests you want. One of such machines is <a class="el" href="group__mod__machine__emitter.html">request/emitter</a>. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;request/emitter&quot;,
         request = {
                 request = { buffer = <span class="stringliteral">&quot;Hello, world!\n&quot;</span> },
@@ -94,10 +90,10 @@ Input</h2>
 <p>Another way is different modules, for example go_http. It create simple web server and pass request to user's machines. </p>
 <div class="fragment"><pre class="fragment"></pre></div><p><em>File</em> </p>
 <p>You could read data from file and use it as input data. Construction is same as for stdin. </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;TODO&quot;</span>  },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                         { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot;  }
@@ -108,20 +104,19 @@ Input</h2>
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><h2><a class="anchor" id="tutorial_basics_output"></a>
 Output</h2>
 <p><em>Debugging</em> </p>
 <p>To debug request flow you can use <a class="el" href="group__mod__machine__debug.html">request/debug</a> machine. It print line in stderr on request arrival, and optionally on request end. Also it can show request content. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
-                source      = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                        { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot; }
-                },
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
+                source      = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdin&quot;</span>,
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                        { <span class="keyword">class </span>=&gt; &quot;request/debug&quot;  }
+                        { <span class="keyword">class </span>=&gt; &quot;request/debug&quot;  },
+                        { <span class="keyword">class </span>= &quot;end&quot; }
                 }
         },
         machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
@@ -129,13 +124,13 @@ Output</h2>
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p><em>Stdout</em> </p>
 <p>This could be done by <a class="el" href="group__mod__machine__stdout.html">io/stdout</a>. It print buffer in console stdout. For stderr - use <a class="el" href="group__mod__machine__stderr.html">io/stderr</a>. </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;TODO&quot;</span>  },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                         { <span class="keyword">class </span>=&gt; &quot;io/stdout&quot;  }
@@ -146,23 +141,18 @@ Output</h2>
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p><em>File</em> </p>
 <p>Write data to file with mod_machine_file machine. Example: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
-{ <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
-        request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
-                source      = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                        { <span class="keyword">class </span>=&gt; &quot;io/stdin&quot; }
-                },
-                destination = (file_t){ filename = <span class="stringliteral">&quot;example_out_file.dat&quot;</span> }
-        },
-        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> }
-        }
+<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;assign&quot;, request = {
+        source      = (<a class="code" href="structfd__t.html">fd_t</a>)<span class="stringliteral">&quot;stdin&quot;</span>,
+        destination = (file_t){ filename = <span class="stringliteral">&quot;example_out_file.dat&quot;</span> }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span>, request = {
+        action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
+        destination = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;destination&quot;</span>
+}},
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><h2><a class="anchor" id="tutorial_basics_processing"></a>
 Processing</h2>
 <p><em>Split</em> </p>
@@ -175,10 +165,10 @@ Processing</h2>
 <h2><a class="anchor" id="tutorial_basics_combine"></a>
 Combining all together</h2>
 <p>As we know some of processing and input machines we could combine it in something useful. For example, you want to know which users have /bin/false shell. Configuration will look like following: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;/etc/passwd&quot;</span>, readonly = (size_t)<span class="charliteral">&#39;1&#39;</span> },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                         { <span class="keyword">class </span>=&gt; &quot;data/split&quot;                         },
@@ -192,21 +182,17 @@ Combining all together</h2>
                                                 { <span class="keyword">class </span>= &quot;io/stdout&quot; }
                                         }
                                 }
-                        }},
-                        { <span class="keyword">class </span>= &quot;end&quot; }
-                }
-        },
-        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
+                        }
+                }},
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>mod_machine_file open file for reading only. <a class="el" href="group__mod__machine__split.html">data/split</a> split it in lines. <a class="el" href="group__mod__machine__regexp.html">data/regexp</a> matches /bin/false aganist input line and pass to <a class="el" href="group__mod__machine__switch.html">request/switch</a>. It lookup for default marker value and if find - pass to <a class="el" href="group__mod__machine__stdout.html">io/stdout</a>. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem: </p>
-<div class="fragment"><pre class="fragment">{ <span class="keyword">class </span>=&gt; &quot;daemon/thread&quot; },
+<div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
-                action      = (action_t)<span class="stringliteral">&quot;transfer&quot;</span>,
+                action      = (action_t)<span class="stringliteral">&quot;convert_to&quot;</span>,
                 source      = (file_t){ filename = <span class="stringliteral">&quot;/etc/passwd&quot;</span>, readonly = (size_t)<span class="charliteral">&#39;1&#39;</span> },
                 destination = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
                         { <span class="keyword">class </span>=&gt; &quot;data/split&quot;                             },
@@ -221,16 +207,12 @@ Combining all together</h2>
                                                 { <span class="keyword">class </span>= &quot;io/stdout&quot; }
                                         }
                                 }
-                        }},
-                        { <span class="keyword">class </span>= &quot;end&quot; }
-                }
-        },
-        machine = (<a class="code" href="structmachine__t.html" title="Machine structure.">machine_t</a>){
-                { <span class="keyword">class </span>= &quot;data/query&quot;, data = (<a class="code" href="structenv__t.html">env_t</a>)<span class="stringliteral">&quot;source&quot;</span> },
+                        }
+                }},
                 { <span class="keyword">class </span>= &quot;end&quot; }
         }
 }},
-{ <span class="keyword">class </span>= &quot;kill&quot; }
+{ <span class="keyword">class </span>= &quot;end&quot; }
 </pre></div><p>As regexp set same marker this construction works like OR. For AND use different markers and combine them in switch rule like so: </p>
 <div class="fragment"><pre class="fragment">      ...
       { <span class="keyword">class </span>=&gt; &quot;data/regexp&quot;, regexp = <span class="stringliteral">&quot;/bin&quot;</span>,  marker = <span class="stringliteral">&quot;key1&quot;</span>  }, 
