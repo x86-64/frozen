@@ -560,23 +560,14 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 
 	if(fargs->data){
 		// convert data to continious memory space
-		switch( (ret = data_make_flat(fargs->data, FORMAT(native), &freeme, &msg_data, &msg_size)) ){
-			case 0: // use old data, it is ok!
-				if( (freehint = memdup(fargs->data, sizeof(data_t))) == NULL){
-					data_free(&freeme);
-					return -ENOMEM;
-				}
-				data_set_void(fargs->data);    // we need current data, so consume it
-				break;
-			case 1: // use converted data, and free old one
-				if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
-					data_free(&freeme);
-					return -ENOMEM;
-				}
-				break;
-			default:
-				return ret;
+		if( (ret = data_make_flat(fargs->data, FORMAT(packed), &freeme, &msg_data, &msg_size)) < 0)
+			return ret;
+		
+		if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
+			data_free(&freeme);
+			return -ENOMEM;
 		}
+		data_set_void(fargs->data);
 	}
 
 	if(zmq_msg_init_data(&zmq_msg, msg_data, msg_size, &zeromq_t_msg_free, freehint) != 0)
