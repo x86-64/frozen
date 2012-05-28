@@ -114,7 +114,7 @@ static ssize_t data_action_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 			
 			fastcall_write r_write2 = { { 5, ACTION_WRITE }, 0, &packed, sizeof(packed) };
 			ret        = data_query(fargs->dest, &r_write2);
-			transfered = r_write.buffer_size;
+			transfered = r_write2.buffer_size;
 			break;
 			
 		default:
