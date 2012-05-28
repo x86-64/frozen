@@ -21,7 +21,7 @@ static err_item errs_list[] = {
  { -200981, "src/libfrozen/data/allocator/fixed/allocator_fixed_t.c: invalid storage supplied" },
  { -200973, "src/libfrozen/data/allocator/fixed/allocator_fixed_t.c: calloc failed" },
  { -200704, "unknown error in module allocator/fixed" },
- { -192792, "src/libfrozen/data/enum/format/format_t.c: format collision" },
+ { -192793, "src/libfrozen/data/enum/format/format_t.c: format collision" },
  { -192512, "unknown error in module enum/format" },
  { -188713, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188416, "unknown error in module enum/hashkey" },
