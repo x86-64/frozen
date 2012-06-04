@@ -378,6 +378,12 @@ ssize_t            pipeline_append   (machine_t **pipeline, config_t *machine_co
 machine_t *        pipeline_finalize (machine_t **pipeline){ // {{{
 	machine_t             *curr;
 	
+	hash_t r_end[] = {
+		{ HK(class), DATA_STRING("end") },
+		hash_end
+	};
+	pipeline_append(pipeline, r_end);
+	
 	for(curr = *pipeline; curr->cprev; curr = curr->cprev);
 	*pipeline = NULL;
 	return curr;
