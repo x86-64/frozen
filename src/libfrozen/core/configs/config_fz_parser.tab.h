@@ -40,7 +40,9 @@
      NAME = 258,
      STRING = 259,
      ASSIGN = 260,
-     TNULL = 261
+     TNULL = 261,
+     KEYWORD = 262,
+     SUB = 263
    };
 #endif
 
@@ -51,14 +53,18 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 47 "configs/config_fz_parser.y"
+#line 49 "configs/config_fz_parser.y"
 
-	hash_t     *entities;
-	hash_t      entity;
+	hash_t     *hash_items;
+	hash_t      hash_item;
 	
 	char       *name;
 	data_t      data;
 	
+	machine_t  *pipeline;
+	hash_t     *pipeline_config;
+
+	action_t    action;
 	hashkey_t   hashkey;
 	datatype_t  datatype;
 	uintmax_t   keyword;
@@ -66,7 +72,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 70 "configs/config_fz_parser.tab.h"
+#line 76 "configs/config_fz_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

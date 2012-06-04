@@ -1,4 +1,6 @@
 %{
+//#define YYDEBUG 1
+
 #include <libfrozen.h>
 #include <configs/config.h>
 #include <configs/config_fz_parser.tab.h>	
@@ -16,7 +18,7 @@ keypair_t fz_keywords[] = {
 
 static void          yyerror(hash_t **, const char *);
 static ssize_t       config_fz_keyword(uintmax_t *keyword, char *string);
-static ssize_t       config_fz_keyword_validate(uintmax_t *pkeyword);
+//static ssize_t       config_fz_keyword_validate(uintmax_t *pkeyword);
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 extern YY_BUFFER_STATE config__scan_string (const char *string);  
@@ -45,51 +47,86 @@ extern char *config_get_text(void);
 %parse-param {hash_t **hash}
 
 %union {
-	hash_t     *entities;
-	hash_t      entity;
+	hash_t     *hash_items;
+	hash_t      hash_item;
 	
 	char       *name;
 	data_t      data;
 	
+	machine_t  *pipeline;
+	hash_t     *pipeline_config;
+
+	action_t    action;
 	hashkey_t   hashkey;
 	datatype_t  datatype;
 	uintmax_t   keyword;
 }
-%token NAME STRING ASSIGN TNULL
-%type  <entities>    entities hash_items
-%type  <entity>      entity hash_item
+%token NAME STRING ASSIGN TNULL KEYWORD SUB
+%nonassoc '~' ':' '>'
 
-%type  <name>        NAME STRING
-%type  <data>        data entity_data entity_data_item entity_pipeline
+%type  <name>            NAME STRING KEYWORD
 
-%type  <hashkey>     hashkey
-%type  <datatype>    datatype
-%type  <keyword>     keyword
+%type  <hash_items>      statements
+%type  <hash_item>       statement
+%type  <hash_items>      hash_items
+%type  <hash_item>       hash_item
+
+%type  <data>            data
+%type  <data>            data_simple
+%type  <data>            data_complex
+%type  <data>            data_complex_rules
+%type  <data>            data_converted
+
+%type  <data>            statement_named_data
+%type  <data>            pipeline
+
+%type  <keyword>         keyword
+
+%type  <action>          action_t
+%type  <datatype>        datatype_t
+%type  <hashkey>         env_t_key
+%type  <hashkey>         hashkey_t
+
+%type  <pipeline>        pipeline_raw
+%type  <pipeline_config> pipeline_machine
+%type  <pipeline_config> pipeline_machine_enum
+%type  <pipeline_config> pipeline_machine_query
+%type  <pipeline_config> pipeline_machine_assign
+%type  <hash_items>      pipeline_machine_assign_items
+%type  <hash_item>       pipeline_machine_assign_item
+
+%type  <data>            env_t
+%type  <data>            hash_t
+%type  <data>            named_t
+%type  <data>            string_t
+%type  <data>            subroutine
 
 %%
 
-start : entities { *hash = $1; }
+start : 
+	/* empty */  { *hash = hash_new(1); }
+	| statements { *hash = $1; }
+	;
 
-/* entities {{{ */
-entities :
-	/* empty */       { $$ = hash_new(1); }
-	| entity          { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
-	| entities entity { $$ = hash_append($1, $2); };
+/* statements {{{ */
+statements :
+	  statement            { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| statements statement { $$ = hash_append($1, $2); };
 
-entity :
-	  entity_data ';' {
+statement :
+	  statement_named_data {
 		$$.key  = HK(data);
 		$$.data = $1;
 	}
-	| entity_pipeline ';' {
+	| subroutine {
 		$$.key  = HK(machine);
 		$$.data = $1;
 	}
 	;
 /* }}} */
-/* entity: data {{{*/
-entity_data :
-	keyword NAME '{' entity_data_item '}' {
+/* statement: named data {{{*/
+statement_named_data :
+	keyword NAME ASSIGN data {
 		ssize_t           ret;
 		
 		if( (ret = data_named_t(&$$, $2, $4)) < 0)
@@ -99,18 +136,220 @@ entity_data :
 	}
 	;
 
-entity_data_item:
-	/* empty */ {
-		data_set_void(&$$);
+/* }}} */
+/* subroutine {{{*/
+pipeline :
+	pipeline_raw {
+		$$.type = TYPE_MACHINET;
+		$$.ptr  = pipeline_finalize(&$1);
 	}
-	| data {
+	;
+
+pipeline_raw :
+	pipeline_machine ';' {
+		pipeline_new(&$$);
+		pipeline_append(&$$, $1);
+		hash_free($1);
+	}
+	| pipeline_raw pipeline_machine ';' {
 		$$ = $1;
+		pipeline_append(&$$, $2);
+		hash_free($2);
 	}
-	| datatype '{' hash_items '}' ',' entity_data_item {
+	;
+
+/* }}} */
+/* subroutine machines {{{*/
+pipeline_machine :
+	  pipeline_machine_query
+	| pipeline_machine_assign
+	| pipeline_machine_enum
+	;
+
+pipeline_machine_enum :
+	data '|' data {
+		data_t  d_action;
+		data_action_t(&d_action, ACTION_ENUM);
+		
+		hash_t *r_request = hash_new(3);
+		r_request[0].key  = HK(action);
+		r_request[0].data = d_action;
+		r_request[1].key  = HK(data);
+		r_request[1].data = $3;
+		
+		hash_t r_config[] = {
+			{ HK(class),   DATA_PTR_STRING(strdup("data/query"))  },
+			{ HK(data),    $1                                     },
+			{ HK(request), DATA_PTR_HASHT(r_request)              },
+			hash_end
+		};
+		$$ = hash_rebuild(r_config);
+	}
+	;
+
+pipeline_machine_query :
+	data '.' action_t '(' hash_items ')' {
+		data_t  d_action;
+		data_action_t(&d_action, $3);
+		
+		hash_t *r_request = hash_new(3);
+		r_request[0].key  = HK(action);
+		r_request[0].data = d_action;
+		hash_assign_hash_inline(&r_request[1], $5);
+		
+		hash_t r_config[] = {
+			{ HK(class),   DATA_PTR_STRING(strdup("data/query"))  },
+			{ HK(data),    $1                                     },
+			{ HK(list),    DATA_HEAP_UINTT(1)                     },
+			{ HK(request), DATA_PTR_HASHT(r_request)              },
+			hash_end
+		};
+		$$ = hash_rebuild(r_config);
+	};
+
+pipeline_machine_assign :
+	pipeline_machine_assign_items {
+		hash_t r_config[] = {
+			{ HK(class),   DATA_PTR_STRING(strdup("assign"))      },
+			{ HK(before),  DATA_PTR_HASHT($1)                     },
+			hash_end
+		};
+		$$ = hash_rebuild(r_config);
+	}
+	;
+
+pipeline_machine_assign_items :
+	  pipeline_machine_assign_item                                   { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| pipeline_machine_assign_items ',' pipeline_machine_assign_item { $$ = hash_append($1, $3); };
+
+pipeline_machine_assign_item :
+	env_t_key ASSIGN data { $$.key  = $1; $$.data = $3; };
+
+/* }}} */
+/* data {{{ */
+data :
+	  data_simple
+	| data_complex_rules
+	;
+
+data_simple :
+	  named_t
+	| env_t 
+	| string_t
+	| hash_t
+	| data_converted
+	| subroutine
+	;
+
+data_complex:
+	  data_simple
+	| data_complex_rules
+	;
+
+/* }}} */
+/* data simple: named_t, env_t, string_t hash_t {{{ */
+named_t : NAME {
+		ssize_t                ret;
+		data_t                 d_void            = DATA_VOID;
+		
+		if( (ret = data_named_t(&$$, $1, d_void)) < 0)
+			emit_error("data init failed (ret: %s)", errors_describe(ret));
+		
+		free($1);
+	};
+	
+env_t : env_t_key {
+		ssize_t                ret;
+		
+		if( (ret = data_env_t(&$$, $1)) < 0)
+			emit_error("data init failed (ret: %s)", errors_describe(ret));
+	};
+
+
+string_t : STRING {
+		ssize_t                ret;
+		data_t                 d_initstr         = DATA_PTR_STRING($1);
+		
+		data_raw_t_empty(&$$);
+		
+		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&$$, &r_init_str)) < 0)
+			emit_error("value init failed from string (ret: %s)", errors_describe(ret));
+		
+		free($1);
+	};
+
+hash_t : '{' hash_items '}' {
+		$$.type = TYPE_HASHT;
+		$$.ptr = $2;
+	};
+
+subroutine :
+	SUB '{' pipeline '}' { $$ = $3; };
+/* }}} */
+/* data complex and converted {{{ */
+data_converted :
+	datatype_t ':' data_simple {
+		ssize_t                ret;
+		
+		$$.type = $1;
+		$$.ptr  = NULL;
+		
+		/* convert string to needed data */
+		fastcall_convert_from r_convert = {
+			{ 5, ACTION_CONVERT_FROM },
+			&$3,
+			($3.type == TYPE_HASHT) ?
+				FORMAT(hash) :
+				FORMAT(config)
+		}; 
+		if( (ret = data_query(&$$, &r_convert)) < 0)
+			emit_error("value init failed (ret: %s)", errors_describe(ret));
+		
+		data_free(&$3);
+	};
+
+data_complex_rules :
+	NAME '~' data_simple '>' data_complex {
+		ssize_t                ret;
+		char                  *triplet_type_str      = NULL;
+		
+		triplet_type_str = strdup("triplet_");
+		strcat(triplet_type_str, $1);
+		strcat(triplet_type_str, "_t");
+		
+		datatype_t             type;
+		data_t                 d_type            = DATA_PTR_DATATYPET(&type);
+		data_t                 d_type_str        = DATA_PTR_STRING(triplet_type_str);
+		
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type_str, FORMAT(config) }; 
+		if( (ret = data_query(&d_type, &r_convert)) < 0)
+			emit_error("unknown triplet datatype_t \"%s\" (ret: %s)", triplet_type_str, errors_describe(ret));
+		
+		hash_t                 r_triplet_config[] = {
+			{ HK(data),  $5 },
+			{ HK(slave), $3 },
+			hash_end
+		};
+		data_t                 d_triplet_config  = DATA_PTR_HASHT(r_triplet_config);
+		
+		$$.type = type;
+		$$.ptr  = NULL;
+		
+		/* convert string to needed data */
+		fastcall_convert_from r_convert_triplet = { { 5, ACTION_CONVERT_FROM }, &d_triplet_config, FORMAT(hash) }; 
+		if( (ret = data_query(&$$, &r_convert_triplet)) < 0)
+			emit_error("triplet data init failed (ret: %s)", errors_describe(ret));
+		
+		data_free(&r_triplet_config[0].data);
+		data_free(&r_triplet_config[1].data);
+		free($1);
+	}
+	| datatype_t ':' '{' hash_items '}' '>' data_complex {
 		ssize_t                ret;
 		hash_t                 r_hash[] = {
-			{ HK(data), $6 },
-			hash_inline($3),
+			{ HK(data), $7 },
+			hash_inline($4),
 			hash_end
 		};
 		data_t                 d_hash            = DATA_PTR_HASHT(r_hash);
@@ -123,83 +362,26 @@ entity_data_item:
 		if( (ret = data_query(&$$, &r_convert)) < 0)
 			emit_error("proxy data init failed (ret: %s)", errors_describe(ret));
 		
-		hash_free($3);
+		hash_free($4);
 		data_free(&r_hash[0].data);
 	}
 	;
-/* }}} */
-/* entity: pipeline {{{*/
-entity_pipeline :
-	NAME {
-		data_set_void(&$$);
-	}
-	| entity_pipeline '|' entity_pipeline {
-		data_set_void(&$$);
-	}
-	;
-/* }}} */
-/* hash {{{ */
-hash_items :
-	/* empty */ { $$ = hash_new(1); }
-	| hash_item { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
-	| hash_items ',' hash_item { $$ = hash_append($1, $3); };
 
-hash_item :
-	  data {
-		$$.key  = 0;
-		$$.data = $1;
-	}
-	| hashkey ASSIGN data {
-		$$.key  = $1;
-		$$.data = $3;
-	}
-	;
-
-data :
-	  STRING             {
+/* }}} */
+/* base atoms: datatype_t, hashkey_t, action_t, env_t {{{ */
+action_t : NAME {
 		ssize_t                ret;
+		data_t                 d_action          = DATA_PTR_ACTIONT(&$$);
 		data_t                 d_initstr         = DATA_PTR_STRING($1);
 		
-		data_raw_t_empty(&$$);
-		
-		fastcall_convert_from r_init_str = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&$$, &r_init_str)) < 0)
-			emit_error("value init failed from string (ret: %s)", errors_describe(ret));
+		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_initstr, FORMAT(config) }; 
+		if( (ret = data_query(&d_action, &r_convert)) < 0)
+			emit_error("unknown action \"%s\" (ret: %s)", $1, errors_describe(ret));
 		
 		free($1);
-	}
-	| '{' hash_items '}' { $$.type = TYPE_HASHT;   $$.ptr = $2; }
-	| datatype STRING {
-		ssize_t                ret;
-		data_t                 d_val_initstr     = DATA_PTR_STRING($2);
-		
-		$$.type = $1;
-		$$.ptr  = NULL;
-		
-		/* convert string to needed data */
-		fastcall_convert_from r_init2 = { { 5, ACTION_CONVERT_FROM }, &d_val_initstr, FORMAT(config) }; 
-		if( (ret = data_query(&$$, &r_init2)) < 0)
-			emit_error("value init failed \"%s\" (ret: %s)", $2, errors_describe(ret));
-		
-		free($2);
-	}
-	| datatype '{' hash_items '}' {
-		ssize_t                ret;
-		data_t                 d_hash            = DATA_PTR_HASHT($3);
-		
-		$$.type = $1;
-		$$.ptr  = NULL;
-		
-		/* convert string to needed data */
-		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_hash, FORMAT(hash) }; 
-		if( (ret = data_query(&$$, &r_convert)) < 0)
-			emit_error("value init failed (ret: %s)", errors_describe(ret));
-		
-		hash_free($3);
 	};
-/* }}} */
-/* base types: datatype, hashkey, keywords {{{ */
-datatype : NAME {
+
+datatype_t : NAME {
 		ssize_t                ret;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&$$);
 		data_t                 d_type_initstr    = DATA_PTR_STRING($1);
@@ -210,11 +392,9 @@ datatype : NAME {
 		
 		free($1);
 	}
-	| '(' datatype ')' {
-		$$ = $2;
-	};
+	;
 
-hashkey : NAME {
+hashkey_t : NAME {
 		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&$$);
 		data_t                 d_initstr         = DATA_PTR_STRING($1);
@@ -226,22 +406,49 @@ hashkey : NAME {
 		free($1);
 	};
 
-keyword : NAME {
+env_t_key : '$' hashkey_t { $$ = $2; }
+
+hash_items :
+	/* empty */ { $$ = hash_new(1); }
+	| hash_item { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| hash_items ',' hash_item { $$ = hash_append($1, $3); };
+
+hash_item :
+	  data {
+		$$.key  = 0;
+		$$.data = $1;
+	}
+	| hashkey_t ASSIGN data {
+		$$.key  = $1;
+		$$.data = $3;
+	}
+	;
+/* }}} */
+/* syntax features: keywords {{{ */
+keyword : KEYWORD {
 		if(config_fz_keyword(&$$, $1) < 0)
 			emit_error("unknown keyword \"%s\"", $1);
 			
 		free($1);
 	}
-	| keyword keyword {
-		ssize_t                ret;
-		
-		$$ = $1 | $2;
-		if( (ret = config_fz_keyword_validate(&$$)) < 0)
-			emit_error("invalid keyword combination (ret: %s)", errors_describe(ret));
-	};
+	;
 /* }}} */
 
 %%
+
+/*
+	| KEYWORD keyword {
+		ssize_t                ret;
+		
+		if(config_fz_keyword(&$$, $1) < 0)
+			emit_error("unknown keyword \"%s\"", $1);
+			
+		free($1);
+		
+		$$ |= $2;
+		if( (ret = config_fz_keyword_validate(&$$)) < 0)
+			emit_error("invalid keyword combination (ret: %s)", errors_describe(ret));
+	};*/
 
 static void    yyerror(hash_t **hash, const char *msg){ // {{{
 	char                  *file              = config_ext_file; 
@@ -263,7 +470,7 @@ static ssize_t config_fz_keyword(uintmax_t *keyword, char *string){ // {{{
 	}
 	return -EINVAL;
 } // }}}
-static ssize_t config_fz_keyword_validate(uintmax_t *pkeyword){ // {{{
+/*static ssize_t config_fz_keyword_validate(uintmax_t *pkeyword){ // {{{
 	uintmax_t             keyword           = *pkeyword;
 	
 	// local/global
@@ -271,11 +478,15 @@ static ssize_t config_fz_keyword_validate(uintmax_t *pkeyword){ // {{{
 	
 	*pkeyword = keyword;
 	return 0;
-} // }}}
+} // }}}*/
 
 hash_t *       configs_fz_string_parse(char *string){ // {{{
 	hash_t *new_hash = NULL;
 	
+	#if YYDEBUG
+	yydebug = 1;
+	#endif
+
 	config__scan_string(string);
 	
 	yyparse(&new_hash);

@@ -1,6 +1,18 @@
 local testdata {
-	record_t { separator = "Z" },
-	raw_t    "aaZbbZccZ"
+	%format record_t { separator = "Z" },
+	        raw_t    "aaZbbZccZ"
 };
 
+local console { fd_t "stdout" };
+
+console.write((uint_t)"0", "Hello!\n");
+
+"Hello #2!\n".convert_to(console), "Hello #3!\n".convert_to(console);
+
+
+local withn {
+	container_t { $value, "\n" }
+};
+
+testdata | withn.convert_to(console);
 

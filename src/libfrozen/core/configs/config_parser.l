@@ -1,6 +1,6 @@
 %{
 #include "libfrozen.h"
-#include "configs/config_parser.tab.h"
+#include "configs/config_fz_parser.tab.h"
 
 #define NEW_STRING_STEP 100
 
@@ -25,10 +25,10 @@ void check_new_string(uintmax_t size);
 %x str
 
 name    [a-z][a-z0-9_]*
-assign1 :
-assign2 =>?
-assign  {assign1}|{assign2}
+assign  =>?
 null    NULL
+keywords local|global
+sub      sub
 
 blank   [ \n\r\t]+
 
@@ -88,6 +88,8 @@ blank   [ \n\r\t]+
 
 {null}          { return TNULL; }
 {assign}        { return ASSIGN; }
+{sub}           { return SUB; }
+{keywords}      { yylval->name = strdup(yytext); return KEYWORD; }
 {name}          { yylval->name = strdup(yytext); return NAME;  }
 
 {blank}
