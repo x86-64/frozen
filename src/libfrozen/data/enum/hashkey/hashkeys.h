@@ -81,6 +81,7 @@
 #define HK_VALUE_length 9794
 #define HK_VALUE_limit_interval 109537
 #define HK_VALUE_linger 9795
+#define HK_VALUE_list 3419
 #define HK_VALUE_loop 3343
 #define HK_VALUE_machine 14586
 #define HK_VALUE_master 10017
@@ -251,6 +252,7 @@ typedef enum hashkey_t {
       HK_length = HK_VALUE_length, 
       HK_limit_interval = HK_VALUE_limit_interval, 
       HK_linger = HK_VALUE_linger, 
+      HK_list = HK_VALUE_list, 
       HK_loop = HK_VALUE_loop, 
       HK_machine = HK_VALUE_machine, 
       HK_master = HK_VALUE_master, 
@@ -425,6 +427,7 @@ keypair_t hashkeys[] = {
       { "length", HK_VALUE_length }, 
       { "limit_interval", HK_VALUE_limit_interval }, 
       { "linger", HK_VALUE_linger }, 
+      { "list", HK_VALUE_list }, 
       { "loop", HK_VALUE_loop }, 
       { "machine", HK_VALUE_machine }, 
       { "master", HK_VALUE_master }, 

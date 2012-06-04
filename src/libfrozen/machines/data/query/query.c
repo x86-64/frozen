@@ -33,6 +33,7 @@
 typedef struct query_userdata {
 	data_t                 data;
 	request_t             *request;
+	uintmax_t              list_query;
 } query_userdata;
 
 static ssize_t query_init(machine_t *machine){ // {{{
@@ -41,14 +42,13 @@ static ssize_t query_init(machine_t *machine){ // {{{
 	if((userdata = machine->userdata = calloc(1, sizeof(query_userdata))) == NULL)
 		return error("calloc failed");
 	
+	userdata->list_query = 0;
 	return 0;
 } // }}}
 static ssize_t query_destroy(machine_t *machine){ // {{{
 	query_userdata       *userdata          = (query_userdata *)machine->userdata;
 	
-	fastcall_free r_free = { { 2, ACTION_FREE } };
-	data_query(&userdata->data, &r_free);
-	
+	data_free(&userdata->data);
 	hash_free(userdata->request);
 	free(userdata);
 	return 0;
@@ -57,6 +57,7 @@ static ssize_t query_configure(machine_t *machine, hash_t *config){ // {{{
 	ssize_t                ret;
 	query_userdata        *userdata          = (query_userdata *)machine->userdata;
 	
+	hash_data_get(ret, TYPE_UINTT, userdata->list_query, config, HK(list));
 	hash_data_consume(ret, TYPE_HASHT, userdata->request, config, HK(request));
 	hash_holder_consume(ret, userdata->data, config, HK(data));
 	if(ret != 0)
@@ -71,12 +72,21 @@ static ssize_t query_handler(machine_t *machine, request_t *request){ // {{{
 	
 	request_enter_context(request);
 	
-		ret = data_hash_query(
-			&userdata->data,
-			userdata->request ?
-				userdata->request :
-				request
-		);
+		if(userdata->list_query == 0){
+			ret = data_hash_query(
+				&userdata->data,
+				userdata->request ?
+					userdata->request :
+					request
+			);
+		}else{
+			ret = data_list_query(
+				&userdata->data,
+				userdata->request ?
+					userdata->request :
+					request
+			);
+		}
 	
 	request_leave_context();
 	if(ret < 0)
