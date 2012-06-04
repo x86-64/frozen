@@ -8,6 +8,19 @@
 
 #define PACKED uintmax_t
 
+ssize_t data_action_t(data_t *data, action_t action){ // {{{
+	action_t              *fdata;
+	
+	if( (fdata = malloc(sizeof(action_t))) == NULL)
+		return -ENOMEM;
+	
+	*fdata = action;
+	
+	data->type = TYPE_ACTIONT;
+	data->ptr  = fdata;
+	return 0;
+} // }}}
+
 static ssize_t action_t_find_value(char **string, action_t value){ // {{{
 	keypair_t             *kp;
 	
@@ -44,13 +57,9 @@ static ssize_t action_t_find_packed(PACKED packed, action_t *value){ // {{{
 
 static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
+	action_t               action;
 	uintmax_t              transfered        = 0;
 	char                   buffer[DEF_BUFFER_SIZE];
-	
-	if(dst->ptr == NULL){ // no buffer, alloc new
-		if( (dst->ptr = malloc(sizeof(action_t))) == NULL)
-			return -ENOMEM;
-	}
 	
 	switch(fargs->format){
 		case FORMAT(config):;
@@ -61,8 +70,14 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			
 			buffer[r_read.buffer_size] = '\0';
 			
-			ret        = action_t_find_string(buffer, (action_t *)dst->ptr);
+			ret        = action_t_find_string(buffer, &action);
 			transfered = r_read.buffer_size;
+
+			if(dst->ptr == NULL){
+				ret = data_action_t(dst, action);
+			}else{
+				*(action_t *)dst->ptr = action;
+			}
 			break;
 			
 		case FORMAT(packed):;
@@ -72,10 +87,16 @@ static ssize_t data_action_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if( (ret = data_query(fargs->src, &r_read2)) < 0)
 				return ret;
 			
-			if( (ret = action_t_find_packed(packed, (action_t *)dst->ptr)) < 0)
+			if( (ret = action_t_find_packed(packed, &action)) < 0)
 				return ret;
 			
 			transfered = r_read2.buffer_size;
+			
+			if(dst->ptr == NULL){
+				ret = data_action_t(dst, action);
+			}else{
+				*(action_t *)dst->ptr = action;
+			}
 			break;
 		
 		default:

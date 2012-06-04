@@ -19,4 +19,6 @@
 #define HAVEBUFF_TYPE_ACTIONT 1
 #define UNVIEW_TYPE_ACTIONT(_ret, _dt, _view)  { _dt = *(action_t *)((_view)->ptr); _ret = 0; }
 
+API ssize_t data_action_t(data_t *data, action_t action);
+
 #endif
