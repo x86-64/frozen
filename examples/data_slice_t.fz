@@ -1,0 +1,24 @@
+local sl =
+	slice_t : {
+		offset = uint_t:"7",
+		size = uint_t:"7"
+	}                                     >
+	"Hello, world!\nSecond line\n"
+
+
+local list  = list_t : { sl }
+local listu = list_t : {}
+local p     = raw_t  : {}
+
+sub {
+	$t = void_t : {};
+	
+	sl.convert_to(fd_t:"stdout");
+	
+	list.convert_to(p, format_t:"packed");
+	/*
+	listu.convert_from(p, format_t:"packed");
+	
+	listu.pop($t);
+	$t | fd_t:"stdout";*/
+}

@@ -1,0 +1,3 @@
+sub {
+	"Hello, world!\n".convert_to(fd_t:"stdout");
+}

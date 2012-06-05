@@ -1,0 +1,12 @@
+local s = netstring_t : {} > "Hello, world!\n"
+local p = netstring_t : {} > raw_t : {}
+local t = raw_t : {}
+
+sub {
+	s.convert_to  (t, format_t:"packed");
+	p.convert_from(t, format_t:"packed");
+
+	p.convert_to(fd_t:"stdout");
+	s.convert_to(fd_t:"stdout");
+	s.convert_to(fd_t:"stdout", format_t:"packed");
+}

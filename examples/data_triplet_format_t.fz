@@ -1,0 +1,30 @@
+local f {
+	%format netstring_t {},
+	{
+		key1 = "5:key1\n,",
+		key2 = "5:key2\n,",
+	}
+};
+
+/*
+{ class = "assign", before = {
+	value1 = (void_t)"",
+	value2 = (void_t)""
+}, copy = (uint_t)"1" },
+
+{ class = "query", data = (env_t)"triplet", request = {
+	action = (action_t)"lookup",
+	key    = (hashkey_t)"key1",
+	value  = (env_t)"value1"
+}},
+{ class = "query", data = (env_t)"triplet", request = {
+	action = (action_t)"lookup",
+	key    = (hashkey_t)"key2",
+	value  = (env_t)"value2"
+}},
+
+{ class = "query", data = (env_t)"value1", request = { action = (action_t)"convert_to", destination = (fd_t)"stdout" }},
+{ class = "query", data = (env_t)"value2", request = { action = (action_t)"convert_to", destination = (fd_t)"stdout" }},
+
+{ class = "end" }
+*/

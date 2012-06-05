@@ -1,0 +1,7 @@
+local l =
+	length_t : {}       >
+	"Hello, world!\n"
+
+sub {
+	l.convert_to(fd_t:"stdout", format_t:"human");
+}

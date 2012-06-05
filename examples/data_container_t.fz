@@ -1,0 +1,10 @@
+local container = 
+	container_t : {
+		"Hello, ",
+		"world!",
+		"\n"
+	}
+
+sub {
+	container.convert_to(fd_t:"stdout");
+}

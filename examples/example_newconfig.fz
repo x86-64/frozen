@@ -1,18 +1,15 @@
-local testdata {
-	%format record_t { separator = "Z" },
-	        raw_t    "aaZbbZccZ"
-};
+local testdata =
+	format ~ record_t : { separator = "Z" } >
+	"aaZbbZccZ"
 
-local console { fd_t "stdout" };
+local console = fd_t:"stdout"
+local withn = container_t : { $value, "\n" } > console
 
-console.write((uint_t)"0", "Hello!\n");
-
-"Hello #2!\n".convert_to(console), "Hello #3!\n".convert_to(console);
-
-
-local withn {
-	container_t { $value, "\n" }
-};
-
-testdata | withn.convert_to(console);
-
+sub {
+	console.write(uint_t:"0", "Hello!\n");
+	
+	"Hello #2!\n".convert_to(console);
+	"Hello #3!\n".convert_to(console);
+	
+	testdata | console;
+}

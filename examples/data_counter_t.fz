@@ -1,0 +1,14 @@
+local c =
+	counter_t : {} >
+	uint_t : "1"
+
+local human = 
+	container_t : {
+		c,
+		"\n"
+	}
+
+sub {
+	human.convert_to(fd_t:"stdout", format_t:"human");
+	human.convert_to(fd_t:"stdout", format_t:"human");
+}

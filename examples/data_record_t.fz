@@ -1,0 +1,11 @@
+local s = 
+	format ~ record_t : {
+		separator = "Z"
+	}                           >
+	"abcZdefZghjZklmZ"
+
+sub {
+	s | sub {
+		container_t:{ $value, "\n" }.convert_to(fd_t:"stdout");
+	};
+}
