@@ -92,6 +92,9 @@ static ssize_t data_named_t_convert_from(data_t *dst, fastcall_convert_from *far
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
+	if(dst->ptr != NULL)
+		return data_named_t_default(dst, (fastcall_header *)fargs);
+	
 	switch(fargs->format){
 		case FORMAT(config):;
 		case FORMAT(human):;
