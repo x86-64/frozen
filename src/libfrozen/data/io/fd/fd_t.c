@@ -93,6 +93,17 @@ static ssize_t data_fd_t_convert_from(data_t *dst, fastcall_convert_from *fargs)
 	};
 	return -ENOSYS;
 } // }}}
+static ssize_t data_fd_t_cu(data_t *dst, fastcall_create *fargs){ // {{{
+	if(fargs->value == NULL)
+		return 0;
+	
+	fastcall_convert_to r_convert = {
+		{ 5, ACTION_CONVERT_TO },
+		dst,
+		FORMAT(native)
+	};
+	return data_query(fargs->value, &r_convert);
+} // }}}
 
 data_proto_t fd_t_proto = {
 	.type                   = TYPE_FDT,
@@ -103,5 +114,8 @@ data_proto_t fd_t_proto = {
 		[ACTION_READ]         = (f_data_func)&data_fd_t_read,
 		[ACTION_WRITE]        = (f_data_func)&data_fd_t_write,
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_fd_t_convert_from,
+		
+		[ACTION_CREATE]       = (f_data_func)&data_fd_t_cu,
+		[ACTION_UPDATE]       = (f_data_func)&data_fd_t_cu,
 	}
 };
