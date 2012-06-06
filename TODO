@@ -1,5 +1,3 @@
-* new config syntax
-
 - fix data_t with data_make_flat func
 - view_t for data in any format
 - unique_t key parameter. using LOOKUP action compare two items
@@ -13,12 +11,9 @@
 - zmq patterns
   - proxy pattern
   - replace machines and stuff in request with proxy
-- default_t default functions sets
-- default_t tags for default function sets
 - mutex_t _VIEW handler to hold lock until .freeit freed
 
 - broken allocator_fixed_t's create/delete
-
 - broken tcp
 - data perthread_t wrapper
 
