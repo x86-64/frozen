@@ -16,6 +16,7 @@ typedef struct hash_t_ctx {
 	hash_t                *hash;
 	uintmax_t              step;
 	data_t                *sl_data;
+	ssize_t                ret;
 } hash_t_ctx;
 
 typedef struct hash_t_rebuild_ctx {
@@ -146,9 +147,21 @@ static ssize_t data_hash_t_convert_to_debug_iter(hash_t *element, hash_t_ctx *ct
 	
 	return ITER_CONTINUE;
 } // }}}
+static ssize_t data_hash_t_enum_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
+	data_t                 d_key             = DATA_PTR_HASHKEYT(&hash_item->key);
+	data_t                 n_key             = DATA_NOTCONSUMABLET(d_key);
+	data_t                 n_value           = DATA_NOTCONSUMABLET(hash_item->data);
+	
+	fastcall_create        r_create          = { { 4, ACTION_CREATE }, &n_key, &n_value };
+	if( (ctx->ret = data_query(ctx->sl_data, &r_create)) < 0)
+		return ITER_BREAK;
+	
+	return ITER_CONTINUE;
+} // }}}
 
 static ssize_t data_hash_t_free(data_t *data, fastcall_free *fargs){ // {{{
-	hash_free(data->ptr);
+	if(data->ptr)
+		hash_free(data->ptr);
 	return 0;
 } // }}}
 static ssize_t data_hash_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
@@ -312,20 +325,25 @@ static ssize_t data_hash_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
 	hashkey_t              key_hashkey;
 	uintmax_t              key_uint;
+	data_t                 d_key;
+	data_t                *d_key_ptr         = &d_key;
 	hash_t                *value;
 	hash_t                *fdata             = (hash_t *)data->ptr;
 	
 	if(fargs->key == NULL || fargs->value == NULL)
 		return -EINVAL;
 	
-	data_get(ret, TYPE_HASHKEYT, key_hashkey, fargs->key);
+	if(helper_key_current(fargs->key, &d_key) < 0)
+		d_key_ptr = fargs->key;
+	
+	data_get(ret, TYPE_HASHKEYT, key_hashkey, d_key_ptr);
 	if(ret == 0){
 		if( (value = hash_find(fdata, key_hashkey)) == NULL)
 			return -ENOENT;
 		
 		goto found;
 	}
-	data_get(ret, TYPE_UINTT, key_uint, fargs->key);
+	data_get(ret, TYPE_UINTT, key_uint, d_key_ptr);
 	if(ret == 0){
 		if( (value = hash_find_id(fdata, &key_uint)) == NULL)
 			return -ENOENT;
@@ -358,6 +376,12 @@ static ssize_t data_hash_t_delete(data_t *data, fastcall_delete *fargs){ // {{{
 	hash_assign_hash_null(hitem);
 	return 0;
 } // }}}
+static ssize_t data_hash_t_enum(data_t *src, fastcall_enum *fargs){ // {{{
+	hash_t_ctx             ctx               = { .hash = src->ptr, .sl_data = fargs->dest, .ret = 0 };
+	
+	hash_iter(ctx.hash, (hash_iterator)&data_hash_t_enum_iter, &ctx, 0);
+	return ctx.ret;
+} // }}}
 
 data_proto_t hash_t_proto = {
 	.type                   = TYPE_HASHT,
@@ -372,6 +396,7 @@ data_proto_t hash_t_proto = {
 		
 		[ACTION_LOOKUP]       = (f_data_func)&data_hash_t_lookup,
 		[ACTION_DELETE]       = (f_data_func)&data_hash_t_delete,
+		[ACTION_ENUM]         = (f_data_func)&data_hash_t_enum,
 	}
 };
 
