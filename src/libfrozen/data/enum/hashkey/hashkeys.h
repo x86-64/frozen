@@ -25,7 +25,6 @@
 #define HK_VALUE_blocks 9928
 #define HK_VALUE_body 3378
 #define HK_VALUE_buffer 9745
-#define HK_VALUE_buffer_size 54686
 #define HK_VALUE_class 6119
 #define HK_VALUE_clientid 21563
 #define HK_VALUE_close 5895
@@ -45,7 +44,6 @@
 #define HK_VALUE_destination 55072
 #define HK_VALUE_destroy 16170
 #define HK_VALUE_device 9357
-#define HK_VALUE_dump_last 31113
 #define HK_VALUE_engine 9534
 #define HK_VALUE_enum_method 53634
 #define HK_VALUE_exclusive 31143
@@ -148,7 +146,6 @@
 #define HK_VALUE_sndbuf_size 54561
 #define HK_VALUE_socket 9863
 #define HK_VALUE_source 9547
-#define HK_VALUE_split 6115
 #define HK_VALUE_start 6176
 #define HK_VALUE_stop 3370
 #define HK_VALUE_storage 14484
@@ -196,7 +193,6 @@ typedef enum hashkey_t {
       HK_blocks = HK_VALUE_blocks, 
       HK_body = HK_VALUE_body, 
       HK_buffer = HK_VALUE_buffer, 
-      HK_buffer_size = HK_VALUE_buffer_size, 
       HK_class = HK_VALUE_class, 
       HK_clientid = HK_VALUE_clientid, 
       HK_close = HK_VALUE_close, 
@@ -216,7 +212,6 @@ typedef enum hashkey_t {
       HK_destination = HK_VALUE_destination, 
       HK_destroy = HK_VALUE_destroy, 
       HK_device = HK_VALUE_device, 
-      HK_dump_last = HK_VALUE_dump_last, 
       HK_engine = HK_VALUE_engine, 
       HK_enum_method = HK_VALUE_enum_method, 
       HK_exclusive = HK_VALUE_exclusive, 
@@ -319,7 +314,6 @@ typedef enum hashkey_t {
       HK_sndbuf_size = HK_VALUE_sndbuf_size, 
       HK_socket = HK_VALUE_socket, 
       HK_source = HK_VALUE_source, 
-      HK_split = HK_VALUE_split, 
       HK_start = HK_VALUE_start, 
       HK_stop = HK_VALUE_stop, 
       HK_storage = HK_VALUE_storage, 
@@ -371,7 +365,6 @@ keypair_t hashkeys[] = {
       { "blocks", HK_VALUE_blocks }, 
       { "body", HK_VALUE_body }, 
       { "buffer", HK_VALUE_buffer }, 
-      { "buffer_size", HK_VALUE_buffer_size }, 
       { "class", HK_VALUE_class }, 
       { "clientid", HK_VALUE_clientid }, 
       { "close", HK_VALUE_close }, 
@@ -391,7 +384,6 @@ keypair_t hashkeys[] = {
       { "destination", HK_VALUE_destination }, 
       { "destroy", HK_VALUE_destroy }, 
       { "device", HK_VALUE_device }, 
-      { "dump_last", HK_VALUE_dump_last }, 
       { "engine", HK_VALUE_engine }, 
       { "enum_method", HK_VALUE_enum_method }, 
       { "exclusive", HK_VALUE_exclusive }, 
@@ -494,7 +486,6 @@ keypair_t hashkeys[] = {
       { "sndbuf_size", HK_VALUE_sndbuf_size }, 
       { "socket", HK_VALUE_socket }, 
       { "source", HK_VALUE_source }, 
-      { "split", HK_VALUE_split }, 
       { "start", HK_VALUE_start }, 
       { "stop", HK_VALUE_stop }, 
       { "storage", HK_VALUE_storage }, 

@@ -833,7 +833,6 @@ enable_triplet_key_t
 enable_machinekill
 enable_machinethread
 enable_machinequery
-enable_machinesplit
 enable_machinestruct_pack
 enable_machinestruct_unpack
 enable_machinejenkins32
@@ -1608,7 +1607,6 @@ Optional Features:
   --disable-machine-thread
                           disable machine thread
   --disable-machine-query disable machine query
-  --disable-machine-split disable machine split
   --disable-machine-struct-pack
                           disable machine struct-pack
   --disable-machine-struct-unpack
@@ -19978,43 +19976,6 @@ fi
 		MACHINE_MAKEFILE_data_query=yes
 
 		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/query/libfrozen_machine_query.la"
-
-	fi
-
-
-
-
-
-
-
-	# Check whether --enable-machinesplit was given.
-if test "${enable_machinesplit+set}" = set; then :
-  enableval=$enable_machinesplit;
-fi
-
-
-	if test "yes" = "yes"; then
-		if test "${enable_machinesplit}" = "yes"; then
-			enable_machinesplit="no"
-		else
-			enable_machinesplit="yes"
-		fi
-	fi
-
-	if test "${enable_machinesplit}" = "yes"; then
-		MACHINE_DIR_split="data/split"
-		MACHINE_DEP_split=""
-				MACHINE_SELECTED="$MACHINE_SELECTED split"
-
-			fi
-
-	if test "$MACHINE_MAKEFILE_data_split" = ""; then
-		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/machines/data/split/Makefile"
-		MACHINE_DIST_DIRS="$MACHINE_DIST_DIRS data/split"
-
-		MACHINE_MAKEFILE_data_split=yes
-
-		MACHINE_LIBS_SELECTED="$MACHINE_LIBS_SELECTED data/split/libfrozen_machine_split.la"
 
 	fi
 

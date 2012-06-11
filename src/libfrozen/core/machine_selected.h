@@ -4,7 +4,6 @@
 extern machine_t kill_proto;
 extern machine_t thread_proto;
 extern machine_t query_proto;
-extern machine_t split_proto;
 extern machine_t struct_pack_proto;
 extern machine_t struct_unpack_proto;
 extern machine_t jenkins32_proto;
@@ -43,7 +42,6 @@ machine_t * machine_protos[] = {
    &kill_proto,
    &thread_proto,
    &query_proto,
-   &split_proto,
    &struct_pack_proto,
    &struct_unpack_proto,
    &jenkins32_proto,
