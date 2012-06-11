@@ -342,7 +342,8 @@ data_complex_rules :
 		ssize_t                ret;
 		char                  *triplet_type_str      = NULL;
 		
-		triplet_type_str = strdup("triplet_");
+		triplet_type_str = calloc(1, strlen($1) + 8 + 2 + 1);
+		strcat(triplet_type_str, "triplet_");
 		strcat(triplet_type_str, $1);
 		strcat(triplet_type_str, "_t");
 		
@@ -353,6 +354,8 @@ data_complex_rules :
 		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type_str, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_convert)) < 0)
 			emit_error("unknown triplet datatype_t \"%s\" (ret: %s)", triplet_type_str, errors_describe(ret));
+		
+		free(triplet_type_str);
 		
 		hash_t                 r_triplet_config[] = {
 			{ HK(data),  $5 },
@@ -380,7 +383,7 @@ data_complex_rules :
 			hash_inline($4),
 			hash_end
 		};
-		data_t                 d_hash            = DATA_PTR_HASHT(r_hash);
+		data_t                 d_hash            = DATA_PTR_HASHT(hash_rebuild(r_hash));
 		
 		$$.type = $1;
 		$$.ptr  = NULL;
@@ -390,7 +393,7 @@ data_complex_rules :
 		if( (ret = data_query(&$$, &r_convert)) < 0)
 			emit_error("proxy data init failed (ret: %s)", errors_describe(ret));
 		
-		hash_free($4);
+		data_free(&d_hash);
 		data_free(&r_hash[0].data);
 	}
 	;

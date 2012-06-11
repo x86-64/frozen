@@ -502,8 +502,8 @@ static const yytype_uint16 yyrline[] =
      153,   158,   168,   169,   170,   174,   195,   215,   226,   227,
      230,   235,   236,   240,   241,   242,   243,   244,   245,   246,
      250,   251,   256,   266,   274,   287,   293,   296,   305,   306,
-     309,   320,   341,   376,   400,   412,   425,   437,   440,   441,
-     442,   445,   449,   456
+     309,   320,   341,   379,   403,   415,   428,   440,   443,   444,
+     445,   448,   452,   459
 };
 #endif
 
@@ -1814,7 +1814,8 @@ yyreduce:
 		ssize_t                ret;
 		char                  *triplet_type_str      = NULL;
 		
-		triplet_type_str = strdup("triplet_");
+		triplet_type_str = calloc(1, strlen((yyvsp[(1) - (5)].name)) + 8 + 2 + 1);
+		strcat(triplet_type_str, "triplet_");
 		strcat(triplet_type_str, (yyvsp[(1) - (5)].name));
 		strcat(triplet_type_str, "_t");
 		
@@ -1825,6 +1826,8 @@ yyreduce:
 		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &d_type_str, FORMAT(config) }; 
 		if( (ret = data_query(&d_type, &r_convert)) < 0)
 			emit_error("unknown triplet datatype_t \"%s\" (ret: %s)", triplet_type_str, errors_describe(ret));
+		
+		free(triplet_type_str);
 		
 		hash_t                 r_triplet_config[] = {
 			{ HK(data),  (yyvsp[(5) - (5)].data) },
@@ -1850,7 +1853,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 376 "configs/config_fz_parser.y"
+#line 379 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		hash_t                 r_hash[] = {
@@ -1858,7 +1861,7 @@ yyreduce:
 			hash_inline((yyvsp[(4) - (7)].hash_items)),
 			hash_end
 		};
-		data_t                 d_hash            = DATA_PTR_HASHT(r_hash);
+		data_t                 d_hash            = DATA_PTR_HASHT(hash_rebuild(r_hash));
 		
 		(yyval.data).type = (yyvsp[(1) - (7)].datatype);
 		(yyval.data).ptr  = NULL;
@@ -1868,7 +1871,7 @@ yyreduce:
 		if( (ret = data_query(&(yyval.data), &r_convert)) < 0)
 			emit_error("proxy data init failed (ret: %s)", errors_describe(ret));
 		
-		hash_free((yyvsp[(4) - (7)].hash_items));
+		data_free(&d_hash);
 		data_free(&r_hash[0].data);
 	}
     break;
@@ -1876,7 +1879,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 400 "configs/config_fz_parser.y"
+#line 403 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_action          = DATA_PTR_ACTIONT(&(yyval.action));
@@ -1893,7 +1896,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 412 "configs/config_fz_parser.y"
+#line 415 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_type            = DATA_PTR_DATATYPET(&(yyval.datatype));
@@ -1910,7 +1913,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 425 "configs/config_fz_parser.y"
+#line 428 "configs/config_fz_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.hashkey));
@@ -1927,35 +1930,35 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 437 "configs/config_fz_parser.y"
+#line 440 "configs/config_fz_parser.y"
     { (yyval.hashkey) = (yyvsp[(2) - (2)].hashkey); }
     break;
 
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 440 "configs/config_fz_parser.y"
+#line 443 "configs/config_fz_parser.y"
     { (yyval.hash_items) = hash_new(1); }
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 441 "configs/config_fz_parser.y"
+#line 444 "configs/config_fz_parser.y"
     { (yyval.hash_items) = hash_new(2); hash_assign_hash_t(&(yyval.hash_items)[0], &(yyvsp[(1) - (1)].hash_item)); }
     break;
 
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 442 "configs/config_fz_parser.y"
+#line 445 "configs/config_fz_parser.y"
     { (yyval.hash_items) = hash_append((yyvsp[(1) - (3)].hash_items), (yyvsp[(3) - (3)].hash_item)); }
     break;
 
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 445 "configs/config_fz_parser.y"
+#line 448 "configs/config_fz_parser.y"
     {
 		(yyval.hash_item).key  = 0;
 		(yyval.hash_item).data = (yyvsp[(1) - (1)].data);
@@ -1965,7 +1968,7 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 449 "configs/config_fz_parser.y"
+#line 452 "configs/config_fz_parser.y"
     {
 		(yyval.hash_item).key  = (yyvsp[(1) - (3)].hashkey);
 		(yyval.hash_item).data = (yyvsp[(3) - (3)].data);
@@ -1975,7 +1978,7 @@ yyreduce:
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 456 "configs/config_fz_parser.y"
+#line 459 "configs/config_fz_parser.y"
     {
 		if(config_fz_keyword(&(yyval.keyword), (yyvsp[(1) - (1)].name)) < 0)
 			emit_error("unknown keyword \"%s\"", (yyvsp[(1) - (1)].name));
@@ -1987,7 +1990,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1991 "configs/config_fz_parser.tab.c"
+#line 1994 "configs/config_fz_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2218,7 +2221,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 465 "configs/config_fz_parser.y"
+#line 468 "configs/config_fz_parser.y"
 
 
 /*

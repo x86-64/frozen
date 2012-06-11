@@ -166,7 +166,7 @@ hash_value :
 			emit_error("data init failed \"%s\" (ret: %s)", $2, errors_describe(ret));
 		
 		free($2);
-		hash_free($5);
+		data_free(&d_hash);
 	};
 
 %%

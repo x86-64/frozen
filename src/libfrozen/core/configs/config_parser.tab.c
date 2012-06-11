@@ -1625,7 +1625,7 @@ yyreduce:
 			emit_error("data init failed \"%s\" (ret: %s)", (yyvsp[(2) - (6)].name), errors_describe(ret));
 		
 		free((yyvsp[(2) - (6)].name));
-		hash_free((yyvsp[(5) - (6)].hash));
+		data_free(&d_hash);
 	}
     break;
 
