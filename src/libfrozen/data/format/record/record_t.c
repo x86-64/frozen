@@ -134,6 +134,18 @@ static ssize_t data_record_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	record_t              *fdata             = (record_t *)dst->ptr;
 	
 	switch(fargs->format){
+		case FORMAT(config):;
+			data_t                separator;
+
+			if(fdata != NULL)
+				return -EINVAL;
+			
+			holder_consume(ret, separator, fargs->src);
+			if(ret < 0)
+				return ret;
+			
+			return data_record_t(dst, separator);
+			
 		case FORMAT(hash):;
 			hash_t                *config;
 			
