@@ -530,10 +530,10 @@ f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
 };
 
 hash_t * api_data_from_list[ACTION_INVALID] = {
-	[ACTION_CREATE]       = (hash_t []){ { HK(action), DATA_VOID } },
-	[ACTION_LOOKUP]       = (hash_t []){ { HK(action), DATA_VOID } },
-	[ACTION_UPDATE]       = (hash_t []){ { HK(action), DATA_VOID } },
-	[ACTION_DELETE]       = (hash_t []){ { HK(action), DATA_VOID } },
+	[ACTION_CREATE]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(key),         DATA_VOID }, { HK(value),  DATA_VOID } },
+	[ACTION_LOOKUP]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(key),         DATA_VOID }, { HK(value),  DATA_VOID } },
+	[ACTION_UPDATE]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(key),         DATA_VOID }, { HK(value),  DATA_VOID } },
+	[ACTION_DELETE]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(key),         DATA_VOID }, { HK(value),  DATA_VOID } },
 	[ACTION_READ]         = (hash_t []){ { HK(action), DATA_VOID }, { HK(offset),      DATA_VOID }, { HK(buffer), DATA_VOID }, { HK(size), DATA_VOID } },
 	[ACTION_WRITE]        = (hash_t []){ { HK(action), DATA_VOID }, { HK(offset),      DATA_VOID }, { HK(buffer), DATA_VOID }, { HK(size), DATA_VOID } },
 	[ACTION_RESIZE]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(size),        DATA_VOID } },
