@@ -1,0 +1,22 @@
+local db = 
+	key    ~ judy_t      : {}               >
+	format ~ container_t : {
+		netstring_t : {} > raw_t : {},
+		raw_t : {}
+	}                                       >
+	format ~ record_t    : "\n"             >
+	"3:abc,hello abc\n3:def,hello def\n3:ghk,hello ghk\n"
+
+sub {
+	db[!data data] | sub { db[!data slave].create($value[0], $key); };
+}
+
+sub {
+	$value1 = void_t : "", $value2 = void_t : "";
+	
+	db.lookup("abc", $value1);
+	db.lookup("def", $value2);
+	
+	container_t:{ "value1 = ", $value1[1], "\n" } | fd_t : "stdout";
+	container_t:{ "value2 = ", $value2[1], "\n" } | fd_t : "stdout";
+}
