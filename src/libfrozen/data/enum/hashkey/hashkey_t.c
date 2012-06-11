@@ -12,6 +12,19 @@
 static list                    dynamic_keys   = LIST_INITIALIZER;
 #endif
 
+ssize_t data_hashkey_t(data_t *data, hashkey_t key){ // {{{
+	hashkey_t             *fdata;
+	
+	if( (fdata = malloc(sizeof(hashkey_t))) == NULL)
+		return -ENOMEM;
+	
+	*fdata = key;
+	
+	data->type = TYPE_HASHKEYT;
+	data->ptr  = fdata;
+	return 0;
+} // }}}
+
 static ssize_t data_hashkey_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              transfered        = 0;

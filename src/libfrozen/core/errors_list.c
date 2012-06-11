@@ -23,7 +23,7 @@ static err_item errs_list[] = {
  { -200704, "unknown error in module allocator/fixed" },
  { -192793, "src/libfrozen/data/enum/format/format_t.c: format collision" },
  { -192512, "unknown error in module enum/format" },
- { -188713, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
+ { -188726, "src/libfrozen/data/enum/hashkey/hashkey_t.c: key collision" },
  { -188416, "unknown error in module enum/hashkey" },
  { -180470, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutex_init failed" },
  { -180467, "src/libfrozen/machines/sync/mutex/mutex.c: pthread_mutexattr_settype failed" },

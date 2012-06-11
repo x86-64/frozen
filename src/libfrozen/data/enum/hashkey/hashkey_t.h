@@ -30,4 +30,6 @@
 #define HAVEBUFF_TYPE_HASHKEYT 1
 #define UNVIEW_TYPE_HASHKEYT(_ret, _dt, _view)  { _dt = *(hashkey_t *)((_view)->ptr); _ret = 0; }
 
+API ssize_t data_hashkey_t(data_t *data, hashkey_t key);
+
 #endif
