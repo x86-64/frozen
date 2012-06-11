@@ -16,4 +16,6 @@ typedef struct inner_t {
 	uintmax_t              control;
 } inner_t;
 
+API ssize_t data_inner_t(data_t *data, data_t storage, data_t key, uintmax_t control);
+
 #endif
