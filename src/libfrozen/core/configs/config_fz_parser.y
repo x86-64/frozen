@@ -95,9 +95,13 @@ extern char *config_get_text(void);
 %type  <hash_items>      pipeline_machine_assign_items
 %type  <hash_item>       pipeline_machine_assign_item
 
+%type  <hash_items>      inner_t_keys
+%type  <hash_item>       inner_t_key
+
 %type  <data>            env_t
 %type  <data>            hash_t
 %type  <data>            named_t
+%type  <data>            inner_t
 %type  <data>            string_t
 %type  <data>            subroutine
 
@@ -237,6 +241,7 @@ data_simple :
 	| env_t 
 	| string_t
 	| hash_t
+	| inner_t
 	| data_converted
 	| subroutine
 	;
@@ -286,6 +291,29 @@ hash_t : '{' hash_items '}' {
 
 subroutine :
 	SUB '{' pipeline '}' { $$ = $3; };
+
+inner_t :
+	data_simple '[' inner_t_keys ']' {
+		ssize_t                ret;
+		data_t                 d_keys            = DATA_PTR_HASHT($3);
+		
+		if( (ret = data_inner_t(&$$, $1, d_keys, 1)) < 0)
+			emit_error("inner init failed (ret: %s)", errors_describe(ret));
+	};
+
+inner_t_keys :
+	  inner_t_key              { $$ = hash_new(2); hash_assign_hash_t(&$$[0], &$1); }
+	| inner_t_keys inner_t_key { $$ = hash_append($1, $2); };
+
+inner_t_key :
+	  hashkey_t {
+		ssize_t                ret;
+		
+		if( (ret = data_hashkey_t(&$$.data, $1)) < 0)
+			emit_error("hashkey init failed (ret: %s)", errors_describe(ret));
+
+		$$.key = 0;
+	};
 /* }}} */
 /* data complex and converted {{{ */
 data_converted :
