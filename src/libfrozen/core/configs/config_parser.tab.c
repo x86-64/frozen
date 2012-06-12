@@ -76,6 +76,7 @@
 /* Line 268 of yacc.c  */
 #line 1 "configs/config_parser.y"
 
+//#define YYDEBUG 1
 #include <libfrozen.h>
 #include <configs/config.h>
 #include <configs/config_parser.tab.h>	
@@ -102,7 +103,7 @@ extern char *config_get_text(void);
 
 
 /* Line 268 of yacc.c  */
-#line 106 "configs/config_parser.tab.c"
+#line 107 "configs/config_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -131,8 +132,11 @@ extern char *config_get_text(void);
    enum yytokentype {
      NAME = 258,
      STRING = 259,
-     ASSIGN = 260,
-     TNULL = 261
+     DIGITS = 260,
+     ASSIGN = 261,
+     TNULL = 262,
+     KEYWORD = 263,
+     SUB = 264
    };
 #endif
 
@@ -143,7 +147,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 32 "configs/config_parser.y"
+#line 33 "configs/config_parser.y"
 
 	hash_t     *hash;
 	hash_t      hash_item;
@@ -155,7 +159,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 159 "configs/config_parser.tab.c"
+#line 163 "configs/config_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -167,7 +171,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 171 "configs/config_parser.tab.c"
+#line 175 "configs/config_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -386,10 +390,10 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  12
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   29
+#define YYLAST   31
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  15
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
@@ -399,7 +403,7 @@ union yyalloc
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   261
+#define YYMAXUTOK   264
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -411,7 +415,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      10,    11,     2,     2,     7,     2,     2,     2,     2,     2,
+      13,    14,     2,     2,    10,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -419,7 +423,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     8,     2,     9,     2,     2,     2,     2,
+       2,     2,     2,    11,     2,    12,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -433,7 +437,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6
+       5,     6,     7,     8,     9
 };
 
 #if YYDEBUG
@@ -449,20 +453,20 @@ static const yytype_uint8 yyprhs[] =
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      13,     0,    -1,    14,    -1,    -1,    15,    -1,    14,    15,
-      -1,    16,    -1,    17,    -1,    16,     7,    17,    -1,     8,
-      18,     9,    -1,    -1,    19,    -1,    18,     7,    19,    -1,
-      20,    21,    -1,     6,    -1,    -1,     6,     5,    -1,     3,
-       5,    -1,     4,    -1,     8,    18,     9,    -1,    10,     3,
-      11,     4,    -1,    10,     3,    11,     8,    18,     9,    -1
+      16,     0,    -1,    17,    -1,    -1,    18,    -1,    17,    18,
+      -1,    19,    -1,    20,    -1,    19,    10,    20,    -1,    11,
+      21,    12,    -1,    -1,    22,    -1,    21,    10,    22,    -1,
+      23,    24,    -1,     7,    -1,    -1,     7,     6,    -1,     3,
+       6,    -1,     4,    -1,    11,    21,    12,    -1,    13,     3,
+      14,     4,    -1,    13,     3,    14,    11,    21,    12,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    50,    50,    54,    55,    56,    60,    68,    73,    81,
-      85,    86,    87,    89,    93,    99,   100,   101,   114,   126,
-     127,   149
+       0,    51,    51,    55,    56,    57,    61,    69,    74,    82,
+      86,    87,    88,    90,    94,   100,   101,   102,   115,   127,
+     128,   150
 };
 #endif
 
@@ -471,9 +475,9 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "NAME", "STRING", "ASSIGN", "TNULL",
-  "','", "'{'", "'}'", "'('", "')'", "$accept", "start",
-  "entity_pipelines", "entity_pipeline", "entity_pipeline_raw",
+  "$end", "error", "$undefined", "NAME", "STRING", "DIGITS", "ASSIGN",
+  "TNULL", "KEYWORD", "SUB", "','", "'{'", "'}'", "'('", "')'", "$accept",
+  "start", "entity_pipelines", "entity_pipeline", "entity_pipeline_raw",
   "entity_pipeline_config", "hash_items", "hash_item", "hash_name",
   "hash_value", 0
 };
@@ -484,17 +488,17 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,    44,   123,   125,
-      40,    41
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+      44,   123,   125,    40,    41
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    12,    13,    14,    14,    14,    15,    16,    16,    17,
-      18,    18,    18,    19,    19,    20,    20,    20,    21,    21,
-      21,    21
+       0,    15,    16,    17,    17,    17,    18,    19,    19,    20,
+      21,    21,    21,    22,    22,    23,    23,    23,    24,    24,
+      24,    24
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -527,16 +531,16 @@ static const yytype_int8 yydefgoto[] =
 #define YYPACT_NINF -21
 static const yytype_int8 yypact[] =
 {
-      -6,    -2,    11,    -6,   -21,    13,   -21,    17,    18,     8,
-     -21,     4,   -21,   -21,    -6,   -21,   -21,     0,   -21,   -21,
-      -2,    21,   -21,   -21,   -21,     9,    14,   -21,     5,   -21,
-      -2,    12,   -21
+      -7,    -1,    20,    -7,   -21,    11,   -21,    16,    17,     3,
+     -21,     1,   -21,   -21,    -7,   -21,   -21,     0,   -21,   -21,
+      -1,    21,   -21,   -21,   -21,     6,    12,   -21,    -3,   -21,
+      -1,     7,   -21
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -21,   -21,   -21,    23,   -21,    15,   -20,    10,   -21,   -21
+     -21,   -21,   -21,    22,   -21,    13,   -20,    14,   -21,   -21
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -545,9 +549,10 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -11
 static const yytype_int8 yytable[] =
 {
-      25,     7,     1,     7,     8,   -10,     8,   -10,    19,    29,
-      31,    12,    20,    30,    21,    17,    17,    18,    27,    17,
-      14,    32,    15,    16,    26,    28,    13,    24,     0,    23
+      25,    29,     7,     7,     1,    19,     8,     8,    30,   -10,
+      31,   -10,    20,    17,    21,    18,    17,    17,    27,    32,
+      12,    14,    15,    16,    26,    13,    28,    23,     0,     0,
+       0,    24
 };
 
 #define yypact_value_is_default(yystate) \
@@ -558,19 +563,20 @@ static const yytype_int8 yytable[] =
 
 static const yytype_int8 yycheck[] =
 {
-      20,     3,     8,     3,     6,     7,     6,     9,     4,     4,
-      30,     0,     8,     8,    10,     7,     7,     9,     9,     7,
-       7,     9,     5,     5,     3,    11,     3,    17,    -1,    14
+      20,     4,     3,     3,    11,     4,     7,     7,    11,    10,
+      30,    12,    11,    10,    13,    12,    10,    10,    12,    12,
+       0,    10,     6,     6,     3,     3,    14,    14,    -1,    -1,
+      -1,    17
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     8,    13,    14,    15,    16,    17,     3,     6,    18,
-      19,    20,     0,    15,     7,     5,     5,     7,     9,     4,
-       8,    10,    21,    17,    19,    18,     3,     9,    11,     4,
-       8,    18,     9
+       0,    11,    16,    17,    18,    19,    20,     3,     7,    21,
+      22,    23,     0,    18,    10,     6,     6,    10,    12,     4,
+      11,    13,    24,    20,    22,    21,     3,    12,    14,     4,
+      11,    21,    12
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1412,35 +1418,35 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 50 "configs/config_parser.y"
+#line 51 "configs/config_parser.y"
     { *hash = (yyvsp[(1) - (1)].hash); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 54 "configs/config_parser.y"
+#line 55 "configs/config_parser.y"
     { (yyval.hash) = hash_new(1); }
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 55 "configs/config_parser.y"
+#line 56 "configs/config_parser.y"
     { (yyval.hash) = hash_new(2); hash_assign_hash_t(&(yyval.hash)[0], &(yyvsp[(1) - (1)].hash_item)); }
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 56 "configs/config_parser.y"
+#line 57 "configs/config_parser.y"
     { (yyval.hash) = hash_append((yyvsp[(1) - (2)].hash), (yyvsp[(2) - (2)].hash_item));  }
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 60 "configs/config_parser.y"
+#line 61 "configs/config_parser.y"
     {
 		(yyval.hash_item).key       = HK(machine);
 		(yyval.hash_item).data.type = TYPE_MACHINET;
@@ -1451,7 +1457,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 68 "configs/config_parser.y"
+#line 69 "configs/config_parser.y"
     {
 		pipeline_new(&(yyval.pipeline));
 		pipeline_append(&(yyval.pipeline), (yyvsp[(1) - (1)].hash));
@@ -1462,7 +1468,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 73 "configs/config_parser.y"
+#line 74 "configs/config_parser.y"
     {
 		(yyval.pipeline) = (yyvsp[(1) - (3)].pipeline);
 		pipeline_append(&(yyval.pipeline), (yyvsp[(3) - (3)].hash));
@@ -1473,35 +1479,35 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 81 "configs/config_parser.y"
+#line 82 "configs/config_parser.y"
     { (yyval.hash) = (yyvsp[(2) - (3)].hash); }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 85 "configs/config_parser.y"
+#line 86 "configs/config_parser.y"
     { (yyval.hash) = hash_new(1); }
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 86 "configs/config_parser.y"
+#line 87 "configs/config_parser.y"
     { (yyval.hash) = hash_new(2); hash_assign_hash_t(&(yyval.hash)[0], &(yyvsp[(1) - (1)].hash_item)); }
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 87 "configs/config_parser.y"
+#line 88 "configs/config_parser.y"
     { (yyval.hash) = hash_append((yyvsp[(1) - (3)].hash), (yyvsp[(3) - (3)].hash_item)); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 89 "configs/config_parser.y"
+#line 90 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = (yyvsp[(1) - (2)].key);
 		(yyval.hash_item).data = (yyvsp[(2) - (2)].data);
@@ -1511,7 +1517,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 93 "configs/config_parser.y"
+#line 94 "configs/config_parser.y"
     {
 		(yyval.hash_item).key = hash_ptr_null;
 	}
@@ -1520,21 +1526,21 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 99 "configs/config_parser.y"
+#line 100 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 100 "configs/config_parser.y"
+#line 101 "configs/config_parser.y"
     { (yyval.key) = 0; }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 101 "configs/config_parser.y"
+#line 102 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_key             = DATA_PTR_HASHKEYT(&(yyval.key));
@@ -1551,7 +1557,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 114 "configs/config_parser.y"
+#line 115 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		data_t                 d_initstr    = DATA_PTR_STRING((yyvsp[(1) - (1)].name));
@@ -1569,14 +1575,14 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 126 "configs/config_parser.y"
+#line 127 "configs/config_parser.y"
     { (yyval.data).type = TYPE_HASHT;   (yyval.data).ptr = (yyvsp[(2) - (3)].hash); }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 127 "configs/config_parser.y"
+#line 128 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		datatype_t             type;
@@ -1604,7 +1610,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 149 "configs/config_parser.y"
+#line 150 "configs/config_parser.y"
     {
 		ssize_t                ret;
 		datatype_t             type;
@@ -1632,7 +1638,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 1636 "configs/config_parser.tab.c"
+#line 1642 "configs/config_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1863,7 +1869,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 172 "configs/config_parser.y"
+#line 173 "configs/config_parser.y"
 
 
 static void yyerror(hash_t **hash, const char *msg){ // {{{
@@ -1878,6 +1884,10 @@ static void yyerror(hash_t **hash, const char *msg){ // {{{
 
 hash_t *   configs_pl_string_parse(char *string){ // {{{
 	hash_t *new_hash = NULL;
+	
+	#if YYDEBUG
+	yydebug = 1;
+	#endif
 	
 	config__scan_string(string);
 	

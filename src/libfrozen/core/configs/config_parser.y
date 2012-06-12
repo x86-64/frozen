@@ -1,4 +1,5 @@
 %{
+//#define YYDEBUG 1
 #include <libfrozen.h>
 #include <configs/config.h>
 #include <configs/config_parser.tab.h>	
@@ -37,11 +38,11 @@ extern char *config_get_text(void);
 	data_t      data;
 	machine_t  *pipeline;
 }
-%token NAME STRING ASSIGN TNULL
+%token NAME STRING DIGITS ASSIGN TNULL KEYWORD SUB
 %type  <hash>        hash_items entity_pipelines entity_pipeline_config
 %type  <hash_item>   hash_item  entity_pipeline
 %type  <key>         hash_name
-%type  <name>        NAME STRING
+%type  <name>        NAME STRING DIGITS
 %type  <data>        hash_value
 %type  <pipeline>    entity_pipeline_raw
 
@@ -183,6 +184,10 @@ static void yyerror(hash_t **hash, const char *msg){ // {{{
 
 hash_t *   configs_pl_string_parse(char *string){ // {{{
 	hash_t *new_hash = NULL;
+	
+	#if YYDEBUG
+	yydebug = 1;
+	#endif
 	
 	config__scan_string(string);
 	

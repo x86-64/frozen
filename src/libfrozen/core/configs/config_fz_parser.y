@@ -61,10 +61,10 @@ extern char *config_get_text(void);
 	datatype_t  datatype;
 	uintmax_t   keyword;
 }
-%token NAME STRING ASSIGN TNULL KEYWORD SUB
+%token NAME STRING DIGITS ASSIGN TNULL KEYWORD SUB
 %nonassoc '~' ':' '>'
 
-%type  <name>            NAME STRING KEYWORD
+%type  <name>            NAME STRING KEYWORD DIGITS
 
 %type  <hash_items>      statements
 %type  <hash_item>       statement
@@ -103,6 +103,7 @@ extern char *config_get_text(void);
 %type  <data>            named_t
 %type  <data>            inner_t
 %type  <data>            string_t
+%type  <data>            uint_t
 %type  <data>            subroutine
 
 %%
@@ -241,6 +242,7 @@ data_simple :
 	| env_t 
 	| string_t
 	| hash_t
+	| uint_t
 	| inner_t
 	| data_converted
 	| subroutine
@@ -283,6 +285,14 @@ string_t : STRING {
 		
 		free($1);
 	};
+	
+uint_t : DIGITS {
+		uintmax_t              value             = strtoul($1, NULL, 10);
+		data_t                 d_uint            = DATA_HEAP_UINTT(value);
+		
+		$$ = d_uint;
+		free($1);
+	};
 
 hash_t : '{' hash_items '}' {
 		$$.type = TYPE_HASHT;
@@ -293,9 +303,16 @@ subroutine :
 	SUB '{' pipeline '}' { $$ = $3; };
 
 inner_t :
-	data_simple '[' inner_t_keys ']' {
+	  data_simple '[' inner_t_keys ']' {
 		ssize_t                ret;
 		data_t                 d_keys            = DATA_PTR_HASHT($3);
+		
+		if( (ret = data_inner_t(&$$, $1, d_keys, 0)) < 0)
+			emit_error("inner init failed (ret: %s)", errors_describe(ret));
+	}
+	| data_simple '[' '!' inner_t_keys ']' {
+		ssize_t                ret;
+		data_t                 d_keys            = DATA_PTR_HASHT($4);
 		
 		if( (ret = data_inner_t(&$$, $1, d_keys, 1)) < 0)
 			emit_error("inner init failed (ret: %s)", errors_describe(ret));
@@ -313,6 +330,10 @@ inner_t_key :
 			emit_error("hashkey init failed (ret: %s)", errors_describe(ret));
 
 		$$.key = 0;
+	}
+	| uint_t {
+		$$.key  = 0;
+		$$.data = $1;
 	};
 /* }}} */
 /* data complex and converted {{{ */

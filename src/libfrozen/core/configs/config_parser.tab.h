@@ -39,8 +39,11 @@
    enum yytokentype {
      NAME = 258,
      STRING = 259,
-     ASSIGN = 260,
-     TNULL = 261
+     DIGITS = 260,
+     ASSIGN = 261,
+     TNULL = 262,
+     KEYWORD = 263,
+     SUB = 264
    };
 #endif
 
@@ -51,7 +54,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 32 "configs/config_parser.y"
+#line 33 "configs/config_parser.y"
 
 	hash_t     *hash;
 	hash_t      hash_item;
@@ -63,7 +66,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 67 "configs/config_parser.tab.h"
+#line 70 "configs/config_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

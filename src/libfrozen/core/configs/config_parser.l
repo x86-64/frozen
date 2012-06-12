@@ -25,6 +25,7 @@ void check_new_string(uintmax_t size);
 %x str
 
 name    [a-z][a-z0-9_]*
+digits  [0-9]+
 assign  =>?
 null    NULL
 keywords local|global
@@ -90,6 +91,7 @@ blank   [ \n\r\t]+
 {assign}        { return ASSIGN; }
 {sub}           { return SUB; }
 {keywords}      { yylval->name = strdup(yytext); return KEYWORD; }
+{digits}        { yylval->name = strdup(yytext); return DIGITS; }
 {name}          { yylval->name = strdup(yytext); return NAME;  }
 
 {blank}
