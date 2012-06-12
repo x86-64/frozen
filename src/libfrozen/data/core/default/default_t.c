@@ -289,8 +289,12 @@ ssize_t       data_default_lookup        (data_t *data, fastcall_lookup *fargs){
 	if(ret < 0)
 		return ret;
 	
-	data_t                 sl_data           = DATA_HEAP_SLICET(data, key, ~0);
-	*fargs->value = sl_data;
+	if(key == 0){ // keep it simple, if no offset required
+		*fargs->value = *data;
+	}else{
+		data_t                 sl_data           = DATA_HEAP_SLICET(data, key, ~0);
+		*fargs->value = sl_data;
+	}
 	return 0;
 } // }}}
 ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ // {{{
