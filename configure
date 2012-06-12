@@ -820,6 +820,7 @@ enable_length_t
 enable_random_t
 enable_ref_t
 enable_unique_t
+enable_complexkey_t
 enable_container_t
 enable_file_t
 enable_folder_t
@@ -1589,6 +1590,8 @@ Optional Features:
   --disable-data-random_t disable data random_t
   --disable-data-ref_t    disable data ref_t
   --disable-data-unique_t disable data unique_t
+  --disable-data-complexkey_t
+                          disable data complexkey_t
   --disable-data-container_t
                           disable data container_t
   --disable-data-file_t   disable data file_t
@@ -19496,6 +19499,43 @@ fi
 		DATA_MAKEFILE_special_unique=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} special/unique/libfrozen_data_unique.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-complexkey_t was given.
+if test "${enable_complexkey_t+set}" = set; then :
+  enableval=$enable_complexkey_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_complexkey_t}" = "yes"; then
+			enable_complexkey_t="no"
+		else
+			enable_complexkey_t="yes"
+		fi
+	fi
+
+	if test "${enable_complexkey_t}" = "yes"; then
+		DATA_DIR_complexkey_t="storage/complexkey"
+		DATA_DEP_complexkey_t="uint_t list_t"
+		DATA_ID_complexkey_t=""
+		DATA_SELECTED="$DATA_SELECTED complexkey_t"
+		DATA_HEADERS="$DATA_HEADERS storage/complexkey/complexkey_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_storage_complexkey" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/storage/complexkey/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS storage/complexkey"
+
+		DATA_MAKEFILE_storage_complexkey=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} storage/complexkey/libfrozen_data_complexkey.la"
 
 	fi
 
