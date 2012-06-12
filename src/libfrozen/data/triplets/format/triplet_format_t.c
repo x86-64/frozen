@@ -8,13 +8,14 @@
 #include <modifiers/slider/slider_t.h>
 #include <io/io/io_t.h>
 #include <storage/raw/raw_t.h>
+#include <storage/complexkey/complexkey_t.h>
 
 typedef struct enum_userdata {
 	data_t                *data;
 	fastcall_enum         *fargs;
 } enum_userdata;
 
-static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest){ // {{{
+static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest, data_t *key){ // {{{
 	ssize_t                ret;
 	uintmax_t              offset;
 	data_t                 converted;
@@ -37,11 +38,11 @@ static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_
 		offset = data_slider_t_get_offset(&sl_storage);
 		data_slider_t_set_offset(&sl_storage, r_convert.transfered, SEEK_CUR);
 		
-		data_t          key      = DATA_HEAP_UINTT(offset);
-		fastcall_create r_create = { { 4, ACTION_CREATE }, &key, &converted };
+		data_t          d_offset       = DATA_UINTT(offset);
+		data_t          d_complex_key  = DATA_COMPLEXKEYT(d_offset, *key);
+		fastcall_create r_create       = { { 4, ACTION_CREATE }, &d_complex_key, &converted };
 		ret = data_query(dest, &r_create);
 		
-		data_free(&key);
 		data_free(&converted);
 	}while(ret >= 0);
 	return ret;
@@ -100,10 +101,15 @@ static void    data_triplet_format_t_destroy(data_t *data){ // {{{
 } // }}}
 
 static ssize_t data_triplet_format_t_iter_iot(data_t *data, enum_userdata *userdata, fastcall_create *fargs){ // {{{
+	data_t                 d_void            = DATA_VOID;
+	data_t                *key;
+	
 	if(fargs->value == NULL)
 		return 0;
 	
-	return data_enum_storage(fargs->value, userdata->data, FORMAT(packed), userdata->fargs->dest);
+	key = fargs->key ? fargs->key : &d_void;
+	
+	return data_enum_storage(fargs->value, userdata->data, FORMAT(packed), userdata->fargs->dest, key);
 } // }}}
 
 static ssize_t data_triplet_format_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
@@ -155,17 +161,43 @@ static ssize_t data_triplet_format_t_crud(data_t *data, fastcall_crud *fargs){ /
 } // }}}
 static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){ // {{{
 	ssize_t                ret;
+	uintmax_t              offset;
 	data_t                 converted;
+	data_t                 d_key;
+	data_t                *d_key_ptr         = &d_key;
 	triplet_format_t      *fdata             = (triplet_format_t *)data->ptr;
 	
-	if( (ret = data_query(&fdata->storage, fargs)) < 0)
+	// fetch value from storage
+	data_t          sl_key    = DATA_SLICET(fargs->key, 1, ~0);
+	fastcall_lookup r_lookup = {
+		{ 4, ACTION_LOOKUP },
+		&sl_key,
+		fargs->value
+	};
+	if( (ret = data_query(&fdata->storage, &r_lookup)) < 0)
 		return ret;
 	
+	// get offset for this data
+	if(helper_key_current(fargs->key, &d_key) < 0)
+		d_key_ptr = fargs->key;
+	
+	data_get(ret, TYPE_UINTT, offset, d_key_ptr);
+	if(ret < 0)
+		return ret;
+	
+	// prepare copy of template
 	holder_copy(ret, &converted, &fdata->slave);
 	if(ret < 0)
 		goto exit;
 	
-	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, fargs->value, FORMAT(packed) };
+	data_t                sl_value  = DATA_SLICET(fargs->value, offset, ~0);
+	fastcall_convert_from r_convert = {
+		{ 5, ACTION_CONVERT_FROM },
+		offset == 0 ?
+			fargs->value :
+			&sl_value,
+		FORMAT(packed)
+	};
 	if( (ret = data_query(&converted, &r_convert)) < 0)
 		goto exit;
 	
