@@ -103,135 +103,138 @@
 <a name="l00047"></a>00047 <span class="preprocessor">#include &lt;special/random/random_t.h&gt;</span>
 <a name="l00048"></a>00048 <span class="preprocessor">#include &lt;special/ref/ref_t.h&gt;</span>
 <a name="l00049"></a>00049 <span class="preprocessor">#include &lt;special/unique/unique_t.h&gt;</span>
-<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;storage/container/container_t.h&gt;</span>
-<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;storage/file/file_t.h&gt;</span>
-<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;storage/folder/folder_t.h&gt;</span>
-<a name="l00053"></a>00053 <span class="preprocessor">#include &lt;storage/list/list_t.h&gt;</span>
-<a name="l00054"></a>00054 <span class="preprocessor">#include &lt;storage/list/list_end_t.h&gt;</span>
-<a name="l00055"></a>00055 <span class="preprocessor">#include &lt;storage/memory/memory_t.h&gt;</span>
-<a name="l00056"></a>00056 <span class="preprocessor">#include &lt;storage/raw/raw_t.h&gt;</span>
-<a name="l00057"></a>00057 <span class="preprocessor">#include &lt;sync/mutex/mutex_t.h&gt;</span>
-<a name="l00058"></a>00058 <span class="preprocessor">#include &lt;triplets/format/triplet_format_t.h&gt;</span>
-<a name="l00059"></a>00059 <span class="preprocessor">#include &lt;triplets/key/triplet_key_t.h&gt;</span>
-<a name="l00060"></a>00060 <span class="preprocessor">#else</span>
-<a name="l00061"></a>00061 <span class="preprocessor"></span><span class="preprocessor">#include &lt;core/default/default_t.h&gt;</span>
-<a name="l00062"></a>00062 <span class="preprocessor">#endif</span>
-<a name="l00063"></a>00063 <span class="preprocessor"></span><span class="preprocessor">#ifdef DATA_C</span>
-<a name="l00064"></a>00064 <span class="preprocessor"></span><span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> allocator_fixed_t_proto;
-<a name="l00065"></a>00065 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> anything_t_proto;
-<a name="l00066"></a>00066 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> data_t_proto;
-<a name="l00067"></a>00067 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> dataptr_t_proto;
-<a name="l00068"></a>00068 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> default_t_proto;
-<a name="l00069"></a>00069 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> hash_t_proto;
-<a name="l00070"></a>00070 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> machine_t_proto;
-<a name="l00071"></a>00071 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> string_t_proto;
-<a name="l00072"></a>00072 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> void_t_proto;
-<a name="l00073"></a>00073 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> action_t_proto;
-<a name="l00074"></a>00074 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> datatype_t_proto;
-<a name="l00075"></a>00075 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> format_t_proto;
-<a name="l00076"></a>00076 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> hashkey_t_proto;
-<a name="l00077"></a>00077 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> named_t_proto;
-<a name="l00078"></a>00078 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> binstring_t_proto;
-<a name="l00079"></a>00079 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> netstring_t_proto;
-<a name="l00080"></a>00080 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> record_t_proto;
-<a name="l00081"></a>00081 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> fd_t_proto;
-<a name="l00082"></a>00082 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> io_t_proto;
-<a name="l00083"></a>00083 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> slice_t_proto;
-<a name="l00084"></a>00084 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> slider_t_proto;
-<a name="l00085"></a>00085 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> struct_t_proto;
-<a name="l00086"></a>00086 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> off_t_proto;
-<a name="l00087"></a>00087 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> size_t_proto;
-<a name="l00088"></a>00088 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint_t_proto;
-<a name="l00089"></a>00089 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int_t_proto;
-<a name="l00090"></a>00090 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int8_t_proto;
-<a name="l00091"></a>00091 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int16_t_proto;
-<a name="l00092"></a>00092 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int32_t_proto;
-<a name="l00093"></a>00093 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int64_t_proto;
-<a name="l00094"></a>00094 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint8_t_proto;
-<a name="l00095"></a>00095 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint16_t_proto;
-<a name="l00096"></a>00096 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint32_t_proto;
-<a name="l00097"></a>00097 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint64_t_proto;
-<a name="l00098"></a>00098 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> bind_t_proto;
-<a name="l00099"></a>00099 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> consumable_t_proto;
-<a name="l00100"></a>00100 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> counter_t_proto;
-<a name="l00101"></a>00101 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> emitter_t_proto;
-<a name="l00102"></a>00102 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> env_t_proto;
-<a name="l00103"></a>00103 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> immortal_t_proto;
-<a name="l00104"></a>00104 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> inner_t_proto;
-<a name="l00105"></a>00105 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> length_t_proto;
-<a name="l00106"></a>00106 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> random_t_proto;
-<a name="l00107"></a>00107 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> ref_t_proto;
-<a name="l00108"></a>00108 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> unique_t_proto;
-<a name="l00109"></a>00109 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> container_t_proto;
-<a name="l00110"></a>00110 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> file_t_proto;
-<a name="l00111"></a>00111 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> folder_t_proto;
-<a name="l00112"></a>00112 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> list_t_proto;
-<a name="l00113"></a>00113 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> list_end_t_proto;
-<a name="l00114"></a>00114 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> memory_t_proto;
-<a name="l00115"></a>00115 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> raw_t_proto;
-<a name="l00116"></a>00116 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> mutex_t_proto;
-<a name="l00117"></a>00117 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> triplet_format_t_proto;
-<a name="l00118"></a>00118 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> triplet_key_t_proto;
-<a name="l00119"></a>00119 <a class="code" href="structdata__proto__t.html">data_proto_t</a> * data_protos_static[] = {
-<a name="l00120"></a>00120    [TYPE_ALLOCATORFIXEDT] = &amp;allocator_fixed_t_proto,
-<a name="l00121"></a>00121    [TYPE_ANYTHINGT] = &amp;anything_t_proto,
-<a name="l00122"></a>00122    [TYPE_DATAT] = &amp;data_t_proto,
-<a name="l00123"></a>00123    [TYPE_DATAPTRT] = &amp;dataptr_t_proto,
-<a name="l00124"></a>00124    [TYPE_DEFAULTT] = &amp;default_t_proto,
-<a name="l00125"></a>00125    [TYPE_HASHT] = &amp;hash_t_proto,
-<a name="l00126"></a>00126    [TYPE_MACHINET] = &amp;machine_t_proto,
-<a name="l00127"></a>00127    [TYPE_STRINGT] = &amp;string_t_proto,
-<a name="l00128"></a>00128    [TYPE_VOIDT] = &amp;void_t_proto,
-<a name="l00129"></a>00129    [TYPE_ACTIONT] = &amp;action_t_proto,
-<a name="l00130"></a>00130    [TYPE_DATATYPET] = &amp;datatype_t_proto,
-<a name="l00131"></a>00131    [TYPE_FORMATT] = &amp;format_t_proto,
-<a name="l00132"></a>00132    [TYPE_HASHKEYT] = &amp;hashkey_t_proto,
-<a name="l00133"></a>00133    [TYPE_NAMEDT] = &amp;named_t_proto,
-<a name="l00134"></a>00134    [TYPE_BINSTRINGT] = &amp;binstring_t_proto,
-<a name="l00135"></a>00135    [TYPE_NETSTRINGT] = &amp;netstring_t_proto,
-<a name="l00136"></a>00136    [TYPE_RECORDT] = &amp;record_t_proto,
-<a name="l00137"></a>00137    [TYPE_FDT] = &amp;fd_t_proto,
-<a name="l00138"></a>00138    [TYPE_IOT] = &amp;io_t_proto,
-<a name="l00139"></a>00139    [TYPE_SLICET] = &amp;slice_t_proto,
-<a name="l00140"></a>00140    [TYPE_SLIDERT] = &amp;slider_t_proto,
-<a name="l00141"></a>00141    [TYPE_STRUCTT] = &amp;struct_t_proto,
-<a name="l00142"></a>00142    [TYPE_OFFT] = &amp;off_t_proto,
-<a name="l00143"></a>00143    [TYPE_SIZET] = &amp;size_t_proto,
-<a name="l00144"></a>00144    [TYPE_UINTT] = &amp;uint_t_proto,
-<a name="l00145"></a>00145    [TYPE_INTT] = &amp;int_t_proto,
-<a name="l00146"></a>00146    [TYPE_INT8T] = &amp;int8_t_proto,
-<a name="l00147"></a>00147    [TYPE_INT16T] = &amp;int16_t_proto,
-<a name="l00148"></a>00148    [TYPE_INT32T] = &amp;int32_t_proto,
-<a name="l00149"></a>00149    [TYPE_INT64T] = &amp;int64_t_proto,
-<a name="l00150"></a>00150    [TYPE_UINT8T] = &amp;uint8_t_proto,
-<a name="l00151"></a>00151    [TYPE_UINT16T] = &amp;uint16_t_proto,
-<a name="l00152"></a>00152    [TYPE_UINT32T] = &amp;uint32_t_proto,
-<a name="l00153"></a>00153    [TYPE_UINT64T] = &amp;uint64_t_proto,
-<a name="l00154"></a>00154    [TYPE_BINDT] = &amp;bind_t_proto,
-<a name="l00155"></a>00155    [TYPE_CONSUMABLET] = &amp;consumable_t_proto,
-<a name="l00156"></a>00156    [TYPE_COUNTERT] = &amp;counter_t_proto,
-<a name="l00157"></a>00157    [TYPE_EMITTERT] = &amp;emitter_t_proto,
-<a name="l00158"></a>00158    [TYPE_ENVT] = &amp;env_t_proto,
-<a name="l00159"></a>00159    [TYPE_IMMORTALT] = &amp;immortal_t_proto,
-<a name="l00160"></a>00160    [TYPE_INNERT] = &amp;inner_t_proto,
-<a name="l00161"></a>00161    [TYPE_LENGTHT] = &amp;length_t_proto,
-<a name="l00162"></a>00162    [TYPE_RANDOMT] = &amp;random_t_proto,
-<a name="l00163"></a>00163    [TYPE_REFT] = &amp;ref_t_proto,
-<a name="l00164"></a>00164    [TYPE_UNIQUET] = &amp;unique_t_proto,
-<a name="l00165"></a>00165    [TYPE_CONTAINERT] = &amp;container_t_proto,
-<a name="l00166"></a>00166    [TYPE_FILET] = &amp;file_t_proto,
-<a name="l00167"></a>00167    [TYPE_FOLDERT] = &amp;folder_t_proto,
-<a name="l00168"></a>00168    [TYPE_LISTT] = &amp;list_t_proto,
-<a name="l00169"></a>00169    [TYPE_LISTENDT] = &amp;list_end_t_proto,
-<a name="l00170"></a>00170    [TYPE_MEMORYT] = &amp;memory_t_proto,
-<a name="l00171"></a>00171    [TYPE_RAWT] = &amp;raw_t_proto,
-<a name="l00172"></a>00172    [TYPE_MUTEXT] = &amp;mutex_t_proto,
-<a name="l00173"></a>00173    [TYPE_TRIPLETFORMATT] = &amp;triplet_format_t_proto,
-<a name="l00174"></a>00174    [TYPE_TRIPLETKEYT] = &amp;triplet_key_t_proto,
-<a name="l00175"></a>00175 };
-<a name="l00176"></a>00176 <span class="keywordtype">size_t</span> data_protos_static_size = <span class="keyword">sizeof</span>(data_protos_static);
-<a name="l00177"></a>00177 <span class="preprocessor">#endif</span>
-<a name="l00178"></a>00178 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;storage/complexkey/complexkey_t.h&gt;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;storage/container/container_t.h&gt;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;storage/file/file_t.h&gt;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &lt;storage/folder/folder_t.h&gt;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &lt;storage/list/list_t.h&gt;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &lt;storage/list/list_end_t.h&gt;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &lt;storage/memory/memory_t.h&gt;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &lt;storage/raw/raw_t.h&gt;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &lt;sync/mutex/mutex_t.h&gt;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &lt;triplets/format/triplet_format_t.h&gt;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &lt;triplets/key/triplet_key_t.h&gt;</span>
+<a name="l00061"></a>00061 <span class="preprocessor">#else</span>
+<a name="l00062"></a>00062 <span class="preprocessor"></span><span class="preprocessor">#include &lt;core/default/default_t.h&gt;</span>
+<a name="l00063"></a>00063 <span class="preprocessor">#endif</span>
+<a name="l00064"></a>00064 <span class="preprocessor"></span><span class="preprocessor">#ifdef DATA_C</span>
+<a name="l00065"></a>00065 <span class="preprocessor"></span><span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> allocator_fixed_t_proto;
+<a name="l00066"></a>00066 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> anything_t_proto;
+<a name="l00067"></a>00067 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> data_t_proto;
+<a name="l00068"></a>00068 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> dataptr_t_proto;
+<a name="l00069"></a>00069 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> default_t_proto;
+<a name="l00070"></a>00070 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> hash_t_proto;
+<a name="l00071"></a>00071 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> machine_t_proto;
+<a name="l00072"></a>00072 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> string_t_proto;
+<a name="l00073"></a>00073 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> void_t_proto;
+<a name="l00074"></a>00074 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> action_t_proto;
+<a name="l00075"></a>00075 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> datatype_t_proto;
+<a name="l00076"></a>00076 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> format_t_proto;
+<a name="l00077"></a>00077 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> hashkey_t_proto;
+<a name="l00078"></a>00078 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> named_t_proto;
+<a name="l00079"></a>00079 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> binstring_t_proto;
+<a name="l00080"></a>00080 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> netstring_t_proto;
+<a name="l00081"></a>00081 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> record_t_proto;
+<a name="l00082"></a>00082 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> fd_t_proto;
+<a name="l00083"></a>00083 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> io_t_proto;
+<a name="l00084"></a>00084 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> slice_t_proto;
+<a name="l00085"></a>00085 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> slider_t_proto;
+<a name="l00086"></a>00086 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> struct_t_proto;
+<a name="l00087"></a>00087 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> off_t_proto;
+<a name="l00088"></a>00088 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> size_t_proto;
+<a name="l00089"></a>00089 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint_t_proto;
+<a name="l00090"></a>00090 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int_t_proto;
+<a name="l00091"></a>00091 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int8_t_proto;
+<a name="l00092"></a>00092 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int16_t_proto;
+<a name="l00093"></a>00093 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int32_t_proto;
+<a name="l00094"></a>00094 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> int64_t_proto;
+<a name="l00095"></a>00095 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint8_t_proto;
+<a name="l00096"></a>00096 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint16_t_proto;
+<a name="l00097"></a>00097 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint32_t_proto;
+<a name="l00098"></a>00098 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> uint64_t_proto;
+<a name="l00099"></a>00099 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> bind_t_proto;
+<a name="l00100"></a>00100 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> consumable_t_proto;
+<a name="l00101"></a>00101 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> counter_t_proto;
+<a name="l00102"></a>00102 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> emitter_t_proto;
+<a name="l00103"></a>00103 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> env_t_proto;
+<a name="l00104"></a>00104 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> immortal_t_proto;
+<a name="l00105"></a>00105 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> inner_t_proto;
+<a name="l00106"></a>00106 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> length_t_proto;
+<a name="l00107"></a>00107 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> random_t_proto;
+<a name="l00108"></a>00108 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> ref_t_proto;
+<a name="l00109"></a>00109 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> unique_t_proto;
+<a name="l00110"></a>00110 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> complexkey_t_proto;
+<a name="l00111"></a>00111 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> container_t_proto;
+<a name="l00112"></a>00112 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> file_t_proto;
+<a name="l00113"></a>00113 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> folder_t_proto;
+<a name="l00114"></a>00114 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> list_t_proto;
+<a name="l00115"></a>00115 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> list_end_t_proto;
+<a name="l00116"></a>00116 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> memory_t_proto;
+<a name="l00117"></a>00117 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> raw_t_proto;
+<a name="l00118"></a>00118 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> mutex_t_proto;
+<a name="l00119"></a>00119 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> triplet_format_t_proto;
+<a name="l00120"></a>00120 <span class="keyword">extern</span> <a class="code" href="structdata__proto__t.html">data_proto_t</a> triplet_key_t_proto;
+<a name="l00121"></a>00121 <a class="code" href="structdata__proto__t.html">data_proto_t</a> * data_protos_static[] = {
+<a name="l00122"></a>00122    [TYPE_ALLOCATORFIXEDT] = &amp;allocator_fixed_t_proto,
+<a name="l00123"></a>00123    [TYPE_ANYTHINGT] = &amp;anything_t_proto,
+<a name="l00124"></a>00124    [TYPE_DATAT] = &amp;data_t_proto,
+<a name="l00125"></a>00125    [TYPE_DATAPTRT] = &amp;dataptr_t_proto,
+<a name="l00126"></a>00126    [TYPE_DEFAULTT] = &amp;default_t_proto,
+<a name="l00127"></a>00127    [TYPE_HASHT] = &amp;hash_t_proto,
+<a name="l00128"></a>00128    [TYPE_MACHINET] = &amp;machine_t_proto,
+<a name="l00129"></a>00129    [TYPE_STRINGT] = &amp;string_t_proto,
+<a name="l00130"></a>00130    [TYPE_VOIDT] = &amp;void_t_proto,
+<a name="l00131"></a>00131    [TYPE_ACTIONT] = &amp;action_t_proto,
+<a name="l00132"></a>00132    [TYPE_DATATYPET] = &amp;datatype_t_proto,
+<a name="l00133"></a>00133    [TYPE_FORMATT] = &amp;format_t_proto,
+<a name="l00134"></a>00134    [TYPE_HASHKEYT] = &amp;hashkey_t_proto,
+<a name="l00135"></a>00135    [TYPE_NAMEDT] = &amp;named_t_proto,
+<a name="l00136"></a>00136    [TYPE_BINSTRINGT] = &amp;binstring_t_proto,
+<a name="l00137"></a>00137    [TYPE_NETSTRINGT] = &amp;netstring_t_proto,
+<a name="l00138"></a>00138    [TYPE_RECORDT] = &amp;record_t_proto,
+<a name="l00139"></a>00139    [TYPE_FDT] = &amp;fd_t_proto,
+<a name="l00140"></a>00140    [TYPE_IOT] = &amp;io_t_proto,
+<a name="l00141"></a>00141    [TYPE_SLICET] = &amp;slice_t_proto,
+<a name="l00142"></a>00142    [TYPE_SLIDERT] = &amp;slider_t_proto,
+<a name="l00143"></a>00143    [TYPE_STRUCTT] = &amp;struct_t_proto,
+<a name="l00144"></a>00144    [TYPE_OFFT] = &amp;off_t_proto,
+<a name="l00145"></a>00145    [TYPE_SIZET] = &amp;size_t_proto,
+<a name="l00146"></a>00146    [TYPE_UINTT] = &amp;uint_t_proto,
+<a name="l00147"></a>00147    [TYPE_INTT] = &amp;int_t_proto,
+<a name="l00148"></a>00148    [TYPE_INT8T] = &amp;int8_t_proto,
+<a name="l00149"></a>00149    [TYPE_INT16T] = &amp;int16_t_proto,
+<a name="l00150"></a>00150    [TYPE_INT32T] = &amp;int32_t_proto,
+<a name="l00151"></a>00151    [TYPE_INT64T] = &amp;int64_t_proto,
+<a name="l00152"></a>00152    [TYPE_UINT8T] = &amp;uint8_t_proto,
+<a name="l00153"></a>00153    [TYPE_UINT16T] = &amp;uint16_t_proto,
+<a name="l00154"></a>00154    [TYPE_UINT32T] = &amp;uint32_t_proto,
+<a name="l00155"></a>00155    [TYPE_UINT64T] = &amp;uint64_t_proto,
+<a name="l00156"></a>00156    [TYPE_BINDT] = &amp;bind_t_proto,
+<a name="l00157"></a>00157    [TYPE_CONSUMABLET] = &amp;consumable_t_proto,
+<a name="l00158"></a>00158    [TYPE_COUNTERT] = &amp;counter_t_proto,
+<a name="l00159"></a>00159    [TYPE_EMITTERT] = &amp;emitter_t_proto,
+<a name="l00160"></a>00160    [TYPE_ENVT] = &amp;env_t_proto,
+<a name="l00161"></a>00161    [TYPE_IMMORTALT] = &amp;immortal_t_proto,
+<a name="l00162"></a>00162    [TYPE_INNERT] = &amp;inner_t_proto,
+<a name="l00163"></a>00163    [TYPE_LENGTHT] = &amp;length_t_proto,
+<a name="l00164"></a>00164    [TYPE_RANDOMT] = &amp;random_t_proto,
+<a name="l00165"></a>00165    [TYPE_REFT] = &amp;ref_t_proto,
+<a name="l00166"></a>00166    [TYPE_UNIQUET] = &amp;unique_t_proto,
+<a name="l00167"></a>00167    [TYPE_COMPLEXKEYT] = &amp;complexkey_t_proto,
+<a name="l00168"></a>00168    [TYPE_CONTAINERT] = &amp;container_t_proto,
+<a name="l00169"></a>00169    [TYPE_FILET] = &amp;file_t_proto,
+<a name="l00170"></a>00170    [TYPE_FOLDERT] = &amp;folder_t_proto,
+<a name="l00171"></a>00171    [TYPE_LISTT] = &amp;list_t_proto,
+<a name="l00172"></a>00172    [TYPE_LISTENDT] = &amp;list_end_t_proto,
+<a name="l00173"></a>00173    [TYPE_MEMORYT] = &amp;memory_t_proto,
+<a name="l00174"></a>00174    [TYPE_RAWT] = &amp;raw_t_proto,
+<a name="l00175"></a>00175    [TYPE_MUTEXT] = &amp;mutex_t_proto,
+<a name="l00176"></a>00176    [TYPE_TRIPLETFORMATT] = &amp;triplet_format_t_proto,
+<a name="l00177"></a>00177    [TYPE_TRIPLETKEYT] = &amp;triplet_key_t_proto,
+<a name="l00178"></a>00178 };
+<a name="l00179"></a>00179 <span class="keywordtype">size_t</span> data_protos_static_size = <span class="keyword">sizeof</span>(data_protos_static);
+<a name="l00180"></a>00180 <span class="preprocessor">#endif</span>
+<a name="l00181"></a>00181 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

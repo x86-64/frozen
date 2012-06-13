@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta name="keywords" content="frozen, data, processing, big data, daemon, fast, flexible"/>
-<title>container_t.h Source File | frozen - flexible data processing daemon</title>
+<title>complexkey_t.h Source File | frozen - flexible data processing daemon</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="stylesheet.css" rel="stylesheet" type="text/css" />
 
@@ -51,20 +51,22 @@
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">container_t.h</div>  </div>
+<div class="title">complexkey_t.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_CONTAINER_T_H</span>
-<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_CONTAINER_T_H</span>
+<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="preprocessor">#ifndef DATA_COMPLEXKEY_T_H</span>
+<a name="l00002"></a>00002 <span class="preprocessor"></span><span class="preprocessor">#define DATA_COMPLEXKEY_T_H</span>
 <a name="l00003"></a>00003 <span class="preprocessor"></span>
-<a name="l00025"></a>00025 
-<a name="l00026"></a><a class="code" href="structcontainer__t.html">00026</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcontainer__t.html" title="container_t structure">container_t</a> {
-<a name="l00027"></a>00027         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 storage;
-<a name="l00028"></a>00028 } <a class="code" href="structcontainer__t.html" title="container_t structure">container_t</a>;
-<a name="l00029"></a>00029 
-<a name="l00030"></a>00030 API ssize_t data_container_t (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> storage);
-<a name="l00031"></a>00031 
-<a name="l00032"></a>00032 <span class="preprocessor">#endif</span>
+<a name="l00025"></a>00025 <span class="preprocessor">#define DATA_COMPLEXKEYT(_value, _next) { TYPE_COMPLEXKEYT, (complexkey_t []){ { _value, _next } }}</span>
+<a name="l00026"></a>00026 <span class="preprocessor"></span>
+<a name="l00028"></a><a class="code" href="structcomplexkey__t.html">00028</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structcomplexkey__t.html" title="complexkey_t structure">complexkey_t</a> {
+<a name="l00029"></a>00029         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 value;
+<a name="l00030"></a>00030         <a class="code" href="structdata__t.html" title="Data holder.">data_t</a>                 cnext;
+<a name="l00031"></a>00031 } <a class="code" href="structcomplexkey__t.html" title="complexkey_t structure">complexkey_t</a>;
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 API ssize_t data_complexkey_t (<a class="code" href="structdata__t.html" title="Data holder.">data_t</a> *data, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> storage, <a class="code" href="structdata__t.html" title="Data holder.">data_t</a> cnext);
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 
 

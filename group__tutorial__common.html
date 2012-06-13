@@ -156,7 +156,7 @@ Output</h2>
 </pre></div><h2><a class="anchor" id="tutorial_basics_processing"></a>
 Processing</h2>
 <p><em>Split</em> </p>
-<p>It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split incoming data on lines. If you want lines you should use <a class="el" href="group__mod__machine__split.html">data/split</a> machine. By default it split input exactly by <br/>
+<p>It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split incoming data on lines. If you want lines you should use mod_machine_split machine. By default it split input exactly by <br/>
  which mean end of line.</p>
 <p><em>Regexp</em> </p>
 <p>To match some input for pattern you can use <a class="el" href="group__mod__machine__regexp.html">data/regexp</a>. It add special marker to current request if data match defined pattern.</p>
@@ -188,7 +188,7 @@ Combining all together</h2>
         }
 }},
 { <span class="keyword">class </span>= &quot;end&quot; }
-</pre></div><p>mod_machine_file open file for reading only. <a class="el" href="group__mod__machine__split.html">data/split</a> split it in lines. <a class="el" href="group__mod__machine__regexp.html">data/regexp</a> matches /bin/false aganist input line and pass to <a class="el" href="group__mod__machine__switch.html">request/switch</a>. It lookup for default marker value and if find - pass to <a class="el" href="group__mod__machine__stdout.html">io/stdout</a>. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem: </p>
+</pre></div><p>mod_machine_file open file for reading only. mod_machine_split split it in lines. <a class="el" href="group__mod__machine__regexp.html">data/regexp</a> matches /bin/false aganist input line and pass to <a class="el" href="group__mod__machine__switch.html">request/switch</a>. It lookup for default marker value and if find - pass to <a class="el" href="group__mod__machine__stdout.html">io/stdout</a>. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem: </p>
 <div class="fragment"><pre class="fragment">
 { <span class="keyword">class </span>=&gt; &quot;emitter&quot;, request = {
         request = {
