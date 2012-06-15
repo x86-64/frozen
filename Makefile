@@ -29,7 +29,7 @@ help:
 	@echo '                                                                       '
 
 
-html: clean $(OUTPUTDIR)/index.html
+all: clean $(OUTPUTDIR)/index.html
 	cd wiki/ && markdoc build
 	@echo 'Done'
 
@@ -39,6 +39,9 @@ $(OUTPUTDIR)/%.html:
 clean:
 	rm -fr $(OUTPUTDIR)
 	mkdir $(OUTPUTDIR)
+
+check:
+	@echo 'ok'
 
 dropbox_upload: $(OUTPUTDIR)/index.html
 	cp -r $(OUTPUTDIR)/* $(DROPBOX_DIR)
@@ -56,4 +59,4 @@ github: $(OUTPUTDIR)/index.html
 	ghp-import $(OUTPUTDIR)
 	git push origin gh-pages
 
-.PHONY: html help clean ftp_upload ssh_upload rsync_upload dropbox_upload github
+.PHONY: all help clean check ftp_upload ssh_upload rsync_upload dropbox_upload github
