@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  
+  <head>
+    
+    
+      
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+      
+      
+      <title>
+        frozen » 
+        Tutorial: configuration
+      </title>
+      
+      
+        <!-- YUI CSS reset, fonts, base -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.0.0/build/cssreset/reset-min.css&amp;3.0.0/build/cssfonts/fonts-min.css&amp;3.0.0/build/cssbase/base-min.css" media="screen, projection" />
+        
+        <link rel="stylesheet" type="text/css" href="media/css/style.css" media="screen, projection" />
+        <link rel="stylesheet" type="text/css" href="media/css/pygments.css" media="screen, projection" />
+      
+      
+      
+      
+      
+        
+          <!-- Google Analytics -->
+          <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+            })();
+          </script>
+        
+      
+    
+  </head>
+  
+  <body >
+    
+      
+      
+        
+          
+  
+    <ol id="breadcrumbs">
+      
+        <li class="crumb-0 not-last">
+          
+            <a href="./">index</a>
+          
+        </li>
+      
+        <li class="crumb-1 last">
+          
+            tutorial_configuration
+          
+        </li>
+      
+    </ol> <!-- ol#breadcrumbs -->
+  
+
+        
+      
+      
+      <div id="content">
+        
+        
+        
+        <h1>Tutorial: configuration</h1>
+<h2>Shop configuration</h2>
+<p>To describe shop you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with
+some modifications.</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="codehilite"><pre><span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 1 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">},</span>
+<span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 2 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">},</span>
+<span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 3 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">}</span>
+
+<span class="p">{</span>
+  <span class="o">&lt;</span><span class="n">machine</span> 4 <span class="n">configuration</span><span class="o">&gt;</span>
+  <span class="n">duplicate_to</span> <span class="p">=</span> <span class="p">{</span>                             <span class="o">//</span> <span class="n">this</span> <span class="n">is</span> <span class="n">configuration</span> <span class="n">parameter</span> <span class="n">name</span> <span class="k">for</span> <span class="n">imaginary</span> <span class="n">duplicator</span> <span class="n">machine</span>
+    <span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 5 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 6 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="o">&lt;</span><span class="n">machine</span> 7 <span class="n">configuration</span><span class="o">&gt;</span> <span class="p">},</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table>
+
+<p>This example configuration describe shops showed on picture in <a href="tutorial_basics.html">Tutorial: how it works?</a>.</p>
+<h2>Machine configuration</h2>
+<p>To configure single machine with required parameters you write all of them inside {} of machine configuration splitting by comma.</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="codehilite"><pre><span class="p">{</span>
+   <span class="n">name</span>      <span class="p">=</span> &quot;<span class="n">some</span> <span class="n">machine</span> <span class="n">name</span>&quot;<span class="p">,</span>                     <span class="o">//</span> <span class="n">single</span> <span class="n">line</span> <span class="n">comment</span>
+   <span class="n">stringpar</span> <span class="p">=</span> &quot;<span class="n">some</span> <span class="n">string</span> <span class="n">value</span>&quot;<span class="p">,</span>
+   <span class="n">intpar</span>    <span class="p">=</span> <span class="p">(</span><span class="n">uint_t</span><span class="p">)</span>&quot;12345&quot;<span class="p">,</span>
+   <span class="n">otherpar</span>  <span class="p">=</span> <span class="p">(</span><span class="n">sometype_t</span><span class="p">)</span>&quot;<span class="n">sometype</span> <span class="n">configuration</span> <span class="n">string</span>&quot;<span class="p">,</span>
+   <span class="n">morepar</span>   <span class="p">=</span> <span class="p">(</span><span class="n">sometype_t</span><span class="p">){</span>
+      <span class="n">value</span>  <span class="p">=</span> &quot;<span class="n">more</span> <span class="n">parameters</span>&quot;<span class="p">,</span>
+      <span class="nb">length</span> <span class="p">=</span> <span class="p">(</span><span class="n">uint_t</span><span class="p">)</span>&quot;100&quot;<span class="p">,</span>
+      <span class="n">nestedpar</span> <span class="p">=</span> <span class="p">(</span><span class="n">anothertype_t</span><span class="p">){</span>
+           <span class="nb">size</span> <span class="p">=</span> <span class="p">(</span><span class="n">uint_t</span><span class="p">)</span>&quot;100&quot;
+      <span class="p">}</span>
+   <span class="p">},</span>
+   <span class="n">envpar</span>    <span class="p">=</span> <span class="p">(</span><span class="n">env_t</span><span class="p">)</span>&quot;<span class="n">somekey</span>&quot;
+<span class="p">}</span>
+</pre></div>
+</td></tr></table>
+
+<p>Here we have every possible parameter that can be passed to machine. There is strings, ints, special types, nested types:</p>
+<ul>
+<li>Already known name parameter is used by core to maintain global names</li>
+<li>String parameter, can have "\t\r\n" inside string.</li>
+<li>Integer parameter, here we have <a href="doxygen/uint__t_8h_source.html">uint_t</a>, it is current platform maximum integer size (4 bytes for 32-bits, 8 for 64-bits). You can specify <a href="doxygen/uint8__t_8h_source.html">uint8_t</a>, <a href="doxygen/uint16__t_8h_source.html">int16_t</a> and another variations.</li>
+<li>Some sometype_t data, which can be initialized from string. Examples: <a href="doxygen/format__t_8h_source.html">format_t</a>, <a href="doxygen/hashkey__t_8h_source.html">hashkey_t</a></li>
+<li>Some complex sometype_t data, which can be initialized from hash. Example: <a href="doxygen/raw__t_8h_source.html">raw_t</a>.</li>
+<li>Environment data <a href="doxygen/env__t_8h_source.html">env_t</a>. It use current request key "somekey" to obtain data. Not every machine parameter can be used in such way. Machine must use this parameter during request and not in initialization stage.</li>
+<li>You can use "=", "=&gt;", ":" as assignment.</li>
+<li>Double or single quoted strings, @@ or ## strings.</li>
+<li>C-style comments, both single and multi-line.</li>
+</ul>
+<h2>Macros and m4</h2>
+<p>Because of simple nature of machines, writing complex systems become very hard. Too many machine need to shop together to achieve some
+feature. So, we need some macros. And very powerful thing in this field is m4. It is macro processor with simple syntax, easy to learn and
+easy to solve our problems. Refer to m4 manual to learn it.</p>
+<p>It have includes, dynamic macro assignment, string manipulation and nice libraries.</p>
+<p>Prev tutorial: <a href="tutorial_basics.html">Tutorial: how it works?</a></p>
+<p>Next tutorial: <a href="tutorial_execution.html">Tutorial: execution</a></p>
+        
+        
+        
+        
+        <hr class="clear" />
+      </div> <!-- div#content -->
+      
+      
+      <div id="footer">
+        <p>
+          
+            frozen —
+          
+          Powered by <a href="http://markdoc.org/">Markdoc</a>.
+        </p>
+      </div>
+      
+    
+    
+    
+    <hr class="clear" />
+  </body>
+</html>

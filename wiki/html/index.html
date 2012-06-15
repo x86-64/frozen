@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  
+  <head>
+    
+    
+      
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+      
+      
+      <title>
+        frozen » 
+        Frozen
+      </title>
+      
+      
+        <!-- YUI CSS reset, fonts, base -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.0.0/build/cssreset/reset-min.css&amp;3.0.0/build/cssfonts/fonts-min.css&amp;3.0.0/build/cssbase/base-min.css" media="screen, projection" />
+        
+        <link rel="stylesheet" type="text/css" href="media/css/style.css" media="screen, projection" />
+        <link rel="stylesheet" type="text/css" href="media/css/pygments.css" media="screen, projection" />
+      
+      
+      
+      
+      
+        
+          <!-- Google Analytics -->
+          <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+            })();
+          </script>
+        
+      
+    
+  </head>
+  
+  <body >
+    
+      
+      
+        
+          
+  
+    <ol id="breadcrumbs">
+      
+        <li class="crumb-0 last">
+          
+            index
+          
+        </li>
+      
+    </ol> <!-- ol#breadcrumbs -->
+  
+
+        
+      
+      
+      <div id="content">
+        
+        
+        
+        <h1>Frozen</h1>
+<h2>Introduction</h2>
+<p>Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing.
+  It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.</p>
+<p>There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one
+  approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels
+  of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.</p>
+<p>Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
+  If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
+  library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.</p>
+<h2>Goals</h2>
+<ul>
+<li>Create flexible tool to manage huge amounts of data</li>
+<li>Make tool to build distributed and fault-tolerant systems in easy way</li>
+<li>Standardize data storage and transmission formats</li>
+<li>Get rid of temporary scripts, conversion utilities, all sort of one-time parsers</li>
+</ul>
+<h2>Capabilities</h2>
+<ul>
+<li>Common data types: ints, strings, lists, hashes and more<br />
+</li>
+<li>Embedded packing and unpacking routines for any type of data</li>
+<li>Processing modules: regular expressions, switches and many more</li>
+<li>Web development related modules: mongrel2, mustache, leveldb</li>
+<li>IO modules: fuse, file, memory, sockets</li>
+<li>Parallelization and distributed systems on top of ZeroMQ network</li>
+<li>Zero-copy everywhere it possible</li>
+<li>M4 macro in configuration files</li>
+<li>Benchmarking and measurements</li>
+</ul>
+<h2>Get started</h2>
+<ul>
+<li><a href="rationale.html">Rationale</a></li>
+<li><a href="tutorial_basics.html">Tutorial</a></li>
+<li><a href="https://github.com/x86-64/frozen/tree/master/examples">Examples</a></li>
+<li><a href="install.html">How to install</a></li>
+</ul>
+<h2>Get involved</h2>
+<ul>
+<li><a href="https://github.com/x86-64/frozen">Github project page</a></li>
+<li><a href="http://groups.google.com/group/frozend">Discussion group &amp; announcements</a></li>
+</ul>
+        
+        
+        
+        
+        <hr class="clear" />
+      </div> <!-- div#content -->
+      
+      
+      <div id="footer">
+        <p>
+          
+            frozen —
+          
+          Powered by <a href="http://markdoc.org/">Markdoc</a>.
+        </p>
+      </div>
+      
+    
+    
+    
+    <hr class="clear" />
+  </body>
+</html>

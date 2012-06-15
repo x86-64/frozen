@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  
+  <head>
+    
+    
+      
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+      
+      
+      <title>
+        frozen » 
+        Tutorial: starting daemon
+      </title>
+      
+      
+        <!-- YUI CSS reset, fonts, base -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.0.0/build/cssreset/reset-min.css&amp;3.0.0/build/cssfonts/fonts-min.css&amp;3.0.0/build/cssbase/base-min.css" media="screen, projection" />
+        
+        <link rel="stylesheet" type="text/css" href="media/css/style.css" media="screen, projection" />
+        <link rel="stylesheet" type="text/css" href="media/css/pygments.css" media="screen, projection" />
+      
+      
+      
+      
+      
+        
+          <!-- Google Analytics -->
+          <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+            })();
+          </script>
+        
+      
+    
+  </head>
+  
+  <body >
+    
+      
+      
+        
+          
+  
+    <ol id="breadcrumbs">
+      
+        <li class="crumb-0 not-last">
+          
+            <a href="./">index</a>
+          
+        </li>
+      
+        <li class="crumb-1 last">
+          
+            tutorial_execution
+          
+        </li>
+      
+    </ol> <!-- ol#breadcrumbs -->
+  
+
+        
+      
+      
+      <div id="content">
+        
+        
+        
+        <h1>Tutorial: starting daemon</h1>
+<p>To actually execute some configuration you should type in your shell following:</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="codehilite"><pre>$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">configuration_file</span><span class="p">.</span><span class="n">conf</span>
+</pre></div>
+</td></tr></table>
+
+<p><b>frozend</b> here is frozen daemon which parse configration file and create machines. <b>frozend --help</b> for more daemon options.</p>
+<p>If you use <a href="doxygen/group__mod__machine__stdin.html">mod_machine_stdin</a> in configuration, pass input as usual. Same for <a href="doxygen/group__mod__machine__stdout.html">mod_machine_stdout</a>, <a href="doxygen/group__mod__machine__stderr.html">mod_machine_stderr</a>.</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="codehilite"><pre>$ <span class="nb">cat</span> <span class="n">file</span> <span class="o">|</span> <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">configuration_file</span><span class="p">.</span><span class="n">conf</span>
+$ <span class="nb">cat</span> <span class="n">file</span> <span class="o">|</span> <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">configuration_file</span><span class="p">.</span><span class="n">conf</span>  <span class="o">&gt;</span><span class="n">log_stdout</span>
+$ <span class="nb">cat</span> <span class="n">file</span> <span class="o">|</span> <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">configuration_file</span><span class="p">.</span><span class="n">conf</span> 2<span class="o">&gt;</span><span class="n">log_stderr</span>
+</pre></div>
+</td></tr></table>
+
+<p>m4 configuration file is same, change extension to use it.</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="codehilite"><pre>$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">configuration_file</span><span class="p">.</span><span class="n">m4</span>
+</pre></div>
+</td></tr></table>
+
+<p>Prev tutorial: <a href="tutorial_configuration.html">Tutorial: configuration</a></p>
+<p>Next tutorial: <a href="tutorial_common.html">Tutorial: most used modules</a></p>
+        
+        
+        
+        
+        <hr class="clear" />
+      </div> <!-- div#content -->
+      
+      
+      <div id="footer">
+        <p>
+          
+            frozen —
+          
+          Powered by <a href="http://markdoc.org/">Markdoc</a>.
+        </p>
+      </div>
+      
+    
+    
+    
+    <hr class="clear" />
+  </body>
+</html>

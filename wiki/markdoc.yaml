@@ -1,0 +1,28 @@
+# Metadata
+wiki-name: "frozen"
+google-analytics: UA-XXXXXX-X
+
+# Directories
+hide-prefix: "."
+wiki-dir: "wiki"
+static-dir: "static"
+html-dir: "html"
+template-dir: ".templates"
+temp-dir: ".tmp"
+cvs-exclude: true
+
+# Building
+document-extensions: [.md, .mdown, .markdown, .wiki, .text]
+generate-listing: always
+listing-filename: "_list.html"
+use-default-static: true
+use-default-templates: true
+
+# Rendering
+markdown:
+  safe-mode: false
+  output-format: xhtml1
+  extensions: [codehilite, def_list]
+  extension-configs:
+    codehilite:
+      force_linenos: true

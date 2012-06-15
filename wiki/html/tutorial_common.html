@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  
+  <head>
+    
+    
+      
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+      
+      
+      <title>
+        frozen » 
+        Tutorial: most used modules
+      </title>
+      
+      
+        <!-- YUI CSS reset, fonts, base -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.0.0/build/cssreset/reset-min.css&amp;3.0.0/build/cssfonts/fonts-min.css&amp;3.0.0/build/cssbase/base-min.css" media="screen, projection" />
+        
+        <link rel="stylesheet" type="text/css" href="media/css/style.css" media="screen, projection" />
+        <link rel="stylesheet" type="text/css" href="media/css/pygments.css" media="screen, projection" />
+      
+      
+      
+      
+      
+        
+          <!-- Google Analytics -->
+          <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+            })();
+          </script>
+        
+      
+    
+  </head>
+  
+  <body >
+    
+      
+      
+        
+          
+  
+    <ol id="breadcrumbs">
+      
+        <li class="crumb-0 not-last">
+          
+            <a href="./">index</a>
+          
+        </li>
+      
+        <li class="crumb-1 last">
+          
+            tutorial_common
+          
+        </li>
+      
+    </ol> <!-- ol#breadcrumbs -->
+  
+
+        
+      
+      
+      <div id="content">
+        
+        
+        
+        <h1>Tutorial: most used modules</h1>
+<h2>Input</h2>
+<h3>Stdin</h3>
+<p>To have anything to be parsed it should be somehow passed in machine. Frozen have different ways in input data, most simple one is console.
+<a href="doxygen/group__mod__machine__stdin.html">mod_machine_stdin</a> used to get data from stdin. And because stdin module is passive, <a href="doxygen/group__mod__machine__query.html">mod_machine_query</a> with <a href="doxygen/group__mod__machine__thread.html">mod_machine_thread</a> used to activly transfer
+data from one machine shop to another. In this case destination is <a href="doxygen/group__mod__machine__stdout.html">mod_machine_stdout</a> used. For more about outputs read next chapter.</p>
+<p><a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_in_stdin.conf">tutorial_in_stdin.conf</a> </p>
+<h3>Fuse</h3>
+<p>Next way is <a href="doxygen/group__mod__machine__fuse.html">mod_machine_fuse</a> machine. It create filesystem using fuse and pass all read and writes to user defined machines.
+Sample configuration can look like so:</p>
+<p><a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_in_fuse.conf">tutorial_in_fuse.conf</a></p>
+<p>This creates file system in /home/test folder, which contain file named "one" and every write request to this file will result in 
+console output. Use "echo 'hello' &gt;&gt; /home/test/one" or similar to test it.</p>
+<h3>Emitter</h3>
+<p>One more way to input is describe machine which send requests you want. One of such machines is <a href="doxygen/group__mod__machine__emitter.html">mod_machine_emitter</a>. Example:
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_in_emitter.conf">tutorial_in_emitter.conf</a></p>
+<h3>HTTP</h3>
+<p>Another way is different modules, for example go_http. It create simple web server and pass request to user's machines.
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_in_http.conf">tutorial_in_http.conf</a></p>
+<h3>File</h3>
+<p>You could read data from file and use it as input data. Construction is same as for stdin.
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_io_file.conf">tutorial_io_file.conf</a></p>
+<h2>Output</h2>
+<h3>Debugging</h3>
+<p>To debug request flow you can use <a href="doxygen/group__mod__machine__debug.html">mod_machine_debug</a> machine. It print line in stderr on request arrival, and optionally on request end.
+Also it can show request content. Example:
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_out_debug.conf">tutorial_out_debug.conf</a></p>
+<h3>Stdout</h3>
+<p>This could be done by <a href="doxygen/group__mod__machine__stdout.html">mod_machine_stdout</a>. It print buffer in console stdout. For stderr - use <a href="doxygen/group__mod__machine__stderr.html">mod_machine_stderr</a>.
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_io_file.conf">tutorial_io_file.conf</a></p>
+<h3>File</h3>
+<p>Write data to file with <a href="doxygen/group__mod__machine__file.html">mod_machine_file</a> machine. Example:
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_out_file.conf">tutorial_out_file.conf</a></p>
+<h2>Processing</h2>
+<h3>Split</h3>
+<p>It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split
+incoming data on lines. If you want lines you should use <a href="doxygen/group__mod__machine__split.html">mod_machine_split</a> machine. By default it split input exactly by \n which mean
+end of line. </p>
+<h3>Regexp</h3>
+<p>To match some input for pattern you can use <a href="doxygen/group__mod__machine__regexp.html">mod_machine_regexp</a>. It add special marker to current request if data match defined pattern.</p>
+<h3>Conditions</h3>
+<p>As we have some markers, where got to be some condition. <a href="doxygen/group__mod__machine__switch.html">mod_machine_switch</a> control request flow using conditions. Because flow could be
+redirected in any other machine shop you could do anything with such request or enviroment, for example terminate request, return success or
+error, write this to logger, trigger some action and so on.</p>
+<h2>Combining all together</h2>
+<p>As we know some of processing and input\output machines we could combine it in something useful. For example, you want to know which users have /bin/false shell.
+Configuration will look like following:
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_proc_shell.conf">tutorial_proc_shell.conf</a></p>
+<p><a href="doxygen/group__mod__machine__file.html">mod_machine_file</a> open file for reading only. <a href="doxygen/group__mod__machine__split.html">mod_machine_split</a> split it in lines.
+<a href="doxygen/group__mod__machine__regexp.html">mod_machine_regexp</a> matches /bin/false aganist input line and pass to <a href="doxygen/group__mod__machine__switch.html">mod_machine_switch</a>. It lookup for default marker value and if find - pass
+to <a href="doxygen/group__mod__machine__stdout.html">mod_machine_stdout</a>. Whole thing works like simple grep, a bit silly but read further. What if you want more regexps? No problem:
+<a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_proc_shell2.conf">tutorial_proc_shell2.conf</a></p>
+<p>As regexp set same marker this construction works like OR. For AND use different markers and combine them in switch rule like so:</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="codehilite"><pre><span class="p">...</span>
+<span class="p">{</span> <span class="n">class</span> <span class="p">=</span><span class="o">&gt;</span> &quot;<span class="n">data</span><span class="o">/</span><span class="n">regexp</span>&quot;<span class="p">,</span> <span class="n">regexp</span> <span class="p">=</span> &quot;<span class="o">/</span><span class="n">bin</span>&quot;<span class="p">,</span>  <span class="n">marker</span> <span class="p">=</span> &quot;<span class="n">key1</span>&quot;  <span class="p">},</span> 
+<span class="p">{</span> <span class="n">class</span> <span class="p">=</span><span class="o">&gt;</span> &quot;<span class="n">data</span><span class="o">/</span><span class="n">regexp</span>&quot;<span class="p">,</span> <span class="n">regexp</span> <span class="p">=</span> &quot;<span class="o">/</span><span class="n">home</span>&quot;<span class="p">,</span> <span class="n">marker</span> <span class="p">=</span> &quot;<span class="n">key2</span>&quot;  <span class="p">},</span> 
+<span class="p">{</span> <span class="n">class</span> <span class="p">=</span><span class="o">&gt;</span> &quot;<span class="n">request</span><span class="o">/</span><span class="k">switch</span>&quot;<span class="p">,</span> <span class="n">rules</span> <span class="p">=</span> <span class="p">{</span>
+ <span class="p">{</span>  
+     <span class="n">request</span> <span class="p">=</span> <span class="p">{</span>
+         <span class="n">key1</span> <span class="p">=</span> <span class="p">(</span><span class="n">uint_t</span><span class="p">)</span><span class="o">&#39;</span>1<span class="o">&#39;</span><span class="p">,</span>
+         <span class="n">key2</span> <span class="p">=</span> <span class="p">(</span><span class="n">uint_t</span><span class="p">)</span><span class="o">&#39;</span>1<span class="o">&#39;</span>
+     <span class="p">},</span>
+<span class="p">...</span>
+</pre></div>
+</td></tr></table>
+
+<p>Because <a href="doxygen/group__mod__machine__switch.html">mod_machine_switch</a> don't care what in your rule's request you could first check for such AND condition, if it not matches check
+for only one marker, or for another, or for both. And for each rule you can supply different machine with any action. </p>
+<p>You can have any number of regexps. And even more: you can define one regexp for pre-matching and it's result will define which set of actions
+(including another regexps) it will go through. You could write matching lines in one file, and simultaneously write non-matching to another file.
+If you pick up <a href="doxygen/group__mod__machine__fuse.html">mod_machine_fuse</a> for input and run frozen as daemon - this predefined complex pipe will process any data at any time. Grep can't do that. </p>
+<p>Prev tutorial: <a href="tutorial_execution.html">Tutorial: execution</a></p>
+        
+        
+        
+        
+        <hr class="clear" />
+      </div> <!-- div#content -->
+      
+      
+      <div id="footer">
+        <p>
+          
+            frozen —
+          
+          Powered by <a href="http://markdoc.org/">Markdoc</a>.
+        </p>
+      </div>
+      
+    
+    
+    
+    <hr class="clear" />
+  </body>
+</html>

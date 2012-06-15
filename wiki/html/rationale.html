@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  
+  <head>
+    
+    
+      
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+      
+      
+      <title>
+        frozen » 
+        Rationale
+      </title>
+      
+      
+        <!-- YUI CSS reset, fonts, base -->
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?3.0.0/build/cssreset/reset-min.css&amp;3.0.0/build/cssfonts/fonts-min.css&amp;3.0.0/build/cssbase/base-min.css" media="screen, projection" />
+        
+        <link rel="stylesheet" type="text/css" href="media/css/style.css" media="screen, projection" />
+        <link rel="stylesheet" type="text/css" href="media/css/pygments.css" media="screen, projection" />
+      
+      
+      
+      
+      
+        
+          <!-- Google Analytics -->
+          <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+            })();
+          </script>
+        
+      
+    
+  </head>
+  
+  <body >
+    
+      
+      
+        
+          
+  
+    <ol id="breadcrumbs">
+      
+        <li class="crumb-0 not-last">
+          
+            <a href="./">index</a>
+          
+        </li>
+      
+        <li class="crumb-1 last">
+          
+            rationale
+          
+        </li>
+      
+    </ol> <!-- ol#breadcrumbs -->
+  
+
+        
+      
+      
+      <div id="content">
+        
+        
+        
+        <h1>Rationale</h1>
+<ul>
+<li><strong>Flow-based programming</strong></li>
+</ul>
+<p>There is a lot of frameworks and different api, and all of them require lot of learning and code writing to describe what you really want to do. Despite of 
+incredible flexibility, this approach is very annoying. Most of use cases reduce to several standard variations, for which there is no examples at all.
+Let's look at electronic engineering - it have simple parts, like transistors, ICs, microcontrollers, and circuit was done by hands. But look for state of art
+in this field - it is model oriented design. Engineer describe process to perform in diagrams and software generate code to run on microprocessor. With this approach
+it is easy to make changes, maintain and test things. Why not use this in general programming?
+So, today frozen can look silly - most of modules repeat coreutils and common tools. But tomorrow you could look at big flat screen with huge block diagram
+which in realtime show load to every computer in your cluster and you could change any parameter on fly, add some more workers and so on.</p>
+<ul>
+<li><strong>Configuration driven software</strong></li>
+</ul>
+<p>Nowadays there is too much of software in "install-and-forget" style. This kind of software is useful in most cases only for
+first time use, but then you start using it turns out it was pre-configured in source code to achieve some goals, which in turn
+can not match with your's. Only you can know how to construct most optimal solution of your problem. Fancy software can't do this,
+For example, one ip address can be address of server in nearby rack, and other ip can be on the another side of earth, so what software could do?
+Measure latency of every ip it see? It will result in horrible, complex code with lot of bugs and overhead to each request. But if where was
+the way to tell "hey, this link would be slow, let's set up a buffer or even compress data. But rest of links will keep send plain data".
+No way your current database can do so.</p>
+<ul>
+<li><strong>Configure every aspect</strong></li>
+</ul>
+<p>Big configs filled with comments to every "max_recv_buffer_size" and alike drives people crazy. There is no image of how the hell this thing working,
+and which parameter belong to which part of software. And this lead to bad configuration and resource wasting.</p>
+<ul>
+<li><strong>Distributed and fault-tolerant systems</strong></li>
+</ul>
+<p>To build such system need to know all possible solutions, pick one, learn it, sharpen your skills with it and finally use it in your
+project. And every time you face changes - you need to rewrite code and test it again. We need a new system, with which there would be
+no reason to write any code related to distribution part and no reason to rewrite existing modules. Flow-based programming allow us to do
+that. You write modules with clean interface. You write simple configuration files and use existing macro sets for distribution, load-balancing
+and fault-tolerance. If anything happens - you only change some configuration and whole system work again like a charm.</p>
+        
+        
+        
+        
+        <hr class="clear" />
+      </div> <!-- div#content -->
+      
+      
+      <div id="footer">
+        <p>
+          
+            frozen —
+          
+          Powered by <a href="http://markdoc.org/">Markdoc</a>.
+        </p>
+      </div>
+      
+    
+    
+    
+    <hr class="clear" />
+  </body>
+</html>
