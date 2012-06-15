@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>frozen</title><link href="/frozen/blog/" rel="alternate"></link><link href="/frozen/blog/feeds/all.atom.xml" rel="self"></link><id>/frozen/blog/</id><updated>2012-03-16T00:00:00+01:00</updated><entry><title>Destination-irrelevant architecture</title><link href="/frozen/blog/destination-irrelevant-architecture.html" rel="alternate"></link><updated>2012-03-16T00:00:00+01:00</updated><author><name>x86_64</name></author><id>tag:/frozen/blog,2012-03-16:destination-irrelevant-architecture.html</id><summary type="html">&lt;p&gt;Today many developers use request-based in everything - it is very easy to think in it, easy to understand, easy to use.
+But that happens next? Next we want to do things fast. Here we go for multi threaded program, event-driven programming, use co-routines,
+and every single bit we can find to speed this damn thing. And they work too - program speeds up. We see incredible async beasts that
+handle tens of thousands requests per second, but how about take a look to another approach in programming?&lt;/p&gt;
+&lt;h2&gt;Situation&lt;/h2&gt;
+&lt;p&gt;Let's imagine following situation: we have big cluster of computers, and we have big pile of data in it. We setup some db solution to
+store this data and retrieve. And this db solution is request-based - we say "i want this data", and server send to to us. Looks good, but
+i do not want to store and retrive data only. I want to process it and write it back in another place. And what happens?
+Single tiny client request huge pile of data, receive it over network, with some magic and time it process all that data and then send
+data back to cluster. Do you see bottleneck?&lt;/p&gt;
+&lt;h2&gt;Obvious solution&lt;/h2&gt;
+&lt;p&gt;Yes, we can setup more advanced software over cluster to run program over all computers in cluster. Then we need some split data algo,
+and it would be good if it use same machine for processing where data stored. Then we need some management software to start our program and
+watch how our system do. May be we hire OpenMP guy to make one huge program to run on cluster. And so on.&lt;/p&gt;
+&lt;p&gt;Too complex, too time-consuming, too costly.&lt;/p&gt;
+&lt;h2&gt;Less obvious solution&lt;/h2&gt;
+&lt;p&gt;Rethink architecture. May be we can somehow to fix this. What if i do not download all that data, but say there i want it to flow to.
+That would be easy - tiny client send request with destination inside, and destination itself is huge processing system which is easy
+to build with ZeroMQ. So, in this environment client can download data and use it by himself (an old way), can pass data to another
+destination (new way). And even more, that destination can flow resulting data to any destination too. Request can have any number of 
+nested destinations. I can even pass some data to client back, i can ask client to solve some specific job and get results back in system.&lt;/p&gt;
+&lt;p&gt;From higher point of view it would look even better. Lets say "company 1" do X with data, and other "company 2" do Y with data.
+We have data and we want to get X(Y(data)). I make request to company 1 to process data and send it to company 2, which in turn
+process incoming data and return it to me back. I'm not in middle of 1 and 2, and i would not see that intermediate data and i really do
+not want to see or store or retransmit it. That helps to same time and space a bit.&lt;/p&gt;
+&lt;p&gt;More - company 2 can use our own secret code Z to make Y processing even better. But we do not want to give them Z, nor access to api, nor
+pay to them to adapt their code to use our api. With this new architecture i can do it easy (of course company 1 and 2 need to support it too)
+I supply temporary zeromq socket to my request, and company 2 see - there is service available - it can use it. Then processing completes -
+temporary access closed and no one can use our code.&lt;/p&gt;
+&lt;h2&gt;Real example&lt;/h2&gt;
+&lt;p&gt;In frozen we can do like that very easy. It use ZeroMQ to build distributed systems, and it can pass sockets inside requests.
+Our service in turn see socket in request, unpack it, and use it to send data to next destination.&lt;/p&gt;
+&lt;p&gt;Code for service A:
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_servicea.m4"&gt;article_flow_servicea.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Code for service B:
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_serviceb.m4"&gt;article_flow_serviceb.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Code for client:
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_client.m4"&gt;article_flow_client.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;We start in different consoles:&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;article_flow_router&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;article_flow_servicea&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;article_flow_serviceb&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And run this on client:&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;article_flow_client&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In result we see following in service B console:&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;article_flow_serviceb&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; 
+&lt;span class="n"&gt;client&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;client_data&lt;/span&gt;
+&lt;span class="n"&gt;service&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;service_a&lt;/span&gt;
+&lt;span class="n"&gt;service&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;service_b&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here we see data we set in client, data which service A set, and service B.&lt;/p&gt;
+&lt;h2&gt;Real world&lt;/h2&gt;
+&lt;p&gt;Examples are cool, but can be not so good in real world. However, i use it to run my crawler project. I have crawler as "service A" and html
+processing engine as "service B". I can add as many crawlers and process engines in any time i want and shut them down too.
+Unfortunately, piece of code for crawler and processing engine would remain closed for a while. Rest of system - frozen and all that distributed
+stuff is open-source and you free to use it.&lt;/p&gt;</summary></entry><entry><title>Building distributed data processing pipeline</title><link href="/frozen/blog/building-distributed-data-processing-pipeline.html" rel="alternate"></link><updated>2012-02-21T00:00:00+01:00</updated><author><name>x86_64</name></author><id>tag:/frozen/blog,2012-02-21:building-distributed-data-processing-pipeline.html</id><summary type="html">&lt;p&gt;Then we try to process huge amount of data it nearly always results in building complex and hardly maintainable
+systems with all sort of tools in it: starting with split + rsync files between computers and ending with hardcore scripts on
+all possible languages. Recently some problems were solved, including appearance of ZeroMQ which really helps. But you still can not
+jump on to problem and solve it quickly, it always require to spend some time to prepare, build blocks and only then solve actual problems.
+Frozen try to fill this gap and provide these blocks. Lets see how we can build something distributed.&lt;/p&gt;
+&lt;h2&gt;Goal&lt;/h2&gt;
+&lt;p&gt;Lets took something simple and move to more complex things. Assume we have huge file with data represented as lines in it. We want to
+split it in several groups and for each group we have own special handler.&lt;/p&gt;
+&lt;h2&gt;Step 1: read data&lt;/h2&gt;
+&lt;p&gt;To read data we use following config:
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_dist_source.m4"&gt;article_dist_source.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;We just read data from file, next we split it in lines and send using zeromq to workers pool. We do not bother with doing it fast right here
+because we do not need to. If you have huge data, you possibly have huge cluster to process it, and very likely you have distributed fs on
+it. Every cluster configuration have it's own advantages and disadvantages. Maybe you have several data storage servers and they are very good
+at reading speed, but maybe you have common hardware with low read\write speed on hdd. In any case you should consider best approach for your
+cluster and use it. We can start as many readers with as many files as we want, because zeromq allow us to join this flows to be merged into
+one.&lt;/p&gt;
+&lt;h2&gt;Step 2: categorize data&lt;/h2&gt;
+&lt;p&gt;At first, we create dummy worker, it only print our data and we ensure that everything is ok.
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_dist_worker.m4"&gt;article_dist_worker.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Next step is to decide - which data where to go. Lets to in straightforward for now with [mod_machine_regexp.][]
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_dist_worker_reg.m4"&gt;article_dist_worker_reg.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Here we grep data with "dhcp" in it and send to another process. See both &lt;a href="/doxygen/group__mod__machine__regexp.html"&gt;mod_machine_regexp&lt;/a&gt;, 
+&lt;a href="/doxygen/group__mod__machine__switch.html"&gt;mod_machine_switch&lt;/a&gt; for more complex examples.&lt;/p&gt;
+&lt;h2&gt;Step 3: save results&lt;/h2&gt;
+&lt;p&gt;After processing we want to save results, lets save it to simple file.
+&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_dist_destination.m4"&gt;article_dist_destination.m4&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Testing&lt;/h2&gt;
+&lt;p&gt;As you can notice, all zeromq adresses is local, so we definitely need to start it on local machine, but it will work on cluster
+when you change addresses to correct one.&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_dist_destination&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+
+$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_dist_worker_reg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+
+$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_dist_source&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then source finish reading, we could see in worker console grepped data and destination worker wrote data to file too.&lt;/p&gt;
+&lt;h2&gt;Possible improvements&lt;/h2&gt;
+&lt;p&gt;That was easy, but not so useful. Here how we can improve things:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt; Problem: hardcoded addresses. Solutions:
+&lt;ul&gt;
+&lt;li&gt;As you can notice config file is m4 script, you can make include file with addresses, or join all files into one and use
+ifdef and roles supplied from command line&lt;/li&gt;
+&lt;li&gt;You can pass zeromq socket to remote machine. And remote machine use this socket to return data, or send it to another stage&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+Problem: hardcoded categorization and complex config file. Solutions:
+&lt;ul&gt;
+&lt;li&gt;It is still m4 file - use define() to describe common categorization rule, and just put MY_RULE(`dhcp', `tcp://somehost:12345') as many
+as you need.&lt;/li&gt;
+&lt;li&gt;You can pass parameters and rules for worker at same time with data. Don't know there it can be used, but you can.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Problem: not flexible processing. Solutions: if you have some very complex processing requirements, write module by yourself -
+it is just zeromq messages with clean data flowing around. Pick your favorite language and process as you like, return to frozen if need.&lt;/li&gt;
+&lt;/ul&gt;</summary></entry><entry><title>Flow-based programming intro</title><link href="/frozen/blog/flow-based-programming-intro.html" rel="alternate"></link><updated>2012-02-17T00:00:00+01:00</updated><author><name>x86_64</name></author><id>tag:/frozen/blog,2012-02-17:flow-based-programming-intro.html</id><summary type="html">&lt;h3&gt;Copying files in simple way&lt;/h3&gt;
+&lt;p&gt;What could be simplier than to copy file? May be this is not very interesting way to spend your time, but lets take a look
+how we can do job using frozen and it's flow-based nature. First, assume we want to copy file within same computer.
+We need to open both files, read some from one file to buffer, write this buffer to second file, and in both steps monitor return codes,
+right? No. We just call "transfer" method on file, like so:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_cp_01_simple.m4"&gt;article_cp_01_simple.m4&lt;/a&gt;&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_01_simple&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &amp;quot;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DINPUT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DOUTPUT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bak&lt;/span&gt;&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;That was pretty easy. But that if we want to copy file from different machines?&lt;/p&gt;
+&lt;h3&gt;Copying file to another computer&lt;/h3&gt;
+&lt;p&gt;If we want to copy something to another machine usually we call scp or rsync, but i always wanted to do this using ZeroMQ socket.
+So, let's do it! We need to open file, open zmq socket, read some info from file and then send message, then repeat until file ends, right?
+Again, no, and again, we use "transfer". Out (client) side configuration file will look like so:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_cp_02_client.m4"&gt;article_cp_02_client.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Not much changes for completely different destination. FILE macro hides some magic, it define new machine with given name and zeromq port.
+This machine pass all requests to remote side for zeromq socket and get reply from it. Transfer routine of file didn't know there actual
+write goes, so it could be anywhere, even on another machine.&lt;/p&gt;
+&lt;p&gt;Let's take a look at server side, maybe it is very complex?&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_cp_02_server.m4"&gt;article_cp_02_server.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Not at all. It have endless thread which read from zeromq socket, then EXPLODE request from incoming message and pass it to file.
+To use this we run in shell following commands:&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_02_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &amp;quot;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DOUTPUT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bak&lt;/span&gt;&amp;quot; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;
+$ &lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_02_client&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &amp;quot;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DINPUT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt;&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Copying files between computers&lt;/h3&gt;
+&lt;p&gt;Next step is to copy between two computers. Client:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/article_cp_03_client.m4"&gt;article_cp_03_client.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pretty obvious changes. We replace file to special machine and everything works just fine. Server side is same, just some macro added.
+To see it in action:&lt;/p&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_03_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &amp;quot;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DFILE&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DPORT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;8888&amp;quot; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;
+&lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_03_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &amp;quot;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DFILE&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TODO&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bak&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;DPORT&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;8887&amp;quot; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;
+&lt;span class="n"&gt;frozend&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="n"&gt;examples&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;article_cp_03_client&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;m4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However, data from file flows through our (client) computer and this is not so good. Possible solutions:
+&lt;em&gt; Pass zeromq socket as destination itself. Yes we can transfer socket object from one computer to another and everything would work fine, but unfortunately "transfer" method not well suitable for this. This is because socket is waiting for clean data and transfer will pass clean data, but other side server is expecting not clean data, but request. So, we need to do special server side - not best solution.
+&lt;/em&gt; Make "transfer" daemon. It would be standalone daemon, which would listen to our requests and will initiate transfer. Data would flow through daemon. Still not best.
+* Make "proxy" pattern for zeromq socket. In this pattern socket act as proxy, passing real requests to it to another end. This will not require server-side changes. Cool, but it not yet implemented, but would be.&lt;/p&gt;
+&lt;h3&gt;Enumerating things on LevelDB&lt;/h3&gt;
+&lt;p&gt;Copying files led us to nice idea - why bother to get data to ourselves, let's shoot everything with it. Last nice example would be
+remote LevelDB instance using our favorite ZeroMQ sockets.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/x86-64/frozen/blob/master/examples/example_leveldb_zmq.m4"&gt;example_leveldb_zmq.m4&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;As you can see, to enumerate database items we pass socket. And we can point this socket to any point in your network. But to see than it is actually
+working we point to ourselves and get all data. Notice how our (incoming) socket used in mustache parser. It use real object to enumerate it and
+zeromq support it, returning all messages as items with key "data".&lt;/p&gt;</summary></entry></feed>
