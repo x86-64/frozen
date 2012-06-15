@@ -8,6 +8,7 @@ SITEURL = '/frozen/blog'
 TIMEZONE = 'Europe/Paris'
 
 DEFAULT_LANG='en'
+GOOGLE_ANALYTICS='UA-7806052-2'
 
 # Blogroll
 LINKS =  (
