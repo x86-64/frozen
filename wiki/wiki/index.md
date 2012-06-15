@@ -38,15 +38,18 @@
 
 ## Get involved
 
+* [Blog][blog]
 * [Github project page][github]
+* [Doxygen files][doxygen]
 * [Discussion group & announcements][group]
-
 
 [flow-based]: http://en.wikipedia.org/wiki/Flow-based_programming
 [install]: install.html
 [rationale]: rationale.html
 [tutorial]: tutorial_basics.html
 [examples]: https://github.com/x86-64/frozen/tree/master/examples
+[blog]: http://x86-64.github.com/frozen/blog/
+[doxygen]: http://x86-64.github.com/frozen/doxygen/
 [group]: http://groups.google.com/group/frozend
 [github]: https://github.com/x86-64/frozen
 
