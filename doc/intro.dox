@@ -6,54 +6,10 @@
 
 /** @mainpage
  *
- *  @section intro Introduction
- *    Frozen is <a href="http://en.wikipedia.org/wiki/Flow-based_programming">flow-based</a> data processing daemon. It contain several modules for input, output and data processing.
- *    It can be used to construct complex data processing systems in short time, reuse existing solutions and code, connect "not-connectable" things.
- *
- *    There is one very nice approach called "Big Data" - it present new techniques for data processing allowing to scale in any amounts. Another one
- *    approach is industrial assembly lines - old but very good way of constructing things. Combining both of them we can achieve incredible levels
- *    of scalability and, in same time, simplicity. However, to do real stuff we need tools too, so frozen tries to fill gap in this field.
- *
- *    Architecture of frozen based on Unix philosophy of simple parts and clean interfaces. This allows usage of existing modules in various places.
- *    If some functionality not present, you can write it and connect it to frozen. There is no limit on language to use - if it can compile to shared
- *    library - it is very likely to work properly. With ZeroMQ module you can reuse any existing code, despite of nature of language.
- *
- *  @section goals Goals
- *    @li Create flexible tool to manage huge amounts of data
- *    @li Make tool to build distributed and fault-tolerant systems in easy way
- *    @li Standardize data storage and transmission formats
- *    @li Get rid of temporary scripts, conversion utilities, all sort of one-time parsers
- *
- *  @section caps Capabilities
- *    @li Common data types: ints, strings, lists, hashes and more  
- *    @li Embedded packing and unpacking routines for any type of data
- *    @li Processing modules: regular expressions, switches and many more
- *    @li Web development related modules: mongrel2, mustache, leveldb
- *    @li IO modules: fuse, file, memory, sockets
- *    @li Parallelization and distributed systems on top of ZeroMQ network
- *    @li Zero-copy everywhere it possible
- *    @li M4 macro in configuration files
- *    @li Benchmarking and measurements
- *
- *  @section get_info Get informed
- *  
- *  @li @ref article_rationale
- *  @li @ref tutorial_basics
- *  @li @ref tutorial_configuration
- *  @li @ref tutorial_execution
- *  @li @ref tutorial_common
- *  @li More @ref tutorial
- *  @li Read some @ref articles
- *
- *  @section get_started Get started
- *
- *  @li @ref article_install
- *  @li <a class="el" href="https://github.com/x86-64/frozen/tree/master/examples">Examples</a> 
- *  
- *  @section get_involved Get involved
- *
- *  @li <a class="el" href="https://github.com/x86-64/frozen">Github project page</a>
- *  @li <a class="el" href="http://groups.google.com/group/frozend">Discussion group & announcements</a>
- *  @li Architecture review: @ref machine, @ref api, @ref data.
+ * This is Doxygen generated api reference.
+ * @li Architecture review: @ref machine, @ref api, @ref data.
+
+ * @li <a href="http://x86-64.github.com/frozen/wiki/html/">Documentation</a>
+ * @li <a href="http://x86-64.github.com/frozen/blog/">Recent articles</a>
  *
  */
