@@ -1,4 +1,6 @@
+
 # Tutorial: most used modules
+<b>Warning</b>: this tutorial refer to old syntax which would be deprecated.
 ## Input
 ### Stdin
 

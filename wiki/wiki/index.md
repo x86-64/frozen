@@ -27,7 +27,8 @@
 ## Get started
 
 * [Rationale][rationale]
-* [Tutorial][tutorial]
+* [How it works? (tutorial)][tutorial]
+* [Tutorials list][tutorials]
 * [Examples][examples]
 * [How to install][install]
 
@@ -42,6 +43,7 @@
 [install]: install.html
 [rationale]: rationale.html
 [tutorial]: tutorial_basics.html
+[tutorials]: tutorials.html
 [examples]: https://github.com/x86-64/frozen/tree/master/examples
 [blog]: http://x86-64.github.com/frozen/blog/
 [doxygen]: http://x86-64.github.com/frozen/doxygen/

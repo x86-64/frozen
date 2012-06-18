@@ -1,4 +1,6 @@
+
 # Tutorial: configuration
+<b>Warning</b>: this tutorial refer to old syntax which would be deprecated.
 ## Shop configuration
 
 To describe shop you want to build you should write configuration file. Configuration file syntax is simple and looks like JSON with

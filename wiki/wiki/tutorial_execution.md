@@ -1,10 +1,10 @@
-# Tutorial: starting daemon
+# Tutorial: executing config
 
 To actually execute some configuration you should type in your shell following:
 
 	$ frozend -c configuration_file.conf
 
-<b>frozend</b> here is frozen daemon which parse configration file and create machines. <b>frozend --help</b> for more daemon options.
+<b>frozend</b> here is frozen application which parse configration file and execute it. <b>frozend --help</b> for more options.
 
 If you use [mod_machine_stdin][] in configuration, pass input as usual. Same for [mod_machine_stdout][], [mod_machine_stderr][].
 
