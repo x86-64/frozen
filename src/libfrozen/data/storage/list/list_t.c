@@ -6,6 +6,13 @@
 #include <modifiers/slider/slider_t.h>
 #include <special/ref/ref_t.h>
 #include <core/data/data_t.h>
+#include <numeric/uint/uint_t.h>
+#include <special/consumable/consumable_t.h>
+
+typedef struct ctx_lookup {
+	uintmax_t              key_uint;
+	data_t                 output;
+} ctx_lookup;
 
 ssize_t        data_list_t(data_t *data){ // {{{
 	if( (data->ptr = list_t_alloc()) == NULL)
@@ -24,6 +31,13 @@ static ssize_t iter_list_t_compare(data_t *data, fastcall_compare *fargs){ // {{
 	
 	if(r_compare.result == 0){ // if equal - exit
 		fargs->result = 0;
+		return 1;
+	}
+	return 0;
+} // }}}
+static ssize_t iter_list_t_lookup(data_t *data, ctx_lookup *ctx){ // {{{
+	if(ctx->key_uint-- == 0){
+		ctx->output = *data;
 		return 1;
 	}
 	return 0;
@@ -191,10 +205,31 @@ static ssize_t data_list_t_create(data_t *data, fastcall_crud *fargs){ // {{{
 			return -ENOMEM;
 	}
 	
-	if(fargs->key == NULL)
+	if(fargs->key == NULL || data_is_void(fargs->key))
 		return list_t_push(fdata, fargs->value);
 	
 	return -ENOSYS;
+} // }}}
+static ssize_t data_list_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              key_uint;
+	data_t                 d_key;
+	data_t                *d_key_ptr         = &d_key;
+	list_t                *fdata             = (list_t *)data->ptr;
+	
+	if(fargs->key == NULL || fargs->value == NULL)
+		return -EINVAL;
+	
+	if(helper_key_current(fargs->key, &d_key) < 0)
+		d_key_ptr = fargs->key;
+	
+	data_get(ret, TYPE_UINTT, key_uint, d_key_ptr);
+	if(ret == 0){
+		ctx_lookup ctx = { key_uint };
+		if(list_t_enum(fdata, (list_t_callback)&iter_list_t_lookup, &ctx) != 0)
+			return data_notconsumable_t(fargs->value, ctx.output);
+	}
+	return -EINVAL;
 } // }}}
 static ssize_t data_list_t_delete(data_t *data, fastcall_crud *fargs){ // {{{
 	list_t                *fdata             = (list_t *)data->ptr;
@@ -264,6 +299,7 @@ data_proto_t list_t_proto = { // {{{
 		[ACTION_CONTROL]      = (f_data_func)&data_default_control,
 		
 		[ACTION_CREATE]       = (f_data_func)&data_list_t_create,
+		[ACTION_LOOKUP]       = (f_data_func)&data_list_t_lookup,
 		[ACTION_DELETE]       = (f_data_func)&data_list_t_delete,
 		[ACTION_ENUM]         = (f_data_func)&data_list_t_enum,
 		[ACTION_PUSH]         = (f_data_func)&data_list_t_push,
@@ -293,8 +329,15 @@ data_proto_t list_end_t_proto = { // {{{
 }; // }}}
 
 static list_chunk_t *    chunk_alloc(data_t *data){ // {{{
+	ssize_t                ret;
 	list_chunk_t          *chunk;
-	ref_t                 *ref               = ref_t_alloc(data);
+	data_t                 consumed;
+	
+	holder_consume(ret, consumed, data);
+	if(ret < 0)
+		return NULL;
+	
+	ref_t                 *ref               = ref_t_alloc(&consumed);
 	data_t                 d_ref             = DATA_PTR_REFT(ref);
 	
 	if(data == NULL || ref == NULL)
