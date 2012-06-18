@@ -1,0 +1,19 @@
+local db = 
+	key    ~ list_t : { }      >
+	format ~ record_t : "\n"   >
+	"value1\nvalue2\n"
+
+sub {
+	db[!data data] | sub { db[!data slave].create(void_t:"", $key); };
+}
+
+
+sub {
+	$value1 = void_t:"", $value2 = void_t:"";
+	
+	db.lookup(0, $value1);
+	db.lookup(1, $value2);
+	
+	$value1 | fd_t:"stdout";
+	$value2 | fd_t:"stdout";
+}

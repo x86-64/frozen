@@ -1,0 +1,14 @@
+local db = {
+	key1 = "value1",
+	key2 = "value2"
+}
+
+sub {
+	$value1 = void_t:"", $value2 = void_t:"";
+	
+	db.lookup(hashkey_t:"key1", $value1);
+	db.lookup(hashkey_t:"key2", $value2);
+	
+	$value1 | fd_t:"stdout";
+	$value2 | fd_t:"stdout";
+}
