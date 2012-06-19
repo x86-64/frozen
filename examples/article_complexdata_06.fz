@@ -1,6 +1,6 @@
 local db = 
 	format ~ record_t : "\n"   >
-	file_t : "examples/article_complexdata_06.dat"
+	file_t : "../examples/article_complexdata_06.dat"
 
 sub {
 	$value1 = void_t:"", $value2 = void_t:"";
