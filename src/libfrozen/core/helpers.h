@@ -78,4 +78,34 @@ typedef struct helper_control_data_t {
 API ssize_t              helper_control_data     (data_t *data, fastcall_control *fargs, helper_control_data_t *internal_ptrs);
 // }}}
 
+// Data query helpers {{{
+ssize_t              helper_data_convert_from(data_t *data, data_t *src, uintmax_t format, uintmax_t *transfered);
+ssize_t              helper_data_convert_to(data_t *data, data_t *dest, uintmax_t format, uintmax_t *transfered);
+ssize_t              helper_data_free(data_t *data);
+ssize_t              helper_data_control(data_t *data, uintmax_t function, data_t *key, data_t *value);
+ssize_t              helper_data_consume(data_t *data, data_t *dest);
+ssize_t              helper_data_resize(data_t *data, uintmax_t length);
+ssize_t              helper_data_length(data_t *data, uintmax_t *length, uintmax_t format);
+ssize_t              helper_data_read(data_t *data, uintmax_t offset, void *buffer, uintmax_t *buffer_size);
+ssize_t              helper_data_write(data_t *data, uintmax_t offset, void *buffer, uintmax_t *buffer_size);
+ssize_t              helper_data_add(data_t *data, data_t *data2);
+ssize_t              helper_data_sub(data_t *data, data_t *data2);
+ssize_t              helper_data_mul(data_t *data, data_t *data2);
+ssize_t              helper_data_div(data_t *data, data_t *data2);
+ssize_t              helper_data_inc(data_t *data);
+ssize_t              helper_data_dec(data_t *data);
+ssize_t              helper_data_compare(data_t *data, data_t *data2, uintmax_t *result);
+ssize_t              helper_data_create(data_t *data, data_t *key, data_t *value);
+ssize_t              helper_data_lookup(data_t *data, data_t *key, data_t *value);
+ssize_t              helper_data_update(data_t *data, data_t *key, data_t *value);
+ssize_t              helper_data_delete(data_t *data, data_t *key, data_t *value);
+ssize_t              helper_data_push(data_t *data, data_t *value);
+ssize_t              helper_data_pop(data_t *data, data_t *value);
+ssize_t              helper_data_enum(data_t *data, data_t *dest);
+ssize_t              helper_data_view(data_t *data, uintmax_t format, void **ptr, uintmax_t *length, data_t *freeit);
+
+data_t               helper_data_from_string(datatype_t type, char *string);
+data_t               helper_data_from_hash(datatype_t type, hash_t *hash);
+// }}}
+
 #endif
