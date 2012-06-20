@@ -244,6 +244,7 @@ ssize_t       data_default_convert_from  (data_t *dest, fastcall_convert_from *f
 ssize_t       data_default_free          (data_t *data, fastcall_free *fargs){ // {{{
 	if(data->ptr != NULL)
 		free(data->ptr);
+	data_set_void(data);
 	return 0;
 } // }}}
 ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs){ // {{{
