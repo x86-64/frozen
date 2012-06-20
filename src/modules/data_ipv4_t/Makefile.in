@@ -51,7 +51,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/modules/data_ipv4_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_null_t/config.m4 \
 	$(top_srcdir)/./src/modules/data_time_t/config.m4 \
+	$(top_srcdir)/./src/modules/pcre/config.m4 \
+	$(top_srcdir)/./src/modules/regexp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/allocator/fixed/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/compare/anything/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/data/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
@@ -63,57 +67,63 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/format/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/hashkey/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/enum/named/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/format/binstring/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/format/netstring/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/format/record/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/lang/go_interface/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slider/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/struct/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/numeric/uint/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/bind/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/consumable/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/counter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/env/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/immortal/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/inner/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/length/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/special/ref/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/unique/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/complexkey/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/folder/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/list/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/memory/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/raw/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/cache/cache/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/sync/mutex/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/triplets/format/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/triplets/key/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/query/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/data/regexp/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/data/transfer/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/murmur/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/index/fill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/index/hashtable/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/index/lookup/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/index/mphf/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/console/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/fuse/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/ipc/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/io/tcp/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/machine/benchmark/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/machine/factory/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/machine/limit/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/machine/morph/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/machine/pool/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/machine/rebuild/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/assign/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/debug/config.m4 \
+	$(top_srcdir)/./src/libfrozen/machines/request/delay/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/emitter/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/end/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/implode/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/null/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/request/switch/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/pass/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/shop/return/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/shop/try/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/sync/mutex/config.m4 \
 	$(top_srcdir)/configure.ac
@@ -184,8 +194,6 @@ BISON = @BISON@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CHECK_CFLAGS = @CHECK_CFLAGS@
-CHECK_LIBS = @CHECK_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -318,7 +326,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 modules_LTLIBRARIES = module_ipv4_t.la
 module_ipv4_t_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/ -DFROZEN_MODULE
-module_ipv4_t_la_LDFLAGS = -module -avoid-version -shared
+module_ipv4_t_la_LDFLAGS = -module -avoid-version -shared -lfrozen
 module_ipv4_t_la_SOURCES = main.c
 headers_mydirdir = $(headersdir)/modules/ipv4_t/
 headers_mydir_HEADERS = ipv4_t.h
