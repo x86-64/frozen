@@ -80,6 +80,7 @@ void *alloca (size_t);
 #include <list.h>
 #include <errors.h>
 #include <public.h>
+#include <paths.h>
 
 #include <configs/config.h>
 #include <enums.h>
@@ -91,8 +92,11 @@ void *alloca (size_t);
 #include <machine_selected.h>
 #include <helpers.h>
 
+extern char  *frozen_modules_dir;
+
 API int       frozen_init(void);
 API int       frozen_destroy(void);
+API void      frozen_set_modules_dir(char *dir);
     intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y);
     intmax_t  safe_mul(uintmax_t *res, uintmax_t x, uintmax_t y);
     intmax_t  safe_div(uintmax_t *res, uintmax_t x, uintmax_t y);

@@ -4,8 +4,109 @@
  */
 
 #include "libfrozen.h"
+#include <dirent.h>
+#include <dlfcn.h>
 
-uintmax_t inited = 0;
+uintmax_t  inited = 0;
+char      *frozen_modules_dir = FROZEN_MODULESDIR;
+
+// modules {{{
+//   go modules {{{
+int go_inited = 0;
+
+void module_init_go(void){
+	void *libgo_ptr;
+	void (*libgo_mallocinit)(void);
+	void (*libgo_goroutineinit)(void *);
+	void (*libgo_gc)(void);
+	void (*libgo_sig)(void);
+	char t[20];
+
+	if(go_inited == 0){
+		if( !(libgo_ptr = dlopen("libgo.so",            RTLD_NOW | RTLD_GLOBAL )) )
+			return;
+		
+		// TODO error handling
+		*(void **)(&libgo_mallocinit)    = dlsym(libgo_ptr, "runtime_mallocinit");
+		*(void **)(&libgo_goroutineinit) = dlsym(libgo_ptr, "__go_gc_goroutine_init");
+		*(void **)(&libgo_sig)           = dlsym(libgo_ptr, "__initsig");
+		*(void **)(&libgo_gc)            = dlsym(libgo_ptr, "__go_enable_gc");
+		
+		(*libgo_mallocinit)();
+		(*libgo_goroutineinit)(&t);
+		(*libgo_sig)();
+		//(*libgo_gc)();
+		
+		go_inited = 1;
+	}
+}
+
+void module_load_go(void *module_handle){ // {{{
+	void (*goinitmain)(void);
+	void (*gomain)(void);
+	
+	*(void **)(&goinitmain)          = dlsym(module_handle, "__go_init_main");
+	*(void **)(&gomain)              = dlsym(module_handle, "main.main");
+	(*goinitmain)();
+	(*gomain)();
+
+	return;
+} // }}}
+int module_is_gomodule(void *module_handle){ // {{{
+	return (dlsym(module_handle, "main.main") != NULL);
+} // }}}
+// }}}
+// c modules {{{
+void module_load_c(void *module_handle){ // {{{
+	void (*cmain)(void);
+	
+	*(void **)(&cmain)              = dlsym(module_handle, "main");
+	(*cmain)();
+
+	return;
+} // }}}
+int module_is_cmodule(void *module_handle){ // {{{
+	return (dlsym(module_handle, "main") != NULL);
+} // }}}
+// }}}
+void modules_load(void){ // {{{
+	char                  *ext;
+	DIR                   *modules_dir;
+	struct dirent         *dir;
+	char                   module_path[4096];
+	void                  *module_handle;
+	
+	module_init_go();
+
+	if((modules_dir = opendir(frozen_modules_dir)) == NULL)
+		return;
+	
+	while( (dir = readdir(modules_dir)) != NULL){
+		if((ext = strrchr(dir->d_name, '.')) == NULL)
+			continue;
+		
+		if(strcasecmp(ext, ".so") != 0)
+			continue;
+
+		if( snprintf(module_path, sizeof(module_path), "%s/%s", frozen_modules_dir, dir->d_name) >= sizeof(module_path) )
+			continue; // truncated path
+		
+		dlerror();
+		if( (module_handle = dlopen(module_path, RTLD_NOW)) == NULL){
+			printf("warning: file '%s' failed: %s\n", dir->d_name, dlerror());
+			continue;
+		}
+
+		if( module_is_gomodule(module_handle) )
+			module_load_go(module_handle);
+
+		if( module_is_cmodule(module_handle) )
+		      module_load_c(module_handle);
+	}
+
+	closedir(modules_dir);
+} // }}}
+// }}}
 
 /** @brief Initialize library
  * @return 0 on success
@@ -25,6 +126,8 @@ int frozen_init(void){
 	if( (ret = frozen_machine_init()) != 0)
 		return ret;
 	
+	modules_load();
+	
 	inited = 1;
 	return 0;
 }
@@ -43,6 +146,7 @@ int frozen_destroy(void){
 	inited = 0;
 	return 0;
 }
+
 
 intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y){
 	uintmax_t t;

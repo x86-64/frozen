@@ -136,9 +136,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_frozend_OBJECTS = frozend-frozend.$(OBJEXT)
 frozend_OBJECTS = $(am_frozend_OBJECTS)
-am__DEPENDENCIES_1 =
-frozend_DEPENDENCIES = $(top_srcdir)/src/libfrozen/libfrozen.la \
-	$(am__DEPENDENCIES_1)
+frozend_DEPENDENCIES = $(top_srcdir)/src/libfrozen/libfrozen.la
 frozend_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(frozend_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -302,11 +300,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@HAVE_DL_TRUE@OPTIONAL = -ldl
-frozend_SOURCES = frozend.c paths.h paths.h.in
+frozend_SOURCES = frozend.c
 frozend_CFLAGS = -I$(top_srcdir)/src/libfrozen/core/ -I$(top_srcdir)/src/libfrozen/data/
-frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la $(OPTIONAL)
-CLEANFILES = paths.h
+frozend_LDADD = $(top_srcdir)/src/libfrozen/libfrozen.la
 all: all-am
 
 .SUFFIXES:
@@ -543,7 +539,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -638,10 +633,6 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
-
-frozend.c: paths.h
-paths.h: paths.h.in
-	cat paths.h.in | sed "s#%modulesdir%#${modulesdir}#g" | sed "s#%m4sdir%#${m4sdir}#g" > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

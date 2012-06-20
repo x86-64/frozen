@@ -134,7 +134,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfrozen_core_la_LIBADD =
+am__DEPENDENCIES_1 =
+libfrozen_core_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libfrozen_core_la_OBJECTS = libfrozen_core_la-libfrozen.lo \
 	libfrozen_core_la-api.lo libfrozen_core_la-errors.lo \
@@ -333,6 +334,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+@HAVE_DL_TRUE@OPTIONAL = -ldl
 AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = \
 	errors_list.c                           \
@@ -356,10 +358,12 @@ libfrozen_core_la_SOURCES = \
                         configs/config_parser.lex.c
 
 libfrozen_core_la_CFLAGS = -I@top_srcdir@/src/libfrozen/data/
+libfrozen_core_la_LIBADD = $(OPTIONAL)
 headers_confdir = $(headersdir)/configs/
-headers_HEADERS = libfrozen.h api.h errors.h data.h list.h machine.h helpers.h public.h enums.h data_selected.h machine_selected.h
+headers_HEADERS = libfrozen.h api.h errors.h data.h list.h machine.h helpers.h public.h enums.h data_selected.h machine_selected.h paths.h
 headers_conf_HEADERS = configs/config.h
 CLEANFILES = \
+		paths.h                                                \
 		configs/config_parser.tab.c                            \
 		configs/config_parser.tab.h                            \
 		configs/config_parser.lex.c                            \
@@ -813,6 +817,10 @@ configs/config_parser.tab.c: configs/config_parser.lex.c
 	${BISON} -p config_ -d -b configs/config_parser configs/config_parser.y
 configs/config_parser.lex.c:
 	${FLEX}  -Pconfig_ --bison-bridge -o configs/config_parser.lex.c configs/config_parser.l
+
+libfrozen.c: paths.h
+paths.h: paths.h.in
+	cat paths.h.in | sed "s#%modulesdir%#${modulesdir}#g" | sed "s#%m4sdir%#${m4sdir}#g" > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

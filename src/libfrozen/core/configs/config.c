@@ -1,7 +1,7 @@
 #include <libfrozen.h>
 
 char  defconfig_m4_path[] = M4PATH;
-char  defconfig_m4_incs[] = "";
+char  defconfig_m4_incs[] = FROZEN_M4SDIR;
 char  defconfig_m4_opts[] = "";
 
 char *config_m4_path      = defconfig_m4_path;

@@ -1,0 +1,4 @@
+
+#define FROZEN_MODULESDIR "%modulesdir%"
+#define FROZEN_M4SDIR "-I%m4sdir%"
+
