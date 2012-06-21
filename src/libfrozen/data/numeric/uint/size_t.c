@@ -203,13 +203,18 @@ static ssize_t data_size_t_convert_from(data_t *dst, fastcall_convert_from *farg
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(size_t) };
-			if( (ret = data_query(fargs->src, &r_read)) < 0){
-				// TODO memleak
-				return ret;
+			if(fargs->src->type == dst->type){
+				*(size_t *)(dst->ptr) = *(size_t *)(fargs->src->ptr);
+				ret = 0;
+			}else{
+				fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(size_t) };
+				if( (ret = data_query(fargs->src, &r_read)) < 0){
+					// TODO memleak
+					return ret;
+				}
+				
+				*(size_t *)(dst->ptr) = *((size_t *)buffer);
 			}
-			
-			*(size_t *)(dst->ptr) = *((size_t *)buffer);
 			transfered = sizeof(size_t);
 			break;
 			

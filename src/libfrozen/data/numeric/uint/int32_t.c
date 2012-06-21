@@ -203,13 +203,18 @@ static ssize_t data_int32_t_convert_from(data_t *dst, fastcall_convert_from *far
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(int32_t) };
-			if( (ret = data_query(fargs->src, &r_read)) < 0){
-				// TODO memleak
-				return ret;
+			if(fargs->src->type == dst->type){
+				*(int32_t *)(dst->ptr) = *(int32_t *)(fargs->src->ptr);
+				ret = 0;
+			}else{
+				fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(int32_t) };
+				if( (ret = data_query(fargs->src, &r_read)) < 0){
+					// TODO memleak
+					return ret;
+				}
+				
+				*(int32_t *)(dst->ptr) = *((int32_t *)buffer);
 			}
-			
-			*(int32_t *)(dst->ptr) = *((int32_t *)buffer);
 			transfered = sizeof(int32_t);
 			break;
 			
