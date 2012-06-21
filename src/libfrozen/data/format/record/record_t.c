@@ -8,6 +8,7 @@
 #include <modifiers/slider/slider_t.h>
 #include <io/io/io_t.h>
 #include <storage/raw/raw_t.h>
+#include <special/ref/ref_t.h>
 
 typedef struct record_t {
 	data_t                 separator;
@@ -94,7 +95,7 @@ static ssize_t data_record_t(data_t *data, data_t separator){ // {{{
 		return -ENOMEM;
 	
 	data_raw_t_empty(&fdata->item);
-	fdata->separator = separator;
+	data_ref_t(&fdata->separator, separator);
 	
 	data->type = TYPE_RECORDT;
 	data->ptr  = fdata;
@@ -187,10 +188,13 @@ static ssize_t data_record_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			if(ret < 0)
 				return ret;
 			
-			if( (ret = data_record_t(dst, fargs_src_separator)) < 0){
+			if( (fdata = dst->ptr = malloc(sizeof(record_t))) == NULL ){
 				data_free(&fargs_src_separator);
-				return ret;
+				return -ENOMEM;
 			}
+			
+			data_raw_t_empty(&fdata->item);
+			fdata->separator = fargs_src_separator;
 			return 0;
 			
 		default:
