@@ -177,7 +177,7 @@ static ssize_t data_int16_t_convert_to(data_t *src, fastcall_convert_to *fargs){
 static ssize_t data_int16_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
 	char                  *endptr;
-	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	char                   buffer[DEF_BUFFER_SIZE];
 	uintmax_t              transfered                = 0;
 	
 	if(fargs->src == NULL)
@@ -196,7 +196,8 @@ static ssize_t data_int16_t_convert_from(data_t *dst, fastcall_convert_from *far
 				// TODO memleak
 				return ret;
 			}
-			
+			buffer[r_read_str.buffer_size] = '\0';
+
 			*(int16_t *)(dst->ptr) = (int16_t )strtoul(buffer, &endptr, 10);
 			transfered = (endptr - buffer);
 			break;
