@@ -10,7 +10,7 @@ static list                    dynamic_formats   = LIST_INITIALIZER;
 #endif
 
 static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
-	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	char                   buffer[DEF_BUFFER_SIZE];
 	keypair_t             *kp;
 	format_t               key_val;
 	uintmax_t              transfered        = 0;
@@ -30,6 +30,8 @@ static ssize_t data_format_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(buffer) - 1 };
 			if(data_query(fargs->src, &r_read) != 0)
 				return -EFAULT;
+			
+			buffer[r_read.buffer_size] = '\0';
 			
 			key_val    = portable_hash(buffer);
 			transfered = strlen(buffer);
