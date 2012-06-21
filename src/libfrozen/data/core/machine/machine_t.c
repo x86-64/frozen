@@ -10,7 +10,7 @@ static ssize_t data_machine_t_default(data_t *data, void *hargs){ // {{{
 } // }}}
 static ssize_t data_machine_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
 	ssize_t                ret;
-	char                   buffer[DEF_BUFFER_SIZE] = { 0 };
+	char                   buffer[DEF_BUFFER_SIZE];
 	
 	if(fargs->src == NULL)
 		return -EINVAL;
