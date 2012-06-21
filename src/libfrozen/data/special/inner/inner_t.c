@@ -15,7 +15,8 @@ ssize_t data_inner_t(data_t *data, data_t storage, data_t key, uintmax_t control
 	fdata->storage = storage;
 	fdata->key     = key;
 	fdata->control = control;
-	
+	fdata->cached_value = NULL;
+
 	data->type = TYPE_INNERT;
 	data->ptr  = fdata;
 	return 0;
@@ -64,14 +65,17 @@ static ssize_t inner_t_find(data_t *data, data_t **inner, data_t *freeit){ // {{
 		ret    = data_query(&fdata->storage, &r_lookup);
 		*inner = freeit;
 	}else{
-		fastcall_control r_control = {
-			{ 5, ACTION_CONTROL },
-			HK(data),
-			&fdata->key,
-			NULL
-		};
-		ret    = data_query(&fdata->storage, &r_control);
-		*inner = r_control.value;
+		if(fdata->cached_value == NULL){
+			fastcall_control r_control = {
+				{ 5, ACTION_CONTROL },
+				HK(data),
+				&fdata->key,
+				NULL
+			};
+			ret    = data_query(&fdata->storage, &r_control);
+			fdata->cached_value = r_control.value;
+		}
+		*inner = fdata->cached_value;
 	}
 	return ret;
 } // }}}

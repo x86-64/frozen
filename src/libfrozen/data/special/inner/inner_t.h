@@ -14,6 +14,8 @@ typedef struct inner_t {
 	data_t                 storage;
 	data_t                 key;
 	uintmax_t              control;
+
+	data_t                *cached_value;
 } inner_t;
 
 API ssize_t data_inner_t(data_t *data, data_t storage, data_t key, uintmax_t control);
