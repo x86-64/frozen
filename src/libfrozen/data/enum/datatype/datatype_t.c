@@ -73,10 +73,14 @@ static ssize_t data_datatype_t_convert_from(data_t *dst, fastcall_convert_from *
 			break;
 
 		case FORMAT(native):;
-			fastcall_read r_clean = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(datatype_t) };
-			if( (ret = data_query(fargs->src, &r_clean)) < 0)
-				return ret;
-			
+			if(fargs->src->type == dst->type){
+				*(datatype_t *)(dst->ptr) = *(datatype_t *)(fargs->src->ptr);
+				ret = 0;
+			}else{
+				fastcall_read r_clean = { { 5, ACTION_READ }, 0, dst->ptr, sizeof(datatype_t) };
+				if( (ret = data_query(fargs->src, &r_clean)) < 0)
+					return ret;
+			}
 			transfered = sizeof(datatype_t);
 			break;
 		
