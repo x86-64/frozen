@@ -5,6 +5,19 @@
 
 #include <ref_t.h>
 
+ssize_t           data_ref_t(data_t *data, data_t value){ // {{{
+	ref_t         *fdata;
+	
+	if( (fdata = malloc(sizeof(ref_t))) == NULL )
+		return -ENOMEM;
+	
+	fdata->refs = 1;
+	fdata->data = value;
+
+	data->type = TYPE_REFT;
+	data->ptr  = fdata;
+	return 0;
+} // }}}
 ref_t *           ref_t_alloc(data_t *data){ // {{{
 	ref_t                 *fdata;
 

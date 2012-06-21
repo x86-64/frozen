@@ -35,6 +35,7 @@ typedef struct ref_t {
 	uintmax_t              refs;
 } ref_t;
 
+ssize_t           data_ref_t(data_t *data, data_t value);
 ref_t *           ref_t_alloc(data_t *data);
 void              ref_t_acquire(ref_t *ref);
 void              ref_t_destroy(ref_t *ref);
