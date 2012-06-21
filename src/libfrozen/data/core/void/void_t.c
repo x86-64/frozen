@@ -17,6 +17,9 @@ static ssize_t data_void_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	data_query(fargs->dest, &r_push);
 	return 0;
 } // }}}
+static ssize_t data_void_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	return 0;
+} // }}}
 
 data_proto_t void_t_proto = {
 	.type          = TYPE_VOIDT,
@@ -28,6 +31,7 @@ data_proto_t void_t_proto = {
 		[ACTION_CONVERT_FROM] = (f_data_func)&data_void_t_convert_from,
 		[ACTION_PUSH]         = (f_data_func)&data_void_t_push,
 		[ACTION_ENUM]         = (f_data_func)&data_void_t_enum,
+		[ACTION_FREE]         = (f_data_func)&data_void_t_free,
 	}
 };
 
