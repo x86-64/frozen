@@ -87,6 +87,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/ref/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/unique/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/complexkey/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/folder/config.m4 \
@@ -99,7 +100,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/kill/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/daemon/thread/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/query/config.m4 \
-	$(top_srcdir)/./src/libfrozen/machines/data/split/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/data/structs/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/jenkins/config.m4 \
 	$(top_srcdir)/./src/libfrozen/machines/hash/murmur/config.m4 \
@@ -329,7 +329,7 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libfrozen_data_format.la
 libfrozen_data_format_la_SOURCES = triplet_format_t.c
 headers_mydirdir = $(headersdir)/triplets/format/
-headers_mydir_HEADERS = triplet_format_t.h
+headers_mydir_HEADERS = triplet_format_t.h triplet_format_single_t.h
 libfrozen_data_format_la_CFLAGS = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 

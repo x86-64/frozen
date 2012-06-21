@@ -244,3 +244,99 @@ data_proto_t triplet_format_t_proto = {
 	}
 };
 
+static ssize_t data_enum_single_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest, data_t *key){ // {{{
+	ssize_t                ret;
+	uintmax_t              offset;
+	data_t                 converted;
+	data_t                 sl_storage        = DATA_SLIDERT(storage, 0);
+	
+	holder_copy(ret, &converted, item_template);
+	if(ret < 0)
+		return ret;
+	
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &sl_storage, format };
+	if( (ret = data_query(&converted, &r_convert)) < -1)
+		goto error;
+	
+	if(ret == -1){
+		ret = 0;
+		goto error;
+	}
+	
+	offset = data_slider_t_get_offset(&sl_storage);
+	data_slider_t_set_offset(&sl_storage, r_convert.transfered, SEEK_CUR);
+	
+	data_t          d_offset       = DATA_UINTT(offset);
+	data_t          d_complex_key  = DATA_COMPLEXKEYT(d_offset, *key);
+	fastcall_create r_create       = { { 4, ACTION_CREATE }, &d_complex_key, &converted };
+	ret = data_query(dest, &r_create);
+	
+error:
+	data_free(&converted);
+	return ret;
+} // }}}
+static ssize_t data_triplet_format_single_t_iter_iot(data_t *data, enum_userdata *userdata, fastcall_create *fargs){ // {{{
+	data_t                 d_void            = DATA_VOID;
+	data_t                *key;
+	
+	if(fargs->value == NULL)
+		return 0;
+	
+	key = fargs->key ? fargs->key : &d_void;
+	
+	return data_enum_single_storage(fargs->value, userdata->data, FORMAT(packed), userdata->fargs->dest, key);
+} // }}}
+
+static ssize_t data_triplet_format_single_t_convert_from(data_t *dst, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	
+	switch(fargs->format){
+		case FORMAT(hash):;
+			ret = data_triplet_format_t_convert_from(dst, fargs);
+			
+			if(dst->type == TYPE_TRIPLETFORMATT)
+				dst->type = TYPE_TRIPLETFORMATSINGLET;
+			
+			return ret;
+			
+		default:
+			break;
+	}
+	return -ENOSYS;
+} // }}}
+static ssize_t data_triplet_format_single_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
+	ssize_t                ret;
+	triplet_format_t      *fdata             = (triplet_format_t *)data->ptr;
+	
+	if(data_is_void(&fdata->storage))
+		return -EINVAL;
+	
+	enum_userdata          userdata          = { &fdata->slave, fargs };
+	data_t                 iot               = DATA_IOT(&userdata, (f_io_func)&data_triplet_format_single_t_iter_iot);
+	fastcall_enum          r_enum            = { { 3, ACTION_ENUM }, &iot };
+	ret = data_query(&fdata->storage, &r_enum);
+	
+	// last
+	fastcall_create r_end = { { 3, ACTION_CREATE }, NULL, NULL };
+	data_query(fargs->dest, &r_end);
+	
+	return ret;
+} // }}}
+
+data_proto_t triplet_format_single_t_proto = {
+	.type            = TYPE_TRIPLETFORMATSINGLET,
+	.type_str        = "triplet_format_single_t",
+	.api_type        = API_HANDLERS,
+	.properties      = DATA_PROXY,
+	.handlers        = {
+		[ACTION_CONVERT_FROM] = (f_data_func)&data_triplet_format_single_t_convert_from,
+		[ACTION_FREE]         = (f_data_func)&data_triplet_format_t_free,
+		[ACTION_CONTROL]      = (f_data_func)&data_triplet_format_t_control,
+		
+		[ACTION_CREATE]       = (f_data_func)&data_triplet_format_t_crud,
+		[ACTION_LOOKUP]       = (f_data_func)&data_triplet_format_t_lookup,
+		[ACTION_UPDATE]       = (f_data_func)&data_triplet_format_t_crud,
+		[ACTION_DELETE]       = (f_data_func)&data_triplet_format_t_crud,
+		[ACTION_ENUM]         = (f_data_func)&data_triplet_format_single_t_enum,
+	}
+};
