@@ -21,7 +21,7 @@
  *  In configuration file:
  *  @code
  *  {
- *        master        = (some_t)"",         // master data, would be used in runtime
+ *        data          = (some_t)"",         // master data, would be used in runtime
  *        slave         = (some_t)"",         // slave data, used to save and load information
  *        format        = (format_t)"native",  // format in which data would be stored, default FORMAT(packed)
  *        fatal         = (uint_t)"1",        // do not ignore load errors, default 0
@@ -39,7 +39,7 @@
 #define HAVEBUFF_TYPE_BINDT 0
 
 typedef struct bind_t {
-	data_t                 master;
+	data_t                 data;
 	data_t                 slave;
 	format_t               format;
 	uintmax_t              sync;
