@@ -31,6 +31,7 @@
 
 typedef enum raw_flags_t {
 	RAW_RESIZEABLE = 1,
+	RAW_ONECHUNK   = 2
 } raw_flags_t;
 
 typedef struct raw_t {
