@@ -766,6 +766,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_gnu_ld
 with_fuse
 enable_modulec_mongrel2
 enable_modulec_null
@@ -792,6 +793,7 @@ enable_named_t
 enable_binstring_t
 enable_netstring_t
 enable_record_t
+enable_cache_t
 enable_fd_t
 enable_io_t
 enable_slice_t
@@ -885,13 +887,19 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP
+CPPFLAGS
 CXX
 CXXFLAGS
+LDFLAGS
+LIBS
+CPPFLAGS
 CCC
 CXXCPP
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
+FUSE_CFLAGS
+FUSE_LIBS
 FUSE_CFLAGS
 FUSE_LIBS'
 
@@ -1559,6 +1567,7 @@ Optional Features:
   --disable-data-netstring_t
                           disable data netstring_t
   --disable-data-record_t disable data record_t
+  --disable-data-cache_t  disable data cache_t
   --disable-data-fd_t     disable data fd_t
   --disable-data-io_t     disable data io_t
   --disable-data-slice_t  disable data slice_t
@@ -16900,6 +16909,7 @@ fi
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -17030,6 +17040,7 @@ if test -n "$FUSE_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_FUSE_CFLAGS=`$PKG_CONFIG --cflags "fuse >= 2.6.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -17046,6 +17057,7 @@ if test -n "$FUSE_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_FUSE_LIBS=`$PKG_CONFIG --libs "fuse >= 2.6.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -17065,9 +17077,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "fuse >= 2.6.0" 2>&1`
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "fuse >= 2.6.0" 2>&1`
         else
-	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors "fuse >= 2.6.0" 2>&1`
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "fuse >= 2.6.0" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$FUSE_PKG_ERRORS" >&5
@@ -17102,6 +17114,7 @@ if test -n "$FUSE_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_FUSE_CFLAGS=`$PKG_CONFIG --cflags "fuse >= 2.6.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -17118,6 +17131,7 @@ if test -n "$FUSE_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_FUSE_LIBS=`$PKG_CONFIG --libs "fuse >= 2.6.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -17137,9 +17151,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "fuse >= 2.6.0" 2>&1`
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "fuse >= 2.6.0" 2>&1`
         else
-	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors "fuse >= 2.6.0" 2>&1`
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "fuse >= 2.6.0" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$FUSE_PKG_ERRORS" >&5
@@ -18477,6 +18491,43 @@ fi
 		DATA_MAKEFILE_format_record=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} format/record/libfrozen_data_record.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-cache_t was given.
+if test "${enable_cache_t+set}" = set; then :
+  enableval=$enable_cache_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_cache_t}" = "yes"; then
+			enable_cache_t="no"
+		else
+			enable_cache_t="yes"
+		fi
+	fi
+
+	if test "${enable_cache_t}" = "yes"; then
+		DATA_DIR_cache_t="io/cache"
+		DATA_DEP_cache_t="uint_t hash_t format_t void_t"
+		DATA_ID_cache_t=""
+		DATA_SELECTED="$DATA_SELECTED cache_t"
+		DATA_HEADERS="$DATA_HEADERS io/cache/cache_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_io_cache" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/io/cache/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS io/cache"
+
+		DATA_MAKEFILE_io_cache=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} io/cache/libfrozen_data_cache.la"
 
 	fi
 
