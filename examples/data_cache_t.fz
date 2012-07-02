@@ -1,0 +1,10 @@
+local file = 
+	cache_t : {}                                 >
+	file_t  : "../examples/data_cache_t.dat"
+
+sub {
+	$buff = raw_t : {};
+	
+	file.read(0, $buff, 100);
+	$buff | fd_t : "stdout";
+}

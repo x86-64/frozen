@@ -25,6 +25,7 @@
 #define HK_VALUE_blocks 9928
 #define HK_VALUE_body 3378
 #define HK_VALUE_buffer 9745
+#define HK_VALUE_chunk_size 41760
 #define HK_VALUE_class 6119
 #define HK_VALUE_clientid 21563
 #define HK_VALUE_close 5895
@@ -98,6 +99,7 @@
 #define HK_VALUE_nelements_min 87991
 #define HK_VALUE_nelements_mul 89381
 #define HK_VALUE_nelements_step 110732
+#define HK_VALUE_nslots 10358
 #define HK_VALUE_offset 9978
 #define HK_VALUE_offset_from 54684
 #define HK_VALUE_offset_key 41762
@@ -193,6 +195,7 @@ typedef enum hashkey_t {
       HK_blocks = HK_VALUE_blocks, 
       HK_body = HK_VALUE_body, 
       HK_buffer = HK_VALUE_buffer, 
+      HK_chunk_size = HK_VALUE_chunk_size, 
       HK_class = HK_VALUE_class, 
       HK_clientid = HK_VALUE_clientid, 
       HK_close = HK_VALUE_close, 
@@ -266,6 +269,7 @@ typedef enum hashkey_t {
       HK_nelements_min = HK_VALUE_nelements_min, 
       HK_nelements_mul = HK_VALUE_nelements_mul, 
       HK_nelements_step = HK_VALUE_nelements_step, 
+      HK_nslots = HK_VALUE_nslots, 
       HK_offset = HK_VALUE_offset, 
       HK_offset_from = HK_VALUE_offset_from, 
       HK_offset_key = HK_VALUE_offset_key, 
@@ -365,6 +369,7 @@ keypair_t hashkeys[] = {
       { "blocks", HK_VALUE_blocks }, 
       { "body", HK_VALUE_body }, 
       { "buffer", HK_VALUE_buffer }, 
+      { "chunk_size", HK_VALUE_chunk_size }, 
       { "class", HK_VALUE_class }, 
       { "clientid", HK_VALUE_clientid }, 
       { "close", HK_VALUE_close }, 
@@ -438,6 +443,7 @@ keypair_t hashkeys[] = {
       { "nelements_min", HK_VALUE_nelements_min }, 
       { "nelements_mul", HK_VALUE_nelements_mul }, 
       { "nelements_step", HK_VALUE_nelements_step }, 
+      { "nslots", HK_VALUE_nslots }, 
       { "offset", HK_VALUE_offset }, 
       { "offset_from", HK_VALUE_offset_from }, 
       { "offset_key", HK_VALUE_offset_key }, 

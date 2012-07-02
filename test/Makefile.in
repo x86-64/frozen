@@ -67,6 +67,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/binstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/netstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/record/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
