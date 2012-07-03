@@ -326,7 +326,7 @@ static ssize_t data_hash_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
 	hashkey_t              key_hashkey;
 	uintmax_t              key_uint;
-	data_t                 d_key;
+	data_t                 d_key             = DATA_VOID;
 	data_t                *d_key_ptr         = &d_key;
 	hash_t                *value;
 	hash_t                *fdata             = (hash_t *)data->ptr;
@@ -351,8 +351,10 @@ static ssize_t data_hash_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 		
 		goto found;
 	}
+	data_free(&d_key);
 	return -EINVAL;
 found:
+	data_free(&d_key);
 	return data_notconsumable_t(fargs->value, value->data);
 } // }}}
 static ssize_t data_hash_t_delete(data_t *data, fastcall_delete *fargs){ // {{{

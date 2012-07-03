@@ -8,6 +8,7 @@
 #include <storage/raw/raw_t.h>
 #include <modifiers/slice/slice_t.h>
 #include <numeric/uint/uint_t.h>
+#include <special/consumable/consumable_t.h>
 
 ssize_t default_transfer(data_t *src, data_t *dest, uintmax_t read_offset, uintmax_t write_offset, uintmax_t size, uintmax_t *ptransfered){ // {{{
 	ssize_t         ret;
@@ -281,8 +282,9 @@ ssize_t       data_default_control       (data_t *data, fastcall_control *fargs)
 
 ssize_t       data_default_lookup        (data_t *data, fastcall_lookup *fargs){ // {{{
 	if(fargs->value){
-		*fargs->value = *data;
-		return 0;
+		//*fargs->value = *data;
+		//return 0;
+		return data_notconsumable_t(fargs->value, *data);
 	}
 	return -EINVAL;
 } // }}}
