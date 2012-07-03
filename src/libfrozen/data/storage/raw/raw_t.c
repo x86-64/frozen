@@ -36,6 +36,18 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 		return 0;
 	}
 	
+	if( (fdata->flags & RAW_ONECHUNK) != 0){ // handle ONECHUNK data
+		if(fdata->size >= new_size) // is enough space?
+			return 0;
+		
+		if( (fdata = data->ptr = realloc(fdata, sizeof(raw_t) + new_size)) == NULL)
+			return -ENOMEM;
+		
+		fdata->ptr  = (void *)(fdata + 1);
+		fdata->size = new_size;
+		return 0;
+	}
+	
 	if(fdata->ptr == NULL){ // empty data holder
 		if( (fdata->ptr = malloc(new_size)) == NULL)
 			return -ENOMEM;
@@ -49,14 +61,9 @@ static ssize_t raw_prepare(data_t *data, uintmax_t new_size){ // {{{
 		return 0;
 	
 	if( (fdata->flags & RAW_RESIZEABLE) != 0){ // can resize?
-		if( (fdata->flags & RAW_ONECHUNK) != 0){
-			if( (fdata = data->ptr = realloc(fdata, sizeof(raw_t) + new_size)) == NULL)
-				return -ENOMEM;
-		}else{
-			if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
-				fdata->size = 0;
-				return -ENOMEM;
-			}
+		if( (fdata->ptr = realloc(fdata->ptr, new_size)) == NULL){
+			fdata->size = 0;
+			return -ENOMEM;
 		}
 		fdata->size = new_size;
 		return 0;
