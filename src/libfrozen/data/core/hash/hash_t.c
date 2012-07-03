@@ -153,10 +153,11 @@ static ssize_t data_hash_t_enum_iter(hash_t *hash_item, hash_t_ctx *ctx){ // {{{
 	data_t                 n_value           = DATA_NOTCONSUMABLET(hash_item->data);
 	
 	fastcall_create        r_create          = { { 4, ACTION_CREATE }, &n_key, &n_value };
-	if( (ctx->ret = data_query(ctx->sl_data, &r_create)) < 0)
-		return ITER_BREAK;
+	ctx->ret = data_query(ctx->sl_data, &r_create);
 	
-	return ITER_CONTINUE;
+	hash_item->data = ((consumable_t *)(n_value.ptr))->data; // HACK, restore value (can change during convert)
+	
+	return (ctx->ret < 0) ? ITER_BREAK : ITER_CONTINUE;
 } // }}}
 
 static ssize_t data_hash_t_free(data_t *data, fastcall_free *fargs){ // {{{
