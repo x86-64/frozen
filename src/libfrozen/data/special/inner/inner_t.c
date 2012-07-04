@@ -74,6 +74,8 @@ static ssize_t inner_t_find(data_t *data, data_t **inner, data_t *freeit){ // {{
 			};
 			ret    = data_query(&fdata->storage, &r_control);
 			fdata->cached_value = r_control.value;
+		}else{
+			ret    = 0;
 		}
 		*inner = fdata->cached_value;
 	}
