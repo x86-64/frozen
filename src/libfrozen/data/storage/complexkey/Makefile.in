@@ -70,6 +70,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/binstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/netstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/record/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
@@ -87,6 +88,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/random/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/ref/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/special/unique/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/storage/complexkey/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/container/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/file/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/storage/folder/config.m4 \
@@ -328,7 +330,7 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libfrozen_data_complexkey.la
 libfrozen_data_complexkey_la_SOURCES = complexkey_t.c
 headers_mydirdir = $(headersdir)/storage/complexkey/
-headers_mydir_HEADERS = complexkey_t.h
+headers_mydir_HEADERS = complexkey_t.h complexkey_end_t.h complexkey_end_uint_t.h
 libfrozen_data_complexkey_la_CFLAGS = -DDATA_TYPE_SOURCE -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/
 all: all-am
 

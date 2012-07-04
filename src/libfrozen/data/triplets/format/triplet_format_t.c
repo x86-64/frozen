@@ -38,9 +38,16 @@ static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_
 		offset = data_slider_t_get_offset(&sl_storage);
 		data_slider_t_set_offset(&sl_storage, r_convert.transfered, SEEK_CUR);
 		
-		data_t          d_offset       = DATA_UINTT(offset);
-		data_t          d_complex_key  = DATA_COMPLEXKEYT(d_offset, *key);
-		fastcall_create r_create       = { { 4, ACTION_CREATE }, &d_complex_key, &converted };
+		data_t          d_offset            = DATA_UINTT(offset);
+		data_t          d_complex_key_next  = DATA_COMPLEXKEY_NEXTT(d_offset, *key);
+		data_t          d_complex_key_end   = DATA_COMPLEXKEY_END_UINTT(offset);
+		fastcall_create r_create       = {
+			{ 4, ACTION_CREATE },
+			data_is_void(key) ? 
+				&d_complex_key_end :
+				&d_complex_key_next,
+			&converted
+		};
 		ret = data_query(dest, &r_create);
 		
 		data_free(&converted);
