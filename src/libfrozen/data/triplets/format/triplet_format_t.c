@@ -165,6 +165,7 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 	data_t                 converted;
 	data_t                 d_key;
 	data_t                *d_key_ptr         = &d_key;
+	data_t                 storage_item;
 	triplet_format_t      *fdata             = (triplet_format_t *)data->ptr;
 	
 	// fetch value from storage
@@ -172,7 +173,7 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 	fastcall_lookup r_lookup = {
 		{ 4, ACTION_LOOKUP },
 		&sl_key,
-		fargs->value
+		&storage_item
 	};
 	if( (ret = data_query(&fdata->storage, &r_lookup)) < 0)
 		return ret;
@@ -182,6 +183,9 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 		d_key_ptr = fargs->key;
 	
 	data_get(ret, TYPE_UINTT, offset, d_key_ptr);
+	
+	data_free(&d_key);
+	
 	if(ret < 0)
 		return ret;
 	
@@ -190,11 +194,11 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 	if(ret < 0)
 		goto exit;
 	
-	data_t                sl_value  = DATA_SLICET(fargs->value, offset, ~0);
+	data_t                sl_value  = DATA_SLICET(&storage_item, offset, ~0);
 	fastcall_convert_from r_convert = {
 		{ 5, ACTION_CONVERT_FROM },
 		offset == 0 ?
-			fargs->value :
+			&storage_item :
 			&sl_value,
 		FORMAT(packed)
 	};
@@ -202,9 +206,8 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 		goto exit;
 	
 	*fargs->value = converted;
-	return 0;
 exit:
-	data_free(fargs->value);
+	data_free(&storage_item);
 	return ret;
 } // }}}
 static ssize_t data_triplet_format_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
@@ -246,15 +249,13 @@ data_proto_t triplet_format_t_proto = {
 
 static ssize_t data_enum_single_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest, data_t *key){ // {{{
 	ssize_t                ret;
-	uintmax_t              offset;
 	data_t                 converted;
-	data_t                 sl_storage        = DATA_SLIDERT(storage, 0);
 	
 	holder_copy(ret, &converted, item_template);
 	if(ret < 0)
 		return ret;
 	
-	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &sl_storage, format };
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, storage, format };
 	if( (ret = data_query(&converted, &r_convert)) < -1)
 		goto error;
 	
@@ -263,12 +264,7 @@ static ssize_t data_enum_single_storage(data_t *storage, data_t *item_template, 
 		goto error;
 	}
 	
-	offset = data_slider_t_get_offset(&sl_storage);
-	data_slider_t_set_offset(&sl_storage, r_convert.transfered, SEEK_CUR);
-	
-	data_t          d_offset       = DATA_UINTT(offset);
-	data_t          d_complex_key  = DATA_COMPLEXKEYT(d_offset, *key);
-	fastcall_create r_create       = { { 4, ACTION_CREATE }, &d_complex_key, &converted };
+	fastcall_create r_create       = { { 4, ACTION_CREATE }, key, &converted };
 	ret = data_query(dest, &r_create);
 	
 error:
@@ -304,6 +300,39 @@ static ssize_t data_triplet_format_single_t_convert_from(data_t *dst, fastcall_c
 	}
 	return -ENOSYS;
 } // }}}
+static ssize_t data_triplet_format_single_t_lookup(data_t *data, fastcall_crud *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 converted;
+	data_t                 storage_item;
+	triplet_format_t      *fdata             = (triplet_format_t *)data->ptr;
+	
+	// fetch value from storage
+	fastcall_lookup r_lookup = {
+		{ 4, ACTION_LOOKUP },
+		fargs->key,
+		&storage_item
+	};
+	if( (ret = data_query(&fdata->storage, &r_lookup)) < 0)
+		return ret;
+	
+	// prepare copy of template
+	holder_copy(ret, &converted, &fdata->slave);
+	if(ret < 0)
+		goto exit;
+	
+	fastcall_convert_from r_convert = {
+		{ 5, ACTION_CONVERT_FROM },
+		&storage_item,
+		FORMAT(packed)
+	};
+	if( (ret = data_query(&converted, &r_convert)) < 0)
+		goto exit;
+	
+	*fargs->value = converted;
+exit:
+	data_free(&storage_item);
+	return ret;
+} // }}}
 static ssize_t data_triplet_format_single_t_enum(data_t *data, fastcall_enum *fargs){ // {{{
 	ssize_t                ret;
 	triplet_format_t      *fdata             = (triplet_format_t *)data->ptr;
@@ -334,7 +363,7 @@ data_proto_t triplet_format_single_t_proto = {
 		[ACTION_CONTROL]      = (f_data_func)&data_triplet_format_t_control,
 		
 		[ACTION_CREATE]       = (f_data_func)&data_triplet_format_t_crud,
-		[ACTION_LOOKUP]       = (f_data_func)&data_triplet_format_t_lookup,
+		[ACTION_LOOKUP]       = (f_data_func)&data_triplet_format_single_t_lookup,
 		[ACTION_UPDATE]       = (f_data_func)&data_triplet_format_t_crud,
 		[ACTION_DELETE]       = (f_data_func)&data_triplet_format_t_crud,
 		[ACTION_ENUM]         = (f_data_func)&data_triplet_format_single_t_enum,
