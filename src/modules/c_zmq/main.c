@@ -391,7 +391,8 @@ static ssize_t zeromq_t_new(data_t *data, config_t *config){ // {{{
 
 static void    zeromq_t_msg_free(void *data, void *hint){ // {{{
 	if(hint){
-		data_free(hint);
+		data_free( &(((data_t *)hint)[0]) ); // free open view on data
+		data_free( &(((data_t *)hint)[1]) ); // free data holder
 		free(hint);
 	}
 } // }}}
@@ -563,10 +564,13 @@ static ssize_t data_zeromq_t_push(data_t *data, fastcall_push *fargs){ // {{{
 		if( (ret = data_make_flat(fargs->data, FORMAT(packed), &freeme, &msg_data, &msg_size)) < 0)
 			return ret;
 		
-		if( (freehint = memdup(&freeme, sizeof(data_t))) == NULL){
+		if( (freehint = malloc(2 * sizeof(data_t))) == NULL){
 			data_free(&freeme);
 			return -ENOMEM;
 		}
+		freehint[0] = freeme;
+		freehint[1] = *fargs->data;
+		
 		data_set_void(fargs->data);
 	}
 
