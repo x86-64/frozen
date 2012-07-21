@@ -483,6 +483,9 @@ ssize_t         list_t_enum                (list_t *list, list_t_callback callba
 	ssize_t           ret;
 	list_chunk_t     *curr;
 	
+	if(list == NULL)
+		return -EINVAL;
+	
 	for(curr = list->head; curr; curr = curr->cnext){
 		if( (ret = callback(&curr->data, userdata)) != 0)
 			return ret;
