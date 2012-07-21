@@ -1,8 +1,10 @@
 
 static err_item errs_list[] = {
- { -46, "src/modules/pcre/pcre.c: regexp compile failed" },
- { -35, "src/modules/pcre/pcre.c: regexp not supplied" },
- { -31, "src/modules/pcre/pcre.c: calloc returns null" },
+ { -246, "src/modules/pcre/pcre.c: regexp compile failed" },
+ { -235, "src/modules/pcre/pcre.c: regexp not supplied" },
+ { -231, "src/modules/pcre/pcre.c: calloc returns null" },
+ { -38, "src/modules/pcre/pcre.c: ENOSYS in module " },
 
-	{ 0, NULL }
 };
+#define            errs_list_size      sizeof(errs_list[0])
+#define            errs_list_nelements sizeof(errs_list) / errs_list_size

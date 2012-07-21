@@ -62,7 +62,7 @@ void               errors_register               (err_item *err_list, uintmax_t 
 	uintmax_t              new_emodule       = last_emodule++ * ESTEP;
 	
 	for(item = err_list; item->errnum != 0; item++){
-		item->errnum -= new_emodule + ECOMMON;
+		item->errnum -= new_emodule;
 	}
 	
 	list_add(&dynamic_errors, err_list);
