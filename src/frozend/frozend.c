@@ -247,7 +247,6 @@ void main_rest(void){
 		exit(255);
 	}
 	
-	signal(SIGHUP,signal_handler); /* catch hangup signal */ // TODO rewrite to sigaction
 	signal(SIGINT,signal_handler);
 	signal(SIGTERM,signal_handler); /* catch kill signal */  // NOTICE after modules_load() coz Go override TERM
 	

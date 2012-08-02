@@ -94,9 +94,16 @@ void *alloca (size_t);
 
 extern char  *frozen_modules_dir;
 
+typedef void (*f_signal_handler)(int sig, void *userdata);
+
+
 API int       frozen_init(void);
 API int       frozen_destroy(void);
+
 API void      frozen_set_modules_dir(char *dir);
+API ssize_t   frozen_subscribe_signal(int sig, f_signal_handler handler, void *userdata);
+API void      frozen_unsubscribe_signal(int sig, f_signal_handler handler, void *userdata);
+
     intmax_t  safe_pow(uintmax_t *res, uintmax_t x, uintmax_t y);
     intmax_t  safe_mul(uintmax_t *res, uintmax_t x, uintmax_t y);
     intmax_t  safe_div(uintmax_t *res, uintmax_t x, uintmax_t y);

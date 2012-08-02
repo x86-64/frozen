@@ -108,6 +108,51 @@ void modules_load(void){ // {{{
 } // }}}
 // }}}
 
+typedef struct signal_handler_t {
+	int                    sig;
+	f_signal_handler       handler;
+	void                  *userdata;
+} signal_handler_t;
+
+list        frozen_signal_handlers = LIST_INITIALIZER;
+
+static void frozen_signal_handler(int sig){ // {{{
+	signal_handler_t      *sh;
+	void                  *iter              = NULL;
+	
+	while( (sh = list_iter_next(&frozen_signal_handlers, &iter))){
+		if(sh->sig == sig)
+			sh->handler(sig, sh->userdata);
+	}
+} // }}}
+
+ssize_t frozen_subscribe_signal(int sig, f_signal_handler handler, void *userdata){ // {{{
+	signal_handler_t      *sh;
+	
+	signal(sig, frozen_signal_handler);
+	
+	if( (sh = malloc(sizeof(signal_handler_t))) == NULL)
+		return -ENOMEM;
+	
+	sh->sig      = sig;
+	sh->handler  = handler;
+	sh->userdata = userdata;
+	list_add(&frozen_signal_handlers, sh);
+	return 0;
+} // }}}
+void    frozen_unsubscribe_signal(int sig, f_signal_handler handler, void *userdata){ // {{{
+	signal_handler_t      *sh;
+	void                  *iter              = NULL;
+	
+	while( (sh = list_iter_next(&frozen_signal_handlers, &iter))){
+		if(sh->sig == sig && sh->handler == handler && sh->userdata == userdata){
+			list_delete(&frozen_signal_handlers, sh);
+			free(sh);
+			break;
+		}
+	}
+} // }}}
+
 /** @brief Initialize library
  * @return 0 on success
  * @return -1 on error
@@ -127,6 +172,7 @@ int frozen_init(void){
 		return ret;
 	
 	modules_load();
+	
 	
 	inited = 1;
 	return 0;

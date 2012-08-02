@@ -8,21 +8,35 @@
 #define ERRORS_MODULE_NAME "storage/file"
 
 typedef struct file_t {
-	int              handle;
-	
-	char            *path;
-	uintmax_t        temprorary;
+	int                    handle;
+	uintmax_t              flags;
+	uintmax_t              mode;
+
+	char                  *path;
+	uintmax_t              temprorary;
 } file_t;
 
+static void file_signal_hup(int sig, void *userdata){ // {{{
+	int                    old_handle;
+	file_t                *fdata             = (file_t *)userdata;
+	
+	old_handle = fdata->handle;
+	
+	fdata->handle = open(fdata->path, fdata->flags, fdata->mode);
+	
+	if(old_handle > 0)
+		close(old_handle);
+} // }}}
 static void    file_destroy(file_t *fdata){ // {{{
 	if(fdata->handle > 0){
 		close(fdata->handle);
-
+		
 		if(fdata->temprorary != 0){
 			unlink(fdata->path);
 			free(fdata->path);
 		}
 	}
+	frozen_unsubscribe_signal(SIGHUP, &file_signal_hup, fdata);
 	free(fdata);
 } // }}}
 static ssize_t file_new(file_t **pfdata, config_t *config){ // {{{
@@ -83,11 +97,13 @@ retry:;
 		goto error;
 	}
 	
-	if(fdata->temprorary != 0){
-		fdata->path = strdup(filepath);
-	}
+	fdata->path  = strdup(filepath);
+	fdata->flags = flags;
+	fdata->mode  = cfg_mode;
 	
 	*pfdata = fdata;
+	
+	frozen_subscribe_signal(SIGHUP, &file_signal_hup, fdata);
 	return 0;
 	
 error:
