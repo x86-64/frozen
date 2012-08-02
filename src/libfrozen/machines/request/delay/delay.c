@@ -44,7 +44,7 @@ static ssize_t delay_handler(machine_t *machine, request_t *request){ // {{{
 		data_convert(ret, TYPE_UINTT, tusleep, &userdata->usleep);
 		(void)ret;
 		
-		sleep(tsleep);
+		while( (tsleep = sleep(tsleep)) );
 		usleep(tusleep);
 		
 	request_leave_context();
