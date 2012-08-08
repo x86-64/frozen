@@ -188,25 +188,28 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
 		{ 5, ACTION_CONTROL },                                         \
 		HK(datatype), NULL, &_d_type                                   \
 	};                                                                     \
-	if(                                                                    \
-		(_src) != NULL &&                                              \
-		data_query((_src), &_r_control) >= 0 &&                        \
-		_datatype == _type                                             \
-	){                                                                     \
-		fastcall_view _r_view = {                                      \
-			{ 6, ACTION_VIEW },                                    \
-			FORMAT(native)                                         \
-		};                                                             \
-		if( (_ret = data_query((_src), &_r_view)) >= 0){               \
-			UNVIEW_##_type(_ret, _dt, &_r_view);                   \
-			data_free(&_r_view.freeit);                            \
+	if( (_src) != NULL ){                                                  \
+		if(                                                            \
+			data_query((_src), &_r_control) >= 0 &&                \
+			_datatype == _type                                     \
+		){                                                             \
+			fastcall_view _r_view = {                              \
+				{ 6, ACTION_VIEW },                            \
+				FORMAT(native)                                 \
+			};                                                     \
+			if( (_ret = data_query((_src), &_r_view)) >= 0){       \
+				UNVIEW_##_type(_ret, _dt, &_r_view);           \
+				data_free(&_r_view.freeit);                    \
+			}                                                      \
+		}else{                                                         \
+			if( HAVEBUFF_##_type == 1 ){                           \
+				data_convert(_ret, _type, _dt, _src);          \
+			}else{                                                 \
+				_ret = -EINVAL;                                \
+			}                                                      \
 		}                                                              \
 	}else{                                                                 \
-		if( HAVEBUFF_##_type == 1 ){                                   \
-			data_convert(_ret, _type, _dt, _src);                  \
-		}else{                                                         \
-			_ret = -EINVAL;                                        \
-		}                                                              \
+		_ret = -EINVAL;                                                \
 	}                                                                      \
 	(void)_ret;                                                            \
 }
