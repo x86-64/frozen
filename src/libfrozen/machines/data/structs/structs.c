@@ -120,7 +120,7 @@ static ssize_t struct_machine_pack(machine_t *machine, request_t *request){
 				return error("struct_pack failed");
 			
 			request_t new_request[] = {
-				{ userdata->size, DATA_PTR_SIZET(&struct_size) },
+				{ userdata->size, DATA_SIZET(struct_size) },
 				hash_next(request)
 			};
 			

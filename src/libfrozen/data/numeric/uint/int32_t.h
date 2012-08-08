@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_INT32T(100);
- *        
- *       int32_t some  = 200;
- *       data_t hpint = DATA_PTR_INT32T(&some);
  *  @endcode
  */
 
 #define DATA_INT32T(value) { TYPE_INT32T, (int32_t []){ value } } 
 #define DATA_HEAP_INT32T(value) { TYPE_INT32T, data_int32_t_alloc(value) } 
-#define DATA_PTR_INT32T(value) { TYPE_INT32T, value } 
 #define DEREF_TYPE_INT32T(_data) *(int32_t *)((_data)->ptr) 
 #define REF_TYPE_INT32T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INT32T 1

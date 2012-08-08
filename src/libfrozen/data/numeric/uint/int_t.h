@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_INTT(100);
- *        
- *       intmax_t some  = 200;
- *       data_t hpint = DATA_PTR_INTT(&some);
  *  @endcode
  */
 
 #define DATA_INTT(value) { TYPE_INTT, (intmax_t []){ value } } 
 #define DATA_HEAP_INTT(value) { TYPE_INTT, data_int_t_alloc(value) } 
-#define DATA_PTR_INTT(value) { TYPE_INTT, value } 
 #define DEREF_TYPE_INTT(_data) *(intmax_t *)((_data)->ptr) 
 #define REF_TYPE_INTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INTT 1

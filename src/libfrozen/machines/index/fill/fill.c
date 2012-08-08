@@ -84,10 +84,11 @@ static ssize_t fill_handler(machine_t *machine, request_t *request){ // {{{
 	// if (data->flags & MODIFIED && userdata->force_update == 0) {
 		request_t r_update[] = {
 			{ HK(action), DATA_ACTIONT(userdata->action) },
-			{ HK(ret),    DATA_PTR_SIZET(&ret3)          },
+			{ HK(ret),    DATA_SIZET(0)                  },
 			hash_next(request)
 		};
 		ret2 = machine_query(userdata->machine_index, r_update);
+		ret3 = DEREF_TYPE_SIZET(&r_update[1].data);
 		if(userdata->fatal != 0){
 			if(ret2 != 0) return ret2;
 			if(ret3 != 0) return ret3;

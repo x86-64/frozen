@@ -62,7 +62,7 @@ static ssize_t data_length_t_handler(data_t *data, fastcall_header *hargs){ // {
 	if( (ret = data_query(&fdata->data, &r_len)) < 0)
 		return ret;
 	
-	data_t                 d_length          = DATA_PTR_UINTT(&r_len.length);
+	data_t                 d_length          = DATA_UINTT(r_len.length);
 	return data_query(&d_length, hargs);
 } // }}}
 

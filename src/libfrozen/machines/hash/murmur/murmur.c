@@ -76,7 +76,7 @@ static ssize_t murmur2_32_handler(machine_t *machine, request_t *request){ // {{
 	hash = MurmurHash2(key, 0);
 	
 	request_t r_next[] = {
-		{ userdata->output, DATA_PTR_UINT32T(&hash) },
+		{ userdata->output, DATA_UINT32T(hash) },
 		hash_next(request)
 	};
 	return machine_pass(machine, r_next);
@@ -96,7 +96,7 @@ static ssize_t murmur2_64_handler(machine_t *machine, request_t *request){ // {{
 	hash = MurmurHash64A(key, 0);
 	
 	request_t r_next[] = {
-		{ userdata->output, DATA_PTR_UINT64T(&hash) },
+		{ userdata->output, DATA_UINT64T(hash) },
 		hash_next(request)
 	};
 	return machine_pass(machine, r_next);

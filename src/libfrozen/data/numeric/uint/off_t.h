@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_OFFT(100);
- *        
- *       off_t some  = 200;
- *       data_t hpint = DATA_PTR_OFFT(&some);
  *  @endcode
  */
 
 #define DATA_OFFT(value) { TYPE_OFFT, (off_t []){ value } } 
 #define DATA_HEAP_OFFT(value) { TYPE_OFFT, data_off_t_alloc(value) } 
-#define DATA_PTR_OFFT(value) { TYPE_OFFT, value } 
 #define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)->ptr) 
 #define REF_TYPE_OFFT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_OFFT 1

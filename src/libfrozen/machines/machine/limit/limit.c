@@ -167,11 +167,12 @@ uintmax_t   limit_parameter_get(machine_t *machine, limit_userdata *userdata){ /
 		case PARAMETER_REQUEST:;
 			uintmax_t buffer    = 0;
 			request_t r_query[] = {
-				{ HK(buffer), DATA_PTR_UINTT(&buffer) },
+				{ HK(buffer), DATA_UINTT(buffer) },
 				hash_next(userdata->parameter_request)
 			};
 			machine_pass(machine, r_query);
 			
+			buffer = DEREF_TYPE_UINTT(&r_query[0].data);
 			return buffer;
 		default:
 			break;

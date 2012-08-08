@@ -181,20 +181,20 @@ static ssize_t try_handler(machine_t *machine, request_t *request){ // {{{
 		if(ret < 0){
 			if(userdata->request == 0){
 				request_t r_pass[] = {
-					{ HK(ret), DATA_PTR_SIZET(&ret) },
+					{ HK(ret), DATA_SIZET(0) },
 					hash_inline(request),
 					hash_end
 				};
 				te_userdata->ret = machine_pass(machine, r_pass);
 			}else{
 				request_t r_pass[] = {
-					{ HK(ret), DATA_PTR_SIZET(&ret) },
+					{ HK(ret), DATA_SIZET(0) },
 					hash_inline(try_request),
 					hash_end
 				};
 				
 				request_t r_next[] = {
-					{ HK(ret),               DATA_PTR_SIZET(&ret)   },
+					{ HK(ret),               DATA_SIZET(0)   },
 					{ userdata->request_out, DATA_PTR_HASHT(r_pass) },
 					hash_inline(request),
 					hash_end

@@ -91,14 +91,19 @@ ssize_t     action_crud_from_hash(data_t *data, request_t *request){ // {{{
 } // }}}
 
 ssize_t     action_io_from_fast(machine_t *machine, fastcall_io *fargs){ // {{{
+	ssize_t                ret;
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		{ HK(offset),     DATA_PTR_UINTT( &fargs->offset                     ) },
+		{ HK(offset),     DATA_UINTT(      fargs->offset                     ) },
 		{ HK(buffer),     DATA_RAW(        fargs->buffer, fargs->buffer_size ) },
-		{ HK(size),       DATA_PTR_UINTT( &fargs->buffer_size                ) },
+		{ HK(size),       DATA_UINTT(      fargs->buffer_size                ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	ret = machine_query(machine, r_next);
+
+	fargs->offset = DEREF_TYPE_UINTT(&r_next[1].data);
+	fargs->buffer_size = DEREF_TYPE_UINTT(&r_next[3].data);
+	return ret;
 } // }}}
 ssize_t     action_read_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
@@ -158,7 +163,7 @@ ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
 ssize_t     action_resize_from_fast(machine_t *machine, fastcall_resize *fargs){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
+		{ HK(size),       DATA_UINTT(      fargs->length                     ) },
 		hash_end
 	};
 	return machine_query(machine, r_next);
@@ -287,15 +292,19 @@ ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
 } // }}}
 
 ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){ // {{{
+	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
-		{ HK(size),       DATA_PTR_UINTT( &fargs->length                     ) },
+		{ HK(size),       DATA_UINTT(      fargs->length                     ) },
 		{ HK(format),     DATA_PTR_FORMATT( &format                          ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	ret = machine_query(machine, r_next);
+
+	fargs->length = DEREF_TYPE_UINTT(&r_next[1].data);
+	return ret;
 } // }}}
 ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
@@ -348,16 +357,20 @@ ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
 } // }}}
 	
 ssize_t     action_convert_to_from_fast(machine_t *machine, fastcall_convert_to *fargs){ // {{{
+	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
 	request_t  r_next[] = {
 		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(destination), *fargs->dest                                         },
 		{ HK(format),      DATA_PTR_FORMATT( &format                          ) },
-		{ HK(size),        DATA_PTR_UINTT( &fargs->transfered                 ) },
+		{ HK(size),        DATA_UINTT(      fargs->transfered                 ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	ret = machine_query(machine, r_next);
+
+	fargs->transfered = DEREF_TYPE_UINTT(&r_next[3].data);
+	return ret;
 } // }}}
 ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;
@@ -381,16 +394,20 @@ ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{
 } // }}}
 
 ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
 	request_t  r_next[] = {
 		{ HK(action),      DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(source),     *fargs->src                                           },
 		{ HK(format),      DATA_PTR_FORMATT( &format                          ) },
-		{ HK(size),        DATA_PTR_UINTT( &fargs->transfered                 ) },
+		{ HK(size),        DATA_UINTT(      fargs->transfered                 ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	ret = machine_query(machine, r_next);
+	
+	fargs->transfered = DEREF_TYPE_UINTT(&r_next[3].data);
+	return ret;
 } // }}}
 ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // {{{
 	ssize_t                ret;

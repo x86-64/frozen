@@ -71,7 +71,7 @@ static ssize_t hashtable_handler(machine_t *machine, request_t *request){ // {{{
 		d_input = d_input % userdata->hashtable_size;
 		
 		request_t r_next[] = {
-			{ userdata->input,  DATA_PTR_UINTT(&d_input) },
+			{ userdata->input,  DATA_UINTT(d_input) },
 			hash_next(request)
 		};
 		return machine_pass(machine, r_next);

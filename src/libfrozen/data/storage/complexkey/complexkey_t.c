@@ -65,7 +65,6 @@ static ssize_t data_complexkey_t_free(data_t *data, fastcall_free *fargs){ // {{
 static ssize_t data_complexkey_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              key               = 0;
-	data_t                 d_key             = DATA_PTR_UINTT(&key);
 	complexkey_t          *fdata             = (complexkey_t *)data->ptr;
 	
 	if(fargs->value == NULL)
@@ -80,6 +79,7 @@ static ssize_t data_complexkey_t_lookup(data_t *data, fastcall_lookup *fargs){ /
 	
 	key--;
 	
+	data_t                 d_key             = DATA_UINTT(key);
 	fastcall_lookup r_lookup = { { 4, ACTION_LOOKUP }, &d_key, fargs->value };
 	return data_query(&fdata->cnext, &r_lookup);
 } // }}}

@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_UINT64T(100);
- *        
- *       uint64_t some  = 200;
- *       data_t hpint = DATA_PTR_UINT64T(&some);
  *  @endcode
  */
 
 #define DATA_UINT64T(value) { TYPE_UINT64T, (uint64_t []){ value } } 
 #define DATA_HEAP_UINT64T(value) { TYPE_UINT64T, data_uint64_t_alloc(value) } 
-#define DATA_PTR_UINT64T(value) { TYPE_UINT64T, value } 
 #define DEREF_TYPE_UINT64T(_data) *(uint64_t *)((_data)->ptr) 
 #define REF_TYPE_UINT64T(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_UINT64T 1

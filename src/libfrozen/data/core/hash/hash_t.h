@@ -80,7 +80,7 @@
  *      uintmax_t  somenewvalue = 100;
  *
  *      hash_t new_values[] = {
- *         { HK(buffer), DATA_PTR_UINTT(&somenewvalue) },
+ *         { HK(buffer), DATA_UINTT(&somevalue) },
  *         hash_inline(old_hash),
  *         hash_end
  *      };

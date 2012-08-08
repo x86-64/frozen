@@ -329,10 +329,11 @@ static int fuseh_getattr(const char *path, struct stat *buf){
 		// updating size
 		request_t r_count[] = {
 			{ HK(action),  DATA_ACTIONT(ACTION_LENGTH)       },
-			{ HK(buffer),  DATA_PTR_OFFT(&size)                  },
+			{ HK(buffer),  DATA_OFFT(0)                      },
 			hash_end
 		};
 		machine_query((machine_t *)item->userdata, r_count);
+		size = DEREF_TYPE_OFFT(&r_count[1].data);
 	}
 	item->stat.st_size = size; //(param) ?
 	//	((offset > size) ? 0 : size - offset) :
@@ -363,14 +364,15 @@ static int fuseh_read(const char *path, char *buf, size_t size, off_t off, struc
 	
 	request_t r_read[] = {
 		{ HK(action), DATA_ACTIONT(ACTION_READ)                  },
-		{ HK(offset), DATA_PTR_OFFT(&off)                             },
-		{ HK(buffer), DATA_RAW(buf, size)                             },
-		{ HK(path),   DATA_PTR_STRING((char *)path)                   },
-		{ HK(ret),    DATA_PTR_SIZET(&ret2)                           },
+		{ HK(offset), DATA_OFFT(off)                             },
+		{ HK(buffer), DATA_RAW(buf, size)                        },
+		{ HK(path),   DATA_PTR_STRING((char *)path)              },
+		{ HK(ret),    DATA_SIZET(0)                              },
 		hash_end
 	};
 	ret = machine_query((machine_t *)item->userdata, r_read);
-	
+	ret2 = DEREF_TYPE_SIZET(&r_read[4].data);
+
 	//printf("read: %x bytes from %x. ret: %x, data: %s\n", (int)size, (int)off, (int)ret, buf);
 	
 	return (ret < 0) ? 0 : (int)ret2; //(int)size;
@@ -381,7 +383,7 @@ static int fuseh_write(const char *path, const char *buf, size_t size, off_t off
 	
 	request_t r_write[] = {
 		{ HK(action),  DATA_ACTIONT(ACTION_WRITE)                      },
-		{ HK(offset),  DATA_PTR_OFFT(&off)                             },
+		{ HK(offset),  DATA_OFFT(off)                             },
 		{ HK(buffer),  DATA_RAW((char *)buf, size)                     },
 		{ HK(path),    DATA_PTR_STRING((char *)path)                   },
 		hash_end

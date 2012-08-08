@@ -133,11 +133,13 @@ static ssize_t data_netstring_t_convert_from(data_t *dst, fastcall_convert_from 
 		case FORMAT(netstring):
 		case FORMAT(packed):;
 			uintmax_t              size;
-			data_t                 d_size           = DATA_PTR_UINTT(&size);
+			data_t                 d_size           = DATA_UINTT(0);
 			
 			fastcall_convert_from r_convert_size = { { 5, ACTION_CONVERT_FROM }, fargs->src, FORMAT(human) };
 			if( (ret = data_query(&d_size, &r_convert_size)) < 0)
 				return ret;
+
+			size = DEREF_TYPE_UINTT(&d_size);
 			
 			data_t d_slice = DATA_SLICET(fargs->src, r_convert_size.transfered + 1, size); // 123:
 			

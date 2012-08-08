@@ -168,7 +168,6 @@ static ssize_t       data_slice_t_control(data_t *data, fastcall_control *fargs)
 static ssize_t       data_slice_t_lookup(data_t *data, fastcall_lookup *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              key;
-	data_t                 d_key             = DATA_PTR_UINTT(&key);
 	slice_t               *fdata             = (slice_t *)data->ptr;
 	
 	data_get(ret, TYPE_UINTT, key, fargs->key);
@@ -177,6 +176,7 @@ static ssize_t       data_slice_t_lookup(data_t *data, fastcall_lookup *fargs){ 
 	
 	key += fdata->off;
 	
+	data_t                 d_key             = DATA_UINTT(key);
 	fastcall_lookup r_lookup = { { 4, ACTION_LOOKUP }, &d_key, fargs->value };
 	return data_query(fdata->data, &r_lookup);
 } // }}}

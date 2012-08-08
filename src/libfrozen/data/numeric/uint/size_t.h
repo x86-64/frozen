@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_SIZET(100);
- *        
- *       size_t some  = 200;
- *       data_t hpint = DATA_PTR_SIZET(&some);
  *  @endcode
  */
 
 #define DATA_SIZET(value) { TYPE_SIZET, (size_t []){ value } } 
 #define DATA_HEAP_SIZET(value) { TYPE_SIZET, data_size_t_alloc(value) } 
-#define DATA_PTR_SIZET(value) { TYPE_SIZET, value } 
 #define DEREF_TYPE_SIZET(_data) *(size_t *)((_data)->ptr) 
 #define REF_TYPE_SIZET(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_SIZET 1

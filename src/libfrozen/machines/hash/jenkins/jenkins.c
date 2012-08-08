@@ -76,7 +76,7 @@ static ssize_t jenkins_32_handler(machine_t *machine, request_t *request){ // {{
 	hash = jenkins32_hash(0, key);
 	
 	request_t r_next[] = {
-		{ userdata->output, DATA_PTR_UINT32T(&hash) },
+		{ userdata->output, DATA_UINT32T(hash) },
 		hash_next(request)
 	};
 	return machine_pass(machine, r_next);
@@ -97,7 +97,7 @@ static ssize_t jenkins_64_handler(machine_t *machine, request_t *request){ // {{
 	hash = jenkins64_hash(0, key);
 	
 	request_t r_next[] = {
-		{ userdata->output, DATA_PTR_UINT64T(&hash) },
+		{ userdata->output, DATA_UINT64T(hash) },
 		hash_next(request)
 	};
 	return machine_pass(machine, r_next);

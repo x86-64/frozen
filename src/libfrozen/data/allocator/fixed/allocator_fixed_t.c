@@ -170,7 +170,7 @@ exit:
 	pthread_rwlock_wrlock(&fdata->rwlock);
 		
 		if(fdata->removed_items.type){
-			data_t       d_offset = DATA_PTR_UINTT(&fargs->offset);
+			data_t       d_offset = DATA_UINTT(0);
 			data_t       d_copy;
 			
 			fastcall_pop r_pop    = {
@@ -182,6 +182,8 @@ exit:
 			
 			fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &d_offset, FORMAT(native) };
 			ret = data_query(&d_copy, &r_convert);
+			
+			fargs->offset = DEREF_TYPE_UINTT(d_offset);
 			goto exit;
 		}
 		
@@ -197,7 +199,7 @@ static ssize_t data_allocator_fixed_t_delete(data_t *data, fastcall_delete *farg
 	pthread_rwlock_wrlock(&fdata->rwlock);
 		
 		if(fdata->removed_items.type){
-			data_t        d_offset = DATA_PTR_UINTT(&fargs->offset);
+			data_t        d_offset = DATA_UINTT(fargs->offset);
 			data_t        d_copy;
 			
 			holder_copy(ret, &d_copy, &d_offset);

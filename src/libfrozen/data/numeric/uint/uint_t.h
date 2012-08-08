@@ -41,15 +41,11 @@
  *  Possible defines:
  *  @code
  *       data_t hint  = DATA_UINTT(100);
- *        
- *       uintmax_t some  = 200;
- *       data_t hpint = DATA_PTR_UINTT(&some);
  *  @endcode
  */
 
 #define DATA_UINTT(value) { TYPE_UINTT, (uintmax_t []){ value } } 
 #define DATA_HEAP_UINTT(value) { TYPE_UINTT, data_uint_t_alloc(value) } 
-#define DATA_PTR_UINTT(value) { TYPE_UINTT, value } 
 #define DEREF_TYPE_UINTT(_data) *(uintmax_t *)((_data)->ptr) 
 #define REF_TYPE_UINTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_UINTT 1
