@@ -10,3 +10,8 @@ FROZEN_DATA(uint8_t, numeric, uint, yes,, 8)
 FROZEN_DATA(uint16_t, numeric, uint, yes,, 9)
 FROZEN_DATA(uint32_t, numeric, uint, yes,, 10)
 FROZEN_DATA(uint64_t, numeric, uint, yes,, 11)
+
+AC_ARG_ENABLE(uint-optimize,   AS_HELP_STRING([--disable-uint-optimize],  [do not optimize uints to have mimimal size in memory]))
+if test "x$enable_uint-optimize" != "xyes"; then
+	AC_DEFINE([OPTIMIZE_UINT], [1], [Define if optimization of uints enabled])
+fi

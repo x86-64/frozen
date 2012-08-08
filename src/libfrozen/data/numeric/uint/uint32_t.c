@@ -30,6 +30,35 @@
 #include <uint32_t.h>
 #include <enum/format/format_t.h>
 
+#ifdef OPTIMIZE_UINT
+
+
+uint32_t * data_uint32_t_alloc(uint32_t value){ // {{{
+	return (void *)(uintmax_t)value;
+} // }}}
+
+static ssize_t data_uint32_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_uint32_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_uint32_t_view(data_t *data, fastcall_view *fargs){ // {{{
+	switch(fargs->format){
+		case FORMAT(native):;
+			fargs->ptr    = &data->ptr;
+			fargs->length = sizeof(uint32_t);
+			data_set_void(&fargs->freeit);
+			return 0;
+			
+		default:
+			break;
+	}
+	return data_default_view(data, fargs);
+} // }}}
+
+#else
+
 uint32_t * data_uint32_t_alloc(uint32_t value){ // {{{
 	uint32_t        *ptr;
 	
@@ -40,16 +69,24 @@ uint32_t * data_uint32_t_alloc(uint32_t value){ // {{{
 	return ptr;
 } // }}}
 
-static ssize_t data_uint32_t_len(data_t *data, fastcall_length *fargs){ // {{{
-	fargs->length = sizeof(uint32_t);
-	return 0;
-} // }}}
 static ssize_t data_uint32_t_resize(data_t *data, fastcall_resize *fargs){ // {{{
 	if(data->ptr)
 		return 0;
 
 	if( (data->ptr = malloc(sizeof(uint32_t))) == NULL)
 		return -ENOMEM;
+	return 0;
+} // }}}
+static ssize_t data_uint32_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	if(data->ptr != NULL)
+		free(data->ptr);
+	data_set_void(data);
+	return 0;
+} // }}}
+#endif
+
+static ssize_t data_uint32_t_len(data_t *data, fastcall_length *fargs){ // {{{
+	fargs->length = sizeof(uint32_t);
 	return 0;
 } // }}}
 static ssize_t data_uint32_t_compare(data_t *data1, fastcall_compare *fargs){ // {{{
@@ -59,8 +96,8 @@ static ssize_t data_uint32_t_compare(data_t *data1, fastcall_compare *fargs){ //
 	if(fargs->data2 == NULL)
 		return -EINVAL;
 	
-	data1_val = *(uint32_t *)(data1->ptr);
-	data2_val = *(uint32_t *)(fargs->data2->ptr); 
+	data1_val = DEREF_TYPE_UINT32T(data1);
+	data2_val = DEREF_TYPE_UINT32T(fargs->data2); 
 	     if(data1_val == data2_val){ cret =  0; }
 	else if(data1_val <  data2_val){ cret =  1; }
 	else                           { cret =  2; }
@@ -75,8 +112,8 @@ static ssize_t data_uint32_t_arith(data_t *data1, fastcall_arith *fargs){ // {{{
 	if(fargs->data2 == NULL)
 		return -EINVAL;
 	
-	operand1_val = *(uint32_t *)(data1->ptr);
-	operand2_val = *(uint32_t *)(fargs->data2->ptr); 
+	operand1_val = DEREF_TYPE_UINT32T(data1);
+	operand2_val = DEREF_TYPE_UINT32T(fargs->data2); 
 	switch(fargs->header.action){
 		case ACTION_ADD:
 			if(__MAX(uint32_t) - operand1_val < operand2_val)
@@ -109,14 +146,14 @@ static ssize_t data_uint32_t_arith(data_t *data1, fastcall_arith *fargs){ // {{{
 		default:
 			return -1;
 	}
-	*(uint32_t *)(data1->ptr) = result;
+	SET_TYPE_UINT32T(data1) = (void *)(uintmax_t)result;
 	return ret;
 } // }}}
 static ssize_t data_uint32_t_arith_no_arg(data_t *data1, fastcall_arith_no_arg *fargs){ // {{{
 	int           ret = 0;
 	uint32_t          operand1_val, result;
 	
-	operand1_val = *(uint32_t *)(data1->ptr);
+	operand1_val = DEREF_TYPE_UINT32T(data1);
 	switch(fargs->header.action){
 		case ACTION_INCREMENT:
 			if(__MAX(uint32_t) - operand1_val < 1)
@@ -133,21 +170,23 @@ static ssize_t data_uint32_t_arith_no_arg(data_t *data1, fastcall_arith_no_arg *
 		default:
 			return -1;
 	}
-	*(uint32_t *)(data1->ptr) = result;
+	SET_TYPE_UINT32T(data1) = (void *)(uintmax_t)result;
 	return ret;
 } // }}}
 static ssize_t data_uint32_t_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              transfered        = 0;
 	char                   buffer[DEF_BUFFER_SIZE];
-	
+	uint32_t                   src_val;
+
+	src_val = DEREF_TYPE_UINT32T(src);
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
 	switch( fargs->format ){
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(uint32_t) };
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &src_val, sizeof(uint32_t) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
 			break;
@@ -157,7 +196,7 @@ static ssize_t data_uint32_t_convert_to(data_t *src, fastcall_convert_to *fargs)
 			if( (transfered = snprintf(
 				buffer, sizeof(buffer),
 				"%" PRIu32,
-				*(uint32_t *)src->ptr
+				src_val
 			)) >= sizeof(buffer))
 				return -ENOMEM;
 			
@@ -183,10 +222,12 @@ static ssize_t data_uint32_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
+	#ifndef OPTIMIZE_UINT
 	if(dst->ptr == NULL){ // no buffer, alloc new
 		if( (dst->ptr = malloc(sizeof(uint32_t))) == NULL)
 			return -ENOMEM;
 	}
+	#endif
 
 	switch( fargs->format ){
 		case FORMAT(config):;
@@ -198,14 +239,14 @@ static ssize_t data_uint32_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			}
 			buffer[r_read_str.buffer_size] = '\0';
 
-			*(uint32_t *)(dst->ptr) = (uint32_t )strtoul(buffer, &endptr, 10);
+			SET_TYPE_UINT32T(dst) = (void *)((uintmax_t)((uint32_t )strtoul(buffer, &endptr, 10)));
 			transfered = (endptr - buffer);
 			break;
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
 			if(fargs->src->type == dst->type){
-				*(uint32_t *)(dst->ptr) = *(uint32_t *)(fargs->src->ptr);
+				SET_TYPE_UINT32T(dst) = (void *)((uintmax_t) DEREF_TYPE_UINT32T(fargs->src));
 				ret = 0;
 			}else{
 				fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(uint32_t) };
@@ -214,7 +255,7 @@ static ssize_t data_uint32_t_convert_from(data_t *dst, fastcall_convert_from *fa
 					return ret;
 				}
 				
-				*(uint32_t *)(dst->ptr) = *((uint32_t *)buffer);
+				SET_TYPE_UINT32T(dst) = (void *)((uintmax_t)(*((uint32_t *)buffer)));
 			}
 			transfered = sizeof(uint32_t);
 			break;
@@ -228,7 +269,7 @@ static ssize_t data_uint32_t_convert_from(data_t *dst, fastcall_convert_from *fa
 	return 0;
 } // }}}
 static ssize_t data_uint32_t_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
-	fargs->is_null = (data->ptr == NULL || *(uint32_t *)data->ptr == 0) ? 1 : 0;
+	fargs->is_null = (data->ptr == NULL || DEREF_TYPE_UINT32T(data) == 0) ? 1 : 0;
 	return 0;
 } // }}}
 
@@ -239,6 +280,7 @@ data_proto_t uint32_t_proto = {
 	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[ACTION_RESIZE]         = (f_data_func)&data_uint32_t_resize,
+		[ACTION_FREE]           = (f_data_func)&data_uint32_t_free,
 		[ACTION_LENGTH]         = (f_data_func)&data_uint32_t_len,
 		[ACTION_COMPARE]        = (f_data_func)&data_uint32_t_compare,
 		[ACTION_ADD]            = (f_data_func)&data_uint32_t_arith,
@@ -250,6 +292,12 @@ data_proto_t uint32_t_proto = {
 		[ACTION_CONVERT_TO]     = (f_data_func)&data_uint32_t_convert_to,
 		[ACTION_CONVERT_FROM]   = (f_data_func)&data_uint32_t_convert_from,
 		[ACTION_IS_NULL]        = (f_data_func)&data_uint32_t_is_null,
+
+		#ifdef OPTIMIZE_UINT
+		[ACTION_VIEW]           = (f_data_func)&data_uint32_t_view,
+		#else
+		[ACTION_VIEW]           = (f_data_func)&data_default_view,
+		#endif
 	}
 };
 /* vim: set filetype=m4: */

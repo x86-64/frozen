@@ -44,12 +44,26 @@
  *  @endcode
  */
 
+#ifdef OPTIMIZE_UINT
+#define DATA_INTT(value) { TYPE_INTT,  (void *)(uintmax_t)(intmax_t)value } 
+#define DATA_HEAP_INTT(value) { TYPE_INTT, data_int_t_alloc(value) } 
+#define DEREF_TYPE_INTT(_data) (intmax_t)((uintmax_t)((_data)->ptr)) 
+#define SET_TYPE_INTT(_data) ((_data)->ptr) 
+
+// BUG won't work with data_set, used because of warnings on uninitialized variable in data_convert
+#define REF_TYPE_INTT(_dt) NULL 
+
+#define HAVEBUFF_TYPE_INTT 1
+#define UNVIEW_TYPE_INTT(_ret, _dt, _view)  {  _dt = *(intmax_t *)((_view)->ptr); _ret = 0; } 
+#else
 #define DATA_INTT(value) { TYPE_INTT, (intmax_t []){ value } } 
 #define DATA_HEAP_INTT(value) { TYPE_INTT, data_int_t_alloc(value) } 
 #define DEREF_TYPE_INTT(_data) *(intmax_t *)((_data)->ptr) 
+#define SET_TYPE_INTT(_data) *(intmax_t *)((_data)->ptr) 
 #define REF_TYPE_INTT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_INTT 1
 #define UNVIEW_TYPE_INTT(_ret, _dt, _view)  {  _dt = *(intmax_t *)((_view)->ptr); _ret = 0; } 
+#endif
 
 intmax_t * data_int_t_alloc(intmax_t value);
 

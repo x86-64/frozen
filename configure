@@ -811,6 +811,7 @@ enable_uint8_t
 enable_uint16_t
 enable_uint32_t
 enable_uint64_t
+enable_uint_optimize
 enable_bind_t
 enable_consumable_t
 enable_counter_t
@@ -1587,6 +1588,7 @@ Optional Features:
   --disable-data-uint16_t disable data uint16_t
   --disable-data-uint32_t disable data uint32_t
   --disable-data-uint64_t disable data uint64_t
+  --disable-uint-optimize do not optimize uints to have mimimal size in memory
   --disable-data-bind_t   disable data bind_t
   --disable-data-consumable_t
                           disable data consumable_t
@@ -19155,6 +19157,17 @@ fi
 
 	fi
 
+
+# Check whether --enable-uint-optimize was given.
+if test "${enable_uint_optimize+set}" = set; then :
+  enableval=$enable_uint_optimize;
+fi
+
+if test "x$enable_uint-optimize" != "xyes"; then
+
+$as_echo "#define OPTIMIZE_UINT 1" >>confdefs.h
+
+fi
 
 
 

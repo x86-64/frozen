@@ -44,12 +44,26 @@
  *  @endcode
  */
 
+#ifdef OPTIMIZE_UINT
+#define DATA_OFFT(value) { TYPE_OFFT,  (void *)(uintmax_t)(off_t)value } 
+#define DATA_HEAP_OFFT(value) { TYPE_OFFT, data_off_t_alloc(value) } 
+#define DEREF_TYPE_OFFT(_data) (off_t)((uintmax_t)((_data)->ptr)) 
+#define SET_TYPE_OFFT(_data) ((_data)->ptr) 
+
+// BUG won't work with data_set, used because of warnings on uninitialized variable in data_convert
+#define REF_TYPE_OFFT(_dt) NULL 
+
+#define HAVEBUFF_TYPE_OFFT 1
+#define UNVIEW_TYPE_OFFT(_ret, _dt, _view)  {  _dt = *(off_t *)((_view)->ptr); _ret = 0; } 
+#else
 #define DATA_OFFT(value) { TYPE_OFFT, (off_t []){ value } } 
 #define DATA_HEAP_OFFT(value) { TYPE_OFFT, data_off_t_alloc(value) } 
 #define DEREF_TYPE_OFFT(_data) *(off_t *)((_data)->ptr) 
+#define SET_TYPE_OFFT(_data) *(off_t *)((_data)->ptr) 
 #define REF_TYPE_OFFT(_dt) (&(_dt)) 
 #define HAVEBUFF_TYPE_OFFT 1
 #define UNVIEW_TYPE_OFFT(_ret, _dt, _view)  {  _dt = *(off_t *)((_view)->ptr); _ret = 0; } 
+#endif
 
 off_t * data_off_t_alloc(off_t value);
 

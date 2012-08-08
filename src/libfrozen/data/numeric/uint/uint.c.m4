@@ -5,6 +5,35 @@ m4_include(uint_init.m4)
 [#include <]NAME()[.h>]
 #include <enum/format/format_t.h>
 
+#ifdef OPTIMIZE_UINT
+
+
+TYPE() * data_[]NAME()_alloc([]TYPE() value){ // {{{
+	return (void *)(uintmax_t)value;
+} // }}}
+
+static ssize_t data_[]NAME()_resize(data_t *data, fastcall_resize *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_[]NAME()_free(data_t *data, fastcall_free *fargs){ // {{{
+	return 0;
+} // }}}
+static ssize_t data_[]NAME()_view(data_t *data, fastcall_view *fargs){ // {{{
+	switch(fargs->format){
+		case FORMAT(native):;
+			fargs->ptr    = &data->ptr;
+			fargs->length = sizeof([]TYPE());
+			data_set_void(&fargs->freeit);
+			return 0;
+			
+		default:
+			break;
+	}
+	return data_default_view(data, fargs);
+} // }}}
+
+#else
+
 TYPE() * data_[]NAME()_alloc([]TYPE() value){ // {{{
 	TYPE()        *ptr;
 	
@@ -15,16 +44,24 @@ TYPE() * data_[]NAME()_alloc([]TYPE() value){ // {{{
 	return ptr;
 } // }}}
 
-static ssize_t data_[]NAME()_len(data_t *data, fastcall_length *fargs){ // {{{
-	fargs->length = sizeof([]TYPE());
-	return 0;
-} // }}}
 static ssize_t data_[]NAME()_resize(data_t *data, fastcall_resize *fargs){ // {{{
 	if(data->ptr)
 		return 0;
 
 	if( (data->ptr = malloc(sizeof([]TYPE()))) == NULL)
 		return -ENOMEM;
+	return 0;
+} // }}}
+static ssize_t data_[]NAME()_free(data_t *data, fastcall_free *fargs){ // {{{
+	if(data->ptr != NULL)
+		free(data->ptr);
+	data_set_void(data);
+	return 0;
+} // }}}
+#endif
+
+static ssize_t data_[]NAME()_len(data_t *data, fastcall_length *fargs){ // {{{
+	fargs->length = sizeof([]TYPE());
 	return 0;
 } // }}}
 static ssize_t data_[]NAME()_compare(data_t *data1, fastcall_compare *fargs){ // {{{
@@ -34,8 +71,8 @@ static ssize_t data_[]NAME()_compare(data_t *data1, fastcall_compare *fargs){ //
 	if(fargs->data2 == NULL)
 		return -EINVAL;
 	
-	data1_val = *(TYPE *)(data1->ptr);
-	data2_val = *(TYPE *)(fargs->data2->ptr); 
+	data1_val = DEREF_TYPE_[]DEF()(data1);
+	data2_val = DEREF_TYPE_[]DEF()(fargs->data2); 
 	     if(data1_val == data2_val){ cret =  0; }
 	else if(data1_val <  data2_val){ cret =  1; }
 	else                           { cret =  2; }
@@ -50,8 +87,8 @@ static ssize_t data_[]NAME()_arith(data_t *data1, fastcall_arith *fargs){ // {{{
 	if(fargs->data2 == NULL)
 		return -EINVAL;
 	
-	operand1_val = *(TYPE *)(data1->ptr);
-	operand2_val = *(TYPE *)(fargs->data2->ptr); 
+	operand1_val = DEREF_TYPE_[]DEF()(data1);
+	operand2_val = DEREF_TYPE_[]DEF()(fargs->data2); 
 	switch(fargs->header.action){
 		case ACTION_ADD:
 			if(__MAX(TYPE) - operand1_val < operand2_val)
@@ -84,14 +121,14 @@ static ssize_t data_[]NAME()_arith(data_t *data1, fastcall_arith *fargs){ // {{{
 		default:
 			return -1;
 	}
-	*(TYPE *)(data1->ptr) = result;
+	SET_TYPE_[]DEF()(data1) = (void *)(uintmax_t)result;
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_arith_no_arg(data_t *data1, fastcall_arith_no_arg *fargs){ // {{{
 	int           ret = 0;
 	TYPE          operand1_val, result;
 	
-	operand1_val = *(TYPE *)(data1->ptr);
+	operand1_val = DEREF_TYPE_[]DEF()(data1);
 	switch(fargs->header.action){
 		case ACTION_INCREMENT:
 			if(__MAX(TYPE) - operand1_val < 1)
@@ -108,21 +145,23 @@ static ssize_t data_[]NAME()_arith_no_arg(data_t *data1, fastcall_arith_no_arg *
 		default:
 			return -1;
 	}
-	*(TYPE *)(data1->ptr) = result;
+	SET_TYPE_[]DEF()(data1) = (void *)(uintmax_t)result;
 	return ret;
 } // }}}
 static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs){ // {{{
 	ssize_t                ret;
 	uintmax_t              transfered        = 0;
 	char                   buffer[[DEF_BUFFER_SIZE]];
-	
+	TYPE                   src_val;
+
+	src_val = DEREF_TYPE_[]DEF()(src);
 	if(fargs->dest == NULL)
 		return -EINVAL;
 	
 	switch( fargs->format ){
 		case FORMAT(native):;
 		case FORMAT(packed):;
-			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, src->ptr, sizeof(TYPE) };
+			fastcall_write r_write = { { 5, ACTION_WRITE }, 0, &src_val, sizeof(TYPE) };
 			ret        = data_query(fargs->dest, &r_write);
 			transfered = r_write.buffer_size;
 			break;
@@ -132,7 +171,7 @@ static ssize_t data_[]NAME()_convert_to(data_t *src, fastcall_convert_to *fargs)
 			if( (transfered = snprintf(
 				buffer, sizeof(buffer),
 				"%" PRINTFORMAT,
-				*(TYPE *)src->ptr
+				src_val
 			)) >= sizeof(buffer))
 				return -ENOMEM;
 			
@@ -158,10 +197,12 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 	if(fargs->src == NULL)
 		return -EINVAL;
 	
+	#ifndef OPTIMIZE_UINT
 	if(dst->ptr == NULL){ // no buffer, alloc new
 		if( (dst->ptr = malloc(sizeof(TYPE))) == NULL)
 			return -ENOMEM;
 	}
+	#endif
 
 	switch( fargs->format ){
 		case FORMAT(config):;
@@ -173,14 +214,14 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 			}
 			buffer[[r_read_str.buffer_size]] = '\0';
 
-			*(TYPE *)(dst->ptr) = (TYPE )strtoul(buffer, &endptr, 10);
+			SET_TYPE_[]DEF()(dst) = (void *)((uintmax_t)((TYPE )strtoul(buffer, &endptr, 10)));
 			transfered = (endptr - buffer);
 			break;
 
 		case FORMAT(native):;
 		case FORMAT(packed):;
 			if(fargs->src->type == dst->type){
-				*(TYPE *)(dst->ptr) = *(TYPE *)(fargs->src->ptr);
+				SET_TYPE_[]DEF()(dst) = (void *)((uintmax_t) DEREF_TYPE_[]DEF()(fargs->src));
 				ret = 0;
 			}else{
 				fastcall_read r_read = { { 5, ACTION_READ }, 0, &buffer, sizeof(TYPE) };
@@ -189,7 +230,7 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 					return ret;
 				}
 				
-				*(TYPE *)(dst->ptr) = *((TYPE *)buffer);
+				SET_TYPE_[]DEF()(dst) = (void *)((uintmax_t)(*((TYPE *)buffer)));
 			}
 			transfered = sizeof(TYPE);
 			break;
@@ -203,7 +244,7 @@ static ssize_t data_[]NAME()_convert_from(data_t *dst, fastcall_convert_from *fa
 	return 0;
 } // }}}
 static ssize_t data_[]NAME()_is_null(data_t *data, fastcall_is_null *fargs){ // {{{
-	fargs->is_null = (data->ptr == NULL || *(TYPE *)data->ptr == 0) ? 1 : 0;
+	fargs->is_null = (data->ptr == NULL || DEREF_TYPE_[]DEF()(data) == 0) ? 1 : 0;
 	return 0;
 } // }}}
 
@@ -214,6 +255,7 @@ data_proto_t NAME()_proto = {
 	.properties             = DATA_ENDPOINT,
 	.handlers               = {
 		[[ACTION_RESIZE]]         = (f_data_func)&data_[]NAME()_resize,
+		[[ACTION_FREE]]           = (f_data_func)&data_[]NAME()_free,
 		[[ACTION_LENGTH]]         = (f_data_func)&data_[]NAME()_len,
 		[[ACTION_COMPARE]]        = (f_data_func)&data_[]NAME()_compare,
 		[[ACTION_ADD]]            = (f_data_func)&data_[]NAME()_arith,
@@ -225,6 +267,12 @@ data_proto_t NAME()_proto = {
 		[[ACTION_CONVERT_TO]]     = (f_data_func)&data_[]NAME()_convert_to,
 		[[ACTION_CONVERT_FROM]]   = (f_data_func)&data_[]NAME()_convert_from,
 		[[ACTION_IS_NULL]]        = (f_data_func)&data_[]NAME()_is_null,
+
+		#ifdef OPTIMIZE_UINT
+		[[ACTION_VIEW]]           = (f_data_func)&data_[]NAME()_view,
+		#else
+		[[ACTION_VIEW]]           = (f_data_func)&data_default_view,
+		#endif
 	}
 };
 /* vim: set filetype=m4: */
