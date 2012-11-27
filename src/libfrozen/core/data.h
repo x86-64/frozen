@@ -141,6 +141,16 @@ API ssize_t              data_make_flat         (data_t *data, format_t format, 
 
 #define data_is_greedy(_data) (data_protos[ ((data_t *)(_data))->type ]->properties & DATA_GREEDY) != 0 ///< Check is data greedy?
 
+#define data_get_type(_ret, _data, _datatype){                                 \
+	data_t           _d_type    = DATA_PTR_DATATYPET(&_datatype);          \
+	fastcall_control _r_control = {                                        \
+		{ 5, ACTION_CONTROL },                                         \
+		HK(datatype), NULL, &_d_type                                   \
+	};                                                                     \
+	_ret = data_query((_data), &_r_control);                               \
+}
+#define data_get_ptr(_data)  (_data)->ptr
+
 /** Get real data holder
  * @param      _ret    Return code (ssize_t)
  * @param      _data   Data (data_t *)
