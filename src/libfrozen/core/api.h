@@ -107,6 +107,8 @@ typedef struct fastcall_header {
 	uintmax_t              action;
 } fastcall_header;
 
+#define FASTCALL_NARGS_LIMIT 50
+
 /*
 	// Various
 	ACTION(QUERY),
@@ -479,9 +481,17 @@ typedef struct fastcall_batch { // ACTION(BATCH)
 
 extern uintmax_t fastcall_nargs[];
 
-ssize_t     data_hash_query(data_t *data, request_t *request);
-ssize_t     data_list_query(data_t *data, request_t *list);
-ssize_t     machine_fast_query(machine_t *machine, void *hargs);
+typedef ssize_t (*f_fast_to_hash)     (void *, request_t *);
+typedef ssize_t (*f_hash_to_fast)     (void *, void *);
+
+ssize_t     api_convert_fastcall_to_request(void *userdata, fastcall_header *hargs, f_fast_to_hash callback);
+ssize_t     api_convert_request_to_fastcall(void *userdata, request_t *request, f_hash_to_fast callback);
+ssize_t     api_pack_fastcall(fastcall_header *input, data_t *output);
+ssize_t     api_unpack_fastcall(data_t *input, fastcall_header *output);
+
+ssize_t     data_hash_query(data_t *data, request_t *request);   // deprecated
+ssize_t     data_list_query(data_t *data, request_t *list);      // deprecated
+ssize_t     machine_fast_query(machine_t *machine, void *hargs); // deprecated
 
 ssize_t     api_machine_nosys  (machine_t *machine, request_t *request);
 ssize_t     api_data_nosys     (data_t *data, fastcall_header *hargs);

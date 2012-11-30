@@ -1,10 +1,10 @@
 #include <libfrozen.h>
 
-typedef ssize_t (*f_machine_from_fast)  (machine_t *, void *);
-typedef ssize_t (*f_data_from_hash)     (data_t *, request_t *);
+typedef ssize_t (*f_convert_to_hash)  (void *, void *,      f_fast_to_hash);
+typedef ssize_t (*f_convert_to_fast)  (void *, request_t *, f_hash_to_fast);
 
-extern f_machine_from_fast api_machine_from_fast [ACTION_INVALID];
-extern f_data_from_hash    api_data_from_hash    [ACTION_INVALID];
+extern f_convert_to_hash   api_convert_to_hash   [ACTION_INVALID];
+extern f_convert_to_fast   api_convert_to_fast   [ACTION_INVALID];
 extern hash_t *            api_data_from_list    [ACTION_INVALID];
 
 ssize_t api_machine_nosys(machine_t *machine, request_t *request){ // {{{
@@ -35,7 +35,7 @@ static ssize_t remove_symlinks(hash_t *hash_item, hash_t **new_hash){ // {{{
 	return ITER_CONTINUE;
 } // }}}
 
-ssize_t     action_crud_from_fast(machine_t *machine, fastcall_crud *fargs){ // {{{
+ssize_t     action_crud_to_hash(void *userdata, fastcall_crud *fargs, f_fast_to_hash callback){ // {{{
 	ssize_t                ret;
 	
 	request_t  r_next[] = {
@@ -52,7 +52,7 @@ ssize_t     action_crud_from_fast(machine_t *machine, fastcall_crud *fargs){ // 
 		r_next[2].key  = HK(value);
 		r_next[2].data = *fargs->value;
 	}
-	ret = machine_query(machine, r_next);
+	ret = callback(userdata, r_next);
 	
 	if(fargs->key)
 		*fargs->key   = r_next[1].data;
@@ -60,7 +60,7 @@ ssize_t     action_crud_from_fast(machine_t *machine, fastcall_crud *fargs){ // 
 		*fargs->value = r_next[2].data;
 	return ret;
 } // }}}
-ssize_t     action_crud_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_crud_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	action_t               action;
 	data_t                *key;
@@ -85,12 +85,12 @@ ssize_t     action_crud_from_hash(data_t *data, request_t *request){ // {{{
 	}
 	
 	fastcall_crud fargs = { { 4, action }, key, value };
-	ret = data_query(data, &fargs);
+	ret = callback(userdata, &fargs);
 	
 	return ret;
 } // }}}
 
-ssize_t     action_io_from_fast(machine_t *machine, fastcall_io *fargs){ // {{{
+ssize_t     action_io_to_hash(void *userdata, fastcall_io *fargs, f_fast_to_hash callback){ // {{{
 	ssize_t                ret;
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
@@ -99,13 +99,13 @@ ssize_t     action_io_from_fast(machine_t *machine, fastcall_io *fargs){ // {{{
 		{ HK(size),       DATA_UINTT(      fargs->buffer_size                ) },
 		hash_end
 	};
-	ret = machine_query(machine, r_next);
+	ret = callback(userdata, r_next);
 
 	fargs->offset = DEREF_TYPE_UINTT(&r_next[1].data);
 	fargs->buffer_size = DEREF_TYPE_UINTT(&r_next[3].data);
 	return ret;
 } // }}}
-ssize_t     action_read_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_read_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *r_buffer;
 	data_t                *r_size;
@@ -121,7 +121,7 @@ ssize_t     action_read_from_hash(data_t *data, request_t *request){ // {{{
 	if( (r_buffer = hash_data_find(request, HK(buffer))) == NULL)
 		return -EINVAL;
 	
-	data_t                 d_slice    = DATA_SLICET(data, offset, size);
+	data_t                 d_slice    = DATA_SLICET(userdata, offset, size); // FIXME
 	fastcall_convert_to      r_convert = { { 5, ACTION_CONVERT_TO }, r_buffer, FORMAT(native) };
 	
 	ret = data_query(&d_slice, &r_convert);
@@ -132,7 +132,7 @@ ssize_t     action_read_from_hash(data_t *data, request_t *request){ // {{{
 	
 	return ret;
 } // }}}
-ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_write_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *r_buffer;
 	data_t                *r_size;
@@ -148,7 +148,7 @@ ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
 	if( (r_buffer = hash_data_find(request, HK(buffer))) == NULL)
 		return -EINVAL;
 	
-	data_t                 d_slice    = DATA_SLICET(data, offset, size);
+	data_t                 d_slice    = DATA_SLICET(userdata, offset, size); // FIXME
 	fastcall_convert_to    r_convert = { { 5, ACTION_CONVERT_TO }, &d_slice, FORMAT(native) };
 	
 	ret = data_query(r_buffer, &r_convert);
@@ -160,24 +160,24 @@ ssize_t     action_write_from_hash(data_t *data, request_t *request){ // {{{
 	return ret;
 } // }}}
 
-ssize_t     action_resize_from_fast(machine_t *machine, fastcall_resize *fargs){ // {{{
+ssize_t     action_resize_to_hash(void *userdata, fastcall_resize *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(size),       DATA_UINTT(      fargs->length                     ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_resize_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_resize_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	fastcall_resize        fargs             = { { 4, ACTION_RESIZE } };
 	
 	hash_data_get(ret, TYPE_UINTT, fargs.length, request, HK(size));
 	
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_push_from_fast(machine_t *machine, fastcall_push *fargs){ // {{{
+ssize_t     action_push_to_hash(void *userdata, fastcall_push *fargs, f_fast_to_hash callback){ // {{{
 	if(fargs->data == NULL)
 		return -EINVAL;
 	
@@ -186,9 +186,9 @@ ssize_t     action_push_from_fast(machine_t *machine, fastcall_push *fargs){ // 
 		{ HK(data),       *fargs->data                                         },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_push_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *pointer;
 	data_t                 holder;
@@ -208,10 +208,10 @@ ssize_t     action_push_from_hash(data_t *data, request_t *request){ // {{{
 	}
 	
 	fastcall_push          fargs             = { { 3, ACTION_PUSH }, holder_ptr };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_pop_from_fast(machine_t *machine, fastcall_pop *fargs){ // {{{
+ssize_t     action_pop_to_hash(void *userdata, fastcall_pop *fargs, f_fast_to_hash callback){ // {{{
 	if(fargs->data == NULL)
 		return -EINVAL;
 	
@@ -220,9 +220,9 @@ ssize_t     action_pop_from_fast(machine_t *machine, fastcall_pop *fargs){ // {{
 		{ HK(data),       *fargs->data                                         },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_pop_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *pointer;
 	
@@ -234,64 +234,64 @@ ssize_t     action_pop_from_hash(data_t *data, request_t *request){ // {{{
 		return ret;
 	
 	fastcall_pop           fargs             = { { 3, ACTION_POP }, pointer };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_free_from_fast(machine_t *machine, fastcall_free *fargs){ // {{{
+ssize_t     action_free_to_hash(void *userdata, fastcall_free *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_free_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_free_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	fastcall_free           fargs             = { { 2, ACTION_FREE } };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_increment_from_fast(machine_t *machine, fastcall_increment *fargs){ // {{{
+ssize_t     action_increment_to_hash(void *userdata, fastcall_increment *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_increment_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_increment_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	fastcall_increment           fargs             = { { 2, ACTION_INCREMENT } };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_decrement_from_fast(machine_t *machine, fastcall_decrement *fargs){ // {{{
+ssize_t     action_decrement_to_hash(void *userdata, fastcall_decrement *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_decrement_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_decrement_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	fastcall_decrement           fargs             = { { 2, ACTION_DECREMENT } };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_enum_from_fast(machine_t *machine, fastcall_enum *fargs){ // {{{
+ssize_t     action_enum_to_hash(void *userdata, fastcall_enum *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(data),      *fargs->dest                                          },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_enum_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_enum_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	data_t                *dest_data;
 	
 	if( (dest_data = hash_data_find(request, HK(data))) == NULL)
 		return -EINVAL;
 	
 	fastcall_enum          fargs             = { { 4, ACTION_ENUM }, dest_data };
-	return data_query(data, &fargs);
+	return callback(userdata, &fargs);
 } // }}}
 
-ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){ // {{{
+ssize_t     action_length_to_hash(void *userdata, fastcall_length *fargs, f_fast_to_hash callback){ // {{{
 	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
@@ -301,19 +301,19 @@ ssize_t     action_length_from_fast(machine_t *machine, fastcall_length *fargs){
 		{ HK(format),     DATA_PTR_FORMATT( &format                          ) },
 		hash_end
 	};
-	ret = machine_query(machine, r_next);
+	ret = callback(userdata, r_next);
 
 	fargs->length = DEREF_TYPE_UINTT(&r_next[1].data);
 	return ret;
 } // }}}
-ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_length_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	format_t               format            = FORMAT(native);
 	
 	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
 	
 	fastcall_length        fargs             = { { 4, ACTION_LENGTH }, 0, format };
-	ret = data_query(data, &fargs);
+	ret = callback(userdata, &fargs);
 	
 	data_t                *buffer            = hash_data_find(request, HK(size));
 	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.length, sizeof(fargs.length) };
@@ -323,15 +323,15 @@ ssize_t     action_length_from_hash(data_t *data, request_t *request){ // {{{
 	return ret;
 } // }}}
 
-ssize_t     action_query_from_fast(machine_t *machine, fastcall_query *fargs){ // {{{
+ssize_t     action_query_to_hash(void *userdata, fastcall_query *fargs, f_fast_to_hash callback){ // {{{
 	request_t  r_next[] = {
 		{ HK(action),     DATA_PTR_ACTIONT( &fargs->header.action            ) },
 		{ HK(request),    DATA_PTR_HASHT( fargs->request                     ) },
 		hash_end
 	};
-	return machine_query(machine, r_next);
+	return callback(userdata, r_next);
 } // }}}
-ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_query_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	request_t             *t, *n;
 	request_t             *q_request;
@@ -343,7 +343,7 @@ ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
 	
 	if(hash_iter(q_request, (hash_iterator)&remove_symlinks, &q_request_clean, 0) == ITER_OK){
 		fastcall_query         fargs             = { { 3, ACTION_QUERY }, q_request_clean };
-		ret = data_query(data, &fargs);
+		ret = callback(userdata, &fargs);
 	}else{
 		ret = -EFAULT;
 	}
@@ -356,7 +356,7 @@ ssize_t     action_query_from_hash(data_t *data, request_t *request){ // {{{
 	return ret;
 } // }}}
 	
-ssize_t     action_convert_to_from_fast(machine_t *machine, fastcall_convert_to *fargs){ // {{{
+ssize_t     action_convert_to_to_hash(void *userdata, fastcall_convert_to *fargs, f_fast_to_hash callback){ // {{{
 	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
@@ -367,12 +367,12 @@ ssize_t     action_convert_to_from_fast(machine_t *machine, fastcall_convert_to 
 		{ HK(size),        DATA_UINTT(      fargs->transfered                 ) },
 		hash_end
 	};
-	ret = machine_query(machine, r_next);
+	ret = callback(userdata, r_next);
 
 	fargs->transfered = DEREF_TYPE_UINTT(&r_next[3].data);
 	return ret;
 } // }}}
-ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_convert_to_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *output;
 	format_t               format            = FORMAT(native);
@@ -383,7 +383,7 @@ ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{
 		return -EINVAL;
 	
 	fastcall_convert_to    fargs             = { { 5, ACTION_CONVERT_TO }, output, format };
-	ret = data_query(data, &fargs);
+	ret = callback(userdata, &fargs);
 	
 	data_t                *buffer            = hash_data_find(request, HK(size));
 	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.transfered, sizeof(fargs.transfered) };
@@ -393,7 +393,7 @@ ssize_t     action_convert_to_from_hash(data_t *data, request_t *request){ // {{
 	return ret;
 } // }}}
 
-ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_from *fargs){ // {{{
+ssize_t     action_convert_from_to_hash(void *userdata, fastcall_convert_from *fargs, f_fast_to_hash callback){ // {{{
 	ssize_t                ret;
 	format_t               format            = fargs->format;
 	
@@ -404,12 +404,12 @@ ssize_t     action_convert_from_from_fast(machine_t *machine, fastcall_convert_f
 		{ HK(size),        DATA_UINTT(      fargs->transfered                 ) },
 		hash_end
 	};
-	ret = machine_query(machine, r_next);
+	ret = callback(userdata, r_next);
 	
 	fargs->transfered = DEREF_TYPE_UINTT(&r_next[3].data);
 	return ret;
 } // }}}
-ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // {{{
+ssize_t     action_convert_from_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	data_t                *input;
 	format_t               format            = FORMAT(native);
@@ -420,7 +420,7 @@ ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // 
 		return -EINVAL;
 	
 	fastcall_convert_from    fargs             = { { 5, ACTION_CONVERT_FROM }, input, format };
-	ret = data_query(data, &fargs);
+	ret = callback(userdata, &fargs);
 	
 	data_t                *buffer            = hash_data_find(request, HK(size));
 	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.transfered, sizeof(fargs.transfered) };
@@ -430,55 +430,98 @@ ssize_t     action_convert_from_from_hash(data_t *data, request_t *request){ // 
 	return ret;
 } // }}}
 
-ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
+ssize_t     api_convert_fastcall_to_request(void *userdata, fastcall_header *hargs, f_fast_to_hash callback){ // {{{
+	f_convert_to_hash    func;
+	
+	if(
+		((fastcall_header *)hargs)->action >= ACTION_INVALID ||
+		(func = api_convert_to_hash[ ((fastcall_header *)hargs)->action]) == NULL
+	)
+		return -ENOSYS;
+	
+	return func(userdata, hargs, callback);
+} // }}}
+ssize_t     api_convert_request_to_fastcall(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
 	ssize_t                ret;
 	action_t               action;
-	f_data_from_hash       func;
+	f_convert_to_fast      func;
 	
 	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
 	if(
 		ret != 0 ||
 		action >= ACTION_INVALID ||
-		(func = api_data_from_hash[action]) == NULL
+		(func = api_convert_to_fast[action]) == NULL
 	)
 		return -ENOSYS;
-		
-	data_realholder(ret, data, data);
-	if(ret < 0)
+	
+	return func(userdata, request, callback);
+} // }}}
+
+static ssize_t api_pack_fastcall_callback(data_t *output, request_t *request){ // {{{
+	data_t                 d_request         = DATA_PTR_HASHT(request);
+
+	fastcall_convert_to r_convert_to = { { 4, ACTION_CONVERT_TO }, output, FORMAT(packed) };
+	return data_query(&d_request, &r_convert_to);
+} // }}}
+static ssize_t api_unpack_fastcall_callback(fastcall_header *output, fastcall_header *input){ // {{{
+	uintmax_t              header_size;
+	
+	header_size = MIN(input->nargs, output->nargs);
+	
+	if(header_size > FASTCALL_NARGS_LIMIT)      // too many arguments
+		return -EFAULT;
+	
+	header_size *= sizeof(output->nargs);
+	
+	memcpy(output, input, header_size);
+	return 0;
+} // }}}
+ssize_t     api_pack_fastcall(fastcall_header *input, data_t *output){ // {{{
+	return api_convert_fastcall_to_request(output, input, (f_fast_to_hash)api_pack_fastcall_callback);
+} // }}}
+ssize_t     api_unpack_fastcall(data_t *input, fastcall_header *output){ // {{{
+	ssize_t                ret;
+	data_t                 d_request         = DATA_PTR_HASHT(NULL);
+	
+	fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, input, FORMAT(packed) };
+	if( (ret = data_query(&d_request, &r_convert_from)) < 0)
 		return ret;
 	
-	return func(data, request);
+	return api_convert_request_to_fastcall(output, data_get_ptr(&d_request), (f_hash_to_fast)api_unpack_fastcall_callback);
+} // }}}
+
+static ssize_t     data_query_callback(void *userdata, void *hargs){ // {{{
+	return data_query( (data_t *)userdata, (fastcall_header *)hargs);
+} // }}}
+static ssize_t     machine_query_callback(void *userdata, request_t *request){ // {{{
+	return machine_query( (machine_t *)userdata, request);
 } // }}}
 ssize_t     data_list_query(data_t *data, request_t *list){ // {{{
 	ssize_t                ret;
 	action_t               action;
-	f_data_from_hash       func;
 	
 	data_get(ret, TYPE_ACTIONT, action, &list->data);
 	if(
 		ret != 0 ||
-		action >= ACTION_INVALID ||
-		(func = api_data_from_hash[action]) == NULL
+		action >= ACTION_INVALID
 	)
 		return -ENOSYS;
-		
+	
+	hash_rename(list, api_data_from_list[action]);
+	
+	return data_hash_query(data, list);
+} // }}}
+ssize_t     data_hash_query(data_t *data, request_t *request){ // {{{
+	ssize_t                ret;
+	
 	data_realholder(ret, data, data);
 	if(ret < 0)
 		return ret;
 	
-	hash_rename(list, api_data_from_list[action]);
-	return func(data, list);
+	return api_convert_request_to_fastcall(data, request, data_query_callback);
 } // }}}
 ssize_t     machine_fast_query(machine_t *machine, void *hargs){ // {{{
-	f_machine_from_fast    func;
-	
-	if(
-		((fastcall_header *)hargs)->action >= ACTION_INVALID ||
-		(func = api_machine_from_fast[ ((fastcall_header *)hargs)->action]) == NULL
-	)
-		return -ENOSYS;
-	
-	return func(machine, hargs);
+	return api_convert_fastcall_to_request(machine, hargs, machine_query_callback);
 } // }}}
 
 uintmax_t fastcall_nargs[ACTION_INVALID] = {
@@ -506,44 +549,44 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_IS_NULL] = 3,
 };
 
-f_machine_from_fast  api_machine_from_fast[ACTION_INVALID] = {
-	[ACTION_CREATE]       = (f_machine_from_fast)&action_crud_from_fast,
-	[ACTION_LOOKUP]       = (f_machine_from_fast)&action_crud_from_fast,
-	[ACTION_UPDATE]       = (f_machine_from_fast)&action_crud_from_fast,
-	[ACTION_DELETE]       = (f_machine_from_fast)&action_crud_from_fast,
-	[ACTION_READ]         = (f_machine_from_fast)&action_io_from_fast,
-	[ACTION_WRITE]        = (f_machine_from_fast)&action_io_from_fast,
-	[ACTION_RESIZE]       = (f_machine_from_fast)&action_resize_from_fast,
-	[ACTION_ENUM]         = (f_machine_from_fast)&action_enum_from_fast,
-	[ACTION_PUSH]         = (f_machine_from_fast)&action_push_from_fast,
-	[ACTION_POP]          = (f_machine_from_fast)&action_pop_from_fast,
-	[ACTION_FREE]         = (f_machine_from_fast)&action_free_from_fast,
-	[ACTION_INCREMENT]    = (f_machine_from_fast)&action_increment_from_fast,
-	[ACTION_DECREMENT]    = (f_machine_from_fast)&action_decrement_from_fast,
-	[ACTION_LENGTH]       = (f_machine_from_fast)&action_length_from_fast,
-	[ACTION_QUERY]        = (f_machine_from_fast)&action_query_from_fast,
-	[ACTION_CONVERT_TO]   = (f_machine_from_fast)&action_convert_to_from_fast,
-	[ACTION_CONVERT_FROM] = (f_machine_from_fast)&action_convert_from_from_fast,
+f_convert_to_hash  api_convert_to_hash[ACTION_INVALID] = {
+	[ACTION_CREATE]       = (f_convert_to_hash)&action_crud_to_hash,
+	[ACTION_LOOKUP]       = (f_convert_to_hash)&action_crud_to_hash,
+	[ACTION_UPDATE]       = (f_convert_to_hash)&action_crud_to_hash,
+	[ACTION_DELETE]       = (f_convert_to_hash)&action_crud_to_hash,
+	[ACTION_READ]         = (f_convert_to_hash)&action_io_to_hash,
+	[ACTION_WRITE]        = (f_convert_to_hash)&action_io_to_hash,
+	[ACTION_RESIZE]       = (f_convert_to_hash)&action_resize_to_hash,
+	[ACTION_ENUM]         = (f_convert_to_hash)&action_enum_to_hash,
+	[ACTION_PUSH]         = (f_convert_to_hash)&action_push_to_hash,
+	[ACTION_POP]          = (f_convert_to_hash)&action_pop_to_hash,
+	[ACTION_FREE]         = (f_convert_to_hash)&action_free_to_hash,
+	[ACTION_INCREMENT]    = (f_convert_to_hash)&action_increment_to_hash,
+	[ACTION_DECREMENT]    = (f_convert_to_hash)&action_decrement_to_hash,
+	[ACTION_LENGTH]       = (f_convert_to_hash)&action_length_to_hash,
+	[ACTION_QUERY]        = (f_convert_to_hash)&action_query_to_hash,
+	[ACTION_CONVERT_TO]   = (f_convert_to_hash)&action_convert_to_to_hash,
+	[ACTION_CONVERT_FROM] = (f_convert_to_hash)&action_convert_from_to_hash,
 };
 
-f_data_from_hash api_data_from_hash[ACTION_INVALID] = {
-	[ACTION_CREATE]       = (f_data_from_hash)&action_crud_from_hash,
-	[ACTION_LOOKUP]       = (f_data_from_hash)&action_crud_from_hash,
-	[ACTION_UPDATE]       = (f_data_from_hash)&action_crud_from_hash,
-	[ACTION_DELETE]       = (f_data_from_hash)&action_crud_from_hash,
-	[ACTION_READ]         = (f_data_from_hash)&action_read_from_hash,
-	[ACTION_WRITE]        = (f_data_from_hash)&action_write_from_hash,
-	[ACTION_RESIZE]       = (f_data_from_hash)&action_resize_from_hash,
-	[ACTION_ENUM]         = (f_data_from_hash)&action_enum_from_hash,
-	[ACTION_PUSH]         = (f_data_from_hash)&action_push_from_hash,
-	[ACTION_POP]          = (f_data_from_hash)&action_pop_from_hash,
-	[ACTION_FREE]         = (f_data_from_hash)&action_free_from_hash,
-	[ACTION_INCREMENT]    = (f_data_from_hash)&action_increment_from_hash,
-	[ACTION_DECREMENT]    = (f_data_from_hash)&action_decrement_from_hash,
-	[ACTION_LENGTH]       = (f_data_from_hash)&action_length_from_hash,
-	[ACTION_QUERY]        = (f_data_from_hash)&action_query_from_hash,
-	[ACTION_CONVERT_TO]   = (f_data_from_hash)&action_convert_to_from_hash,
-	[ACTION_CONVERT_FROM] = (f_data_from_hash)&action_convert_from_from_hash,
+f_convert_to_fast api_convert_to_fast[ACTION_INVALID] = {
+	[ACTION_CREATE]       = (f_convert_to_fast)&action_crud_to_fast,
+	[ACTION_LOOKUP]       = (f_convert_to_fast)&action_crud_to_fast,
+	[ACTION_UPDATE]       = (f_convert_to_fast)&action_crud_to_fast,
+	[ACTION_DELETE]       = (f_convert_to_fast)&action_crud_to_fast,
+	[ACTION_READ]         = (f_convert_to_fast)&action_read_to_fast,
+	[ACTION_WRITE]        = (f_convert_to_fast)&action_write_to_fast,
+	[ACTION_RESIZE]       = (f_convert_to_fast)&action_resize_to_fast,
+	[ACTION_ENUM]         = (f_convert_to_fast)&action_enum_to_fast,
+	[ACTION_PUSH]         = (f_convert_to_fast)&action_push_to_fast,
+	[ACTION_POP]          = (f_convert_to_fast)&action_pop_to_fast,
+	[ACTION_FREE]         = (f_convert_to_fast)&action_free_to_fast,
+	[ACTION_INCREMENT]    = (f_convert_to_fast)&action_increment_to_fast,
+	[ACTION_DECREMENT]    = (f_convert_to_fast)&action_decrement_to_fast,
+	[ACTION_LENGTH]       = (f_convert_to_fast)&action_length_to_fast,
+	[ACTION_QUERY]        = (f_convert_to_fast)&action_query_to_fast,
+	[ACTION_CONVERT_TO]   = (f_convert_to_fast)&action_convert_to_to_fast,
+	[ACTION_CONVERT_FROM] = (f_convert_to_fast)&action_convert_from_to_fast,
 };
 
 hash_t * api_data_from_list[ACTION_INVALID] = {
