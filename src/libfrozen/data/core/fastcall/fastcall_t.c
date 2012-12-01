@@ -14,8 +14,7 @@ static ssize_t data_fastcall_t_convert_to(data_t *src, fastcall_convert_to *farg
 			return api_pack_fastcall(fdata->hargs, fargs->dest);
 			
 		case FORMAT(output):;
-			
-			break;
+			return api_pack_fastcall_output(fdata->hargs, fargs->dest);
 	}
 	return -ENOSYS;
 } // }}}
@@ -27,8 +26,7 @@ static ssize_t data_fastcall_t_convert_from(data_t *dst, fastcall_convert_from *
 			return api_unpack_fastcall(fargs->src, fdata->hargs);
 		
 		case FORMAT(output):;
-			
-			break;
+			return api_unpack_fastcall_output(fargs->src, fdata->hargs);
 	}
 	
 	return 0;

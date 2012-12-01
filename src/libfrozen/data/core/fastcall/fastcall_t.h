@@ -18,14 +18,14 @@
  *  @endcode
  */
 
-#define DATA_FASTCALLT(_ret, _fastcall)      { TYPE_FASTCALLT, (fastcall_t []){ { _ret, _fastcall }  }
+#define DATA_FASTCALLT(_ret, _fastcall)      { TYPE_FASTCALLT, (fastcall_t []){ { _ret, _fastcall }  } }
 #define DEREF_TYPE_FASTCALLT(_data) (fastcall_t *)((_data)->ptr)
 #define REF_TYPE_FASTCALLT(_dt) _dt
 #define HAVEBUFF_TYPE_FASTCALLT 0
 #define UNVIEW_TYPE_FASTCALLT(_ret, _dt, _view)  { _dt = (fastcall_t *)((_view)->ptr); _ret = 0; }
 
 typedef struct fastcall_t {
-	uintmax_t             *ret;
+	ssize_t               *ret;
 	fastcall_header       *hargs;
 } fastcall_t;
 
