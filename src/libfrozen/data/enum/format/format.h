@@ -7,6 +7,7 @@
 #define FORMAT_VALUE_debug 5833
 #define FORMAT_VALUE_hash 3191
 #define FORMAT_VALUE_human 5855
+#define FORMAT_VALUE_input 6325
 #define FORMAT_VALUE_ip_dothexint 71753
 #define FORMAT_VALUE_ip_dotint 31540
 #define FORMAT_VALUE_ip_dotoctint 71644
@@ -15,6 +16,7 @@
 #define FORMAT_VALUE_item 3222
 #define FORMAT_VALUE_native 9808
 #define FORMAT_VALUE_netstring 30930
+#define FORMAT_VALUE_output 10516
 #define FORMAT_VALUE_packed 9228
 #define FORMAT_VALUE_time_dot_dmy 70279
 #define FORMAT_VALUE_time_dot_dmyhm 109219
@@ -32,6 +34,7 @@ typedef enum format_t {
       FORMAT_debug = FORMAT_VALUE_debug, 
       FORMAT_hash = FORMAT_VALUE_hash, 
       FORMAT_human = FORMAT_VALUE_human, 
+      FORMAT_input = FORMAT_VALUE_input, 
       FORMAT_ip_dothexint = FORMAT_VALUE_ip_dothexint, 
       FORMAT_ip_dotint = FORMAT_VALUE_ip_dotint, 
       FORMAT_ip_dotoctint = FORMAT_VALUE_ip_dotoctint, 
@@ -40,6 +43,7 @@ typedef enum format_t {
       FORMAT_item = FORMAT_VALUE_item, 
       FORMAT_native = FORMAT_VALUE_native, 
       FORMAT_netstring = FORMAT_VALUE_netstring, 
+      FORMAT_output = FORMAT_VALUE_output, 
       FORMAT_packed = FORMAT_VALUE_packed, 
       FORMAT_time_dot_dmy = FORMAT_VALUE_time_dot_dmy, 
       FORMAT_time_dot_dmyhm = FORMAT_VALUE_time_dot_dmyhm, 
@@ -61,6 +65,7 @@ keypair_t formats[] = {
       { "debug", FORMAT_VALUE_debug }, 
       { "hash", FORMAT_VALUE_hash }, 
       { "human", FORMAT_VALUE_human }, 
+      { "input", FORMAT_VALUE_input }, 
       { "ip_dothexint", FORMAT_VALUE_ip_dothexint }, 
       { "ip_dotint", FORMAT_VALUE_ip_dotint }, 
       { "ip_dotoctint", FORMAT_VALUE_ip_dotoctint }, 
@@ -69,6 +74,7 @@ keypair_t formats[] = {
       { "item", FORMAT_VALUE_item }, 
       { "native", FORMAT_VALUE_native }, 
       { "netstring", FORMAT_VALUE_netstring }, 
+      { "output", FORMAT_VALUE_output }, 
       { "packed", FORMAT_VALUE_packed }, 
       { "time_dot_dmy", FORMAT_VALUE_time_dot_dmy }, 
       { "time_dot_dmyhm", FORMAT_VALUE_time_dot_dmyhm }, 

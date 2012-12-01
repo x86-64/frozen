@@ -781,6 +781,7 @@ enable_anything_t
 enable_data_t
 enable_dataptr_t
 enable_default_t
+enable_fastcall_t
 enable_hash_t
 enable_machine_t
 enable_string_t
@@ -1553,6 +1554,8 @@ Optional Features:
                           disable data dataptr_t
   --disable-data-default_t
                           disable data default_t
+  --disable-data-fastcall_t
+                          disable data fastcall_t
   --disable-data-hash_t   disable data hash_t
   --disable-data-machine_t
                           disable data machine_t
@@ -18053,6 +18056,43 @@ fi
 		DATA_MAKEFILE_core_default=yes
 
 		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/default/libfrozen_data_default.la"
+
+	fi
+
+
+
+
+
+
+	# Check whether --enable-fastcall_t was given.
+if test "${enable_fastcall_t+set}" = set; then :
+  enableval=$enable_fastcall_t;
+fi
+
+
+	if test "yes" = "yes"; then
+		if test "${enable_fastcall_t}" = "yes"; then
+			enable_fastcall_t="no"
+		else
+			enable_fastcall_t="yes"
+		fi
+	fi
+
+	if test "${enable_fastcall_t}" = "yes"; then
+		DATA_DIR_fastcall_t="core/fastcall"
+		DATA_DEP_fastcall_t="string_t hash_t"
+		DATA_ID_fastcall_t="1"
+		DATA_SELECTED="$DATA_SELECTED fastcall_t"
+		DATA_HEADERS="$DATA_HEADERS core/fastcall/fastcall_t.h"
+	fi
+
+	if test "$DATA_MAKEFILE_core_fastcall" = ""; then
+		GEN_MAKEFILES="$GEN_MAKEFILES src/libfrozen/data/core/fastcall/Makefile"
+		DATA_DIST_DIRS="$DATA_DIST_DIRS core/fastcall"
+
+		DATA_MAKEFILE_core_fastcall=yes
+
+		DATA_LIBS_SELECTED="${DATA_LIBS_SELECTED} core/fastcall/libfrozen_data_fastcall.la"
 
 	fi
 
