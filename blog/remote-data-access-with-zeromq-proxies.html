@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <title>frozen</title>
+        <title>Remote data access with ZeroMQ proxies</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="./theme/css/main.css" type="text/css" />
         <link href="/frozen/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="frozen Atom Feed" />
@@ -29,29 +29,47 @@
                 
                 
                 
-                    <li ><a href="./category/misc.html">misc</a></li>
+                    <li class="active"><a href="./category/misc.html">misc</a></li>
                 
                 </ul></nav>
         </header><!-- /#banner -->
         
 <section id="content" class="body">
-<h1>Archives for frozen</h1>
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="remote-data-access-with-zeromq-proxies.html" rel="bookmark"
+           title="Permalink to Remote data access with ZeroMQ proxies">Remote data access with ZeroMQ proxies</a></h1>
+      
+    </header>
 
-<dl>
+    <div class="entry-content">
+      <footer class="post-info">
+        <abbr class="published" title="2012-12-05T00:00:00">
+                Wed 05 December 2012
+        </abbr>
 
-    <dt>Fri 17 February 2012</dt>
-    <dd><a href="./flow-based-programming-intro.html">Flow-based programming intro</a></dd>
+        
+        <address class="vcard author">
+                By <a class="url fn" href="./author/x86_64.html">x86_64</a>
+        </address>
+        
+<p>In <a href="./category/misc.html">misc</a>. </p>
 
-    <dt>Tue 21 February 2012</dt>
-    <dd><a href="./building-distributed-data-processing-pipeline.html">Building distributed data processing pipeline</a></dd>
 
-    <dt>Fri 16 March 2012</dt>
-    <dd><a href="./destination-irrelevant-architecture.html">Destination-irrelevant architecture</a></dd>
 
-    <dt>Wed 05 December 2012</dt>
-    <dd><a href="./remote-data-access-with-zeromq-proxies.html">Remote data access with ZeroMQ proxies</a></dd>
+</footer><!-- /.post-info -->
+      <p>Now with ZeroMQ data proxy we can access remote data which hosted in another frozen instance in same way
+as it could be inside same process.
+It looks like:</p>
+<p><a href="https://github.com/x86-64/frozen/blob/master/examples/data_zeromq_proxy_t.fz">data_zeromq_proxy_t.fz</a></p>
+<p>Here is "client" variable represent remote data. And "server" is data on remote server. For testing purpose it was created
+in same process, however communications go only through ZeroMQ socket.
+Data we access is simple hash, with "testkey" which store test value.</p>
+    </div><!-- /.entry-content -->
+    
 
-</dl>
+  </article>
 </section>
 
         <section id="extras" class="body">

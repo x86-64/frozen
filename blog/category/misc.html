@@ -41,8 +41,54 @@
         
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href=".././destination-irrelevant-architecture.html">Destination-irrelevant architecture</a></h1> 
+                    <h1 class="entry-title"><a href=".././remote-data-access-with-zeromq-proxies.html">Remote data access with ZeroMQ proxies</a></h1> 
                     <footer class="post-info">
+        <abbr class="published" title="2012-12-05T00:00:00">
+                Wed 05 December 2012
+        </abbr>
+
+        
+        <address class="vcard author">
+                By <a class="url fn" href=".././author/x86_64.html">x86_64</a>
+        </address>
+        
+<p>In <a href=".././category/misc.html">misc</a>. </p>
+
+
+
+</footer><!-- /.post-info --><p>Now with ZeroMQ data proxy we can access remote data which hosted in another frozen instance in same way
+as it could be inside same process.
+It looks like:</p>
+<p><a href="https://github.com/x86-64/frozen/blob/master/examples/data_zeromq_proxy_t.fz">data_zeromq_proxy_t.fz</a></p>
+<p>Here is "client" variable represent remote data. And "server" is data on remote server. For testing purpose it was created
+in same process, however communications go only through ZeroMQ socket.
+Data we access is simple hash, with "testkey" which store test value.</p>
+                </article>
+                
+            </aside><!-- /#featured -->
+            
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+            
+        
+        
+        
+        
+            
+
+        
+         
+            
+            <li><article class="hentry">    
+                <header>
+                    <h1><a href=".././destination-irrelevant-architecture.html" rel="bookmark"
+                           title="Permalink to Destination-irrelevant architecture">Destination-irrelevant architecture</a></h1>
+                </header>
+                
+                <div class="entry-content">
+                <footer class="post-info">
         <abbr class="published" title="2012-03-16T00:00:00">
                 Fri 16 March 2012
         </abbr>
@@ -56,80 +102,14 @@
 
 
 
-</footer><!-- /.post-info --><p>Today many developers use request-based in everything - it is very easy to think in it, easy to understand, easy to use.
+</footer><!-- /.post-info -->
+                <p>Today many developers use request-based in everything - it is very easy to think in it, easy to understand, easy to use.
 But that happens next? Next we want to do things fast. Here we go for multi threaded program, event-driven programming, use co-routines,
-and every single bit we can find to speed this damn thing. And they work too - program speeds up. We see incredible async beasts that
-handle tens of thousands requests per second, but how about take a look to another approach in programming?</p>
-<h2>Situation</h2>
-<p>Let's imagine following situation: we have big cluster of computers, and we have big pile of data in it. We setup some db solution to
-store this data and retrieve. And this db solution is request-based - we say "i want this data", and server send to to us. Looks good, but
-i do not want to store and retrive data only. I want to process it and write it back in another place. And what happens?
-Single tiny client request huge pile of data, receive it over network, with some magic and time it process all that data and then send
-data back to cluster. Do you see bottleneck?</p>
-<h2>Obvious solution</h2>
-<p>Yes, we can setup more advanced software over cluster to run program over all computers in cluster. Then we need some split data algo,
-and it would be good if it use same machine for processing where data stored. Then we need some management software to start our program and
-watch how our system do. May be we hire OpenMP guy to make one huge program to run on cluster. And so on.</p>
-<p>Too complex, too time-consuming, too costly.</p>
-<h2>Less obvious solution</h2>
-<p>Rethink architecture. May be we can somehow to fix this. What if i do not download all that data, but say there i want it to flow to.
-That would be easy - tiny client send request with destination inside, and destination itself is huge processing system which is easy
-to build with ZeroMQ. So, in this environment client can download data and use it by himself (an old way), can pass data to another
-destination (new way). And even more, that destination can flow resulting data to any destination too. Request can have any number of 
-nested destinations. I can even pass some data to client back, i can ask client to solve some specific job and get results back in system.</p>
-<p>From higher point of view it would look even better. Lets say "company 1" do X with data, and other "company 2" do Y with data.
-We have data and we want to get X(Y(data)). I make request to company 1 to process data and send it to company 2, which in turn
-process incoming data and return it to me back. I'm not in middle of 1 and 2, and i would not see that intermediate data and i really do
-not want to see or store or retransmit it. That helps to same time and space a bit.</p>
-<p>More - company 2 can use our own secret code Z to make Y processing even better. But we do not want to give them Z, nor access to api, nor
-pay to them to adapt their code to use our api. With this new architecture i can do it easy (of course company 1 and 2 need to support it too)
-I supply temporary zeromq socket to my request, and company 2 see - there is service available - it can use it. Then processing completes -
-temporary access closed and no one can use our code.</p>
-<h2>Real example</h2>
-<p>In frozen we can do like that very easy. It use ZeroMQ to build distributed systems, and it can pass sockets inside requests.
-Our service in turn see socket in request, unpack it, and use it to send data to next destination.</p>
-<p>Code for service A:
-<a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_servicea.m4">article_flow_servicea.m4</a></p>
-<p>Code for service B:
-<a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_serviceb.m4">article_flow_serviceb.m4</a></p>
-<p>Code for client:
-<a href="https://github.com/x86-64/frozen/blob/master/examples/article_flow_client.m4">article_flow_client.m4</a></p>
-<p>We start in different consoles:</p>
-<div class="codehilite"><pre>$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">article_flow_router</span><span class="p">.</span><span class="n">m4</span>
-$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">article_flow_servicea</span><span class="p">.</span><span class="n">m4</span>
-$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">article_flow_serviceb</span><span class="p">.</span><span class="n">m4</span>
-</pre></div>
-
-
-<p>And run this on client:</p>
-<div class="codehilite"><pre>$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">article_flow_client</span><span class="p">.</span><span class="n">m4</span>
-</pre></div>
-
-
-<p>In result we see following in service B console:</p>
-<div class="codehilite"><pre>$ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span> <span class="n">article_flow_serviceb</span><span class="p">.</span><span class="n">m4</span> 
-<span class="n">client</span> <span class="n">data</span><span class="p">:</span> <span class="n">client_data</span>
-<span class="n">service</span> <span class="n">a</span> <span class="n">data</span><span class="p">:</span> <span class="n">service_a</span>
-<span class="n">service</span> <span class="n">b</span> <span class="n">data</span><span class="p">:</span> <span class="n">service_b</span>
-</pre></div>
-
-
-<p>Here we see data we set in client, data which service A set, and service B.</p>
-<h2>Real world</h2>
-<p>Examples are cool, but can be not so good in real world. However, i use it to run my crawler project. I have crawler as "service A" and html
-processing engine as "service B". I can add as many crawlers and process engines in any time i want and shut them down too.
-Unfortunately, piece of code for crawler and processing engine would remain closed for a while. Rest of system - frozen and all that distributed
-stuff is open-source and you free to use it.</p>
-                </article>
+and every single bit we can find ...</p>
+                <a class="readmore" href=".././destination-irrelevant-architecture.html">read more</a>
                 
-            </aside><!-- /#featured -->
-            
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
-            
-        
+                </div><!-- /.entry-content -->
+            </article></li>
         
         
         
@@ -197,7 +177,7 @@ all possible languages. Recently some problems were solved, including appearance
 
 
 </footer><!-- /.post-info -->
-                <h3>Copying files in simple way</h3>
+                <h3 id="copying_files_in_simple_way">Copying files in simple way</h3>
 <p>What could be simplier than to copy file? May be this is not very interesting way to spend your time, but lets take a look
 how we can do job using frozen and it's flow-based nature. First, assume we want to copy file within ...</p>
                 <a class="readmore" href=".././flow-based-programming-intro.html">read more</a>

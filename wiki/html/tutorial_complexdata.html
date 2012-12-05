@@ -144,7 +144,7 @@ any high-level language can do that. </p>
 </td></tr></table>
 
 <p>Here we have string, with "record_t" data on top of it and this defined as "format". That means that any data that pass thought format
-converted to template defined. In this case to "record_t". Record_t represent one line in this case, because it looks for "\n".
+converted to template defined. In this case to "record_t". Record_t represent one line in this case, because it looks for "n".
 Notice that we use numerics to query our "database", instead of hashkey_t as in previous example. Also notice that this numeric represent offset 
 in target string, not line number as could one think about it at first sight.</p>
 <p>To remove this numeric offsets and query data by line number we need some help. Lets use "key ~" to store data offsets.</p>

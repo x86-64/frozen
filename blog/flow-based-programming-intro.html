@@ -59,7 +59,7 @@
 
 
 </footer><!-- /.post-info -->
-      <h3>Copying files in simple way</h3>
+      <h3 id="copying_files_in_simple_way">Copying files in simple way</h3>
 <p>What could be simplier than to copy file? May be this is not very interesting way to spend your time, but lets take a look
 how we can do job using frozen and it's flow-based nature. First, assume we want to copy file within same computer.
 We need to open both files, read some from one file to buffer, write this buffer to second file, and in both steps monitor return codes,
@@ -70,7 +70,7 @@ right? No. We just call "transfer" method on file, like so:</p>
 
 
 <p>That was pretty easy. But that if we want to copy file from different machines?</p>
-<h3>Copying file to another computer</h3>
+<h3 id="copying_file_to_another_computer">Copying file to another computer</h3>
 <p>If we want to copy something to another machine usually we call scp or rsync, but i always wanted to do this using ZeroMQ socket.
 So, let's do it! We need to open file, open zmq socket, read some info from file and then send message, then repeat until file ends, right?
 Again, no, and again, we use "transfer". Out (client) side configuration file will look like so:</p>
@@ -87,7 +87,7 @@ $ <span class="n">frozend</span> <span class="o">-</span><span class="n">c</span
 </pre></div>
 
 
-<h3>Copying files between computers</h3>
+<h3 id="copying_files_between_computers">Copying files between computers</h3>
 <p>Next step is to copy between two computers. Client:</p>
 <p><a href="https://github.com/x86-64/frozen/blob/master/examples/article_cp_03_client.m4">article_cp_03_client.m4</a></p>
 <p>Pretty obvious changes. We replace file to special machine and everything works just fine. Server side is same, just some macro added.
@@ -102,7 +102,7 @@ To see it in action:</p>
 <em> Pass zeromq socket as destination itself. Yes we can transfer socket object from one computer to another and everything would work fine, but unfortunately "transfer" method not well suitable for this. This is because socket is waiting for clean data and transfer will pass clean data, but other side server is expecting not clean data, but request. So, we need to do special server side - not best solution.
 </em> Make "transfer" daemon. It would be standalone daemon, which would listen to our requests and will initiate transfer. Data would flow through daemon. Still not best.
 * Make "proxy" pattern for zeromq socket. In this pattern socket act as proxy, passing real requests to it to another end. This will not require server-side changes. Cool, but it not yet implemented, but would be.</p>
-<h3>Enumerating things on LevelDB</h3>
+<h3 id="enumerating_things_on_leveldb">Enumerating things on LevelDB</h3>
 <p>Copying files led us to nice idea - why bother to get data to ourselves, let's shoot everything with it. Last nice example would be
 remote LevelDB instance using our favorite ZeroMQ sockets.</p>
 <p><a href="https://github.com/x86-64/frozen/blob/master/examples/example_leveldb_zmq.m4">example_leveldb_zmq.m4</a></p>

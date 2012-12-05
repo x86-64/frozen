@@ -115,7 +115,7 @@ Also it can show request content. Example:
 <h2>Processing</h2>
 <h3>Split</h3>
 <p>It is very common to process data line-by-line, especially in UNIX world, but for performance reasons frozen by default don't split
-incoming data on lines. If you want lines you should use <a href="doxygen/group__mod__machine__split.html">mod_machine_split</a> machine. By default it split input exactly by \n which mean
+incoming data on lines. If you want lines you should use <a href="doxygen/group__mod__machine__split.html">mod_machine_split</a> machine. By default it split input exactly by n which mean
 end of line. </p>
 <h3>Regexp</h3>
 <p>To match some input for pattern you can use <a href="doxygen/group__mod__machine__regexp.html">mod_machine_regexp</a>. It add special marker to current request if data match defined pattern.</p>
@@ -124,7 +124,7 @@ end of line. </p>
 redirected in any other machine shop you could do anything with such request or enviroment, for example terminate request, return success or
 error, write this to logger, trigger some action and so on.</p>
 <h2>Combining all together</h2>
-<p>As we know some of processing and input\output machines we could combine it in something useful. For example, you want to know which users have /bin/false shell.
+<p>As we know some of processing and inputoutput machines we could combine it in something useful. For example, you want to know which users have /bin/false shell.
 Configuration will look like following:
 <a href="https://github.com/x86-64/frozen/blob/master/examples/tutorial_proc_shell.conf">tutorial_proc_shell.conf</a></p>
 <p><a href="doxygen/group__mod__machine__file.html">mod_machine_file</a> open file for reading only. <a href="doxygen/group__mod__machine__split.html">mod_machine_split</a> split it in lines.
