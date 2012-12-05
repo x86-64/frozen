@@ -1,0 +1,20 @@
+local server = 
+	zeromq_proxy_t : {
+		type      = "rep",
+		bind      = "tcp://127.0.0.1:65000"
+	}                                              >
+	{ testkey = "testvalue\n" }
+
+local client =
+	zeromq_proxy_t : {
+		type      = "req",
+		connect   = "tcp://127.0.0.1:65000"
+	}
+
+sub {
+	$output = void_t : {};
+	
+	client.lookup(hashkey_t:"testkey", $output);
+	
+	$output | fd_t:"stdout"; $output.free();
+}

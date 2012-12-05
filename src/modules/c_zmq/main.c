@@ -13,6 +13,7 @@ typedef struct zeromq_t {
 	uintmax_t              suspended;
 
 	int                    zmq_type;                
+	
 } zeromq_t;
 
 typedef struct zeromq_t_opt_t {
@@ -700,6 +701,182 @@ data_proto_t zmq_msg_proto = { // {{{
 	}
 }; // }}}
 
+
+typedef struct zeromq_proxy_t {
+	data_t                 zmq_socket;
+	
+	pthread_t              thread;
+	data_t                 slave;       // slave data for zeromq_proxy_t
+} zeromq_proxy_t;
+
+static void *  zeromq_proxy_t_thread(void *fdata){ // {{{
+	ssize_t                ret;
+	data_t                 d_proxy           = { type_zeromq_proxyt, fdata };
+	
+	while(1){
+		fastcall_enum r_enum = { { 3, ACTION_ENUM }, NULL };
+		if( (ret = data_query(&d_proxy, &r_enum)) < 0 )
+			errors_log("zeromq_proxy_t server error: %d: %s\n", ret, errors_describe(ret));
+	}
+	return NULL;
+} // }}}
+static void    zeromq_proxy_t_destroy(data_t *data){ // {{{
+	void *                 res;
+	zeromq_proxy_t        *fdata             = (zeromq_proxy_t *)data->ptr; 
+	
+	if(data_is_void(&fdata->slave)){
+		// client
+		
+	}else{
+		// server
+		pthread_cancel(fdata->thread);
+		pthread_join(fdata->thread, &res);
+		
+		data_free(&fdata->slave);
+	}
+	
+	data_free(&fdata->zmq_socket);
+	
+	free(fdata);
+	data_set_void(data);
+} // }}}
+static ssize_t zeromq_proxy_t_new(data_t *data, config_t *config){ // {{{
+	ssize_t                ret;
+	zeromq_proxy_t        *fdata;
+	
+	if((data->ptr = fdata = calloc(1, sizeof(zeromq_proxy_t))) == NULL)
+		return -ENOMEM;
+	
+	hash_holder_consume(ret, fdata->slave, config, HK(data));
+	if(ret != 0){
+		data_set_void(&fdata->slave);
+	}
+	
+	fdata->zmq_socket.type = type_zeromqt;
+	fdata->zmq_socket.ptr  = NULL;
+	
+	if( (ret = zeromq_t_new(&fdata->zmq_socket, config)) < 0){
+		data_free(&fdata->slave);
+		return ret;
+	}
+	
+	if( data_is_void(&fdata->slave) ){
+		// client
+		
+	}else{
+		// server
+		if(pthread_create(&fdata->thread, NULL, &zeromq_proxy_t_thread, fdata) != 0)
+			ret = errorn(EFAULT);
+	}
+	
+	return ret;
+} // }}}
+
+static ssize_t data_zeromq_proxy_t_convert_from(data_t *data, fastcall_convert_from *fargs){ // {{{
+	ssize_t                ret;
+	
+	if(data->ptr != NULL)
+		return 0;
+	
+	switch(fargs->format){
+		case FORMAT(hash):;
+			hash_t            *config;
+			
+			data_get(ret, TYPE_HASHT, config, fargs->src);
+			if(ret != 0 || config == NULL)
+				return -EINVAL;
+			
+			return zeromq_proxy_t_new(data, config);
+			
+		default:
+			break;
+	};
+	return -ENOSYS;
+} // }}}
+static ssize_t data_zeromq_proxy_t_free(data_t *data, fastcall_free *fargs){ // {{{
+	zeromq_proxy_t_destroy(data);
+	return 0;
+} // }}}
+static ssize_t data_zeromq_proxy_t_default(data_t *data, fastcall_header *hargs){ // {{{
+	ssize_t                ret;
+	zeromq_proxy_t        *fdata             = (zeromq_proxy_t *)data->ptr;
+	data_t                 d_input           = DATA_RAWT_EMPTY();
+	data_t                 d_output          = DATA_RAWT_EMPTY();
+	
+	if(data_is_void(&fdata->slave)){
+		// client side
+		
+		// 1. pack fastcall
+		data_t                 d_fastcall        = DATA_FASTCALLT(&ret, hargs);
+		fastcall_convert_to    r_convert_to      = { { 4, ACTION_CONVERT_TO }, &d_input, FORMAT(input) };
+		if( (ret = data_query(&d_fastcall, &r_convert_to)) < 0)
+			return ret;
+		
+		// 2. send it to server
+		fastcall_push r_push = { { 4, ACTION_PUSH }, &d_input };
+		if( (ret = data_zeromq_t_push(&fdata->zmq_socket, &r_push)) < 0)
+			return ret;
+		
+		// 3. fetch result from server
+		fastcall_pop r_pop = { { 4, ACTION_POP }, &d_output };
+		if( (ret = data_zeromq_t_pop(&fdata->zmq_socket, &r_pop)) < 0)
+			return ret;
+		
+		// 4. unpack fastcall
+		fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, &d_output, FORMAT(output) };
+		if( (ret = data_query(&d_fastcall, &r_convert_from)) < 0)
+			return ret;
+		
+		data_free(&d_fastcall);
+		data_free(&d_output);
+		ret = 0;
+	}else{
+		// server side
+		// 1. fetch packed fastcall
+		fastcall_pop r_pop = { { 4, ACTION_POP }, &d_input };
+		if( (ret = data_zeromq_t_pop(&fdata->zmq_socket, &r_pop)) < 0)
+			return ret;
+		
+		// 2. unpack
+		fastcall_header        zargs[FASTCALL_NARGS_LIMIT];
+		data_t                 d_fastcall        = DATA_FASTCALLT(&ret, zargs);
+		zargs[0].nargs = FASTCALL_NARGS_LIMIT;
+		
+		fastcall_convert_from  r_convert_from    = { { 4, ACTION_CONVERT_FROM }, &d_input, FORMAT(input) };
+		if( (ret = data_query(&d_fastcall, &r_convert_from)) < 0)
+			return ret;
+		
+		// 3. make a query
+		ret = data_query(&fdata->slave, &zargs);
+		
+		// 4. pack fastcall
+		fastcall_convert_to    r_convert_to      = { { 4, ACTION_CONVERT_TO }, &d_output, FORMAT(output) };
+		if( (ret = data_query(&d_fastcall, &r_convert_to)) < 0)
+			return ret;
+		
+		// 5. reply with packed fastcall
+		fastcall_push r_push = { { 4, ACTION_PUSH }, &d_output };
+		if( (ret = data_zeromq_t_push(&fdata->zmq_socket, &r_push)) < 0)
+			return ret;
+		
+		data_free(&d_fastcall);
+	}
+	data_free(&d_input);
+	return ret;
+} // }}}
+data_proto_t zmq_proxy_proto = { // {{{
+	.type_str               = ZEROMQ_PROXYT_NAME,
+	.api_type               = API_HANDLERS,
+	.handler_default        = (f_data_func)&data_zeromq_proxy_t_default,
+	.handlers               = {
+		// use zeromq_t as base type
+		[ACTION_CONVERT_FROM]   = (f_data_func)&data_zeromq_proxy_t_convert_from,
+		[ACTION_FREE]           = (f_data_func)&data_zeromq_proxy_t_free,
+		
+	}
+}; // }}}
+
+
 typedef struct zeromq_userdata {
 	data_t                 socket;
 	data_t                 shop;
@@ -1004,10 +1181,12 @@ int main(void){
 	errors_register((err_item *)&errs_list, &emodule);
 	data_register(&zmq_proto);
 	data_register(&zmq_msg_proto);
+	data_register(&zmq_proxy_proto);
 	class_register(&zmq_helper_proto);
 	class_register(&zmq_device_proto);
 	
-	type_zeromqt     = datatype_t_getid_byname(ZEROMQT_NAME,     NULL);
-	type_zeromq_msgt = datatype_t_getid_byname(ZEROMQ_MSGT_NAME, NULL);
+	type_zeromqt       = datatype_t_getid_byname(ZEROMQT_NAME,       NULL);
+	type_zeromq_msgt   = datatype_t_getid_byname(ZEROMQ_MSGT_NAME,   NULL);
+	type_zeromq_proxyt = datatype_t_getid_byname(ZEROMQ_PROXYT_NAME, NULL);
 	return 0;
 }

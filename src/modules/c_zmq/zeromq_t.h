@@ -49,6 +49,18 @@
  *              lazy                    = (uint_t)"1"         // do not create socket until it actually need
  * }
  * @endcode
+ *
+ * @code
+ * some = (zeromq_proxy_t){
+ *              // SERVER MODE
+ *              data                    = (something_t)""     // slave data to send requests to
+ *              ... (same options as for zeromq_t) ...
+ *              ... bind or connect here ...
+ *
+ *              // CLIENT MODE
+ *              ... (same options as for zeromq_t) ...
+ *              ... bind or connect here ...
+ * }
  */
 /**
  * @ingroup machine
@@ -81,12 +93,15 @@
 
 #define ZEROMQT_NAME       "zeromq_t"
 #define ZEROMQ_MSGT_NAME   "zeromq_msg_t"
+#define ZEROMQ_PROXYT_NAME "zeromq_proxy_t"
 
 datatype_t                type_zeromqt; 
 datatype_t                type_zeromq_msgt;
+datatype_t                type_zeromq_proxyt;
 
 #define TYPE_ZEROMQT      type_zeromqt
 #define TYPE_ZEROMQ_MSGT  type_zeromq_msgt
+#define TYPE_ZEROMQ_PROXYT  type_zeromq_proxyt
 
 #define DATA_PTR_ZEROMQ_MSGT(_msg) { TYPE_ZEROMQ_MSGT, _msg } 
 #define DEREF_TYPE_ZEROMQT(_data) (ipv4_t *)((_data)->ptr) 
