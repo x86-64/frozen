@@ -500,26 +500,7 @@ ssize_t     api_convert_request_to_fastcall(void *userdata, request_t *request, 
 	return func(userdata, request, callback);
 } // }}}
 
-static ssize_t api_pack_fastcall_callback(data_t *output, request_t *request){ // {{{
-	data_t                 d_request         = DATA_PTR_HASHT(request);
-
-	fastcall_convert_to r_convert_to = { { 4, ACTION_CONVERT_TO }, output, FORMAT(packed) };
-	return data_query(&d_request, &r_convert_to);
-} // }}}
-static ssize_t api_unpack_fastcall_callback(fastcall_header *output, fastcall_header *input){ // {{{
-	uintmax_t              header_size;
-	
-	header_size = MIN(input->nargs, output->nargs);
-	
-	if(header_size > FASTCALL_NARGS_LIMIT)      // too many arguments
-		return -EFAULT;
-	
-	header_size *= sizeof(output->nargs);
-	
-	memcpy(output, input, header_size);
-	return 0;
-} // }}}
-static ssize_t api_unpack_fastcall_output_callback(fastcall_header *output, fastcall_header *input){ // {{{
+ssize_t     api_transfer_fastcall(fastcall_header *input, fastcall_header *output){ // {{{
 	action_t               action            = input->action;
 	f_copy_output          func;
 	
@@ -530,37 +511,6 @@ static ssize_t api_unpack_fastcall_output_callback(fastcall_header *output, fast
 		return -ENOSYS;
 	
 	return func(input, output);
-} // }}}
-ssize_t     api_pack_fastcall(fastcall_header *input, data_t *output){ // {{{
-	return api_convert_fastcall_to_request(output, input, (f_fast_to_hash)api_pack_fastcall_callback);
-} // }}}
-ssize_t     api_unpack_fastcall(data_t *input, fastcall_header *output){ // {{{
-	ssize_t                ret;
-	data_t                 d_request         = DATA_PTR_HASHT(NULL);
-	
-	fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, input, FORMAT(packed) };
-	if( (ret = data_query(&d_request, &r_convert_from)) < 0)
-		return ret;
-	
-	ret = api_convert_request_to_fastcall(output, data_get_ptr(&d_request), (f_hash_to_fast)api_unpack_fastcall_callback);
-	data_free(&d_request);
-	return ret;
-} // }}}
-ssize_t     api_pack_fastcall_output(fastcall_header *input, data_t *output){ // {{{
-	// TODO rewrite this to pack only changed parameters, like "transfered" field
-	return api_convert_fastcall_to_request(output, input, (f_fast_to_hash)api_pack_fastcall_callback);
-} // }}}
-ssize_t     api_unpack_fastcall_output(data_t *input, fastcall_header *output){ // {{{
-	ssize_t                ret;
-	data_t                 d_request         = DATA_PTR_HASHT(NULL);
-	
-	fastcall_convert_from r_convert_from = { { 4, ACTION_CONVERT_FROM }, input, FORMAT(packed) };
-	if( (ret = data_query(&d_request, &r_convert_from)) < 0)
-		return ret;
-	
-	ret = api_convert_request_to_fastcall(output, data_get_ptr(&d_request), (f_hash_to_fast)api_unpack_fastcall_output_callback);
-	data_free(&d_request);
-	return ret;
 } // }}}
 
 static ssize_t     data_query_callback(void *userdata, void *hargs){ // {{{

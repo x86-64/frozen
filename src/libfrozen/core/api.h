@@ -486,10 +486,7 @@ typedef ssize_t (*f_hash_to_fast)     (void *, void *);
 
 ssize_t     api_convert_fastcall_to_request(void *userdata, fastcall_header *hargs, f_fast_to_hash callback);
 ssize_t     api_convert_request_to_fastcall(void *userdata, request_t *request, f_hash_to_fast callback);
-ssize_t     api_pack_fastcall(fastcall_header *input, data_t *output);
-ssize_t     api_unpack_fastcall(data_t *input, fastcall_header *output);
-ssize_t     api_pack_fastcall_output(fastcall_header *input, data_t *output);
-ssize_t     api_unpack_fastcall_output(data_t *input, fastcall_header *output);
+ssize_t     api_transfer_fastcall(fastcall_header *input, fastcall_header *output);
 
 ssize_t     data_hash_query(data_t *data, request_t *request);   // deprecated
 ssize_t     data_list_query(data_t *data, request_t *list);      // deprecated
