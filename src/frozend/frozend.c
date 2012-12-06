@@ -16,6 +16,7 @@ char            defopt_config_file[] = "frozen.conf";
 char           *opt_pidfile        = NULL;
 char           *opt_config_file    = defopt_config_file;
 unsigned int    opt_daemon         = 0;
+unsigned int    opt_keep_running   = 0;
 
 /* getopt arrays  {{{ */
 struct cmdline_option {
@@ -43,6 +44,7 @@ static struct cmdline_option option_data[] = {
 	{ "help",           'h', OPT_FUNC,       (void *)&opts_help,    "help screen"              },
 	{ "config",         'c', OPT_VALUE_STR,  &opt_config_file,      "file with configuration"  },
 	{ "daemon",         'd', OPT_VALUE_BOOL, &opt_daemon,           "daemonize"                },
+	{ "keep-running",   'k', OPT_VALUE_BOOL, &opt_keep_running,     "keep running after script is done" },
 	{ "pid-file",        0,  OPT_VALUE_STR,  &opt_pidfile,          "save pid to pidfile"      },
 	{ "modules",         0,  OPT_VALUE_STR,  &frozen_modules_dir,   "frozen modules dir"       },
 	{ "m4-path",        'p', OPT_VALUE_STR,  &config_m4_path,       "m4 path"                  },
@@ -265,6 +267,8 @@ void main_rest(void){
 		errors_log("pipelines_execute error: %d: %s\n", ret, errors_describe(ret));
 		exit(255);
 	}
+	while(opt_keep_running){ sleep(1); }
+	
 	hash_free(pipelines);
 }
 
