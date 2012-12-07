@@ -186,12 +186,13 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 		return ret;
 	
 	// get offset for this data
-	if(helper_key_current(fargs->key, &d_key) < 0)
+	if(helper_key_current(fargs->key, &d_key) < 0){
 		d_key_ptr = fargs->key;
-	
-	data_get(ret, TYPE_UINTT, offset, d_key_ptr);
-	
-	data_free(&d_key);
+		data_get(ret, TYPE_UINTT, offset, d_key_ptr);
+	}else{
+		data_get(ret, TYPE_UINTT, offset, d_key_ptr);
+		data_free(&d_key);
+	}
 	
 	if(ret < 0)
 		return ret;
