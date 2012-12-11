@@ -160,19 +160,10 @@ static ssize_t data_record_t_convert_from(data_t *dst, fastcall_convert_from *fa
 			return data_record_t_from_config(dst, config);
 		
 		case FORMAT(packed):;
-			uintmax_t              offset;
-			uintmax_t              sep_len;
-			
-			if( (ret = data_strstr(fargs->src, &fdata->separator, &offset, &sep_len)) < 0)
-				return ret;
-			
-			data_t                 sl_src           = DATA_SLICET(fargs->src, 0, offset);
-			fastcall_convert_from  r_convert        = { { 5, ACTION_CONVERT_FROM }, &sl_src, FORMAT(native) };
-			if( (ret = data_query(&fdata->item, &r_convert)) < 0)
-				return ret;
-			
-			fargs->transfered = offset + sep_len;
-			return 0;
+			fastcall_unpack r_unpack = { { 6, ACTION_UNPACK }, fargs->src, &fdata->item, fargs->format };
+			ret = data_query(dst, &r_unpack);
+			fargs->transfered = r_unpack.transfered;
+			return ret;
 		
 		case FORMAT(native):;
 			data_t                     fargs_src_separator;
@@ -271,6 +262,59 @@ static ssize_t data_record_t_handler(data_t *data, fastcall_header *fargs){ // {
 	return data_query(&fdata->item, fargs);
 } // }}}
 
+static ssize_t data_record_t_pack(data_t *data, fastcall_pack *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              transfered        = 0;
+	data_t                 d_output          = DATA_RAWT_EMPTY();
+	data_t                 sl_output         = DATA_SLIDERT(&d_output, 0);
+	record_t              *fdata             = (record_t *)data->ptr;
+	
+	fastcall_convert_to r_convert = { { 5, ACTION_CONVERT_TO }, &sl_output, FORMAT(native) };
+	
+	// <data>
+	ret         = data_query(fargs->input, &r_convert);
+	transfered += r_convert.transfered;
+	
+	data_slider_t_set_offset(&sl_output, r_convert.transfered, SEEK_CUR);
+	
+	if(ret < 0)
+		goto error;
+	
+	// <separator>
+	ret         = data_query(&fdata->separator, &r_convert);
+	transfered += r_convert.transfered;
+	
+	if(ret < 0)
+		goto error;
+	
+	*fargs->output    = d_output;
+	fargs->transfered = transfered;
+	return ret;
+	
+error:
+	data_free(&d_output);
+	return ret;
+} // }}}
+static ssize_t data_record_t_unpack(data_t *data, fastcall_unpack *fargs){ // {{{
+	ssize_t                ret;
+	uintmax_t              offset;
+	uintmax_t              sep_len;
+	data_t                 d_output          = DATA_RAWT_EMPTY();
+	record_t              *fdata             = (record_t *)data->ptr;
+	
+	if( (ret = data_strstr(fargs->input, &fdata->separator, &offset, &sep_len)) < 0)
+		return ret;
+	
+	data_t                 sl_input          = DATA_SLICET(fargs->input, 0, offset);
+	fastcall_convert_from  r_convert         = { { 5, ACTION_CONVERT_FROM }, &sl_input, FORMAT(native) };
+	if( (ret = data_query(&d_output, &r_convert)) < 0)
+		return ret;
+	
+	*fargs->output = d_output;
+	fargs->transfered = offset + sep_len;
+	return 0;
+} // }}}
+
 data_proto_t record_t_proto = {
 	.type            = TYPE_RECORDT,
 	.type_str        = "record_t",
@@ -288,5 +332,8 @@ data_proto_t record_t_proto = {
 		[ACTION_WRITE]        = (f_data_func)&data_record_t_handler,
 		[ACTION_LENGTH]       = (f_data_func)&data_record_t_handler,
 		[ACTION_VIEW]         = (f_data_func)&data_record_t_handler,
+
+		[ACTION_PACK]         = (f_data_func)&data_record_t_pack,
+		[ACTION_UNPACK]       = (f_data_func)&data_record_t_unpack,
 	}
 };
