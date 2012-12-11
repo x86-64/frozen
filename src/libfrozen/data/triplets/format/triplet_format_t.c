@@ -18,25 +18,21 @@ typedef struct enum_userdata {
 static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_t format, data_t *dest, data_t *key){ // {{{
 	ssize_t                ret;
 	uintmax_t              offset;
-	data_t                 converted;
+	data_t                 converted         = DATA_VOID;
 	data_t                 sl_storage        = DATA_SLIDERT(storage, 0);
 	
 	do{
-		holder_copy(ret, &converted, item_template);
-		if(ret < 0)
+		fastcall_unpack r_unpack = { { 4, ACTION_UNPACK }, &sl_storage, &converted, format };
+		if( (ret = data_query(item_template, &r_unpack)) < -1)
 			break;
-		
-		fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, &sl_storage, format };
-		if( (ret = data_query(&converted, &r_convert)) < -1)
-			goto error;
-		
+
 		if(ret == -1){
 			ret = 0;
 			goto error;
 		}
 		
 		offset = data_slider_t_get_offset(&sl_storage);
-		data_slider_t_set_offset(&sl_storage, r_convert.transfered, SEEK_CUR);
+		data_slider_t_set_offset(&sl_storage, r_unpack.transfered, SEEK_CUR);
 		
 		data_t          d_offset            = DATA_UINTT(offset);
 		data_t          d_complex_key_next  = DATA_COMPLEXKEY_NEXTT(d_offset, *key);
@@ -53,7 +49,6 @@ static ssize_t data_enum_storage(data_t *storage, data_t *item_template, format_
 		data_free(&converted);
 	}while(ret >= 0);
 	return ret;
-	
 error:
 	data_free(&converted);
 	return ret;
@@ -197,20 +192,16 @@ static ssize_t data_triplet_format_t_lookup(data_t *data, fastcall_crud *fargs){
 	if(ret < 0)
 		return ret;
 	
-	// prepare copy of template
-	holder_copy(ret, &converted, &fdata->slave);
-	if(ret < 0)
-		goto exit;
-	
 	data_t                sl_value  = DATA_SLICET(&storage_item, offset, ~0);
-	fastcall_convert_from r_convert = {
-		{ 5, ACTION_CONVERT_FROM },
+	fastcall_unpack       r_unpack  = {
+		{ 4, ACTION_UNPACK },
 		offset == 0 ?
 			&storage_item :
 			&sl_value,
+		&converted,
 		FORMAT(packed)
 	};
-	if( (ret = data_query(&converted, &r_convert)) < 0)
+	if( (ret = data_query(&fdata->slave, &r_unpack)) < 0)
 		goto exit;
 	
 	*fargs->value = converted;
@@ -259,12 +250,8 @@ static ssize_t data_enum_single_storage(data_t *storage, data_t *item_template, 
 	ssize_t                ret;
 	data_t                 converted;
 	
-	holder_copy(ret, &converted, item_template);
-	if(ret < 0)
-		return ret;
-	
-	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, storage, format };
-	if( (ret = data_query(&converted, &r_convert)) < -1)
+	fastcall_unpack r_unpack = { { 6, ACTION_UNPACK }, storage, &converted, format };
+	if( (ret = data_query(item_template, &r_unpack)) < -1)
 		goto error;
 	
 	if(ret == -1){
