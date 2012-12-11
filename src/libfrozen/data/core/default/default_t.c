@@ -301,6 +301,54 @@ ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs){ /
 	return ret;
 } // }}}
 
+ssize_t       data_default_pack          (data_t *data, fastcall_pack *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 converted;
+	data_t                 output            = DATA_RAWT_EMPTY();
+	
+	holder_copy(ret, &converted, data);
+	if(ret < 0)
+		return ret;
+	
+	// initialize format data with input data
+	fastcall_convert_from r_convert_from = { { 5, ACTION_CONVERT_FROM }, fargs->input, FORMAT(native) };
+	if( (ret = data_query(&converted, &r_convert_from)) < -1){
+		data_free(&converted);
+		return ret;
+	}
+	
+	// transfer packed data into empty raw_t
+	fastcall_convert_to r_convert_to     = { { 5, ACTION_CONVERT_TO   }, &output,      fargs->format };
+	if( (ret = data_query(&converted, &r_convert_to)) < 0){
+		data_free(&converted);
+		return ret;
+	}
+	
+	*fargs->output    = output;
+	fargs->transfered = r_convert_to.transfered;
+	return 0;
+	
+} // }}}
+ssize_t       data_default_unpack        (data_t *data, fastcall_unpack *fargs){ // {{{
+	ssize_t                ret;
+	data_t                 converted;
+	
+	holder_copy(ret, &converted, data);
+	if(ret < 0)
+		return ret;
+	
+	// initialize format data from input data
+	fastcall_convert_from r_convert = { { 5, ACTION_CONVERT_FROM }, fargs->input, fargs->format };
+	if( (ret = data_query(&converted, &r_convert)) < -1){
+		data_free(&converted);
+		return ret;
+	}
+	
+	*fargs->output    = converted;
+	fargs->transfered = r_convert.transfered;
+	return ret;
+} // }}}
+
 data_proto_t default_t_proto = {
 	.type            = TYPE_DEFAULTT,
 	.type_str        = "",
@@ -322,6 +370,9 @@ data_proto_t default_t_proto = {
 		
 		[ACTION_LOOKUP]      = (f_data_func)&data_default_lookup,
 		[ACTION_ENUM]        = (f_data_func)&data_default_enum,
+
+		[ACTION_PACK]        = (f_data_func)&data_default_pack,
+		[ACTION_UNPACK]      = (f_data_func)&data_default_unpack,
 	}
 };
 

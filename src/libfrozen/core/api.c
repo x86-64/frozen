@@ -472,6 +472,42 @@ ssize_t     action_convert_from_copy_output(fastcall_convert_from *src, fastcall
 	return 0;
 } // }}}
 
+ssize_t     action_pack_to_fast(void *userdata, request_t *request, f_hash_to_fast callback){ // {{{
+	ssize_t                ret;
+	action_t               action;
+	data_t                *input;
+	data_t                *output;
+	format_t               format            = FORMAT(packed);
+	
+	hash_data_get(ret, TYPE_ACTIONT, action, request, HK(action));
+	if(ret != 0)
+		return ret;
+	
+	hash_data_get(ret, TYPE_FORMATT, format, request, HK(format));
+	
+	input  = hash_data_find(request, HK(input));
+	output = hash_data_find(request, HK(output));
+	
+	if(!input || !output)
+		return -EINVAL;
+	
+	data_realholder(ret, input, input);
+	if(ret < 0)
+		return ret;
+	data_realholder(ret, output, output);
+	if(ret < 0)
+		return ret;
+	
+	fastcall_pack fargs = { { 6, action }, input, output, format };
+	ret = callback(userdata, &fargs);
+	
+	data_t                *buffer            = hash_data_find(request, HK(size));
+	fastcall_write         r_write           = { { 5, ACTION_WRITE }, 0, &fargs.transfered, sizeof(fargs.transfered) };
+	if(buffer)
+		data_query(buffer, &r_write);
+	
+	return ret;
+} // }}}
 
 ssize_t     api_convert_fastcall_to_request(void *userdata, fastcall_header *hargs, f_fast_to_hash callback){ // {{{
 	f_convert_to_hash    func;
@@ -562,7 +598,9 @@ uintmax_t fastcall_nargs[ACTION_INVALID] = {
 	[ACTION_QUERY] = 3,
 	[ACTION_CONVERT_TO] = 4,
 	[ACTION_CONVERT_FROM] = 4,
-	
+	[ACTION_PACK] = 6,
+	[ACTION_UNPACK] = 6,
+
 	[ACTION_COMPARE] = 3,
 	[ACTION_ADD] = 3,
 	[ACTION_SUB] = 3,
@@ -610,6 +648,8 @@ f_convert_to_fast api_convert_to_fast[ACTION_INVALID] = {
 	[ACTION_QUERY]        = (f_convert_to_fast)&action_query_to_fast,
 	[ACTION_CONVERT_TO]   = (f_convert_to_fast)&action_convert_to_to_fast,
 	[ACTION_CONVERT_FROM] = (f_convert_to_fast)&action_convert_from_to_fast,
+	[ACTION_PACK]         = (f_convert_to_fast)&action_pack_to_fast,
+	[ACTION_UNPACK]       = (f_convert_to_fast)&action_pack_to_fast,
 };
 
 f_copy_output api_copy_output[ACTION_INVALID] = {
@@ -644,4 +684,6 @@ hash_t * api_data_from_list[ACTION_INVALID] = {
 	[ACTION_QUERY]        = (hash_t []){ { HK(action), DATA_VOID }, { HK(request),     DATA_VOID } },
 	[ACTION_CONVERT_TO]   = (hash_t []){ { HK(action), DATA_VOID }, { HK(destination), DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
 	[ACTION_CONVERT_FROM] = (hash_t []){ { HK(action), DATA_VOID }, { HK(source),      DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
+	[ACTION_PACK]         = (hash_t []){ { HK(action), DATA_VOID }, { HK(input),       DATA_VOID }, { HK(output), DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
+	[ACTION_UNPACK]       = (hash_t []){ { HK(action), DATA_VOID }, { HK(input),       DATA_VOID }, { HK(output), DATA_VOID }, { HK(format), DATA_VOID }, { HK(size), DATA_VOID } },
 };

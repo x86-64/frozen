@@ -24,5 +24,7 @@ ssize_t       data_default_control       (data_t *data, fastcall_control *fargs)
 ssize_t       data_default_consume       (data_t *data, fastcall_consume *fargs);
 ssize_t       data_default_lookup        (data_t *data, fastcall_lookup *fargs);
 ssize_t       data_default_enum          (data_t *data, fastcall_enum *fargs);
+ssize_t       data_default_pack          (data_t *data, fastcall_pack *fargs);
+ssize_t       data_default_unpack        (data_t *data, fastcall_unpack *fargs);
 
 #endif

@@ -467,6 +467,47 @@ typedef struct fastcall_view { // ACTION(VIEW)
 	data_t                 freeit;
 } fastcall_view;
 // }}}
+// Pack/unpack api set {{{
+/** @ingroup api
+ *  @addtogroup api_pack Pack/Unpack api set
+ */
+/** @ingroup api_pack
+ *  @page api_pack_overview Overview
+ *  
+ *  This is api set is for format-defining datatypes. It used to pack and unpack given data into desired format. For example,
+ *  netstring_t will convert any scalar data into raw_t with netstring format ("Xbytes:something,")
+ */
+
+/** @ingroup api_pack
+ *  @section api_pack_pack Pack action
+ *  
+ *  Pack given data using desired format.
+ *
+ *  <h3> For developer </h3>
+ *  @li Return ref_t or copy of data
+ *  <h3> For user </h3>
+ *  @li Free data then it is no longer need.
+ */
+/** @ingroup api_pack
+ *  @section api_pack_unpack Unpack action
+ *  
+ *  Unpack given data into clean data.
+ *
+ *  <h3> For developer </h3>
+ *  @li Return ref_t or copy of data
+ *  <h3> For user </h3>
+ *  @li Free data then it is no longer need.
+ */
+struct fastcall_pack {
+	fastcall_header        header;
+	data_t                *input;
+	data_t                *output;
+	uintmax_t              format;
+	uintmax_t              transfered;
+};
+typedef struct fastcall_pack fastcall_pack;   // ACTION(PACK)
+typedef struct fastcall_pack fastcall_unpack; // ACTION(UNPACK)
+// }}}
 
 typedef struct fastcall_query {
 	fastcall_header        header;
