@@ -1,0 +1,19 @@
+sub {
+	$format = netstring_t : {} > raw_t : {};
+	$input  = "Hello, world!\n";
+	$output = raw_t : {};
+
+	$format.pack($input, $output);
+	$output | fd_t : "stdout";
+	$output.free();
+}
+
+sub {
+	$format = netstring_t : {} > raw_t : {};
+	$input  = "6:Hello\n,";
+	$output = raw_t : {};
+
+	$format.unpack($input, $output);
+	$output | fd_t : "stdout";
+	$output.free();
+}

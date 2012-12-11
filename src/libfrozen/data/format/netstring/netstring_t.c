@@ -1,6 +1,7 @@
 #include <libfrozen.h>
 #include <netstring_t.h>
 
+#include <core/default/default_t.h>
 #include <enum/format/format_t.h>
 #include <core/hash/hash_t.h>
 #include <numeric/uint/uint_t.h>
@@ -214,6 +215,9 @@ data_proto_t netstring_t_proto = {
 		[ACTION_LENGTH]       = (f_data_func)&data_netstring_t_length,
 		[ACTION_FREE]         = (f_data_func)&data_netstring_t_free,
 		[ACTION_CONTROL]      = (f_data_func)&data_netstring_t_control,
+
+		[ACTION_PACK]         = (f_data_func)&data_default_pack,
+		[ACTION_UNPACK]       = (f_data_func)&data_default_unpack,
 	}
 };
 
