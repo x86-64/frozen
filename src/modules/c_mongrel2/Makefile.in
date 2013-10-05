@@ -56,6 +56,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/data/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/core/fastcall/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/machine/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
@@ -68,6 +69,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/binstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/netstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/record/config.m4 \
+	$(top_srcdir)/./src/libfrozen/data/io/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
@@ -323,7 +325,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 modules_LTLIBRARIES = module_c_mongrel2.la
 module_c_mongrel2_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/ -DFROZEN_MODULE
-module_c_mongrel2_la_LDFLAGS = -module -avoid-version -shared -lfrozen
+module_c_mongrel2_la_LDFLAGS = -module -avoid-version -shared -L@top_srcdir@/src/libfrozen/ -lfrozen
 module_c_mongrel2_la_SOURCES = main.c
 EXTRA_DIST = errors_list.c
 all: all-am
