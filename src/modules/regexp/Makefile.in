@@ -58,7 +58,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/data/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/dataptr/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/default/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/core/fastcall/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/hash/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/machine/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/core/string/config.m4 \
@@ -71,7 +70,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/binstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/netstring/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/format/record/config.m4 \
-	$(top_srcdir)/./src/libfrozen/data/io/cache/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/fd/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/io/io/config.m4 \
 	$(top_srcdir)/./src/libfrozen/data/modifiers/slice/config.m4 \
@@ -329,7 +327,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 modules_LTLIBRARIES = module_regexp_t.la
 module_regexp_t_la_CFLAGS = -I@top_srcdir@/src/libfrozen/core/ -I@top_srcdir@/src/libfrozen/data/ -DFROZEN_MODULE
-module_regexp_t_la_LDFLAGS = -module -avoid-version -shared -L@top_srcdir@/src/libfrozen/ -lfrozen
+module_regexp_t_la_LDFLAGS = -module -avoid-version -shared -lfrozen
 module_regexp_t_la_SOURCES = regexp.c
 headers_mydirdir = $(headersdir)/modules/regexp_t/
 headers_mydir_HEADERS = regexp_t.h
